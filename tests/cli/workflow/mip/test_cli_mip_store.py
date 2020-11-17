@@ -48,9 +48,7 @@ def test_store_analysis(
 
     with caplog.at_level("INFO"):
         # WHEN we run store on a config
-        result = cli_runner.invoke(
-            analysis, [str(mip_configs["yellowhog"])], obj=mip_store_context, catch_exceptions=False
-        )
+        result = cli_runner.invoke(analysis, [str(mip_configs["yellowhog"])], obj=mip_store_context)
         # THEN we should store the files in housekeeper
         assert "new bundle added: yellowhog" in caplog.text
         assert "Included files in Housekeeper" in caplog.text
