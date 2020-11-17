@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.6]
+
+### Fixed
+- 'cg upload auto --pipeline' to accept 'mip-dna' as pipeline 
+
 ## [16.0.5]
 
 ### Fixed
