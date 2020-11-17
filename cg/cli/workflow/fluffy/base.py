@@ -58,6 +58,8 @@ def run(context, case_id, dry_run):
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
     if not dry_run:
+
+        # Submit pending analysis to Trailblazer
         fluffy_analysis_api.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
@@ -67,6 +69,11 @@ def run(context, case_id, dry_run):
             priority=fluffy_analysis_api.get_priority(case_id),
             data_analysis="FLUFFY",
         )
+
+        # Update status_db to running
+        case_object = fluffy_analysis_api.status_db.family(case_id)
+        case_object.action = "running"
+        fluffy_analysis_api.status_db.commit()
 
 
 @fluffy.command()
