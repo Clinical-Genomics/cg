@@ -6,7 +6,6 @@ from typing import Any, Optional
 
 import requests
 from cg.constants import Pipeline
-from cg.utils.StrEnum import StrEnum
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 
@@ -73,7 +72,7 @@ class TrailblazerAPI:
             "before": str(before) if before else None,
             "is_visible": is_visible,
             "family": family,
-            "pipeline": str(data_analysis).upper() if data_analysis else None,
+            "data_analysis": str(data_analysis).upper() if data_analysis else None,
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
@@ -146,7 +145,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
-            "pipeline": str(data_analysis).upper(),
+            "data_analysis": str(data_analysis).upper(),
         }
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
