@@ -125,8 +125,8 @@ class UploadScoutAPI:
             "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
-        LOG.info("generate_configasd: {}".format(latest_version.id))
-        for sample in self.build_samples(analysis_obj, latest_version.id):
+
+        for sample in self.build_samples(analysis_obj, hk_version.id):
             data["samples"].append(sample)
 
         self._include_mandatory_files(data, hk_version)
