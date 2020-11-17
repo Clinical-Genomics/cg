@@ -1,3 +1,4 @@
+from cg.constants import Pipeline
 from cg.store import Store
 from cg.meta.workflow.mip import MipAnalysisAPI
 import logging
@@ -13,30 +14,28 @@ def test_config(analysis_store: Store, analysis_api: MipAnalysisAPI):
         analysis_store.commit()
 
     # WHEN generating the MIP config for the family
-    mip_config = analysis_api.pedigree_config(family_obj, pipeline="mip-dna")
+    mip_config = analysis_api.pedigree_config(family_obj, pipeline=Pipeline.MIP_DNA)
 
     # THEN it should fill in values accordingly
     assert len(mip_config["samples"]) == len(family_obj.links)
 
 
-def test_get_latest_data_genome_build(analysis_api: MipAnalysisAPI):
+def test_get_latest_data_genome_build(analysis_api: MipAnalysisAPI, case_id: str):
 
     # GIVEN
-    family_id = "case_id"
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata(family_id)
+    trending_data = analysis_api.get_latest_metadata(case_id)
 
     # THEN contains genome_build
     assert trending_data["genome_build"]
 
 
-def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI):
+def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI, case_id: str):
     # GIVEN
-    family_id = "case_id"
 
     # WHEN
-    trending_data = analysis_api.get_latest_metadata(family_id)
+    trending_data = analysis_api.get_latest_metadata(case_id)
 
     # THEN contains rankmodelversion
     assert trending_data["rank_model_version"]

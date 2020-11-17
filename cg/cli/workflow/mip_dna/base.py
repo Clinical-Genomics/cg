@@ -11,11 +11,8 @@ from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.cli.workflow.mip_dna.deliver import deliver as deliver_cmd
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
@@ -68,13 +65,6 @@ def mip_dna(
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=DeliverAPI(
-            context.obj,
-            hk_api=context.obj["housekeeper_api"],
-            lims_api=context.obj["lims_api"],
-            case_tags=CASE_TAGS,
-            sample_tags=SAMPLE_TAGS,
-        ),
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],
@@ -137,7 +127,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
             )
             dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
-        if "mip" in link_obj.family.data_analysis.lower():
+        if link_obj.family.data_analysis == str(Pipeline.MIP_DNA):
             dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
 
@@ -164,7 +154,9 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
         raise click.Abort()
 
     try:
-        config_data = dna_api.pedigree_config(case_obj, panel_bed=panel_bed, pipeline="mip-dna")
+        config_data = dna_api.pedigree_config(
+            case_obj, panel_bed=panel_bed, pipeline=Pipeline.MIP_DNA
+        )
     except CgError as error:
         LOG.error(error.message)
         raise click.Abort()
@@ -263,7 +255,7 @@ def run(
             out_dir=dna_api.get_case_output_path(case_id).as_posix(),
             config_path=dna_api.get_slurm_job_ids_path(case_id).as_posix(),
             priority=dna_api.get_priority(case_obj),
-            data_analysis="MIP-DNA",
+            data_analysis=Pipeline.MIP_DNA,
         )
         dna_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("MIP rd-dna run started!")
@@ -279,7 +271,7 @@ def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
     exit_code = EXIT_SUCCESS
-    for case_obj in dna_api.db.cases_to_analyze(pipeline="mip", threshold=0.75):
+    for case_obj in dna_api.db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
@@ -315,9 +307,8 @@ def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = Fals
         LOG.error("provide a case, suggestions:")
     else:
         LOG.warning("provide a case, suggestions:")
-    for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline="mip", limit=50):
+    for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, limit=50):
         LOG.info(case_obj)
 
 
 mip_dna.add_command(store_cmd)
-mip_dna.add_command(deliver_cmd)

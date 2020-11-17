@@ -12,10 +12,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.cli.workflow.mip_rna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.cli.workflow.mip_rna.deliver import deliver as deliver_cmd
-from cg.meta.deliver import DeliverAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.constants import Pipeline
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -38,13 +36,6 @@ def mip_rna(context: click.Context):
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=DeliverAPI(
-            context.obj,
-            hk_api=context.obj["housekeeper_api"],
-            lims_api=context.obj["lims_api"],
-            case_tags=CASE_TAGS,
-            sample_tags=SAMPLE_TAGS,
-        ),
         script=context.obj["mip-rd-rna"]["script"],
         pipeline=context.obj["mip-rd-rna"]["pipeline"],
         conda_env=context.obj["mip-rd-rna"]["conda_env"],
@@ -126,7 +117,7 @@ def run(
         out_dir=rna_api.get_case_output_path(case_id).as_posix(),
         config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
         priority="normal",
-        data_analysis="MIP-RNA",
+        data_analysis=Pipeline.MIP_RNA,
     )
     rna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-rna run started!")
@@ -143,7 +134,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     case_obj = rna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-    config_data = rna_api.pedigree_config(case_obj, pipeline="mip-rna")
+    config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)
     if dry:
         print(config_data)
         return
@@ -152,4 +143,3 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
 
 
 mip_rna.add_command(store_cmd)
-mip_rna.add_command(deliver_cmd)

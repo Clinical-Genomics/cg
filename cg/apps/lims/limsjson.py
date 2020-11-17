@@ -1,3 +1,5 @@
+from cg.constants import Pipeline
+
 OPTIONAL_KEYS = (
     "container_name",
     "quantity",
@@ -14,7 +16,7 @@ OPTIONAL_KEYS = (
 def parse_json(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
     data = {
-        "project_type": "mip",
+        "project_type": str(Pipeline.MIP_DNA),
         "customer": indata["customer"].lower(),
         "name": indata.get("name"),
         "comment": indata.get("comment"),
@@ -49,7 +51,7 @@ def parse_json(indata: dict) -> dict:
                 "application": sample["application"],
                 "source": sample["source"],
                 "container": sample["container"],
-                "data_analysis": sample.get("data_analysis", "MIP"),
+                "data_analysis": sample.get("data_analysis", str(Pipeline.MIP_DNA)),
             }
             well_position_raw = sample.get("well_position")
             if well_position_raw:

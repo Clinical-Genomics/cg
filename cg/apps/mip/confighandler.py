@@ -6,8 +6,7 @@ from marshmallow import Schema, fields, validate
 import ruamel.yaml
 
 from cg.exc import PedigreeConfigError
-from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT
-
+from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT, Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -44,14 +43,14 @@ class ConfigSchema(Schema):
 
 
 class ConfigHandler:
-    def make_pedigree_config(self, data: dict, pipeline: str = None) -> dict:
+    def make_pedigree_config(self, data: dict, pipeline: Pipeline = None) -> dict:
         """Make a MIP pedigree config"""
         self.validate_config(data=data, pipeline=pipeline)
         config_data = self.parse_pedigree_config(data)
         return config_data
 
     @staticmethod
-    def validate_config(data: dict, pipeline: str = None) -> dict:
+    def validate_config(data: dict, pipeline: Pipeline = None) -> dict:
         """Validate MIP pedigree config format"""
         errors = ConfigSchema().validate(data)
         fatal_error = False

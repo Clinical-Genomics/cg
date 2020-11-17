@@ -95,6 +95,7 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_success)).touch(
         exist_ok=True
     )
+
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
@@ -111,7 +112,7 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     assert case_id_fail not in caplog.text
 
     # THEN action of the case should NOT be set to running
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action == None
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action is None
 
 
 def test_store_available(
@@ -149,6 +150,7 @@ def test_store_available(
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
+
     # WHEN running command
     result = cli_runner.invoke(store_available, ["--dry-run"], obj=balsamic_context)
 
@@ -159,7 +161,7 @@ def test_store_available(
     assert case_id_success in caplog.text
 
     # THEN bundle added successfully and action set to None
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == None
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action is None
 
     # THEN case id WITHOUT analysis_finish is still running
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action == "running"

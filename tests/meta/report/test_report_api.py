@@ -59,7 +59,6 @@ def test_collect_delivery_data(report_api, report_store, case_id):
         assert sample["target_completeness"]
         assert sample["duplicates"]
         assert sample["processing_time"]
-        assert sample["data_analysis"]
         assert sample["analysis_sex"]
 
     assert delivery_data["pipeline"]
@@ -113,13 +112,12 @@ def is_float(value):
     try:
         float(value)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
 
 
-def test_presentable_delivery_report_contains_delivery_data(report_api):
+def test_presentable_delivery_report_contains_delivery_data(report_api, case_id):
     # GIVEN data from an analysed case and an initialised report_api
-    case_id = "yellowhog"
     delivery_data = report_api._get_delivery_data(case_id=case_id)
 
     # WHEN creating delivery report

@@ -15,9 +15,15 @@ from cg.apps.mip.confighandler import ConfigHandler
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import COLLABORATORS, COMBOS, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS, MASTER_LIST
+from cg.constants import (
+    COLLABORATORS,
+    COMBOS,
+    DEFAULT_CAPTURE_KIT,
+    FAMILY_ACTIONS,
+    MASTER_LIST,
+    Pipeline,
+)
 from cg.exc import CgDataError, LimsDataError
-from cg.meta.deliver import DeliverAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -34,7 +40,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         scout_api: ScoutAPI,
         tb_api: TrailblazerAPI,
         lims_api: LimsAPI,
-        deliver_api: DeliverAPI,
         script: str,
         pipeline: str,
         conda_env: str,
@@ -45,7 +50,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.hk = hk_api
         self.scout = scout_api
         self.lims = lims_api
-        self.deliver = deliver_api
         self.script = script
         self.pipeline = pipeline
         self.conda_env = conda_env
@@ -85,7 +89,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
 
     def pedigree_config(
-        self, family_obj: models.Family, pipeline: str, panel_bed: str = None
+        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
     ) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
@@ -114,7 +118,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def build_config(self, family_obj: models.Family, pipeline: str, panel_bed: str = None) -> dict:
+    def build_config(
+        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
+    ) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
@@ -150,8 +156,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             return sample_data
 
         dispatch = {
-            "mip-dna": config_dna_sample,
-            "mip-rna": config_rna_sample,
+            Pipeline.MIP_DNA: config_dna_sample,
+            Pipeline.MIP_RNA: config_rna_sample,
         }
 
         data = {
@@ -324,9 +330,10 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
         """Get a python object file for a tag and a family ."""
 
-        analysis_files = self.deliver.get_post_analysis_files(
-            case=family_id, version=False, tags=[tag]
-        )
+        last_version = self.hk.last_version(bundle=family_id)
+
+        analysis_files = self.hk.files(bundle=family_id, version=last_version.id, tags=[tag]).all()
+
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
@@ -340,9 +347,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = Path(self.deliver.get_post_analysis_files_root_dir()).joinpath(
-            relative_file_path
-        )
+        full_file_path = Path(self.hk.get_root_dir()).joinpath(relative_file_path)
         open_file = safe_load(open(full_file_path))
         return open_file
 
@@ -451,8 +456,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         out_dir: str,
         config_path: str,
         priority: str,
-        data_analysis: str,
+        data_analysis: Pipeline,
     ) -> TrailblazerAnalysis:
+
         return self.tb.add_pending_analysis(
             case_id=case_id,
             email=email,
@@ -476,7 +482,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         before: dt.datetime = None,
         is_visible: bool = None,
         family: str = None,
-        data_analysis: str = None,
+        data_analysis: Pipeline = None,
     ) -> list:
         return self.tb.analyses(
             case_id=case_id,

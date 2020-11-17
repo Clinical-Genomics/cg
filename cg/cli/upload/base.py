@@ -13,13 +13,13 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
+from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
-from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
+from cg.utils.click.EnumChoice import EnumChoice
 
 from .coverage import coverage
 from .delivery_report import (
@@ -92,20 +92,12 @@ def upload(context, family_id, force_restart):
     context.obj["chanjo_api"] = ChanjoAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
 
-    context.obj["deliver_api"] = DeliverAPI(
-        context.obj,
-        hk_api=context.obj["housekeeper_api"],
-        lims_api=context.obj["lims_api"],
-        case_tags=CASE_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
     context.obj["analysis_api"] = MipAnalysisAPI(
         db=context.obj["status_db"],
         hk_api=context.obj["housekeeper_api"],
         tb_api=context.obj["trailblazer_api"],
         scout_api=context.obj["scout_api"],
         lims_api=context.obj["lims_api"],
-        deliver_api=context.obj["deliver_api"],
         script=context.obj["mip-rd-dna"]["script"],
         pipeline=context.obj["mip-rd-dna"]["pipeline"],
         conda_env=context.obj["mip-rd-dna"]["conda_env"],
@@ -153,9 +145,9 @@ def upload(context, family_id, force_restart):
 
 
 @upload.command()
-@click.option("--pipeline", type=str, help="Limit to specific pipeline")
+@click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
 @click.pass_context
-def auto(context: click.Context, pipeline: str = None):
+def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
 
     click.echo(click.style("----------------- AUTO ------------------------"))
@@ -171,11 +163,11 @@ def auto(context: click.Context, pipeline: str = None):
             continue
         internal_id = analysis_obj.family.internal_id
 
-        LOG.info("uploading family: %s", internal_id)
+        LOG.info("Uploading family: %s", internal_id)
         try:
             context.invoke(upload, family_id=internal_id)
         except Exception:
-            LOG.error("uploading family failed: %s", internal_id)
+            LOG.error("Uploading family failed: %s", internal_id)
             LOG.error(traceback.format_exc())
             exit_code = 1
 
