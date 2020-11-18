@@ -114,7 +114,7 @@ def start_available(context, dry_run):
 @OPTION_DRY
 @click.pass_context
 def store(context, case_id, dry_run):
-    """Stre analysis in Housekeeper"""
+    """Store analysis in Housekeeper"""
     pass
 
 
