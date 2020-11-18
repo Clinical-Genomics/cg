@@ -134,7 +134,7 @@ class MockScoutApi(ScoutAPI):
         """docstring for __init__"""
         pass
 
-    def upload(self, scout_config, force=False):
+    def upload(self, scout_load_config, force=False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
 
