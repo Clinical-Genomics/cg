@@ -16,6 +16,13 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.1.0]
+
+
+### Changed
+
+- Use CLI to upload to Scout
+
 ## [16.0.6]
 
 ### Fixed
