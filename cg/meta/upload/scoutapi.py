@@ -76,7 +76,7 @@ class UploadScoutAPI:
             }
             yield sample
 
-    def generate_config(self, analysis_obj: models.Analysis) -> dict:
+    def generate_config(self, analysis_obj: models.Analysis, rank_score_threshold: int = 5) -> dict:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
@@ -86,6 +86,7 @@ class UploadScoutAPI:
             "default_gene_panels": analysis_obj.family.panels,
             "family": analysis_obj.family.internal_id,
             "family_name": analysis_obj.family.name,
+            "rank_score_threshold": rank_score_threshold,
             "gene_panels": self.analysis.convert_panels(
                 analysis_obj.family.customer.internal_id, analysis_obj.family.panels
             ),

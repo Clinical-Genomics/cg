@@ -4,6 +4,7 @@ import datetime as dt
 import logging
 from typing import List
 from pathlib import Path
+import yaml
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
@@ -28,23 +29,26 @@ class ScoutAPI(MongoAdapter):
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)
 
-    def upload(self, data: dict, threshold: int = 5, force: bool = False):
+    def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
+        with open(load_config, "r") as stream:
+            data = yaml.safe_load(stream)
         data["rank_score_threshold"] = threshold
         config_data = parse_case_data(config=data)
         existing_case = self.case(
             institute_id=config_data["owner"], display_name=config_data["family_name"]
         )
+        load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or config_data["analysis_date"] > existing_case["analysis_date"]:
+                load_command.append("--update")
                 LOG.info("update existing Scout case")
-                load_scout(self, config_data, update=True)
             else:
                 existing_date = existing_case["analysis_date"].date()
                 LOG.warning("analysis of case already loaded: %s", existing_date)
-            return
+                return
         LOG.debug("load new Scout case")
-        load_scout(self, config_data)
+        self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
     def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
