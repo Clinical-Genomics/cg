@@ -211,7 +211,8 @@ def test_incorporate_lims_methods(report_samples, report_api):
 
 def test_render_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist
-    report_data = report_api._get_delivery_data(case_id="yellowhog")
+    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    report_data = report_api._make_data_presentable(delivery_data)
 
     # WHEN rendering a report from that data
     rendered_report = ReportAPI._render_delivery_report(report_data)
@@ -325,7 +326,8 @@ def test_get_application_data_from_status_db_none_accredited(report_samples, rep
 def test_render_accredited_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist with accredited application
     report_api.store._application_accreditation = True
-    report_data = report_api._get_delivery_data(case_id="yellowhog")
+    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    report_data = report_api._make_data_presentable(delivery_data)
     assert report_data["accredited"] is True
 
     # WHEN rendering a report from that data
@@ -338,7 +340,8 @@ def test_render_accredited_delivery_report(report_api):
 def test_render_non_accredited_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist with non accredited application
     report_api.store._application_accreditation = False
-    report_data = report_api._get_delivery_data(case_id="yellowhog")
+    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    report_data = report_api._make_data_presentable(delivery_data)
     assert report_data["accredited"] is False
 
     # WHEN rendering a report from that data
@@ -354,6 +357,7 @@ def test_get_delivery_data_not_accredited(report_api, report_store, case_id):
 
     # WHEN collecting delivery data for case
     case = report_store.family(case_id)
+    assert case.links
     for link in case.links:
         link.sample.application_version.application.is_accredited = False
 
@@ -375,34 +379,3 @@ def test_get_delivery_data_accredited(report_api, report_store, case_id):
 
     # THEN the accreditation status int the delivery_data is true
     assert delivery_data["accredited"] is True
-
-
-def test_render_accredited_delivery_report_from_samples(report_api, report_store, case_id):
-    # GIVEN proper qc data from an analysis exist with accredited application
-    case = report_store.family(case_id)
-    for link in case.links:
-        link.sample.application_version.application.is_accredited = True
-    report_data = report_api._get_delivery_data(case_id="yellowhog")
-    assert report_data["accredited"] is True
-
-    # WHEN rendering a report from that data
-    rendered_report = ReportAPI._render_delivery_report(report_data)
-
-    # THEN a html report with swedac logo should have been rendered
-    assert "SWEDAC logo" in rendered_report
-
-
-def test_render_non_accredited_delivery_report_from_samples(report_api, report_store, case_id):
-    # GIVEN proper qc data from an analysis exist with non accredited application
-    case = report_store.family(case_id)
-    for link in case.links:
-        link.sample.application_version.application.is_accredited = False
-    report_data = report_api._get_delivery_data(case_id="yellowhog")
-    assert report_data["accredited"] is False
-
-    # WHEN rendering a report from that data
-    rendered_report = ReportAPI._render_delivery_report(report_data)
-
-    # THEN a html report without swedac logo should have been rendered
-    assert "SWEDAC logo" not in rendered_report
-

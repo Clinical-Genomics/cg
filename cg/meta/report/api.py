@@ -246,6 +246,7 @@ class ReportAPI:
 
         application_data["applications"] = applications
         application_data["accredited"] = bool(all(accreditations))
+
         return application_data
 
     def _fetch_panels_from_status_db(self, case_id: str) -> list:
@@ -288,6 +289,8 @@ class ReportAPI:
         presenter = Presenter(precision=2)
 
         _presentable_dict = presenter.process_dict(delivery_data)
+        _presentable_dict['accredited'] = delivery_data['accredited']
+        _presentable_dict['scout_access'] = delivery_data['accredited']
 
         for sample in delivery_data["samples"]:
             sample["mapped_reads"] = presenter.process_float_string(sample["mapped_reads"], 2)
