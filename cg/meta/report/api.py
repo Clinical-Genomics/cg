@@ -289,8 +289,8 @@ class ReportAPI:
         presenter = Presenter(precision=2)
 
         _presentable_dict = presenter.process_dict(delivery_data)
-        _presentable_dict['accredited'] = delivery_data['accredited']
-        _presentable_dict['scout_access'] = delivery_data['accredited']
+        _presentable_dict["accredited"] = delivery_data["accredited"]
+        _presentable_dict["scout_access"] = delivery_data["accredited"]
 
         for sample in delivery_data["samples"]:
             sample["mapped_reads"] = presenter.process_float_string(sample["mapped_reads"], 2)
