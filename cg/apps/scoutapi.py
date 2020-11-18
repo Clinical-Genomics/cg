@@ -9,7 +9,6 @@ import yaml
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
 from scout.export.panel import export_panels as scout_export_panels
-from scout.load import load_scout
 from scout.load.report import load_delivery_report
 from scout.parse.case import parse_case_data
 from cg.utils.commands import Process
@@ -31,9 +30,8 @@ class ScoutAPI(MongoAdapter):
 
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
-        with open(load_config, "r") as stream:
+        with open(scout_load_config, "r") as stream:
             data = yaml.safe_load(stream)
-        data["rank_score_threshold"] = threshold
         config_data = parse_case_data(config=data)
         existing_case = self.case(
             institute_id=config_data["owner"], display_name=config_data["family_name"]

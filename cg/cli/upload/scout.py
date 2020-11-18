@@ -3,9 +3,9 @@ import logging
 from pathlib import Path
 
 import click
-import yaml
 
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 
 from .utils import suggest_cases_to_upload
@@ -80,17 +80,15 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
 
         return scout_config_files[0].full_path
 
-    scout_api = context.obj["scout_api"]
-    hk_api = context.obj["housekeeper_api"]
+    scout_api: ScoutAPI = context.obj["scout_api"]
+    hk_api: HousekeeperAPI = context.obj["housekeeper_api"]
 
     load_config = _get_load_config_from_hk(hk_api, case_id)
 
     LOG.info("uploading case %s to scout", case_id)
-    with open(load_config, "r") as stream:
-        scout_configs = yaml.safe_load(stream)
 
     if not dry_run:
-        scout_api.upload(scout_configs, force=re_upload)
+        scout_api.upload(scout_load_config=load_config, force=re_upload)
 
     click.echo(
         click.style("uploaded to scout using load config {}".format(load_config), fg="green")
