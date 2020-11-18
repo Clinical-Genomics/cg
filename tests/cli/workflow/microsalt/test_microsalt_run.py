@@ -27,9 +27,7 @@ def test_dry_arguments(
     caplog.set_level(logging.INFO)
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(
-        run, ["--dry-run", microbial_ticket], obj=base_context, catch_exceptions=False
-    )
+    result = cli_runner.invoke(run, ["--dry-run", microbial_ticket], obj=base_context)
 
     # THEN command should mention missing arguments
     assert result.exit_code == EXIT_SUCCESS
