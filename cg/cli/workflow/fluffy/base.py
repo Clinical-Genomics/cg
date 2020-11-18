@@ -54,28 +54,27 @@ def link(context, case_id, dry_run):
 @OPTION_DRY
 @click.pass_context
 def run(context, case_id, dry_run):
-    """Run fluffy command
-    Update status in CG
-    Submit to Trailblazer"""
+    """Run fluffy analysis"""
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
-    if not dry_run:
+    if dry_run:
+        return
 
-        # Submit pending analysis to Trailblazer
-        fluffy_analysis_api.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            email=environ_email(),
-            type="tgs",
-            out_dir=fluffy_analysis_api.get_output_path(case_id).as_posix(),
-            config_path=fluffy_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
-            priority=fluffy_analysis_api.get_priority(case_id),
-            data_analysis="FLUFFY",
-        )
+    # Submit pending analysis to Trailblazer
+    fluffy_analysis_api.trailblazer_api.add_pending_analysis(
+        case_id=case_id,
+        email=environ_email(),
+        type="tgs",
+        out_dir=fluffy_analysis_api.get_output_path(case_id).as_posix(),
+        config_path=fluffy_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
+        priority=fluffy_analysis_api.get_priority(case_id),
+        data_analysis="FLUFFY",
+    )
 
-        # Update status_db to running
-        case_object = fluffy_analysis_api.status_db.family(case_id)
-        case_object.action = "running"
-        fluffy_analysis_api.status_db.commit()
+    # Update status_db to running
+    case_object = fluffy_analysis_api.status_db.family(case_id)
+    case_object.action = "running"
+    fluffy_analysis_api.status_db.commit()
 
 
 @fluffy.command()
@@ -92,10 +91,7 @@ def start(context, case_id, dry_run):
 @OPTION_DRY
 @click.pass_context
 def start_available(context, dry_run):
-    """Run link and start commands for all cases/batches ready to be analyzed
-    Needs:
-
-    """
+    """Run link and start commands for all cases/batches ready to be analyzed"""
     exit_code = EXIT_SUCCESS
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
     cases_to_analyze = fluffy_analysis_api.status_db.cases_to_analyze(pipeline="fluffy")
@@ -114,8 +110,8 @@ def start_available(context, dry_run):
 @OPTION_DRY
 @click.pass_context
 def store(context, case_id, dry_run):
-    """Store analysis in Housekeeper"""
-    pass
+    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
+    fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
 
 
 @fluffy.command()
