@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
-import ruamel_yaml
+from ruamel.yaml import safe_load
+import datetime as dt
 from cg.utils import Process
 from cg.apps.NIPTool import NIPToolAPI
 from cg.apps.hk import HousekeeperAPI
@@ -40,7 +41,7 @@ class FluffyAnalysisAPI:
         return Path(self.root_dir, case_id, "output", "deliverables.yaml")
 
     def get_slurm_job_ids_path(self, case_id: str) -> Path:
-        return Path(self.root_dir, case_id, "sacct.yaml")
+        return Path(self.root_dir, case_id, "output", "sacct", "submitted_jobs.yaml")
 
     def get_priority(self, case_id: str) -> str:
         case_object = self.status_db.family(case_id)
@@ -99,9 +100,29 @@ class FluffyAnalysisAPI:
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def store_housekeeper(self, case_id):
+    def parse_deliverables(self, case_id) -> list:
         deliverables_yaml = self.get_deliverables_path(case_id=case_id)
-        pass
+        deliverables_dict = safe_load(open(deliverables_yaml))
+        deliverable_files = deliverables_dict["files"]
+        bundle_files = []
+        for entry in deliverable_files:
+            bundle_file = {"path": entry["path"], "archive": False, "tags": [entry["tag"]]}
+            bundle_files.append(bundle_file)
+        return bundle_files
+
+    def upload_bundle_housekeeper(self, case_id: str):
+        bundle_data = {
+            "name": case_id,
+            "created": dt.datetime.now(),
+            "files": self.parse_deliverables(case_id=case_id),
+        }
+        bundle_result = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
+        bundle_object, bundle_version = bundle_result
+        self.housekeeper_api.include(bundle_version)
+        self.housekeeper_api.add_commit(bundle_object, bundle_version)
+        LOG.info(
+            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+        )
 
     def upload_results(self, case_id):
         """Upload to NIPT viewer
