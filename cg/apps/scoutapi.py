@@ -5,6 +5,7 @@ import logging
 from typing import List
 from pathlib import Path
 import yaml
+import json
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
@@ -114,16 +115,17 @@ class ScoutAPI(MongoAdapter):
 
         return models
 
-    def get_causative_variants(self, case_id=None, collaborator=None):
+    def get_causative_variants(self, case_id: str) -> List[dict]:
         """
         Get causative variants for a case
         """
         # These commands can be run with `scout export variants`
-        causative_ids = self.get_causatives(institute_id=collaborator, case_id=case_id)
+        get_causatives_command = ["export", "variants", "case-id", case_id]
+        self.process.run_command(get_causatives_command)
+        if not self.process.stdout:
+            return []
 
-        causatives = [self.variant(causative_id) for causative_id in causative_ids]
-
-        return causatives
+        return json.loads(self.process.stdout)
 
     def get_solved_cases(self, days_ago):
         """
