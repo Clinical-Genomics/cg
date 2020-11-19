@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.1.1]
+
+### Fixed
+- Accreditation logotype only shown on new delivery reports for accredited analyses
+
 ## [16.1.0]
 
 ### Changed
