@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import List
 
 from cg.apps.hk import HousekeeperAPI
+from cg.constants import Pipeline
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
@@ -154,7 +155,7 @@ class StoreHelpers:
         upload_started: datetime = None,
         delivery_reported_at: datetime = None,
         cleaned_at: datetime = None,
-        pipeline: str = "dummy_pipeline",
+        pipeline: Pipeline = Pipeline.BALSAMIC,
         pipeline_version: str = "1.0",
         uploading: bool = False,
         config_path: str = None,
@@ -162,7 +163,7 @@ class StoreHelpers:
         """Utility function to add an analysis for tests"""
 
         if not family:
-            family = self.add_family(store)
+            family = self.add_family(store, data_analysis=pipeline)
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
@@ -180,7 +181,7 @@ class StoreHelpers:
         if config_path:
             analysis.config_path = config_path
         if pipeline:
-            analysis.pipeline = pipeline
+            analysis.pipeline = str(pipeline)
 
         analysis.limitations = "A limitation"
         analysis.family = family
@@ -196,7 +197,6 @@ class StoreHelpers:
         is_tumour: bool = False,
         is_rna: bool = False,
         is_external: bool = False,
-        data_analysis: str = "balsamic",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         customer_name: str = None,
@@ -221,8 +221,6 @@ class StoreHelpers:
             name=sample_name,
             sex=gender,
             tumour=is_tumour,
-            sequenced_at=datetime.now(),
-            data_analysis=data_analysis,
             reads=reads,
             ticket=ticket,
         )
@@ -241,7 +239,10 @@ class StoreHelpers:
             sample.received_at = kwargs["received_at"]
 
         if kwargs.get("prepared_at"):
-            sample.received_at = kwargs["prepared_at"]
+            sample.prepared_at = kwargs["prepared_at"]
+
+        if kwargs.get("sequenced_at"):
+            sample.sequenced_at = kwargs["sequenced_at"]
 
         if kwargs.get("capture_kit"):
             sample.capture_kit = kwargs["capture_kit"]
@@ -251,6 +252,9 @@ class StoreHelpers:
 
         if internal_id:
             sample.internal_id = internal_id
+
+        if kwargs.get("no_invoice"):
+            sample.no_invoice = kwargs["no_invoice"]
 
         store.add_commit(sample)
         return sample
@@ -277,11 +281,11 @@ class StoreHelpers:
         self,
         store: Store,
         family_id: str = "family_test",
+        data_analysis: Pipeline = Pipeline.MIP_DNA,
         action: str = None,
-        data_analysis: str = "mip",
         internal_id: str = None,
         customer_id: str = "cust000",
-        panels: List = None,
+        panels: List = ["panel_test"],
         family_obj: models.Family = None,
     ) -> models.Family:
         """Utility function to add a family to use in tests,
@@ -291,8 +295,6 @@ class StoreHelpers:
         customer = self.ensure_customer(store, customer_id)
         if family_obj:
             panels = family_obj.panels
-        if not panels:
-            panels = ["panel_test"]
         for panel_name in panels:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
@@ -312,7 +314,7 @@ class StoreHelpers:
         return family_obj
 
     def ensure_family(
-        self, store: Store, name: str, customer: models.Customer, data_analysis: str = ""
+        self, store: Store, name: str, customer: models.Customer, data_analysis: Pipeline = None
     ):
         family = store.find_family(customer=customer, name=name)
         if not family:
@@ -344,7 +346,7 @@ class StoreHelpers:
         app_tag = app_tag or "WGTPCFC030"
         app_type = family_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
-        data_analysis = family_info.get("data_analysis", "mip")
+        data_analysis = family_info.get("data_analysis", str(Pipeline.MIP_DNA))
         sample_objs = {}
         for sample_data in family_info["samples"]:
             sample_id = sample_data["internal_id"]
@@ -354,7 +356,6 @@ class StoreHelpers:
                 gender=sample_data["sex"],
                 sample_id=sample_data.get("name"),
                 internal_id=sample_id,
-                data_analysis=data_analysis,
                 application_type=app_type,
                 ticket=sample_data["ticket_number"],
                 reads=sample_data["reads"],
@@ -381,7 +382,7 @@ class StoreHelpers:
 
         self.add_analysis(
             store,
-            pipeline="pipeline",
+            pipeline=Pipeline.MIP_DNA,
             family=family_obj,
             completed_at=completed_at or datetime.now(),
         )
@@ -442,7 +443,9 @@ class StoreHelpers:
             ticket=ticket,
         )
         sample.customer = customer
-        case = self.ensure_family(store=store, name=str(ticket), customer=customer)
+        case = self.ensure_family(
+            store=store, name=str(ticket), customer=customer, data_analysis=Pipeline.MICROSALT
+        )
         self.add_relationship(store=store, family=case, sample=sample)
         return sample
 
@@ -461,6 +464,7 @@ class StoreHelpers:
         flowcell_id: str = "flowcell_test",
         archived_at: datetime = None,
         samples: list = None,
+        status: str = None,
     ) -> models.Flowcell:
         """Utility function to set a flowcell to use in tests"""
         flowcell_obj = store.add_flowcell(
@@ -472,6 +476,8 @@ class StoreHelpers:
         flowcell_obj.archived_at = archived_at
         if samples:
             flowcell_obj.samples = samples
+        if status:
+            flowcell_obj.status = status
 
         store.add_commit(flowcell_obj)
         return flowcell_obj

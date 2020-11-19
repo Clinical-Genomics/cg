@@ -16,6 +16,23 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.0.6]
+
+### Fixed
+- 'cg upload auto --pipeline' to accept 'mip-dna' as pipeline 
+
+## [16.0.5]
+
+### Fixed
+- Trailblazer integration fixed
+
+## [16.0.4]
+
+### Fixed
+- Case database entities (Family) can only have specific values for data_analysis
+- Analysis database entities can only have specific values for pipeline
+- Enum used for pipeline as arguments 
+
 ## [16.0.3]
 
 ### Fixed

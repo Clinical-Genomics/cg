@@ -15,7 +15,14 @@ from cg.apps.mip.confighandler import ConfigHandler
 from cg.apps.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import COLLABORATORS, COMBOS, DEFAULT_CAPTURE_KIT, FAMILY_ACTIONS, MASTER_LIST
+from cg.constants import (
+    COLLABORATORS,
+    COMBOS,
+    DEFAULT_CAPTURE_KIT,
+    FAMILY_ACTIONS,
+    MASTER_LIST,
+    Pipeline,
+)
 from cg.exc import CgDataError, LimsDataError
 from cg.store import Store, models
 
@@ -82,7 +89,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
 
     def pedigree_config(
-        self, family_obj: models.Family, pipeline: str, panel_bed: str = None
+        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
     ) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
@@ -111,7 +118,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def build_config(self, family_obj: models.Family, pipeline: str, panel_bed: str = None) -> dict:
+    def build_config(
+        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
+    ) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
@@ -147,8 +156,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             return sample_data
 
         dispatch = {
-            "mip-dna": config_dna_sample,
-            "mip-rna": config_rna_sample,
+            Pipeline.MIP_DNA: config_dna_sample,
+            Pipeline.MIP_RNA: config_rna_sample,
         }
 
         data = {
@@ -447,8 +456,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         out_dir: str,
         config_path: str,
         priority: str,
-        data_analysis: str,
+        data_analysis: Pipeline,
     ) -> TrailblazerAnalysis:
+
         return self.tb.add_pending_analysis(
             case_id=case_id,
             email=email,
@@ -472,7 +482,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         before: dt.datetime = None,
         is_visible: bool = None,
         family: str = None,
-        data_analysis: str = None,
+        data_analysis: Pipeline = None,
     ) -> list:
         return self.tb.analyses(
             case_id=case_id,

@@ -5,6 +5,7 @@ import logging
 import datetime as dt
 
 from cg.cli.clean import balsamic_past_run_dirs, balsamic_run_dir
+from cg.constants import Pipeline
 
 EXIT_SUCCESS = 0
 
@@ -47,7 +48,7 @@ def test_with_yes(cli_runner, clean_context: dict, timestamp_today: dt.datetime,
     # THEN the analysis should have been cleaned
     assert result.exit_code == EXIT_SUCCESS
     assert analysis_to_clean.cleaned_at
-    assert analysis_to_clean not in store.analyses_to_clean(pipeline="balsamic")
+    assert analysis_to_clean not in store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
     assert not Path(case_path).exists()
 
 
@@ -61,7 +62,7 @@ def test_dry_run(
     base_store = clean_context["BalsamicAnalysisAPI"].store
     helpers.add_analysis(
         base_store,
-        pipeline="balsamic",
+        pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
@@ -77,7 +78,7 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert case_id in caplog.text
-    assert analysis_to_clean in base_store.analyses_to_clean(pipeline="Balsamic")
+    assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
 
 
 def test_cleaned_at_valid(cli_runner, clean_context: dict, caplog):

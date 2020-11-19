@@ -13,6 +13,7 @@ from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.constants import Pipeline
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -116,7 +117,7 @@ def run(
         out_dir=rna_api.get_case_output_path(case_id).as_posix(),
         config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
         priority="normal",
-        data_analysis="MIP-RNA",
+        data_analysis=Pipeline.MIP_RNA,
     )
     rna_api.set_statusdb_action(case_id=case_id, action="running")
     LOG.info("MIP rd-rna run started!")
@@ -133,7 +134,7 @@ def config_case(context: click.Context, case_id: str, dry: bool = False):
     case_obj = rna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         context.abort()
-    config_data = rna_api.pedigree_config(case_obj, pipeline="mip-rna")
+    config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)
     if dry:
         print(config_data)
         return

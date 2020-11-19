@@ -88,10 +88,10 @@ def all_orders_to_submit(
     return {
         OrderType.RML: rml_order_to_submit,
         OrderType.FASTQ: fastq_order_to_submit,
-        OrderType.MIP: mip_order_to_submit,
+        OrderType.MIP_DNA: mip_order_to_submit,
         OrderType.MIP_RNA: mip_rna_order_to_submit,
         OrderType.EXTERNAL: external_order_to_submit,
-        OrderType.MICROBIAL: microbial_order_to_submit,
+        OrderType.MICROSALT: microbial_order_to_submit,
         OrderType.METAGENOME: metagenome_order_to_submit,
         OrderType.BALSAMIC: balsamic_order_to_submit,
     }
