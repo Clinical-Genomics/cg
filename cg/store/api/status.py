@@ -571,7 +571,9 @@ class StatusHandler(BaseHandler):
 
         return records
 
-    def analyses_to_clean(self, before: datetime = datetime.now(), pipeline: Pipeline = None):
+    def analyses_to_clean(
+        self, before: datetime = datetime.now(), pipeline: Pipeline = None
+    ) -> Query:
         """Fetch analyses that haven't been cleaned."""
         records = self.latest_analyses()
         records = records.filter(
