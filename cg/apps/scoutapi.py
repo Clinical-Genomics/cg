@@ -2,10 +2,13 @@
 
 import datetime as dt
 import logging
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 import yaml
 import json
+
+from subprocess import CalledProcessError
+
 
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
@@ -85,35 +88,37 @@ class ScoutAPI(MongoAdapter):
 
     def get_cases(
         self,
-        case_id=None,
-        institute=None,
-        reruns=None,
-        finished=None,
-        causatives=None,
-        research_requested=None,
-        is_research=None,
-        status=None,
-    ):
+        case_id: Optional[str] = None,
+        reruns: bool = False,
+        finished: bool = False,
+        status: Optional[str] = None,
+    ) -> List[dict]:
         """Interact with cases existing in the database."""
         # These commands can be run with `scout export cases`
         models = []
+        get_cases_command = ["export", "cases", "--json"]
         if case_id:
-            case_obj = self.case(case_id=case_id)
-            if case_obj:
-                models.append(case_obj)
+            get_cases_command.extend(["--case-id", case_id])
 
-        else:
-            models = self.cases(
-                collaborator=institute,
-                reruns=reruns,
-                finished=finished,
-                has_causatives=causatives,
-                research_requested=research_requested,
-                is_research=is_research,
-                status=status,
-            )
+        elif status:
+            get_cases_command.extend(["--status", status])
 
-        return models
+        elif finished:
+            get_cases_command.extend(["--finished"])
+
+        if reruns:
+            LOG.info("Fetching cases that are reruns")
+            get_cases_command.append("--reruns")
+
+        try:
+            self.process.run_command(get_cases_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.info("Could not find cases")
+            return []
+
+        return json.loads(self.process.stdout)
 
     def get_causative_variants(self, case_id: str) -> List[dict]:
         """
@@ -121,8 +126,12 @@ class ScoutAPI(MongoAdapter):
         """
         # These commands can be run with `scout export variants`
         get_causatives_command = ["export", "variants", "case-id", case_id]
-        self.process.run_command(get_causatives_command)
-        if not self.process.stdout:
+        try:
+            self.process.run_command(get_causatives_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.warning("Could not find case %s in scout", case_id)
             return []
 
         return json.loads(self.process.stdout)

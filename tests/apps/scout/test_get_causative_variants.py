@@ -1,5 +1,6 @@
 """Tests for the scout api"""
 
+import logging
 from cg.apps.scoutapi import ScoutAPI
 
 
@@ -34,3 +35,20 @@ def test_get_causative_variants_one_variant(
 
     # THEN assert that the variant has a variant_id
     assert "variant_id" in result[0]
+
+
+def test_get_causative_variants_non_existing_case(
+    scout_api: ScoutAPI, case_id: str, causative_output: str, caplog
+):
+    """Test to get causative variants when the case does not exist"""
+    caplog.set_level(logging.INFO)
+    # GIVEN a scout api and a process that will fail
+    scout_api.process.set_exit_code(1)
+
+    # WHEN querying for causative variants
+    result = scout_api.get_causative_variants(case_id=case_id)
+
+    # THEN assert that the output is a empty list
+    assert isinstance(result, list)
+    # THEN assert that the information is communicated
+    assert "Could not find case" in caplog.text
