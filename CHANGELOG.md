@@ -16,12 +16,20 @@ Try to use the following format:
 
 ### Fixed
 
-## [16.1.0]
-
+## [16.2.0]
 
 ### Changed
 
 - Use CLI to upload to Scout
+
+## [16.1.0]
+
+### Changed
+- Changed the way cg cleans cases. Now it only uses StatusDB and family status
+
+### Added
+- Added one-time script to iterate over mip directories, and set cleaned_at timestamp on very old cases that were already cleaned
+
 
 ## [16.0.6]
 
