@@ -41,7 +41,7 @@ def get(context: click.Context, identifier: str):
 def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: List[str]):
     """Get information about a sample."""
     for sample_id in sample_ids:
-        LOG.debug("{sample_id}: get info about sample")
+        LOG.debug("%s: get info about sample", sample_id)
         sample_obj = context.obj["status_db"].sample(sample_id)
         if sample_obj is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
