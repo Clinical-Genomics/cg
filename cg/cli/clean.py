@@ -71,33 +71,27 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
 
     analysis_obj = case_object.analyses[0] if case_object.analyses else None
     if not analysis_obj:
-        LOG.error("%s: analysis not found", case_id)
+        LOG.error(f"{case_id}: analysis not found")
         raise click.Abort()
 
     analysis_path = Path(balsamic_analysis_api.get_case_path(case_id))
 
     if dry_run:
-        LOG.info("Would have deleted: %s", analysis_path)
+        LOG.info(f"Would have deleted: {analysis_path}")
         return EXIT_SUCCESS
 
     if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
         if not analysis_path.exists():
-            LOG.warning("could not find: %s", analysis_path)
+            LOG.warning(f"Could not find path: {analysis_path}")
             return EXIT_FAIL
         if analysis_path.is_symlink():
             LOG.warning(
-                "Will not automatically delete symlink: %s, delete it manually", analysis_path
+                f"Will not automatically delete symlink: {analysis_path}, delete it manually",
             )
             return EXIT_FAIL
 
-        try:
-            shutil.rmtree(analysis_path, ignore_errors=True)
-            LOG.info(f"Cleaned {analysis_path}")
-        except Exception as e:
-            LOG.warning(
-                f" Directory {analysis_path} will not be deleted due to unexpected error - {e}!"
-            )
-
+        shutil.rmtree(analysis_path, ignore_errors=True)
+        LOG.info(f"Cleaned {analysis_path}")
         analysis_obj.cleaned_at = datetime.now()
         balsamic_analysis_api.store.commit()
 
@@ -126,20 +120,13 @@ def mip_run_dir(context, yes, case_id, dry_run: bool = False):
         LOG.info(f"Cleaning case {case_id} : Would have deleted contents of {analysis_path}")
         return
 
-    try:
-        if mip_analysis_api.is_latest_analysis_ongoing(case_id):
-            LOG.warning(f"Analysis for case {case_id} is still ongoing!")
-
-        if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
-            shutil.rmtree(analysis_path, ignore_errors=True)
-            LOG.info(f"Cleaning case {case_id} : Deleted contents of {analysis_path}")
-            mip_analysis_api.mark_analyses_deleted(case_id)
-            for analysis_obj in case_obj.analyses:
-                analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
-            mip_analysis_api.db.commit()
-    except Exception as error:
-        LOG.error(f"{case_id}: {error}")
-        raise click.Abort()
+    if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
+        shutil.rmtree(analysis_path, ignore_errors=True)
+        LOG.info(f"Cleaning case {case_id} : Deleted contents of {analysis_path}")
+        mip_analysis_api.mark_analyses_deleted(case_id)
+        for analysis_obj in case_obj.analyses:
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
+        mip_analysis_api.db.commit()
 
 
 @clean.command("hk-alignment-files")
@@ -246,21 +233,23 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
 def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run: bool = False):
     """Clean up of "old" Balsamic case run dirs"""
 
+    exit_code = EXIT_SUCCESS
     before = parse_date(before_str)
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     possible_cleanups = balsamic_analysis_api.get_analyses_to_clean(before_date=before)
-    LOG.info(f"Cleaning all analyses created before {before}")
+    LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 
-    # for all analyses
     for analysis in possible_cleanups:
         case_id = analysis.family.internal_id
-
-        # call clean
-        LOG.info(f"Cleaning Balsamic output for {case_id}")
+        LOG.info(f"{case_id} - {balsamic_analysis_api.store.family(case_id).action}")
         try:
+            LOG.info(f"Cleaning Balsamic output for {case_id}")
             context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
-        except click.Abort:
-            continue
+        except Exception as e:
+            LOG.error(f"Failed to clean directories for case {case_id} - {e.__class__}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
 
     LOG.info("Done cleaning Balsamic output")
 
@@ -274,17 +263,28 @@ def mip_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs"""
+    exit_code = EXIT_SUCCESS
     mip_analysis_api = context.obj["MipAnalysisAPI"]
     before = parse_date(before_str)
     old_analyses = mip_analysis_api.get_analyses_to_clean(before=before)
+    LOG.info(f"Cleaning {len(old_analyses)} analyses created before {before}")
     for status_analysis in old_analyses:
         case_id = status_analysis.family.internal_id
         try:
+            LOG.info(f"Cleaning MIP output for {case_id}")
             context.invoke(
                 mip_run_dir,
                 yes=yes,
                 case_id=case_id,
                 dry_run=dry_run,
             )
-        except click.Abort:
+        except Exception as e:
+            LOG.error(
+                f"Failed to clean directories for case {status_analysis.family.internal_id} - {e.__class__}"
+            )
+            exit_code = EXIT_FAIL
             continue
+    if exit_code:
+        raise click.Abort
+
+    LOG.info("Done cleaning MIP output")
