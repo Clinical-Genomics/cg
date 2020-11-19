@@ -65,6 +65,7 @@ class ScoutAPI(MongoAdapter):
 
     def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""
+        # This can be run from CLI with `scout export panels --bed <panen1> <panel2>`
         return scout_export_panels(self, panels, versions)
 
     def get_genes(self, panel_id: str, version: str = None) -> list:
@@ -77,6 +78,7 @@ class ScoutAPI(MongoAdapter):
         Returns:
             panel genes: panel genes list
         """
+        # This can be run from CLI with `scout export panels <panel1> `
         gene_panel = self.gene_panel(panel_id=panel_id, version=version)
         return gene_panel.get("genes")
 
@@ -92,7 +94,7 @@ class ScoutAPI(MongoAdapter):
         status=None,
     ):
         """Interact with cases existing in the database."""
-
+        # These commands can be run with `scout export cases`
         models = []
         if case_id:
             case_obj = self.case(case_id=case_id)
@@ -116,6 +118,7 @@ class ScoutAPI(MongoAdapter):
         """
         Get causative variants for a case
         """
+        # These commands can be run with `scout export variants`
         causative_ids = self.get_causatives(institute_id=collaborator, case_id=case_id)
 
         causatives = [self.variant(causative_id) for causative_id in causative_ids]
@@ -171,6 +174,7 @@ class ScoutAPI(MongoAdapter):
             updated_case(dict)
 
         """
+        # This command can be run with `scout load delivery-report <CASE-ID> <REPORT-PATH>`
 
         return load_delivery_report(
             adapter=self, case_id=case_id, report_path=report_path, update=update
