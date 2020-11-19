@@ -92,10 +92,7 @@ class UploadScoutAPI:
         )
         LOG.debug("Found housekeeper version %s", hk_version.id)
         analysis_data: dict = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
-        raw_genome_build = analysis_data.get("genome_build", "37")
-        genome_build = "37"
-        if "38" in raw_genome_build:
-            genome_build = "38"
+        genome_build = "38" if "38" in analysis_data.get("genome_build", "") else "37"
         data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
