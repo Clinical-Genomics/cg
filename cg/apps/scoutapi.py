@@ -13,7 +13,6 @@ from subprocess import CalledProcessError
 from pymongo import MongoClient
 from scout.adapter.mongo import MongoAdapter
 from scout.export.panel import export_panels as scout_export_panels
-from scout.load.report import load_delivery_report
 from scout.parse.case import parse_case_data
 from cg.utils.commands import Process
 
@@ -164,7 +163,7 @@ class ScoutAPI(MongoAdapter):
 
         return json.loads(self.process.stdout)
 
-    def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False):
+    def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False) -> None:
         """Load a delivery report into a case in the database
 
         If the report already exists the function will exit.
@@ -181,7 +180,12 @@ class ScoutAPI(MongoAdapter):
 
         """
         # This command can be run with `scout load delivery-report <CASE-ID> <REPORT-PATH>`
+        upload_delivery_report_command = ["load", "delivery-report", case_id, report_path]
+        if update:
+            upload_delivery_report_command.append("--update")
 
-        return load_delivery_report(
-            adapter=self, case_id=case_id, report_path=report_path, update=update
-        )
+        try:
+            LOG.info("Uploading delivery report %s to case %s", report_path, case_id)
+            self.process.run_command(upload_delivery_report_command)
+        except CalledProcessError:
+            LOG.warning("Something went wrong when uploading delivery report")
