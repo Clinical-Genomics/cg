@@ -35,8 +35,6 @@ openpyxl
 tabulate
 lxml
 python-dateutil
-cyvcf2<0.10.0
-pymongo<3.7
 colorclass
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
 cairocffi==0.9.0        # due to strange version number in package
@@ -46,5 +44,4 @@ dataclasses<0.8
 genologics
 trailblazer>=6.7.0
 housekeeper>=2.0.0b2
-scout-browser>=4.4.1
 cgstats>=1.1.2

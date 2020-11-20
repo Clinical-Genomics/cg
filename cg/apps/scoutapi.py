@@ -1,6 +1,5 @@
 """Code for talking to Scout regarding uploads"""
 
-import datetime as dt
 import logging
 from typing import List, Optional
 from pathlib import Path
@@ -9,23 +8,18 @@ import json
 
 from subprocess import CalledProcessError
 
-
-from pymongo import MongoClient
-from scout.adapter.mongo import MongoAdapter
-from scout.export.panel import export_panels as scout_export_panels
-from scout.parse.case import parse_case_data
 from cg.utils.commands import Process
+from cg.models.scout_load_config import ScoutCase
+from cg.models.scout_export import Case
 
 LOG = logging.getLogger(__name__)
 
 
-class ScoutAPI(MongoAdapter):
+class ScoutAPI:
 
     """Interface to Scout."""
 
     def __init__(self, config):
-        client = MongoClient(config["scout"]["database"], serverSelectionTimeoutMS=20)
-        super(ScoutAPI, self).__init__(client[config["scout"]["database_name"]])
 
         binary_path = config["scout"]["binary_path"]
         config_path = config["scout"]["config_path"]
@@ -35,17 +29,17 @@ class ScoutAPI(MongoAdapter):
         """Load analysis of a new family into Scout."""
         with open(scout_load_config, "r") as stream:
             data = yaml.safe_load(stream)
-        config_data = parse_case_data(config=data)
-        existing_case = self.case(
-            institute_id=config_data["owner"], display_name=config_data["family_name"]
-        )
+        scout_load_config_object: ScoutCase = ScoutCase(**data)
+        existing_case = self.get_cases(case_id=data["family"])
+        if existing_case:
+            existing_case: Case = Case(**existing_case[0])
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
-            if force or config_data["analysis_date"] > existing_case["analysis_date"]:
+            if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
                 load_command.append("--update")
                 LOG.info("update existing Scout case")
             else:
-                existing_date = existing_case["analysis_date"].date()
+                existing_date = existing_case.analysis_date.date()
                 LOG.warning("analysis of case already loaded: %s", existing_date)
                 return
         LOG.debug("load new Scout case")
@@ -66,12 +60,29 @@ class ScoutAPI(MongoAdapter):
         ]
         self.process.run_command(parameters=parameters)
 
-    def export_panels(self, panels: List[str], versions=None):
-        """Pass through to export of a list of gene panels."""
-        # This can be run from CLI with `scout export panels --bed <panen1> <panel2>`
-        return scout_export_panels(self, panels, versions)
+    def export_panels(self, panels: List[str], build: str = None) -> List[str]:
+        """Pass through to export of a list of gene panels.
 
-    def get_genes(self, panel_id: str, version: str = None) -> list:
+        Return list of lines in bed format
+        """
+        export_panels_command = ["export", "panels", "--bed"]
+        for panel_id in panels:
+            export_panels_command.append(panel_id)
+
+        if build:
+            export_panels_command.extend(["--build", build])
+
+        try:
+            self.process.run_command(export_panels_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.info("Could not find panels")
+            return []
+
+        return [line for line in self.process.stdout_lines()]
+
+    def get_genes(self, panel_id: str, build: str = None) -> list:
         """Fetch panel genes.
 
         Args:
@@ -82,8 +93,28 @@ class ScoutAPI(MongoAdapter):
             panel genes: panel genes list
         """
         # This can be run from CLI with `scout export panels <panel1> `
-        gene_panel = self.gene_panel(panel_id=panel_id, version=version)
-        return gene_panel.get("genes")
+        export_panel_command = ["export", "panel", panel_id]
+        if build:
+            export_panel_command.extend(["--build", build])
+
+        try:
+            self.process.run_command(export_panel_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.info("Could not find panel %s", panel_id)
+            return []
+
+        panel_genes = []
+        for gene_line in self.process.stdout_lines():
+            if gene_line.startswith("#"):
+                continue
+            gene_info = gene_line.strip().split("\t")
+            if not len(gene_info) > 1:
+                continue
+            panel_genes.append({"hgnc_id": int(gene_info[0]), "hgnc_symbol": gene_info[1]})
+
+        return panel_genes
 
     def get_cases(
         self,
