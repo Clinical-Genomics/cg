@@ -95,7 +95,6 @@ class ScoutAPI(MongoAdapter):
     ) -> List[dict]:
         """Interact with cases existing in the database."""
         # These commands can be run with `scout export cases`
-        models = []
         get_cases_command = ["export", "cases", "--json"]
         if case_id:
             get_cases_command.extend(["--case-id", case_id])
@@ -136,7 +135,7 @@ class ScoutAPI(MongoAdapter):
 
         return json.loads(self.process.stdout)
 
-    def get_solved_cases(self, days_ago):
+    def get_solved_cases(self, days_ago: int):
         """
         Get cases solved within chosen timespan
 
@@ -146,28 +145,24 @@ class ScoutAPI(MongoAdapter):
         Return:
             cases (list): list of cases
         """
+        solved_cases_command = [
+            "export",
+            "cases",
+            "--json",
+            "--status",
+            "--solved",
+            "--within-days",
+            str(days_ago),
+        ]
+        try:
+            self.process.run_command(solved_cases_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.warning("Could not find any solved cases in scout")
+            return []
 
-        days_datetime = dt.datetime.now() - dt.timedelta(days=days_ago)
-
-        # Look up 'mark_causative' events added since specified number days ago
-        event_query = {
-            "category": "case",
-            "verb": "mark_causative",
-            "created_at": {"$gte": days_datetime},
-        }
-        recent_events = self.event_collection.find(event_query)
-        solved_cases = set()
-
-        # Find what cases these events concern
-        for event in recent_events:
-            solved_cases.add(event["case"])
-
-        solved_cases = list(solved_cases)
-
-        # Find these cases in the database
-        cases = self.case_collection.find({"_id": {"$in": solved_cases}})
-
-        return cases
+        return json.loads(self.process.stdout)
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False):
         """Load a delivery report into a case in the database
