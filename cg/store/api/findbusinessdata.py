@@ -114,7 +114,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def family(self, internal_id: str) -> models.Family:
         """Fetch a family by internal id from the database."""
-        import pdb; pdb.set_trace()
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
     def family_samples(self, family_id: str) -> List[models.FamilySample]:
