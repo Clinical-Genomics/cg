@@ -47,7 +47,6 @@ class UploadScoutAPI:
         LOG.info("hk_file: {}".format(hk_file))
         if hk_file:
             return hk_file.full_path
-        
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
@@ -57,12 +56,14 @@ class UploadScoutAPI:
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
             coverage_image = self.fetch_file_path_from_tags(
-                tags=["chromograph", "tcov", "mip-dna", "wgs",], sample_id=sample_id, hk_version_id=hk_version_id
+                tags=["chromograph", "tcov", "mip-dna", "wgs",],
+                sample_id=sample_id,
+                hk_version_id=hk_version_id,
             )
-            
+
             upd_sites_image = self.fetch_file_path_from_tags(
                 ["chromograph", "sites"], sample_id, hk_version_id
-            ) 
+            )
             upd_regions_image = self.fetch_file_path_from_tags(
                 ["chromograph", "regions"], sample_id, hk_version_id
             )
@@ -110,7 +111,6 @@ class UploadScoutAPI:
         LOG.info("*** analysis_internal id: {}".format(analysis_obj.family.internal_id))
         LOG.info("*** analysis_family.name: {}".format(analysis_obj.family.name))
 
-        
         data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
