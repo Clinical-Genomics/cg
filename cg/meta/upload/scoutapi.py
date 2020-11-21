@@ -56,11 +56,8 @@ class UploadScoutAPI:
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
             coverage_image = self.fetch_file_path_from_tags(
-                tags=["chromograph", "tcov", "mip-dna", "wgs",],
-                sample_id=sample_id,
-                hk_version_id=hk_version_id,
+                ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version_id
             )
-
             upd_sites_image = self.fetch_file_path_from_tags(
                 ["chromograph", "sites"], sample_id, hk_version_id
             )
