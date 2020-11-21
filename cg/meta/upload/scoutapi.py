@@ -41,16 +41,12 @@ class UploadScoutAPI:
     def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
         """Fetch files from housekeeper matching a list of tags """
         tags.append(sample_id)
-        LOG.info("tags: {}".format(tags))
-        LOG.info("HK version: {}".format(hk_version_id))
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
-        LOG.info("hk_file: {}".format(hk_file))
         if hk_file:
             return hk_file.full_path
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
-        LOG.info("BUILDSAMPLES HK version: {}".format(hk_version_id))
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
@@ -102,11 +98,7 @@ class UploadScoutAPI:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
-        LOG.info("generate_config: {}".format(hk_version))
         analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
-        LOG.info("*** analysis_data: {}".format(analysis_data))
-        LOG.info("*** analysis_internal id: {}".format(analysis_obj.family.internal_id))
-        LOG.info("*** analysis_family.name: {}".format(analysis_obj.family.name))
 
         data = {
             "analysis_date": analysis_obj.completed_at,
