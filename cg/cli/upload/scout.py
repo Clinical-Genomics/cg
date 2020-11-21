@@ -30,35 +30,21 @@ def scout(context, re_upload, print_console, case_id):
     LOG.info("context:{}".format(context))
     status_db = context.obj["status_db"]
     scout_upload_api = context.obj["scout_upload_api"]
-    LOG.info("upload_api:{}".format(scout_upload_api))    
+    LOG.info("upload_api:{}".format(scout_upload_api))
     hk_api = context.obj["housekeeper_api"]
     last_version = hk_api.last_version(case_id)
-    LOG.info("get latest:{}".format(last_version))    
-
+    LOG.info("get latest:{}".format(last_version))
     family_obj = status_db.family(case_id)
     analysis = status_db.analysis(family_obj, last_version.created_at)
     LOG.info("analysis:{}".format(analysis))
     LOG.info("family_obj:{}".format(family_obj))
     LOG.info("family_obj.analyses:{}".format(family_obj.analyses))
-    
     scout_config = scout_upload_api.generate_config(family_obj.analyses[0])
     mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
-
-
-
-
-
-
-
-
-    
-
     if print_console:
         click.echo(scout_config)
         return
-
     file_path = Path(mip_dna_root_dir, case_id, "scout_load.yaml")
-
     if file_path.exists():
         message = (
             "Scout load config %s already exists, you might remove the file and try "
