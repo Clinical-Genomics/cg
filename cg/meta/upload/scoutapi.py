@@ -1,6 +1,7 @@
 """File includes api to uploading data into Scout"""
 
 import logging
+import re
 from pathlib import Path
 
 import requests
@@ -34,24 +35,41 @@ class UploadScoutAPI:
         self.lims = lims_api
 
     def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
-        """"Fetch files from housekeeper"""
-        tags = [tag, sample_id]
+        """"Fetch files from housekeeper matchin one tag string"""
+        return self.fetch_file_path_from_tags([tag], sample_id, hk_version_id)
+
+    def fetch_file_path_from_tags(self, tags: list, sample_id: str, hk_version_id: int = None):
+        """Fetch files from housekeeper matching a list of tags """
+        tags.append(sample_id)
+        LOG.info("tags: {}".format(tags))
+        LOG.info("HK version: {}".format(hk_version_id))
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
-        file_path = None
+        LOG.info("hk_file: {}".format(hk_file))
         if hk_file:
-            file_path = hk_file.full_path
-        return file_path
+            return hk_file.full_path
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
-
+        LOG.info("BUILDSAMPLES HK version: {}".format(hk_version_id))
         for link_obj in analysis_obj.family.links:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
-            chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
+            coverage_image = self.fetch_file_path_from_tags(
+                ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version_id
+            )
+            upd_sites_image = self.fetch_file_path_from_tags(
+                ["chromograph", "sites"], sample_id, hk_version_id
+            )
+            upd_regions_image = self.fetch_file_path_from_tags(
+                ["chromograph", "regions"], sample_id, hk_version_id
+            )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
+
+            coverage_path = self._extract_generic_filepath(coverage_image)
+            upd_sites_path = self._extract_generic_filepath(upd_sites_image)
+            upd_regions_path = self._extract_generic_filepath(upd_regions_image)
 
             lims_sample = dict()
             try:
@@ -63,7 +81,11 @@ class UploadScoutAPI:
                 "bam_path": bam_path,
                 "capture_kit": None,
                 "alignment_path": alignment_file_path,
-                "chromograph": chromograph_path,
+                "chromograph_images": {
+                    "upd_regions": upd_regions_path,
+                    "upd_sites": upd_sites_path,
+                    "coverage": coverage_path,
+                },
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
                 "mt_bam": mt_bam_path,
@@ -80,7 +102,12 @@ class UploadScoutAPI:
         """Fetch data about an analysis to load Scout."""
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
+        LOG.info("generate_config: {}".format(hk_version))
         analysis_data = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
+        LOG.info("*** analysis_data: {}".format(analysis_data))
+        LOG.info("*** analysis_internal id: {}".format(analysis_obj.family.internal_id))
+        LOG.info("*** analysis_family.name: {}".format(analysis_obj.family.name))
+
         data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
@@ -95,6 +122,7 @@ class UploadScoutAPI:
             "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
+
         for sample in self.build_samples(analysis_obj, hk_version.id):
             data["samples"].append(sample)
 
@@ -222,3 +250,13 @@ class UploadScoutAPI:
         ]
         svg_path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path
+
+    @staticmethod
+    def _extract_generic_filepath(file_path):
+        """Remove a file's sufffix and identifying integer or X/Y
+        Example:
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
+        if file_path is None:
+            return ""
+        return re.split("(\d+|X|Y)\.png", file_path)[0]
