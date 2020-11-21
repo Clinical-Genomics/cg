@@ -27,10 +27,24 @@ def fixture_causatives_file(scout_dir: Path) -> Path:
     return scout_dir / "export_causatives.json"
 
 
+@pytest.fixture(name="cases_file")
+def fixture_cases_file(scout_dir: Path) -> Path:
+    """Return the path to a file with export cases output"""
+    return scout_dir / "case_export.json"
+
+
 @pytest.fixture(name="causative_output")
 def fixture_causative_output(causatives_file: Path) -> str:
     """Return the content of a export causatives run with scout"""
     with open(causatives_file, "r") as infile:
+        content = infile.read()
+    return content
+
+
+@pytest.fixture(name="export_cases_output")
+def fixture_export_cases_output(cases_file: Path) -> str:
+    """Return the content of a export cases output"""
+    with open(cases_file, "r") as infile:
         content = infile.read()
     return content
 
