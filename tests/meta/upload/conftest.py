@@ -265,9 +265,10 @@ def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
 
 
 @pytest.yield_fixture(scope="function")
-def analysis(analysis_store, case_id):
+def analysis(analysis_store, case_id, timestamp):
     """Fixture to mock an analysis"""
     _analysis = analysis_store.add_analysis(pipeline=Pipeline.BALSAMIC, version="version")
     _analysis.family = analysis_store.family(case_id)
     _analysis.config_path = "dummy_path"
+    _analysis.completed_at = timestamp
     yield _analysis

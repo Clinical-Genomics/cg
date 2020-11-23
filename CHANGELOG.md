@@ -16,10 +16,18 @@ Try to use the following format:
 
 ### Fixed
 
+
+## [16.2.0]
+
+### Changed
+
+- Use CLI to upload to Scout
+
 ## [16.1.1]
 
 ### Fixed
 - Accreditation logotype only shown on new delivery reports for accredited analyses
+
 
 ## [16.1.0]
 
@@ -28,6 +36,7 @@ Try to use the following format:
 
 ### Added
 - Added one-time script to iterate over mip directories, and set cleaned_at timestamp on very old cases that were already cleaned
+
 
 ## [16.0.6]
 
