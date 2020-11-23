@@ -61,8 +61,12 @@ def parse_json(indata: dict) -> dict:
     else:
         items = parsed_samples
 
-    data = {"customer": customer_id, "items": items, "project_type": project_type, "comment":
-        comment}
+    data = {
+        "customer": customer_id,
+        "items": items,
+        "project_type": project_type,
+        "comment": comment,
+    }
 
     return data
 
@@ -88,7 +92,7 @@ def expand_case(case_id, parsed_case):
             gene_panels.update(raw_sample["panels"])
         new_sample = {}
         for key, value in raw_sample.items():
-            if key not in ['panels']:
+            if key not in ["panels"]:
                 new_sample[key] = value
 
         new_case["samples"].append(new_sample)

@@ -33,6 +33,7 @@ def check_orderform_version(document_title):
     for valid_orderform in VALID_ORDERFORMS:
         if valid_orderform in document_title:
             return
+    print(document_title)
     raise OrderFormError(f"Unsupported orderform: {document_title}")
 
 
@@ -42,7 +43,7 @@ def parse_orderform(excel_path: str) -> dict:
 
     sheet_name = None
     sheet_names = workbook.sheet_names()
-    for name in ["orderform", "order form"]:
+    for name in ["Orderform", "orderform", "order form"]:
         if name in sheet_names:
             sheet_name = name
             break
@@ -85,13 +86,32 @@ def parse_orderform(excel_path: str) -> dict:
 
 def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.Sheet) -> str:
     """Get the document title for the order form."""
-    if "information" in workbook.sheet_names():
-        information_sheet = workbook.sheet_by_name("information")
+    if "information" in map(str.lower, workbook.sheet_names()):
+        information_sheet = get_information_sheet(workbook)
         document_title = information_sheet.row(0)[2].value
         return document_title
 
     document_title = orderform_sheet.row(0)[1].value
     return document_title
+
+
+def get_information_sheet(workbook):
+
+    sheet_name = None
+    sheet_names = workbook.sheet_names()
+    for name in ["Information", "information"]:
+        if name in sheet_names:
+            sheet_name = name
+            break
+    if sheet_name is None:
+        raise OrderFormError("Information sheet not found in Excel file")
+
+    sheet = workbook.sheet_by_name(sheet_name)
+
+    if not sheet:
+        raise OrderFormError(f"'information' sheet not found in: {workbook.sheet_names()}")
+
+    return sheet
 
 
 def get_project_type(document_title: str, parsed_samples: List) -> str:
@@ -248,6 +268,8 @@ def parse_sample(raw_sample):
         sample["data_analysis"] = str(Pipeline.MIP_DNA)
     elif data_analysis and "microbial" in data_analysis:
         sample["data_analysis"] = str(Pipeline.MICROSALT)
+    elif data_analysis and "fluffy" in data_analysis:
+        sample["data_analysis"] = str(Pipeline.FLUFFY)
     elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
         sample["data_analysis"] = str(Pipeline.FASTQ)
     else:

@@ -348,7 +348,7 @@ def metagenome_order_to_submit():
 @pytest.fixture
 def microbial_order_to_submit():
     """Load an example microbial order."""
-    return json.load(open("tests/fixtures/orders/microbial.json"))
+    return json.load(open("tests/fixtures/orders/microsalt.json"))
 
 
 @pytest.fixture

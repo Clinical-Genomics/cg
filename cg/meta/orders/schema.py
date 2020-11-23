@@ -268,7 +268,6 @@ RML_SAMPLE = {
     "index_sequence": OptionalNone(TypeValidatorNone(str)),
     # "Not required"
     "comment": OptionalNone(TypeValidatorNone(str)),
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
 }
 
 MICROSALT_SAMPLE = {

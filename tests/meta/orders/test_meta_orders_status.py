@@ -14,11 +14,10 @@ def test_pools_to_status(rml_order_to_submit):
     assert data["customer"] == "cust000"
     assert data["order"] == "ctDNA sequencing - order 9"
     # ... and information about the pool(s)
-    assert len(data["pools"]) == 2
+    assert len(data["pools"]) == 1
     assert data["pools"][0]["name"] == "pool-1"
-    assert data["pools"][0]["application"] == "RMLP10R150"
+    assert data["pools"][0]["application"] == "RMLS05R150"
     assert data["pools"][0]["data_analysis"] == str(Pipeline.FLUFFY)
-    assert data["pools"][0]["capture_kit"] == "Agilent Sureselect CRE"
 
 
 def test_samples_to_status(fastq_order_to_submit):
@@ -104,8 +103,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_pool == new_pools[0]
     assert new_pool.name == "pool-1"
     assert new_pool.application_version.application.tag == "RMLS05R150"
-    assert new_pool.data_analysis == str(Pipeline.FASTQ)
-    assert new_pool.capture_kit == "Agilent Sureselect CRE"
+    assert new_pool.data_analysis == str(Pipeline.FLUFFY)
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"

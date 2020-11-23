@@ -21,7 +21,7 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
-    assert sample_data["index"] == "TruSeq DNA HT Dual-index (D7-D5)"
+    assert sample_data["index"] == "IDT DupSeq 10 bp Set B "
     assert sample_data["index_number"] == "1"
 
     assert sample_data["container_name"] is None
@@ -29,12 +29,11 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["well_position"] is None
     assert sample_data["well_position_rml"] == "A:1"
 
-    assert sample_data["reagent_label"] == "A01 - D701-D501 (ATTACTCG-TATAGCCT)"
+    assert sample_data["reagent_label"] == "A01 IDT_10nt_541 (ATTCCACACT-AACAAGACCA)"
 
     assert sample_data["custom_index"] == "GATACA"
 
     assert sample_data["comment"] == "comment"
-    assert sample_data["capture_kit"] == "Agilent Sureselect CRE"
     assert sample_data["concentration_sample"] == "3"
 
 
