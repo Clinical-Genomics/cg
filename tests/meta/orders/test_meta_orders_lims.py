@@ -38,8 +38,10 @@ def test_to_lims_external(external_order_to_submit):
 
 def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
+
     # WHEN parsing the order to format for LIMS
     samples = LimsHandler.to_lims(customer="dummyCust", samples=fastq_order_to_submit["samples"])
+
     # THEN should "work"
     assert len(samples) == 2
     # ... and pick out relevant UDF values
@@ -58,7 +60,7 @@ def test_to_lims_rml(rml_order_to_submit):
     assert first_sample["udfs"]["pool"] == "pool-1"
     assert first_sample["udfs"]["volume"] == "30"
     assert first_sample["udfs"]["concentration"] == "5"
-    assert first_sample["udfs"]["index"] == "TruSeq DNA HT Dual-index (D7-D5)"
+    assert first_sample["udfs"]["index"] == "TruSeq Custom Amplicon Dual-index (A7-A5)"
     assert first_sample["udfs"]["index_number"] == "1"
 
 

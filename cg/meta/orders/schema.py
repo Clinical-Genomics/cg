@@ -252,7 +252,7 @@ RML_SAMPLE = {
     "data_analysis": str,
     "volume": str,
     "concentration": str,
-    "concentration_pool": str,
+    "concentration_sample": str,
     "index": str,
     "index_number": OptionalNone(TypeValidatorNone(str)),  # optional for NoIndex
     # "Required if Plate"
@@ -284,7 +284,7 @@ MICROBIAL_SAMPLE = {
     # "Required if "Other" is chosen in column "Species""
     "organism_other": OptionalNone(TypeValidatorNone(str)),
     # "These fields are not required"
-    "concentration_weight": OptionalNone(TypeValidatorNone(str)),
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
@@ -304,7 +304,7 @@ METAGENOME_SAMPLE = {
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # "This information is not required"
-    "concentration_weight": OptionalNone(TypeValidatorNone(str)),
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "extraction_method": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),

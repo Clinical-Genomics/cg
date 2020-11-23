@@ -34,7 +34,8 @@ def test_parsing_rml_orderform(rml_orderform):
 
     assert sample_data["comment"] == "comment"
     assert sample_data["capture_kit"] == "Agilent Sureselect CRE"
-    assert sample_data["concentration_pool"] == "3"
+    # TODO:
+    # assert sample_data["concentration_sample"] == "3"
 
 
 def test_parsing_fastq_orderform(fastq_orderform):
@@ -194,7 +195,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     assert sample["well_position"] == "A:1"
 
     # These fields are not required
-    assert sample["concentration_weight"] == "1"
+    assert sample["concentration_sample"] == "1"
     assert sample["quantity"] == "2"
     assert sample["comment"] == "comment"
 
@@ -233,7 +234,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
 
     assert sample_data["organism_other"] == "other species"
 
-    assert sample_data["concentration_weight"] == "1"
+    assert sample_data["concentration_sample"] == "1"
     assert sample_data["quantity"] == "2"
     assert sample_data["comment"] == "comment"
 
@@ -345,7 +346,7 @@ def test_parse_mip_rna(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP-RNA"
+    raw_sample["UDF/Data Analysis"] = "mip rna"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)

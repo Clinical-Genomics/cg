@@ -3,6 +3,7 @@
 """
 import copy
 import datetime as dt
+import json
 import logging
 import shutil
 import os
@@ -305,6 +306,54 @@ def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
     _file = apps_dir / "madeline/madeline.xml"
     return str(_file)
+
+
+@pytest.fixture
+def mip_order_to_submit():
+    """Load an example scout order."""
+    return json.load(open("tests/fixtures/orders/mip.json"))
+
+
+@pytest.fixture
+def mip_rna_order_to_submit():
+    """Load an example rna order."""
+    return json.load(open("tests/fixtures/orders/mip_rna.json"))
+
+
+@pytest.fixture
+def external_order_to_submit():
+    """Load an example external order."""
+    return json.load(open("tests/fixtures/orders/external.json"))
+
+
+@pytest.fixture
+def fastq_order_to_submit():
+    """Load an example fastq order."""
+    return json.load(open("tests/fixtures/orders/fastq.json"))
+
+
+@pytest.fixture
+def rml_order_to_submit():
+    """Load an example rml order."""
+    return json.load(open("tests/fixtures/orders/rml.json"))
+
+
+@pytest.fixture
+def metagenome_order_to_submit():
+    """Load an example metagenome order."""
+    return json.load(open("tests/fixtures/orders/metagenome.json"))
+
+
+@pytest.fixture
+def microbial_order_to_submit():
+    """Load an example microbial order."""
+    return json.load(open("tests/fixtures/orders/microbial.json"))
+
+
+@pytest.fixture
+def balsamic_order_to_submit():
+    """Load an example cancer order."""
+    return json.load(open("tests/fixtures/orders/balsamic.json"))
 
 
 # Compression fixtures

@@ -16,7 +16,7 @@ VALID_ORDERFORMS = [
     "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-CASE_PROJECT_TYPES = ["mip", "external", "balsamic", "mip_rna"]
+CASE_PROJECT_TYPES = ["mip-dna", "external", "balsamic", "mip-rna"]
 
 
 def check_orderform_version(document_title):
@@ -126,6 +126,7 @@ def expand_case(case_id, parsed_case):
     if len(customers) != 1:
         raise OrderFormError("Invalid customer information: {}".format(customers))
     customer = customers.pop()
+
     gene_panels = set()
     for raw_sample in samples:
         if raw_sample["panels"]:
@@ -246,8 +247,7 @@ def parse_sample(raw_sample):
         ("volume", "UDF/Volume (uL)"),
         ("quantity", "UDF/Quantity"),
         ("concentration", "UDF/Concentration (nM)"),
-        ("concentration_pool", "UDF/Concentration Pool (nM)"),
-        ("concentration_weight", "UDF/Sample Conc."),
+        ("concentration_sample", "UDF/Sample Conc."),
         ("time_point", "UDF/time_point"),
     ]
     for json_key, excel_key in numeric_values:

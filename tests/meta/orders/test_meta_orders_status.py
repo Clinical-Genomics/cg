@@ -10,13 +10,13 @@ def test_pools_to_status(rml_order_to_submit):
     # WHEN parsing for status
     data = StatusHandler.pools_to_status(rml_order_to_submit)
     # THEN it should pick out the general information
-    assert data["customer"] == "cust001"
+    assert data["customer"] == "cust000"
     assert data["order"] == "ctDNA sequencing - order 9"
     # ... and information about the pool(s)
-    assert len(data["pools"]) == 1
+    assert len(data["pools"]) == 2
     assert data["pools"][0]["name"] == "pool-1"
-    assert data["pools"][0]["application"] == "RMLS05R150"
-    assert data["pools"][0]["data_analysis"] == "fastq"
+    assert data["pools"][0]["application"] == "RMLP10R150"
+    assert data["pools"][0]["data_analysis"] == "fluffy"
     assert data["pools"][0]["capture_kit"] == "Agilent Sureselect CRE"
 
 

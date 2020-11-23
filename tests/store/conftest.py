@@ -61,7 +61,7 @@ def fixture_microbial_submitted_order():
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
             analysis="fastq",
-            concentration_weight="1",
+            concentration_sample="1",
             mother=None,
             father=None,
         )

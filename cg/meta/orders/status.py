@@ -1,4 +1,4 @@
-"""Ordering module for intration"""
+"""Ordering module"""
 import datetime as dt
 from typing import List
 
@@ -17,9 +17,10 @@ class StatusHandler:
         """Group samples in cases."""
         cases = {}
         for sample in samples:
-            if sample["family_name"] not in cases:
-                cases[sample["family_name"]] = []
-            cases[sample["family_name"]].append(sample)
+            case_id = sample["family_name"]
+            if case_id not in cases:
+                cases[case_id] = []
+            cases[case_id].append(sample)
         return cases
 
     @staticmethod
@@ -438,6 +439,7 @@ class StatusHandler:
             with self.status.session.no_autoflush:
                 application_version = self.status.current_application_version(pool["application"])
                 if application_version is None:
+                    print(f"Invalid application: {pool['application']}")
                     raise OrderError(f"Invalid application: {pool['application']}")
             new_pool = self.status.add_pool(
                 customer=customer_obj,
