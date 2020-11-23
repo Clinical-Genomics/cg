@@ -5,6 +5,7 @@ import logging
 import datetime as dt
 
 from cg.cli.clean import balsamic_past_run_dirs, balsamic_run_dir
+from cg.constants import Pipeline
 
 EXIT_SUCCESS = 0
 
@@ -35,9 +36,8 @@ def test_with_yes(cli_runner, clean_context: dict, timestamp_today: dt.datetime,
     store = clean_context["BalsamicAnalysisAPI"].store
     timestamp_now = timestamp_today
 
-    analysis_to_clean = store.analyses_to_clean(pipeline="balsamic").first()
-    assert not analysis_to_clean.cleaned_at
-    case_id = analysis_to_clean.family.internal_id
+    case_id = "balsamic_case_clean"
+    analysis_to_clean = store.family(case_id).analyses[0]
     case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
     Path(case_path).mkdir()
 
@@ -48,7 +48,7 @@ def test_with_yes(cli_runner, clean_context: dict, timestamp_today: dt.datetime,
     # THEN the analysis should have been cleaned
     assert result.exit_code == EXIT_SUCCESS
     assert analysis_to_clean.cleaned_at
-    assert analysis_to_clean not in store.analyses_to_clean(pipeline="balsamic")
+    assert analysis_to_clean not in store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
     assert not Path(case_path).exists()
 
 
@@ -62,13 +62,13 @@ def test_dry_run(
     base_store = clean_context["BalsamicAnalysisAPI"].store
     helpers.add_analysis(
         base_store,
-        pipeline="balsamic",
+        pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    analysis_to_clean = base_store.analyses_to_clean(pipeline="Balsamic").first()
-    case_id = analysis_to_clean.family.internal_id
+    case_id = "balsamic_case_clean"
+    analysis_to_clean = base_store.family(case_id).analyses[0]
     case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
     Path(case_path).mkdir()
 
@@ -78,15 +78,14 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert case_id in caplog.text
-    assert analysis_to_clean in base_store.analyses_to_clean(pipeline="Balsamic")
+    assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
 
 
-def test_cleaned_at(cli_runner, clean_context: dict, helpers, caplog):
+def test_cleaned_at_valid(cli_runner, clean_context: dict, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
     base_store = clean_context["BalsamicAnalysisAPI"].store
-    analysis_to_clean = base_store.analyses_to_clean(pipeline="balsamic")[0]
-    case_id = analysis_to_clean.family.internal_id
+    case_id = "balsamic_case_clean"
     case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
     Path(case_path).mkdir()
     # WHEN dry running with dry run specified
@@ -94,6 +93,25 @@ def test_cleaned_at(cli_runner, clean_context: dict, helpers, caplog):
 
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
-    assert analysis_to_clean.cleaned_at
-    assert analysis_to_clean not in base_store.analyses_to_clean(pipeline="Balsamic")
+    assert base_store.family("balsamic_case_clean").analyses[0].cleaned_at
     assert not Path(case_path).exists()
+
+
+def test_cleaned_at_invalid(cli_runner, clean_context: dict, caplog):
+    """Test command with dry run options"""
+    # GIVEN a case on disk that could be deleted
+    base_store = clean_context["BalsamicAnalysisAPI"].store
+    case_id = "balsamic_case_not_clean"
+    case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
+    Path(case_path).mkdir()
+    assert not base_store.family("balsamic_case_not_clean").analyses[0].cleaned_at
+    # WHEN dry running with dry run specified
+
+    result = cli_runner.invoke(
+        balsamic_past_run_dirs, ["2020-12-01", "-d", "-y"], obj=clean_context
+    )
+
+    # THEN case directory should not have been cleaned
+    assert result.exit_code == EXIT_SUCCESS
+    assert not base_store.family("balsamic_case_not_clean").analyses[0].cleaned_at
+    assert Path(case_path).exists()

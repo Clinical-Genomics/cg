@@ -253,11 +253,9 @@ class MockHousekeeperAPI:
 
     def bundle(self, name: str) -> MockBundle:
         """ Fetch a bundle """
-        print("Fetching bundle %s" % name)
         if name:
             for bundle_obj in self.bundles():
                 if bundle_obj.name == name:
-                    print("Bundle %s found" % name)
                     return bundle_obj
         return self._bundle_obj
 
@@ -271,7 +269,6 @@ class MockHousekeeperAPI:
         bundle_obj = MockBundle(id=self._id_counter, name=name, created_at=created_at)
         self._bundle_obj = bundle_obj
         self._bundles.append(bundle_obj)
-        print("Create new bundle %s (%s)" % (name, bundle_obj.id))
         return bundle_obj
 
     def version(self, *args, **kwargs):
@@ -311,7 +308,6 @@ class MockHousekeeperAPI:
         expires_at = expires_at or datetime.datetime.now()
         version_obj = MockVersion(id=self._id_counter, created_at=created_at, expires_at=expires_at)
         self._version_obj = version_obj
-        print("Create new version with id %s" % version_obj.id)
         return version_obj
 
     def add_version(
@@ -426,13 +422,3 @@ class MockHousekeeperAPI:
 
 if __name__ == "__main__":
     hk_api = MockHousekeeperAPI(config={})
-    my_list = EnhancedList()
-    print(my_list.first())
-    my_list.append(1)
-    print(my_list)
-    print(my_list.first())
-    my_list.append(2)
-    print(my_list)
-    print(my_list.first())
-    print(my_list[0])
-    print(my_list[1])

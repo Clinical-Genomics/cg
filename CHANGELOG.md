@@ -16,6 +16,45 @@ Try to use the following format:
 
 ### Fixed
 
+
+## [16.2.0]
+
+### Changed
+
+- Use CLI to upload to Scout
+
+## [16.1.1]
+
+### Fixed
+- Accreditation logotype only shown on new delivery reports for accredited analyses
+
+
+## [16.1.0]
+
+### Changed
+- Changed the way cg cleans cases. Now it only uses StatusDB and family status
+
+### Added
+- Added one-time script to iterate over mip directories, and set cleaned_at timestamp on very old cases that were already cleaned
+
+
+## [16.0.6]
+
+### Fixed
+- 'cg upload auto --pipeline' to accept 'mip-dna' as pipeline 
+
+## [16.0.5]
+
+### Fixed
+- Trailblazer integration fixed
+
+## [16.0.4]
+
+### Fixed
+- Case database entities (Family) can only have specific values for data_analysis
+- Analysis database entities can only have specific values for pipeline
+- Enum used for pipeline as arguments 
+
 ## [16.0.3]
 
 ### Fixed

@@ -1,4 +1,5 @@
 from cg.apps.lims import orderform
+from cg.constants import Pipeline
 
 
 def test_parsing_rml_orderform(rml_orderform):
@@ -17,7 +18,7 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["name"] == "sample1"
     assert sample_data["pool"] == "pool1"
     assert sample_data["application"] == "RMLP10R300"
-    assert sample_data["data_analysis"] == "FLUFFY"
+    assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
     assert sample_data["index"] == "TruSeq DNA HT Dual-index (D7-D5)"
@@ -34,8 +35,7 @@ def test_parsing_rml_orderform(rml_orderform):
 
     assert sample_data["comment"] == "comment"
     assert sample_data["capture_kit"] == "Agilent Sureselect CRE"
-    # TODO:
-    # assert sample_data["concentration_sample"] == "3"
+    assert sample_data["concentration_sample"] == "3"
 
 
 def test_parsing_fastq_orderform(fastq_orderform):
@@ -45,7 +45,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     data = orderform.parse_orderform(fastq_orderform)
 
     # THEN it should determine the project type
-    assert data["project_type"] == "fastq"
+    assert data["project_type"] == str(Pipeline.FASTQ)
     # ... and find all samples
     assert len(data["items"]) == 38
 
@@ -54,7 +54,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     tumour_sample = data["items"][0]
     assert normal_sample["name"] == "s2"
     assert normal_sample["container"] == "Tube"
-    assert normal_sample["data_analysis"] == "fastq"
+    assert normal_sample["data_analysis"] == str(Pipeline.FASTQ)
     assert normal_sample["application"] == "WGSLIFC030"
     assert normal_sample["sex"] == "female"
     assert normal_sample["case"] == "family"
@@ -82,10 +82,12 @@ def test_parsing_mip_orderform(mip_orderform):
     data = orderform.parse_orderform(mip_orderform)
 
     # THEN it should detect the type of project
-    assert data["project_type"] == "mip"
+    assert data["project_type"] == str(Pipeline.MIP_DNA)
     assert data["customer"] == "cust000"
+
     # ... and it should find and group all samples in families
     assert len(data["items"]) == 36
+
     # ... and collect relevant data about the families
     trio_family = data["items"][0]
     assert len(trio_family["samples"]) == 3
@@ -93,29 +95,21 @@ def test_parsing_mip_orderform(mip_orderform):
     assert trio_family["priority"] == "research"
     assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert trio_family["require_qcok"] is True
-    # ... and collect relevant info about the samples
 
+    # ... and collect relevant info about the samples
     proband_sample = trio_family["samples"][0]
     assert proband_sample["name"] == "s1"
     assert proband_sample["container"] == "96 well plate"
-    assert proband_sample["data_analysis"] == "MIP"
+    assert proband_sample["data_analysis"] == str(Pipeline.MIP_DNA)
     assert proband_sample["application"] == "WGSPCFC030"
     assert proband_sample["sex"] == "male"
-    # family-id on the family
-    # customer on the order (data)
-    # require-qc-ok on the family
     assert proband_sample["source"] == "other"
     assert proband_sample["tumour"] is True
-
     assert proband_sample["container_name"] == "plate"
     assert proband_sample["well_position"] == "A:1"
-
-    # panels on the family
     assert proband_sample["status"] == "affected"
-
     assert proband_sample["mother"] == "s2"
     assert proband_sample["father"] == "s3"
-
     assert proband_sample["quantity"] == "1"
     assert proband_sample["comment"] == "other Elution buffer"
 
@@ -179,9 +173,9 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     # ... and collect relevant sample info
     sample = data["items"][0]
 
-    assert sample["name"] == "s1"
+    assert sample["name"] == "sample1"
     assert sample["source"] == "other"
-    assert sample["data_analysis"] == "fastq"
+    assert sample["data_analysis"] == str(Pipeline.FASTQ)
     assert sample["application"] == "METPCFR030"
     assert sample["customer"] == "cust000"
     assert sample["require_qcok"] is True
@@ -207,7 +201,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     data = orderform.parse_orderform(microbial_orderform)
 
     # THEN it should determine the type of project and customer
-    assert data["project_type"] == "microbial"
+    assert data["project_type"] == str(Pipeline.MICROSALT)
     assert data["customer"] == "cust000"
 
     # ... and find all samples
@@ -220,7 +214,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data.get("internal_id") is None
     assert sample_data["organism"] == "other"
     assert sample_data["reference_genome"] == "NC_00001"
-    assert sample_data["data_analysis"] == "fastq"
+    assert sample_data["data_analysis"] == str(Pipeline.FASTQ)
     assert sample_data["application"] == "MWRNXTR003"
     # customer on order (data)
     assert sample_data["require_qcok"] is True
@@ -246,7 +240,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     data = orderform.parse_orderform(balsamic_orderform)
 
     # THEN it should detect the type of project
-    assert data["project_type"] == "balsamic"
+    assert data["project_type"] == str(Pipeline.BALSAMIC)
 
     # ... and it should find and group all samples in case
     assert len(data["items"]) == 36
@@ -262,7 +256,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
 
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
-    assert sample["data_analysis"] == "Balsamic "
+    assert sample["data_analysis"] == str(Pipeline.BALSAMIC)
     assert sample["application"] == "WGSPCFC030"
     assert sample["sex"] == "male"
     assert case["name"] == "family"
@@ -299,7 +293,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     data = orderform.parse_orderform(mip_rna_orderform)
 
     # THEN it should detect the type of project
-    assert data["project_type"] == "mip_rna"
+    assert data["project_type"] == str(Pipeline.MIP_RNA)
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in cases
     assert len(data["items"]) == 36
@@ -315,7 +309,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     first_sample = first_case["samples"][0]
     assert first_sample["name"] == "s1"
     assert first_sample["container"] == "96 well plate"
-    assert first_sample["data_analysis"] == "MIP RNA"
+    assert first_sample["data_analysis"] == str(Pipeline.MIP_RNA)
     assert first_sample["application"] == "RNAPOAR025"
     assert first_sample["sex"] == "male"
     # case-id on the case
@@ -346,36 +340,36 @@ def test_parse_mip_rna(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "mip rna"
+    raw_sample["UDF/Data Analysis"] = "mip-rna"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is mip only
-    assert parsed_sample["analysis"] == "mip_rna"
+    assert parsed_sample["data_analysis"] == str(Pipeline.MIP_RNA)
 
 
 def test_parse_mip_only(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP"
+    raw_sample["UDF/Data Analysis"] = "mip-dna"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is mip only
-    assert parsed_sample["analysis"] == "mip"
+    assert parsed_sample["data_analysis"] == str(Pipeline.MIP_DNA)
 
 
 def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with balsamic only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "Balsamic "
+    raw_sample["UDF/Data Analysis"] = "balsamic"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is balsamic only
-    assert parsed_sample["analysis"] == "balsamic"
+    assert parsed_sample["data_analysis"] == str(Pipeline.BALSAMIC)

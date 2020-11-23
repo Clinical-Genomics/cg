@@ -1,9 +1,11 @@
 from typing import List
 
 import xlrd
-from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
+from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES, Pipeline
 
 from cg.exc import OrderFormError
+from cg.meta.orders import OrderType
+from cg.utils.StrEnum import StrEnum
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
@@ -16,7 +18,14 @@ VALID_ORDERFORMS = [
     "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-CASE_PROJECT_TYPES = ["mip-dna", "external", "balsamic", "mip-rna"]
+
+
+CASE_PROJECT_TYPES = [
+    str(OrderType.MIP_DNA),
+    str(OrderType.EXTERNAL),
+    str(OrderType.BALSAMIC),
+    str(OrderType.MIP_RNA),
+]
 
 
 def check_orderform_version(document_title):
@@ -95,15 +104,18 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif "1604" in document_title:
         project_type = "rml"
     elif "1603" in document_title:
-        project_type = "microbial"
+        project_type = "microsalt"
     elif "1605" in document_title:
         project_type = "metagenome"
     elif "1508" in document_title:
-        analyses = set(sample["analysis"].lower() for sample in parsed_samples)
-        if len(analyses) == 1:
-            project_type = analyses.pop()
-        else:
+        analyses = set(sample["data_analysis"].lower() for sample in parsed_samples)
+
+        if len(analyses) != 1:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+
+        project_type = analyses.pop()
+        if "mip" in project_type and "balsamic" in project_type:
+            raise OrderFormError(f"mixed 'Data Analysis' types: {project_type}")
 
     return project_type
 
@@ -126,7 +138,6 @@ def expand_case(case_id, parsed_case):
     if len(customers) != 1:
         raise OrderFormError("Invalid customer information: {}".format(customers))
     customer = customers.pop()
-
     gene_panels = set()
     for raw_sample in samples:
         if raw_sample["panels"]:
@@ -198,7 +209,7 @@ def parse_sample(raw_sample):
         "container_name": raw_sample.get("Container/Name"),
         "custom_index": raw_sample.get("UDF/Custom index"),
         "customer": raw_sample["UDF/customer"],
-        "data_analysis": raw_sample["UDF/Data Analysis"],
+        "data_delivery": raw_sample.get("UDF/Data Delivery"),
         "elution_buffer": raw_sample.get("UDF/Sample Buffer"),
         "extraction_method": raw_sample.get("UDF/Extraction method"),
         "formalin_fixation_time": raw_sample.get("UDF/Formalin Fixation Time"),
@@ -230,15 +241,15 @@ def parse_sample(raw_sample):
     data_analysis = raw_sample.get("UDF/Data Analysis").lower()
 
     if data_analysis and "balsamic" in data_analysis:
-        sample["analysis"] = "balsamic"
-    elif data_analysis and "mip rna" in data_analysis:
-        sample["analysis"] = "mip_rna"
+        sample["data_analysis"] = str(Pipeline.BALSAMIC)
+    elif data_analysis and "rna" in data_analysis:
+        sample["data_analysis"] = str(Pipeline.MIP_RNA)
     elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        sample["analysis"] = "mip"
-    elif data_analysis and ("fastq" in data_analysis or data_analysis == "custom"):
-        sample["analysis"] = "fastq"
-    elif data_analysis and "fluffy" in data_analysis:
-        sample["analysis"] = "fluffy"
+        sample["data_analysis"] = str(Pipeline.MIP_DNA)
+    elif data_analysis and "microbial" in data_analysis:
+        sample["data_analysis"] = str(Pipeline.MICROSALT)
+    elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
+        sample["data_analysis"] = str(Pipeline.FASTQ)
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 

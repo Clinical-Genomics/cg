@@ -11,7 +11,7 @@ from typing import List, Optional
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 
-from cg.constants import FAMILY_ACTIONS
+from cg.constants import FAMILY_ACTIONS, Pipeline
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
@@ -140,7 +140,7 @@ class BalsamicAnalysisAPI:
         case_object = self.get_case_object(case_id=case_id)
         valid_sample_list = []
         for link in case_object.links:
-            if "balsamic" in case_object.data_analysis.lower():
+            if str(Pipeline.BALSAMIC) == case_object.data_analysis:
                 valid_sample_list.append(link)
         return valid_sample_list
 
@@ -434,7 +434,7 @@ class BalsamicAnalysisAPI:
         )
         case_object.action = None
         new_analysis = self.store.add_analysis(
-            pipeline="balsamic",
+            pipeline=Pipeline.BALSAMIC,
             version=config_data["analysis"]["BALSAMIC_version"],
             started_at=analysis_start,
             completed_at=dt.datetime.now(),
@@ -451,7 +451,7 @@ class BalsamicAnalysisAPI:
         query = (
             self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
-            .filter(models.Family.data_analysis.ilike("%Balsamic%"))
+            .filter(models.Family.data_analysis == str(Pipeline.BALSAMIC))
         )
 
         return all(
@@ -463,14 +463,16 @@ class BalsamicAnalysisAPI:
 
     def get_analyses_to_clean(self, before_date: dt.datetime = dt.datetime.now()) -> list:
         """Retrieve a list of analyses for cleaning created before certain date"""
-        analyses_to_clean = self.store.analyses_to_clean(pipeline="balsamic", before=before_date)
+        analyses_to_clean = self.store.analyses_to_clean(
+            pipeline=Pipeline.BALSAMIC, before=before_date
+        )
         return analyses_to_clean.all()
 
     def get_cases_to_analyze(self) -> list:
         """Retrieve a list of balsamic cases without analysis,
         where samples have enough reads to be analyzed"""
         cases_to_analyze = []
-        for case_object in self.store.cases_to_analyze(pipeline="balsamic", threshold=0.75):
+        for case_object in self.store.cases_to_analyze(pipeline=Pipeline.BALSAMIC, threshold=0.75):
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id):
                 cases_to_analyze.append(case_object.internal_id)
         return cases_to_analyze
@@ -479,7 +481,7 @@ class BalsamicAnalysisAPI:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
         cases_to_store = []
-        for case_object in self.store.cases_to_store(pipeline="balsamic"):
+        for case_object in self.store.cases_to_store(pipeline=Pipeline.BALSAMIC):
             case_id = case_object.internal_id
             if Path(self.get_analysis_finish_path(case_id=case_id)).exists():
                 cases_to_store.append(case_id)

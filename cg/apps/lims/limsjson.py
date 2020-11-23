@@ -1,6 +1,7 @@
 from cg.apps.lims.orderform import CASE_PROJECT_TYPES, expand_case
 from cg.exc import OrderFormError
 from cg.meta.orders.status import StatusHandler
+from cg.constants import Pipeline
 
 OPTIONAL_KEYS = (
     "container_name",
@@ -102,7 +103,7 @@ def expand_case(case_id, parsed_case):
 def parse_json_old(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
     data = {
-        "project_type": get_project_type(indata),
+        "project_type": str(Pipeline.MIP_DNA),
         "customer": indata["customer"].lower(),
         "name": indata.get("name"),
         "comment": indata.get("comment"),
@@ -137,7 +138,7 @@ def parse_json_old(indata: dict) -> dict:
                 "application": sample["application"],
                 "source": sample["source"],
                 "container": sample["container"],
-                "data_analysis": sample.get("data_analysis", "MIP"),
+                "data_analysis": sample.get("data_analysis", str(Pipeline.MIP_DNA)),
             }
             well_position_raw = sample.get("well_position")
             if well_position_raw:
