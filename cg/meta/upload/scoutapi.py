@@ -87,8 +87,10 @@ class UploadScoutAPI:
         LOG.info("Generate scout load config")
         analysis_date: datetime = analysis_obj.started_at or analysis_obj.completed_at
         LOG.debug("Found analysis date %s", analysis_date)
-        hk_version: hk_models.Version = self.housekeeper.version(
-            analysis_obj.family.internal_id, analysis_date
+        # Fetch last version from housekeeper
+        # This should be safe since analyses are only added if data is analysed
+        hk_version: hk_models.Version = self.housekeeper.last_version(
+            analysis_obj.family.internal_id
         )
         LOG.debug("Found housekeeper version %s", hk_version.id)
         analysis_data: dict = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
