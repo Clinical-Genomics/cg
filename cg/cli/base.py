@@ -37,11 +37,16 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.option(
     "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
 )
+@click.option("--verbose", is_flag=True, help="Show full log information, time stamp etc")
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
-def base(context, config, database, log_level):
+def base(context, config, database, log_level, verbose):
     """cg - interface between tools at Clinical Genomics."""
-    log_format = "%(message)s" if sys.stdout.isatty() else None
+    if verbose:
+        log_format = "%(asctime)s %(hostname)s %(name)s[%(process)d] %(levelname)s %(message)s"
+    else:
+        log_format = "%(message)s" if sys.stdout.isatty() else None
+
     coloredlogs.install(level=log_level, fmt=log_format)
     context.obj = ruamel.yaml.safe_load(config) if config else {}
     if database:

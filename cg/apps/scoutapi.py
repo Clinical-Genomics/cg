@@ -36,6 +36,7 @@ class ScoutAPI:
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
+
                 load_command.append("--update")
                 LOG.info("update existing Scout case")
             else:
