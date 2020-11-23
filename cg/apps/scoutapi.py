@@ -30,7 +30,7 @@ class ScoutAPI:
         with open(scout_load_config, "r") as stream:
             data = yaml.safe_load(stream)
         scout_load_config_object: ScoutCase = ScoutCase(**data)
-        existing_case = self.get_cases(case_id=data["family"])
+        existing_case: dict = self.get_cases(case_id=data["family"])
         if existing_case:
             existing_case: Case = Case(**existing_case[0])
         load_command = ["load", "case", str(scout_load_config)]
@@ -116,39 +116,6 @@ class ScoutAPI:
 
         return panel_genes
 
-    def get_cases(
-        self,
-        case_id: Optional[str] = None,
-        reruns: bool = False,
-        finished: bool = False,
-        status: Optional[str] = None,
-    ) -> List[dict]:
-        """Interact with cases existing in the database."""
-        # These commands can be run with `scout export cases`
-        get_cases_command = ["export", "cases", "--json"]
-        if case_id:
-            get_cases_command.extend(["--case-id", case_id])
-
-        elif status:
-            get_cases_command.extend(["--status", status])
-
-        elif finished:
-            get_cases_command.extend(["--finished"])
-
-        if reruns:
-            LOG.info("Fetching cases that are reruns")
-            get_cases_command.append("--reruns")
-
-        try:
-            self.process.run_command(get_cases_command)
-            if not self.process.stdout:
-                return []
-        except CalledProcessError:
-            LOG.info("Could not find cases")
-            return []
-
-        return json.loads(self.process.stdout)
-
     def get_causative_variants(self, case_id: str) -> List[dict]:
         """
         Get causative variants for a case
@@ -165,6 +132,47 @@ class ScoutAPI:
 
         return json.loads(self.process.stdout)
 
+    def get_cases(
+        self,
+        case_id: Optional[str] = None,
+        reruns: bool = False,
+        finished: bool = False,
+        status: Optional[str] = None,
+        days_ago: int = None,
+    ) -> List[dict]:
+        """Interact with cases existing in the database."""
+        # These commands can be run with `scout export cases`
+        get_cases_command = ["export", "cases", "--json"]
+        if case_id:
+            get_cases_command.extend(["--case-id", case_id])
+
+        elif status:
+            get_cases_command.extend(["--status", status])
+
+        elif finished:
+            get_cases_command.append("--finished")
+
+        if reruns:
+            LOG.info("Fetching cases that are reruns")
+            get_cases_command.append("--reruns")
+
+        if days_ago:
+            get_cases_command.extend(["--within-days", str(days_ago)])
+
+        try:
+            self.process.run_command(get_cases_command)
+            if not self.process.stdout:
+                return []
+        except CalledProcessError:
+            LOG.info("Could not find cases")
+            return []
+
+        cases = []
+        for case_export in json.loads(self.process.stdout):
+            case_obj = Case(**case_export)
+            cases.append(case_obj.dict(exclude_none=True))
+        return cases
+
     def get_solved_cases(self, days_ago: int):
         """
         Get cases solved within chosen timespan
@@ -175,24 +183,7 @@ class ScoutAPI:
         Return:
             cases (list): list of cases
         """
-        solved_cases_command = [
-            "export",
-            "cases",
-            "--json",
-            "--status",
-            "--solved",
-            "--within-days",
-            str(days_ago),
-        ]
-        try:
-            self.process.run_command(solved_cases_command)
-            if not self.process.stdout:
-                return []
-        except CalledProcessError:
-            LOG.warning("Could not find any solved cases in scout")
-            return []
-
-        return json.loads(self.process.stdout)
+        return self.get_cases(status="solved", days_ago=days_ago)
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False) -> None:
         """Load a delivery report into a case in the database

@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from typing_extensions import Literal
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 
@@ -34,17 +34,17 @@ class Gene(BaseModel):
 
 
 class Case(BaseModel):
-    _id: str
+    id: str = Field(str, alias="_id")
     analysis_date: datetime
     owner: str
     causatives: Optional[List[str]]
     collaborators: List[str]
     individuals: List[Individual]
-    genoe_build: str
+    genome_build: str
     panels: Optional[List[Panel]]
     rank_model_version: Optional[str]
     sv_rank_model_version: Optional[str]
-    rank_score_treshold: int
+    rank_score_threshold: int
     phenotype_terms: Optional[List[Phenotype]]
     phenotype_groups: Optional[List[Phenotype]]
     diagnosis_phenotypes: Optional[List[Phenotype]]
