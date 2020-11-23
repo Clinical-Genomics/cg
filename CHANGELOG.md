@@ -17,6 +17,15 @@ Try to use the following format:
 ### Fixed
 
 
+## [x.x.x]
+
+### Added
+- Use Pydantic models to validate Scout input/output
+
+### Changed
+- Decouples scout from CG
+
+
 ## [16.2.0]
 
 ### Changed
