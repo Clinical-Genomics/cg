@@ -10,7 +10,7 @@ from subprocess import CalledProcessError
 
 from cg.utils.commands import Process
 from cg.models.scout_load_config import ScoutCase
-from cg.models.scout_export import Case
+from cg.models.scout_export import Case, Variant
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ class ScoutAPI:
 
         return panel_genes
 
-    def get_causative_variants(self, case_id: str) -> List[dict]:
+    def get_causative_variants(self, case_id: str) -> List[Variant]:
         """
         Get causative variants for a case
         """
@@ -130,8 +130,10 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning("Could not find case %s in scout", case_id)
             return []
-
-        return json.loads(self.process.stdout)
+        variants: List[Variant] = []
+        for variant_info in json.loads(self.process.stdout):
+            variants.append(Variant(**variant_info))
+        return variants
 
     def get_cases(
         self,
@@ -140,7 +142,7 @@ class ScoutAPI:
         finished: bool = False,
         status: Optional[str] = None,
         days_ago: int = None,
-    ) -> List[dict]:
+    ) -> List[Case]:
         """Interact with cases existing in the database."""
         # These commands can be run with `scout export cases`
         get_cases_command = ["export", "cases", "--json"]
@@ -171,10 +173,10 @@ class ScoutAPI:
         cases = []
         for case_export in json.loads(self.process.stdout):
             case_obj = Case(**case_export)
-            cases.append(case_obj.dict(exclude_none=True))
+            cases.append(case_obj)
         return cases
 
-    def get_solved_cases(self, days_ago: int):
+    def get_solved_cases(self, days_ago: int) -> List[Case]:
         """
         Get cases solved within chosen timespan
 

@@ -1,6 +1,5 @@
 """Tests for the get cases functionality in ScoutAPI"""
 
-import logging
 from datetime import datetime
 from cg.apps.scoutapi import ScoutAPI
 
@@ -31,13 +30,8 @@ def test_get_cases_one_case(scout_api: ScoutAPI, case_id: str, export_cases_outp
     # THEN assert that there was one case in the list
     assert len(result) == 1
     case_data = result[0]
-    from pprint import pprint
 
-    pprint(export_cases_output)
-    pprint(case_data)
     # THEN assert that the case has a _id
-    assert "_id" in case_data
-    # THEN assert that the case has a analysis date
-    assert "analysis_date" in case_data
+    assert case_data.id
     # THEN assert that the analysis date is a datetime object
-    assert isinstance(case_data["analysis_date"], datetime)
+    assert isinstance(case_data.analysis_date, datetime)
