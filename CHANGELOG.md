@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.3.0]
+
+### Changed
+- Changed logic for which cases are to be compressed. Now compression will be run on all cases older then 60 days provided their fastq files have not been decompressed less than 21 days prior
+
 
 ## [x.x.x]
 
