@@ -340,7 +340,7 @@ class StoreHelpers:
             ordered_at=ordered_at,
             data_analysis=family_info.get("data_analysis", str(Pipeline.MIP_DNA)),
             created_at=created_at,
-            action=None,
+            action=family_info.get("action"),
         )
 
         family_obj = self.add_family(
