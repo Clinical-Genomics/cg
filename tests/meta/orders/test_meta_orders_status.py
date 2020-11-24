@@ -13,11 +13,19 @@ def test_pools_to_status(rml_order_to_submit):
     # THEN it should pick out the general information
     assert data["customer"] == "cust000"
     assert data["order"] == "ctDNA sequencing - order 9"
+    assert data["comment"] == "order comment"
+
     # ... and information about the pool(s)
     assert len(data["pools"]) == 1
-    assert data["pools"][0]["name"] == "pool-1"
-    assert data["pools"][0]["application"] == "RMLS05R150"
-    assert data["pools"][0]["data_analysis"] == str(Pipeline.FLUFFY)
+    pool = data["pools"][0]
+    assert pool["name"] == "pool-1"
+    assert pool["application"] == "RMLS05R150"
+    assert pool["data_analysis"] == str(Pipeline.FLUFFY)
+    assert len(pool["samples"]) == 2
+    sample = pool["samples"][0]
+    assert sample["name"] == "sample1"
+    assert sample["comment"] == "test comment"
+    assert sample["priority"] == "research"
 
 
 def test_samples_to_status(fastq_order_to_submit):
@@ -88,6 +96,9 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
+    assert base_store.families(customer=None).count() == 0
+    assert base_store.samples(customer=None).count() == 0
+
     # WHEN storing the order
     new_pools = orders_api.store_pools(
         customer=rml_status_data["customer"],
@@ -98,7 +109,10 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     )
     # THEN it should update the database with new pools
     assert len(new_pools) == 1
+
     assert base_store.pools(customer=None).count() == 1
+    assert base_store.families(customer=None).count() != 0
+    assert base_store.samples(customer=None).count() != 0
     new_pool = base_store.pools(customer=None).first()
     assert new_pool == new_pools[0]
     assert new_pool.name == "pool-1"

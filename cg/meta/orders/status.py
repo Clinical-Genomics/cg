@@ -28,7 +28,12 @@ class StatusHandler:
     def pools_to_status(data: dict) -> dict:
         """Convert input to pools."""
 
-        status_data = {"customer": data["customer"], "order": data["name"], "pools": []}
+        status_data = {
+            "customer": data["customer"],
+            "order": data["name"],
+            "comment": data["comment"],
+            "pools": [],
+        }
 
         # group pools
         pools = {}
@@ -38,18 +43,16 @@ class StatusHandler:
             application = sample["application"]
             data_analysis = sample["data_analysis"]
             data_delivery = sample.get("data_delivery")
-            capture_kit = sample.get("capture_kit")
 
             if pool_name not in pools:
                 pools[pool_name] = {}
                 pools[pool_name]["name"] = pool_name
                 pools[pool_name]["applications"] = set()
                 pools[pool_name]["capture_kits"] = set()
+                pools[pool_name]["samples"] = []
 
+            pools[pool_name]["samples"].append(sample)
             pools[pool_name]["applications"].add(application)
-
-            if capture_kit:
-                pools[pool_name]["capture_kits"].add(capture_kit)
 
         # each pool must only have one application type
         for pool in pools.values():
@@ -59,25 +62,12 @@ class StatusHandler:
             if len(applications) != 1:
                 raise OrderError(f"different application in pool: {pool_name} - {applications}")
 
-        # each pool must only have one capture kit
-        for pool in pools.values():
-
-            capture_kits = pool["capture_kits"]
-            pool_name = pool["name"]
-
-            if len(capture_kits) > 1:
-                raise OrderError(f"different capture kits in pool: {pool_name} - {capture_kits}")
-
         for pool in pools.values():
 
             pool_name = pool["name"]
             applications = pool["applications"]
             application = applications.pop()
-            capture_kits = pool["capture_kits"]
-            capture_kit = None
-
-            if len(capture_kits) == 1:
-                capture_kit = capture_kits.pop()
+            pool_samples = pool["samples"]
 
             status_data["pools"].append(
                 {
@@ -85,7 +75,16 @@ class StatusHandler:
                     "application": application,
                     "data_analysis": data_analysis,
                     "data_delivery": data_delivery,
-                    "capture_kit": capture_kit,
+                    "samples": [
+                        {
+                            "application": sample["application"],
+                            "comment": sample.get("comment"),
+                            "data_delivery": sample.get("data_delivery"),
+                            "name": sample["name"],
+                            "priority": sample["priority"],
+                        }
+                        for sample in pool_samples
+                    ],
                 }
             )
         return status_data
@@ -448,12 +447,24 @@ class StatusHandler:
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         new_pools = []
+        new_samples = []
         for pool in pools:
             with self.status.session.no_autoflush:
                 application_version = self.status.current_application_version(pool["application"])
                 if application_version is None:
                     print(f"Invalid application: {pool['application']}")
                     raise OrderError(f"Invalid application: {pool['application']}")
+            case_obj = self.status.find_family(customer=customer_obj, name=ticket)
+
+            if not case_obj:
+                case_obj = self.status.add_family(
+                    data_analysis=Pipeline(pool["data_analysis"]),
+                    name=pool["name"],
+                    panels=None,
+                )
+                case_obj.customer = customer_obj
+                self.status.add_commit(case_obj)
+
             new_pool = self.status.add_pool(
                 customer=customer_obj,
                 name=pool["name"],
@@ -462,8 +473,22 @@ class StatusHandler:
                 ticket=ticket,
                 application_version=application_version,
                 data_analysis=Pipeline(pool["data_analysis"]),
-                capture_kit=pool["capture_kit"],
             )
+            for sample in pool["samples"]:
+                new_sample = self.status.add_sample(
+                    application_version=application_version,
+                    comment=sample["comment"],
+                    customer=customer_obj,
+                    data_delivery=sample["data_delivery"],
+                    name=sample["name"],
+                    order=order,
+                    ordered=ordered,
+                    priority=sample["priority"],
+                    sex="unknown",
+                    ticket=ticket,
+                )
+            new_samples.append(new_sample)
+            self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
             self.status.add(new_delivery)
             new_pools.append(new_pool)
