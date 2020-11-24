@@ -82,7 +82,7 @@ def test_compress_fastq_cli_multiple_family(
     """Test to run the compress command with multiple families"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a database with multiple families
-    nr_cases = sum(1 for i in populated_multiple_compress_context["status_db"].families())
+    nr_cases = populated_multiple_compress_context["status_db"].families().count()
     assert nr_cases > 1
 
     # WHEN running the compress command
