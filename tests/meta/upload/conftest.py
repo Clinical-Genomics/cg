@@ -18,6 +18,7 @@ from cg.store import models
 from cg.store import Store
 from cg.models.scout_export import Case
 
+from tests.cli.upload.conftest import fixture_scout_load_object
 
 # Mocks
 
