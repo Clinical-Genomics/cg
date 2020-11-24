@@ -14,7 +14,7 @@
       "pool": "pool-1",
       "rml_plate_name": "plate",
       "well_position_rml": "A:1",
-      "index": "TruSeq Custom Amplicon Dual-index (A7-A5)",
+      "index": "IDT DupSeq 10 bp Set B",
       "index_number": "1",
       "index_sequence": "A01 - D701-D501 (ATTACTCG-TATAGCCT)",
       "priority": "research"
@@ -30,7 +30,7 @@
       "pool": "pool-1",
       "rml_plate_name": "plate",
       "well_position_rml": "A:1",
-      "index": "TruSeq Custom Amplicon Dual-index (A7-A5)",
+      "index": "IDT DupSeq 10 bp Set B",
       "index_number": "2",
       "index_sequence": "B01 - D701-D502 (ATTACTCG-ATAGAGGC)",
       "priority": "research"

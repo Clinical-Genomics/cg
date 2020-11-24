@@ -22,7 +22,7 @@ def test_parsing_rml_json(rml_order_to_submit):
     assert sample_data["data_analysis"] == "fluffy"
     assert sample_data["volume"] == "30"
     assert sample_data["concentration"] == "5"
-    assert sample_data["index"] == "TruSeq Custom Amplicon Dual-index (A7-A5)"
+    assert sample_data["index"] == "IDT DupSeq 10 bp Set B"
     assert sample_data["index_number"] == "1"
     assert sample_data.get("container_name") is None
     assert sample_data["rml_plate_name"] == "plate"

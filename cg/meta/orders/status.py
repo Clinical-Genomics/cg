@@ -465,6 +465,7 @@ class StatusHandler:
                 case_obj.customer = customer_obj
                 self.status.add_commit(case_obj)
 
+            # TODO: Remove adding of pool, convert to case
             new_pool = self.status.add_pool(
                 customer=customer_obj,
                 name=pool["name"],
