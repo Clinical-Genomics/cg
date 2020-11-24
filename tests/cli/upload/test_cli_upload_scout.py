@@ -39,7 +39,7 @@ def test_upload_with_load_config(
 
     # WHEN invoking command to upload case to scout
     with caplog.at_level(logging.DEBUG):
-        result = cli_runner.invoke(scout, [case_id], obj=base_context)
+        cli_runner.invoke(scout, [case_id], obj=base_context)
 
     # THEN assert that the case was loaded succesfully
     def case_loaded_succesfully(caplog):
@@ -72,7 +72,6 @@ def test_produce_load_config(
     result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
 
     # THEN assert that the call was executed with success
-    print(caplog.text)
     assert result.exit_code == 0
     # THEN assert mother: '0' and father: '0'
     assert "'mother': '0'" in result.output

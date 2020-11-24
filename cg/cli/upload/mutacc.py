@@ -42,10 +42,9 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     for case in finished_cases:
 
         number_processed += 1
-        if customers:
-            if case.owner not in customers:
-                LOG.info("skipping %s: Not valid customer %s", case.id, case.owner)
-                continue
+        if customers and case.owner not in customers:
+            LOG.info("skipping %s: Not valid customer %s", case.id, case.owner)
+            continue
         if dry_run:
             LOG.info("Would process case %s with mutacc", case.id)
             continue

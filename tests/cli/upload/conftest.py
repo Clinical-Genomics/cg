@@ -151,7 +151,7 @@ class MockScoutApi(ScoutAPI):
         """docstring for __init__"""
         pass
 
-    def upload(self, scout_load_config: Path, force=False):
+    def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
 
