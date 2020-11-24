@@ -84,7 +84,7 @@ CASES_TO_IGNORE = PROBLEMATIC_CASES + VALIDATION_CASES
 @click.option(
     "-b",
     "--days-back",
-    default=90,
+    default=60,
     show_default=True,
     help="Threshold for how long ago family was created",
 )
@@ -101,9 +101,10 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, d
         if not case_obj:
             LOG.warning("Could not find case %s", case_id)
             return
-
-    date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
-    cases = ready_for_spring_compression(store, date_threshold=date_threshold)
+        cases = [case_obj]
+    else:
+        date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
+        cases = ready_for_spring_compression(store, date_threshold=date_threshold)
 
     case_conversion_count = 0
     ind_conversion_count = 0
@@ -140,7 +141,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, d
 @click.option(
     "-b",
     "--days-back",
-    default=90,
+    default=60,
     show_default=True,
     help="Threshold for how long ago family was created",
 )

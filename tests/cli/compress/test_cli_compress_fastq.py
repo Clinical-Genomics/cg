@@ -1,7 +1,8 @@
 """Tests for the compress fastq cli"""
 
 import logging
-
+import datetime as dt
+from cg.constants import Pipeline
 from cg.cli.compress.fastq import fastq_cmd
 
 
@@ -33,11 +34,39 @@ def test_compress_fastq_cli_case_id_no_family(compress_context, cli_runner, capl
     assert f"Could not find case {case_id}" in caplog.text
 
 
-def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, caplog):
+def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, helpers, caplog):
     """Test to run the compress command with a specified case id"""
     caplog.set_level(logging.DEBUG)
-    # GIVEN a context with a family
+
+    # GIVEN a context with a family that can be compressed
     case_id = "chonkywombat"
+
+    valid_compressable_case = helpers.add_family(
+        store=populated_compress_context["status_db"],
+        family_id=case_id,
+        internal_id=case_id,
+        data_analysis=Pipeline.MIP_DNA,
+        action=None,
+    )
+    valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
+    sample1 = helpers.add_sample(
+        store=populated_compress_context["status_db"], internal_id="ACCR9000"
+    )
+    sample2 = helpers.add_sample(
+        store=populated_compress_context["status_db"], internal_id="ACCR9001"
+    )
+    helpers.add_relationship(
+        store=populated_compress_context["status_db"],
+        sample=sample1,
+        family=valid_compressable_case,
+    )
+    helpers.add_relationship(
+        store=populated_compress_context["status_db"],
+        sample=sample2,
+        family=valid_compressable_case,
+    )
+    populated_compress_context["status_db"].commit()
+
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
 
@@ -51,14 +80,15 @@ def test_compress_fastq_cli_multiple_family(
     populated_multiple_compress_context, cli_runner, caplog
 ):
     """Test to run the compress command with multiple families"""
-    compress_context = populated_multiple_compress_context
     caplog.set_level(logging.DEBUG)
-    # GIVEN a database with multople families
-    nr_cases = sum(1 for i in compress_context["status_db"].families())
+    # GIVEN a database with multiple families
+    nr_cases = sum(1 for i in populated_multiple_compress_context["status_db"].families())
     assert nr_cases > 1
 
     # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, ["--number-of-conversions", nr_cases], obj=compress_context)
+    res = cli_runner.invoke(
+        fastq_cmd, ["--number-of-conversions", nr_cases], obj=populated_multiple_compress_context
+    )
 
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
@@ -73,7 +103,7 @@ def test_compress_fastq_cli_multiple_set_limit(
     compress_context = populated_multiple_compress_context
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with more families than the limit
-    nr_cases = sum(1 for i in compress_context["status_db"].families())
+    nr_cases = compress_context["status_db"].families().count()
     limit = 5
     assert nr_cases > limit
 
