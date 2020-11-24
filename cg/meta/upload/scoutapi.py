@@ -82,7 +82,9 @@ class UploadScoutAPI:
             scout_sample = ScoutIndividual(**sample)
             yield scout_sample.dict(exclude_none=True)
 
-    def generate_config(self, analysis_obj: models.Analysis, rank_score_threshold: int = 5) -> dict:
+    def generate_config(
+        self, analysis_obj: models.Analysis, rank_score_threshold: int = 5
+    ) -> ScoutCase:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
         analysis_date: datetime = analysis_obj.started_at or analysis_obj.completed_at
@@ -130,7 +132,7 @@ class UploadScoutAPI:
 
         scout_case = ScoutCase(**data)
 
-        return scout_case.dict(exclude_none=True)
+        return scout_case
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -138,19 +140,18 @@ class UploadScoutAPI:
         return "scout-load-config"
 
     @staticmethod
-    def save_config_file(upload_config: dict, file_path: Path):
+    def save_config_file(upload_config: ScoutCase, file_path: Path):
         """Save a scout load config file to <file_path>"""
 
         LOG.info("Save Scout load config to %s", file_path)
         yml = yaml.YAML()
-        yml.dump(upload_config, file_path)
+        yml.dump(upload_config.dict(exclude_none=True), file_path)
 
-    @staticmethod
-    def add_scout_config_to_hk(config_file_path: Path, hk_api: HousekeeperAPI, case_id: str):
+    def add_scout_config_to_hk(self, config_file_path: Path, case_id: str):
         """Add scout load config to hk bundle"""
         tag_name = UploadScoutAPI.get_load_config_tag()
-        version_obj = hk_api.last_version(bundle=case_id)
-        uploaded_config_files = hk_api.get_files(
+        version_obj = self.housekeeper.last_version(bundle=case_id)
+        uploaded_config_files = self.housekeeper.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id
         )
 
@@ -160,9 +161,9 @@ class UploadScoutAPI:
         if bundle_config_exists:
             raise FileExistsError("Upload config already exists")
 
-        file_obj = hk_api.add_file(str(config_file_path), version_obj, tag_name)
-        hk_api.include_file(file_obj, version_obj)
-        hk_api.add_commit(file_obj)
+        file_obj = self.housekeeper.add_file(str(config_file_path), version_obj, tag_name)
+        self.housekeeper.include_file(file_obj, version_obj)
+        self.housekeeper.add_commit(file_obj)
 
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
