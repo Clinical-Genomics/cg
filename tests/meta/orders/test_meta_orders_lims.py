@@ -61,7 +61,7 @@ def test_to_lims_rml(rml_order_to_submit):
     assert first_sample["udfs"]["pool"] == "pool-1"
     assert first_sample["udfs"]["volume"] == "30"
     assert first_sample["udfs"]["concentration"] == "5"
-    assert first_sample["udfs"]["index"] == "TruSeq Custom Amplicon Dual-index (A7-A5)"
+    assert first_sample["udfs"]["index"] == "IDT DupSeq 10 bp Set B"
     assert first_sample["udfs"]["index_number"] == "1"
 
 
