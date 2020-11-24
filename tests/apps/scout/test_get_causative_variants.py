@@ -35,7 +35,7 @@ def test_get_causative_variants_one_variant(
     # THEN assert that there was one variant in the list
     assert len(result) == 1
     first_variant: Variant = result[0]
-    raw_info = yaml.load(causative_output, Loader=yaml.FullLoader)
+    raw_info = yaml.safe_load(causative_output)
 
     # THEN assert that the variant has a variant_id
     assert first_variant.document_id == raw_info[0]["_id"]
