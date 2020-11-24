@@ -149,12 +149,13 @@ class UploadScoutAPI:
 
     def add_scout_config_to_hk(self, config_file_path: Path, case_id: str):
         """Add scout load config to hk bundle"""
+        LOG.info("Adding load config to housekeeper")
         tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = self.housekeeper.last_version(bundle=case_id)
         uploaded_config_files = self.housekeeper.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id
         )
-
+        LOG.info("Config files: %s", uploaded_config_files)
         number_of_configs = sum(1 for i in uploaded_config_files)
         bundle_config_exists = number_of_configs > 0
 

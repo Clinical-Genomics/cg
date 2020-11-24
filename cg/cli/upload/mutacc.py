@@ -6,6 +6,7 @@ import click
 
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.apps.scoutapi import ScoutAPI
 from cg.models.scout_export import Case
 
 LOG = logging.getLogger(__name__)
@@ -21,9 +22,9 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
 
-    click.echo(click.style("----------------- PROCESS-SOLVED ----------------"))
+    LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    scout_api = context.obj["scout_api"]
+    scout_api: ScoutAPI = context.obj["scout_api"]
     mutacc_auto_api = MutaccAutoAPI(context.obj)
 
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
@@ -61,7 +62,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 def processed_solved(context):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
-    click.echo(click.style("----------------- PROCESSED-SOLVED ----------------"))
+    LOG.info("----------------- PROCESSED-SOLVED ----------------")
 
     LOG.info("Uploading processed cases by mutacc to the mutacc database")
 

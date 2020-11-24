@@ -30,13 +30,10 @@ class ScoutAPI:
         with open(scout_load_config, "r") as stream:
             data = yaml.safe_load(stream)
         scout_load_config_object: ScoutCase = ScoutCase(**data)
-        existing_case: dict = self.get_cases(case_id=data["family"])
-        if existing_case:
-            existing_case: Case = Case(**existing_case[0])
+        existing_case: Optional[Case] = self.get_case(case_id=scout_load_config_object.family)
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
-
                 load_command.append("--update")
                 LOG.info("update existing Scout case")
             else:
@@ -134,6 +131,13 @@ class ScoutAPI:
         for variant_info in json.loads(self.process.stdout):
             variants.append(Variant(**variant_info))
         return variants
+
+    def get_case(self, case_id: str) -> Optional[Case]:
+        """Fetch a case from Scout"""
+        cases = List[Case] = self.get_cases(case_id=case_id)
+        if not cases:
+            return None
+        return cases[0]
 
     def get_cases(
         self,

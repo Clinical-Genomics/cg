@@ -1,7 +1,9 @@
 """Test the cli for uploading to scout"""
 import logging
 
+from pathlib import Path
 from cg.cli.upload.base import scout
+from cg.models.scout_load_config import ScoutCase
 
 
 def check_log(caplog, string=None, warning=None):
@@ -16,7 +18,7 @@ def check_log(caplog, string=None, warning=None):
 
 
 def test_upload_with_load_config(
-    base_context, scout_load_config, upload_scout_api, cli_runner, caplog
+    base_context: dict, scout_load_config: Path, upload_scout_api, cli_runner, caplog
 ):
     """Test to upload a case to scout using a load config"""
     # GIVEN a case with a scout load config in housekeeper
@@ -24,7 +26,7 @@ def test_upload_with_load_config(
     tag_name = upload_scout_api.get_load_config_tag()
 
     base_context["housekeeper_api"].add_file(
-        path=scout_load_config, version_obj=None, tags=tag_name
+        path=str(scout_load_config), version_obj=None, tags=tag_name
     )
     load_config_file = base_context["housekeeper_api"].get_files(case_id, [tag_name])[0]
     assert load_config_file
@@ -36,7 +38,7 @@ def test_upload_with_load_config(
     assert case_exists_in_status(case_id, base_context["status_db"])
 
     # WHEN invoking command to upload case to scout
-    with caplog.at_level(logging.INFO):
+    with caplog.at_level(logging.DEBUG):
         result = cli_runner.invoke(scout, [case_id], obj=base_context)
 
     # THEN assert that the case was loaded succesfully
@@ -47,11 +49,11 @@ def test_upload_with_load_config(
     assert case_loaded_succesfully(caplog)
 
     # THEN assert that the load config was used
-    def load_file_mentioned_in_result(result, load_config_file):
+    def load_file_mentioned_in_result(caplog, load_config_file: Path):
         """Check output that load file is mentioned"""
-        return load_config_file in result.output
+        return f"uploaded to scout using load config {load_config_file}" in caplog.text
 
-    assert load_file_mentioned_in_result(result, load_config_file.full_path)
+    assert load_file_mentioned_in_result(caplog, load_config_file.full_path)
 
 
 def test_produce_load_config(
@@ -167,16 +169,18 @@ def test_upload_scout_cli(base_context, cli_runner, case_id, scout_load_config):
     assert result.exit_code == 0
 
 
-def test_upload_scout_cli_print_console(base_context, cli_runner, case_id):
+def test_upload_scout_cli_print_console(
+    base_context, cli_runner, case_id: str, scout_load_object: ScoutCase, caplog
+):
     """Test to dry run a case upload"""
+    caplog.set_level(logging.DEBUG)
     # GIVEN a case_id where the case exists in status db with at least one analysis
     # GIVEN that the analysis is done and exists in tb
-    config = {"dummy": "data"}
-    base_context["scout_upload_api"].config = config
+    base_context["scout_upload_api"].config = scout_load_object
     # WHEN uploading a case with the cli and printing the upload config
     result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
 
     # THEN assert that the call exits without errors
     assert result.exit_code == 0
 
-    assert "dummy" in result.output
+    assert case_id in result.output

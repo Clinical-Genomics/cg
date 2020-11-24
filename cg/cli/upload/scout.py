@@ -35,7 +35,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
     family_obj: Family = status_api.family(case_id)
     scout_case: ScoutCase = scout_upload_api.generate_config(family_obj.analyses[0])
     mip_dna_root_dir: Path = Path(context.obj["mip-rd-dna"]["root"])
-
+    print(scout_case)
     if print_console:
         click.echo(scout_case.dict(exclude_none=True))
         return

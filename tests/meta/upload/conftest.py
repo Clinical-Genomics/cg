@@ -16,6 +16,7 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import models
 from cg.store import Store
+from cg.models.scout_export import Case
 
 
 # Mocks
@@ -138,6 +139,51 @@ class MockLims:
             if sample["id"] == sample_id:
                 return sample
         return None
+
+
+@pytest.fixture(name="scout_export_case_data")
+def fixture_scout_export_case_data() -> dict:
+    """Return information in the form of a scout export case"""
+    case_data = {
+        "_id": "internal_id",
+        "owner": "cust000",
+        "analysis_date": "2020-11-18T15:02:03.554000",
+        "causatives": ["variant_id"],
+        "individuals": [
+            {
+                "individual_id": "individual_1",
+                "bam_file": "",
+                "sex": "1",
+                "father": "individual_2",
+                "mother": "individual_3",
+                "phenotype": 2,
+            },
+            {
+                "individual_id": "individual_2",
+                "bam_file": "",
+                "sex": "1",
+                "father": "0",
+                "mother": "0",
+                "phenotype": 1,
+            },
+            {
+                "individual_id": "individual_3",
+                "bam_file": "",
+                "sex": "2",
+                "father": "0",
+                "mother": "0",
+                "phenotype": 1,
+            },
+        ],
+    }
+    return case_data
+
+
+@pytest.fixture(name="scout_export_case")
+def fixture_scout_export_case(scout_export_case_data: dict) -> Case:
+    """ Returns a export case object """
+
+    return Case(**scout_export_case_data)
 
 
 @pytest.fixture(name="lims_family")
