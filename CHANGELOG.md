@@ -14,7 +14,13 @@ Try to use the following format:
 
 ### Changed
 
+
+
+## [16.3.1]
+
 ### Fixed
+
+- Fixed a bug in naming of "default_gene_panels" in Scout load config
 
 ## [16.3.0]
 
