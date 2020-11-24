@@ -1,6 +1,7 @@
 """Fixtures for cli compress functions"""
 
 import pytest
+import datetime as dt
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
@@ -140,12 +141,14 @@ def fixture_populated_compress_multiple_store(
                 analysis_family["samples"][ind]["mother"] = "_".join(
                     [str(number), analysis_family["samples"][ind]["mother"]]
                 )
+
         helpers.ensure_family_from_dict(
             store,
             family_info=analysis_family,
             app_tag=compress_case_info.application_tag,
             ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,
+            created_at=dt.datetime.now() - dt.timedelta(days=1000),
         )
     return store
 
