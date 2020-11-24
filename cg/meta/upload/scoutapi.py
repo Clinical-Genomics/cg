@@ -34,7 +34,7 @@ class UploadScoutAPI:
         self.analysis = analysis_api
         self.lims = lims_api
 
-    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
+    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None) -> Optional[str]:
         """"Fetch files from housekeeper matchin one tag string"""
         return self.fetch_file_path_from_tags([tag], sample_id, hk_version_id)
 
