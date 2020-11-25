@@ -15,7 +15,7 @@ class Individual(BaseModel):
     phenotype: Literal[1, 2, 0]
     analysis_type: str = "wgs"
 
-    @validator("father", "mother", allow_reuse=True)
+    @validator("father", "mother")
     def convert_to_zero(cls, v):
         if v is None:
             return "0"
@@ -47,7 +47,7 @@ class ScoutExportCase(BaseModel):
     causatives: Optional[List[str]] = None
     collaborators: List[str] = []
     individuals: List[Individual]
-    genome_build: str = "37"
+    genome_build: Optional[str]
     panels: Optional[List[Panel]]
     rank_model_version: Optional[str]
     sv_rank_model_version: Optional[str]
@@ -56,6 +56,12 @@ class ScoutExportCase(BaseModel):
     phenotype_groups: Optional[List[Phenotype]]
     diagnosis_phenotypes: Optional[List[Phenotype]]
     diagnosis_genes: Optional[List[Gene]]
+
+    @validator("genome_build")
+    def convert_genome_build(cls, v):
+        if v is None:
+            return "37"
+        return v
 
 
 class Genotype(BaseModel):
