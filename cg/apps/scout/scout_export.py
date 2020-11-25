@@ -54,8 +54,8 @@ class ScoutExportCase(BaseModel):
     rank_score_threshold: int = 5
     phenotype_terms: Optional[List[Phenotype]]
     phenotype_groups: Optional[List[Phenotype]]
-    diagnosis_phenotypes: Optional[List[Phenotype]]
-    diagnosis_genes: Optional[List[Gene]]
+    diagnosis_phenotypes: Optional[List[int]]
+    diagnosis_genes: Optional[List[int]]
 
     @validator("genome_build")
     def convert_genome_build(cls, v):
