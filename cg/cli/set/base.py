@@ -236,7 +236,7 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         if key in ["customer", "application_version", "priority"]:
             if key == "priority":
-                if isinstance(value, str):
+                if isinstance(value, str) and not value.isdigit():
                     new_key = "priority_human"
             elif key == "customer":
                 new_value = context.obj["status_db"].customer(value)
