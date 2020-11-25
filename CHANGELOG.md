@@ -15,6 +15,11 @@ Try to use the following format:
 ### Changed
 
 
+## [16.3.2]
+
+### Fixed
+
+- Fixed setting of apptag in LIMS for samples
 
 ## [16.3.1]
 
