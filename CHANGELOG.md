@@ -14,6 +14,13 @@ Try to use the following format:
 
 ### Changed
 
+### Fixed
+
+## [16.3.3]
+
+### Fixed
+
+- Fixed setting of priority in statusDB and LIMS for samples
 
 ## [16.3.2]
 
