@@ -187,6 +187,22 @@ def fixture_scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
     return ScoutExportCase(**scout_export_case_data)
 
 
+@pytest.fixture(name="scout_export_case_missing_bam")
+def fixture_scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
+    """ Returns a export case object where one individual is missing bam file """
+    scout_export_case_data["individuals"][1].pop("bam_file")
+
+    return ScoutExportCase(**scout_export_case_data)
+
+
+@pytest.fixture(name="scout_export_case_no_causatives")
+def fixture_scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
+    """ Returns a export case object without causatives """
+    scout_export_case_data.pop("causatives")
+
+    return ScoutExportCase(**scout_export_case_data)
+
+
 @pytest.fixture(name="lims_family")
 def fixture_lims_family():
     """ Returns a lims-like family of samples """

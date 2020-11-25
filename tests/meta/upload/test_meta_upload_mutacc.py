@@ -44,15 +44,13 @@ def test_data(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
     assert set(result.keys()) == {"case", "causatives"}
 
 
-def test_data_no_bam(mutacc_upload_api, scout_export_case_data: dict, mocker):
+def test_data_no_bam(mutacc_upload_api, scout_export_case_missing_bam: ScoutExportCase, mocker):
     """
     Test get data when no bam_file field is given for one of the samples
     """
 
     # GIVEN a case dictionary where one individual is missing bam_file
-    scout_export_case_data["individuals"][1].pop("bam_file")
-
-    case = ScoutExportCase(**scout_export_case_data)
+    case = scout_export_case_missing_bam
 
     # mock that file is a file
     mocker.patch.object(os.path, "isfile")
@@ -83,13 +81,14 @@ def test_data_bam_path_not_exists(mutacc_upload_api, scout_export_case: ScoutExp
     assert result == {}
 
 
-def test_data_no_causatives(mutacc_upload_api, scout_export_case_data: dict, mocker):
+def test_data_no_causatives(
+    mutacc_upload_api, scout_export_case_no_causatives: ScoutExportCase, mocker
+):
     """
     Test get data when no causatives are given
     """
     # GIVEN a case dictionary with no causative variants
-    scout_export_case_data.pop("causatives")
-    case = ScoutExportCase(**scout_export_case_data)
+    case = scout_export_case_no_causatives
 
     mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True
