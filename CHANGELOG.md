@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.3.4]
+
+### Fixed
+
+- Fixed documentation on Trailblazers purpose
+
 ## [16.3.3]
 
 ### Fixed
