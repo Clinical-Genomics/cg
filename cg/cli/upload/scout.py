@@ -5,11 +5,11 @@ from pathlib import Path
 import click
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.store import Store
 from cg.store.models import Family
 from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.models.scout_load_config import ScoutCase
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 
 from .utils import suggest_cases_to_upload
 
@@ -33,11 +33,10 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
     status_api: Store = context.obj["status_db"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
     family_obj: Family = status_api.family(case_id)
-    scout_case: ScoutCase = scout_upload_api.generate_config(family_obj.analyses[0])
+    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
     mip_dna_root_dir: Path = Path(context.obj["mip-rd-dna"]["root"])
-    print(scout_case)
     if print_console:
-        click.echo(scout_case.dict(exclude_none=True))
+        click.echo(scout_load_config.dict(exclude_none=True))
         return
 
     file_path = mip_dna_root_dir / case_id / "scout_load.yaml"
@@ -50,7 +49,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
         LOG.warning(message)
         raise click.Abort
 
-    scout_upload_api.save_config_file(scout_case, file_path)
+    scout_upload_api.save_config_file(scout_load_config, file_path)
     try:
         LOG.info("Upload file to housekeeper: %s", file_path)
         scout_upload_api.add_scout_config_to_hk(config_file_path=file_path, case_id=case_id)

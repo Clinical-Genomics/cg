@@ -1,7 +1,6 @@
 """Fixtures for the meta tests"""
 
 from datetime import datetime
-from pathlib import Path
 
 import pytest
 from _pytest import tmpdir
@@ -10,7 +9,7 @@ from cg.store import Store
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.microsalt.fastq import FastqHandler as MicrosaltFastqHandler
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 
 from tests.store_helpers import StoreHelpers

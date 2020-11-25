@@ -1,7 +1,7 @@
 """Tests for the get cases functionality in ScoutAPI"""
 
 from datetime import datetime
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 
 
 def test_get_cases_no_case(scout_api: ScoutAPI, case_id: str):

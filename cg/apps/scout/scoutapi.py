@@ -9,8 +9,8 @@ import json
 from subprocess import CalledProcessError
 
 from cg.utils.commands import Process
-from cg.models.scout_load_config import ScoutCase
-from cg.models.scout_export import Case, Variant
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
+from cg.apps.scout.scout_export import ScoutExportCase, Variant
 
 LOG = logging.getLogger(__name__)
 
@@ -29,8 +29,10 @@ class ScoutAPI:
         """Load analysis of a new family into Scout."""
         with open(scout_load_config, "r") as stream:
             data = yaml.safe_load(stream)
-        scout_load_config_object: ScoutCase = ScoutCase(**data)
-        existing_case: Optional[Case] = self.get_case(case_id=scout_load_config_object.family)
+        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**data)
+        existing_case: Optional[ScoutExportCase] = self.get_case(
+            case_id=scout_load_config_object.family
+        )
         load_command = ["load", "case", str(scout_load_config)]
         if existing_case:
             if force or scout_load_config_object.analysis_date > existing_case.analysis_date:
@@ -132,9 +134,9 @@ class ScoutAPI:
             variants.append(Variant(**variant_info))
         return variants
 
-    def get_case(self, case_id: str) -> Optional[Case]:
+    def get_case(self, case_id: str) -> Optional[ScoutExportCase]:
         """Fetch a case from Scout"""
-        cases = List[Case] = self.get_cases(case_id=case_id)
+        cases = List[ScoutExportCase] = self.get_cases(case_id=case_id)
         if not cases:
             return None
         return cases[0]
@@ -146,7 +148,7 @@ class ScoutAPI:
         finished: bool = False,
         status: Optional[str] = None,
         days_ago: int = None,
-    ) -> List[Case]:
+    ) -> List[ScoutExportCase]:
         """Interact with cases existing in the database."""
         # These commands can be run with `scout export cases`
         get_cases_command = ["export", "cases", "--json"]
@@ -176,11 +178,11 @@ class ScoutAPI:
 
         cases = []
         for case_export in json.loads(self.process.stdout):
-            case_obj = Case(**case_export)
+            case_obj = ScoutExportCase(**case_export)
             cases.append(case_obj)
         return cases
 
-    def get_solved_cases(self, days_ago: int) -> List[Case]:
+    def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:
         """
         Get cases solved within chosen timespan
 

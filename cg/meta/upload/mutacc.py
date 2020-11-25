@@ -7,9 +7,9 @@ from typing import Dict
 import logging
 from collections import namedtuple
 
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
-from cg.models import scout_export
+from cg.apps.scout import scout_export
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class UploadToMutaccAPI:
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
 
-    def extract_reads(self, case: scout_export.Case):
+    def extract_reads(self, case: scout_export.ScoutExportCase):
         """Use mutacc API to extract reads from case"""
         data: dict = self.data(case)
         if data:
@@ -35,7 +35,7 @@ class UploadToMutaccAPI:
         LOG.info("importing cases into mutacc database")
         self.mutacc_auto.import_reads()
 
-    def data(self, case: scout_export.Case) -> Dict[str, dict]:
+    def data(self, case: scout_export.ScoutExportCase) -> Dict[str, dict]:
         """
         Find the necessary data for the case
 
@@ -56,7 +56,7 @@ class UploadToMutaccAPI:
         return {}
 
     @staticmethod
-    def _has_bam(case: scout_export.Case) -> bool:
+    def _has_bam(case: scout_export.ScoutExportCase) -> bool:
 
         """
         Check that all samples in case has a given path to a bam file,
@@ -91,7 +91,7 @@ class UploadToMutaccAPI:
         return True
 
     @staticmethod
-    def _has_causatives(case: scout_export.Case) -> bool:
+    def _has_causatives(case: scout_export.ScoutExportCase) -> bool:
         """
         Check that the case has marked causative variants in scout
 

@@ -16,9 +16,8 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import models
 from cg.store import Store
-from cg.models.scout_export import Case
+from cg.apps.scout.scout_export import ScoutExportCase
 
-from tests.cli.upload.conftest import fixture_scout_load_object
 
 # Mocks
 
@@ -181,10 +180,10 @@ def fixture_scout_export_case_data() -> dict:
 
 
 @pytest.fixture(name="scout_export_case")
-def fixture_scout_export_case(scout_export_case_data: dict) -> Case:
+def fixture_scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
     """ Returns a export case object """
 
-    return Case(**scout_export_case_data)
+    return ScoutExportCase(**scout_export_case_data)
 
 
 @pytest.fixture(name="lims_family")

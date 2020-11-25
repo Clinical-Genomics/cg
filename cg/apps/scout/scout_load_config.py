@@ -38,7 +38,7 @@ class ScoutIndividual(BaseModel):
     tissue_type: Optional[str] = None
 
 
-class ScoutCase(BaseModel):
+class ScoutLoadConfig(BaseModel):
     owner: str
     family: str
     family_name: Optional[str] = None

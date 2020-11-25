@@ -8,7 +8,7 @@ from cg.meta.upload.mutacc import (
     resolve_parent,
     resolve_phenotype,
 )
-from cg.models.scout_export import Case
+from cg.apps.scout.scout_export import ScoutExportCase
 
 
 def test_instantiate():
@@ -28,7 +28,7 @@ def test_instantiate():
     assert mutacc_upload_api.mutacc_auto == mutacc_auto_api
 
 
-def test_data(mutacc_upload_api, scout_export_case: Case, mocker):
+def test_data(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
     """
     Test the data method
     """
@@ -52,7 +52,7 @@ def test_data_no_bam(mutacc_upload_api, scout_export_case_data: dict, mocker):
     # GIVEN a case dictionary where one individual is missing bam_file
     scout_export_case_data["individuals"][1].pop("bam_file")
 
-    case = Case(**scout_export_case_data)
+    case = ScoutExportCase(**scout_export_case_data)
 
     # mock that file is a file
     mocker.patch.object(os.path, "isfile")
@@ -65,7 +65,7 @@ def test_data_no_bam(mutacc_upload_api, scout_export_case_data: dict, mocker):
     assert result == {}
 
 
-def test_data_bam_path_not_exists(mutacc_upload_api, scout_export_case: Case, mocker):
+def test_data_bam_path_not_exists(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
     """
     Test get data when bam file does not exist
     """
@@ -89,7 +89,7 @@ def test_data_no_causatives(mutacc_upload_api, scout_export_case_data: dict, moc
     """
     # GIVEN a case dictionary with no causative variants
     scout_export_case_data.pop("causatives")
-    case = Case(**scout_export_case_data)
+    case = ScoutExportCase(**scout_export_case_data)
 
     mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True

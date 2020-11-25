@@ -7,13 +7,13 @@ from datetime import datetime
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.gt import GenotypeAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store import models
-from cg.models.scout_load_config import ScoutCase
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 
 from tests.mocks.madeline import MockMadelineAPI
 
@@ -93,7 +93,7 @@ def fixture_upload_genotypes_context(
 
 
 @pytest.fixture(name="scout_load_object")
-def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutCase:
+def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadConfig:
     """Create a scout load config case object"""
     case_data = {
         "owner": "cust000",
@@ -105,7 +105,7 @@ def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutCase:
             {"sample_id": "sample", "sex": "male", "phenotype": "affected", "analysis_type": "wgs"}
         ],
     }
-    return ScoutCase(**case_data)
+    return ScoutLoadConfig(**case_data)
 
 
 @pytest.fixture(scope="function", name="base_context")

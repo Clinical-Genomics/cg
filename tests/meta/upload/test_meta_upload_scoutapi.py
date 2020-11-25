@@ -6,7 +6,7 @@ import yaml
 
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
-from cg.models.scout_load_config import ScoutCase
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 
 CASE_FILE_PATHS = ["multiqc"]
 
@@ -74,7 +74,7 @@ def test_generate_config_adds_sample_paths(
     assert analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutCase = upload_scout_api.generate_config(analysis)
+    result_data: ScoutLoadConfig = upload_scout_api.generate_config(analysis)
 
     # THEN the config should contain the sample file path for each sample
     for sample in result_data.samples:
@@ -90,7 +90,7 @@ def test_generate_config_adds_sample_paths(
     assert analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutCase = upload_scout_api.generate_config(analysis)
+    result_data: ScoutLoadConfig = upload_scout_api.generate_config(analysis)
 
     # THEN the config should contain the case file path
     assert result_data.dict()[file_path]
@@ -113,7 +113,7 @@ def _file_is_yaml(file_path):
 
 
 def test_save_config_creates_file(
-    upload_scout_api: UploadScoutAPI, scout_load_object: ScoutCase, tmp_file
+    upload_scout_api: UploadScoutAPI, scout_load_object: ScoutLoadConfig, tmp_file
 ):
     """"Tests that save config creates a file"""
 
@@ -127,7 +127,7 @@ def test_save_config_creates_file(
 
 
 def test_save_config_creates_yaml(
-    upload_scout_api: UploadScoutAPI, scout_load_object: ScoutCase, tmp_file
+    upload_scout_api: UploadScoutAPI, scout_load_object: ScoutLoadConfig, tmp_file
 ):
     """Tests that the file created by save_config_file create a yaml """
 

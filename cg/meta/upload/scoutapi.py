@@ -8,12 +8,12 @@ import requests
 from ruamel import yaml
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
-from cg.models.scout_load_config import ScoutCase, ScoutIndividual
+from cg.apps.scout.scout_load_config import ScoutLoadConfig, ScoutIndividual
 
 from housekeeper.store import models as hk_models
 
@@ -84,7 +84,7 @@ class UploadScoutAPI:
 
     def generate_config(
         self, analysis_obj: models.Analysis, rank_score_threshold: int = 5
-    ) -> ScoutCase:
+    ) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
         analysis_date: datetime = analysis_obj.started_at or analysis_obj.completed_at
@@ -130,7 +130,7 @@ class UploadScoutAPI:
 
         # Validate that the config is correct
 
-        scout_case = ScoutCase(**data)
+        scout_case = ScoutLoadConfig(**data)
 
         return scout_case
 
@@ -140,7 +140,7 @@ class UploadScoutAPI:
         return "scout-load-config"
 
     @staticmethod
-    def save_config_file(upload_config: ScoutCase, file_path: Path):
+    def save_config_file(upload_config: ScoutLoadConfig, file_path: Path):
         """Save a scout load config file to <file_path>"""
 
         LOG.info("Save Scout load config to %s", file_path)

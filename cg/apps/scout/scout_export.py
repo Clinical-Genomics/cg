@@ -34,7 +34,7 @@ class Gene(BaseModel):
     polyphen_prediction: Optional[str]
 
 
-class Case(BaseModel):
+class ScoutExportCase(BaseModel):
     id: str = Field(str, alias="_id")
     analysis_date: datetime
     owner: str

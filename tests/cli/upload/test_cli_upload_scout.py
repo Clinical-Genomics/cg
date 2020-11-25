@@ -3,7 +3,7 @@ import logging
 
 from pathlib import Path
 from cg.cli.upload.base import scout
-from cg.models.scout_load_config import ScoutCase
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 
 
 def check_log(caplog, string=None, warning=None):
@@ -169,7 +169,7 @@ def test_upload_scout_cli(base_context, cli_runner, case_id, scout_load_config):
 
 
 def test_upload_scout_cli_print_console(
-    base_context, cli_runner, case_id: str, scout_load_object: ScoutCase, caplog
+    base_context, cli_runner, case_id: str, scout_load_object: ScoutLoadConfig, caplog
 ):
     """Test to dry run a case upload"""
     caplog.set_level(logging.DEBUG)

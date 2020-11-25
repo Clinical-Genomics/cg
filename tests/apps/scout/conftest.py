@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from tests.mocks.process_mock import ProcessMock
 
 

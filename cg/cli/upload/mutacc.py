@@ -6,8 +6,8 @@ import click
 
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
-from cg.apps.scoutapi import ScoutAPI
-from cg.models.scout_export import Case
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.scout.scout_export import ScoutExportCase
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
-    finished_cases: List[Case] = []
+    finished_cases: List[ScoutExportCase] = []
     if case_id is not None:
         finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
     elif days_ago is not None:
