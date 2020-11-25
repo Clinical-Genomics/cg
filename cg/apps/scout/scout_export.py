@@ -10,8 +10,8 @@ class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
     sex: Literal["0", "1", "2"]
-    father: str
-    mother: str
+    father: str = "0"
+    mother: str = "0"
     phenotype: Literal[1, 2, 0]
     analysis_type: str = "wgs"
 
