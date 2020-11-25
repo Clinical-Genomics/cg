@@ -276,11 +276,13 @@ def test_application(cli_runner, base_context, base_store: Store, helpers):
             "application_version",
             application_tag,
             "-y",
-            "--skip-lims",
         ],
         obj=base_context,
     )
 
-    # THEN then the application should have been set
+    # THEN then the application should have been set in status db
     assert result.exit_code == SUCCESS
     assert sample_obj.application_version.application.tag == application_tag
+    # THEN then the application should have been set in LIMS
+    assert base_context["lims_api"].get_updated_sample_key() == "application"
+    assert base_context["lims_api"].get_updated_sample_value() == application_tag

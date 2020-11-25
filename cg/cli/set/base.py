@@ -6,7 +6,7 @@ import click
 from cg.apps.lims import LimsAPI
 from .families import families
 from .family import family
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS, PRIORITY_MAP
+from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.store import Store, models
 
@@ -261,22 +261,27 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         for key, value in kwargs:
 
+            if key == "application_version":
+                new_key = "application"
+            else:
+                new_key = key
+
             if key == "priority":
                 new_value = sample_obj.priority_human
             else:
                 new_value = value
 
-            click.echo(f"Would set {key} to {new_value} for {sample_obj.internal_id} in LIMS")
+            click.echo(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
             try:
-                context.obj["lims_api"].update_sample(lims_id=sample_id, **{key: new_value})
-                click.echo(click.style(f"Set LIMS/{key} to {new_value}", fg="blue"))
+                context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: new_value})
+                click.echo(click.style(f"Set LIMS/{new_key} to {new_value}", fg="blue"))
             except LimsDataError as err:
                 click.echo(
-                    click.style(f"Failed to set LIMS/{key} to {new_value}, {err.message}", fg="red")
+                    click.style(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}", fg="red")
                 )
 
 
