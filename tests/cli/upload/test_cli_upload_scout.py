@@ -54,10 +54,13 @@ def test_upload_with_load_config(
     assert load_file_mentioned_in_result(result, load_config_file.full_path)
 
 
-def test_produce_load_config(base_context, cli_runner, case_id, scout_hk_bundle_data, helpers):
+def test_produce_load_config(
+    base_context, cli_runner, case_id, scout_hk_bundle_data, helpers, caplog
+):
     """Test create a scout load config with the scout upload api"""
+    caplog.set_level(logging.DEBUG)
     # GIVEN a singleton WGS case
-
+    # GIVEN that the api generates a config
     base_context["scout_upload_api"].mock_generate_config = False
     # GIVEN a housekeeper instance with some bundle information
     hk_mock = base_context["housekeeper_api"]
@@ -65,6 +68,10 @@ def test_produce_load_config(base_context, cli_runner, case_id, scout_hk_bundle_
 
     # WHEN running cg upload scout -p <caseid>
     result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
+
+    # THEN assert that the call was executed with success
+    print(caplog.text)
+    assert result.exit_code == 0
     # THEN assert mother: '0' and father: '0'
     assert "'mother': '0'" in result.output
     assert "'father': '0'" in result.output
