@@ -45,7 +45,7 @@ class ScoutCase(BaseModel):
     synopsis: Optional[str] = None
     phenotype_terms: Optional[List[str]] = None
     gene_panels: Optional[List[str]] = None
-    default_panels: Optional[List[str]] = None
+    default_gene_panels: List[str] = []
     cohorts: Optional[List[str]] = None
     human_genome_build: str
     rank_model_version: Optional[str] = None
