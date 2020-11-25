@@ -1,6 +1,7 @@
 """Set data in the status database and LIMS"""
 import datetime
 import getpass
+import logging
 
 import click
 from cg.apps.lims import LimsAPI
@@ -19,7 +20,7 @@ OPTION_LONG_SKIP_LIMS = "--skip-lims"
 OPTION_LONG_YES = "--yes"
 OPTION_SHORT_KEY_VALUE = "-kv"
 OPTION_SHORT_YES = "-y"
-NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
+NOT_CHANGEABLE_SAMPLE_ATTRIBUTES = [
     "application_version_id",
     "customer_id",
     "deliveries",
@@ -33,6 +34,8 @@ NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
     "state",
     "to_dict",
 ]
+
+LOG = logging.getLogger(__name__)
 
 
 @click.group("set")
@@ -79,13 +82,13 @@ def samples(
     sample_objs = _get_samples(case_id, identifiers, store)
 
     if not sample_objs:
-        click.echo(click.style(fg="red", text="No samples to alter!"))
+        LOG.error("No samples to alter!")
         context.abort()
 
-    click.echo("Would alter samples:")
+    LOG.info("Would alter samples:")
 
     for sample_obj in sample_objs:
-        click.echo(f"{sample_obj}")
+        LOG.info(f"{sample_obj}")
 
     if not (yes or click.confirm(CONFIRM)):
         context.abort()
@@ -156,21 +159,21 @@ def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_att
         if sample_obj:
             message += f": {sample_obj.__dict__.get(attribute)}"
 
-        click.echo(message)
+        LOG.info(message)
 
 
 def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
-    click.echo("sample_id: optional, internal_id of sample to set value on")
+    LOG.info("sample_id: optional, internal_id of sample to set value on")
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
     show_option_help(
         short_name=OPTION_SHORT_KEY_VALUE, long_name=OPTION_LONG_KEY_VALUE, help_text=HELP_KEY_VALUE
     )
-    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
-    click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
-    click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
-    click.echo(
+    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
+    LOG.info(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
+    LOG.info(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
+    LOG.info(
         f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]"
     )
 
@@ -191,7 +194,7 @@ def show_option_help(short_name: str = None, long_name: str = None, help_text: s
     if help_text:
         help_message += f": {help_text}"
 
-    click.echo(help_message)
+    LOG.info(help_message)
 
 
 @set_cmd.command()
@@ -216,16 +219,16 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         show_set_sample_help(sample_obj)
 
     if sample_obj is None:
-        click.echo(click.style(f"Can't find sample {sample_id}", fg="red"))
+        LOG.error(f"Can't find sample {sample_id}")
         context.abort()
 
     for key, value in kwargs:
 
-        if is_locked_attribute_on_sample(key, NOT_CHANGABLE_SAMPLE_ATTRIBUTES):
-            click.echo(click.style(f"{key} is not a changeable attribute on sample", fg="yellow"))
+        if is_locked_attribute_on_sample(key, NOT_CHANGEABLE_SAMPLE_ATTRIBUTES):
+            LOG.warning(f"{key} is not a changeable attribute on sample")
             continue
         if not hasattr(sample_obj, key):
-            click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
+            LOG.warning(f"{key} is not a property of sample")
             continue
 
         new_key = key
@@ -241,12 +244,12 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
                 new_value = context.obj["status_db"].current_application_version(value)
 
             if not new_value:
-                click.echo(click.style(f"{key} {value} not found, aborting", fg="red"))
+                LOG.error(f"{key} {value} not found, aborting")
                 context.abort()
 
         old_value = getattr(sample_obj, new_key)
 
-        click.echo(
+        LOG.info(
             f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
         )
 
@@ -271,20 +274,16 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
             else:
                 new_value = value
 
-            click.echo(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
+            LOG.info(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
             try:
                 context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: new_value})
-                click.echo(click.style(f"Set LIMS/{new_key} to {new_value}", fg="blue"))
+                LOG.info(f"Set LIMS/{new_key} to {new_value}")
             except LimsDataError as err:
-                click.echo(
-                    click.style(
-                        f"Failed to set LIMS/{new_key} to {new_value}, {err.message}", fg="red"
-                    )
-                )
+                LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}")
 
 
 def _generate_comment(what, old_value, new_value):
@@ -311,13 +310,13 @@ def flowcell(context, flowcell_name, status):
     flowcell_obj = context.obj["status_db"].flowcell(flowcell_name)
 
     if flowcell_obj is None:
-        click.echo(click.style(f"flowcell not found: {flowcell_name}", fg="yellow"))
+        LOG.warning(f"flowcell not found: {flowcell_name}")
         context.abort()
     prev_status = flowcell_obj.status
     flowcell_obj.status = status
 
     context.obj["status_db"].commit()
-    click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
+    LOG.info(f"{flowcell_name} set: {prev_status} -> {status}")
 
 
 set_cmd.add_command(family)
