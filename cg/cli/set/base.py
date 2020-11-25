@@ -6,7 +6,7 @@ import click
 from cg.apps.lims import LimsAPI
 from .families import families
 from .family import family
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
+from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS, PRIORITY_MAP
 from cg.exc import LimsDataError
 from cg.store import Store, models
 
@@ -224,7 +224,10 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         if not hasattr(sample_obj, key):
             click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
             continue
-        new_value = None
+
+        new_key = key
+        new_value = value
+
         if key in ["customer", "application_version"]:
             if key == "customer":
                 new_value = context.obj["status_db"].customer(value)
@@ -234,34 +237,40 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
             if not new_value:
                 click.echo(click.style(f"{key} {value} not found, aborting", fg="red"))
                 context.abort()
-        else:
-            new_value = value
 
-        old_value = getattr(sample_obj, key)
+        old_value = getattr(sample_obj, new_key)
 
-        click.echo(f"Would change from {key}={old_value} to {key}={new_value} on {sample_obj}")
+        click.echo(
+            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
+        )
 
         if not (yes or click.confirm(CONFIRM)):
             continue
 
-        setattr(sample_obj, key, new_value)
-        _update_comment(_generate_comment(key, old_value, new_value), sample_obj)
+        setattr(sample_obj, new_key, new_value)
+        _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
         context.obj["status_db"].commit()
 
     if not skip_lims:
 
         for key, value in kwargs:
-            click.echo(f"Would set {key} to {value} for {sample_obj.internal_id} in LIMS")
+
+            if key == "application_version":
+                new_key = "application"
+            else:
+                new_key = key
+
+            click.echo(f"Would set {new_key} to {value} for {sample_obj.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
             try:
-                context.obj["lims_api"].update_sample(lims_id=sample_id, **{key: value})
-                click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
+                context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: value})
+                click.echo(click.style(f"Set LIMS/{new_key} to {value}", fg="blue"))
             except LimsDataError as err:
                 click.echo(
-                    click.style(f"Failed to set LIMS/{key} to {value}, {err.message}", fg="red")
+                    click.style(f"Failed to set LIMS/{new_key} to {value}, {err.message}", fg="red")
                 )
 
 
