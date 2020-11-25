@@ -5,12 +5,13 @@ import copy
 import logging
 from subprocess import CalledProcessError
 
+from cg.utils.commands import Process
 from cg.constants import RETURN_SUCCESS
 
 LOG = logging.getLogger(__name__)
 
 
-class ProcessMock:
+class ProcessMock(Process):
     """Mock the utils.commands.Process class"""
 
     def __init__(
@@ -26,9 +27,9 @@ class ProcessMock:
             config(str): Path to config if used by process
             environment(str): Activate conda environment before executing binary
         """
-        self.binary = binary
-        self.config = config
-        self.environment = environment
+        super(ProcessMock, self).__init__(
+            binary=binary, config=config, config_parameter=config_parameter, environment=environment
+        )
         self.config_parameter = config_parameter
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call: List = []
@@ -40,8 +41,7 @@ class ProcessMock:
             if self.config:
                 self.base_call.extend([self.config_parameter, self.config])
             LOG.debug("Use base call %s", self.base_call)
-        self._stdout = ""
-        self._stderr = ""
+
         self._exit_code: int = RETURN_SUCCESS
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
@@ -92,42 +92,3 @@ class ProcessMock:
         if self.config:
             self.base_call.extend([self.config_parameter, self.config])
         LOG.debug("Use base call %s", self.base_call)
-
-    @property
-    def stdout(self):
-        """Fetch stdout"""
-        return self._stdout
-
-    @stdout.setter
-    def stdout(self, text):
-        self._stdout = text
-
-    @stdout.deleter
-    def stdout(self):
-        del self._stdout
-
-    @property
-    def stderr(self):
-        """Fetch stderr"""
-        return self._stderr
-
-    @stderr.setter
-    def stderr(self, text):
-        self._stderr = text
-
-    @stderr.deleter
-    def stderr(self):
-        del self._stderr
-
-    def stdout_lines(self):
-        """Iterate over the lines in self.stdout"""
-        for line in self.stdout.split("\n"):
-            yield line
-
-    def stderr_lines(self):
-        """Iterate over the lines in self.stderr"""
-        for line in self.stderr.split("\n"):
-            yield line
-
-    def __repr__(self):
-        return f"Process:base_call:{self.base_call}"
