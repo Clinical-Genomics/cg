@@ -14,7 +14,23 @@ Try to use the following format:
 
 ### Changed
 
+
+## [16.3.2]
+
 ### Fixed
+
+- Fixed setting of apptag in LIMS for samples
+
+## [16.3.1]
+
+### Fixed
+
+- Fixed a bug in naming of "default_gene_panels" in Scout load config
+
+## [16.3.0]
+
+### Changed
+- Changed logic for which cases are to be compressed. Now compression will be run on all cases older then 60 days provided their fastq files have not been decompressed less than 21 days prior
 
 
 ## [16.2.0]
