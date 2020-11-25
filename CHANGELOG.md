@@ -14,6 +14,7 @@ Try to use the following format:
 
 ### Changed
 
+### Fixed
 
 ## [x.x.x]
 
@@ -22,6 +23,24 @@ Try to use the following format:
 
 ### Changed
 - Decouples scout from CG
+
+## [16.3.4]
+
+### Fixed
+
+- Fixed documentation on Trailblazers purpose
+
+## [16.3.3]
+
+### Fixed
+
+- Fixed setting of priority in statusDB and LIMS for samples
+
+## [16.3.2]
+
+### Fixed
+
+- Fixed setting of apptag in LIMS for samples
 
 ## [16.3.1]
 
