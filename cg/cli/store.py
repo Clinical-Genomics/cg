@@ -31,6 +31,7 @@ def store(context):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_sample(context, sample_id, dry_run):
+    """Include links to decompressed FASTQ files belonging to this sample in housekeeper"""
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
@@ -47,7 +48,7 @@ def store_sample(context, sample_id, dry_run):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_case(context, case_id, dry_run):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+    """Include links to decompressed FASTQ files belonging to this case in housekeeper"""
 
     status_db = context.obj["status_db"]
     try:
@@ -66,7 +67,7 @@ def store_case(context, case_id, dry_run):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_flowcell(context, flowcell_id, dry_run):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+    """Include links to decompressed FASTQ files belonging to this flowcell in housekeeper"""
 
     status_db = context.obj["status_db"]
     samples = status_db.get_samples_from_flowcell(flowcell_id=flowcell_id)
@@ -82,7 +83,7 @@ def store_flowcell(context, flowcell_id, dry_run):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_ticket(context, ticket_id, dry_run):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+    """Include links to decompressed FASTQ files belonging to this ticket in housekeeper"""
     status_db = context.obj["status_db"]
     samples = status_db.get_samples_from_ticket(ticket_id=ticket_id)
     stored_inds = 0

@@ -11,38 +11,19 @@ from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store, models
-from cg.store.get.cases import ready_for_spring_compression
 
 LOG = logging.getLogger(__name__)
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Fetch individual ids from cases that are ready for SPRING compression"""
-    for case in get_fastq_cases(store, case_id):
-        for link_obj in case.links:
-            yield link_obj.sample.internal_id
+    case_obj = store.family(case_id)
+    if not case_obj:
+        LOG.error("Could not find case %s", case_id)
+        raise CaseNotFoundError("")
 
-
-def get_fastq_cases(store: Store, case_id: str = None):
-    """Return cases ready for SPRING compression"""
-    if case_id:
-        return get_cases(store, case_id)
-    return ready_for_spring_compression(store)
-
-
-def get_cases(store: Store, case_id: str = None) -> List[models.Family]:
-    """Fetch cases from store
-
-    If case_id return one case (if existing) otherwise return all
-    """
-    if case_id:
-        case_obj = store.family(case_id)
-        if not case_obj:
-            LOG.warning("Could not find case %s", case_id)
-            raise CaseNotFoundError("Could not find case {}".format(case_id))
-        return [case_obj]
-
-    return store.families()
+    for link_obj in case_obj.links:
+        yield link_obj.sample.internal_id
 
 
 def update_compress_api(

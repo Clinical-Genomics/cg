@@ -57,6 +57,7 @@ def test_generate_config_adds_meta_result_key(
     """Test that generate config adds rank model version"""
     # GIVEN a status db and hk with an analysis
     assert analysis  # WHEN generating the scout config for the analysis
+
     result_data = upload_scout_api.generate_config(
         analysis
     )  # THEN the config should contain the rank model version used

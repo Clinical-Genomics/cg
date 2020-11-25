@@ -190,6 +190,14 @@ class MockScout:
 
 
 @pytest.fixture(scope="function")
+def report_store(analysis_store, helpers):
+    family = analysis_store.families()[0]
+    helpers.add_analysis(analysis_store, family)
+    helpers.add_analysis(analysis_store, family)
+    return analysis_store
+
+
+@pytest.fixture(scope="function")
 def report_api(report_store, lims_samples):
     db = MockDB(report_store)
     lims = MockLims(lims_samples)
@@ -210,11 +218,3 @@ def report_api(report_store, lims_samples):
         path_tool=path_tool,
     )
     return _report_api
-
-
-@pytest.fixture(scope="function")
-def report_store(analysis_store, helpers):
-    family = analysis_store.families()[0]
-    helpers.add_analysis(analysis_store, family)
-    helpers.add_analysis(analysis_store, family)
-    return analysis_store
