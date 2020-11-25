@@ -136,7 +136,7 @@ class ScoutAPI:
 
     def get_case(self, case_id: str) -> Optional[ScoutExportCase]:
         """Fetch a case from Scout"""
-        cases = List[ScoutExportCase] = self.get_cases(case_id=case_id)
+        cases: List[ScoutExportCase] = self.get_cases(case_id=case_id)
         if not cases:
             return None
         return cases[0]
