@@ -178,6 +178,7 @@ class ScoutAPI:
 
         cases = []
         for case_export in json.loads(self.process.stdout):
+            LOG.info("Validating case %s", case_export.get("_id"))
             case_obj = ScoutExportCase(**case_export)
             cases.append(case_obj)
         return cases

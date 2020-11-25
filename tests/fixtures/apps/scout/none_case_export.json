@@ -4,6 +4,7 @@
     "display_name": "KMP-00104_balsamic",
     "owner": "cust000",
     "collaborators": ["cust000"],
+    "diagnosis_phenotypes": [],
     "smn_tsv": null,
     "individuals": [
       {
