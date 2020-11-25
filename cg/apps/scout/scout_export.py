@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from typing_extensions import Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
 
@@ -10,10 +10,16 @@ class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
     sex: Literal["0", "1", "2"]
-    father: str = "0"
-    mother: str = "0"
+    father: Optional[str]
+    mother: Optional[str]
     phenotype: Literal[1, 2, 0]
     analysis_type: str = "wgs"
+
+    @validator("father", "mother", allow_reuse=True)
+    def convert_to_zero(cls, v):
+        if v is None:
+            return "0"
+        return v
 
 
 class Panel(BaseModel):

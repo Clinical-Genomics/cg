@@ -33,6 +33,20 @@ def fixture_cases_file(scout_dir: Path) -> Path:
     return scout_dir / "case_export.json"
 
 
+@pytest.fixture(name="none_case_file")
+def fixture_none_case_file(scout_dir: Path) -> Path:
+    """Return the path to a file with export cases output where mandatory fields are None"""
+    return scout_dir / "none_case_export.json"
+
+
+@pytest.fixture(name="none_case_output")
+def fixture_none_case_output(none_case_file: Path) -> str:
+    """Return the content of a export causatives run with scout"""
+    with open(none_case_file, "r") as infile:
+        content = infile.read()
+    return content
+
+
 @pytest.fixture(name="causative_output")
 def fixture_causative_output(causatives_file: Path) -> str:
     """Return the content of a export causatives run with scout"""
