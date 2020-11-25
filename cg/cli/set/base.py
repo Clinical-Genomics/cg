@@ -281,7 +281,9 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
                 click.echo(click.style(f"Set LIMS/{new_key} to {new_value}", fg="blue"))
             except LimsDataError as err:
                 click.echo(
-                    click.style(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}", fg="red")
+                    click.style(
+                        f"Failed to set LIMS/{new_key} to {new_value}, {err.message}", fg="red"
+                    )
                 )
 
 
