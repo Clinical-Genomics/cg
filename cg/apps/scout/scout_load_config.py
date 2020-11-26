@@ -48,6 +48,7 @@ class ScoutLoadConfig(BaseModel):
     default_gene_panels: List[str] = []
     cohorts: Optional[List[str]] = None
     human_genome_build: str
+    madeline: Optional[str]
     rank_model_version: Optional[str] = None
     rank_score_threshold: int
     sv_rank_model_version: Optional[str] = None
