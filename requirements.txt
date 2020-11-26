@@ -34,6 +34,5 @@ dataclasses<0.8
 
 # apps
 genologics
-trailblazer>=6.7.0
-housekeeper>=2.0.0b2
+housekeeper>=3
 cgstats>=1.1.2
