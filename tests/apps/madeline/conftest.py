@@ -1,20 +1,22 @@
 """Fixtures for testing the madeline cg app"""
 
 from pathlib import Path
+from typing import List, Dict, Optional
 
 import pytest
 
 from cg.apps.madeline.api import MadelineAPI
+from tests.mocks.process_mock import ProcessMock
 
 
 @pytest.fixture(name="madeline_output")
-def fixture_madeline_output():
-    """File with madeline output"""
-    return "tests/fixtures/apps/madeline/madeline.xml"
+def fixture_madeline_output(apps_dir: Path) -> Path:
+    """Path to madeline output"""
+    return apps_dir / "madeline" / "madeline.xml"
 
 
-@pytest.fixture
-def madeline_columns():
+@pytest.fixture(name="madeline_columns")
+def fixture_madeline_columns() -> Dict[str, str]:
     """return a dictionary with madeline columns"""
     columns = {
         "family": "FamilyId",
@@ -30,7 +32,7 @@ def madeline_columns():
 
 
 @pytest.fixture(name="mother")
-def fixture_mother():
+def fixture_mother() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "mother",
@@ -42,7 +44,7 @@ def fixture_mother():
 
 
 @pytest.fixture(name="father")
-def fixture_father():
+def fixture_father() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "father",
@@ -54,7 +56,7 @@ def fixture_father():
 
 
 @pytest.fixture(name="proband")
-def fixture_proband():
+def fixture_proband() -> Dict[str, Optional[str]]:
     """return a dictionary with ind info"""
     ind_info = {
         "sample": "proband",
@@ -69,53 +71,38 @@ def fixture_proband():
 
 
 @pytest.fixture(name="trio")
-def fixture_trio(proband, mother, father):
+def fixture_trio(proband: dict, mother: dict, father: dict) -> List[Dict[str, Optional[str]]]:
     """return a list with a trio"""
     return [proband, mother, father]
 
 
 @pytest.fixture
-def madeline_input(proband):
+def madeline_input(proband: dict) -> List[str]:
     """return a iterable with madeline formated lines"""
-    inds = [proband]
+    individuals = [proband]
     case_id = "test"
     _input = []
-    for line in MadelineAPI.make_ped(case_id, inds):
+    for line in MadelineAPI.make_ped(case_id, individuals):
         _input.append(line)
 
     return _input
 
 
-@pytest.fixture
-def madeline_process(madeline_output):
-    """return a madeline process mock"""
-    return MadelineProcessMock(binary="madeline", madeline_file=madeline_output)
+@pytest.fixture(name="madeline_api")
+def fixture_madeline_api() -> MadelineAPI:
+    """Return a madeline API with mocked process"""
+    binary_path = "madeline"
+    config = {"madeline_exe": binary_path}
+    madeline_api: MadelineAPI = MadelineAPI(config)
+    madeline_process: ProcessMock = ProcessMock(binary=binary_path)
+    madeline_api.process = madeline_process
+    return madeline_api
 
 
-class MadelineProcessMock:
-    """Class to mock simple madeline process calls"""
-
-    def __init__(self, binary, config=None, config_parameter="--config", madeline_file=None):
-        """Initialise mock"""
-        self.binary = binary
-        self.config = config
-        self.config_parameter = config_parameter
-        self.stdout = ""
-        self._madeline_content = ""
-        if madeline_file:
-            with open(madeline_file, "r") as output:
-                self._madeline_content = output.read()
-
-    def run_command(self, parameters):
-        """Mock that a command is run"""
-        output_prefix = Path(parameters[-2])
-        outfile = output_prefix.with_suffix(".xml")
-        with open(outfile, "w") as file_handle:
-            file_handle.write(self._madeline_content)
-
-        return outfile
-
-    def stdout_lines(self):
-        """Iterate over the lines in self.stdout"""
-        for line in self.stdout.split("\n"):
-            yield line
+@pytest.fixture(name="populated_madeline_api")
+def fixture_populated_madeline_api(madeline_output: Path, madeline_api: MadelineAPI) -> MadelineAPI:
+    """Return a madeline API populated with some output"""
+    with open(madeline_output, "r") as output:
+        madeline_content = output.read()
+    madeline_api.process.set_stdout(madeline_content)
+    return madeline_api

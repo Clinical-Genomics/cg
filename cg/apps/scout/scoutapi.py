@@ -65,7 +65,7 @@ class ScoutAPI:
 
         Return list of lines in bed format
         """
-        export_panels_command = ["export", "panels", "--bed"]
+        export_panels_command = ["export", "panel", "--bed"]
         for panel_id in panels:
             export_panels_command.append(panel_id)
 

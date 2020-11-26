@@ -9,6 +9,7 @@ from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
 
+
 LOG = logging.getLogger(__name__)
 
 
