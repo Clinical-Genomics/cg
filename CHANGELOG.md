@@ -16,11 +16,17 @@ Try to use the following format:
 
 ### Fixed
 
-## [16.4.1]
+## [16.4.2]
 
 ### Fixed
 
 - Bug that display_name was used instead of sample_name
+
+## [16.4.1]
+
+### Fixed
+
+- Change compression query to be both satisfactory syntax for flake and to be working on our version of sql server
 
 ## [16.4.0]
 
