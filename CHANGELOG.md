@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.4.1]
+
+### Fixed
+
+- Bug that display_name was used instead of sample_name
+
 ## [16.4.0]
 
 ### Added
