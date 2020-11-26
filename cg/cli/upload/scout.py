@@ -61,6 +61,23 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 
 
 @click.command()
+@click.argument("case_id")
+@click.pass_context
+def generate_config(context, case_id: str, print_console: bool):
+    """Generate a scout load config"""
+    status_api: Store = context.obj["status_db"]
+    scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
+    family_obj: Family = status_api.family(case_id)
+    if not family_obj:
+        LOG.warning("Could not find case %s", case_id)
+        return
+    if not family_obj.analyses:
+        LOG.warning("Case %s is missing analyses", case_id)
+        return
+    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
+
+
+@click.command()
 @click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
