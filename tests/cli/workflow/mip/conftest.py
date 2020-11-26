@@ -5,19 +5,16 @@ import copy
 import datetime as dt
 
 from cg.constants import Pipeline
-from cg.meta.workflow.mip import MipAnalysisAPI
 from pathlib import Path
 from ruamel.yaml import YAML
 
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.tb_mock import MockTB
 
-from trailblazer.store.models import Analysis as tb_Analysis
+from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
 
 
 @pytest.fixture

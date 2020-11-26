@@ -8,65 +8,49 @@ from cg.meta.upload.mutacc import (
     resolve_parent,
     resolve_phenotype,
 )
+from cg.apps.scout.scout_export import ScoutExportCase
 
 
-def test_instatiate():
+def test_instantiate():
     """
-    Test instatiate object of type UploadToMutaccAPI
+    Test instantiate object of type UploadToMutaccAPI
     """
     # GIVEN a scout-api and mutacc-auto-api
 
     mutacc_auto_api = 1
-    scou_api = 1
+    scout_api = 1
 
     # When instatiating the mutacc_upload api
-    mutacc_upload_api = UploadToMutaccAPI(scou_api, mutacc_auto_api)
+    mutacc_upload_api = UploadToMutaccAPI(scout_api, mutacc_auto_api)
 
     # THEN all attributes should have been set
-    assert mutacc_upload_api.scout == scou_api
+    assert mutacc_upload_api.scout == scout_api
     assert mutacc_upload_api.mutacc_auto == mutacc_auto_api
 
 
-def test_data(mutacc_upload_api, mocker):
+def test_data(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
     """
     Test the data method
     """
-    # GIVEN a case dictionary
-    case = {
-        "_id": "internal_id",
-        "causatives": ["variant_id"],
-        "individuals": [
-            {"individual_id": "individual_1", "bam_file": ""},
-            {"individual_id": "individual_2", "bam_file": ""},
-            {"individual_id": "individual_3", "bam_file": ""},
-        ],
-    }
+    # GIVEN a case object
 
     mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True
 
     # WHEN generating data
-    result = mutacc_upload_api.data(case)
+    result = mutacc_upload_api.data(scout_export_case)
 
     # THEN data dict should have keys 'case', and 'causatives'
     assert set(result.keys()) == {"case", "causatives"}
 
 
-def test_data_no_bam(mutacc_upload_api, mocker):
+def test_data_no_bam(mutacc_upload_api, scout_export_case_missing_bam: ScoutExportCase, mocker):
     """
     Test get data when no bam_file field is given for one of the samples
     """
 
     # GIVEN a case dictionary where one individual is missing bam_file
-    case = {
-        "_id": "internal_id",
-        "causatives": ["variant_id"],
-        "individuals": [
-            {"individual_id": "individual_1", "bam_file": ""},
-            {"individual_id": "individual_2"},
-            {"individual_id": "individual_3", "bam_file": ""},
-        ],
-    }
+    case = scout_export_case_missing_bam
 
     # mock that file is a file
     mocker.patch.object(os.path, "isfile")
@@ -79,20 +63,12 @@ def test_data_no_bam(mutacc_upload_api, mocker):
     assert result == {}
 
 
-def test_data_bam_path_not_exists(mutacc_upload_api, mocker):
+def test_data_bam_path_not_exists(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
     """
     Test get data when bam file does not exist
     """
-    # GIVEN a case dictionary
-    case = {
-        "_id": "internal_id",
-        "causatives": ["variant_id"],
-        "individuals": [
-            {"individual_id": "individual_1", "bam_file": ""},
-            {"individual_id": "individual_2", "bam_file": ""},
-            {"individual_id": "individual_3", "bam_file": ""},
-        ],
-    }
+    # GIVEN a case object
+    case = scout_export_case
 
     # mock that file is not a file
     mocker.patch.object(os.path, "isfile")
@@ -105,19 +81,14 @@ def test_data_bam_path_not_exists(mutacc_upload_api, mocker):
     assert result == {}
 
 
-def test_data_no_causatives(mutacc_upload_api, mocker):
+def test_data_no_causatives(
+    mutacc_upload_api, scout_export_case_no_causatives: ScoutExportCase, mocker
+):
     """
     Test get data when no causatives are given
     """
     # GIVEN a case dictionary with no causative variants
-    case = {
-        "_id": "internal_id",
-        "individuals": [
-            {"individual_id": "individual_1", "bam_file": ""},
-            {"individual_id": "individual_2", "bam_file": ""},
-            {"individual_id": "individual_3", "bam_file": ""},
-        ],
-    }
+    case = scout_export_case_no_causatives
 
     mocker.patch.object(os.path, "isfile")
     os.path.isfile.return_value = True

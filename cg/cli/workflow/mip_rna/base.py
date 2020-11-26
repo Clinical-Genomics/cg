@@ -6,7 +6,7 @@ import click
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 
 from cg.apps.environ import environ_email

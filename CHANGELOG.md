@@ -14,6 +14,39 @@ Try to use the following format:
 
 ### Changed
 
+### Fixed
+
+## [16.4.2]
+
+### Fixed
+
+- Bug that display_name was used instead of sample_name
+
+## [16.4.1]
+
+### Fixed
+
+- Change compression query to be both satisfactory syntax for flake and to be working on our version of sql server
+
+## [16.4.0]
+
+### Added
+- Use Pydantic models to validate Scout input/output
+
+### Changed
+- Decouples scout from CG
+
+## [16.3.4]
+
+### Fixed
+
+- Fixed documentation on Trailblazers purpose
+
+## [16.3.3]
+
+### Fixed
+
+- Fixed setting of priority in statusDB and LIMS for samples
 
 ## [16.3.2]
 
@@ -26,6 +59,7 @@ Try to use the following format:
 ### Fixed
 
 - Fixed a bug in naming of "default_gene_panels" in Scout load config
+
 
 ## [16.3.0]
 
