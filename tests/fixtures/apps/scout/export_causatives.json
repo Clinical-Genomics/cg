@@ -1,0 +1,275 @@
+[
+    {
+        "_id": "4c7d5c70d955875504db72ef8e1abe77",
+        "document_id": "4c7d5c70d955875504db72ef8e1abe77",
+        "variant_id": "5e015a22c50c8555f04898cf774d5a74",
+        "display_name": "7_124491972_C_A_clinical",
+        "variant_type": "clinical",
+        "case_id": "internal_id",
+        "chromosome": "7",
+        "reference": "C",
+        "alternative": "A",
+        "institute": "cust000",
+        "missing_data": false,
+        "position": 124491972,
+        "rank_score": 11.0,
+        "end": 124491972,
+        "length": 1,
+        "simple_id": "7_124491972_C_A",
+        "quality": 1040.6700439453125,
+        "filters": [
+            "PASS"
+        ],
+        "dbsnp_id": "rs116916706",
+        "cosmic_ids": null,
+        "category": "snv",
+        "sub_category": "snv",
+        "mate_id": null,
+        "cytoband_start": "q31.33",
+        "cytoband_end": "q31.33",
+        "end_chrom": "7",
+        "samples": [
+            {
+                "sample_id": "ADM1059A2",
+                "display_name": "NA12882",
+                "genotype_call": "0/1",
+                "allele_depths": [
+                    24,
+                    15
+                ],
+                "read_depth": 39,
+                "genotype_quality": 99
+            },
+            {
+                "sample_id": "ADM1059A1",
+                "display_name": "NA12877",
+                "genotype_call": "0/1",
+                "allele_depths": [
+                    31,
+                    18
+                ],
+                "read_depth": 49,
+                "genotype_quality": 99
+            },
+            {
+                "sample_id": "ADM1059A3",
+                "display_name": "NA12878",
+                "genotype_call": "0/0",
+                "allele_depths": [
+                    37,
+                    0
+                ],
+                "read_depth": 37,
+                "genotype_quality": 99
+            }
+        ],
+        "genetic_models": [
+            "AR_comp_dn"
+        ],
+        "compounds": [
+            {
+                "variant": "cd75b4caed2c089717e56bb4b9407169",
+                "display_name": "7_124537031_G_A",
+                "combined_score": 17.0,
+                "rank_score": 6.0,
+                "genes": [
+                    {
+                        "hgnc_id": 17284,
+                        "hgnc_symbol": "POT1",
+                        "region_annotation": "ncRNA_exonic",
+                        "functional_annotation": "non_coding_transcript_variant"
+                    }
+                ],
+                "not_loaded": false
+            }
+        ],
+        "genes": [
+            {
+                "hgnc_id": 17284,
+                "hgnc_symbol": "POT1",
+                "ensembl_id": "ENSG00000128513",
+                "description": "protection of telomeres 1",
+                "transcripts": [
+                    {
+                        "transcript_id": "ENST00000357628",
+                        "hgnc_id": 17284,
+                        "protein_id": "ENSP00000350249",
+                        "sift_prediction": "tolerated",
+                        "polyphen_prediction": "possibly_damaging",
+                        "swiss_prot": "Q9NUX5",
+                        "biotype": "protein_coding",
+                        "functional_annotations": [
+                            "missense_variant"
+                        ],
+                        "region_annotations": [
+                            "exonic"
+                        ],
+                        "exon": "11/19",
+                        "strand": "-",
+                        "coding_sequence_name": "c.903G>T",
+                        "protein_sequence_name": "p.Gln301His",
+                        "is_canonical": true,
+                        "refseq_id": "NM_015450",
+                        "refseq_identifiers": [
+                            "NM_015450"
+                        ]
+                    }
+                ],
+                "functional_annotation": "missense_variant",
+                "region_annotation": "exonic",
+                "sift_prediction": "deleterious",
+                "polyphen_prediction": "probably_damaging",
+                "hgvs_identifier": "c.903G>T",
+                "canonical_transcript": "ENST00000357628",
+                "exon": "11/19",
+                "phenotypes": null,
+                "disease_associated_transcripts": [],
+                "manual_penetrance": false,
+                "mosaicism": false,
+                "manual_inheritance": [],
+                "common": {
+                    "_id": {
+                        "$oid": "5fb5295158abce1a8e2c7bde"
+                    },
+                    "hgnc_id": 17284,
+                    "hgnc_symbol": "POT1",
+                    "ensembl_id": "ENSG00000128513",
+                    "chromosome": "7",
+                    "start": 124462440,
+                    "end": 124570037,
+                    "length": 107597,
+                    "description": "protection of telomeres 1",
+                    "aliases": [
+                        "DKFZp586D211",
+                        "POT1",
+                        "hPot1"
+                    ],
+                    "primary_transcripts": [
+                        "NM_001042594"
+                    ],
+                    "entrez_id": 25913,
+                    "omim_id": 606478,
+                    "ucsc_id": "uc003vlm.4",
+                    "uniprot_ids": [
+                        "Q9NUX5"
+                    ],
+                    "vega_id": "OTTHUMG00000157194",
+                    "pli_score": 0.522727216703268,
+                    "incomplete_penetrance": false,
+                    "build": "37",
+                    "transcripts": [
+                        {
+                            "_id": {
+                                "$oid": "5fb5295158abce1a8e2c83d7"
+                            },
+                            "ensembl_transcript_id": "ENST00000393329",
+                            "hgnc_id": 17284,
+                            "chrom": "7",
+                            "start": 124462441,
+                            "end": 124570037,
+                            "is_primary": true,
+                            "refseq_id": "NM_001042594",
+                            "refseq_identifiers": [
+                                "NM_001042594"
+                            ],
+                            "build": "37",
+                            "length": 107596
+                        }
+                    ],
+                    "transcripts_dict": {
+                        "ENST00000393329": {
+                            "_id": {
+                                "$oid": "5fb5295158abce1a8e2c83d7"
+                            },
+                            "ensembl_transcript_id": "ENST00000393329",
+                            "hgnc_id": 17284,
+                            "chrom": "7",
+                            "start": 124462441,
+                            "end": 124570037,
+                            "is_primary": true,
+                            "refseq_id": "NM_001042594",
+                            "refseq_identifiers": [
+                                "NM_001042594"
+                            ],
+                            "build": "37",
+                            "length": 107596
+                        }
+                    }
+                },
+                "disease_terms": []
+            }
+        ],
+        "hgnc_ids": [
+            17284
+        ],
+        "hgnc_symbols": [
+            "POT1"
+        ],
+        "panels": [
+            "panel1"
+        ],
+        "gatk": "Pass",
+        "phast_conservation": [
+            "NotConserved"
+        ],
+        "gerp_conservation": [
+            "NotConserved"
+        ],
+        "phylop_conservation": [
+            "NotConserved"
+        ],
+        "thousand_genomes_frequency": 0.001597439986653626,
+        "max_thousand_genomes_frequency": 0.00800000037997961,
+        "exac_frequency": 0.0025949999690055847,
+        "local_obs_old": 1,
+        "cadd_score": 15.0,
+        "spidex": -1.0010000467300415,
+        "rank_score_results": [
+            {
+                "category": "Splicing",
+                "score": 3
+            },
+            {
+                "category": "Variant_call_quality_filter",
+                "score": 3
+            },
+            {
+                "category": "Inheritance_Models",
+                "score": 1
+            },
+            {
+                "category": "Clinical_significance",
+                "score": 0
+            },
+            {
+                "category": "Consequence",
+                "score": 5
+            },
+            {
+                "category": "Gene_intolerance_prediction",
+                "score": 0
+            },
+            {
+                "category": "Conservation",
+                "score": 0
+            },
+            {
+                "category": "allele_frequency",
+                "score": 1
+            },
+            {
+                "category": "Deleteriousness",
+                "score": 2
+            },
+            {
+                "category": "Protein_prediction",
+                "score": 2
+            }
+        ],
+        "variant_rank": 2,
+        "overlapping": null,
+        "evaluations": [],
+        "clinical_assessments": [],
+        "has_refseq": true
+    }
+]

@@ -10,7 +10,7 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants import Pipeline

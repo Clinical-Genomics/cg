@@ -5,10 +5,11 @@ from pathlib import Path
 import click
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.store import Store
 from cg.store.models import Family
 from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 
 from .utils import suggest_cases_to_upload
 
@@ -23,7 +24,7 @@ LOG = logging.getLogger(__name__)
 def scout(context, re_upload: bool, print_console: bool, case_id: str):
     """Upload variants from analysis to Scout."""
 
-    click.echo(click.style("----------------- SCOUT -----------------------"))
+    LOG.info("----------------- SCOUT -----------------------")
 
     if not case_id:
         suggest_cases_to_upload(context)
@@ -31,16 +32,14 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 
     status_api: Store = context.obj["status_db"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
-    hk_api: HousekeeperAPI = context.obj["housekeeper_api"]
     family_obj: Family = status_api.family(case_id)
-    scout_config: dict = scout_upload_api.generate_config(family_obj.analyses[0])
-    mip_dna_root_dir: str = context.obj["mip-rd-dna"]["root"]
-
+    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
+    mip_dna_root_dir: Path = Path(context.obj["mip-rd-dna"]["root"])
     if print_console:
-        click.echo(scout_config)
+        click.echo(scout_load_config.dict(exclude_none=True))
         return
 
-    file_path = Path(mip_dna_root_dir, case_id, "scout_load.yaml")
+    file_path = mip_dna_root_dir / case_id / "scout_load.yaml"
 
     if file_path.exists():
         message = (
@@ -50,10 +49,10 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
         LOG.warning(message)
         raise click.Abort
 
-    scout_upload_api.save_config_file(scout_config, file_path)
+    scout_upload_api.save_config_file(scout_load_config, file_path)
     try:
         LOG.info("Upload file to housekeeper: %s", file_path)
-        scout_upload_api.add_scout_config_to_hk(file_path, hk_api, case_id)
+        scout_upload_api.add_scout_config_to_hk(config_file_path=file_path, case_id=case_id)
     except FileExistsError as err:
         LOG.warning("%s, consider removing the file from housekeeper and try again", str(err))
         context.abort()
@@ -69,7 +68,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 def upload_case_to_scout(context, re_upload, dry_run, case_id):
     """Upload variants and case from analysis to Scout."""
 
-    click.echo(click.style("----------------- CONFIG -----------------------"))
+    LOG.info("----------------- CONFIG -----------------------")
 
     def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id):
         tag_name = UploadScoutAPI.get_load_config_tag()
@@ -92,6 +91,4 @@ def upload_case_to_scout(context, re_upload, dry_run, case_id):
     if not dry_run:
         scout_api.upload(scout_load_config=load_config, force=re_upload)
 
-    click.echo(
-        click.style("uploaded to scout using load config {}".format(load_config), fg="green")
-    )
+    LOG.info("uploaded to scout using load config %s", load_config)

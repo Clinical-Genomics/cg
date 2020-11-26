@@ -8,7 +8,7 @@ import ruamel.yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.report.report_validator import ReportValidator
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.report.sample_calculator import SampleCalculator

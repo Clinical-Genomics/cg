@@ -12,7 +12,7 @@ from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

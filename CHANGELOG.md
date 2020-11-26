@@ -16,6 +16,14 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.4.0]
+
+### Added
+- Use Pydantic models to validate Scout input/output
+
+### Changed
+- Decouples scout from CG
+
 ## [16.3.4]
 
 ### Fixed
@@ -39,6 +47,7 @@ Try to use the following format:
 ### Fixed
 
 - Fixed a bug in naming of "default_gene_panels" in Scout load config
+
 
 ## [16.3.0]
 

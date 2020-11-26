@@ -84,7 +84,7 @@ class Process:
         if res.returncode != RETURN_SUCCESS:
             LOG.critical("Call %s exit with a non zero exit code", command)
             LOG.critical(self.stderr)
-            raise CalledProcessError(command, res.returncode)
+            raise CalledProcessError(res.returncode, command)
 
         return res.returncode
 
