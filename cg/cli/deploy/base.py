@@ -45,7 +45,7 @@ def deploy_scout_cmd(context):
     LOG.info("Deploying scout-browser with CG")
     scout_config = context.obj["scout"]["deploy_config"]
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_config=scout_config)
+    shipping_api.deploy(app_name="scout", app_config=scout_config)
 
 
 deploy.add_command(deploy_shipping_cmd)
