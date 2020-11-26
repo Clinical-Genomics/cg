@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "28c05f8067709e7448e072210ccff9a762010443fbf83961007b0db5e88dfdf3"
+            "sha256": "839069d1eddfedda25a410995e02b83cb517d061c9b9edb7aa7b5dcfb5d9a6ad"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -276,6 +276,7 @@
             "hashes": [
                 "sha256:c5244de44cc85d2267115624d83faef3f9e8f088756788694f305a5d5ad137c5"
             ],
+            "index": "pypi",
             "version": "==2.1"
         },
         "genologics": {

@@ -36,6 +36,7 @@ Flask-Admin = "*"
 Flask-Alchy = "*"
 Flask-Cors = "*"
 Flask-Dance = "*"
+Flask-SQLAlchemy = "==2.1"
 Werkzeug = "<1.0"
 "ruamel.yaml" = "*"
 cg = {editable = true,path = "."}
