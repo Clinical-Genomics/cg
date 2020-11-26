@@ -76,6 +76,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                             message += f" (already existing sample{sample_customer})"
 
+                        if sample.get("priority"):
+                            message += ", priority: " + sample.get("priority")
+
                         if sample.get("comment"):
                             message += ", " + sample.get("comment")
 
