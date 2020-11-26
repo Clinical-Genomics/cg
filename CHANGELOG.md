@@ -16,6 +16,39 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.4.0]
+
+### Added
+- Use Pydantic models to validate Scout input/output
+
+### Changed
+- Decouples scout from CG
+
+## [16.3.4]
+
+### Fixed
+
+- Fixed documentation on Trailblazers purpose
+
+## [16.3.3]
+
+### Fixed
+
+- Fixed setting of priority in statusDB and LIMS for samples
+
+## [16.3.2]
+
+### Fixed
+
+- Fixed setting of apptag in LIMS for samples
+
+## [16.3.1]
+
+### Fixed
+
+- Fixed a bug in naming of "default_gene_panels" in Scout load config
+
+
 ## [16.3.0]
 
 ### Changed

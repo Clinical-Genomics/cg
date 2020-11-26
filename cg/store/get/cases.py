@@ -15,4 +15,5 @@ def ready_for_spring_compression(store: Store, date_threshold: dt.datetime) -> Q
         .filter(models.Family.created_at < date_threshold)
         .order_by(models.Family.created_at.asc())
     )
+
     return cases

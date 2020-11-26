@@ -3,11 +3,13 @@
 """
 
 import os
+from typing import Dict
 import logging
 from collections import namedtuple
 
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
+from cg.apps.scout import scout_export
 
 LOG = logging.getLogger(__name__)
 
@@ -21,11 +23,11 @@ class UploadToMutaccAPI:
         self.scout = scout_api
         self.mutacc_auto = mutacc_auto_api
 
-    def extract_reads(self, case: dict):
+    def extract_reads(self, case: scout_export.ScoutExportCase):
         """Use mutacc API to extract reads from case"""
-        data = self.data(case)
+        data: dict = self.data(case)
         if data:
-            LOG.info("Extracting reads from case %s", case["_id"])
+            LOG.info("Extracting reads from case %s", case.id)
             self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
 
     def import_cases(self):
@@ -33,7 +35,7 @@ class UploadToMutaccAPI:
         LOG.info("importing cases into mutacc database")
         self.mutacc_auto.import_reads()
 
-    def data(self, case) -> dict:
+    def data(self, case: scout_export.ScoutExportCase) -> Dict[str, dict]:
         """
         Find the necessary data for the case
 
@@ -45,14 +47,16 @@ class UploadToMutaccAPI:
         """
 
         if all([self._has_bam(case), self._has_causatives(case)]):
-            causatives = self.scout.get_causative_variants(case_id=case["_id"])
-            mutacc_case = remap(case, SCOUT_TO_MUTACC_CASE)
-            mutacc_variants = [remap(variant, SCOUT_TO_MUTACC_VARIANTS) for variant in causatives]
+            causatives = self.scout.get_causative_variants(case_id=case.id)
+            mutacc_case = remap(case.dict(), SCOUT_TO_MUTACC_CASE)
+            mutacc_variants = [
+                remap(variant.dict(), SCOUT_TO_MUTACC_VARIANTS) for variant in causatives
+            ]
             return {"case": mutacc_case, "causatives": mutacc_variants}
         return {}
 
     @staticmethod
-    def _has_bam(case: dict) -> bool:
+    def _has_bam(case: scout_export.ScoutExportCase) -> bool:
 
         """
         Check that all samples in case has a given path to a bam file,
@@ -65,32 +69,29 @@ class UploadToMutaccAPI:
             (bool): True if all samples has valid paths to a bam-file
 
         """
-        if case.get("individuals") is None:
-            LOG.warning("case dictionary is missing 'individuals' key")
-            raise KeyError
+        sample: scout_export.Individual
+        for sample in case.individuals:
 
-        for sample in case["individuals"]:
-
-            if sample.get("bam_file") is None:
+            if sample.bam_file is None:
                 LOG.info(
                     "sample %s in case %s is missing bam file. skipping",
-                    sample["individual_id"],
-                    case["_id"],
+                    sample.individual_id,
+                    case.id,
                 )
                 return False
 
-            if not os.path.isfile(sample["bam_file"]):
+            if not os.path.isfile(sample.bam_file):
                 LOG.info(
                     "sample %s in %s has non existing bam file. skipping",
-                    sample["individual_id"],
-                    case["_id"],
+                    sample.individual_id,
+                    case.id,
                 )
                 return False
 
         return True
 
     @staticmethod
-    def _has_causatives(case: dict) -> bool:
+    def _has_causatives(case: scout_export.ScoutExportCase) -> bool:
         """
         Check that the case has marked causative variants in scout
 
@@ -100,10 +101,10 @@ class UploadToMutaccAPI:
         Returns:
             (bool): True if case has marked causative variants in scout
         """
-        if case.get("causatives"):
+        if case.causatives:
             return True
 
-        LOG.info("case %s has no marked causatives in scout", case["_id"])
+        LOG.info("case %s has no marked causatives in scout", case.id)
         return False
 
 
@@ -112,7 +113,7 @@ class UploadToMutaccAPI:
 MAPPER = namedtuple("mapper", ["field_name_1", "field_name_2", "conv"])
 
 
-def remap(input_dict: dict, mapper_list: list) -> dict:
+def remap(input_dict: dict, mapper_list: tuple) -> dict:
     """
     Reformat dict from one application to be used by another
 
@@ -131,7 +132,7 @@ def remap(input_dict: dict, mapper_list: list) -> dict:
     return output_dict
 
 
-def resolve_sex(scout_sex):
+def resolve_sex(scout_sex: str) -> str:
     """ Convert scout sex value to mutacc valid value"""
     if scout_sex == "1":
         mutacc_sex = "male"
@@ -142,7 +143,7 @@ def resolve_sex(scout_sex):
     return mutacc_sex
 
 
-def resolve_parent(scout_parent):
+def resolve_parent(scout_parent: str) -> str:
     """ Convert parent (father/mother) value to mutacc """
     if scout_parent == "":
         mutacc_parent = "0"
@@ -151,8 +152,9 @@ def resolve_parent(scout_parent):
     return mutacc_parent
 
 
-def resolve_phenotype(scout_phenotype):
+def resolve_phenotype(scout_phenotype: int) -> str:
     """ Convert scout phenotype to mutacc phenotype"""
+    mutacc_phenotype = "unknown"
     if scout_phenotype == 1:
         mutacc_phenotype = "unaffected"
     if scout_phenotype == 2:
