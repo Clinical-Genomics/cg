@@ -16,7 +16,7 @@ Try to use the following format:
 
 ### Fixed
 
-## [x.x.x]
+## [16.4.0]
 
 ### Added
 - Use Pydantic models to validate Scout input/output
