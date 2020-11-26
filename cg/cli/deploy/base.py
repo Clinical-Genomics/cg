@@ -43,9 +43,11 @@ def deploy_genotype_cmd(context):
 def deploy_scout_cmd(context):
     """Deploy the scout tool"""
     LOG.info("Deploying scout-browser with CG")
+    scout_config = context.obj["scout"]["deploy_config"]
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_name="genotype")
+    shipping_api.deploy(app_config=scout_config)
 
 
 deploy.add_command(deploy_shipping_cmd)
 deploy.add_command(deploy_genotype_cmd)
+deploy.add_command(deploy_scout_cmd)
