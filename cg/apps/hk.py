@@ -50,10 +50,12 @@ class HousekeeperAPI:
 
     def get_file(self, file_id: int) -> Optional[models.File]:
         """ Fetch a file based on file id """
-        file_obj = self._store.File.get(file_id)
+        LOG.info("Fetching file %s", file_id)
+        file_obj = self._store.file_(file_id)
         if not file_obj:
             LOG.info("file not found")
             return None
+        return file_obj
 
     def delete_file(self, file_id: int) -> Optional[models.File]:
         """ Delete a file both from database and disk (if included) """
