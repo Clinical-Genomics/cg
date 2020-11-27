@@ -16,6 +16,13 @@ Try to use the following format:
 
 ### Fixed
 
+## [x.x.x]
+
+### Changed
+
+- Split generating config into its own command
+- Delete old load config when running `cg upload scout --re-upload`
+
 ## [16.5.0]
 
 ### Added
