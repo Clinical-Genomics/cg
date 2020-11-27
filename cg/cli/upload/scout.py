@@ -62,6 +62,7 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     if file_path.exists():
         LOG.warning("Scout load config %s already exists", file_path)
         if re_upload:
+            LOG.info("Deleting old load config")
             file_path.unlink()
         else:
             LOG.info(
@@ -72,7 +73,9 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
 
     try:
         LOG.info("Upload file to housekeeper: %s", file_path)
-        scout_upload_api.add_scout_config_to_hk(config_file_path=file_path, case_id=case_id)
+        scout_upload_api.add_scout_config_to_hk(
+            config_file_path=file_path, case_id=case_id, delete=re_upload
+        )
     except FileExistsError as err:
         LOG.warning("%s, consider removing the file from housekeeper and try again", str(err))
         raise click.Abort
