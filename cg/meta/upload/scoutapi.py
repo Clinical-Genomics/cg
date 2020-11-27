@@ -121,8 +121,8 @@ class UploadScoutAPI:
 
         if self._is_multi_sample_case(data):
             if self._is_family_case(data):
-                svg_path = self._run_madeline(analysis_obj.family)
-                data["madeline"] = svg_path
+                svg_path: Path = self._run_madeline(analysis_obj.family)
+                data["madeline"] = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
@@ -140,14 +140,14 @@ class UploadScoutAPI:
         return "scout-load-config"
 
     @staticmethod
-    def save_config_file(upload_config: ScoutLoadConfig, file_path: Path):
+    def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
         """Save a scout load config file to <file_path>"""
 
         LOG.info("Save Scout load config to %s", file_path)
         yml = yaml.YAML()
         yml.dump(upload_config.dict(exclude_none=True), file_path)
 
-    def add_scout_config_to_hk(self, config_file_path: Path, case_id: str):
+    def add_scout_config_to_hk(self, config_file_path: Path, case_id: str) -> hk_models.File:
         """Add scout load config to hk bundle"""
         LOG.info("Adding load config to housekeeper")
         tag_name = UploadScoutAPI.get_load_config_tag()
@@ -162,7 +162,9 @@ class UploadScoutAPI:
         if bundle_config_exists:
             raise FileExistsError("Upload config already exists")
 
-        file_obj = self.housekeeper.add_file(str(config_file_path), version_obj, tag_name)
+        file_obj: hk_models.File = self.housekeeper.add_file(
+            str(config_file_path), version_obj, tag_name
+        )
         self.housekeeper.include_file(file_obj, version_obj)
         self.housekeeper.add_commit(file_obj)
 
@@ -179,7 +181,7 @@ class UploadScoutAPI:
         ]
         self._include_files(data, hk_version, scout_hk_map)
 
-    def _include_peddy_files(self, data, hk_version):
+    def _include_peddy_files(self, data, hk_version) -> None:
         scout_hk_map = [
             ("peddy_ped", "ped"),
             ("peddy_sex", "sex-check"),
@@ -187,7 +189,7 @@ class UploadScoutAPI:
         ]
         self._include_files(data, hk_version, scout_hk_map, extra_tag="peddy")
 
-    def _include_mandatory_files(self, data, hk_version):
+    def _include_mandatory_files(self, data, hk_version) -> None:
         scout_hk_map = {
             ("vcf_snv", "vcf-snv-clinical"),
             ("vcf_snv_research", "vcf-snv-research"),
@@ -196,7 +198,7 @@ class UploadScoutAPI:
         }
         self._include_files(data, hk_version, scout_hk_map, skip_missing=False)
 
-    def _include_files(self, data, hk_version, scout_hk_map, **kwargs):
+    def _include_files(self, data, hk_version, scout_hk_map, **kwargs) -> None:
         extra_tag = kwargs.get("extra_tag")
         skip_missing = kwargs.get("skip_missing", True)
         for scout_key, hk_tag in scout_hk_map:
@@ -216,7 +218,7 @@ class UploadScoutAPI:
                     raise FileNotFoundError(f"missing file: {scout_key}")
 
     @staticmethod
-    def _is_family_case(data: dict):
+    def _is_family_case(data: dict) -> bool:
         """Check if there are any linked individuals in a case"""
         for sample in data["samples"]:
             if sample["mother"] and sample["mother"] != "0":
@@ -226,10 +228,10 @@ class UploadScoutAPI:
         return False
 
     @staticmethod
-    def _is_multi_sample_case(data):
+    def _is_multi_sample_case(data) -> bool:
         return len(data["samples"]) > 1
 
-    def _run_madeline(self, family_obj: models.Family):
+    def _run_madeline(self, family_obj: models.Family) -> Path:
         """Generate a madeline file for an analysis."""
         samples = [
             {
@@ -241,5 +243,5 @@ class UploadScoutAPI:
             }
             for link_obj in family_obj.links
         ]
-        svg_path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
+        svg_path: Path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path

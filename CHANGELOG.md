@@ -16,6 +16,19 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.5.0]
+
+### Added
+
+- Functionality to deploy scout with cg
+
+## [16.4.3]
+
+### Fixed
+
+- Bug that madeline output files where not uploaded to scout
+- Bug when exporting panels with `cg workflow mip-dna panel`
+
 ## [16.4.2]
 
 ### Fixed

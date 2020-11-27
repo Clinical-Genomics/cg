@@ -1,7 +1,8 @@
 """Tests for madeline extension"""
 
+from pathlib import Path
+
 from cg.apps.madeline.api import MadelineAPI
-from cg.utils import Process
 
 
 def get_ind_info(columns, line):
@@ -10,19 +11,21 @@ def get_ind_info(columns, line):
     return ind_info
 
 
-def test_run_madeline(mocker, trio, madeline_output):
+def test_run_madeline(trio: dict, populated_madeline_api: MadelineAPI, project_dir: Path):
     """Test to run the madeline call from api"""
-    # GIVEN a ped stream and a madeline process mock
-    config = {"madeline_exe": "madeline"}
-    madeline_api = MadelineAPI(config)
-    mocker.patch.object(Process, "run_command")
+    # GIVEN a populated madeline api
+    madeline_api = populated_madeline_api
+    # GIVEN a outfile
+    outfile = project_dir / "madeline.xml"
+    outfile.touch()
+
     # WHEN running the madeline command
-    outpath = madeline_api.run("a family", trio, madeline_output)
+    out_path: Path = madeline_api.run("a family", trio, str(outfile))
     # THEN assert a madeline xml file is returned
-    assert outpath.endswith(".xml")
+    assert out_path.suffix == ".xml"
 
 
-def test_generate_madeline_input_no_mother(madeline_columns, proband):
+def test_generate_madeline_input_no_mother(madeline_columns: dict, proband: dict):
     """Test generate input for madeline when mother is missing"""
     # GIVEN a family id and a ind with unknown mother
     family_id = "test"
@@ -30,9 +33,9 @@ def test_generate_madeline_input_no_mother(madeline_columns, proband):
     inds = [proband]
     # WHEN generating madeline formated lines
     madeline_lines = MadelineAPI.make_ped(family_id, inds)
-    i = 0
-    for i, line in enumerate(madeline_lines, 1):
-        if i == 1:
+    nr_lines = 0
+    for nr_lines, line in enumerate(madeline_lines, 1):
+        if nr_lines == 1:
             continue
         ind_info = get_ind_info(madeline_columns.keys(), line)
 
