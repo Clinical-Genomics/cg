@@ -206,7 +206,7 @@ class MockScoutUploadApi(UploadScoutAPI):
         """docstring for save_config_file"""
         return
 
-    def add_scout_config_to_hk(self, config_file_path: str, case_id: str):
+    def add_scout_config_to_hk(self, config_file_path: str, case_id: str, delete: bool = False):
         """docstring for add_scout_config_to_hk"""
         LOG.info("Use mock to upload file")
         if self.file_exists:

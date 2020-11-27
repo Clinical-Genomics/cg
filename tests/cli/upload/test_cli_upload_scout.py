@@ -179,8 +179,6 @@ def test_upload_scout_cli_print_console(
     result = cli_runner.invoke(scout, [case_id, "--print"], obj=base_context)
 
     # THEN assert that the call exits without errors
-    print(caplog.text)
-    print(result.output)
     assert result.exit_code == 0
 
     assert case_id in result.output
