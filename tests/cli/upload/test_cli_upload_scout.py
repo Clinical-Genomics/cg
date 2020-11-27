@@ -74,9 +74,8 @@ def test_produce_load_config(
 
     # THEN assert that the call was executed with success
     assert result.exit_code == 0
-    output = json.loads(result.output)
     # THEN there was some relevant output
-    assert output.get("owner") is not None
+    assert "owner" in result.output
 
 
 def test_produce_load_config_no_delivery(
