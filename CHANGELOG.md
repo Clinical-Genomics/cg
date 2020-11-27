@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.5.0]
+
+### Added
+
+- Functionality to deploy scout with cg
+
 ## [16.4.3]
 
 ### Fixed
