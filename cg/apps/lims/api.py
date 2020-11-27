@@ -247,8 +247,7 @@ class LimsAPI(Lims, OrderHandler):
         try:
             if not PROP2UDF.get(key):
                 raise LimsDataError(
-                    f"Unknown how to get {key} from LIMS since it is not defined in " 
-                    f"{PROP2UDF}"
+                    f"Unknown how to get {key} from LIMS since it is not defined in " f"{PROP2UDF}"
                 )
             data = sample.udf[PROP2UDF[key]]
         except HTTPError:
