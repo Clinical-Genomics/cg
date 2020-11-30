@@ -114,7 +114,8 @@ class StatsAPI(alchy.Manager):
             )
             .join(models.Flowcell.demux, models.Demux.datasource, models.Datasource.supportparams)
             .filter(models.Flowcell.flowcellname == flowcell_obj)
-            .order_by(models.Supportparams.supportparams_id.desc()).first()
+            .order_by(models.Supportparams.supportparams_id.desc())
+            .first()
         )
         document_path = query.document_path
         return document_path
@@ -125,7 +126,8 @@ class StatsAPI(alchy.Manager):
             self.session.query(models.Datasource.runname)
             .join(models.Flowcell.demux, models.Demux.datasource)
             .filter(models.Flowcell.flowcellname == flowcell_obj)
-            .order_by(models.Datasource.time.desc()).first()
+            .order_by(models.Datasource.time.desc())
+            .first()
         )
         run_name = query.runname
         return run_name
