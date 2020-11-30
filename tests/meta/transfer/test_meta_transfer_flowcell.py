@@ -35,7 +35,10 @@ def test_transfer_flowcell(mock_sample_sheet_path, flowcell_store, transfer_flow
     hk_bundle = housekeeper_api.bundle(status_sample.internal_id)
 
     assert len(hk_bundle.versions[0].files) > 0
-    assert len([hk_file for hk_file in hk_bundle.versions[0].files if hk_file.path.endswith("csv")]) == 1
+    assert (
+        len([hk_file for hk_file in hk_bundle.versions[0].files if hk_file.path.endswith("csv")])
+        == 1
+    )
 
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith("fastq.gz") or hk_file.path.endswith("csv")
