@@ -106,7 +106,7 @@ class StatsAPI(alchy.Manager):
             files = self.root_dir.glob(pattern)
             yield from files
 
-    def document_path(self, flowcell_obj: models.Flowcell) -> Iterator:
+    def document_path(self, flowcell_obj: models.Flowcell) -> str:
         """Get the latest document path of a flowcell from supportparams"""
         query = (
             self.session.query(
@@ -119,7 +119,7 @@ class StatsAPI(alchy.Manager):
         document_path = query.document_path
         return document_path
 
-    def run_name(self, flowcell_obj: models.Flowcell) -> Iterator:
+    def run_name(self, flowcell_obj: models.Flowcell) -> str:
         """Get the latest run name of a flowcell from datasource"""
         query = (
             self.session.query(models.Datasource.runname)
