@@ -66,6 +66,9 @@ class UploadScoutAPI:
             upd_regions_image = self.fetch_file_path_from_tags(
                 ["chromograph", "regions"], sample_id, hk_version_id
             )
+            autozyg_regions_image = self.fetch_file_path_from_tags(
+                ["chromograph", "autozyg"], sample_id, hk_version_id
+            )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
 
@@ -87,6 +90,7 @@ class UploadScoutAPI:
                     "upd_regions": upd_regions_path,
                     "upd_sites": upd_sites_path,
                     "coverage": coverage_path,
+                    "autozyg": autozyg_regions_image
                 },
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
