@@ -16,7 +16,7 @@ Try to use the following format:
 
 ### Fixed
 
-## [NG.NG.NG]
+## 16.7.0
 
 ### Added
 - Show sample priorities in created ticket
