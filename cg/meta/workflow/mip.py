@@ -12,7 +12,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import (

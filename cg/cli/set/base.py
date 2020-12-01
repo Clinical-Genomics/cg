@@ -1,12 +1,13 @@
 """Set data in the status database and LIMS"""
 import datetime
 import getpass
+import logging
 
 import click
 from cg.apps.lims import LimsAPI
 from .families import families
 from .family import family
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, FLOWCELL_STATUS
+from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.store import Store, models
 
@@ -19,7 +20,7 @@ OPTION_LONG_SKIP_LIMS = "--skip-lims"
 OPTION_LONG_YES = "--yes"
 OPTION_SHORT_KEY_VALUE = "-kv"
 OPTION_SHORT_YES = "-y"
-NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
+NOT_CHANGEABLE_SAMPLE_ATTRIBUTES = [
     "application_version_id",
     "customer_id",
     "deliveries",
@@ -33,6 +34,8 @@ NOT_CHANGABLE_SAMPLE_ATTRIBUTES = [
     "state",
     "to_dict",
 ]
+
+LOG = logging.getLogger(__name__)
 
 
 @click.group("set")
@@ -79,13 +82,13 @@ def samples(
     sample_objs = _get_samples(case_id, identifiers, store)
 
     if not sample_objs:
-        click.echo(click.style(fg="red", text="No samples to alter!"))
+        LOG.error("No samples to alter!")
         context.abort()
 
-    click.echo("Would alter samples:")
+    LOG.info("Would alter samples:")
 
     for sample_obj in sample_objs:
-        click.echo(f"{sample_obj}")
+        LOG.info(f"{sample_obj}")
 
     if not (yes or click.confirm(CONFIRM)):
         context.abort()
@@ -156,20 +159,23 @@ def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_att
         if sample_obj:
             message += f": {sample_obj.__dict__.get(attribute)}"
 
-        click.echo(message)
+        LOG.info(message)
 
 
 def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
-    click.echo("sample_id: optional, internal_id of sample to set value on")
+    LOG.info("sample_id: optional, internal_id of sample to set value on")
     show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
     show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
     show_option_help(
         short_name=OPTION_SHORT_KEY_VALUE, long_name=OPTION_LONG_KEY_VALUE, help_text=HELP_KEY_VALUE
     )
-    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGABLE_SAMPLE_ATTRIBUTES)
-    click.echo(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
-    click.echo(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
+    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
+    LOG.info(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
+    LOG.info(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
+    LOG.info(
+        f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]"
+    )
 
 
 def show_option_help(short_name: str = None, long_name: str = None, help_text: str = None):
@@ -188,7 +194,7 @@ def show_option_help(short_name: str = None, long_name: str = None, help_text: s
     if help_text:
         help_message += f": {help_text}"
 
-    click.echo(help_message)
+    LOG.info(help_message)
 
 
 @set_cmd.command()
@@ -213,56 +219,71 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
         show_set_sample_help(sample_obj)
 
     if sample_obj is None:
-        click.echo(click.style(f"Can't find sample {sample_id}", fg="red"))
+        LOG.error(f"Can't find sample {sample_id}")
         context.abort()
 
     for key, value in kwargs:
 
-        if is_locked_attribute_on_sample(key, NOT_CHANGABLE_SAMPLE_ATTRIBUTES):
-            click.echo(click.style(f"{key} is not a changeable attribute on sample", fg="yellow"))
+        if is_locked_attribute_on_sample(key, NOT_CHANGEABLE_SAMPLE_ATTRIBUTES):
+            LOG.warning(f"{key} is not a changeable attribute on sample")
             continue
         if not hasattr(sample_obj, key):
-            click.echo(click.style(f"{key} is not a property of sample", fg="yellow"))
+            LOG.warning(f"{key} is not a property of sample")
             continue
-        new_value = None
-        if key in ["customer", "application_version"]:
-            if key == "customer":
+
+        new_key = key
+        new_value = value
+
+        if key in ["customer", "application_version", "priority"]:
+            if key == "priority":
+                if isinstance(value, str) and not value.isdigit():
+                    new_key = "priority_human"
+            elif key == "customer":
                 new_value = context.obj["status_db"].customer(value)
             elif key == "application_version":
                 new_value = context.obj["status_db"].current_application_version(value)
 
             if not new_value:
-                click.echo(click.style(f"{key} {value} not found, aborting", fg="red"))
+                LOG.error(f"{key} {value} not found, aborting")
                 context.abort()
-        else:
-            new_value = value
 
-        old_value = getattr(sample_obj, key)
+        old_value = getattr(sample_obj, new_key)
 
-        click.echo(f"Would change from {key}={old_value} to {key}={new_value} on {sample_obj}")
+        LOG.info(
+            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
+        )
 
         if not (yes or click.confirm(CONFIRM)):
             continue
 
-        setattr(sample_obj, key, new_value)
-        _update_comment(_generate_comment(key, old_value, new_value), sample_obj)
+        setattr(sample_obj, new_key, new_value)
+        _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
         context.obj["status_db"].commit()
 
     if not skip_lims:
 
         for key, value in kwargs:
-            click.echo(f"Would set {key} to {value} for {sample_obj.internal_id} in LIMS")
+
+            if key == "application_version":
+                new_key = "application"
+            else:
+                new_key = key
+
+            if key == "priority":
+                new_value = sample_obj.priority_human
+            else:
+                new_value = value
+
+            LOG.info(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
                 context.abort()
 
             try:
-                context.obj["lims_api"].update_sample(lims_id=sample_id, **{key: value})
-                click.echo(click.style(f"Set LIMS/{key} to {value}", fg="blue"))
+                context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: new_value})
+                LOG.info(f"Set LIMS/{new_key} to {new_value}")
             except LimsDataError as err:
-                click.echo(
-                    click.style(f"Failed to set LIMS/{key} to {value}, {err.message}", fg="red")
-                )
+                LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}")
 
 
 def _generate_comment(what, old_value, new_value):
@@ -289,13 +310,13 @@ def flowcell(context, flowcell_name, status):
     flowcell_obj = context.obj["status_db"].flowcell(flowcell_name)
 
     if flowcell_obj is None:
-        click.echo(click.style(f"flowcell not found: {flowcell_name}", fg="yellow"))
+        LOG.warning(f"flowcell not found: {flowcell_name}")
         context.abort()
     prev_status = flowcell_obj.status
     flowcell_obj.status = status
 
     context.obj["status_db"].commit()
-    click.echo(click.style(f"{flowcell_name} set: {prev_status} -> {status}", fg="green"))
+    LOG.info(f"{flowcell_name} set: {prev_status} -> {status}")
 
 
 set_cmd.add_command(family)

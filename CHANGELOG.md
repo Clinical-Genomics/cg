@@ -16,6 +16,88 @@ Try to use the following format:
 - Update Scout config output for images from chromograph
 ### Fixed
 
+## [16.7.1]
+
+### Fixed
+
+- Mutacc looks for 'id' instead of '_id' in case export
+- Convert 'other' to '0' for sex in case export
+
+## 16.7.0
+
+### Added
+- Show sample priorities in created ticket
+
+## [16.6.0]
+
+### Changed
+
+- Split generating config into its own command
+- Delete old load config when running `cg upload scout --re-upload`
+
+## [16.5.0]
+
+### Added
+
+- Functionality to deploy scout with cg
+
+## [16.4.3]
+
+### Fixed
+
+- Bug that madeline output files where not uploaded to scout
+- Bug when exporting panels with `cg workflow mip-dna panel`
+
+## [16.4.2]
+
+### Fixed
+
+- Bug that display_name was used instead of sample_name
+
+## [16.4.1]
+
+### Fixed
+
+- Change compression query to be both satisfactory syntax for flake and to be working on our version of sql server
+
+## [16.4.0]
+
+### Added
+- Use Pydantic models to validate Scout input/output
+
+### Changed
+- Decouples scout from CG
+
+## [16.3.4]
+
+### Fixed
+
+- Fixed documentation on Trailblazers purpose
+
+## [16.3.3]
+
+### Fixed
+
+- Fixed setting of priority in statusDB and LIMS for samples
+
+## [16.3.2]
+
+### Fixed
+
+- Fixed setting of apptag in LIMS for samples
+
+## [16.3.1]
+
+### Fixed
+
+- Fixed a bug in naming of "default_gene_panels" in Scout load config
+
+
+## [16.3.0]
+
+### Changed
+- Changed logic for which cases are to be compressed. Now compression will be run on all cases older then 60 days provided their fastq files have not been decompressed less than 21 days prior
+
 
 ## [16.2.0]
 

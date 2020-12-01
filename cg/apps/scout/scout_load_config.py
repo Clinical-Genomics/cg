@@ -10,7 +10,7 @@ class ScoutIndividual(BaseModel):
     sample_id: str
     father: Optional[str] = None
     mother: Optional[str] = None
-    display_name: Optional[str] = None
+    sample_name: Optional[str] = None
     sex: Literal["male", "female", "unknown"]
     phenotype: Literal["affected", "unaffected", "unknown"]
     capture_kit: Optional[str] = None
@@ -38,16 +38,17 @@ class ScoutIndividual(BaseModel):
     tissue_type: Optional[str] = None
 
 
-class ScoutCase(BaseModel):
+class ScoutLoadConfig(BaseModel):
     owner: str
     family: str
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
     phenotype_terms: Optional[List[str]] = None
     gene_panels: Optional[List[str]] = None
-    default_panels: Optional[List[str]] = None
+    default_gene_panels: List[str] = []
     cohorts: Optional[List[str]] = None
     human_genome_build: str
+    madeline: Optional[str]
     rank_model_version: Optional[str] = None
     rank_score_threshold: int
     sv_rank_model_version: Optional[str] = None

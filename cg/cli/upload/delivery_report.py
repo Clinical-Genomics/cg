@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.exc import DeliveryReportError, CgError
 

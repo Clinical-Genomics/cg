@@ -1,17 +1,17 @@
 """CLI function to compress FASTQ files into SPRING archives"""
 
 import logging
-
+import datetime as dt
 import click
 
 from cg.exc import CaseNotFoundError
 
 from .helpers import (
     correct_spring_paths,
-    get_fastq_cases,
     get_fastq_individuals,
     update_compress_api,
 )
+from cg.store.get.cases import ready_for_spring_compression
 
 LOG = logging.getLogger(__name__)
 
@@ -81,18 +81,30 @@ CASES_TO_IGNORE = PROBLEMATIC_CASES + VALIDATION_CASES
 @click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
 @click.option("-t", "--ntasks", default=12, show_default=True, help="Number of tasks for slurm job")
 @click.option("-m", "--mem", default=50, show_default=True, help="Memory for slurm job")
+@click.option(
+    "-b",
+    "--days-back",
+    default=60,
+    show_default=True,
+    help="Threshold for how long ago family was created",
+)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
+def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     LOG.info("Running compress FASTQ")
     update_compress_api(context.obj["compress_api"], dry_run=dry_run, ntasks=ntasks, mem=mem)
 
     store = context.obj["status_db"]
-    try:
-        cases = get_fastq_cases(store, case_id)
-    except CaseNotFoundError:
-        return
+    if case_id:
+        case_obj = store.family(case_id)
+        if not case_obj:
+            LOG.warning("Could not find case %s", case_id)
+            return
+        cases = [case_obj]
+    else:
+        date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
+        cases = ready_for_spring_compression(store, date_threshold=date_threshold)
 
     case_conversion_count = 0
     ind_conversion_count = 0
@@ -126,27 +138,42 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, dry_run):
 
 @click.command("fastq")
 @click.option("-c", "--case-id")
+@click.option(
+    "-b",
+    "--days-back",
+    default=60,
+    show_default=True,
+    help="Threshold for how long ago family was created",
+)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def clean_fastq(context, case_id, dry_run):
+def clean_fastq(context, case_id, days_back, dry_run):
     """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
     LOG.info("Running compress clean FASTQ")
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
     store = context.obj["status_db"]
-    samples = get_fastq_individuals(store, case_id)
+
+    if case_id:
+        case_obj = store.family(case_id)
+        if not case_obj:
+            LOG.warning("Could not find case %s", case_id)
+            return
+        cases = [case_obj]
+    else:
+        date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
+        cases = ready_for_spring_compression(store, date_threshold=date_threshold)
 
     cleaned_inds = 0
-    try:
+    for case_obj in cases:
+        samples = get_fastq_individuals(store=store, case_id=case_obj.internal_id)
         for sample_id in samples:
             res = compress_api.clean_fastq(sample_id)
             if res is False:
-                LOG.info("skipping individual %s", sample_id)
+                LOG.info("Skipping individual %s", sample_id)
                 continue
             cleaned_inds += 1
-    except CaseNotFoundError:
-        return
 
     LOG.info("Cleaned fastqs in %s individuals", cleaned_inds)
 
