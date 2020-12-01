@@ -165,10 +165,7 @@ def test_add_scout_config_to_hk_existing_files(upload_scout_api: UploadScoutAPI,
     # WHEN adding the file path to hk_api
     with pytest.raises(FileExistsError):
         # THEN assert File exists exception is raised
-
-        upload_scout_api.add_scout_config_to_hk(
-            config_file_path=tmp_file, hk_api=housekeeper_api, case_id="dummy"
-        )
+        upload_scout_api.add_scout_config_to_hk(config_file_path=tmp_file, case_id="dummy")
 
 
 def test_extract_generic_filepath(upload_scout_api):

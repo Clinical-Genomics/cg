@@ -65,7 +65,7 @@ class UploadScoutAPI:
                 ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version_id
             )
             upd_sites_image = self.fetch_file_path_from_tags(
-                ["chromograph", "sites"], sample_id, hk_version_id
+                ["chromograph", "sites"], sample_id, hk_versteion_id
             )
             upd_regions_image = self.fetch_file_path_from_tags(
                 ["chromograph", "regions"], sample_id, hk_version_id
