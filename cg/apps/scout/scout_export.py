@@ -9,7 +9,7 @@ from datetime import datetime
 class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
-    sex: Literal["0", "1", "2"]
+    sex: Literal["0", "1", "2", "other"]
     father: Optional[str]
     mother: Optional[str]
     phenotype: Literal[1, 2, 0]
@@ -18,6 +18,12 @@ class Individual(BaseModel):
     @validator("father", "mother")
     def convert_to_zero(cls, v):
         if v is None:
+            return "0"
+        return v
+
+    @validator("sex")
+    def convert_sex_to_zero(cls, v):
+        if v == "other":
             return "0"
         return v
 

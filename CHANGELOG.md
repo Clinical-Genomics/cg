@@ -16,6 +16,13 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.7.1]
+
+### Fixed
+
+- Mutacc looks for 'id' instead of '_id' in case export
+- Convert 'other' to '0' for sex in case export
+
 ## 16.7.0
 
 ### Added
