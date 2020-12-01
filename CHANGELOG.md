@@ -16,7 +16,7 @@ Try to use the following format:
 
 ### Fixed
 
-## [x.x.x]
+## [16.2.0]
 
 ### Added
 
