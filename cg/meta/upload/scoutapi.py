@@ -15,6 +15,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
 from cg.apps.scout.scout_load_config import ScoutLoadConfig, ScoutIndividual
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 from housekeeper.store import models as hk_models
 
@@ -47,12 +48,17 @@ class UploadScoutAPI:
             file_path = hk_file.full_path
         return file_path
 
-    def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
+    def build_samples(
+        self, analysis_obj: models.Analysis, hk_version_id: int = None, analysis_type: str = "rare"
+    ):
         """Loop over the samples in an analysis and build dicts from them"""
         LOG.info("Building samples")
         for link_obj in analysis_obj.family.links:
             LOG.debug("Found link obj %ss", link_obj)
-            sample_id = link_obj.sample.internal_id
+            if analysis_type == "cancer":
+                sample_id = BalsamicAnalysisAPI.get_sample_type(link_obj)
+            else:
+                sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
             chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
@@ -103,7 +109,9 @@ class UploadScoutAPI:
             "default_gene_panels": analysis_obj.family.panels,
             "family": analysis_obj.family.internal_id,
             "family_name": analysis_obj.family.name,
+            # No rank score for balsamic
             "rank_score_threshold": rank_score_threshold,
+            # No panels for balsamic
             "gene_panels": self.analysis.convert_panels(
                 analysis_obj.family.customer.internal_id, analysis_obj.family.panels
             )

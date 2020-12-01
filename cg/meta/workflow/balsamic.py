@@ -198,7 +198,10 @@ class BalsamicAnalysisAPI:
 
     @staticmethod
     def get_application_type(link_object: models.FamilySample) -> str:
-        """Returns application type of a sample"""
+        """Returns application type of a sample
+
+        Any of 'wgs', 'wes', 'tgs'
+        """
         application_type = link_object.sample.application_version.application.prep_category
         return application_type
 
