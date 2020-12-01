@@ -16,6 +16,25 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.7.1]
+
+### Fixed
+
+- Mutacc looks for 'id' instead of '_id' in case export
+- Convert 'other' to '0' for sex in case export
+
+## 16.7.0
+
+### Added
+- Show sample priorities in created ticket
+
+## [16.6.0]
+
+### Changed
+
+- Split generating config into its own command
+- Delete old load config when running `cg upload scout --re-upload`
+
 ## [16.5.0]
 
 ### Added

@@ -76,6 +76,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                             message += f" (already existing sample{sample_customer})"
 
+                        if sample.get("priority"):
+                            message += ", priority: " + sample.get("priority")
+
                         if sample.get("comment"):
                             message += ", " + sample.get("comment")
 
@@ -308,7 +311,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         if project_type == OrderType.MIP_DNA:
             return getattr(self, "submit_mip_dna")
-        elif project_type == OrderType.MIP_RNA:
+        if project_type == OrderType.MIP_RNA:
             return getattr(self, "submit_mip_rna")
 
         return getattr(self, f"submit_{str(project_type)}")
