@@ -35,5 +35,5 @@ dataclasses<0.8
 
 # apps
 genologics
-housekeeper>=3
+housekeeper>=2.5
 cgstats>=1.1.2
