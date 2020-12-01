@@ -13,7 +13,7 @@ Try to use the following format:
 ### Added
 
 ### Changed
-
+- Update Scout config output for images from chromograph
 ### Fixed
 
 
