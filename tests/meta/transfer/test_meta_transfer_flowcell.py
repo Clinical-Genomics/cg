@@ -9,7 +9,9 @@ from sqlalchemy import exc as sa_exc
 
 @mock.patch("pathlib.Path.exists")
 @mock.patch("cg.meta.transfer.flowcell.TransferFlowcell._sample_sheet_path")
-def test_transfer_flowcell(mock_sample_sheet_path, mock_path_exists, flowcell_store, transfer_flowcell_api):
+def test_transfer_flowcell(
+    mock_sample_sheet_path, mock_path_exists, flowcell_store, transfer_flowcell_api
+):
 
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
