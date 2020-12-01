@@ -21,6 +21,19 @@ Try to use the following format:
 ### Added
 - Show sample priorities in created ticket
 
+## [16.6.0]
+
+### Changed
+
+- Split generating config into its own command
+- Delete old load config when running `cg upload scout --re-upload`
+
+## [16.5.0]
+
+### Added
+
+- Functionality to deploy scout with cg
+
 ## [16.4.3]
 
 ### Fixed
