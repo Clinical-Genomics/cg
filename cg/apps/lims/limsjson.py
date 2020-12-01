@@ -19,13 +19,10 @@ OPTIONAL_KEYS = (
 def get_project_type(samples):
     """Determine the project type."""
 
-    project_type = None
     data_analyses = set(sample["data_analysis"].lower() for sample in samples)
 
     if len(data_analyses) == 1:
         data_analysis = data_analyses.pop()
-
-        # print(f"{data_analysis=}")
 
         if data_analysis == "mip-dna":
             project_type = "mip-dna"
@@ -74,7 +71,6 @@ def parse_json(indata: dict) -> dict:
 def expand_case(case_id, parsed_case):
     """Fill-in information about families."""
     new_case = {"name": case_id, "samples": []}
-    # print("parsed_case: ", parsed_case)
     samples = parsed_case
 
     require_qcoks = set(raw_sample["require_qcok"] for raw_sample in samples)
