@@ -39,8 +39,11 @@ class TransferFlowcell:
             )
         flowcell_obj.status = "ondisk"
 
-        if store:
-            self.store_samplesheet(flowcell_name)
+        sample_sheet_path = self._sample_sheet_path(flowcell_name)
+        if not Path(sample_sheet_path).exists():
+            LOG.warning(f"unable to find samplesheet: {sample_sheet_path}")
+        elif store:
+            self.store_samplesheet(flowcell_name, sample_sheet_path)
 
         for sample_data in stats_data["samples"]:
             LOG.debug(f"adding reads/fastqs to sample: {sample_data['name']}")
@@ -97,7 +100,7 @@ class TransferFlowcell:
                     hk_version.files.append(new_file)
             self.hk.commit()
 
-    def store_samplesheet(self, flowcell: str):
+    def store_samplesheet(self, flowcell: str, sample_sheet_path: str):
         """Store samplesheet for a run in Housekeeper"""
         hk_bundle = self.hk.bundle(flowcell)
         if hk_bundle is None:
@@ -107,8 +110,6 @@ class TransferFlowcell:
             hk_bundle.versions.append(new_version)
             self.hk.commit()
             LOG.info(f"added new Housekeeper bundle: {hk_bundle.name}")
-
-        sample_sheet_path = self._sample_sheet_path(flowcell)
 
         with self.hk.session_no_autoflush():
             hk_version = hk_bundle.versions[0]
