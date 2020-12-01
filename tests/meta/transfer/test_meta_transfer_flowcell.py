@@ -1,13 +1,15 @@
 """Tests for transfer flowcell data"""
 import datetime as dt
+from pathlib import Path
 import warnings
 
 import mock
 from sqlalchemy import exc as sa_exc
 
 
+@mock.patch("pathlib.Path.exists")
 @mock.patch("cg.meta.transfer.flowcell.TransferFlowcell._sample_sheet_path")
-def test_transfer_flowcell(mock_sample_sheet_path, flowcell_store, transfer_flowcell_api):
+def test_transfer_flowcell(mock_sample_sheet_path, mock_path_exists, flowcell_store, transfer_flowcell_api):
 
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
@@ -18,6 +20,7 @@ def test_transfer_flowcell(mock_sample_sheet_path, flowcell_store, transfer_flow
 
     # AND a samplesheet
     mock_sample_sheet_path.return_value = "/path/to/samplesheet.csv"
+    mock_path_exists.return_vale = True
 
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
