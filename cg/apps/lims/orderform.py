@@ -33,7 +33,6 @@ def check_orderform_version(document_title):
     for valid_orderform in VALID_ORDERFORMS:
         if valid_orderform in document_title:
             return
-    print(document_title)
     raise OrderFormError(f"Unsupported orderform: {document_title}")
 
 
