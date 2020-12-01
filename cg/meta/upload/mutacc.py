@@ -195,7 +195,7 @@ SCOUT_TO_MUTACC_SAMPLE = (
 )
 
 SCOUT_TO_MUTACC_CASE = (
-    MAPPER("_id", "case_id", str),
+    MAPPER("id", "case_id", str),
     MAPPER("genome_build", "genome_build", str),
     MAPPER("panels", "panels", lambda panels: [panel["panel_name"] for panel in panels]),
     MAPPER("rank_model_version", "rank_model_version", str),
