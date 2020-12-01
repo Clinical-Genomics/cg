@@ -1,0 +1,95 @@
+[
+    {
+        "_id": "internal_id",
+        "display_name": "643594",
+        "owner": "cust000",
+        "collaborators": ["cust000"],
+        "smn_tsv": "scout/demo/643594.solo.smn.tsv",
+        "individuals": [
+            {
+                "individual_id": "ADM1059A2",
+                "display_name": "NA12882",
+                "sex": "other",
+                "phenotype": 2,
+                "bam_file": null,
+                "mt_bam": "reduced_mt.bam",
+                "vcf2cytosure": "ADM1059A2.dummy.cgh",
+                "rhocall_bed": null,
+                "rhocall_wig": null,
+                "tiddit_coverage_wig": null,
+                "upd_regions_bed": null,
+                "upd_sites_bed": null,
+                "father": "ADM1059A1",
+                "mother": "ADM1059A3",
+                "capture_kits": ["Agilent_SureSelectCRE.V1"],
+                "confirmed_sex": true,
+                "confirmed_parent": null,
+                "predicted_ancestry": "EUR",
+                "analysis_type": "wes",
+                "tissue_type": "blood",
+                "is_sma": false,
+                "is_sma_carrier": false,
+                "smn1_cn": 2,
+                "smn2_cn": 2,
+                "smn2delta78_cn": 0,
+                "smn_27134_cn": 0
+            }
+        ],
+        "created_at": "2020-11-18T15:02:03.554000",
+        "updated_at": "2020-11-18T15:02:03.554000",
+        "synopsis": "Test case consisting of an affected male individual. Both parents are unaffected",
+        "status": "solved",
+        "is_research": false,
+        "research_requested": false,
+        "rerun_requested": false,
+        "lims_id": "LID1234",
+        "analysis_date": "2016-10-12T14:00:46",
+        "panels": [
+            {
+                "panel_id": "5fb5295b58abce1a8e2c903e",
+                "panel_name": "panel1",
+                "display_name": "Test panel",
+                "version": 1.0,
+                "updated_at": "2020-11-18T15:01:55.617000",
+                "nr_genes": 263,
+                "is_default": true
+            }
+        ],
+        "dynamic_gene_list": [],
+        "genome_build": 37,
+        "genome_version": null,
+        "rank_model_version": "1.20",
+        "sv_rank_model_version": "1.5",
+        "rank_score_threshold": -100.0,
+        "cohorts": ["pedhep", "mito"],
+        "phenotype_terms": [
+            {"phenotype_id": "HP:0001298", "feature": "Encephalopathy"},
+            {"phenotype_id": "HP:0001250", "feature": "Seizures"}
+        ],
+        "chromograph_image_files": "scout/demo/images",
+        "chromograph_prefixes": {
+            "roh": "roh_chr",
+            "upd": "upd_chr",
+            "chr": "cytoband.txt.chr"
+        },
+        "multiqc": null,
+        "cnv_report": null,
+        "vcf_files": {
+            "vcf_snv": "scout/demo/643594.clinical.vcf.gz",
+            "vcf_sv": "scout/demo/643594.clinical.SV.vcf.gz",
+            "vcf_str": "scout/demo/643594.clinical.str.annotated.vcf.gz",
+            "vcf_cancer": null,
+            "vcf_cancer_sv": null,
+            "vcf_snv_research": "scout/demo/643594.research.vcf.gz",
+            "vcf_sv_research": "scout/demo/643594.research.SV.vcf.gz",
+            "vcf_cancer_research": null,
+            "vcf_cancer_sv_research": null
+        },
+        "delivery_report": "scout/demo/delivery_report.html",
+        "has_svvariants": true,
+        "has_strvariants": true,
+        "is_migrated": false,
+        "track": "rare",
+        "causatives": ["4c7d5c70d955875504db72ef8e1abe77"]
+    }
+]

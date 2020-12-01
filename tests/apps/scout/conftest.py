@@ -39,10 +39,24 @@ def fixture_none_case_file(scout_dir: Path) -> Path:
     return scout_dir / "none_case_export.json"
 
 
+@pytest.fixture(name="other_sex_case_file")
+def fixture_other_sex_case_file(scout_dir: Path) -> Path:
+    """Return the path to a file with export cases output where sex is 'other0'"""
+    return scout_dir / "other_sex_case.json"
+
+
 @pytest.fixture(name="none_case_output")
 def fixture_none_case_output(none_case_file: Path) -> str:
     """Return the content of a export causatives run with scout"""
     with open(none_case_file, "r") as infile:
+        content = infile.read()
+    return content
+
+
+@pytest.fixture(name="other_sex_case_output")
+def fixture_other_sex_case_output(other_sex_case_file: Path) -> str:
+    """Return the content of a export causatives run with scout"""
+    with open(other_sex_case_file, "r") as infile:
         content = infile.read()
     return content
 
