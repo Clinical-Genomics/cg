@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Fixed
 
+## [x.x.x]
+
+### Added
+
+- Adds adding samplesheet to HK flowcell bundle to cg transfer flowcell
+
 ## [16.7.1]
 
 ### Fixed
