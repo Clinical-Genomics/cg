@@ -17,6 +17,7 @@ from cg.store import models
 from cg.models.scout_load_config import ScoutCase, ScoutIndividual
 
 from housekeeper.store import models as hk_models
+from typing import Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -43,14 +44,13 @@ class UploadScoutAPI:
         return self.fetch_file_path_from_tags([tag], sample_id, hk_version_id)
 
     def fetch_file_path_from_tags(
-            self, tags: list, sample_id: str, hk_version_id: int = None
+        self, tags: list, sample_id: str, hk_version_id: int = None
     ) -> Optional[str]:
         """Fetch files from housekeeper matching a list of tags """
         tags.append(sample_id)
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         if hk_file:
             return hk_file.full_path
-        
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
