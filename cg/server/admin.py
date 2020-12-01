@@ -49,6 +49,7 @@ class ApplicationView(BaseView):
         "description",
         "is_accredited",
         "target_reads",
+        "guaranteed_covarage",
         "comment",
         "prep_category",
         "sequencing_depth",
