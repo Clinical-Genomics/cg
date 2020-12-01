@@ -18,7 +18,6 @@ from cg.store import models
 from cg.apps.scout.scout_load_config import ScoutLoadConfig, ScoutIndividual
 
 from housekeeper.store import models as hk_models
-from typing import Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ class UploadScoutAPI:
                 ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version_id
             )
             upd_sites_image = self.fetch_file_path_from_tags(
-                ["chromograph", "sites"], sample_id, hk_versteion_id
+                ["chromograph", "sites"], sample_id, hk_version_id
             )
             upd_regions_image = self.fetch_file_path_from_tags(
                 ["chromograph", "regions"], sample_id, hk_version_id
