@@ -258,7 +258,7 @@ RML_SAMPLE = {
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "volume": str,
     "concentration": str,
-    "concentration_sample": str,
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "index": str,
     "index_number": OptionalNone(TypeValidatorNone(str)),  # optional for NoIndex
     # "Required if Plate"
