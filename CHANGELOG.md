@@ -22,6 +22,24 @@ Try to use the following format:
 
 - Added support for RML-orderforms as json-file
 
+## [16.8.0]
+
+### Added
+
+- Adds adding samplesheet to HK flowcell bundle to cg transfer flowcell
+
+## [16.7.1]
+
+### Fixed
+
+- Mutacc looks for 'id' instead of '_id' in case export
+- Convert 'other' to '0' for sex in case export
+
+## 16.7.0
+
+### Added
+- Show sample priorities in created ticket
+
 ## [16.6.0]
 
 ### Changed
