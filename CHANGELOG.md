@@ -12,6 +12,8 @@ Try to use the following format:
 
 ### Added
 
+- column percent_reads_guaranteed to application table
+
 ### Changed
 
 ### Fixed
