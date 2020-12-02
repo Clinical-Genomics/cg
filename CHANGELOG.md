@@ -16,6 +16,13 @@ Try to use the following format:
 
 ### Fixed
 
+## [16.2.1]
+
+### Fixed
+
+- Bug in the interactions with Scout when cleaning Scout cases
+- Bug in the interaction with scout in command export_causatives
+
 ## [16.2.0]
 
 ### Added
