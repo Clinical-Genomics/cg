@@ -219,11 +219,7 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
-            name=sample_name,
-            sex=gender,
-            tumour=is_tumour,
-            reads=reads,
-            ticket=ticket,
+            name=sample_name, sex=gender, tumour=is_tumour, reads=reads, ticket=ticket,
         )
 
         sample.application_version_id = application_version_id
@@ -301,9 +297,7 @@ class StoreHelpers:
 
         if not family_obj:
             family_obj = store.add_family(
-                data_analysis=data_analysis,
-                name=family_id,
-                panels=panels,
+                data_analysis=data_analysis, name=family_id, panels=panels,
             )
         if action:
             family_obj.action = action
