@@ -128,6 +128,5 @@ def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, h
     )
 
     # THEN then it should set data_analysis on the case
-    print(result.output)
     assert result.exit_code == SUCCESS
     assert str(data_analysis) == case_obj.data_analysis

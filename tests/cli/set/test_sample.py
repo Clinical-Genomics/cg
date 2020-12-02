@@ -157,7 +157,6 @@ def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
     )
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS
-    print(result.output)
     assert result.exit_code == SUCCESS
     assert sample_obj.priority == new_value
     assert base_context["lims_api"].get_updated_sample_key() == key

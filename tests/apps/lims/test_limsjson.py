@@ -45,7 +45,6 @@ def test_parsing_mip_json(mip_order_to_submit):
     assert data["customer"] == "cust000"
 
     # ... and it should find and group all samples in families
-    print(f'{data["items"]=}')
     assert len(data["items"]) == 2
 
     # ... and collect relevant data about the families
