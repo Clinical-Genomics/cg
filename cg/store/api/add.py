@@ -59,6 +59,7 @@ class AddHandler(BaseHandler):
         category: str,
         description: str,
         percent_kth: int,
+        percent_reads_guaranteed: int,
         is_accredited: bool = False,
         **kwargs,
     ) -> models.Application:
@@ -70,6 +71,7 @@ class AddHandler(BaseHandler):
             description=description,
             is_accredited=is_accredited,
             percent_kth=percent_kth,
+            percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
         return new_record

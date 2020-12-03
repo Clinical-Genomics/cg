@@ -306,6 +306,7 @@ def ensure_applications(base_store: Store, active_applications: list, inactive_a
                     "dummy_description",
                     is_archived=False,
                     percent_kth=80,
+                    percent_reads_guaranteed=75,
                 )
             )
 
@@ -318,6 +319,7 @@ def ensure_applications(base_store: Store, active_applications: list, inactive_a
                     description="dummy_description",
                     is_archived=True,
                     percent_kth=80,
+                    percent_reads_guaranteed=75,
                 )
             )
 
@@ -332,6 +334,7 @@ def ensure_application(store, tag):
             description="dummy_description",
             is_external=False,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         )
         store.add_commit(application)
 

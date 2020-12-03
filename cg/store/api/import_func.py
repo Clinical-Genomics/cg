@@ -165,6 +165,7 @@ def add_application_from_raw(raw_application, sign, store: Store):
         details=raw_application["details"],
         limitations=raw_application["limitations"],
         percent_kth=raw_application["percent_kth"],
+        percent_reads_guaranteed=raw_application["percent_reads_guaranteed"],
         comment=raw_application["comment"] + " Added by %s" % sign,
         is_archived=raw_application["is_archived"] == 1.0,
         is_external=raw_application["is_external"] == 1.0,
