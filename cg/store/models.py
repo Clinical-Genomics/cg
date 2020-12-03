@@ -63,6 +63,7 @@ class Application(Model):
     sequencing_depth = Column(types.Integer)
     min_sequencing_depth = Column(types.Integer)
     target_reads = Column(types.BigInteger, default=0)
+    percent_reads_guaranteed = Column(types.Integer, nullable=False)
     sample_amount = Column(types.Integer)
     sample_volume = Column(types.Text)
     sample_concentration = Column(types.Text)

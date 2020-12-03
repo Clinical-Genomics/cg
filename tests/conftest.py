@@ -167,11 +167,7 @@ def fixture_genotype_config() -> dict:
     genotype config fixture
     """
     _config = {
-        "genotype": {
-            "database": "database",
-            "config_path": "config/path",
-            "binary_path": "gtdb",
-        }
+        "genotype": {"database": "database", "config_path": "config/path", "binary_path": "gtdb",}
     }
     return _config
 
@@ -678,10 +674,7 @@ def fixture_customer_group() -> str:
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with information about the prod customer"""
     _cust = dict(
-        customer_id="cust000",
-        name="Production",
-        scout_access=True,
-        customer_group=customer_group,
+        customer_id="cust000", name="Production", scout_access=True, customer_group=customer_group,
     )
     return _cust
 
@@ -803,6 +796,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -812,6 +806,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -821,6 +816,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=30,
             accredited=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -829,6 +825,7 @@ def fixture_base_store(store) -> Store:
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -840,6 +837,7 @@ def fixture_base_store(store) -> Store:
             target_reads=30,
             limitations="some",
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METLIFR020",
@@ -848,6 +846,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             target_reads=400000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METNXTR020",
@@ -856,6 +855,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             target_reads=200000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="MWRNXTR003",
@@ -863,6 +863,7 @@ def fixture_base_store(store) -> Store:
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -870,6 +871,7 @@ def fixture_base_store(store) -> Store:
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
+            percent_reads_guaranteed=75,
             sequencing_depth=25,
             accredited=True,
             target_reads=10,

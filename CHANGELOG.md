@@ -22,6 +22,19 @@ Try to use the following format:
 
 - Added support for RML-orderforms as json-file
 
+## [16.9.0]
+
+### Added
+
+- column percent_reads_guaranteed to application table
+
+## [16.8.1]
+
+### Fixed
+
+- Bug in the interactions with Scout when cleaning Scout cases
+- Bug in the interaction with scout in command export_causatives
+
 ## [16.8.0]
 
 ### Added
