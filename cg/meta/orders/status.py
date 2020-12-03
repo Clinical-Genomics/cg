@@ -48,7 +48,6 @@ class StatusHandler:
                 pools[pool_name] = {}
                 pools[pool_name]["name"] = pool_name
                 pools[pool_name]["applications"] = set()
-                pools[pool_name]["capture_kits"] = set()
                 pools[pool_name]["samples"] = []
 
             pools[pool_name]["samples"].append(sample)
@@ -439,7 +438,7 @@ class StatusHandler:
             self.status.add_commit(new_samples)
         return sample_objs
 
-    def store_pools(
+    def store_rml(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]
     ) -> List[models.Pool]:
         """Store pools in the status database."""
@@ -465,7 +464,7 @@ class StatusHandler:
                 case_obj.customer = customer_obj
                 self.status.add_commit(case_obj)
 
-            # TODO: Remove adding of pool, convert to case
+            # TODO: Remove adding of pool, convert to case, remember to change invoicing
             new_pool = self.status.add_pool(
                 customer=customer_obj,
                 name=pool["name"],
@@ -481,6 +480,7 @@ class StatusHandler:
                     comment=sample["comment"],
                     customer=customer_obj,
                     data_delivery=sample["data_delivery"],
+                    internal_id=sample["internal_id"],
                     name=sample["name"],
                     order=order,
                     ordered=ordered,
@@ -488,8 +488,8 @@ class StatusHandler:
                     sex="unknown",
                     ticket=ticket,
                 )
-            new_samples.append(new_sample)
-            self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
+                new_samples.append(new_sample)
+                self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
             self.status.add(new_delivery)
             new_pools.append(new_pool)

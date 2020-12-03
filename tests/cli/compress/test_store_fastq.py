@@ -18,7 +18,7 @@ def test_store_fastq_cli_no_family(compress_context, cli_runner, caplog):
 
 
 def test_store_fastq_cli_non_existing_family(compress_context, cli_runner, caplog):
-    """Test to run the compress command witha non existing case"""
+    """Test to run the compress command with a non existing case"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context and a non existing case id
     case_id = "happychap"

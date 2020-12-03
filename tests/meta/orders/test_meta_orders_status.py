@@ -100,7 +100,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert base_store.samples(customer=None).count() == 0
 
     # WHEN storing the order
-    new_pools = orders_api.store_pools(
+    new_pools = orders_api.store_rml(
         customer=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
@@ -134,7 +134,7 @@ def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_pools(
+        orders_api.store_rml(
             customer=rml_status_data["customer"],
             order=rml_status_data["order"],
             ordered=dt.datetime.now(),
