@@ -12,20 +12,20 @@ def test_parsing_rml_json(rml_order_to_submit):
     assert data["comment"] == "order comment"
 
     # ... and find all samples
-    assert len(data["items"]) == 2
+    assert len(data["items"]) == 4
 
     # ... and collect relevant sample data
-    sample_data = data["items"][0]
-    assert sample_data["name"] == "sample1"
-    assert sample_data["pool"] == "pool-1"
+    sample_data = data["items"][2]
+    assert sample_data["name"] == "sample3"
+    assert sample_data["pool"] == "pool-2"
     assert sample_data["application"] == "RMLS05R150"
     assert sample_data["data_analysis"] == "fluffy"
     assert sample_data["volume"] == "30"
     assert sample_data["concentration"] == "5"
     assert sample_data["index"] == "IDT DupSeq 10 bp Set B"
-    assert sample_data["index_number"] == "1"
+    assert sample_data["index_number"] == "3"
     assert sample_data.get("container_name") is None
-    assert sample_data["rml_plate_name"] == "plate"
+    assert sample_data["rml_plate_name"] == "plate1"
     assert sample_data.get("well_position") is None
     assert sample_data["well_position_rml"] == "A:1"
     assert sample_data["index_sequence"] == "A01 - D701-D501 (ATTACTCG-TATAGCCT)"

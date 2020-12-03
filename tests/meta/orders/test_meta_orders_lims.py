@@ -51,11 +51,13 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
 
 def test_to_lims_rml(rml_order_to_submit):
-    # GIVEN a rml order for three samples
+    # GIVEN a rml order for four samples
+
     # WHEN parsing for LIMS
     samples = LimsHandler.to_lims(customer="dummyCust", samples=rml_order_to_submit["samples"])
+
     # THEN it should "work"
-    assert len(samples) == 2
+    assert len(samples) == 4
     # ... and pick out relevant UDFs
     first_sample = samples[0]
     assert first_sample["udfs"]["pool"] == "pool-1"

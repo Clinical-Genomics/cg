@@ -16,7 +16,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert data["comment"] == "order comment"
 
     # ... and information about the pool(s)
-    assert len(data["pools"]) == 1
+    assert len(data["pools"]) == 2
     pool = data["pools"][0]
     assert pool["name"] == "pool-1"
     assert pool["application"] == "RMLS05R150"
@@ -108,14 +108,16 @@ def test_store_rml(orders_api, base_store, rml_status_data):
         pools=rml_status_data["pools"],
     )
     # THEN it should update the database with new pools
-    assert len(new_pools) == 1
+    assert len(new_pools) == 2
 
-    assert base_store.pools(customer=None).count() == 1
-    assert base_store.families(customer=None).count() != 0
-    assert base_store.samples(customer=None).count() != 0
+    assert base_store.pools(customer=None).count() == 2
+    assert base_store.families(customer=None).count() == 2
+    assert base_store.samples(customer=None).count() == 4
     new_pool = base_store.pools(customer=None).first()
-    assert new_pool == new_pools[0]
-    assert new_pool.name == "pool-1"
+
+    assert new_pool == new_pools[1]
+
+    assert new_pool.name == "pool-2"
     assert new_pool.application_version.application.tag == "RMLS05R150"
     assert new_pool.data_analysis == str(Pipeline.FLUFFY)
     # ... and add a delivery

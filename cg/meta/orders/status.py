@@ -480,7 +480,7 @@ class StatusHandler:
                     comment=sample["comment"],
                     customer=customer_obj,
                     data_delivery=sample["data_delivery"],
-                    internal_id=sample["internal_id"],
+                    internal_id=sample.get("internal_id"),
                     name=sample["name"],
                     order=order,
                     ordered=ordered,
