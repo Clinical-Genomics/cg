@@ -21,7 +21,7 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
-    assert sample_data["index"] == "IDT DupSeq 10 bp Set B "
+    assert sample_data["index"] == "IDT DupSeq 10 bp Set B"
     assert sample_data["index_number"] == "1"
 
     assert sample_data["container_name"] is None
