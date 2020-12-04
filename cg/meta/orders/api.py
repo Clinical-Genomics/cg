@@ -9,7 +9,6 @@ be validated and if passing all checks be accepted as new samples.
 import datetime as dt
 import logging
 import re
-from pprint import pprint
 from typing import List
 
 import typing
