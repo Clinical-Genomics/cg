@@ -39,9 +39,7 @@ class DeliverAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
-        LOG.info("Set case tags to %s", ", ".join(case_tags))
         self.case_tags: List[Set[str]] = case_tags
-        LOG.info("Set sample tags to %s", ", ".join(sample_tags))
         self.sample_tags: List[Set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket_id: str = ""
