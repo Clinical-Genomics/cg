@@ -432,7 +432,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return self.db.family(case_id)
 
     def get_analyses_to_clean(self, before: dt.datetime) -> list:
-        analyses_to_clean = self.db.analyses_to_clean(pipeline="MIP_DNA", before=before)
+        analyses_to_clean = self.db.analyses_to_clean(pipeline=Pipeline.MIP_DNA, before=before)
         return analyses_to_clean.all()
 
     def get_slurm_job_ids_path(self, case_id: str) -> Path:
