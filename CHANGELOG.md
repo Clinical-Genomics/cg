@@ -16,7 +16,12 @@ Try to use the following format:
 
 ### Changed
 
-## [16.11.0]
+## [16.10.2]
+
+### Fixed
+- Use correct pipeline name when cleaning mip analysis dirs
+
+## [16.10.1]
 
 ### Added
 
