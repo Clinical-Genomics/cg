@@ -40,6 +40,7 @@ class DeliverAPI:
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
         self.case_tags: List[Set[str]] = case_tags
+        self.all_case_tags: Set[str] = {tag for tags in case_tags for tag in tags}
         self.sample_tags: List[Set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket_id: str = ""
@@ -156,6 +157,7 @@ class DeliverAPI:
         file_obj: hk_models.File
         for file_obj in version_obj.files:
             if not self.include_file_case(file_obj, sample_ids=sample_ids):
+                LOG.debug("Skipping file %s", file_obj.path)
                 continue
             yield Path(file_obj.full_path)
 
@@ -177,9 +179,15 @@ class DeliverAPI:
         """
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
+        if self.all_case_tags.isdisjoint(file_tags):
+            LOG.debug("No tags are mathing")
+            return False
+
+        LOG.debug("Found file tags %s", ", ".join(file_tags))
 
         # Check if any of the sample tags exist
-        if not sample_ids.isdisjoint(file_tags):
+        if sample_ids.intersection(file_tags):
+            LOG.debug("Found sample tag, skipping %s", file_obj.path)
             return False
 
         # Check if any of the file tags matches the case tags
@@ -187,6 +195,7 @@ class DeliverAPI:
         for tags in self.case_tags:
             if tags.issubset(file_tags):
                 return True
+        LOG.debug("Could not find any tags matching file %s with tags %s", file_obj.path, file_tags)
 
         return False
 
