@@ -40,6 +40,7 @@ class DeliverAPI:
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
         self.case_tags: List[Set[str]] = case_tags
+        self.all_case_tags: Set[str] = {tag for tags in case_tags for tag in tags}
         self.sample_tags: List[Set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket_id: str = ""
@@ -178,21 +179,23 @@ class DeliverAPI:
         """
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
+        if self.all_case_tags.isdisjoint(file_tags):
+            LOG.debug("No tags are mathing")
+            return False
+
         LOG.debug("Found file tags %s", ", ".join(file_tags))
 
         # Check if any of the sample tags exist
-        if not sample_ids.isdisjoint(file_tags):
+        if sample_ids.intersection(file_tags):
             LOG.debug("Found sample tag, skipping %s", file_obj.path)
             return False
 
         # Check if any of the file tags matches the case tags
         tags: Set[str]
         for tags in self.case_tags:
-            LOG.debug("Check if %s is subset of %s", tags, file_tags)
             if tags.issubset(file_tags):
-                LOG.debug("Found subset")
                 return True
-            LOG.debug("Not subset")
+        LOG.debug("Could not find any tags matching file %s with tags %s", file_obj.path, file_tags)
 
         return False
 
