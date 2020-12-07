@@ -39,7 +39,9 @@ class DeliverAPI:
         self.store = store
         self.hk_api = hk_api
         self.project_base_path: Path = project_base_path
+        LOG.info("Set case tags to %s", ", ".join(case_tags))
         self.case_tags: List[Set[str]] = case_tags
+        LOG.info("Set sample tags to %s", ", ".join(sample_tags))
         self.sample_tags: List[Set[str]] = sample_tags
         self.customer_id: str = ""
         self.ticket_id: str = ""
@@ -156,6 +158,7 @@ class DeliverAPI:
         file_obj: hk_models.File
         for file_obj in version_obj.files:
             if not self.include_file_case(file_obj, sample_ids=sample_ids):
+                LOG.debug("Skipping file %s", file_obj.path)
                 continue
             yield Path(file_obj.full_path)
 
@@ -177,16 +180,21 @@ class DeliverAPI:
         """
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
+        LOG.debug("Found file tags %s", ", ".join(file_tags))
 
         # Check if any of the sample tags exist
         if not sample_ids.isdisjoint(file_tags):
+            LOG.debug("Found sample tag, skipping %s", file_obj.path)
             return False
 
         # Check if any of the file tags matches the case tags
         tags: Set[str]
         for tags in self.case_tags:
+            LOG.debug("Check if %s is subset of %s", tags, file_tags)
             if tags.issubset(file_tags):
+                LOG.debug("Found subset")
                 return True
+            LOG.debug("Not subset")
 
         return False
 

@@ -1,37 +1,6 @@
 """Constants for delivery"""
 
 
-BALSAMIC_ANALYSIS_CASE_TAGS = [
-    {"cnv", "annotated-somatic-vcf-all", "vcf-all", "cnvkit"},
-    {"cnv", "annotated-somatic-vcf-all-index", "vcf-all", "cnvkit"},
-    {"cnv-cnr", "cnr"},
-    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "vardict"},
-    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "vardict"},
-    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnscope"},
-    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "tnscope"},
-    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnhaplotyper"},
-    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "tnhaplotyper"},
-    {"sv", "annotated-somatic-vcf-pass", "vcf-pass", "manta"},
-    {"sv", "annotated-somatic-vcf-pass-index", "vcf-pass", "manta"},
-    {"cnv-scatter"},
-    {"cnv-diagram"},
-    {"multiqc-html"},
-    {"normal-cram"},
-    {"normal-cram-index"},
-    {"tumor-cram"},
-    {"tumor-cram-index"},
-]
-
-BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
-    {"normal-cram"},
-    {"normal-cram-index"},
-    {"tumor-cram"},
-    {"tumor-cram-index"},
-    {"bam"},
-    {"quality-trimmed-fastq-read1"},
-    {"quality-trimmed-fastq-read2"},
-]
-
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnv", "annotated-somatic-vcf-all", "vcf-all", "cnvkit"},
     {"cnv", "annotated-somatic-vcf-all-index", "vcf-all", "cnvkit"},
@@ -49,7 +18,25 @@ BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"multiqc-html"},
 ]
 
-BALSAMIC_ANALYSIS_ONLY_SAMPLE_TAGS = []
+
+BALSAMIC_ANALYSIS_CASE_TAGS = BALSAMIC_ANALYSIS_ONLY_CASE_TAGS.extend(
+    [
+        {"normal-cram"},
+        {"normal-cram-index"},
+        {"tumor-cram"},
+        {"tumor-cram-index"},
+    ]
+)
+
+BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
+    {"normal-cram"},
+    {"normal-cram-index"},
+    {"tumor-cram"},
+    {"tumor-cram-index"},
+    {"bam"},
+    {"quality-trimmed-fastq-read1"},
+    {"quality-trimmed-fastq-read2"},
+]
 
 BALSAMIC_QC_CASE_TAGS = [
     {"multiqc-html"},
@@ -110,10 +97,7 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
-    "balsamic-analysis": {
-        "case_tags": BALSAMIC_ANALYSIS_ONLY_CASE_TAGS,
-        "sample_tags": BALSAMIC_ANALYSIS_ONLY_SAMPLE_TAGS,
-    },
+    "balsamic-analysis": {"case_tags": BALSAMIC_ANALYSIS_ONLY_CASE_TAGS, "sample_tags": []},
     "balsamic-qc": {
         "case_tags": BALSAMIC_QC_CASE_TAGS,
         "sample_tags": BALSAMIC_QC_SAMPLE_TAGS,
