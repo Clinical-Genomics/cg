@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+## [16.11.0]
+
+### Added
+
+- Adds new mip-dna tags to hk
+
 ## [16.10.0]
 
 ### Added
