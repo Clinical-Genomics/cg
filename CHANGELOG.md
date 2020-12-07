@@ -8,15 +8,17 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [x.x.x]
+## [16.10.0]
+
+### Added
+
+- Adds new delivery type to balsamic-analysis
+
+## [16.9.0]
 
 ### Added
 
 - column percent_reads_guaranteed to application table
-
-### Changed
-
-### Fixed
 
 ## [16.8.1]
 
