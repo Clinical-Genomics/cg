@@ -31,8 +31,11 @@ class FluffyAnalysisAPI:
         self.root_dir = Path(root_dir)
         self.process = Process(binary=binary)
 
+    def get_workdir_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id)
+
     def get_samplesheet_path(self, case_id: str) -> Path:
-        return Path(self.root_dir, case_id, "samplesheet.csv")
+        return Path(self.root_dir, case_id, "SampleSheet.csv")
 
     def get_fastq_path(self, case_id: str, sample_id: str) -> Path:
         return Path(self.root_dir, case_id, "fastq", sample_id)
@@ -105,9 +108,7 @@ class FluffyAnalysisAPI:
         samplesheet_housekeeper_path = Path(
             self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"])[0].path
         )
-        samplesheet_workdir_path = Path(
-            self.get_samplesheet_path(case_id=case_id), samplesheet_housekeeper_path.name
-        )
+        samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
         LOG.info("Writing modified csv from to %s", samplesheet_workdir_path)
         if not dry_run:
             self.add_concentrations_to_samplesheet(
@@ -120,7 +121,7 @@ class FluffyAnalysisAPI:
             "--sample",
             self.get_samplesheet_path(case_id=case_id).as_posix(),
             "--project",
-            self.get_fastq_path(case_id=case_id).as_posix(),
+            self.get_workdir_path(case_id=case_id).as_posix(),
             "--out",
             self.get_output_path(case_id=case_id).as_posix(),
             "analyse",
