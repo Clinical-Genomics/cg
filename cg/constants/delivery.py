@@ -1,5 +1,6 @@
 """Constants for delivery"""
 
+import copy
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnv", "annotated-somatic-vcf-all", "vcf-all", "cnvkit"},
@@ -18,8 +19,8 @@ BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"multiqc-html"},
 ]
 
-
-BALSAMIC_ANALYSIS_CASE_TAGS = BALSAMIC_ANALYSIS_ONLY_CASE_TAGS.extend(
+BALSAMIC_ANALYSIS_CASE_TAGS = copy.deepcopy(BALSAMIC_ANALYSIS_ONLY_CASE_TAGS)
+BALSAMIC_ANALYSIS_CASE_TAGS.extend(
     [
         {"normal-cram"},
         {"normal-cram-index"},
