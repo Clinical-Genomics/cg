@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## [16.10.4]
+
+### Fixed
+- Bug when building tag definition for balsamic-analysis delivery
+
 ## [16.10.3]
 
 ### Fixed
