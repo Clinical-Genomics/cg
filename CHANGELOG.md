@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## [NG.NG.NG]
+
+### Added
+- Customer in the ticket created for an order from the Orderportal
+
 ## [16.10.2]
 
 ### Fixed
