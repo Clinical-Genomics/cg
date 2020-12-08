@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## [16.10.3]
+
+### Fixed
+- Use `--json` when exporting causative variants from scout
+
 ## [16.10.2]
 
 ### Fixed
