@@ -21,6 +21,11 @@ Try to use the following format:
 ### Added
 - Customer in the ticket created for an order from the Orderportal
 
+## [16.10.3]
+
+### Fixed
+- Use `--json` when exporting causative variants from scout
+
 ## [16.10.2]
 
 ### Fixed
