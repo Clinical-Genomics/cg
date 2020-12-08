@@ -1,11 +1,13 @@
 from pathlib import Path
 import logging
+import csv
 from ruamel.yaml import safe_load
 import datetime as dt
 from cg.utils import Process
 from cg.apps.NIPTool import NIPToolAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.lims import LimsAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -16,6 +18,7 @@ class FluffyAnalysisAPI:
         self,
         housekeeper_api: HousekeeperAPI,
         trailblazer_api: TrailblazerAPI,
+        lims_api: LimsAPI,
         niptool_api: NIPToolAPI,
         status_db: Store,
         root_dir: str,
@@ -31,8 +34,8 @@ class FluffyAnalysisAPI:
     def get_samplesheet_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "samplesheet.csv")
 
-    def get_fastq_path(self, case_id: str) -> Path:
-        return Path(self.root_dir, case_id, "fastq")
+    def get_fastq_path(self, case_id: str, sample_id: str) -> Path:
+        return Path(self.root_dir, case_id, "fastq", sample_id)
 
     def get_output_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "output")
@@ -51,42 +54,66 @@ class FluffyAnalysisAPI:
             return "low"
         return "normal"
 
-    def link_fastq(self, case_id: str, dry_run: bool) -> None:
+    def link_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """
         1. Get fastq from HK
-            1a. If split by 4 lanes, concatenate
         2. Copy sample fastq to root_dir/case_id/fastq/sample_id (from samplesheet)
         """
         case_obj = self.status_db.family(case_id)
         for familysample in case_obj.links:
             sample_id = familysample.sample.internal_id
-            nipt_id = familysample.sample.name
             files = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
+            sample_path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
             for file in files:
-                # Link files
-                sample_path = self.get_fastq_path(case_id=case_id) / nipt_id
                 if not dry_run:
                     Path.mkdir(sample_path, exist_ok=True, parents=True)
-                    # Link and concatenate if necessary
+                    Path(file.path).symlink_to(sample_path, target_is_directory=True)
                 LOG.info(f"Linking {file.path} to {sample_path / Path(file.path).name}")
 
-    def link_samplesheet(self, case_id: str, dry_run: bool) -> None:
+    def get_concentrations_from_lims(self, sample_id: str) -> float:
+        # placeholder
+        return 50.0
+
+    def add_concentrations_to_samplesheet(
+        self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
+    ) -> None:
+        csv_reader = csv.reader(open(samplesheet_housekeeper_path, "r"), delimiter=",")
+        csv_writer = csv.writer(open(samplesheet_workdir_path, "w"), delimiter=",")
+
+        sampleid_index = None
+        csv_columns = None
+        for row in csv_reader:
+            if not sampleid_index:
+                if "SampleID" in row:
+                    sampleid_index = row.index("SampleID")
+                    csv_columns = len(row)
+                    csv_writer.writerow(row.append("Library_nM"))
+            if csv_columns and len(row) == csv_columns:
+                sample_id = row[sampleid_index]
+                csv_writer.writerow(
+                    row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
+                )
+
+    def make_samplesheet(self, case_id: str, dry_run: bool) -> None:
 
         """
         1. Get samplesheet from HK
         2. Copy file to root_dir/case_id/samplesheet.csv
         """
         case_obj = self.status_db.family(case_id)
-        case_name = case_obj.name
+        flowcell_name = case_obj.links[0].sample.flowcells[0].name
         samplesheet_housekeeper_path = Path(
-            self.housekeeper_api.files(bundle=case_name, tags=["samplesheet"])[0].path
+            self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"])[0].path
         )
+        samplesheet_workdir_path = Path(
+            self.get_samplesheet_path(case_id=case_id), samplesheet_housekeeper_path.name
+        )
+        LOG.info("Writing modified csv from to %s", samplesheet_workdir_path)
         if not dry_run:
-            LOG.info(f"Placeholder to actually link")
-
-        LOG.info(
-            f"Linking {samplesheet_housekeeper_path} to {self.get_samplesheet_path(case_id=case_id)}"
-        )
+            self.add_concentrations_to_samplesheet(
+                samplesheet_housekeeper_path=samplesheet_housekeeper_path,
+                samplesheet_workdir_path=samplesheet_workdir_path,
+            )
 
     def run_fluffy(self, case_id: str, dry_run: bool) -> None:
         command_args = [

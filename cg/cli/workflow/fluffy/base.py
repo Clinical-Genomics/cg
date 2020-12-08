@@ -2,6 +2,7 @@ import logging
 import click
 
 from cg.apps.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.NIPTool import NIPToolAPI
 from cg.store import Store
@@ -28,6 +29,7 @@ def fluffy(context):
     context.obj["fluffy_analysis_api"] = FluffyAnalysisAPI(
         housekeeper_api=HousekeeperAPI(config),
         trailblazer_api=TrailblazerAPI(config),
+        lims_api=LimsAPI(config),
         niptool_api=NIPToolAPI(config),
         status_db=Store(config["database"]),
         binary=config["Fluffy"]["binary_path"],
@@ -45,8 +47,8 @@ def link(context, case_id, dry_run):
 
     """
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.link_samplesheet(case_id=case_id, dry_run=dry_run)
-    fluffy_analysis_api.link_fastq(case_id=case_id, dry_run=dry_run)
+    fluffy_analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
+    fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
 @fluffy.command()
