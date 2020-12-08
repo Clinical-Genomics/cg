@@ -25,6 +25,7 @@ from .mocks.scout import MockScoutAPI
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 from .mocks.tb_mock import MockTB
+from .mocks.process_mock import ProcessMock
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -559,6 +560,15 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
     return _version
 
 
+# Process Mock
+
+
+@pytest.fixture(name="process")
+def fixture_process() -> ProcessMock:
+    """Returns a mocked process"""
+    return ProcessMock()
+
+
 # Scout fixtures
 
 
@@ -744,6 +754,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -753,6 +764,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -762,6 +774,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=30,
             accredited=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -770,6 +783,7 @@ def fixture_base_store(store) -> Store:
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -781,6 +795,7 @@ def fixture_base_store(store) -> Store:
             target_reads=30,
             limitations="some",
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METLIFR020",
@@ -789,6 +804,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             target_reads=400000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METNXTR020",
@@ -797,6 +813,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             target_reads=200000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="MWRNXTR003",
@@ -804,6 +821,7 @@ def fixture_base_store(store) -> Store:
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -811,6 +829,7 @@ def fixture_base_store(store) -> Store:
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
+            percent_reads_guaranteed=75,
             sequencing_depth=25,
             accredited=True,
             target_reads=10,

@@ -10,7 +10,7 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants import Pipeline
@@ -30,7 +30,7 @@ from .delivery_report import (
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
-from .scout import scout, upload_case_to_scout
+from .scout import scout, upload_case_to_scout, create_scout_load_config
 from .utils import suggest_cases_to_upload
 from .validate import validate
 
@@ -179,6 +179,7 @@ upload.add_command(processed_solved)
 upload.add_command(validate)
 upload.add_command(scout)
 upload.add_command(upload_case_to_scout)
+upload.add_command(create_scout_load_config)
 upload.add_command(observations)
 upload.add_command(genotypes)
 upload.add_command(coverage)

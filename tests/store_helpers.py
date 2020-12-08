@@ -95,6 +95,7 @@ class StoreHelpers:
             category=application_type,
             description=description,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
@@ -329,6 +330,7 @@ class StoreHelpers:
         app_tag: str = None,
         ordered_at: datetime = None,
         completed_at: datetime = None,
+        created_at: datetime = datetime.now(),
     ):
         """Load a family with samples and link relations"""
         customer_obj = self.ensure_customer(store)
@@ -337,6 +339,9 @@ class StoreHelpers:
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
             ordered_at=ordered_at,
+            data_analysis=family_info.get("data_analysis", str(Pipeline.MIP_DNA)),
+            created_at=created_at,
+            action=family_info.get("action"),
         )
 
         family_obj = self.add_family(
@@ -346,7 +351,7 @@ class StoreHelpers:
         app_tag = app_tag or "WGTPCFC030"
         app_type = family_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
-        data_analysis = family_info.get("data_analysis", str(Pipeline.MIP_DNA))
+
         sample_objs = {}
         for sample_data in family_info["samples"]:
             sample_id = sample_data["internal_id"]

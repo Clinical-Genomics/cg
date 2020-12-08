@@ -7,12 +7,13 @@ from datetime import datetime
 import pytest
 
 from cg.apps.hk import HousekeeperAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.gt import GenotypeAPI
 from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store import models
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 
 from tests.mocks.madeline import MockMadelineAPI
 
@@ -20,13 +21,13 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="scout_load_config")
-def fixture_scout_load_config(apps_dir):
+def fixture_scout_load_config(apps_dir) -> Path:
     """Yaml file with load information from scout"""
-    return str(apps_dir / "scout/643594.config.yaml")
+    return apps_dir / "scout/643594.config.yaml"
 
 
 @pytest.fixture(scope="function", name="scout_hk_bundle_data")
-def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
+def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestamp: datetime):
     """Get some bundle data for housekeeper"""
     tag_name = UploadScoutAPI.get_load_config_tag()
 
@@ -34,7 +35,7 @@ def fixture_scout_hk_bundle_data(case_id, scout_load_config, timestamp):
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [{"path": scout_load_config, "archive": False, "tags": [tag_name]}],
+        "files": [{"path": str(scout_load_config), "archive": False, "tags": [tag_name]}],
     }
     return hk_bundle_data
 
@@ -91,6 +92,22 @@ def fixture_upload_genotypes_context(
     }
 
 
+@pytest.fixture(name="scout_load_object")
+def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadConfig:
+    """Create a scout load config case object"""
+    case_data = {
+        "owner": "cust000",
+        "family": case_id,
+        "human_genome_build": "37",
+        "rank_score_threshold": 5,
+        "analysis_date": timestamp,
+        "samples": [
+            {"sample_id": "sample", "sex": "male", "phenotype": "affected", "analysis_type": "wgs"}
+        ],
+    }
+    return ScoutLoadConfig(**case_data)
+
+
 @pytest.fixture(scope="function", name="base_context")
 def fixture_base_cli_context(
     analysis_store: Store, housekeeper_api, upload_scout_api, trailblazer_api
@@ -134,7 +151,7 @@ class MockScoutApi(ScoutAPI):
         """docstring for __init__"""
         pass
 
-    def upload(self, scout_config, force=False):
+    def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
 
@@ -189,8 +206,9 @@ class MockScoutUploadApi(UploadScoutAPI):
         """docstring for save_config_file"""
         return
 
-    def add_scout_config_to_hk(self, file_path, hk_api, case_id):
+    def add_scout_config_to_hk(self, config_file_path: str, case_id: str, delete: bool = False):
         """docstring for add_scout_config_to_hk"""
+        LOG.info("Use mock to upload file")
         if self.file_exists:
             raise FileExistsError("Scout config already exists")
 

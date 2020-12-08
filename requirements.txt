@@ -1,6 +1,3 @@
-# build
-cython
-
 # database
 Alchy
 SQLAlchemy
@@ -18,10 +15,7 @@ Flask-Dance
 google-auth
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 requests[security]
-requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
-oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
 requests_cache
-requests[security]
 
 # utils
 ruamel.yaml
@@ -35,15 +29,11 @@ openpyxl
 tabulate
 lxml
 python-dateutil
-cyvcf2<0.10.0
-pymongo<3.7
 colorclass
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
-cairocffi==0.9.0        # due to strange version number in package
+dataclasses<0.8
 
 # apps
 genologics
-trailblazer>=6.7.0
-housekeeper>=2.0.0b2
-scout-browser>=4.4.1
+housekeeper>=2.5
 cgstats>=1.1.2

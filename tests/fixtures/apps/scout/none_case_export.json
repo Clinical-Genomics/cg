@@ -1,0 +1,51 @@
+[
+  {
+    "_id": "KMP-00104_balsamic",
+    "display_name": "KMP-00104_balsamic",
+    "owner": "cust000",
+    "collaborators": ["cust000"],
+    "diagnosis_phenotypes": [],
+    "smn_tsv": null,
+    "individuals": [
+      {
+        "individual_id": "TUMOR",
+        "display_name": "TUMOR",
+        "sex": "0",
+        "phenotype": 2,
+        "father": null,
+        "mother": null
+      }
+    ],
+    "created_at": "2020-05-06T09:26:04.375000",
+    "updated_at": "2020-05-06T10:08:38.657000",
+    "status": "solved",
+    "is_research": false,
+    "research_requested": false,
+    "rerun_requested": false,
+    "analysis_date": "2020-05-06T10:08:32.263000",
+    "panels": [
+      {
+        "panel_id": "5e6103d4124f632899d358ef",
+        "panel_name": "panel1",
+        "display_name": "The Panel",
+        "version": 23.0,
+        "updated_at": "2020-03-05T14:51:16.961000",
+        "nr_genes": 264,
+        "is_default": true
+      }
+    ],
+    "genome_build": 37,
+    "rank_model_version": "1.1",
+    "rank_score_threshold": -100.0,
+    "vcf_files": {
+      "vcf_snv": null,
+      "vcf_sv": null,
+      "vcf_str": null,
+      "vcf_cancer": "/path/to/vardict.pass.filtered.vcf.gz",
+      "vcf_snv_research": null,
+      "vcf_cancer_research": null
+    },
+    "track": "cancer",
+    "sv_rank_model_version": null
+  }
+]
