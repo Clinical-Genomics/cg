@@ -284,7 +284,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         return getattr(self, f"submit_{str(project_type)}")
 
-    def _create_new_ticket_message(self, data:dict, ticket:dict) -> str:
+    def _create_new_ticket_message(self, data: dict, ticket: dict) -> str:
         message = f"data:text/html;charset=utf-8,New incoming samples: "
 
         for sample in data.get("samples"):
