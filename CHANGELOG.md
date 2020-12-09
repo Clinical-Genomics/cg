@@ -11,6 +11,8 @@ Try to use the following format:
 ## [x.x.x]
 
 ### Added
+### Changed
+### Fixed
 
 ## [NG.NG.NG]
 
