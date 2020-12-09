@@ -1,6 +1,7 @@
 from cg.apps.lims import limsjson
 from cg.constants import Pipeline
 
+
 def test_parsing_balsamic_json(balsamic_order_to_submit):
 
     # GIVEN an order form for a cancer order with 11 samples,
