@@ -16,7 +16,7 @@ Try to use the following format:
 
 ### Added
 
-- Added support for RML-orderforms as json-file
+- Added support for Balsamic-orderforms as json-file
 
 ### Changed
 
