@@ -16,6 +16,15 @@ Try to use the following format:
 
 ### Changed
 
+## [x.x.x]
+
+### Added
+- Fluffy workflow start
+
+### Fixed
+
+### Changed
+
 ## [16.10.4]
 
 ### Fixed
