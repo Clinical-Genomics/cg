@@ -44,6 +44,8 @@ class BalsamicAPI:
                 "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
+                "--tumor-name": arguments.get("tumor_name"),
+                "--normal-name": arguments.get("normal_name"),
             }
         )
         parameters = command + options
