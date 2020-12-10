@@ -12,15 +12,42 @@ Try to use the following format:
 
 ### Added
 
-### Changed
-
 ### Fixed
+
+### Changed
 
 ## [NG.NG.NG]
 
 ### Added
 
 - Added support for RML-orderforms as json-file
+
+## [16.10.4]
+
+### Fixed
+- Bug when building tag definition for balsamic-analysis delivery
+
+## [16.10.3]
+
+### Fixed
+- Use `--json` when exporting causative variants from scout
+
+## [16.10.2]
+
+### Fixed
+- Use correct pipeline name when cleaning mip analysis dirs
+
+## [16.10.1]
+
+### Added
+
+- Adds new mip-dna tags to hk
+
+## [16.10.0]
+
+### Added
+
+- Adds new delivery type to balsamic-analysis
 
 ## [16.9.0]
 

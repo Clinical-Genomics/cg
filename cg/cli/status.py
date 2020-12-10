@@ -4,7 +4,7 @@ from tabulate import tabulate
 from colorclass import Color
 
 from cg.store import Store
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
+from cg.constants import FAMILY_ACTIONS, Pipeline, PRIORITY_OPTIONS
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
@@ -55,7 +55,7 @@ def status(context):
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj["status_db"].cases_to_analyze(pipeline="mip")
+    records = context.obj["status_db"].cases_to_analyze(pipeline=Pipeline.MIP_DNA)
     for family_obj in records:
         click.echo(family_obj)
 

@@ -121,7 +121,7 @@ class ScoutAPI:
         Get causative variants for a case
         """
         # These commands can be run with `scout export variants`
-        get_causatives_command = ["export", "variants", "--case-id", case_id]
+        get_causatives_command = ["export", "variants", "--json", "--case-id", case_id]
         try:
             self.process.run_command(get_causatives_command)
             if not self.process.stdout:
