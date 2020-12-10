@@ -19,7 +19,7 @@ Try to use the following format:
 ## [x.x.x]
 
 ### Added
-- Fluffy workflow start
+- Lims ID is sent to Balsamic during case config
 
 ### Fixed
 
