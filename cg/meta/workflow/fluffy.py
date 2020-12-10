@@ -21,15 +21,15 @@ class FluffyAnalysisAPI:
         lims_api: LimsAPI,
         niptool_api: NIPToolAPI,
         status_db: Store,
-        root_dir: str,
-        binary: str,
+        config: dict,
     ):
         self.housekeeper_api = housekeeper_api
         self.trailblazer_api = trailblazer_api
         self.niptool_api = niptool_api
         self.status_db = status_db
-        self.root_dir = Path(root_dir)
-        self.process = Process(binary=binary)
+        self.root_dir = Path(config["root_dir"])
+        self.process = Process(binary=config["binary"])
+        self.fluffy_config = Path(config["config_path"])
 
     def get_workdir_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id)
@@ -110,6 +110,8 @@ class FluffyAnalysisAPI:
 
     def run_fluffy(self, case_id: str, dry_run: bool) -> None:
         command_args = [
+            "--config",
+            self.fluffy_config.as_posix(),
             "--sample",
             self.get_samplesheet_path(case_id=case_id).as_posix(),
             "--project",
