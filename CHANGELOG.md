@@ -146,6 +146,15 @@ Try to use the following format:
 ### Added
 - cg set family [CASEID] now has the option --data-delivery
 
+## [x.x.x]
+
+### Added
+- Fluffy workflow start
+
+### Fixed
+
+### Changed
+
 ## [16.10.4]
 
 ### Fixed
