@@ -232,7 +232,7 @@ class UploadScoutAPI:
             ["chromograph", "autozyg"], sample_id, hk_version
         )
         coverage_image = self.fetch_file_path_from_tags(
-            ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version
+            ["chromograph", "tcov"], sample_id, hk_version
         )
         upd_regions_image = self.fetch_file_path_from_tags(
             ["chromograph", "regions"], sample_id, hk_version
@@ -243,7 +243,13 @@ class UploadScoutAPI:
         coverage_path = self._extract_generic_filepath(coverage_image)
         upd_regions_path = self._extract_generic_filepath(upd_regions_image)
         upd_sites_path = self._extract_generic_filepath(upd_sites_image)
-
+        print({
+            "autozyg": autozyg_regions_image,
+            "coverage": coverage_path,
+            "upd_regions": upd_regions_path,
+            "upd_sites": upd_sites_path,
+        })
+        
         return {
             "autozyg": autozyg_regions_image,
             "coverage": coverage_path,
