@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## [NG.NG.NG]
+
+### Added
+- cg set family [CASEID] now has the option --data-delivery 
+
 ## [16.10.4]
 
 ### Fixed
