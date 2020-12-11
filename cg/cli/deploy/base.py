@@ -62,3 +62,4 @@ def deploy_scout_cmd(context):
 deploy.add_command(deploy_shipping_cmd)
 deploy.add_command(deploy_genotype_cmd)
 deploy.add_command(deploy_scout_cmd)
+deploy.add_command(deploy_fluffy_cmd)
