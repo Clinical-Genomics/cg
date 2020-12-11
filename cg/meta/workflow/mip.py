@@ -19,7 +19,7 @@ from cg.constants import (
     COLLABORATORS,
     COMBOS,
     DEFAULT_CAPTURE_KIT,
-    FAMILY_ACTIONS,
+    CASE_ACTIONS,
     MASTER_LIST,
     Pipeline,
 )
@@ -403,7 +403,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return False
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
