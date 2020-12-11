@@ -26,9 +26,8 @@ def deploy(context, dry_run):
 def deploy_shipping_cmd(context):
     """Deploy the shipping tool"""
     LOG.info("Deploying shipping with CG")
-    fluffy_config: Path = Path(context.obj["fluffy"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_name="shipping", app_config=fluffy_config)
+    shipping_api.deploy(app_name="shipping")
 
 
 @click.command(name="fluffy")
@@ -36,8 +35,9 @@ def deploy_shipping_cmd(context):
 def deploy_fluffy_cmd(context):
     """Deploy the fluffy tool"""
     LOG.info("Deploying fluffy with CG")
+    fluffy_config: Path = Path(context.obj["fluffy"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_name="fluffy")
+    shipping_api.deploy(app_name="fluffy", app_config=fluffy_config)
 
 
 @click.command(name="genotype")
