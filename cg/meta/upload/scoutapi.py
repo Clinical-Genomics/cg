@@ -45,12 +45,13 @@ class UploadScoutAPI:
 
     def fetch_file_path_from_tags(
         self, tags: list, sample_id: str, hk_version_id: int = None
-    ) -> Optional[str]:
+    ) -> str:
         """Fetch files from housekeeper matching a list of tags """
         tags.append(sample_id)
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         if hk_file:
             return hk_file.full_path
+        return ''
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
@@ -60,25 +61,8 @@ class UploadScoutAPI:
             sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
-            coverage_image = self.fetch_file_path_from_tags(
-                ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version_id
-            )
-            upd_sites_image = self.fetch_file_path_from_tags(
-                ["chromograph", "sites"], sample_id, hk_version_id
-            )
-            upd_regions_image = self.fetch_file_path_from_tags(
-                ["chromograph", "regions"], sample_id, hk_version_id
-            )
-            autozyg_regions_image = self.fetch_file_path_from_tags(
-                ["chromograph", "autozyg"], sample_id, hk_version_id
-            )
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
-
-            coverage_path = self._extract_generic_filepath(coverage_image)
-            upd_sites_path = self._extract_generic_filepath(upd_sites_image)
-            upd_regions_path = self._extract_generic_filepath(upd_regions_image)
-
             lims_sample = dict()
             try:
                 lims_sample = self.lims.sample(sample_id) or {}
@@ -89,12 +73,6 @@ class UploadScoutAPI:
                 "bam_path": bam_path,
                 "capture_kit": None,
                 "alignment_path": alignment_file_path,
-                "chromograph_images": {
-                    "upd_regions": upd_regions_path,
-                    "upd_sites": upd_sites_path,
-                    "coverage": coverage_path,
-                    "autozyg": autozyg_regions_image,
-                },
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
                 "mt_bam": mt_bam_path,
@@ -105,6 +83,7 @@ class UploadScoutAPI:
                 "tissue_type": lims_sample.get("source", "unknown"),
                 "vcf2cytosure": vcf2cytosure_path,
             }
+            sample["chromograph_files"] = self._get_chromograph_files(sample_id, hk_version_id)
             scout_sample = ScoutIndividual(**sample)
             yield scout_sample.dict(exclude_none=True)
 
@@ -248,6 +227,30 @@ class UploadScoutAPI:
                 else:
                     raise FileNotFoundError(f"missing file: {scout_key}")
 
+    def _get_chromograph_files(self, sample_id: "str", hk_version: int) -> dict:
+        autozyg_regions_image = self.fetch_file_path_from_tags(
+            ["chromograph", "autozyg"], sample_id, hk_version
+        )
+        coverage_image = self.fetch_file_path_from_tags(
+            ["chromograph", "tcov", "mip-dna", "wgs"], sample_id, hk_version
+        )
+        upd_regions_image = self.fetch_file_path_from_tags(
+            ["chromograph", "regions"], sample_id, hk_version
+        )
+        upd_sites_image = self.fetch_file_path_from_tags(
+            ["chromograph", "sites"], sample_id, hk_version
+        )
+        coverage_path = self._extract_generic_filepath(coverage_image)
+        upd_regions_path = self._extract_generic_filepath(upd_regions_image)
+        upd_sites_path = self._extract_generic_filepath(upd_sites_image)
+
+        return {
+            "autozyg": autozyg_regions_image,
+            "coverage": coverage_path,
+            "upd_regions": upd_regions_path,
+            "upd_sites": upd_sites_path,
+        }
+
     @staticmethod
     def _is_family_case(data: dict) -> bool:
         """Check if there are any linked individuals in a case"""
@@ -278,7 +281,7 @@ class UploadScoutAPI:
         return svg_path
 
     @staticmethod
-    def _extract_generic_filepath(file_path):
+    def _extract_generic_filepath(file_path: str):
         """Remove a file's suffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
