@@ -1,6 +1,7 @@
 """CLI for deploying tools with CG"""
 
 import logging
+from pathlib import Path
 
 import click
 
@@ -25,8 +26,18 @@ def deploy(context, dry_run):
 def deploy_shipping_cmd(context):
     """Deploy the shipping tool"""
     LOG.info("Deploying shipping with CG")
+    fluffy_config: Path = Path(context.obj["fluffy"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_name="shipping")
+    shipping_api.deploy(app_name="shipping", app_config=fluffy_config)
+
+
+@click.command(name="fluffy")
+@click.pass_context
+def deploy_fluffy_cmd(context):
+    """Deploy the fluffy tool"""
+    LOG.info("Deploying fluffy with CG")
+    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api.deploy(app_name="fluffy")
 
 
 @click.command(name="genotype")
@@ -43,7 +54,7 @@ def deploy_genotype_cmd(context):
 def deploy_scout_cmd(context):
     """Deploy the scout tool"""
     LOG.info("Deploying scout-browser with CG")
-    scout_config = context.obj["scout"]["deploy_config"]
+    scout_config: Path = Path(context.obj["scout"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
     shipping_api.deploy(app_name="scout", app_config=scout_config)
 
