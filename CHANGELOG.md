@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## 16.12.0
+
+### Added
+- cg deploy fluffy
+
 ## 16.11.0
 
 ### Added
