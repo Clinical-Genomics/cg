@@ -83,7 +83,7 @@ class UploadScoutAPI:
                 "tissue_type": lims_sample.get("source", "unknown"),
                 "vcf2cytosure": vcf2cytosure_path,
             }
-            sample["chromograph_files"] = self._get_chromograph_files(sample_id, hk_version_id)
+            sample["chromograph_images"] = self._get_chromograph_images(sample_id, hk_version_id)
             scout_sample = ScoutIndividual(**sample)
             yield scout_sample.dict(exclude_none=True)
 
@@ -227,7 +227,7 @@ class UploadScoutAPI:
                 else:
                     raise FileNotFoundError(f"missing file: {scout_key}")
 
-    def _get_chromograph_files(self, sample_id: "str", hk_version: int) -> dict:
+    def _get_chromograph_images(self, sample_id: "str", hk_version: int) -> dict:
         autozyg_regions_image = self.fetch_file_path_from_tags(
             ["chromograph", "autozyg"], sample_id, hk_version
         )
@@ -243,13 +243,7 @@ class UploadScoutAPI:
         coverage_path = self._extract_generic_filepath(coverage_image)
         upd_regions_path = self._extract_generic_filepath(upd_regions_image)
         upd_sites_path = self._extract_generic_filepath(upd_sites_image)
-        print({
-            "autozyg": autozyg_regions_image,
-            "coverage": coverage_path,
-            "upd_regions": upd_regions_path,
-            "upd_sites": upd_sites_path,
-        })
-        
+
         return {
             "autozyg": autozyg_regions_image,
             "coverage": coverage_path,
