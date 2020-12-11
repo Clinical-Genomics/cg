@@ -16,7 +16,7 @@ OPTIONAL_KEYS = (
 )
 
 
-def get_project_type(samples):
+def get_project_type(samples: [dict]) -> str:
     """Determine the project type."""
 
     data_analyses = set(sample["data_analysis"].lower() for sample in samples)

@@ -1,7 +1,7 @@
 from cg.apps.lims import limsjson
 
 
-def test_parsing_rml_json(rml_order_to_submit):
+def test_parsing_rml_json(rml_order_to_submit: dict) -> None:
     # GIVEN a path to a RML limsjson with 2 sample in a pool
     # WHEN parsing the file
     data = limsjson.parse_json(rml_order_to_submit)
@@ -33,7 +33,7 @@ def test_parsing_rml_json(rml_order_to_submit):
     assert sample_data["concentration_sample"] == "6"
 
 
-def test_parsing_mip_json(mip_order_to_submit):
+def test_parsing_mip_json(mip_order_to_submit: dict):
 
     # GIVEN an order form for a Scout order with samples, 1 trio, in a plate
 

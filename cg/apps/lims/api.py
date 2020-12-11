@@ -250,7 +250,7 @@ class LimsAPI(Lims, OrderHandler):
             )
         return sample.udf[PROP2UDF[key]]
 
-    def update_project(self, lims_id: str, name=None) -> None:
+    def update_project(self, lims_id: str, name: str = None) -> None:
         """Update information about a project."""
         lims_project = Project(self, id=lims_id)
         if name:

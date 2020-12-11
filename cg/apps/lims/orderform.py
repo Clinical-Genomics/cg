@@ -94,7 +94,8 @@ def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.She
     return document_title
 
 
-def get_information_sheet(workbook):
+def get_information_sheet(workbook: xlrd.book.Book) -> xlrd.sheet.Sheet:
+    """Get the excel sheet named Information."""
 
     sheet_name = None
     sheet_names = workbook.sheet_names()
