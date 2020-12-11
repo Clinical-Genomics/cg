@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
     help="Update case data analysis",
 )
 @click.option(
-    "-d",
+    "-dd",
     "--data-delivery",
     "data_delivery",
     type=EnumChoice(DataDelivery),
