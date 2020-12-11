@@ -1,7 +1,7 @@
 """This script tests the cli methods to set families to status-db"""
 
 from cg.cli.set.family import family
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.store import Store
 
 SUCCESS = 0
@@ -130,3 +130,40 @@ def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, h
     # THEN then it should set data_analysis on the case
     assert result.exit_code == SUCCESS
     assert str(data_analysis) == case_obj.data_analysis
+
+
+def test_set_family_bad_data_delivery(cli_runner, base_context, base_store: Store, helpers):
+    """Test to set a family using a non-existing data_delivery"""
+    # GIVEN a database with a family
+
+    # WHEN setting a data_delivery on a family
+    data_delivery = "dummy_delivery"
+    family_id = helpers.add_family(base_store).internal_id
+    result = cli_runner.invoke(
+        family, [family_id, "--data-delivery", data_delivery], obj=base_context
+    )
+
+    # THEN then it should complain in non valid data_delivery instead of setting a value
+    assert result.exit_code != SUCCESS
+    assert str(data_delivery) != base_store.Family.query.first().data_delivery
+
+
+def test_set_family_data_delivery(cli_runner, base_context, base_store: Store, helpers):
+    """Test to set a family using an existing data_delivery"""
+
+    # GIVEN a database with a family and a data_delivery not yet set on the case
+    data_delivery = DataDelivery.FASTQ
+    case_obj = helpers.add_family(base_store)
+    assert str(data_delivery) != case_obj.data_delivery
+
+    # WHEN setting a data_delivery of a case
+    result = cli_runner.invoke(
+        family,
+        [case_obj.internal_id, "--data-delivery", str(data_delivery)],
+        obj=base_context,
+        catch_exceptions=False,
+    )
+
+    # THEN then it should set data_delivery on the case
+    assert result.exit_code == SUCCESS
+    assert str(data_delivery) == case_obj.data_delivery

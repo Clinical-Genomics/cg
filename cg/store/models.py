@@ -7,7 +7,7 @@ from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
 from cg.constants import (
     DataDelivery,
-    FAMILY_ACTIONS,
+    CASE_ACTIONS,
     FLOWCELL_STATUS,
     Pipeline,
     PREP_CATEGORIES,
@@ -255,7 +255,7 @@ class Delivery(Model):
 class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action = Column(types.Enum(*FAMILY_ACTIONS))
+    action = Column(types.Enum(*CASE_ACTIONS))
     analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)

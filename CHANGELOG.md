@@ -22,6 +22,11 @@ Try to use the following format:
 
 - Added support for RML-orderforms as json-file
 
+## 16.11.0
+
+### Added
+- cg set family [CASEID] now has the option --data-delivery 
+
 ## [16.10.4]
 
 ### Fixed
