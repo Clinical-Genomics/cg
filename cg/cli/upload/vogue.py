@@ -81,8 +81,14 @@ def samples(context, days: int):
 
     LOG.info("----------------- SAMPLES -----------------------")
 
-    context.obj["vogue_api"].load_samples(days=days)
-
+    i = 0
+    while i < 10:
+        try:
+            context.obj["vogue_api"].load_samples(days=days)
+            i=10
+        except:
+            i += 1
+            continue
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
 @click.option(
