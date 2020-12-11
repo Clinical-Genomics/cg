@@ -51,7 +51,7 @@ class UploadScoutAPI:
         hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         if hk_file:
             return hk_file.full_path
-        return ''
+        return ""
 
     def build_samples(self, analysis_obj: models.Analysis, hk_version_id: int = None):
         """Loop over the samples in an analysis and build dicts from them"""
