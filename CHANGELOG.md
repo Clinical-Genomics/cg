@@ -16,14 +16,23 @@ Try to use the following format:
 
 ### Changed
 
+
 ## [x.x.x]
 
 ### Added
 - Lims ID is sent to Balsamic during case config
 
+## [16.11.1]
+
 ### Fixed
 
-### Changed
+- Lock dependency for xlrd so that we can parse modern excel files
+
+## 16.11.0
+
+### Added
+- cg set family [CASEID] now has the option --data-delivery 
+
 
 ## [16.10.4]
 

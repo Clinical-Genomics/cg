@@ -11,7 +11,7 @@ from typing import List, Optional
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 
-from cg.constants import FAMILY_ACTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
@@ -57,7 +57,7 @@ class BalsamicAnalysisAPI:
         return case_object
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.get_case_object(case_id=case_id)
             case_object.action = action
             self.store.commit()
