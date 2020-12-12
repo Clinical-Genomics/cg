@@ -16,10 +16,18 @@ Try to use the following format:
 
 ### Changed
 
+
 ## [NG.NG.NG]
 
 ### Fixed
 - Save in Family and Analysis Admin views
+
+## [16.11.1]
+
+### Fixed
+
+- Lock dependency for xlrd so that we can parse modern excel files
+
 
 ## 16.11.0
 
