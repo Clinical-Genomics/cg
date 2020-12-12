@@ -3,13 +3,21 @@
 import logging
 import sys
 from datetime import datetime
+from typing import List
 
 import xlrd
+import openpyxl
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 from cg.exc import CgError
 from cg.store import models, Store
 
+LOG = logging.getLogger(__name__)
 
-def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
+
+def import_application_versions(
+    store: Store, excel_path: str, sign: str, dry_run: bool, skip_missing: bool
+):
     """
     Imports all application versions from the specified excel file
     Args:
@@ -21,28 +29,29 @@ def import_application_versions(store, excel_path, sign, dry_run, skip_missing):
         :param skip_missing:        Continue despite missing applications
     """
 
-    workbook = XlFileHelper.get_workbook_from_xl(excel_path)
-    raw_versions = XlFileHelper.get_raw_dicts_from_xl(excel_path)
+    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    raw_versions: List[dict] = XlFileHelper.get_raw_dicts_from_xl(excel_path)
 
+    raw_version: dict
     for raw_version in raw_versions:
         tag = _get_tag_from_raw_version(raw_version)
-        application_obj = store.application(tag)
+        application_obj: models.Application = store.application(tag)
 
         if not application_obj:
-            logging.error("Failed to find application! Please manually " "add application: %s", tag)
+            LOG.error("Failed to find application! Please manually " "add application: %s", tag)
 
             if skip_missing:
                 continue
 
-            logging.error("Rolling back transaction.")
+            LOG.error("Rolling back transaction.")
             store.rollback()
             sys.exit()
 
-        app_tag = application_obj.tag
-        latest_version = store.latest_version(tag)
+        app_tag: str = application_obj.tag
+        latest_version: models.ApplicationVersion = store.latest_version(tag)
 
         if latest_version and versions_are_same(latest_version, raw_version, workbook.datemode):
-            logging.info("skipping redundant application version for app tag %s", app_tag)
+            LOG.info("skipping redundant application version for app tag %s", app_tag)
             continue
 
         logging.info("adding new application version to transaction for app tag %s", app_tag)
@@ -264,45 +273,45 @@ class XlFileHelper:
     """Organises methods to get data from file"""
 
     @staticmethod
-    def get_raw_dicts_from_xl(excel_path, sheet_name=None):
+    def get_raw_dicts_from_xl(excel_path: str, sheet_name=None):
         """Get raw data from the xl file"""
-        workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+        workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
         if sheet_name:
-            data_sheet = workbook.sheet_by_name(sheet_name)
+            data_sheet = workbook[sheet_name]
         else:
-            data_sheet = workbook.sheet_by_index(0)
+            data_sheet = workbook.worksheets[0]
         return XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet)
 
     @staticmethod
-    def get_raw_cells_from_xl(excel_path, sheet_name, tag_column):
+    def get_raw_cells_from_xl(excel_path: str, sheet_name: str, tag_column: int):
         """Get raw data from the xl file"""
-        workbook = XlFileHelper.get_workbook_from_xl(excel_path)
-        data_sheet = workbook.sheet_by_name(sheet_name)
+        workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+        data_sheet: Worksheet = workbook[sheet_name]
         return XlSheetHelper.get_raw_cells_from_sheet(data_sheet, tag_column)
 
     @staticmethod
-    def get_workbook_from_xl(excel_path):
+    def get_workbook_from_xl(excel_path: str) -> Workbook:
         """Get the workbook from the xl file"""
-        return xlrd.open_workbook(excel_path)
+        return openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
 
     @staticmethod
-    def get_datemode_from_xl(excel_path):
+    def get_datemode_from_xl(excel_path: str) -> int:
         """"Returns the datemode of of the workbook in the specified xl"""
-        workbook = xlrd.open_workbook(excel_path)
-        return workbook.datemode
+
+        return 0
 
 
 class XlSheetHelper:
     """Organises methods to get data from sheet"""
 
     @staticmethod
-    def get_raw_dicts_from_xlsheet(sheet) -> []:
+    def get_raw_dicts_from_xlsheet(sheet: Worksheet) -> List[dict]:
         """Get the relevant rows from a sheet."""
         raw_data = []
         header_row = []
         first_row = True
 
-        for row in sheet.get_rows():
+        for row in sheet.rows:
             if row[0].value == "":
                 break
 
@@ -317,16 +326,16 @@ class XlSheetHelper:
         return raw_data
 
     @staticmethod
-    def no_more_tags(row, tag_column: int) -> bool:
+    def no_more_tags(row: tuple, tag_column: int) -> bool:
         """Returns if there are no more app-tags found"""
         return _get_tag_from_column(row, tag_column).value == ""
 
     @staticmethod
-    def get_raw_cells_from_sheet(sheet, tag_column: int) -> []:
+    def get_raw_cells_from_sheet(sheet: Worksheet, tag_column: int) -> []:
         """Get the relevant rows from an price sheet."""
         raw_data = []
 
-        for row in sheet.get_rows():
+        for row in sheet.rows:
             if XlSheetHelper.no_more_tags(row, tag_column):
                 break
 
@@ -336,7 +345,7 @@ class XlSheetHelper:
         return raw_data
 
 
-def _get_tag_from_raw_version(raw_data):
+def _get_tag_from_raw_version(raw_data: dict) -> str:
     """Gets the application tag from a raw xl application version record"""
     return raw_data["App tag"]
 
