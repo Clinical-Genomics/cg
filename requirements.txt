@@ -24,7 +24,7 @@ petname
 marshmallow>3               # due to code expects behaviour from >3
 pydantic
 pyschemes
-xlrd
+xlrd==1.2.0
 openpyxl
 tabulate
 lxml

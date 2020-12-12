@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+## [16.11.1]
+
+### Fixed
+
+- Lock dependency for xlrd so that we can parse modern excel files
+
 ## 16.11.0
 
 ### Added
