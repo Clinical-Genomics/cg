@@ -274,10 +274,10 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     # This information is required for Balsamic analysis (cancer)
     assert sample["tumour"] is True
     assert sample["capture_kit"] == "LymphoMATIC"
-    assert sample["tumour_purity"] == "5.0"
+    assert sample["tumour_purity"] == "5"
 
-    assert sample["formalin_fixation_time"] == "1.0"
-    assert sample["post_formalin_fixation_time"] == "2.0"
+    assert sample["formalin_fixation_time"] == "1"
+    assert sample["post_formalin_fixation_time"] == "2"
     assert sample["tissue_block_size"] == "small"
 
     # This information is optional

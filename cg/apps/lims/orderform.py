@@ -56,6 +56,7 @@ def parse_orderform(excel_path: str) -> dict:
     check_orderform_version(document_title)
 
     raw_samples = relevant_rows(orderform_sheet)
+
     if len(raw_samples) == 0:
         raise OrderFormError("orderform doesn't contain any samples")
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
@@ -297,7 +298,12 @@ def relevant_rows(orderform_sheet: Worksheet) -> List[Dict[str, str]]:
             header_row = [cell.value for cell in row]
             current_row = None
         elif current_row == "samples":
-            values = [str(cell.value) for cell in row]
+            values = []
+            for cell in row:
+                value = str(cell.value)
+                if value == "None":
+                    value = ""
+                values.append(value)
 
             # skip empty rows
             if values[0]:
