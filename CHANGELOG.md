@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## [NG.NG.NG]
+
+### Fixed
+- Save in Family and Analysis Admin views
+
 ## 16.12.0
 
 ### Added
