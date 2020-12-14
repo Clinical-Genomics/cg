@@ -12,9 +12,68 @@ Try to use the following format:
 
 ### Added
 
+### Fixed
+
 ### Changed
 - Update Scout config output for images from chromograph
+
+
+## [16.11.1]
+
 ### Fixed
+
+- Lock dependency for xlrd so that we can parse modern excel files
+
+## 16.11.0
+
+### Added
+- cg set family [CASEID] now has the option --data-delivery 
+
+## [16.10.4]
+
+### Fixed
+- Bug when building tag definition for balsamic-analysis delivery
+
+## [16.10.3]
+
+### Fixed
+- Use `--json` when exporting causative variants from scout
+
+## [16.10.2]
+
+### Fixed
+- Use correct pipeline name when cleaning mip analysis dirs
+
+## [16.10.1]
+
+### Added
+
+- Adds new mip-dna tags to hk
+
+## [16.10.0]
+
+### Added
+
+- Adds new delivery type to balsamic-analysis
+
+## [16.9.0]
+
+### Added
+
+- column percent_reads_guaranteed to application table
+
+## [16.8.1]
+
+### Fixed
+
+- Bug in the interactions with Scout when cleaning Scout cases
+- Bug in the interaction with scout in command export_causatives
+
+## [16.8.0]
+
+### Added
+
+- Adds adding samplesheet to HK flowcell bundle to cg transfer flowcell
 
 ## [16.7.1]
 

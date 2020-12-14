@@ -4,7 +4,7 @@ from tabulate import tabulate
 from colorclass import Color
 
 from cg.store import Store
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
+from cg.constants import CASE_ACTIONS, Pipeline, PRIORITY_OPTIONS
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
@@ -55,7 +55,7 @@ def status(context):
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj["status_db"].cases_to_analyze(pipeline="mip")
+    records = context.obj["status_db"].cases_to_analyze(pipeline=Pipeline.MIP_DNA)
     for family_obj in records:
         click.echo(family_obj)
 
@@ -115,7 +115,7 @@ def present_string(a_dict, param, show_negative):
 @click.option("--days", default=31, help="days to go back")
 @click.option("--internal-id", help="search by internal id")
 @click.option("--name", help="search by name given by customer")
-@click.option("--case-action", type=click.Choice(FAMILY_ACTIONS), help="filter by case action")
+@click.option("--case-action", type=click.Choice(CASE_ACTIONS), help="filter by case action")
 @click.option("--priority", type=click.Choice(PRIORITY_OPTIONS), help="filter by priority")
 @click.option("--data-analysis", help="filter on case data_analysis")
 @click.option("--sample-id", help="filter by sample id")
