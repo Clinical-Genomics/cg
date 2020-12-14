@@ -16,18 +16,22 @@ Try to use the following format:
 
 ### Changed
 
-
 ## [NG.NG.NG]
 
 ### Fixed
 - Save in Family and Analysis Admin views
+
+## 16.12.0
+
+### Added
+
+- Added support for RML-orderforms as json-file
 
 ## [16.11.1]
 
 ### Fixed
 
 - Lock dependency for xlrd so that we can parse modern excel files
-
 
 ## 16.11.0
 
