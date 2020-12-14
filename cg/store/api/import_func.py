@@ -286,7 +286,7 @@ def import_apptags(
 def get_cells_from_excel(
     excel_path: str, sheet_name: str = "Drop down list", tag_column: int = 2
 ) -> Iterable[str]:
-    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    workbook: Workbook = openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
     data_sheet: Worksheet = workbook[sheet_name]
 
     for row in data_sheet.rows:
@@ -299,115 +299,45 @@ def get_cells_from_excel(
 def parse_application_versions(
     excel_path: str, sheet_name: Optional[str] = None
 ) -> Iterable[ApplicationVersionSchema]:
-    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    workbook: Workbook = openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
     data_sheet = workbook.worksheets[0]
     if sheet_name:
         data_sheet = workbook[sheet_name]
 
     application_info: dict
-    for application_info in XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet):
+    for application_info in get_raw_dicts_from_xlsheet(data_sheet):
         yield ApplicationVersionSchema(**application_info)
 
 
 def parse_applications(
     excel_path: str, sheet_name: Optional[str] = None
 ) -> Iterable[ApplicationSchema]:
-    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    workbook: Workbook = openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
     data_sheet = workbook.worksheets[0]
     if sheet_name:
         data_sheet = workbook[sheet_name]
 
     application_info: dict
-    for application_info in XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet):
+    for application_info in get_raw_dicts_from_xlsheet(data_sheet):
         yield ApplicationSchema(**application_info)
 
 
-class XlFileHelper:
-    """Organises methods to get data from file"""
+def get_raw_dicts_from_xlsheet(sheet: Worksheet) -> List[dict]:
+    """Get the relevant rows from a sheet."""
+    raw_data = []
+    header_row = []
+    first_row = True
 
-    @staticmethod
-    def get_raw_dicts_from_xl(excel_path: str, sheet_name=None):
-        """Get raw data from the xl file"""
-        workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
-        if sheet_name:
-            data_sheet = workbook[sheet_name]
+    for row in sheet.rows:
+        if row[0].value is None:
+            break
+
+        if first_row:
+            header_row = [cell.value for cell in row if cell.value is not None]
+            first_row = False
         else:
-            data_sheet = workbook.worksheets[0]
-        return XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet)
+            values = [cell.value for cell in row]
+            version_dict = dict(zip(header_row, values))
+            raw_data.append(version_dict)
 
-    @staticmethod
-    def get_raw_cells_from_xl(excel_path: str, sheet_name: str, tag_column: int):
-        """Get raw data from the xl file"""
-        workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
-        data_sheet: Worksheet = workbook[sheet_name]
-        return XlSheetHelper.get_raw_cells_from_sheet(data_sheet, tag_column)
-
-    @staticmethod
-    def get_workbook_from_xl(excel_path: str) -> Workbook:
-        """Get the workbook from the xl file"""
-        return openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
-
-    @staticmethod
-    def get_datemode_from_xl(excel_path: str) -> int:
-        """"Returns the datemode of of the workbook in the specified xl"""
-
-        return 0
-
-
-class XlSheetHelper:
-    """Organises methods to get data from sheet"""
-
-    @staticmethod
-    def get_raw_dicts_from_xlsheet(sheet: Worksheet) -> List[dict]:
-        """Get the relevant rows from a sheet."""
-        raw_data = []
-        header_row = []
-        first_row = True
-
-        for row in sheet.rows:
-            if row[0].value is None:
-                break
-
-            if first_row:
-                header_row = [cell.value for cell in row if cell.value is not None]
-                first_row = False
-            else:
-                values = [cell.value for cell in row]
-                version_dict = dict(zip(header_row, values))
-                raw_data.append(version_dict)
-
-        return raw_data
-
-    @staticmethod
-    def no_more_tags(row: tuple, tag_column: int) -> bool:
-        """Returns if there are no more app-tags found"""
-        return _get_tag_from_column(row, tag_column).value == ""
-
-    @staticmethod
-    def get_raw_cells_from_sheet(sheet: Worksheet, tag_column: int) -> List[List[str]]:
-        """Get the relevant rows from an price sheet."""
-        raw_data = []
-
-        for row in sheet.rows:
-            if XlSheetHelper.no_more_tags(row, tag_column):
-                break
-
-            values = [str(cell.value) for cell in row]
-            raw_data.append(values)
-
-        return raw_data
-
-
-def _get_tag_from_raw_version(raw_data: dict) -> str:
-    """Gets the application tag from a raw xl application version record"""
-    return raw_data["App tag"]
-
-
-def _get_tag_from_column(raw_data, column: int):
-    """Gets the application tag from a raw xl data record"""
-    return raw_data[column]
-
-
-def _get_tag_from_raw_application(raw_application):
-    """Gets the application tag from a raw xl application record"""
-    return raw_application["tag"]
+    return raw_data
