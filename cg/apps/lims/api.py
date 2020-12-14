@@ -240,7 +240,7 @@ class LimsAPI(Lims, OrderHandler):
 
         lims_sample.put()
 
-    def get_from_sample(self, lims_id: str, key: str) -> str:
+    def get_sample_attribute(self, lims_id: str, key: str) -> str:
         """Get data from a sample."""
 
         sample = Sample(self, id=lims_id)
