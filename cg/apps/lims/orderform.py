@@ -50,8 +50,9 @@ def parse_orderform(excel_path: str) -> dict:
             break
     if sheet_name is None:
         raise OrderFormError("'orderform' sheet not found in Excel file")
-    orderform_sheet: Worksheet = workbook[sheet_name]
 
+    orderform_sheet: Worksheet = workbook[sheet_name]
+    print("Orderform sheet ", orderform_sheet, type(orderform_sheet))
     document_title: str = get_document_title(workbook, orderform_sheet)
     check_orderform_version(document_title)
 
@@ -91,10 +92,11 @@ def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:
 
     Openpyxl use 1 based counting
     """
-    if "information" in workbook.sheetnames:
-        information_sheet: Worksheet = workbook["information"]
-        document_title = information_sheet.cell(1, 3).value
-        return document_title
+    for sheet_number, sheet_name in enumerate(workbook.sheetnames):
+        if sheet_name.lower() == "information":
+            information_sheet: Worksheet = workbook[sheet_name]
+            document_title = information_sheet.cell(1, 3).value
+            return document_title
 
     # By looking at the test file this will not work
     document_title = orderform_sheet.cell(1, 2).value

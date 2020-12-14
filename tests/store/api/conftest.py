@@ -1,12 +1,85 @@
-from typing import Iterable
-from cg.store import Store
-from cg.store.api.models import ApplicationVersionSchema
+from typing import Iterable, List
+from cg.store import Store, models
+from cg.store.api.models import ApplicationVersionSchema, ApplicationSchema
 
 from tests.store_helpers import StoreHelpers
 
 import pytest
 
-from cg.store.api.import_func import parse_application_versions
+from cg.store.api.import_func import (
+    parse_application_versions,
+    versions_are_same,
+    parse_applications,
+)
+
+
+class StoreCheckers:
+    @staticmethod
+    def get_versions_from_store(
+        store: Store, application_tag: str
+    ) -> List[models.ApplicationVersion]:
+        """Gets all versions for the specified application"""
+
+        return store.application(application_tag).versions
+
+    @staticmethod
+    def get_application_from_store(store: Store, application_tag: str) -> models.Application:
+        """Gets the specified application"""
+
+        return store.application(application_tag)
+
+    @staticmethod
+    def exists_version_in_store(store: Store, application: ApplicationVersionSchema):
+        """Check if the given raw version exists in the store"""
+        db_versions: List[models.Application] = StoreCheckers.get_versions_from_store(
+            store=store, application_tag=application.app_tag
+        )
+
+        for db_version in db_versions:
+            if versions_are_same(version_obj=db_version, application_version=application):
+                return True
+
+        return False
+
+    @staticmethod
+    def all_versions_exists_in_store(store: Store, excel_path: str):
+        """Check if all versions in the excel exists in the store"""
+        applications: Iterable[ApplicationVersionSchema] = parse_application_versions(
+            excel_path=excel_path
+        )
+
+        for application in applications:
+            if not StoreCheckers.exists_version_in_store(store=store, application=application):
+                return False
+
+        return True
+
+    @staticmethod
+    def all_applications_exists(store: Store, applications_file: str):
+        """Check if all applications in the excel exists in the store"""
+        applications: Iterable[ApplicationSchema] = parse_applications(excel_path=applications_file)
+
+        for application in applications:
+            if not StoreCheckers.exists_application_in_store(
+                store=store, application_tag=application.tag
+            ):
+                return False
+
+        return True
+
+    @staticmethod
+    def exists_application_in_store(store: Store, application_tag: str):
+        """Check if the given raw application exists in the store"""
+        db_application = StoreCheckers.get_application_from_store(
+            store=store, application_tag=application_tag
+        )
+
+        return db_application is not None
+
+
+@pytest.fixture(name="store_checkers")
+def fixture_store_checkers() -> StoreCheckers:
+    return StoreCheckers()
 
 
 @pytest.fixture(name="applications_store")

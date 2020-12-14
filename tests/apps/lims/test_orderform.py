@@ -2,7 +2,7 @@ from cg.apps.lims import orderform
 from cg.constants import Pipeline
 
 
-def test_parsing_rml_orderform(rml_orderform):
+def test_parsing_rml_orderform(rml_orderform: str):
     # GIVEN a path to a RML orderform with 2 sample in a pool
     # WHEN parsing the file
     data = orderform.parse_orderform(rml_orderform)
