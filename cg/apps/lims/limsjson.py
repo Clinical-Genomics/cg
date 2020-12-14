@@ -21,17 +21,15 @@ def get_project_type(samples: [dict]) -> str:
 
     data_analyses = set(sample["data_analysis"].lower() for sample in samples)
 
-    if len(data_analyses) == 1:
-        data_analysis = data_analyses.pop()
-
-        if data_analysis == "mip-dna":
-            project_type = "mip-dna"
-        elif data_analysis == "fluffy":
-            project_type = "rml"
-        else:
-            raise OrderFormError(f"Unsupported json orderform: {data_analysis}")
-    else:
+    if len(data_analyses) != 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
+
+    if data_analysis == {"mip-dna"}:
+        project_type = "mip-dna"
+    elif data_analysis == {"fluffy"}:
+        project_type = "rml"
+    else:
+        raise OrderFormError(f"Unsupported json orderform: {data_analysis}")
 
     return project_type
 
