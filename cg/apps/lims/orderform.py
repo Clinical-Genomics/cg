@@ -140,7 +140,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     return project_type
 
 
-def expand_case(case_id: str, parsed_case: dict) -> dict:
+def expand_case(case_id: str, parsed_case: dict) -> tuple:
     """Fill-in information about families."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case["samples"]
