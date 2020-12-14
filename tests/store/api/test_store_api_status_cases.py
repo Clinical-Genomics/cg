@@ -1,7 +1,7 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
 from cg.store import Store
 
 
@@ -737,10 +737,10 @@ def test_excluded_by_action(base_store: Store, helpers):
     """Test to that cases can be excluded by action"""
 
     # GIVEN a database with a family with an action
-    add_family(helpers, base_store, action=FAMILY_ACTIONS[0])
+    add_family(helpers, base_store, action=CASE_ACTIONS[0])
 
     # WHEN getting active cases by action
-    cases = base_store.cases(case_action=FAMILY_ACTIONS[1])
+    cases = base_store.cases(case_action=CASE_ACTIONS[1])
 
     # THEN cases should not contain this case
     assert not cases
@@ -750,7 +750,7 @@ def test_included_by_action(base_store: Store, helpers):
     """Test to that cases can be included by action"""
 
     # GIVEN a database with a family with an action
-    family = add_family(helpers, base_store, action=FAMILY_ACTIONS[0])
+    family = add_family(helpers, base_store, action=CASE_ACTIONS[0])
 
     # WHEN getting active cases by action
     cases = base_store.cases(case_action=family.action)
