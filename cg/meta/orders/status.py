@@ -451,7 +451,6 @@ class StatusHandler:
             with self.status.session.no_autoflush:
                 application_version = self.status.current_application_version(pool["application"])
                 if application_version is None:
-                    print(f"Invalid application: {pool['application']}")
                     raise OrderError(f"Invalid application: {pool['application']}")
             case_obj = self.status.find_family(customer=customer_obj, name=ticket)
 
