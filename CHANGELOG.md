@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+## [NG.NG.NG]
+
+### Added
+
+- Stop on bad values for analysis (pipeline) when adding family through CLI
+
 ## 16.12.1
 
 ### Fixed
