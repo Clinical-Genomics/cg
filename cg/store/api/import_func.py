@@ -3,14 +3,15 @@
 import logging
 import sys
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Iterable
 
-import xlrd
 import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from cg.exc import CgError
 from cg.store import models, Store
+
+from .models import ApplicationVersionSchema, ApplicationSchema
 
 LOG = logging.getLogger(__name__)
 
@@ -28,17 +29,19 @@ def import_application_versions(
         :param dry_run:             Test run, no changes to the database
         :param skip_missing:        Continue despite missing applications
     """
+    application_versions: Iterable[ApplicationVersionSchema] = parse_application_versions(
+        excel_path=excel_path
+    )
 
-    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
-    raw_versions: List[dict] = XlFileHelper.get_raw_dicts_from_xl(excel_path)
+    for application_version in application_versions:
 
-    raw_version: dict
-    for raw_version in raw_versions:
-        tag = _get_tag_from_raw_version(raw_version)
-        application_obj: models.Application = store.application(tag)
+        application_obj: models.Application = store.application(application_version.app_tag)
 
         if not application_obj:
-            LOG.error("Failed to find application! Please manually " "add application: %s", tag)
+            LOG.error(
+                "Failed to find application! Please manually " "add application: %s",
+                application_version.app_tag,
+            )
 
             if skip_missing:
                 continue
@@ -48,29 +51,39 @@ def import_application_versions(
             sys.exit()
 
         app_tag: str = application_obj.tag
-        latest_version: models.ApplicationVersion = store.latest_version(tag)
+        latest_version: models.ApplicationVersion = store.latest_version(
+            application_version.app_tag
+        )
 
-        if latest_version and versions_are_same(latest_version, raw_version, workbook.datemode):
+        if latest_version and versions_are_same(
+            version_obj=latest_version, application_version=application_version
+        ):
             LOG.info("skipping redundant application version for app tag %s", app_tag)
             continue
 
-        logging.info("adding new application version to transaction for app tag %s", app_tag)
-        new_version = add_version_from_raw(
-            application_obj, latest_version, raw_version, sign, store, workbook
+        LOG.info("adding new application version to transaction for app tag %s", app_tag)
+        new_version = add_application_version(
+            application_obj=application_obj,
+            latest_version=latest_version,
+            version=application_version,
+            sign=sign,
+            store=store,
         )
         store.add(new_version)
 
     if not dry_run:
-        logging.info(
+        LOG.info(
             "all application versions successfully added to transaction, committing " "transaction"
         )
         store.commit()
     else:
-        logging.error("Dry-run, rolling back transaction.")
+        LOG.error("Dry-run, rolling back transaction.")
         store.rollback()
 
 
-def import_applications(store, excel_path, sign, dry_run, sheet_name=None):
+def import_applications(
+    store: Store, excel_path: str, sign: str, dry_run: bool, sheet_name: Optional[str] = None
+):
     """
     Imports all applications from the specified excel file
     Args:
@@ -81,30 +94,29 @@ def import_applications(store, excel_path, sign, dry_run, sheet_name=None):
         :param sign:                Signature of user running the script
         :param dry_run:             Test run, no changes to the database
     """
+    applications: Iterable[ApplicationSchema] = parse_applications(excel_path=excel_path)
 
-    raw_applications = XlFileHelper.get_raw_dicts_from_xl(excel_path, sheet_name)
-
-    for raw_application in raw_applications:
-        tag = _get_tag_from_raw_application(raw_application)
-        application_obj = store.application(tag)
-
-        if application_obj and applications_are_same(application_obj, raw_application):
-            logging.info("skipping redundant application %s", tag)
+    for application in applications:
+        application_obj: models.Application = store.application(application.tag)
+        if application_obj and applications_are_same(
+            application_obj=application_obj, application=application
+        ):
+            LOG.info("skipping redundant application %s", application.tag)
             continue
 
-        logging.info("adding new application to transaction %s", tag)
-        new_application = add_application_from_raw(raw_application, sign, store)
+        LOG.info("adding new application to transaction %s", application.tag)
+        new_application = add_application_object(application=application, sign=sign, store=store)
         store.add(new_application)
 
     if not dry_run:
-        logging.info("all applications successfully added to transaction, committing transaction")
+        LOG.info("all applications successfully added to transaction, committing transaction")
         store.commit()
     else:
-        logging.error("Dry-run, rolling back transaction.")
+        LOG.error("Dry-run, rolling back transaction.")
         store.rollback()
 
 
-def prices_are_same(first_price, second_price):
+def prices_are_same(first_price: float, second_price: float) -> bool:
     """Checks if the given prices are to be considered equal"""
 
     if first_price == second_price:
@@ -115,69 +127,72 @@ def prices_are_same(first_price, second_price):
     return False
 
 
-def versions_are_same(version_obj: models.ApplicationVersion, raw_version: dict, datemode: int):
+def versions_are_same(
+    version_obj: models.ApplicationVersion, application_version: ApplicationVersionSchema
+) -> bool:
     """Checks if the given versions are to be considered equal"""
-
     return (
-        version_obj.application.tag == _get_tag_from_raw_version(raw_version)
-        and version_obj.valid_from
-        == datetime(*xlrd.xldate_as_tuple(float(raw_version["Valid from"]), datemode))
-        and prices_are_same(version_obj.price_standard, raw_version["Standard"])
-        and prices_are_same(version_obj.price_priority, raw_version["Priority"])
-        and prices_are_same(version_obj.price_express, raw_version["Express"])
-        and prices_are_same(version_obj.price_research, raw_version["Research"])
+        version_obj.application.tag == application_version.app_tag
+        and version_obj.valid_from == application_version.valid_from
+        and prices_are_same(version_obj.price_standard, application_version.standard)
+        and prices_are_same(version_obj.price_priority, application_version.priority)
+        and prices_are_same(version_obj.price_express, application_version.express)
+        and prices_are_same(version_obj.price_research, application_version.research)
     )
 
 
-def applications_are_same(application_obj: models.Application, raw_application: dict):
+def applications_are_same(application_obj: models.Application, application: ApplicationSchema):
     """Checks if the given applications are to be considered equal"""
 
-    return application_obj and application_obj.tag == _get_tag_from_raw_application(raw_application)
+    return application_obj and application_obj.tag == application.tag
 
 
-def add_version_from_raw(
-    application_obj, latest_version, raw_version, sign, store: Store, workbook
-):
-    """Adds an application version from a raw application version record"""
+def add_application_version(
+    application_obj: models.Application,
+    latest_version: Optional[models.ApplicationVersion],
+    version: ApplicationVersionSchema,
+    sign: str,
+    store: Store,
+) -> models.ApplicationVersion:
     new_version = store.add_version(
         application=application_obj,
         version=latest_version.version + 1 if latest_version else 1,
-        valid_from=datetime(
-            *xlrd.xldate_as_tuple(float(raw_version["Valid from"]), workbook.datemode)
-        ),
+        valid_from=version.valid_from,
         prices={
-            "standard": raw_version["Standard"],
-            "priority": raw_version["Priority"],
-            "express": raw_version["Express"],
-            "research": raw_version["Research"],
+            "standard": version.standard,
+            "priority": version.priority,
+            "express": version.express,
+            "research": version.research,
         },
         comment="Added by %s" % sign,
     )
     return new_version
 
 
-def add_application_from_raw(raw_application, sign, store: Store):
+def add_application_object(
+    application: ApplicationSchema, sign: str, store: Store
+) -> models.Application:
     """Adds an application from a raw application record"""
-    new_application = store.add_application(
-        tag=_get_tag_from_raw_application(raw_application),
-        category=raw_application["prep_category"],
-        description=raw_application["description"],
-        is_accredited=raw_application["is_accredited"] == 1.0,
-        turnaround_time=raw_application["turnaround_time"],
-        minimum_order=raw_application["minimum_order"],
-        sequencing_depth=raw_application["sequencing_depth"],
-        target_reads=raw_application["target_reads"],
-        sample_amount=raw_application["sample_amount"],
-        sample_volume=raw_application["sample_volume"],
-        sample_concentration=raw_application["sample_concentration"],
-        priority_processing=raw_application["priority_processing"] == 1.0,
-        details=raw_application["details"],
-        limitations=raw_application["limitations"],
-        percent_kth=raw_application["percent_kth"],
-        percent_reads_guaranteed=raw_application["percent_reads_guaranteed"],
-        comment=raw_application["comment"] + " Added by %s" % sign,
-        is_archived=raw_application["is_archived"] == 1.0,
-        is_external=raw_application["is_external"] == 1.0,
+    new_application: models.Application = store.add_application(
+        tag=application.tag,
+        category=application.prep_category,
+        description=application.description,
+        is_accredited=application.is_accredited == 1.0,
+        turnaround_time=application.turnaround_time,
+        minimum_order=application.minimum_order,
+        sequencing_depth=application.sequencing_depth,
+        target_reads=application.target_reads,
+        sample_amount=application.sample_amount,
+        sample_volume=application.sample_volume,
+        sample_concentration=application.sample_concentration,
+        priority_processing=application.priority_processing == 1.0,
+        details=application.details,
+        limitations=application.limitations,
+        percent_kth=application.percent_kth,
+        percent_reads_guaranteed=application.percent_reads_guaranteed,
+        comment=application.comment + " Added by %s" % sign,
+        is_archived=application.is_archived == 1.0,
+        is_external=application.is_external == 1.0,
         created_at=datetime.now(),
     )
     return new_application
@@ -269,6 +284,33 @@ def import_apptags(
         store.commit()
 
 
+def parse_application_versions(
+    excel_path: str, sheet_name: Optional[str] = None
+) -> Iterable[ApplicationVersionSchema]:
+    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    data_sheet = workbook.worksheets[0]
+    if sheet_name:
+        data_sheet = workbook[sheet_name]
+
+    application_info: dict
+    for application_info in XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet):
+        yield ApplicationVersionSchema(**application_info)
+
+
+def parse_applications(
+    excel_path: str, sheet_name: Optional[str] = None
+) -> Iterable[ApplicationSchema]:
+    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    data_sheet = workbook.worksheets[0]
+    if sheet_name:
+        data_sheet = workbook[sheet_name]
+
+    application_info: dict
+    for application_info in XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet):
+        print(application_info)
+        yield ApplicationSchema(**application_info)
+
+
 class XlFileHelper:
     """Organises methods to get data from file"""
 
@@ -312,14 +354,14 @@ class XlSheetHelper:
         first_row = True
 
         for row in sheet.rows:
-            if row[0].value == "":
+            if row[0].value is None:
                 break
 
             if first_row:
-                header_row = [cell.value for cell in row]
+                header_row = [cell.value for cell in row if cell.value is not None]
                 first_row = False
             else:
-                values = [str(cell.value) for cell in row]
+                values = [cell.value for cell in row]
                 version_dict = dict(zip(header_row, values))
                 raw_data.append(version_dict)
 
@@ -331,7 +373,7 @@ class XlSheetHelper:
         return _get_tag_from_column(row, tag_column).value == ""
 
     @staticmethod
-    def get_raw_cells_from_sheet(sheet: Worksheet, tag_column: int) -> []:
+    def get_raw_cells_from_sheet(sheet: Worksheet, tag_column: int) -> List[List[str]]:
         """Get the relevant rows from an price sheet."""
         raw_data = []
 

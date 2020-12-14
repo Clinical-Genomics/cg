@@ -1,6 +1,6 @@
 """Fixtures for store tests"""
 import datetime as dt
-
+from pathlib import Path
 import pytest
 
 # Files fixtures
@@ -9,7 +9,7 @@ from cg.store import Store
 
 
 @pytest.fixture
-def application_versions_file(fixtures_dir):
+def application_versions_file(fixtures_dir: Path) -> str:
     """"application version import file"""
     _file = fixtures_dir / "store/api/application_versions.xlsx"
     return str(_file)

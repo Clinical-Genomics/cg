@@ -1,18 +1,23 @@
 """Tests for reset part of the store API"""
 
-from cg.store import Store
+from typing import List, Iterable
+
+from openpyxl.workbook import Workbook
+
+from cg.store import Store, models
 from cg.store.api.import_func import (
     prices_are_same,
     versions_are_same,
+    add_application_version,
     import_application_versions,
     _get_tag_from_raw_version,
-    add_version_from_raw,
     import_applications,
-    _get_tag_from_raw_application,
     import_apptags,
     XlFileHelper,
-    XlSheetHelper,
+    parse_applications,
+    parse_application_versions,
 )
+from cg.store.api.models import ApplicationVersionSchema, ApplicationSchema
 
 
 def test_prices_are_same_int_and_int():
@@ -67,81 +72,118 @@ def test_prices_are_same_float_and_float():
     assert should_be_same
 
 
-def test_versions_are_same(store: Store, application_versions_file):
+def test_versions_are_same(applications_store: Store, application_versions_file: str):
+    # GIVEN a database with some applications loaded
+    store = applications_store
+
     # GIVEN an excel price row
     # same price row committed to the database
-    add_applications(store, application_versions_file)
-    raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[0]
-    tag = _get_tag_from_raw_version(raw_version)
-    application_obj = store.application(tag)
+    excel_versions: List[ApplicationVersionSchema] = list(
+        parse_applications(excel_path=application_versions_file)
+    )
+    version: ApplicationVersionSchema = excel_versions[0]
+
+    # GIVEN that the application exists in the database
+    application_obj: models.Application = store.application(version.app_tag)
+
+    # GIVEN that there is a application version
     sign = "DummySign"
-    workbook = XlFileHelper.get_workbook_from_xl(application_versions_file)
-    db_version = add_version_from_raw(application_obj, None, raw_version, sign, store, workbook)
-    datemode = XlFileHelper.get_datemode_from_xl(application_versions_file)
+    db_version: models.ApplicationVersion = add_application_version(
+        application_obj=application_obj,
+        latest_version=None,
+        version=version,
+        sign=sign,
+        store=store,
+    )
 
     # WHEN calling versions are same
-    should_be_same = versions_are_same(db_version, raw_version, datemode)
+    should_be_same = versions_are_same(version_obj=db_version, application_version=version)
 
     # THEN versions are considered same
     assert should_be_same
 
 
-def test_versions_are_not_same(store, application_versions_file):
+def test_versions_are_not_same(applications_store: Store, application_versions_file: str):
+    # GIVEN a database with some applications loaded
+    store = applications_store
     # GIVEN an excel price row
     # NOT same price row committed to the database
-    add_applications(store, application_versions_file)
-    raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[0]
-    tag = _get_tag_from_raw_version(raw_version)
-    application_obj = store.application(tag)
+    excel_versions: List[ApplicationVersionSchema] = list(
+        parse_applications(excel_path=application_versions_file)
+    )
+    version: ApplicationVersionSchema = excel_versions[0]
+    application_obj: models.Application = store.application(version.app_tag)
     sign = "DummySign"
-    workbook = XlFileHelper.get_workbook_from_xl(application_versions_file)
-    db_version = add_version_from_raw(application_obj, None, raw_version, sign, store, workbook)
-    datemode = XlFileHelper.get_datemode_from_xl(application_versions_file)
-    another_raw_version = XlFileHelper.get_raw_dicts_from_xl(application_versions_file)[1]
+
+    db_version: models.ApplicationVersion = add_application_version(
+        application_obj=application_obj,
+        latest_version=None,
+        version=version,
+        sign=sign,
+        store=store,
+    )
+
+    another_version: ApplicationVersionSchema = excel_versions[1]
 
     # WHEN calling versions are same
-    should_not_be_same = versions_are_same(db_version, another_raw_version, datemode)
+    should_not_be_same: bool = versions_are_same(
+        version_obj=db_version, application_version=another_version
+    )
 
     # THEN versions are not considered same
-    assert not should_not_be_same
+    assert should_not_be_same is False
 
 
-def test_application_version(application_versions_file, store: Store):
+def test_application_version(
+    applications_store: Store, application_versions_file: str, store: Store
+):
     # GIVEN a store with applications
     # and an excel file with prices for those applications
-    add_applications(store, application_versions_file)
     sign = "TestSign"
 
     # WHEN calling import_application_version
     import_application_versions(
-        store, application_versions_file, sign, dry_run=False, skip_missing=False
+        store=applications_store,
+        excel_path=application_versions_file,
+        sign=sign,
+        dry_run=False,
+        skip_missing=False,
     )
 
     # THEN versions should have been created in the store
-    assert all_versions_exists_in_store(store, application_versions_file)
+    assert all_versions_exists_in_store(
+        store=applications_store, excel_path=application_versions_file
+    )
 
 
-def test_application_version_dry_run(application_versions_file, store: Store):
+def test_application_version_dry_run(applications_store: Store, application_versions_file: str):
     # GIVEN a store with applications
     # and an excel file with prices for those applications
-    add_applications(store, application_versions_file)
     sign = "TestSign"
 
     # WHEN calling import_application_version as dry run
     import_application_versions(
-        store, application_versions_file, sign, dry_run=True, skip_missing=False
+        store=applications_store,
+        excel_path=application_versions_file,
+        sign=sign,
+        dry_run=True,
+        skip_missing=False,
     )
 
     # THEN versions should not have been created in the store
-    assert not all_versions_exists_in_store(store, application_versions_file)
+    assert not all_versions_exists_in_store(
+        store=applications_store, excel_path=application_versions_file
+    )
 
 
-def test_application(applications_file, store: Store):
-    # GIVEN a store and an excel file with applications
+def test_application(store: Store, applications_file: str):
+    # GIVEN an excel file with applications
+    assert all_applications_exists(store, applications_file) is False
+    # GIVEN a store without the applications
     sign = "TestSign"
 
     # WHEN calling import_applications
-    import_applications(store, applications_file, sign, dry_run=False)
+    import_applications(store=store, excel_path=applications_file, sign=sign, dry_run=False)
 
     # THEN applications should have been created in the store
     assert all_applications_exists(store, applications_file)
@@ -324,7 +366,7 @@ def ensure_applications(base_store: Store, active_applications: list, inactive_a
             )
 
 
-def ensure_application(store, tag):
+def ensure_application(store: Store, tag: str):
     """Ensure that the specified application exists in the store"""
     application = store.application(tag=tag)
     if not application:
@@ -351,54 +393,57 @@ def add_applications(store, application_versions_file):
         ensure_application(store, tag)
 
 
-def get_prices_from_store(store, raw_price):
+def get_versions_from_store(store: Store, application_tag: str) -> List[models.ApplicationVersion]:
     """Gets all versions for the specified application"""
-    tag = _get_tag_from_raw_version(raw_price)
-    return store.application(tag).versions
+
+    return store.application(application_tag).versions
 
 
-def get_application_from_store(store, raw_application):
+def get_application_from_store(store: Store, application_tag: str) -> models.Application:
     """Gets the specified application"""
-    tag = _get_tag_from_raw_application(raw_application)
-    return store.application(tag)
+
+    return store.application(application_tag)
 
 
-def exists_version_in_store(raw_price, store, datemode):
+def exists_version_in_store(store: Store, application: ApplicationVersionSchema):
     """Check if the given raw version exists in the store"""
-    db_versions = get_prices_from_store(store, raw_price)
+    db_versions: List[models.Application] = get_versions_from_store(
+        store=store, application_tag=application.app_tag
+    )
 
-    version_found = False
-    for db_price in db_versions:
-        if versions_are_same(db_price, raw_price, datemode):
-            version_found = True
+    for db_version in db_versions:
+        if versions_are_same(version_obj=db_version, application_version=application):
+            return True
 
-    return version_found
+    return False
 
 
-def all_versions_exists_in_store(store, excel_path):
+def all_versions_exists_in_store(store: Store, excel_path: str):
     """Check if all versions in the excel exists in the store"""
-    raw_versions = XlFileHelper.get_raw_dicts_from_xl(excel_path)
-    datemode = XlFileHelper.get_datemode_from_xl(excel_path)
-    for raw_version in raw_versions:
-        if not exists_version_in_store(raw_version, store, datemode):
+    applications: Iterable[ApplicationVersionSchema] = parse_application_versions(
+        excel_path=excel_path
+    )
+
+    for application in applications:
+        if not exists_version_in_store(store=store, application=application):
             return False
 
     return True
 
 
-def all_applications_exists(store, applications_file):
+def all_applications_exists(store: Store, applications_file: str):
     """Check if all applications in the excel exists in the store"""
-    raw_applications = XlFileHelper.get_raw_dicts_from_xl(applications_file)
+    applications: Iterable[ApplicationSchema] = parse_applications(excel_path=applications_file)
 
-    for raw_application in raw_applications:
-        if not exists_application_in_store(raw_application, store):
+    for application in applications:
+        if not exists_application_in_store(store=store, application_tag=application.tag):
             return False
 
     return True
 
 
-def exists_application_in_store(raw_application, store):
+def exists_application_in_store(store: Store, application_tag: str):
     """Check if the given raw application exists in the store"""
-    db_application = get_application_from_store(store, raw_application)
+    db_application = get_application_from_store(store=store, application_tag=application_tag)
 
     return db_application is not None

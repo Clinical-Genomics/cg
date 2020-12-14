@@ -73,6 +73,13 @@ class StoreHelpers:
             store.add_commit(version)
         return version
 
+    def ensure_application(self, store: Store, tag: str) -> models.Application:
+        """Ensure that application exists in store"""
+        application: models.Application = store.application(tag=tag)
+        if not application:
+            application: models.Application = self.add_application(store=store, application_tag=tag)
+        return application
+
     @staticmethod
     def add_application(
         store: Store,
