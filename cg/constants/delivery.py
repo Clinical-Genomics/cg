@@ -1,9 +1,11 @@
 """Constants for delivery"""
 
+import copy
 
-BALSAMIC_ANALYSIS_CASE_TAGS = [
+BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnv", "annotated-somatic-vcf-all", "vcf-all", "cnvkit"},
     {"cnv", "annotated-somatic-vcf-all-index", "vcf-all", "cnvkit"},
+    {"cnv-cnr", "cnr"},
     {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "vardict"},
     {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "vardict"},
     {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnscope"},
@@ -15,12 +17,18 @@ BALSAMIC_ANALYSIS_CASE_TAGS = [
     {"cnv-scatter"},
     {"cnv-diagram"},
     {"multiqc-html"},
-    {"balsamic-report"},
-    {"normal-cram"},
-    {"normal-cram-index"},
-    {"tumor-cram"},
-    {"tumor-cram-index"},
 ]
+
+BALSAMIC_ANALYSIS_CASE_TAGS = copy.deepcopy(BALSAMIC_ANALYSIS_ONLY_CASE_TAGS)
+BALSAMIC_ANALYSIS_CASE_TAGS.extend(
+    [
+        {"normal-cram"},
+        {"normal-cram-index"},
+        {"tumor-cram"},
+        {"tumor-cram-index"},
+    ]
+)
+
 BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
     {"normal-cram"},
     {"normal-cram-index"},
@@ -90,6 +98,7 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
+    "balsamic-analysis": {"case_tags": BALSAMIC_ANALYSIS_ONLY_CASE_TAGS, "sample_tags": []},
     "balsamic-qc": {
         "case_tags": BALSAMIC_QC_CASE_TAGS,
         "sample_tags": BALSAMIC_QC_SAMPLE_TAGS,

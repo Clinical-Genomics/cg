@@ -76,6 +76,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
                             message += f" (already existing sample{sample_customer})"
 
+                        if sample.get("priority"):
+                            message += ", priority: " + sample.get("priority")
+
                         if sample.get("comment"):
                             message += ", " + sample.get("comment")
 
@@ -107,8 +110,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def submit_rml(self, data: dict) -> dict:
         """Submit a batch of ready made libraries."""
         status_data = self.pools_to_status(data)
-        project_data, _ = self.process_lims(data, data["samples"])
-        new_records = self.store_pools(
+        project_data, lims_map = self.process_lims(data, data["samples"])
+        samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
+        self.fill_in_sample_ids(samples, lims_map, id_key="internal_id")
+        new_records = self.store_rml(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
@@ -308,7 +313,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         if project_type == OrderType.MIP_DNA:
             return getattr(self, "submit_mip_dna")
-        elif project_type == OrderType.MIP_RNA:
+        if project_type == OrderType.MIP_RNA:
             return getattr(self, "submit_mip_rna")
 
         return getattr(self, f"submit_{str(project_type)}")

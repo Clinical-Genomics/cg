@@ -200,6 +200,7 @@ def add_application(disk_store, application_tag="dummy_tag"):
         category="wgs",
         description="dummy_description",
         percent_kth=80,
+        percent_reads_guaranteed=75,
     )
     disk_store.add_commit(application)
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}

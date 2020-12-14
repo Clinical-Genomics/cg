@@ -95,6 +95,7 @@ class StoreHelpers:
             category=application_type,
             description=description,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,

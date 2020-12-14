@@ -19,7 +19,7 @@ from cg.constants import (
     COLLABORATORS,
     COMBOS,
     DEFAULT_CAPTURE_KIT,
-    FAMILY_ACTIONS,
+    CASE_ACTIONS,
     MASTER_LIST,
     Pipeline,
 )
@@ -403,7 +403,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return False
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
@@ -432,7 +432,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return self.db.family(case_id)
 
     def get_analyses_to_clean(self, before: dt.datetime) -> list:
-        analyses_to_clean = self.db.analyses_to_clean(pipeline="mip", before=before)
+        analyses_to_clean = self.db.analyses_to_clean(pipeline=Pipeline.MIP_DNA, before=before)
         return analyses_to_clean.all()
 
     def get_slurm_job_ids_path(self, case_id: str) -> Path:

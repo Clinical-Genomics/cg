@@ -3,6 +3,7 @@
 import logging
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 import requests
 from ruamel import yaml
@@ -37,10 +38,10 @@ class UploadScoutAPI:
         self.analysis = analysis_api
         self.lims = lims_api
 
-    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None):
+    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None) -> str:
         """"Fetch files from housekeeper"""
         tags = [tag, sample_id]
-        hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
+        hk_file: hk_models.File = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         file_path = None
         if hk_file:
             file_path = hk_file.full_path
@@ -147,7 +148,9 @@ class UploadScoutAPI:
         yml = yaml.YAML()
         yml.dump(upload_config.dict(exclude_none=True), file_path)
 
-    def add_scout_config_to_hk(self, config_file_path: Path, case_id: str) -> hk_models.File:
+    def add_scout_config_to_hk(
+        self, config_file_path: Path, case_id: str, delete: bool = False
+    ) -> hk_models.File:
         """Add scout load config to hk bundle"""
         LOG.info("Adding load config to housekeeper")
         tag_name = UploadScoutAPI.get_load_config_tag()
@@ -155,12 +158,14 @@ class UploadScoutAPI:
         uploaded_config_files = self.housekeeper.get_files(
             bundle=case_id, tags=[tag_name], version=version_obj.id
         )
-        LOG.info("Config files: %s", uploaded_config_files)
-        number_of_configs = sum(1 for i in uploaded_config_files)
-        bundle_config_exists = number_of_configs > 0
-
-        if bundle_config_exists:
-            raise FileExistsError("Upload config already exists")
+        config_file: Optional[hk_models.File] = None
+        for file_obj in uploaded_config_files:
+            config_file = file_obj
+        if config_file:
+            LOG.info("Found config file: %s", config_file)
+            if delete is False:
+                raise FileExistsError("Upload config already exists")
+            self.housekeeper.delete_file(config_file.id)
 
         file_obj: hk_models.File = self.housekeeper.add_file(
             str(config_file_path), version_obj, tag_name

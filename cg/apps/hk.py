@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Iterable, Optional
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -48,6 +48,32 @@ class HousekeeperAPI:
             tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
+    def get_file(self, file_id: int) -> Optional[models.File]:
+        """ Fetch a file based on file id """
+        LOG.info("Fetching file %s", file_id)
+        file_obj = self._store.file_(file_id)
+        if not file_obj:
+            LOG.info("file not found")
+            return None
+        return file_obj
+
+    def delete_file(self, file_id: int) -> Optional[models.File]:
+        """ Delete a file both from database and disk (if included) """
+        file_obj: models.File = self.get_file(file_id)
+        if not file_obj:
+            LOG.info("Could not find file %s", file_id)
+            return
+
+        if file_obj.is_included and Path(file_obj.full_path).exists():
+            LOG.info("Deleting file %s form disc", file_obj.full_path)
+            Path(file_obj.full_path).unlink()
+
+        LOG.info("Deleting file %s from housekeeper", file_id)
+        file_obj.delete()
+        self._store.commit()
+
+        return file_obj
+
     def add_file(self, path, version_obj: models.Version, tags, to_archive=False) -> models.File:
         """Add a file to the database"""
         if isinstance(tags, str):
@@ -67,7 +93,7 @@ class HousekeeperAPI:
 
     def files(
         self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
-    ) -> List[models.File]:
+    ) -> Iterable[models.File]:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
@@ -79,7 +105,7 @@ class HousekeeperAPI:
         """ Wrap property in Housekeeper Store """
         return self._store.session.no_autoflush
 
-    def get_files(self, bundle: str, tags: list, version: int = None):
+    def get_files(self, bundle: str, tags: list, version: int = None) -> Iterable[models.File]:
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
 

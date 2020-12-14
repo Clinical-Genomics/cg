@@ -1,11 +1,17 @@
 """Tests for transfer flowcell data"""
 import datetime as dt
+from pathlib import Path
 import warnings
 
+import mock
 from sqlalchemy import exc as sa_exc
 
 
-def test_transfer_flowcell(flowcell_store, transfer_flowcell_api):
+@mock.patch("pathlib.Path.exists")
+@mock.patch("cg.meta.transfer.flowcell.TransferFlowcell._sample_sheet_path")
+def test_transfer_flowcell(
+    mock_sample_sheet_path, mock_path_exists, flowcell_store, transfer_flowcell_api
+):
 
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
@@ -13,6 +19,10 @@ def test_transfer_flowcell(flowcell_store, transfer_flowcell_api):
     assert flowcell_store.samples().count() == 1
     assert flowcell_store.flowcells().count() == 0
     assert housekeeper_api.bundles().count() == 0
+
+    # AND a samplesheet
+    mock_sample_sheet_path.return_value = "/path/to/samplesheet.csv"
+    mock_path_exists.return_vale = True
 
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
@@ -26,10 +36,14 @@ def test_transfer_flowcell(flowcell_store, transfer_flowcell_api):
     status_sample = flowcell_store.samples().first()
     assert isinstance(status_sample.sequenced_at, dt.datetime)
 
-    # ... and it should store the fastq files for the sample in housekeeper
+    # ... and it should store the fastq files and samplesheet for the sample in housekeeper
     hk_bundle = housekeeper_api.bundle(status_sample.internal_id)
 
     assert len(hk_bundle.versions[0].files) > 0
+    assert (
+        len([hk_file for hk_file in hk_bundle.versions[0].files if hk_file.path.endswith("csv")])
+        == 1
+    )
 
     for hk_file in hk_bundle.versions[0].files:
-        assert hk_file.path.endswith("fastq.gz")
+        assert hk_file.path.endswith("fastq.gz") or hk_file.path.endswith("csv")
