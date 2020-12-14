@@ -16,7 +16,7 @@ Try to use the following format:
 
 ### Changed
 
-## [NG.NG.NG]
+## 16.12.0
 
 ### Added
 
