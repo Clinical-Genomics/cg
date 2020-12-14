@@ -827,7 +827,7 @@ def mock_deliverable(balsamic_dir: Path) -> None:
                 "path": f"{balsamic_dir}/{case_id}/multiqc_report.html",
                 "path_index": "",
                 "step": "multiqc",
-                "tag": "qc",
+                "tag": ["qc"],
                 "id": "T_WGS",
                 "format": "html",
             },
@@ -835,7 +835,7 @@ def mock_deliverable(balsamic_dir: Path) -> None:
                 "path": f"{balsamic_dir}/{case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
                 "path_index": "",
                 "step": "fastp",
-                "tag": f"concatenated_{samples[0]}_R,qc",
+                "tag": [f"concatenated_{samples[0]}_R", "qc"],
                 "id": f"concatenated_{samples[0]}_R",
                 "format": "fastq.gz",
             },
@@ -844,8 +844,8 @@ def mock_deliverable(balsamic_dir: Path) -> None:
                 "path_index": "",
                 "step": "vep_somatic",
                 "format": "vcf.gz.tbi",
-                "tag": f"CNV,{case_id},cnvkit,annotation,somatic,index",
-                "id": f"{case_id}",
+                "tag": ["CNV", case_id, "cnvkit", "annotation", "somatic", "index"],
+                "id": case_id,
             },
         ]
     }
