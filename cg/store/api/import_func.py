@@ -214,27 +214,27 @@ def import_apptags(
 
     orderform_application_tags = []
 
-    for raw_row in XlFileHelper.get_raw_cells_from_xl(excel_path, sheet_name, tag_column):
-        tag = _get_tag_from_column(raw_row, tag_column)
-        logging.info("Found: %s in orderform", tag)
+    for tag in get_cells_from_excel(
+        excel_path=excel_path, sheet_name=sheet_name, tag_column=tag_column
+    ):
+        LOG.info("Found: %s in orderform", tag)
         orderform_application_tags.append(tag)
 
     if not orderform_application_tags:
-        message = "No applications found in column %s (zero-based), exiting" % tag_column
+        message = f"No applications found in column {tag_column} (zero-based), exiting"
         raise CgError(message)
 
     for orderform_application_tag in orderform_application_tags:
         application_obj = store.application(tag=orderform_application_tag)
 
         if not application_obj:
-            message = "Application %s was not found" % orderform_application_tag
+            message = f"Application {orderform_application_tag} was not found"
             raise CgError(message)
 
         if application_obj.prep_category != prep_category:
-            message = "%s prep_category, expected: %s was: %s" % (
-                orderform_application_tag,
-                prep_category,
-                application_obj.prep_category,
+            message = (
+                f"{orderform_application_tag} prep_category, expected: {prep_category} was:"
+                f" {application_obj.prep_category}"
             )
             raise CgError(message)
 
@@ -245,45 +245,55 @@ def import_apptags(
                     f"Application un-archived by {sign}"
                 )
                 application_obj.is_archived = False
-                logging.info("Un-archiving %s", application_obj)
+                LOG.info("Un-archiving %s", application_obj)
             else:
-                logging.warning(
+                LOG.warning(
                     "%s is marked as archived but is used in the orderform, consider "
                     "activating it",
                     application_obj,
                 )
         else:
-            logging.info("%s is already active, no need to activate it", application_obj)
+            LOG.info("%s is already active, no need to activate it", application_obj)
 
     all_active_apps_for_category = store.applications(category=prep_category, archived=False)
 
     for active_application in all_active_apps_for_category:
-        if active_application.tag not in orderform_application_tags:
-            if inactivate:
-                active_application.is_archived = True
-                active_application.comment = (
-                    f"{active_application.comment}"
-                    f"\n{str(datetime.now())[:-10]} "
-                    f"Application archived by {sign}"
-                )
-                logging.info("Archiving %s", active_application)
-            else:
-                logging.warning(
-                    "%s is marked as active but is not used in the orderform, "
-                    "consider archiving it",
-                    active_application,
-                )
-        else:
-            logging.info(
-                "%s was found in orderform tags, no need to archive it", active_application
+        if active_application.tag in orderform_application_tags:
+            LOG.info("%s was found in orderform tags, no need to archive it", active_application)
+            continue
+        if not inactivate:
+            LOG.warning(
+                "%s is marked as active but is not used in the orderform, " "consider archiving it",
+                active_application,
             )
+            continue
+        active_application.is_archived = True
+        active_application.comment = (
+            f"{active_application.comment}"
+            f"\n{str(datetime.now())[:-10]} "
+            f"Application archived by {sign}"
+        )
+        LOG.info("Archiving %s", active_application)
 
     if not activate and not inactivate:
-        logging.info("no change mode requested, rolling back transaction")
+        LOG.info("no change mode requested, rolling back transaction")
         store.rollback()
     else:
-        logging.info("all applications successfully synced, committing transaction")
+        LOG.info("all applications successfully synced, committing transaction")
         store.commit()
+
+
+def get_cells_from_excel(
+    excel_path: str, sheet_name: str = "Drop down list", tag_column: int = 2
+) -> Iterable[str]:
+    workbook: Workbook = XlFileHelper.get_workbook_from_xl(excel_path)
+    data_sheet: Worksheet = workbook[sheet_name]
+
+    for row in data_sheet.rows:
+        value = row[tag_column].value
+        if value is None:
+            continue
+        yield value
 
 
 def parse_application_versions(
@@ -309,7 +319,6 @@ def parse_applications(
 
     application_info: dict
     for application_info in XlSheetHelper.get_raw_dicts_from_xlsheet(data_sheet):
-        print(application_info)
         yield ApplicationSchema(**application_info)
 
 

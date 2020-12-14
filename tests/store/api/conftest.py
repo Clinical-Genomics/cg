@@ -6,7 +6,7 @@ from tests.store_helpers import StoreHelpers
 
 import pytest
 
-from cg.store.api.import_func import parse_applications
+from cg.store.api.import_func import parse_application_versions
 
 
 @pytest.fixture(name="applications_store")
@@ -14,7 +14,7 @@ def fixture_applications_store(
     store: Store, application_versions_file: str, helpers: StoreHelpers
 ) -> Store:
     """Return a store populated with applications from excel file"""
-    versions: Iterable[ApplicationVersionSchema] = parse_applications(
+    versions: Iterable[ApplicationVersionSchema] = parse_application_versions(
         excel_path=application_versions_file
     )
 
@@ -41,3 +41,12 @@ def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
         )
 
     return store
+
+
+@pytest.fixture(name="microbial_store_dummy_tag")
+def fixture_microbial_store_dummy_tag(microbial_store: Store, helpers: StoreHelpers) -> Store:
+    """Populate a microbial store with a extra dummy app tag"""
+    helpers.ensure_application(
+        store=microbial_store, tag="dummy_tag", application_type="mic", is_archived=False
+    )
+    return microbial_store
