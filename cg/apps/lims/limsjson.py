@@ -39,12 +39,11 @@ def get_project_type(samples: [dict]) -> str:
 def parse_json(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
 
-    raw_samples = indata.get("samples")
+    parsed_samples = indata.get("samples", [])
 
-    if len(raw_samples) == 0:
+    if not parsed_samples:
         raise OrderFormError("orderform doesn't contain any samples")
 
-    parsed_samples = [raw_sample for raw_sample in raw_samples]
     project_type = get_project_type(parsed_samples)
     customer_id = indata.get("customer")
     comment = indata.get("comment")
