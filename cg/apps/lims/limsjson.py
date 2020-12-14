@@ -75,10 +75,9 @@ def expand_case(case_id: str, parsed_case: dict) -> dict:
     new_case["require_qcok"] = True in require_qcoks
 
     priorities = set(raw_sample["priority"] for raw_sample in samples)
-    if len(priorities) == 1:
-        new_case["priority"] = priorities.pop()
-    else:
+    if len(priorities) != 1:
         raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
+    new_case["priority"] = priorities.pop()
 
     gene_panels = set()
     for raw_sample in samples:
