@@ -22,6 +22,12 @@ Try to use the following format:
 
 - Added support for RML-orderforms as json-file
 
+## [16.11.1]
+
+### Fixed
+
+- Lock dependency for xlrd so that we can parse modern excel files
+
 ## 16.11.0
 
 ### Added
