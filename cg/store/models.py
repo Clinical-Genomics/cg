@@ -399,7 +399,6 @@ class Pool(Model):
     application_version = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
-    capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)

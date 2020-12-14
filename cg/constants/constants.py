@@ -38,6 +38,7 @@ FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 class Pipeline(StrEnum):
     BALSAMIC: str = "balsamic"
     FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"

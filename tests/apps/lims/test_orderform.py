@@ -11,17 +11,17 @@ def test_parsing_rml_orderform(rml_orderform):
     assert data["project_type"] == "rml"
     assert data["customer"] == "cust000"
     # ... and find all samples
-    assert len(data["items"]) == 21
+    assert len(data["items"]) == 26
 
     # ... and collect relevant sample data
     sample_data = data["items"][0]
     assert sample_data["name"] == "sample1"
     assert sample_data["pool"] == "pool1"
-    assert sample_data["application"] == "RMLP10R150"
-    assert sample_data["data_analysis"] == str(Pipeline.FASTQ)
+    assert sample_data["application"] == "RMLP10R300"
+    assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
-    assert sample_data["index"] == "TruSeq Custom Amplicon Dual-index (A7-A5)"
+    assert sample_data["index"] == "IDT DupSeq 10 bp Set B"
     assert sample_data["index_number"] == "1"
 
     assert sample_data["container_name"] is None
@@ -29,12 +29,12 @@ def test_parsing_rml_orderform(rml_orderform):
     assert sample_data["well_position"] is None
     assert sample_data["well_position_rml"] == "A:1"
 
-    assert sample_data["reagent_label"] == "A701-A501 (ATCACGAC-TGAACCTT)"
+    assert sample_data["reagent_label"] == "A01 IDT_10nt_541 (ATTCCACACT-AACAAGACCA)"
 
     assert sample_data["custom_index"] == "GATACA"
 
-    assert sample_data["comment"] == "test comment"
-    assert sample_data["capture_kit"] == "Agilent Sureselect CRE"
+    assert sample_data["comment"] == "comment"
+    assert sample_data["concentration_sample"] == "3"
 
 
 def test_parsing_fastq_orderform(fastq_orderform):
@@ -188,7 +188,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     assert sample["well_position"] == "A:1"
 
     # These fields are not required
-    assert sample["concentration_weight"] == "1"
+    assert sample["concentration_sample"] == "1"
     assert sample["quantity"] == "2"
     assert sample["comment"] == "comment"
 
@@ -227,7 +227,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
 
     assert sample_data["organism_other"] == "other species"
 
-    assert sample_data["concentration_weight"] == "1"
+    assert sample_data["concentration_sample"] == "1"
     assert sample_data["quantity"] == "2"
     assert sample_data["comment"] == "comment"
 
@@ -339,7 +339,7 @@ def test_parse_mip_rna(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP + RNA"
+    raw_sample["UDF/Data Analysis"] = "mip-rna"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)
@@ -352,7 +352,7 @@ def test_parse_mip_only(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "MIP"
+    raw_sample["UDF/Data Analysis"] = "mip-dna"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)
@@ -365,10 +365,10 @@ def test_parse_balsamic_only(skeleton_orderform_sample: dict):
 
     # GIVEN a raw sample with balsamic only value from orderform 1508 for data_analysis
     raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "Balsamic "
+    raw_sample["UDF/Data Analysis"] = "balsamic"
 
     # WHEN parsing the sample
     parsed_sample = orderform.parse_sample(raw_sample)
 
     # THEN data_analysis is balsamic only
-    assert parsed_sample["data_analysis"] == "balsamic"
+    assert parsed_sample["data_analysis"] == str(Pipeline.BALSAMIC)

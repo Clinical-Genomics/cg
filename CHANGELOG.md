@@ -16,6 +16,24 @@ Try to use the following format:
 
 ### Changed
 
+
+## [16.13.0]
+
+### Added
+
+- Stop on bad values for analysis (pipeline) when adding family through CLI
+
+## 16.12.1
+
+### Fixed
+- Save in Family and Analysis Admin views
+
+## 16.12.0
+
+### Added
+
+- Added support for RML-orderforms as json-file
+
 ## [16.11.1]
 
 ### Fixed
