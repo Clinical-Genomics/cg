@@ -227,7 +227,7 @@ class UploadScoutAPI:
                 else:
                     raise FileNotFoundError(f"missing file: {scout_key}")
 
-    def _get_chromograph_images(self, sample_id: "str", hk_version: int) -> dict:
+    def _get_chromograph_images(self, sample_id: str, hk_version: int) -> dict:
         autozyg_regions_image = self.fetch_file_path_from_tags(
             ["chromograph", "autozyg"], sample_id, hk_version
         )
