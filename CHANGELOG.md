@@ -16,6 +16,7 @@ Try to use the following format:
 
 ### Changed
 
+
 ## [16.14.0]
 
 ### Added
@@ -27,6 +28,7 @@ Try to use the following format:
 - Removes dependency on deprecated excel-parser `xlrd`
 
 ## [16.13.0]
+
 
 ### Added
 
