@@ -281,7 +281,7 @@ class UploadScoutAPI:
         return svg_path
 
     @staticmethod
-    def _extract_generic_filepath(file_path: str):
+    def _extract_generic_filepath(file_path: str) -> str:
         """Remove a file's suffix and identifying integer or X/Y
         Example:
         `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
