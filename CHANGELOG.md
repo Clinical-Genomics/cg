@@ -16,6 +16,15 @@ Try to use the following format:
 
 ### Changed
 
+## [16.14.x]
+
+### Added
+
+- Validation models for excel files in `cg/store/api/import_func.py`
+
+### Fixed
+
+- Removes dependency on deprecated excel-parser `xlrd`
 
 ## [16.13.0]
 
