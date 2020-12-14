@@ -342,8 +342,8 @@ class BalsamicAnalysisAPI:
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
-            "tumor_sample_id": self.get_tumor_sample_name(case_id=case_id),
-            "normal_sample_id": self.get_normal_sample_name(case_id=case_id),
+            "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
+            "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
         return arguments
 
