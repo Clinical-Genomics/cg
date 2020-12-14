@@ -39,7 +39,7 @@ def import_application_versions(
 
         if not application_obj:
             LOG.error(
-                "Failed to find application! Please manually " "add application: %s",
+                "Failed to find application! Please manually add application: %s",
                 application_version.app_tag,
             )
 
@@ -263,7 +263,7 @@ def import_apptags(
             continue
         if not inactivate:
             LOG.warning(
-                "%s is marked as active but is not used in the orderform, " "consider archiving it",
+                "%s is marked as active but is not used in the orderform, consider archiving it",
                 active_application,
             )
             continue
