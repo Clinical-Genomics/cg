@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+## [NG.NG.NG]
+
+### Added
+
+- Added support for RML-orderforms as json-file
+
 ## [16.11.1]
 
 ### Fixed
