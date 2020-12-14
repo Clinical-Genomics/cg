@@ -189,44 +189,45 @@ def test_application(store: Store, applications_file: str):
     assert all_applications_exists(store, applications_file)
 
 
-def test_application_sheet_name(applications_file, store: Store):
+def test_application_sheet_name(applications_file: str, store: Store):
     # GIVEN a store and an excel file with applications
     sign = "TestSign"
 
     # WHEN calling import_applications
-    import_applications(store, applications_file, sign, dry_run=False, sheet_name="application")
+    import_applications(
+        store=store,
+        excel_path=applications_file,
+        sign=sign,
+        dry_run=False,
+        sheet_name="application",
+    )
 
     # THEN applications should have been created in the store
     assert all_applications_exists(store, applications_file)
 
 
-def test_application_dry_run(applications_file, store: Store):
+def test_application_dry_run(applications_file: str, store: Store):
     # GIVEN a store and an excel file with applications
     sign = "TestSign"
 
     # WHEN calling import_applications as dry run
-    import_applications(store, applications_file, sign, dry_run=True)
+    import_applications(store=store, excel_path=applications_file, sign=sign, dry_run=True)
 
     # THEN applications should not have been created in the store
     assert not all_applications_exists(store, applications_file)
 
 
-def test_sync_microbial_orderform_dryrun(base_store: Store, microbial_orderform):
+def test_sync_microbial_orderform_dry_run(microbial_store: Store, microbial_orderform: str):
     # GIVEN a microbial orderform and a store where all the apptags exists half some inactive and
     # some active
-    ensure_applications(
-        base_store,
-        ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"],
-        ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"],
-    )
     prep_category = "mic"
     sign = "PG"
     activate = False
     inactivate = False
-    active_mic_apps_from_start = base_store.applications(
+    active_mic_apps_from_start = microbial_store.applications(
         category=prep_category, archived=False
     ).count()
-    inactive_mic_apps_from_start = base_store.applications(
+    inactive_mic_apps_from_start = microbial_store.applications(
         category=prep_category, archived=True
     ).count()
 

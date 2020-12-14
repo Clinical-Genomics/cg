@@ -22,3 +22,22 @@ def fixture_applications_store(
         helpers.ensure_application(store=store, tag=version.app_tag)
 
     return store
+
+
+@pytest.fixture(name="microbial_store")
+def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
+    """Populate a store with microbial application tags"""
+    microbial_active_apptags = ["MWRNXTR003", "MWGNXTR003", "MWMNXTR003", "MWLNXTR003"]
+    microbial_inactive_apptags = ["MWXNXTR003", "VWGNXTR001", "VWLNXTR001"]
+
+    for app_tag in microbial_active_apptags:
+        helpers.ensure_application(
+            store=store, tag=app_tag, application_type="mic", is_archived=False
+        )
+
+    for app_tag in microbial_inactive_apptags:
+        helpers.ensure_application(
+            store=store, tag=app_tag, application_type="mic", is_archived=True
+        )
+
+    return store

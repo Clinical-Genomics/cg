@@ -73,11 +73,24 @@ class StoreHelpers:
             store.add_commit(version)
         return version
 
-    def ensure_application(self, store: Store, tag: str) -> models.Application:
+    def ensure_application(
+        self,
+        store: Store,
+        tag: str,
+        application_type: str = "wgs",
+        description: str = "dummy_description",
+        is_archived: bool = False,
+    ) -> models.Application:
         """Ensure that application exists in store"""
         application: models.Application = store.application(tag=tag)
         if not application:
-            application: models.Application = self.add_application(store=store, application_tag=tag)
+            application: models.Application = self.add_application(
+                store=store,
+                application_tag=tag,
+                application_type=application_type,
+                description=description,
+                is_archived=is_archived,
+            )
         return application
 
     @staticmethod
@@ -86,6 +99,7 @@ class StoreHelpers:
         application_tag: str = "dummy_tag",
         application_type: str = "wgs",
         description: str = None,
+        is_archived: bool = False,
         is_accredited: bool = False,
         is_external: bool = False,
         **kwargs,
@@ -101,6 +115,7 @@ class StoreHelpers:
             tag=application_tag,
             category=application_type,
             description=description,
+            is_archived=is_archived,
             percent_kth=80,
             percent_reads_guaranteed=75,
             is_accredited=is_accredited,

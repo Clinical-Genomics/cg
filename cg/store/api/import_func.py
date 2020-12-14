@@ -94,7 +94,9 @@ def import_applications(
         :param sign:                Signature of user running the script
         :param dry_run:             Test run, no changes to the database
     """
-    applications: Iterable[ApplicationSchema] = parse_applications(excel_path=excel_path)
+    applications: Iterable[ApplicationSchema] = parse_applications(
+        excel_path=excel_path, sheet_name=sheet_name
+    )
 
     for application in applications:
         application_obj: models.Application = store.application(application.tag)
