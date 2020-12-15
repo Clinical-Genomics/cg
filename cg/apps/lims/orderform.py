@@ -52,7 +52,6 @@ def parse_orderform(excel_path: str) -> dict:
         raise OrderFormError("'orderform' sheet not found in Excel file")
 
     orderform_sheet: Worksheet = workbook[sheet_name]
-    print("Orderform sheet ", orderform_sheet, type(orderform_sheet))
     document_title: str = get_document_title(workbook, orderform_sheet)
     check_orderform_version(document_title)
 
