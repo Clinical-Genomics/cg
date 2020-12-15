@@ -2,7 +2,7 @@ from cg.apps.lims import orderform
 from cg.constants import Pipeline
 
 
-def test_parsing_rml_orderform(rml_orderform):
+def test_parsing_rml_orderform(rml_orderform: str):
     # GIVEN a path to a RML orderform with 2 sample in a pool
     # WHEN parsing the file
     data = orderform.parse_orderform(rml_orderform)
@@ -274,10 +274,10 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     # This information is required for Balsamic analysis (cancer)
     assert sample["tumour"] is True
     assert sample["capture_kit"] == "LymphoMATIC"
-    assert sample["tumour_purity"] == "5.0"
+    assert sample["tumour_purity"] == "5"
 
-    assert sample["formalin_fixation_time"] == "1.0"
-    assert sample["post_formalin_fixation_time"] == "2.0"
+    assert sample["formalin_fixation_time"] == "1"
+    assert sample["post_formalin_fixation_time"] == "2"
     assert sample["tissue_block_size"] == "small"
 
     # This information is optional

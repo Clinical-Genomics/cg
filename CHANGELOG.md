@@ -21,16 +21,26 @@ Try to use the following format:
 ### Fixed
 - The problem handling mip-json without specified data_analysis
 
+## [16.16.0]
+
+### Added
+
+- Validation models for excel files in `cg/store/api/import_func.py`
+
+### Fixed
+
+- Removes dependency on deprecated excel-parser `xlrd`
+
 ## 16.15.0
 
 ### Added
 - cg deploy hermes
 
-
 ## 16.14.0
 
 ### Added
 - cg deploy fluffy
+
 
 ## 16.13.0
 
