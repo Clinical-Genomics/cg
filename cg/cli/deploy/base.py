@@ -33,7 +33,7 @@ def deploy_shipping_cmd(context):
 @click.command(name="hermes")
 @click.pass_context
 def deploy_hermes_cmd(context):
-    """Deploy the fluffy tool"""
+    """Deploy the hermes tool"""
     LOG.info("Deploying hermes with CG")
     hermes_config: Path = Path(context.obj["hermes"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
