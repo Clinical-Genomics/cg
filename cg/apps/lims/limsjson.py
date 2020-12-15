@@ -19,7 +19,7 @@ OPTIONAL_KEYS = (
 def get_project_type(samples: [dict]) -> str:
     """Determine the project type."""
 
-    data_analyses = set(sample["data_analysis"].lower() for sample in samples)
+    data_analyses = set(sample.get("data_analysis", "mip-dna").lower() for sample in samples)
 
     if len(data_analyses) != 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
@@ -43,7 +43,7 @@ def parse_json(indata: dict) -> dict:
         raise OrderFormError("orderform doesn't contain any samples")
 
     project_type = get_project_type(parsed_samples)
-    customer_id = indata.get("customer")
+    customer_id = indata.get("customer").lower()
     comment = indata.get("comment")
 
     if project_type in CASE_PROJECT_TYPES:
@@ -73,7 +73,7 @@ def expand_case(case_id: str, parsed_case: dict) -> dict:
     require_qcoks = set(raw_sample["require_qcok"] for raw_sample in samples)
     new_case["require_qcok"] = True in require_qcoks
 
-    priorities = set(raw_sample["priority"] for raw_sample in samples)
+    priorities = set(raw_sample["priority"].lower() for raw_sample in samples)
     if len(priorities) != 1:
         raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
     new_case["priority"] = priorities.pop()
