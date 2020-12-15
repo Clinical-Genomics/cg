@@ -17,7 +17,7 @@ Try to use the following format:
 ### Changed
 
 
-## [16.14.0]
+## [16.16.0]
 
 ### Added
 
@@ -27,8 +27,18 @@ Try to use the following format:
 
 - Removes dependency on deprecated excel-parser `xlrd`
 
-## [16.13.0]
+## 16.15.0
 
+### Added
+- cg deploy hermes
+
+## 16.14.0
+
+### Added
+- cg deploy fluffy
+
+
+## 16.13.0
 
 ### Added
 
@@ -50,6 +60,7 @@ Try to use the following format:
 ### Fixed
 
 - Lock dependency for xlrd so that we can parse modern excel files
+
 
 ## 16.11.0
 
