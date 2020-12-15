@@ -150,7 +150,7 @@ def test_application_version(
     )
 
     # THEN versions should have been created in the store
-    assert store_checkers.all_versions_exists_in_store(
+    assert store_checkers.all_versions_exist_in_store(
         store=applications_store, excel_path=application_versions_file
     )
 
@@ -172,7 +172,7 @@ def test_application_version_dry_run(
     )
 
     # THEN versions should not have been created in the store
-    assert not store_checkers.all_versions_exists_in_store(
+    assert not store_checkers.all_versions_exist_in_store(
         store=applications_store, excel_path=application_versions_file
     )
 

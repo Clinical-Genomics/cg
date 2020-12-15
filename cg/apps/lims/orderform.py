@@ -97,7 +97,6 @@ def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:
             document_title = information_sheet.cell(1, 3).value
             return document_title
 
-    # By looking at the test file this will not work
     document_title = orderform_sheet.cell(1, 2).value
     return document_title
 

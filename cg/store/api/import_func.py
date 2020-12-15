@@ -143,10 +143,12 @@ def versions_are_same(
     )
 
 
-def applications_are_same(application_obj: models.Application, application: ApplicationSchema):
+def applications_are_same(
+    application_obj: models.Application, application: ApplicationSchema
+) -> bool:
     """Checks if the given applications are to be considered equal"""
 
-    return application_obj and application_obj.tag == application.tag
+    return application_obj.tag == application.tag
 
 
 def add_application_version(

@@ -49,19 +49,3 @@ class ApplicationSchema(BaseModel):
         if value is None:
             return 80
         return value
-
-
-if __name__ == "__main__":
-    app_tag = {
-        "App tag": "PGOTTTR020",
-        "Version": 2,
-        "Valid from": datetime(2020, 5, 1, 0, 0),
-        "Standard": 9805.5242159147,
-        "Priority": 19805.524215914702,
-        "Express": 4805.5242159147,
-        "Research": 4700.3246648188,
-        "Percent kth": 80,
-    }
-
-    app_obj = ApplicationVersionSchema(**app_tag)
-    print(app_obj.dict())

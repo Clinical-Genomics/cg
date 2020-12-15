@@ -29,7 +29,7 @@ class StoreCheckers:
         return store.application(application_tag)
 
     @staticmethod
-    def exists_version_in_store(store: Store, application: ApplicationVersionSchema):
+    def version_exists_in_store(store: Store, application: ApplicationVersionSchema):
         """Check if the given raw version exists in the store"""
         db_versions: List[models.Application] = StoreCheckers.get_versions_from_store(
             store=store, application_tag=application.app_tag
@@ -42,14 +42,14 @@ class StoreCheckers:
         return False
 
     @staticmethod
-    def all_versions_exists_in_store(store: Store, excel_path: str):
+    def all_versions_exist_in_store(store: Store, excel_path: str):
         """Check if all versions in the excel exists in the store"""
         applications: Iterable[ApplicationVersionSchema] = parse_application_versions(
             excel_path=excel_path
         )
 
         for application in applications:
-            if not StoreCheckers.exists_version_in_store(store=store, application=application):
+            if not StoreCheckers.version_exists_in_store(store=store, application=application):
                 return False
 
         return True
