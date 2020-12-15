@@ -5,6 +5,8 @@ from flask_dance.contrib.google import google
 from markupsafe import Markup
 
 from cg.server.ext import db
+from cg.utils.flask.enum import SelectEnumField
+from cg.constants.constants import Pipeline, DataDelivery
 
 
 class BaseView(ModelView):
@@ -187,6 +189,10 @@ class FamilyView(BaseView):
     column_filters = ["customer.internal_id", "priority", "action"]
     column_formatters = {"internal_id": view_family_sample_link, "priority": view_human_priority}
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
+    form_extra_fields = {
+        "data_analysis": SelectEnumField(enum_class=Pipeline),
+        "data_delivery": SelectEnumField(enum_class=DataDelivery),
+    }
 
     @staticmethod
     def view_family_link(unused1, unused2, model, unused3):
@@ -259,6 +265,7 @@ class AnalysisView(BaseView):
         "family.internal_id",
         "family.name",
     ]
+    form_extra_fields = {"pipeline": SelectEnumField(enum_class=Pipeline)}
 
 
 class OrganismView(BaseView):

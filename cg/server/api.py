@@ -44,7 +44,7 @@ def before_request():
             return abort(403, "no JWT token found on request")
         try:
             user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
-        except ValueError as error:
+        except ValueError:
             return abort(make_response(jsonify(message="outdated login certificate"), 403))
         user_obj = db.user(user_data["email"])
         if user_obj is None:

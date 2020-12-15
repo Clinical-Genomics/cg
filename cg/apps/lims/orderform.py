@@ -15,7 +15,7 @@ VALID_ORDERFORMS = [
     "1508:21",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
     "1603:9",  # Microbial WGS
-    "1604:9",  # Orderform Ready made libraries (RML)
+    "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
 
@@ -42,7 +42,7 @@ def parse_orderform(excel_path: str) -> dict:
 
     sheet_name = None
     sheet_names = workbook.sheet_names()
-    for name in ["orderform", "order form"]:
+    for name in ["Orderform", "orderform", "order form"]:
         if name in sheet_names:
             sheet_name = name
             break
@@ -85,13 +85,33 @@ def parse_orderform(excel_path: str) -> dict:
 
 def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.Sheet) -> str:
     """Get the document title for the order form."""
-    if "information" in workbook.sheet_names():
-        information_sheet = workbook.sheet_by_name("information")
+    if "information" in map(str.lower, workbook.sheet_names()):
+        information_sheet = get_information_sheet(workbook)
         document_title = information_sheet.row(0)[2].value
         return document_title
 
     document_title = orderform_sheet.row(0)[1].value
     return document_title
+
+
+def get_information_sheet(workbook: xlrd.book.Book) -> xlrd.sheet.Sheet:
+    """Get the excel sheet named Information."""
+
+    sheet_name = None
+    sheet_names = workbook.sheet_names()
+    for name in ["Information", "information"]:
+        if name in sheet_names:
+            sheet_name = name
+            break
+    if sheet_name is None:
+        raise OrderFormError("Information sheet not found in Excel file")
+
+    sheet = workbook.sheet_by_name(sheet_name)
+
+    if not sheet:
+        raise OrderFormError(f"'information' sheet not found in: {workbook.sheet_names()}")
+
+    return sheet
 
 
 def get_project_type(document_title: str, parsed_samples: List) -> str:
@@ -120,7 +140,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     return project_type
 
 
-def expand_case(case_id, parsed_case):
+def expand_case(case_id: str, parsed_case: dict) -> tuple:
     """Fill-in information about families."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case["samples"]
@@ -248,6 +268,8 @@ def parse_sample(raw_sample):
         sample["data_analysis"] = str(Pipeline.MIP_DNA)
     elif data_analysis and "microbial" in data_analysis:
         sample["data_analysis"] = str(Pipeline.MICROSALT)
+    elif data_analysis and "fluffy" in data_analysis:
+        sample["data_analysis"] = str(Pipeline.FLUFFY)
     elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
         sample["data_analysis"] = str(Pipeline.FASTQ)
     else:
@@ -258,7 +280,7 @@ def parse_sample(raw_sample):
         ("volume", "UDF/Volume (uL)"),
         ("quantity", "UDF/Quantity"),
         ("concentration", "UDF/Concentration (nM)"),
-        ("concentration_weight", "UDF/Sample Conc."),
+        ("concentration_sample", "UDF/Sample Conc."),
         ("time_point", "UDF/time_point"),
     ]
     for json_key, excel_key in numeric_values:
