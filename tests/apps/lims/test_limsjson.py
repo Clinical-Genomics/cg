@@ -36,13 +36,12 @@ def test_parsing_rml_json(rml_order_to_submit: dict) -> None:
 def test_parsing_mip_json(mip_json_order_to_submit: dict):
 
     # GIVEN an order form for a Scout order with samples, 1 trio, in a plate
-
     # WHEN parsing the order form
     data = limsjson.parse_json(mip_json_order_to_submit)
 
     # THEN it should detect the type of project
     assert data["project_type"] == "mip-dna"
-    assert data["customer"] == "Cust000"
+    assert data["customer"] == "cust000"
 
     # ... and it should find and group all samples in families
     assert len(data["items"]) == 7
@@ -52,7 +51,7 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
 
     assert len(duo_family["samples"]) == 2
     assert duo_family["name"] == "F0018192"
-    assert duo_family["priority"] == "Standard"
+    assert duo_family["priority"] == "standard"
     assert set(duo_family["panels"]) == set(["CTD"])
     assert duo_family["require_qcok"] is False
 

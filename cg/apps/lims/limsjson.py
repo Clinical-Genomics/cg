@@ -37,23 +37,23 @@ def get_project_type(samples: [dict]) -> str:
 def parse_json(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
 
-    parsed_samples = indata.get("samples", [])
+    samples = indata.get("samples")
 
-    if not parsed_samples:
+    if not samples:
         raise OrderFormError("orderform doesn't contain any samples")
 
-    project_type = get_project_type(parsed_samples)
-    customer_id = indata.get("customer").lower()
+    project_type = get_project_type(samples)
+    customer_id = indata["customer"].lower()
     comment = indata.get("comment")
 
     if project_type in CASE_PROJECT_TYPES:
-        parsed_cases = StatusHandler.group_cases(parsed_samples)
+        parsed_cases = StatusHandler.group_cases(samples)
         items = []
         for case_id, parsed_case in parsed_cases.items():
             case_data = expand_case(case_id, parsed_case)
             items.append(case_data)
     else:
-        items = parsed_samples
+        items = samples
 
     data = {
         "customer": customer_id,
