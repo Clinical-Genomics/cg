@@ -16,6 +16,10 @@ Try to use the following format:
 
 ### Changed
 
+## [NG.NG.NG]
+
+### Fixed
+- The problem handling mip-json without specified data_analysis
 
 ## 16.15.0
 
