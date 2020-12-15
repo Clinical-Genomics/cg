@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+
+## 16.14.0
+
+### Added
+- cg deploy fluffy
+
 ## 16.13.0
 
 ### Added
@@ -38,6 +44,7 @@ Try to use the following format:
 ### Fixed
 
 - Lock dependency for xlrd so that we can parse modern excel files
+
 
 ## 16.11.0
 
