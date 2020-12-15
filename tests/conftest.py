@@ -322,7 +322,6 @@ def mip_json_order_to_submit() -> dict:
     return json.load(open("tests/fixtures/orders/mip-json.json"))
 
 
-
 @pytest.fixture
 def mip_rna_order_to_submit() -> dict:
     """Load an example rna order."""
