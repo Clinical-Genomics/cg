@@ -30,7 +30,7 @@ COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
-FAMILY_ACTIONS = ("analyze", "running", "hold")
+CASE_ACTIONS = ("analyze", "running", "hold")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 

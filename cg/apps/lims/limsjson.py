@@ -16,24 +16,22 @@ OPTIONAL_KEYS = (
 )
 
 
-def get_project_type(samples):
+def get_project_type(samples: [dict]) -> str:
     """Determine the project type."""
 
-    data_analyses = set(sample["data_analysis"].lower() for sample in samples)
+    data_analyses = set(sample.get("data_analysis", "mip-dna").lower() for sample in samples)
 
-    if len(data_analyses) == 1:
-        data_analysis = data_analyses.pop()
-
-        if data_analysis == "mip-dna":
-            project_type = "mip-dna"
-        elif data_analysis == "fluffy":
-            project_type = "rml"
-        elif data_analysis == "balsamic":
-            project_type = "balsamic"
-        else:
-            raise OrderFormError(f"Unsupported json orderform: {data_analysis}")
-    else:
+    if len(data_analyses) != 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
+
+    if data_analyses == {"mip-dna"}:
+        project_type = "mip-dna"
+    elif data_analyses == {"fluffy"}:
+        project_type = "rml"
+    elif data_analyses == {"balsamic"}:
+        project_type = "balsamic"
+    else:
+        raise OrderFormError(f"Unsupported json orderform: {data_analyses}")
 
     return project_type
 
@@ -41,24 +39,23 @@ def get_project_type(samples):
 def parse_json(indata: dict) -> dict:
     """Parse JSON from LIMS export."""
 
-    raw_samples = indata.get("samples")
+    samples = indata.get("samples")
 
-    if len(raw_samples) == 0:
+    if not samples:
         raise OrderFormError("orderform doesn't contain any samples")
 
-    parsed_samples = [raw_sample for raw_sample in raw_samples]
-    project_type = get_project_type(parsed_samples)
-    customer_id = indata.get("customer")
+    project_type = get_project_type(samples)
+    customer_id = indata["customer"].lower()
     comment = indata.get("comment")
 
     if project_type in CASE_PROJECT_TYPES:
-        parsed_cases = StatusHandler.group_cases(parsed_samples)
+        parsed_cases = StatusHandler.group_cases(samples)
         items = []
         for case_id, parsed_case in parsed_cases.items():
             case_data = expand_case(case_id, parsed_case)
             items.append(case_data)
     else:
-        items = parsed_samples
+        items = samples
 
     data = {
         "customer": customer_id,
@@ -70,7 +67,7 @@ def parse_json(indata: dict) -> dict:
     return data
 
 
-def expand_case(case_id, parsed_case):
+def expand_case(case_id: str, parsed_case: dict) -> dict:
     """Fill-in information about families."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case
@@ -78,15 +75,14 @@ def expand_case(case_id, parsed_case):
     require_qcoks = set(raw_sample["require_qcok"] for raw_sample in samples)
     new_case["require_qcok"] = True in require_qcoks
 
-    priorities = set(raw_sample["priority"] for raw_sample in samples)
-    if len(priorities) == 1:
-        new_case["priority"] = priorities.pop()
-    else:
+    priorities = set(raw_sample["priority"].lower() for raw_sample in samples)
+    if len(priorities) != 1:
         raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
+    new_case["priority"] = priorities.pop()
 
     gene_panels = set()
     for raw_sample in samples:
-        if raw_sample.get("panels"):
+        if raw_sample["panels"]:
             gene_panels.update(raw_sample["panels"])
         new_sample = {}
         for key, value in raw_sample.items():
@@ -95,7 +91,6 @@ def expand_case(case_id, parsed_case):
 
         new_case["samples"].append(new_sample)
 
-    if gene_panels:
-        new_case["panels"] = list(gene_panels)
+    new_case["panels"] = list(gene_panels)
 
     return new_case

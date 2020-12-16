@@ -240,21 +240,17 @@ class LimsAPI(Lims, OrderHandler):
 
         lims_sample.put()
 
-    def get_from_sample(self, lims_id: str, key: str) -> str:
+    def get_sample_attribute(self, lims_id: str, key: str) -> str:
         """Get data from a sample."""
 
         sample = Sample(self, id=lims_id)
-        try:
-            if not PROP2UDF.get(key):
-                raise LimsDataError(
-                    f"Unknown how to get {key} from LIMS since it is not defined in " f"{PROP2UDF}"
-                )
-            data = sample.udf[PROP2UDF[key]]
-        except HTTPError:
-            data = None
-        return data
+        if not PROP2UDF.get(key):
+            raise LimsDataError(
+                f"Unknown how to get {key} from LIMS since it is not defined in " f"{PROP2UDF}"
+            )
+        return sample.udf[PROP2UDF[key]]
 
-    def update_project(self, lims_id: str, name=None) -> None:
+    def update_project(self, lims_id: str, name: str = None) -> None:
         """Update information about a project."""
         lims_project = Project(self, id=lims_id)
         if name:

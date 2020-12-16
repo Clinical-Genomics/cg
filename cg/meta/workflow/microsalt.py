@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from cg.apps.microsalt.fastq import FastqHandler
-from cg.constants import FAMILY_ACTIONS
+from cg.constants import CASE_ACTIONS
 from cg.exc import CgDataError
 from cg.store.models import Sample
 
@@ -277,7 +277,7 @@ class MicrosaltAnalysisAPI:
 
     def set_statusdb_action(self, name: str, action: str) -> None:
         """Sets action on case based on ticket number"""
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.find_family(name)
             case_object.action = action
             self.db.commit()

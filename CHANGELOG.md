@@ -22,6 +22,61 @@ Try to use the following format:
 
 ### Changed
 
+## 16.15.1
+
+### Fixed
+- The problem handling mip-json without specified data_analysis
+
+## [16.16.0]
+
+### Added
+
+- Validation models for excel files in `cg/store/api/import_func.py`
+
+### Fixed
+
+- Removes dependency on deprecated excel-parser `xlrd`
+
+## 16.15.0
+
+### Added
+- cg deploy hermes
+
+## 16.14.0
+
+### Added
+- cg deploy fluffy
+
+
+## 16.13.0
+
+### Added
+
+- Stop on bad values for analysis (pipeline) when adding family through CLI
+
+## 16.12.1
+
+### Fixed
+- Save in Family and Analysis Admin views
+
+## 16.12.0
+
+### Added
+
+- Added support for RML-orderforms as json-file
+
+## [16.11.1]
+
+### Fixed
+
+- Lock dependency for xlrd so that we can parse modern excel files
+
+
+## 16.11.0
+
+### Added
+- cg set family [CASEID] now has the option --data-delivery 
+
 ## [16.10.4]
 
 ### Fixed
