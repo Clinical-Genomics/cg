@@ -208,7 +208,7 @@ def fixture_fixtures_dir() -> Path:
 
 
 @pytest.fixture(name="analysis_dir")
-def fixture_analysis_dir(fixtures_dir) -> Path:
+def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir"""
     return fixtures_dir / "analysis"
 
