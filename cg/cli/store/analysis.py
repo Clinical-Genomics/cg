@@ -5,7 +5,8 @@ import click
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import ANALYSIS_TYPES, Pipeline
+from cg.constants.constants import ANALYSIS_TYPES
+from cg.exc import AnalysisUploadError
 from cg.meta.upload.analysis import UploadAnalysisApi
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +28,11 @@ def analysis(context):
 @click.argument("infile", type=click.Path(exists=True))
 def fluffy_cmd(context, infile: Path):
     upload_api = context.obj["upload_api"]
-    upload_api.upload_deliverables(deliverables_file=infile, pipeline="fluffy")
+    try:
+        upload_api.upload_deliverables(deliverables_file=infile, pipeline="fluffy")
+    except AnalysisUploadError as err:
+        LOG.warning(err)
+        raise click.Abort
 
 
 @analysis.command(name="balsamic")

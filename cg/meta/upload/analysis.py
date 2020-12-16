@@ -1,12 +1,14 @@
 """Api to upload analysis results to Housekeeper"""
 import logging
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import Optional
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import AnalysisUploadError
 
 LOG = logging.getLogger(__name__)
 
@@ -25,12 +27,17 @@ class UploadAnalysisApi:
         Hermes will convert the deliverables to a format that CG knows, this will then be converted to a housekeeper
         bundle and loaded into housekeeper.
         """
-        cg_deliverables: CGDeliverables = self.hermes_api.convert_deliverables(
-            deliverables_file=deliverables_file, pipeline=pipeline, analysis_type=analysis_type
-        )
-        hk_bundle: hk_models.InputBundle = self.create_housekeeper_bundle(cg_deliverables)
+        try:
+            cg_deliverables: CGDeliverables = self.hermes_api.convert_deliverables(
+                deliverables_file=deliverables_file, pipeline=pipeline, analysis_type=analysis_type
+            )
+        except CalledProcessError as err:
+            LOG.warning("Something went wrong when validating the deliverables file")
+            LOG.info(err)
+            raise AnalysisUploadError("Could not store deliverables")
+        housekeeper_bundle: hk_models.InputBundle = self.create_housekeeper_bundle(cg_deliverables)
         LOG.info("Uploading analysis results from %s to housekeeper", deliverables_file)
-        self.hk_api.add_bundle(hk_bundle.dict())
+        self.hk_api.add_bundle(housekeeper_bundle.dict())
 
     @staticmethod
     def create_housekeeper_bundle(deliverables: CGDeliverables) -> hk_models.InputBundle:

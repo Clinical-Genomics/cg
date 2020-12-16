@@ -31,3 +31,23 @@ def test_upload_fluffy_analysis(
 
     # THEN assert that the new bundle exists in housekeeper
     assert housekeeper_api.bundle(name=case_id)
+
+
+def test_upload_failing_fluffy_analysis(
+    populated_fluffy_context: dict,
+    fluffy_deliverables_file: Path,
+):
+    # GIVEN a process where the heremes call will fail
+    hermes_api: HermesApi = populated_fluffy_context["upload_api"].hermes_api
+    hermes_api.process.set_exit_code(1)
+
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # WHEN uploading the analysis results to housekeeper with cli
+    result = runner.invoke(
+        fluffy_cmd, [str(fluffy_deliverables_file)], obj=populated_fluffy_context
+    )
+
+    # THEN assert that the program makes a controlled exit
+    assert result.exit_code == 1

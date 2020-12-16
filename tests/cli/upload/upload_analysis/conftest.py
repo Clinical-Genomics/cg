@@ -5,6 +5,10 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.store.analysis import fluffy_cmd
+from cg.meta.upload.analysis import UploadAnalysisApi
 from tests.mocks.process_mock import ProcessMock
 
 
@@ -79,3 +83,13 @@ def fixture_fluffy_process(hermes_process: ProcessMock, fluffy_hermes_output: di
     """Return a process mock populated with some fluffy hermes output"""
     hermes_process.set_stdout(text=json.dumps(fluffy_hermes_output))
     return hermes_process
+
+
+@pytest.fixture(name="populated_fluffy_context")
+def fixture_populated_fluffy_context(
+    housekeeper_api: HousekeeperAPI, fluffy_process: ProcessMock
+) -> dict:
+    hermes_config = {"hermes": {"binary_path": "hermes"}}
+    hermes_api = HermesApi(config=hermes_config)
+    hermes_api.process = fluffy_process
+    return {"upload_api": UploadAnalysisApi(hk_api=housekeeper_api, hermes_api=hermes_api)}
