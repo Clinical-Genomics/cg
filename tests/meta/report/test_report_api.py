@@ -301,7 +301,7 @@ def test_get_application_data_from_status_db(report_samples, report_api):
 
 def test_get_application_data_from_status_db_all_accredited(report_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
-    report_api.fastq._application_accreditation = True
+    report_api.store._application_accreditation = True
 
     # WHEN fetch_application_data_from_status_db
     samples = report_samples
@@ -313,7 +313,7 @@ def test_get_application_data_from_status_db_all_accredited(report_samples, repo
 
 def test_get_application_data_from_status_db_none_accredited(report_samples, report_api):
     # GIVEN data from an analysed case and an initialised report_api
-    report_api.fastq._application_accreditation = False
+    report_api.store._application_accreditation = False
 
     # WHEN fetch_application_data_from_status_db
     samples = report_samples
@@ -325,7 +325,7 @@ def test_get_application_data_from_status_db_none_accredited(report_samples, rep
 
 def test_render_accredited_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist with accredited application
-    report_api.fastq._application_accreditation = True
+    report_api.store._application_accreditation = True
     delivery_data = report_api._get_delivery_data(case_id="yellowhog")
     report_data = report_api._make_data_presentable(delivery_data)
     assert report_data["accredited"] is True
@@ -339,7 +339,7 @@ def test_render_accredited_delivery_report(report_api):
 
 def test_render_non_accredited_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist with non accredited application
-    report_api.fastq._application_accreditation = False
+    report_api.store._application_accreditation = False
     delivery_data = report_api._get_delivery_data(case_id="yellowhog")
     report_data = report_api._make_data_presentable(delivery_data)
     assert report_data["accredited"] is False

@@ -1,13 +1,7 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
-from cg.cli.workflow.balsamic.base import (
-    balsamic,
-    start,
-    store,
-    start_available,
-    store_available,
-)
+from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
 
 EXIT_SUCCESS = 0
 
@@ -63,7 +57,7 @@ def test_store(
     assert not balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
     # Make sure  analysis not already stored in ClinicalDB
-    assert not balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id).analyses
+    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
 
     # WHEN running command
     result = cli_runner.invoke(store, [case_id, "--dry-run"], obj=balsamic_context)
@@ -72,7 +66,7 @@ def test_store(
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in ClinicalDB" in caplog.text
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id).analyses
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
     assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
 
@@ -106,13 +100,13 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     assert case_id_success in caplog.text
 
     # THEN action of the case should be set to running
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id_success).action == "running"
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
     # THEN the ineligible case should NOT be ran
     assert case_id_fail not in caplog.text
 
     # THEN action of the case should NOT be set to running
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id_fail).action is None
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action is None
 
 
 def test_store_available(
@@ -147,7 +141,7 @@ def test_store_available(
     # THEN command exits with 1 because one of the cases threw errors
     assert result.exit_code == 1
     assert case_id_success in caplog.text
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id_success).action == "running"
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
 
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
 
@@ -161,13 +155,13 @@ def test_store_available(
     assert case_id_success in caplog.text
 
     # THEN bundle added successfully and action set to None
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id_success).action is None
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action is None
 
     # THEN case id WITHOUT analysis_finish is still running
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id_fail).action == "running"
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action == "running"
 
     # THEN case has analyses
-    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id_success).analyses
+    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).analyses
 
     # THEN bundle can be found in Housekeeper
     assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id_success)
