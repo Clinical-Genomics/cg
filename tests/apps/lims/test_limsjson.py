@@ -55,7 +55,6 @@ def test_parsing_balsamic_json(balsamic_order_to_submit):
     assert sample["comment"] == "other Elution buffer"
 
 
-
 def test_parsing_rml_json(rml_order_to_submit: dict) -> None:
     # GIVEN a path to a RML limsjson with 2 sample in a pool
 
