@@ -298,9 +298,10 @@ def microbial_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def rml_orderform():
+def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return "tests/fixtures/orderforms/1604.10.rml.xlsx"
+    _file = orderforms / "1604.10.rml.xlsx"
+    return str(_file)
 
 
 @pytest.fixture(name="madeline_output")
@@ -314,6 +315,12 @@ def fixture_madeline_output(apps_dir: Path) -> str:
 def mip_order_to_submit() -> dict:
     """Load an example scout order."""
     return json.load(open("tests/fixtures/orders/mip.json"))
+
+
+@pytest.fixture
+def mip_json_order_to_submit() -> dict:
+    """Load an example json scout order."""
+    return json.load(open("tests/fixtures/orders/mip-json.json"))
 
 
 @pytest.fixture
