@@ -124,32 +124,6 @@ class MicrosaltAnalysisAPI:
 
         return rs
 
-    def link(self, ticket: int, sample: str, files: List[dict]) -> None:
-        """Link FASTQ files for a usalt sample.
-        Shall be linked to /<usalt root directory>/ticket/fastq/"""
-
-        # The fastq files should be linked to /.../fastq/<ticket>/<sample>/*.fastq.gz.
-        wrk_dir = Path(self.root_dir) / "fastq" / str(ticket) / sample
-
-        wrk_dir.mkdir(parents=True, exist_ok=True)
-
-        for fastq_data in files:
-            original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = self.generate_fastq_name(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample,
-                read=fastq_data["read"],
-                more={"undetermined": fastq_data["undetermined"]},
-            )
-            linked_fastq_path = wrk_dir / linked_fastq_name
-
-            if not linked_fastq_path.exists():
-                LOG.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
-                linked_fastq_path.symlink_to(original_fastq_path)
-            else:
-                LOG.debug("destination path already exists: %s", linked_fastq_path)
-
     def link_samples(self, case_id: str, sample_id: str = None) -> None:
 
         case_dir = Path(self.root_dir, "fastq", case_id)
@@ -168,8 +142,12 @@ class MicrosaltAnalysisAPI:
                 sample=sample,
             )
 
-    def link_fastq(self, sample: str, ticket: int) -> None:
+    def link_fastq(self, case_dir: Path, sample: str) -> None:
         """Link FASTQ files for a sample."""
+
+        fastq_dir = Path(case_dir, sample)
+        fastq_dir.mkdir(exist_ok=True, parents=True)
+
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
 
@@ -191,6 +169,23 @@ class MicrosaltAnalysisAPI:
             if len(matches) > 0:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
+
+        for fastq_data in files:
+            original_fastq_path = Path(fastq_data["path"])
+            linked_fastq_name = self.generate_fastq_name(
+                lane=fastq_data["lane"],
+                flowcell=fastq_data["flowcell"],
+                sample=sample,
+                read=fastq_data["read"],
+                more={"undetermined": fastq_data["undetermined"]},
+            )
+            linked_fastq_path = Path(fastq_dir, linked_fastq_name)
+
+            if not linked_fastq_path.exists():
+                LOG.info("Linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                linked_fastq_path.symlink_to(original_fastq_path)
+            else:
+                LOG.debug("Destination path already exists: %s, skipping", linked_fastq_path)
 
         self.link(ticket=ticket, sample=sample, files=files)
 
