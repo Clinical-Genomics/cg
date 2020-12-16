@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 import re
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from cg.apps.microsalt.fastq import FastqHandler
 from cg.constants import CASE_ACTIONS
@@ -20,6 +20,7 @@ from cg.store.models import Sample
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.store import models, Store
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -32,14 +33,16 @@ class MicrosaltAnalysisAPI:
         db: Store,
         hk_api: HousekeeperAPI,
         lims_api: LimsAPI,
-        fastq_handler: FastqHandler,
         config: dict = None,
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
-        self.fastq_handler = fastq_handler
-        self.root_dir = config.get("root") if config else None
+        self.root_dir = config.get("root")
+        self.queries_path = config.get("queries_path")
+        self.process = Process(
+            binary=config.get("binary_path"), environment=config.get("conda_env")
+        )
 
     def has_flowcells_on_disk(self, ticket: int) -> bool:
         """Check stuff before starting the analysis."""
@@ -54,6 +57,18 @@ class MicrosaltAnalysisAPI:
             elif flowcell_obj.status != "ondisk":
                 LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
         return all(status == "ondisk" for status in statuses)
+
+    @staticmethod
+    def generate_fastq_name(
+        lane: str, flowcell: str, sample: str, read: str, more: dict = None
+    ) -> str:
+        """Name a FASTQ file following usalt conventions. Naming must be
+        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+
+        undetermined = more.get("undetermined", None)
+        # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
 
     @staticmethod
     def fastq_header(line: str) -> dict:
@@ -109,21 +124,51 @@ class MicrosaltAnalysisAPI:
 
         return rs
 
-    def link_samples(self, ticket: int, sample_id: str):
+    def link(self, ticket: int, sample: str, files: List[dict]) -> None:
+        """Link FASTQ files for a usalt sample.
+        Shall be linked to /<usalt root directory>/ticket/fastq/"""
 
-        sample_objs = self.get_samples(ticket, sample_id)
+        # The fastq files should be linked to /.../fastq/<ticket>/<sample>/*.fastq.gz.
+        wrk_dir = Path(self.root_dir) / "fastq" / str(ticket) / sample
 
-        if not sample_objs:
-            raise Exception("Could not find any samples to link")
+        wrk_dir.mkdir(parents=True, exist_ok=True)
 
-        for sample_obj in sample_objs:
-            LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-            self.link_sample(
-                ticket=ticket,
-                sample=sample_obj.internal_id,
+        for fastq_data in files:
+            original_fastq_path = Path(fastq_data["path"])
+            linked_fastq_name = self.generate_fastq_name(
+                lane=fastq_data["lane"],
+                flowcell=fastq_data["flowcell"],
+                sample=sample,
+                read=fastq_data["read"],
+                more={"undetermined": fastq_data["undetermined"]},
+            )
+            linked_fastq_path = wrk_dir / linked_fastq_name
+
+            if not linked_fastq_path.exists():
+                LOG.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                linked_fastq_path.symlink_to(original_fastq_path)
+            else:
+                LOG.debug("destination path already exists: %s", linked_fastq_path)
+
+    def link_samples(self, case_id: str, sample_id: str = None) -> None:
+
+        case_dir = Path(self.root_dir, "fastq", case_id)
+        case_dir.mkdir(parents=True, exist_ok=True)
+
+        if sample_id:
+            samples = [self.db.Sample(sample_id).internal_id]
+        else:
+            case_obj = self.db.family(case_id)
+            samples = [link.sample.internal_id for link in case_obj.links]
+
+        for sample in samples:
+            LOG.info("%s: link FASTQ files", sample)
+            self.link_fastq(
+                case_dir,
+                sample=sample,
             )
 
-    def link_sample(self, sample: str, ticket: int) -> None:
+    def link_fastq(self, sample: str, ticket: int) -> None:
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample, tags=["fastq"])
         files = []
@@ -147,9 +192,11 @@ class MicrosaltAnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        self.fastq_handler.link(ticket=ticket, sample=sample, files=files)
+        self.link(ticket=ticket, sample=sample, files=files)
 
-    def get_samples(self, ticket: int = None, sample_id: str = None) -> [models.Sample]:
+    def get_samples(
+        self, unique_id: Any, ticket: bool = False, sample: bool = False
+    ) -> [models.Sample]:
         ids = {}
         if ticket:
             ids["ticket_number"] = ticket
@@ -278,10 +325,35 @@ class MicrosaltAnalysisAPI:
     def set_statusdb_action(self, name: str, action: str) -> None:
         """Sets action on case based on ticket number"""
         if action in [None, *CASE_ACTIONS]:
-            case_object = self.db.find_family(name)
+            case_object = self.db.find_family_by_name(name)
             case_object.action = action
             self.db.commit()
             return
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
         )
+
+    def get_case_id_from_ticket(self, unique_id) -> (str, None):
+        case_obj = self.db.find_family_by_name(unique_id)
+        if not case_obj:
+            LOG.error("No case found for ticket number:  %s", unique_id)
+            raise click.Abort
+        case_id = case_obj.internal_id
+        return case_id, None
+
+    def get_case_id_from_sample(self, unique_id) -> (str, str):
+        sample_obj = self.db.Sample(unique_id)
+        if not sample_obj:
+            LOG.error("No sample found with id: %s", unique_id)
+            raise click.Abort
+        case_id = sample_obj.links[0].family.internal_id
+        sample_id = sample_obj.internal_id
+        return case_id, sample_id
+
+    def get_case_id_from_case(self, unique_id) -> (str, None):
+        case_obj = self.db.family(unique_id)
+        if not case_obj:
+            LOG.error("No case found with the id:  %s", unique_id)
+            raise click.Abort
+        case_id = case_obj.internal_id
+        return case_id, None

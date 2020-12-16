@@ -3,12 +3,12 @@
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 import click
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.microsalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
@@ -16,66 +16,71 @@ from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
+OPTION_DRY_RUN = click.option(
+    "-d",
+    "--dry-run",
+    help="Print command to console without executing",
+    is_flag=True,
+)
+OPTION_SAMPLE = click.option(
+    "-s",
+    "--sample",
+    help="Start workflow by providing a sample_id (By default case_id will be used)",
+    is_flag=True,
+)
+OPTION_TICKET = click.option(
+    "-t",
+    "--ticket",
+    help="Start workflow by providing a ticket_id (By default case_id will be used)",
+    is_flag=True,
+)
+ARGUMENT_UNIQUE_IDENTIFIER = click.argument(
+    "unique_id",
+    help="Unique identifier for case/ticket/sample which it to be analyzed",
+    required=True,
+)
+
 
 @click.group("microsalt", invoke_without_command=True)
-@click.option("-d", "--dry-run", is_flag=True, help="print to console")
-@click.option("-t", "--ticket", help="include all microbial samples for a ticket")
 @click.pass_context
-def microsalt(context: click.Context, ticket: str, dry_run: bool):
+def microsalt(context: click.Context):
     """Microbial workflow"""
-    context.obj["status_db"] = Store(context.obj["database"])
-    hk_api = HousekeeperAPI(context.obj)
-    lims_api = LimsAPI(context.obj)
-    analysis_api = MicrosaltAnalysisAPI(
-        db=context.obj["status_db"],
-        hk_api=hk_api,
-        lims_api=lims_api,
-        fastq_handler=FastqHandler(context.obj),
+    microsalt_analysis_api = MicrosaltAnalysisAPI(
+        db=Store(context.obj["database"]),
+        hk_api=HousekeeperAPI(context.obj),
+        lims_api=LimsAPI(context.obj),
         config=context.obj["microsalt"],
     )
-    context.obj["microsalt_analysis_api"] = analysis_api
-
-    if context.invoked_subcommand:
-        return
-
-    if not ticket:
-        LOG.error("Please provide a ticket")
-        context.abort()
-
-    if not analysis_api.has_flowcells_on_disk(ticket=ticket):
-        LOG.warning(
-            f"Ticket {ticket} not ready to run, requesting flowcells from long term storage!",
-        )
-        analysis_api.request_removed_flowcells(ticket=ticket)
-        return
-
-    # execute the analysis!
-    context.invoke(config_case, ticket=ticket, dry_run=dry_run)
-    context.invoke(link, ticket=ticket, dry_run=dry_run)
-    context.invoke(run, ticket=ticket, dry_run=dry_run)
+    context.obj["microsalt_analysis_api"] = microsalt_analysis_api
 
 
-@click.command()
-@click.option("-d", "--dry-run", is_flag=True, help="only print to console")
-@click.option("-t", "--ticket", help="link all microbial samples for a ticket")
-@click.argument("sample_id", required=False)
+@microsalt.command()
+@OPTION_DRY_RUN
+@OPTION_TICKET
+@OPTION_SAMPLE
+@ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
-def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
+def link(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: Any):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
-    analysis_api = context.obj["microsalt_analysis_api"]
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
 
-    if not any([ticket, sample_id]):
-        LOG.error("provide ticket and/or sample")
-        context.abort()
+    if ticket and sample:
+        LOG.error("Flags -t and -s are mutually exclusive!")
+        raise click.Abort
+    if ticket:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
 
-    if dry_run:
-        return
+    elif sample:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_sample(unique_id)
 
-    analysis_api.link_samples(ticket=ticket, sample_id=sample_id)
+    else:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
+
+    microsalt_analysis_api.link_samples(case_id=case_id, sample_id=sample_id, dry_run=dry_run)
 
 
-@click.command("config-case")
+@microsalt.command("config-case")
 @click.option("-d", "--dry-run", is_flag=True, help="print config to console")
 @click.option("-t", "--ticket", help="create config-case all microbial samples for an order")
 @click.argument("sample_id", required=False)
@@ -108,7 +113,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 
-@click.command()
+@microsalt.command()
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option(
     "-c",
@@ -123,11 +128,11 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
 def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
 
-    microbial_api = context.obj["microsalt_analysis_api"]
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
 
     microsalt_bin = context.obj["microsalt"]["binary_path"]
     microsalt_env = context.obj["microsalt"]["conda_env"]
-    fastq_path = Path(context.obj["microsalt"]["root"]) / "fastq" / str(ticket)
+    fastq_path = Path(microsalt_analysis_api.root_dir / "fastq" / str(ticket))
 
     if config_case_path:
         config_case_path = Path(config_case_path)
@@ -145,10 +150,23 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
     process.run_command(parameters=analyse_command, dry_run=dry_run)
 
     if not dry_run:
-        microbial_api.set_statusdb_action(name=ticket, action="running")
+        microsalt_analysis_api.set_statusdb_action(name=ticket, action="running")
+
+
+@microsalt.command()
+@click.pass_context
+def start(context, case_id: str, dry_run: bool):
+    # execute the analysis!
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    if not microsalt_analysis_api.has_flowcells_on_disk(ticket=ticket):
+        LOG.warning(
+            f"Ticket {ticket} not ready to run, requesting flowcells from long term storage!",
+        )
+        microsalt_analysis_api.request_removed_flowcells(ticket=ticket)
+        return
+    context.invoke(config_case, ticket=ticket, dry_run=dry_run)
+    context.invoke(link, ticket=ticket, dry_run=dry_run)
+    context.invoke(run, ticket=ticket, dry_run=dry_run)
 
 
 microsalt.add_command(store_cmd)
-microsalt.add_command(run)
-microsalt.add_command(config_case)
-microsalt.add_command(link)
