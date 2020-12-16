@@ -186,7 +186,7 @@ def store_housekeeper(context, case_id):
     except (BundleAlreadyAddedError, FileExistsError) as e:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
         balsamic_analysis_api.housekeeper_api.rollback()
-        balsamic_analysis_api.store.rollback()
+        balsamic_analysis_api.fastq.rollback()
         raise click.Abort()
     except BalsamicStartError as e:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")

@@ -30,7 +30,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
 
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    assert not balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id)
 
     # WHEN running
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
@@ -109,7 +109,7 @@ def test_valid_case(
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
 
     # Make sure  analysis not alredy stored in ClinicalDB
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
+    assert not balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id).analyses
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
@@ -118,7 +118,7 @@ def test_valid_case(
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in ClinicalDB" in caplog.text
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
+    assert balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id).analyses
     assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
 
 
@@ -139,7 +139,7 @@ def test_valid_case_already_added(
     balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
 
     # Make sure  analysis not alredy stored in ClinicalDB
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
+    assert not balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id).analyses
 
     # Ensure bundles exist by creating them first
     cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)

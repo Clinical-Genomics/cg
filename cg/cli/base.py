@@ -19,7 +19,7 @@ from .import_cmd import import_cmd
 from .reset import reset_cmd
 from cg.cli.set.base import set_cmd
 from .status import status
-from .store import store as store_cmd
+from cg.cli.store.store import store as store_cmd
 from .transfer import transfer
 from .upload import vogue as vogue_command
 from .upload.base import upload

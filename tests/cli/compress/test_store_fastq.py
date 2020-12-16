@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.cli.store import store_case
+from cg.cli.store.store import store_case
 
 
 def test_store_fastq_cli_no_family(compress_context, cli_runner, caplog):

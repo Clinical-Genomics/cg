@@ -1,5 +1,3 @@
-"""Code for store part of CLI"""
-
 import logging
 
 import click
@@ -16,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group()
 @click.pass_context
-def store(context):
+def fastq(context):
     """Command for storing files"""
     housekeeper_api = HousekeeperAPI(context.obj)
     crunchy_api = CrunchyAPI(context.obj)
@@ -26,7 +24,7 @@ def store(context):
     context.obj["status_db"] = Store(context.obj.get("database"))
 
 
-@store.command("sample")
+@fastq.command("sample")
 @click.argument("sample-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -43,7 +41,7 @@ def store_sample(context, sample_id, dry_run):
     return 1
 
 
-@store.command("case")
+@fastq.command("case")
 @click.argument("case-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -62,7 +60,7 @@ def store_case(context, case_id, dry_run):
     LOG.info(f"Stored fastq files for {stored_inds} samples")
 
 
-@store.command("flowcell")
+@fastq.command("flowcell")
 @click.argument("flowcell_id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -78,7 +76,7 @@ def store_flowcell(context, flowcell_id, dry_run):
     LOG.info(f"Stored fastq files for {stored_inds} samples")
 
 
-@store.command("ticket")
+@fastq.command("ticket")
 @click.argument("ticket_id", type=int)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context

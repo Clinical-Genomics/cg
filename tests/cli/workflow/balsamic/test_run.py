@@ -23,7 +23,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    assert not balsamic_context["BalsamicAnalysisAPI"].fastq.family(case_id)
     # WHEN running
     result = cli_runner.invoke(run, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates

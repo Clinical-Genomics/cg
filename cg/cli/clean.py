@@ -95,7 +95,7 @@ def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
         shutil.rmtree(analysis_path, ignore_errors=True)
         LOG.info(f"Cleaned {analysis_path}")
         analysis_obj.cleaned_at = datetime.now()
-        balsamic_analysis_api.store.commit()
+        balsamic_analysis_api.fastq.commit()
 
 
 @clean.command("mip-run-dir")
@@ -248,7 +248,7 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
 
     for analysis in possible_cleanups:
         case_id = analysis.family.internal_id
-        LOG.info(f"{case_id} - {balsamic_analysis_api.store.family(case_id).action}")
+        LOG.info(f"{case_id} - {balsamic_analysis_api.fastq.family(case_id).action}")
         try:
             LOG.info(f"Cleaning Balsamic output for {case_id}")
             context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
