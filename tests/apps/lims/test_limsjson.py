@@ -48,7 +48,6 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
 
     # ... and collect relevant data about the families
     duo_family = data["items"][4]
-
     assert len(duo_family["samples"]) == 2
     assert duo_family["name"] == "F0018192"
     assert duo_family["priority"] == "standard"
@@ -58,7 +57,6 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
     # ... and collect relevant info about the samples
     sibling_sample = duo_family["samples"][0]
     assert sibling_sample["name"] == "2020-16171-81"
-    assert sibling_sample["container"] == "Tube"
     assert sibling_sample["application"] == "WGSPCFC030"
     assert sibling_sample["sex"] == "female"
 
@@ -67,9 +65,9 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
     # require-qc-ok on the family
     assert sibling_sample["source"] == "blood"
     assert sibling_sample.get("tumour") is None
-
+    assert sibling_sample["container"] == "96 well plate"
     assert sibling_sample["container_name"] == "2020-16171-81"
-    assert sibling_sample["well_position"] == ""
+    assert sibling_sample["well_position"] == "A:1"
 
     # panels on the family
     assert sibling_sample["status"] == "affected"
