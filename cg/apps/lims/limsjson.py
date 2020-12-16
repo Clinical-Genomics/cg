@@ -82,7 +82,7 @@ def expand_case(case_id: str, parsed_case: dict) -> dict:
 
     gene_panels = set()
     for raw_sample in samples:
-        if raw_sample["panels"]:
+        if raw_sample.get("panels"):
             gene_panels.update(raw_sample["panels"])
         new_sample = {}
         for key, value in raw_sample.items():
@@ -91,6 +91,7 @@ def expand_case(case_id: str, parsed_case: dict) -> dict:
 
         new_case["samples"].append(new_sample)
 
-    new_case["panels"] = list(gene_panels)
+    if gene_panels:
+        new_case["panels"] = list(gene_panels)
 
     return new_case
