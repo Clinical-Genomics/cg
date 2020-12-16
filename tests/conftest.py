@@ -5,16 +5,16 @@ import copy
 import datetime as dt
 import json
 import logging
-import shutil
 import os
+import shutil
 from pathlib import Path
 
 import pytest
 import ruamel.yaml
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
 from cg.apps.gt import GenotypeAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
 from cg.models import CompressionData
 from cg.store import Store
@@ -22,11 +22,11 @@ from cg.store import Store
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.process_mock import ProcessMock
 from .mocks.scout import MockScoutAPI
+from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
-from .mocks.tb_mock import MockTB
-from .mocks.process_mock import ProcessMock
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {

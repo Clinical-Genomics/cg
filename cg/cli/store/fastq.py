@@ -3,7 +3,7 @@ import logging
 import click
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI

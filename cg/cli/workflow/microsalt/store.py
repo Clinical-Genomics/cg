@@ -1,20 +1,15 @@
 """Click commands to store microSALT analyses"""
 import logging
 
+import _io
 import click
 
-from cg.apps.hk import HousekeeperAPI
-from cg.exc import (
-    AnalysisDuplicationError,
-    BundleAlreadyAddedError,
-    MandatoryFilesMissing,
-)
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.exc import (AnalysisDuplicationError, BundleAlreadyAddedError,
+                    MandatoryFilesMissing)
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
-
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
-
-import _io
 
 LOG = logging.getLogger(__name__)
 

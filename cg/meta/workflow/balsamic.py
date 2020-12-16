@@ -10,12 +10,10 @@ from typing import List, Optional
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-
-from cg.constants import CASE_ACTIONS, Pipeline
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
 

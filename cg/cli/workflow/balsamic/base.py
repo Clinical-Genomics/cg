@@ -4,16 +4,16 @@ import logging
 
 import click
 
-from cg.apps.environ import environ_email
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 
 LOG = logging.getLogger(__name__)
 

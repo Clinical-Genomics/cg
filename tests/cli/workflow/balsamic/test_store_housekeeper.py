@@ -1,11 +1,7 @@
-from pathlib import Path
-import json
 import logging
-import pytest
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.base import store_housekeeper
-from cg.exc import BalsamicStartError, BundleAlreadyAddedError
-from cg.apps.hk import HousekeeperAPI
 
 EXIT_SUCCESS = 0
 

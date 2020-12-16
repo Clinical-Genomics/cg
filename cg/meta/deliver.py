@@ -2,16 +2,15 @@
 
 import logging
 import os
-
-from typing import List, Set, Iterable
-from pathlib import Path
 from copy import deepcopy
-
-from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
-from cg.store.models import Family, Sample, FamilySample
+from pathlib import Path
+from typing import Iterable, List, Set
 
 from housekeeper.store import models as hk_models
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.store import Store
+from cg.store.models import Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 

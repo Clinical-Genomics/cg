@@ -6,7 +6,7 @@ from pathlib import Path
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.microsalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd

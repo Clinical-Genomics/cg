@@ -23,4 +23,6 @@ def store_analysis_cmd(context, pipeline: Pipeline, infile: Path):
     """Command for storing analysis results in housekeeper"""
     LOG.info("Store analysis result in Housekeeper")
     hermes_api = HermesApi(config=context.obj, pipeline=pipeline)
-    print(hermes_api.convert_deliverables(deliverables_file=infile))
+    from pprint import pprint as pp
+
+    pp(hermes_api.convert_deliverables(deliverables_file=infile).dict())

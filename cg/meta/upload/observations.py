@@ -2,14 +2,15 @@
     API for uploading observations
 """
 
-from pathlib import Path
 import logging
+from pathlib import Path
 from typing import List
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.exc import DuplicateRecordError, DuplicateSampleError, CaseNotFoundError
-from cg.store import models, Store
+from cg.exc import (CaseNotFoundError, DuplicateRecordError,
+                    DuplicateSampleError)
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 

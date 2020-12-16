@@ -2,7 +2,7 @@ import logging
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.stats import StatsAPI
 from cg.meta import transfer as transfer_app

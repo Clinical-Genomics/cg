@@ -9,10 +9,10 @@ import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 
 
