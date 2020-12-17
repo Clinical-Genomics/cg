@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+## 16.16.1
+
+### Fixed
+
+- This PR fixes the problem handling wells in json orders without ":" as separator, e.g. A1 instead of A:1
+
 ## 16.15.1
 
 ### Fixed
