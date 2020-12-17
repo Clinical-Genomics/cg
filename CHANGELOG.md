@@ -17,13 +17,18 @@ Try to use the following format:
 ### Changed
 
 
-## [x.x.x]
+## [16.17.1_dev]
 
 ### Added
 
 ### Fixed
 - Fixed exporting reduced mt_bam to scout config
 ### Changed
+
+## 16.17.0
+
+### Changed
+- Update Scout config output for images from chromograph
 
 ## 16.16.1
 
@@ -45,11 +50,6 @@ Try to use the following format:
 ### Fixed
 
 - Removes dependency on deprecated excel-parser `xlrd`
-
-## 16.16.0
-
-### Changed
-- Update Scout config output for images from chromograph
 
 
 ## 16.15.0
