@@ -10,6 +10,7 @@ from cg.apps.environ import environ_email
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.cli.store.analysis import balsamic_cmd as store_balsamic_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -161,7 +162,6 @@ def report_deliver(context, case_id, analysis_type, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Creating delivery report for {case_id}")
-        case_object = balsamic_analysis_api.get_case_object(case_id)
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
@@ -222,9 +222,18 @@ def start(context, case_id, analysis_type, panel_bed, priority, dry):
 @click.pass_context
 def store(context, case_id, analysis_type, dry):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
+    balsamic_analysis_api: BalsamicAnalysisAPI = context.obj["BalsamicAnalysisAPI"]
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
-    context.invoke(store_housekeeper, case_id=case_id)
+    try:
+        deliverables_file: str = balsamic_analysis_api.get_deliverables_file_path(
+            case_id=case_id, check_exists=True
+        )
+    except BalsamicStartError as err:
+        LOG.warning(err)
+        raise click.Abort
+    analysis_type: str = balsamic_analysis_api.get_analysis_type(case_id=case_id)
+    context.invoke(store_balsamic_cmd, infile=deliverables_file, analysis_type=analysis_type)
 
 
 @balsamic.command("start-available")

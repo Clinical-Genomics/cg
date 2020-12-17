@@ -8,6 +8,8 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
+from typing_extensions import Literal
+
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -142,6 +144,20 @@ class BalsamicAnalysisAPI:
                 valid_sample_list.append(link)
         return valid_sample_list
 
+    def get_analysis_type(self, case_id: str) -> str:
+        """Return the analysis type for a case
+
+        Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
+        """
+        analysis_type: str = self.get_analysis_type(case_id=case_id)
+        number_of_samples: int = len(self.get_balsamic_sample_objects(case_id=case_id))
+        sample_type = "tumor"
+        if number_of_samples == 2:
+            sample_type = "tumor_normal"
+        if analysis_type != "wgs":
+            analysis_type = "panel"
+        return "_".join([sample_type, analysis_type])
+
     def link_samples(self, case_id: str) -> None:
         """Links and copies files to working directory"""
         for link_object in self.get_balsamic_sample_objects(case_id=case_id):
@@ -195,9 +211,9 @@ class BalsamicAnalysisAPI:
         return "normal"
 
     @staticmethod
-    def get_application_type(link_object: models.FamilySample) -> str:
-        """Returns application type of a sample"""
-        application_type = link_object.sample.application_version.application.prep_category
+    def get_application_type(link_object: models.FamilySample) -> Literal["wgs", "wes", "tgs"]:
+        """Returns application type of a sample."""
+        application_type: str = link_object.sample.application_version.application.prep_category
         return application_type
 
     def get_priority(self, case_id: str) -> str:
@@ -381,7 +397,9 @@ class BalsamicAnalysisAPI:
     def parse_deliverables_report(self, case_id: str) -> list:
         """Parse BALSAMIC deliverables report, and return a list of files and their respective tags in bundle"""
         self.get_case_object(case_id=case_id)
-        deliverables_file_path = self.get_deliverables_file_path(case_id=case_id, check_exists=True)
+        deliverables_file_path = self.get_deliverables_file_path(
+            case_id=case_id, root_dir=self.balsamic_api.root_dir, check_exists=True
+        )
         sample_names = [
             x.sample.internal_id for x in self.get_balsamic_sample_objects(case_id=case_id)
         ]
