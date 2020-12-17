@@ -22,7 +22,7 @@ from .constants import (
     DEFAULT_CAPTURE_KIT,
     DataDelivery,
     COMBOS,
-    CASE_ACTIONS,
+    FAMILY_ACTIONS,
     FLOWCELL_STATUS,
     Pipeline,
     PREP_CATEGORIES,

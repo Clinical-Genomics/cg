@@ -68,6 +68,7 @@ def link(context: click.Context, dry_run: bool, ticket: bool, sample: bool, uniq
     if ticket and sample:
         LOG.error("Flags -t and -s are mutually exclusive!")
         raise click.Abort
+
     if ticket:
         case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
 
@@ -77,20 +78,25 @@ def link(context: click.Context, dry_run: bool, ticket: bool, sample: bool, uniq
     else:
         case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
 
+    if not microsalt_analysis_api.check_flowcells_on_disk(case_id=case_id, sample_id=sample_id):
+        raise click.Abort
     microsalt_analysis_api.link_samples(case_id=case_id, sample_id=sample_id, dry_run=dry_run)
 
 
 @microsalt.command("config-case")
-@click.option("-d", "--dry-run", is_flag=True, help="print config to console")
-@click.option("-t", "--ticket", help="create config-case all microbial samples for an order")
-@click.argument("sample_id", required=False)
+@OPTION_DRY_RUN
+@OPTION_TICKET
+@OPTION_SAMPLE
+@ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
-def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: str):
+def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: Any):
     """ Create a config file on case level for microSALT """
 
-    if not ticket and not sample_id:
-        LOG.error("Provide ticket and/or sample")
-        context.abort()
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+
+    if ticket and sample:
+        LOG.error("Flags -t and -s are mutually exclusive!")
+        raise click.Abort
 
     sample_objs = context.obj["microsalt_analysis_api"].get_samples(ticket, sample_id)
 

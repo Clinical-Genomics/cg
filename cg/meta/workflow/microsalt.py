@@ -10,9 +10,9 @@ import logging
 from pathlib import Path
 import re
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
+import click
 
-from cg.apps.microsalt.fastq import FastqHandler
 from cg.constants import CASE_ACTIONS
 from cg.exc import CgDataError
 from cg.store.models import Sample
@@ -33,7 +33,7 @@ class MicrosaltAnalysisAPI:
         db: Store,
         hk_api: HousekeeperAPI,
         lims_api: LimsAPI,
-        config: dict = None,
+        config: Optional[dict] = {},
     ):
         self.db = db
         self.hk = hk_api
@@ -44,19 +44,32 @@ class MicrosaltAnalysisAPI:
             binary=config.get("binary_path"), environment=config.get("conda_env")
         )
 
-    def has_flowcells_on_disk(self, ticket: int) -> bool:
-        """Check stuff before starting the analysis."""
+    def check_flowcells_on_disk(self, case_id: str, sample_id: Optional[str] = None) -> bool:
+        """Check if flowcells are on disk for sample before starting the analysis.
+        Flowcells not on disk will be requested
+        """
 
-        flowcells = self.get_flowcells(ticket=ticket)
+        flowcells = self.get_flowcells(case_id=case_id, sample_id=sample_id)
         statuses = []
         for flowcell_obj in flowcells:
             LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: flowcell not on disk")
+                LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
+                flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
                 LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        self.db.commit()
         return all(status == "ondisk" for status in statuses)
+
+    def get_flowcells(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Flowcell]:
+        """Get all flowcells for all samples in a ticket"""
+        flowcells = set()
+        for sample in self.get_samples(case_id=case_id, sample_id=sample_id):
+            for flowcell in sample.flowcells:
+                flowcells.add(flowcell)
+
+        return list(flowcells)
 
     @staticmethod
     def generate_fastq_name(
@@ -124,22 +137,18 @@ class MicrosaltAnalysisAPI:
 
         return rs
 
-    def link_samples(self, case_id: str, sample_id: str = None) -> None:
+    def link_samples(self, case_id: str, sample_id: Optional[str] = None) -> None:
 
         case_dir = Path(self.root_dir, "fastq", case_id)
         case_dir.mkdir(parents=True, exist_ok=True)
 
-        if sample_id:
-            samples = [self.db.Sample(sample_id).internal_id]
-        else:
-            case_obj = self.db.family(case_id)
-            samples = [link.sample.internal_id for link in case_obj.links]
+        samples = self.get_samples(case_id=case_id, sample_id=sample_id)
 
         for sample in samples:
-            LOG.info("%s: link FASTQ files", sample)
+            LOG.info("%s: link FASTQ files", sample.internal_id)
             self.link_fastq(
                 case_dir,
-                sample=sample,
+                sample=sample.internal_id,
             )
 
     def link_fastq(self, case_dir: Path, sample: str) -> None:
@@ -187,18 +196,12 @@ class MicrosaltAnalysisAPI:
             else:
                 LOG.debug("Destination path already exists: %s, skipping", linked_fastq_path)
 
-        self.link(ticket=ticket, sample=sample, files=files)
-
-    def get_samples(
-        self, unique_id: Any, ticket: bool = False, sample: bool = False
-    ) -> [models.Sample]:
-        ids = {}
-        if ticket:
-            ids["ticket_number"] = ticket
-            samples = self.db.samples_by_ids(**ids).all()
+    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
         if sample_id:
-            sample = self.db.sample(internal_id=sample_id)
-            samples = [sample] if sample else []
+            samples = [self.db.Sample(sample_id)]
+        else:
+            case_obj = self.db.family(case_id)
+            samples = [link.sample for link in case_obj.links]
         return samples
 
     def get_lims_comment(self, sample_id: str) -> str:
@@ -272,30 +275,6 @@ class MicrosaltAnalysisAPI:
         """Get LIMS project for a sample"""
         return self.lims.get_sample_project(sample_id)
 
-    def get_flowcells(self, ticket: int) -> [models.Flowcell]:
-        """Get all flowcells for all samples in a ticket"""
-
-        flowcells = set()
-
-        for sample in self.get_samples(ticket=ticket):
-            for flowcell in sample.flowcells:
-                flowcells.add(flowcell)
-
-        return list(flowcells)
-
-    def request_removed_flowcells(self, ticket):
-        """Check stuff before starting the analysis."""
-
-        flowcells = self.get_flowcells(ticket=ticket)
-        for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking if flowcell should be requested")
-            if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
-        self.db.commit()
-
     def get_deliverables_to_store(self) -> List[Path]:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
@@ -328,7 +307,7 @@ class MicrosaltAnalysisAPI:
             f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
         )
 
-    def get_case_id_from_ticket(self, unique_id) -> (str, None):
+    def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
         case_obj = self.db.find_family_by_name(unique_id)
         if not case_obj:
             LOG.error("No case found for ticket number:  %s", unique_id)
@@ -336,7 +315,7 @@ class MicrosaltAnalysisAPI:
         case_id = case_obj.internal_id
         return case_id, None
 
-    def get_case_id_from_sample(self, unique_id) -> (str, str):
+    def get_case_id_from_sample(self, unique_id: str) -> (str, str):
         sample_obj = self.db.Sample(unique_id)
         if not sample_obj:
             LOG.error("No sample found with id: %s", unique_id)
@@ -345,7 +324,7 @@ class MicrosaltAnalysisAPI:
         sample_id = sample_obj.internal_id
         return case_id, sample_id
 
-    def get_case_id_from_case(self, unique_id) -> (str, None):
+    def get_case_id_from_case(self, unique_id: str) -> (str, None):
         case_obj = self.db.family(unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
