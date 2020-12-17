@@ -1,11 +1,12 @@
-from typing import List
+from typing import List, Dict
 
-import xlrd
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES, Pipeline
 
 from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
-from cg.utils.StrEnum import StrEnum
+import openpyxl
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
@@ -15,7 +16,7 @@ VALID_ORDERFORMS = [
     "1508:21",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
     "1603:9",  # Microbial WGS
-    "1604:9",  # Orderform Ready made libraries (RML)
+    "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
 
@@ -28,7 +29,7 @@ CASE_PROJECT_TYPES = [
 ]
 
 
-def check_orderform_version(document_title):
+def check_orderform_version(document_title: str) -> None:
     """Raise an error if the orderform is too new or too old for the order portal."""
     for valid_orderform in VALID_ORDERFORMS:
         if valid_orderform in document_title:
@@ -38,22 +39,24 @@ def check_orderform_version(document_title):
 
 def parse_orderform(excel_path: str) -> dict:
     """Parse out information from an order form."""
-    workbook = xlrd.open_workbook(excel_path)
+
+    workbook: Workbook = openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
 
     sheet_name = None
-    sheet_names = workbook.sheet_names()
-    for name in ["orderform", "order form"]:
+    sheet_names: List[str] = workbook.sheetnames
+    for name in ["Orderform", "orderform", "order form"]:
         if name in sheet_names:
             sheet_name = name
             break
     if sheet_name is None:
         raise OrderFormError("'orderform' sheet not found in Excel file")
-    orderform_sheet = workbook.sheet_by_name(sheet_name)
 
-    document_title = get_document_title(workbook, orderform_sheet)
+    orderform_sheet: Worksheet = workbook[sheet_name]
+    document_title: str = get_document_title(workbook, orderform_sheet)
     check_orderform_version(document_title)
 
     raw_samples = relevant_rows(orderform_sheet)
+
     if len(raw_samples) == 0:
         raise OrderFormError("orderform doesn't contain any samples")
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
@@ -83,14 +86,18 @@ def parse_orderform(excel_path: str) -> dict:
     return data
 
 
-def get_document_title(workbook: xlrd.book.Book, orderform_sheet: xlrd.sheet.Sheet) -> str:
-    """Get the document title for the order form."""
-    if "information" in workbook.sheet_names():
-        information_sheet = workbook.sheet_by_name("information")
-        document_title = information_sheet.row(0)[2].value
-        return document_title
+def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:
+    """Get the document title for the order form.
 
-    document_title = orderform_sheet.row(0)[1].value
+    Openpyxl use 1 based counting
+    """
+    for sheet_number, sheet_name in enumerate(workbook.sheetnames):
+        if sheet_name.lower() == "information":
+            information_sheet: Worksheet = workbook[sheet_name]
+            document_title = information_sheet.cell(1, 3).value
+            return document_title
+
+    document_title = orderform_sheet.cell(1, 2).value
     return document_title
 
 
@@ -120,7 +127,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     return project_type
 
 
-def expand_case(case_id, parsed_case):
+def expand_case(case_id: str, parsed_case: dict) -> tuple:
     """Fill-in information about families."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case["samples"]
@@ -192,7 +199,7 @@ def group_cases(parsed_samples):
     return raw_cases
 
 
-def parse_sample(raw_sample):
+def parse_sample(raw_sample: Dict[str, str]) -> dict:
     """Parse a raw sample row from order form sheet."""
     if ":" in raw_sample.get("UDF/Gene List", ""):
         raw_sample["UDF/Gene List"] = raw_sample["UDF/Gene List"].replace(":", ";")
@@ -248,6 +255,8 @@ def parse_sample(raw_sample):
         sample["data_analysis"] = str(Pipeline.MIP_DNA)
     elif data_analysis and "microbial" in data_analysis:
         sample["data_analysis"] = str(Pipeline.MICROSALT)
+    elif data_analysis and "fluffy" in data_analysis:
+        sample["data_analysis"] = str(Pipeline.FLUFFY)
     elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
         sample["data_analysis"] = str(Pipeline.FASTQ)
     else:
@@ -258,7 +267,7 @@ def parse_sample(raw_sample):
         ("volume", "UDF/Volume (uL)"),
         ("quantity", "UDF/Quantity"),
         ("concentration", "UDF/Concentration (nM)"),
-        ("concentration_weight", "UDF/Sample Conc."),
+        ("concentration_sample", "UDF/Sample Conc."),
         ("time_point", "UDF/time_point"),
     ]
     for json_key, excel_key in numeric_values:
@@ -277,12 +286,13 @@ def parse_sample(raw_sample):
     return sample
 
 
-def relevant_rows(orderform_sheet):
+def relevant_rows(orderform_sheet: Worksheet) -> List[Dict[str, str]]:
     """Get the relevant rows from an order form sheet."""
     raw_samples = []
     current_row = None
     empty_row_found = False
-    for row in orderform_sheet.get_rows():
+    row: tuple
+    for row in orderform_sheet.rows:
         if row[0].value == "</SAMPLE ENTRIES>":
             break
 
@@ -290,7 +300,12 @@ def relevant_rows(orderform_sheet):
             header_row = [cell.value for cell in row]
             current_row = None
         elif current_row == "samples":
-            values = [str(cell.value) for cell in row]
+            values = []
+            for cell in row:
+                value = str(cell.value)
+                if value == "None":
+                    value = ""
+                values.append(value)
 
             # skip empty rows
             if values[0]:
@@ -301,7 +316,6 @@ def relevant_rows(orderform_sheet):
                     )
 
                 sample_dict = dict(zip(header_row, values))
-
                 raw_samples.append(sample_dict)
             else:
                 empty_row_found = True

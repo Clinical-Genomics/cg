@@ -1,11 +1,12 @@
 {
   "name": "MIP order",
-  "customer": "cust003",
+  "customer": "cust000",
   "comment": "",
   "samples": [
     {
       "name": "sample1",
       "application": "WGTPCFC030",
+      "comment": "comment",
       "data_analysis": "mip-dna",
       "container": "96 well plate",
       "container_name": "CMMS",
