@@ -15,7 +15,7 @@ class ScoutIndividual(BaseModel):
     phenotype: Literal["affected", "unaffected", "unknown"]
     capture_kit: Optional[str] = None
     alignment_path: Optional[str] = None
-    chromograph: Optional[str] = None
+    chromograph_images: Optional[dict] = None
     rhocall_bed: Optional[str] = None
     rhocall_wig: Optional[str] = None
     tiddit_coverage_wig: Optional[str] = None
