@@ -17,7 +17,7 @@ Try to use the following format:
 ### Changed
 
 
-## [16.17.1_dev]
+## [16.17.1]
 
 ### Added
 
