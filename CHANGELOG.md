@@ -46,6 +46,12 @@ Try to use the following format:
 
 - Removes dependency on deprecated excel-parser `xlrd`
 
+## 16.16.0
+
+### Changed
+- Update Scout config output for images from chromograph
+
+
 ## 16.15.0
 
 ### Added
