@@ -13,6 +13,15 @@ Try to use the following format:
 ### Added
 
 ### Fixed
+
+### Changed
+
+
+## [x.x.x]
+
+### Added
+
+### Fixed
 - Fixed exporting reduced mt_bam to scout config
 ### Changed
 
