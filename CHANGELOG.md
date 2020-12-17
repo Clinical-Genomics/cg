@@ -22,6 +22,25 @@ Try to use the following format:
 
 ### Changed
 
+## [17.0.0]
+
+### Added
+- Lims ID is sent to Balsamic during case config
+
+
+## [16.17.1]
+
+### Added
+
+### Fixed
+- Fixed exporting reduced mt_bam to scout config
+### Changed
+
+## 16.17.0
+
+### Changed
+- Update Scout config output for images from chromograph
+
 ## 16.16.1
 
 ### Fixed
@@ -42,11 +61,6 @@ Try to use the following format:
 ### Fixed
 
 - Removes dependency on deprecated excel-parser `xlrd`
-
-## 16.16.0
-
-### Changed
-- Update Scout config output for images from chromograph
 
 
 ## 16.15.0
@@ -87,7 +101,7 @@ Try to use the following format:
 ## 16.11.0
 
 ### Added
-- cg set family [CASEID] now has the option --data-delivery 
+- cg set family [CASEID] now has the option --data-delivery
 
 ## [16.10.4]
 
@@ -242,7 +256,7 @@ Try to use the following format:
 ## [16.0.6]
 
 ### Fixed
-- 'cg upload auto --pipeline' to accept 'mip-dna' as pipeline 
+- 'cg upload auto --pipeline' to accept 'mip-dna' as pipeline
 
 ## [16.0.5]
 
@@ -254,7 +268,7 @@ Try to use the following format:
 ### Fixed
 - Case database entities (Family) can only have specific values for data_analysis
 - Analysis database entities can only have specific values for pipeline
-- Enum used for pipeline as arguments 
+- Enum used for pipeline as arguments
 
 ## [16.0.3]
 
@@ -277,7 +291,7 @@ Try to use the following format:
 - Deliver analysis based on case-id or ticket
 
 ### Changed
-- Deliver commands merged into new command `cg deliver analysis` 
+- Deliver commands merged into new command `cg deliver analysis`
 
 ## [15.0.4]
 ### Fixed
@@ -301,7 +315,7 @@ Try to use the following format:
 - New command: cg store ticket <ticket_id>
 - New command: cg store flowcell <flowcell_id>
 - New command: cg store case <case_id>
-- New command: cg store sample <sample_id> 
+- New command: cg store sample <sample_id>
 
 ### Removed
 - Old command: cg store fastq <case_id>
@@ -318,7 +332,7 @@ Try to use the following format:
 - New command: cg decompress ticket <ticket_id>
 - New command: cg decompress flowcell <flowcell_id>
 - New command: cg decompress case <case_id>
-- New command: cg decompress sample <sample_id> 
+- New command: cg decompress sample <sample_id>
 
 ### Removed
 - Old command: cg compress decompress spring <case_id>
@@ -388,11 +402,11 @@ Try to use the following format:
 ## [13.14.2]
 
 ### Fixed
- 
+
  - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
  - Rephrased query used for compression. The query output is unchanged
  - Fixed typo in query name
- 
+
 
 ## [13.14.1]
 ### Removed
@@ -423,7 +437,7 @@ Try to use the following format:
 ## [13.10.1]
 
 ### Fixed
-- Repaired automation query for storing Balsamic cases in Housekeeper 
+- Repaired automation query for storing Balsamic cases in Housekeeper
 
 ## [13.10]
 
@@ -492,19 +506,19 @@ Made unidirectional links to ApplicationVersion (instead of bi) to speed up view
 ## [13.3.0]
 
 ### Added
-- Added new cases to skip during compression 
+- Added new cases to skip during compression
 
 ## [13.2.0]
 
 ### Changed
-- Only talk to genotype via subprocess and CLI 
+- Only talk to genotype via subprocess and CLI
 
 
 ## [13.1.0]
 
 ### Changed
 - Added cases for all microbial samples
-- Add a case when a new microbial order is received 
+- Add a case when a new microbial order is received
 
 ## [13.0.0]
 
@@ -567,7 +581,7 @@ Made unidirectional links to ApplicationVersion (instead of bi) to speed up view
 ## [12.3.4]
 
 ### Fixed
-- Fixes bug where  upload_started_at and uploaded_at timestamps were not being updated in StatusDB upon successful Scout upload. 
+- Fixes bug where  upload_started_at and uploaded_at timestamps were not being updated in StatusDB upon successful Scout upload.
 This bug was happening because several instances of Store were instantiated in the same context
 
 ## [12.3.3]
@@ -601,7 +615,7 @@ This bug was happening because several instances of Store were instantiated in t
 ## [12.3.1]
 
 ### Fixed
- 
+
 - Fixed bug where AnalysisAPI in cg upload auto was not updated to recent class changes
 
 ## [12.3.0]
