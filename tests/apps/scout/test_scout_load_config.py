@@ -2,6 +2,7 @@
 
 from cg.apps.scout import scout_load_config
 
+
 def test_validate_individual_display_name(sample_dict):
     """Test to validate an individual"""
     # GIVEN some sample information
@@ -12,6 +13,7 @@ def test_validate_individual_display_name(sample_dict):
 
     # THEN assert that the display name is correct
     assert ind_obj.sample_name == sample["sample_name"]
+
 
 def test_validate_mt_bam(sample_dict):
     """Test to validate an individual"""

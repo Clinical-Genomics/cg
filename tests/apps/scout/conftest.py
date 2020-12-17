@@ -7,6 +7,7 @@ import pytest
 from cg.apps.scout.scoutapi import ScoutAPI
 from tests.mocks.process_mock import ProcessMock
 
+
 class MockScoutApi(ScoutAPI):
     def __init__(self, config: dict):
         binary_path = "scout"
@@ -30,6 +31,7 @@ def fixture_sample_dict() -> dict:
         "phenotype": "affected",
     }
     return dict(sample_dict)
+
 
 @pytest.fixture(name="scout_dir")
 def fixture_scout_dir(apps_dir: Path) -> Path:
