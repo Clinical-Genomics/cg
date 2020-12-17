@@ -16,6 +16,11 @@ Try to use the following format:
 
 ### Changed
 
+## [17.0.0]
+
+### Added
+- Lims ID is sent to Balsamic during case config
+
 
 ## [16.17.1]
 
