@@ -14,8 +14,8 @@ class MockScoutApi(ScoutAPI):
         self.process = ProcessMock(binary=binary_path, config=config_path)
 
 
-@pytest.fixture
-def fake_sample_dict() -> dict:
+@pytest.fixture(name="sample_dict")
+def fixture_sample_dict() -> dict:
     sample_dict = {
         "analysis_type": "wgs",
         "bam_path": "/path/to/sample.bam",
