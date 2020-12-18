@@ -12,7 +12,6 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
-from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -129,6 +128,9 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
 
 @microsalt.command()
 @OPTION_DRY_RUN
+@OPTION_TICKET
+@OPTION_SAMPLE
+@ARGUMENT_UNIQUE_IDENTIFIER
 @click.option(
     "-c",
     "--config-case",
@@ -137,7 +139,6 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config-case",
 )
-@click.argument("ticket", type=int)
 @click.pass_context
 def run(
     context: click.Context,
@@ -166,9 +167,7 @@ def run(
 
     fastq_path = Path(microsalt_analysis_api.root_dir, "fastq", case_id)
 
-    if config_case_path:
-        config_case_path = Path(config_case_path)
-    else:
+    if not config_case_path:
         filename = sample_id or case_id
         config_case_path = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
 
