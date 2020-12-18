@@ -133,9 +133,9 @@
       "application": "WGSPCFC030",
       "source": "blood",
       "status": "affected",
-      "container": "Tube",
+      "container":"96 well plate",
       "container_name": "2020-16171-81",
-      "well_position": "",
+      "well_position":"A1",
       "family_name": "F0018192",
       "panels": [
         "CTD"

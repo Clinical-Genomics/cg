@@ -28,6 +28,8 @@ def get_project_type(samples: [dict]) -> str:
         project_type = "mip-dna"
     elif data_analyses == {"fluffy"}:
         project_type = "rml"
+    elif data_analyses == {"balsamic"}:
+        project_type = "balsamic"
     else:
         raise OrderFormError(f"Unsupported json orderform: {data_analyses}")
 
@@ -80,15 +82,23 @@ def expand_case(case_id: str, parsed_case: dict) -> dict:
 
     gene_panels = set()
     for raw_sample in samples:
-        if raw_sample["panels"]:
+        if raw_sample.get("panels"):
             gene_panels.update(raw_sample["panels"])
+
         new_sample = {}
+        well_position_raw = raw_sample.get("well_position")
+        if well_position_raw:
+            new_sample["well_position"] = (
+                ":".join(well_position_raw) if ":" not in well_position_raw else well_position_raw
+            )
+
         for key, value in raw_sample.items():
-            if key not in ["panels"]:
+            if key not in ["panels", "well_position"]:
                 new_sample[key] = value
 
         new_case["samples"].append(new_sample)
 
-    new_case["panels"] = list(gene_panels)
+    if gene_panels:
+        new_case["panels"] = list(gene_panels)
 
     return new_case

@@ -539,7 +539,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
-    assert new_link.sample.comment == "comment"
+    assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 
     assert base_store.deliveries().count() == base_store.samples().count()

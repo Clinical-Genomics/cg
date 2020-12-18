@@ -123,4 +123,4 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["udfs"]["tissue_block_size"] == "small"
 
     assert first_sample["udfs"]["quantity"] == "2"
-    assert first_sample["udfs"]["comment"] == "comment"
+    assert first_sample["udfs"]["comment"] == "other Elution buffer"
