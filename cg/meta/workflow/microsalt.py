@@ -305,6 +305,24 @@ class MicrosaltAnalysisAPI:
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
+    def resolve_case_sample_id(
+        self, sample: bool, ticket: bool, unique_id: Any
+    ) -> (str, Optional[str]):
+        if ticket and sample:
+            LOG.error("Flags -t and -s are mutually exclusive!")
+            raise click.Abort
+
+        if ticket:
+            case_id, sample_id = self.get_case_id_from_ticket(unique_id)
+
+        elif sample:
+            case_id, sample_id = self.get_case_id_from_sample(unique_id)
+
+        else:
+            case_id, sample_id = self.get_case_id_from_case(unique_id)
+
+        return case_id, sample_id
+
     def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
         case_obj = self.db.find_family_by_name(unique_id)
         if not case_obj:

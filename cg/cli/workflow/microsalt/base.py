@@ -65,18 +65,9 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: Any):
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
 
-    if ticket and sample:
-        LOG.error("Flags -t and -s are mutually exclusive!")
-        raise click.Abort
-
-    if ticket:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
-
-    elif sample:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_sample(unique_id)
-
-    else:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
+    case_id, sample_id = microsalt_analysis_api.resolve_case_sample_id(
+        sample=sample, ticket=ticket, unique_id=unique_id
+    )
 
     if not microsalt_analysis_api.check_flowcells_on_disk(case_id=case_id, sample_id=sample_id):
         raise click.Abort
@@ -97,18 +88,9 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
 
-    if ticket and sample:
-        LOG.error("Flags -t and -s are mutually exclusive!")
-        raise click.Abort
-
-    if ticket:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
-
-    elif sample:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_sample(unique_id)
-
-    else:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
+    case_id, sample_id = microsalt_analysis_api.resolve_case_sample_id(
+        sample=sample, ticket=ticket, unique_id=unique_id
+    )
 
     sample_objs = microsalt_analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
@@ -154,18 +136,9 @@ def run(
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
 
-    if ticket and sample:
-        LOG.error("Flags -t and -s are mutually exclusive!")
-        raise click.Abort
-
-    if ticket:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
-
-    elif sample:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_sample(unique_id)
-
-    else:
-        case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
+    case_id, sample_id = microsalt_analysis_api.resolve_case_sample_id(
+        sample=sample, ticket=ticket, unique_id=unique_id
+    )
 
     fastq_path = Path(microsalt_analysis_api.root_dir, "fastq", case_id)
 
@@ -185,7 +158,4 @@ def run(
         microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
 
-microsalt.add_command(store_cmd)
-microsalt.add_command(store_cmd)
-microsalt.add_command(store_cmd)
 microsalt.add_command(store_cmd)
