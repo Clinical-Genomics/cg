@@ -35,7 +35,6 @@ OPTION_TICKET = click.option(
 )
 ARGUMENT_UNIQUE_IDENTIFIER = click.argument(
     "unique_id",
-    help="Unique identifier for case/ticket/sample which it to be analyzed",
     required=True,
 )
 
