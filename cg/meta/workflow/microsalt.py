@@ -38,11 +38,9 @@ class MicrosaltAnalysisAPI:
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
-        self.root_dir = config.get("root")
-        self.queries_path = config.get("queries_path")
-        self.process = Process(
-            binary=config.get("binary_path"), environment=config.get("conda_env")
-        )
+        self.root_dir = config["root"]
+        self.queries_path = config["queries_path"]
+        self.process = Process(binary=config["binary_path"], environment=config["conda_env"])
 
     def check_flowcells_on_disk(self, case_id: str, sample_id: Optional[str] = None) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
@@ -148,16 +146,16 @@ class MicrosaltAnalysisAPI:
             LOG.info("%s: link FASTQ files", sample.internal_id)
             self.link_fastq(
                 case_dir,
-                sample=sample.internal_id,
+                sample_id=sample.internal_id,
             )
 
-    def link_fastq(self, case_dir: Path, sample: str) -> None:
+    def link_fastq(self, case_dir: Path, sample_id: str) -> None:
         """Link FASTQ files for a sample."""
 
-        fastq_dir = Path(case_dir, sample)
+        fastq_dir = Path(case_dir, sample_id)
         fastq_dir.mkdir(exist_ok=True, parents=True)
 
-        file_objs = self.hk.files(bundle=sample, tags=["fastq"])
+        file_objs = self.hk.files(bundle=sample_id, tags=["fastq"])
         files = []
 
         for file_obj in file_objs:
@@ -184,7 +182,7 @@ class MicrosaltAnalysisAPI:
             linked_fastq_name = self.generate_fastq_name(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
-                sample=sample,
+                sample=sample_id,
                 read=fastq_data["read"],
                 more={"undetermined": fastq_data["undetermined"]},
             )
@@ -296,15 +294,15 @@ class MicrosaltAnalysisAPI:
         )
         return deliverables_file_path
 
-    def set_statusdb_action(self, name: str, action: str) -> None:
+    def set_statusdb_action(self, case_id: str, action: str) -> None:
         """Sets action on case based on ticket number"""
         if action in [None, *CASE_ACTIONS]:
-            case_object = self.db.find_family_by_name(name)
+            case_object = self.db.fqamily(case_id)
             case_object.action = action
             self.db.commit()
             return
         LOG.warning(
-            f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
     def get_case_id_from_ticket(self, unique_id: str) -> (str, None):

@@ -55,12 +55,11 @@ def microsalt(context: click.Context):
 
 
 @microsalt.command()
-@OPTION_DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
-def link(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: Any):
+def link(context: click.Context, ticket: bool, sample: bool, unique_id: Any):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
@@ -80,7 +79,10 @@ def link(context: click.Context, dry_run: bool, ticket: bool, sample: bool, uniq
 
     if not microsalt_analysis_api.check_flowcells_on_disk(case_id=case_id, sample_id=sample_id):
         raise click.Abort
-    microsalt_analysis_api.link_samples(case_id=case_id, sample_id=sample_id, dry_run=dry_run)
+    microsalt_analysis_api.link_samples(
+        case_id=case_id,
+        sample_id=sample_id,
+    )
 
 
 @microsalt.command("config-case")
@@ -98,19 +100,25 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
         LOG.error("Flags -t and -s are mutually exclusive!")
         raise click.Abort
 
-    sample_objs = context.obj["microsalt_analysis_api"].get_samples(ticket, sample_id)
+    if ticket:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
+
+    elif sample:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_sample(unique_id)
+
+    else:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
+
+    sample_objs = microsalt_analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
-        context.abort()
+        raise click.Abort
 
-    parameters = [
-        context.obj["microsalt_analysis_api"].get_parameters(sample_obj)
-        for sample_obj in sample_objs
-    ]
+    parameters = [microsalt_analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
 
-    filename = str(ticket) if ticket else sample_id
-    outfilename = (Path(context.obj["microsalt"]["queries_path"]) / filename).with_suffix(".json")
+    filename = sample_id or case_id
+    outfilename = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
     if dry_run:
         print(json.dumps(parameters, indent=4, sort_keys=True))
         return
@@ -120,7 +128,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
 
 
 @microsalt.command()
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@OPTION_DRY_RUN
 @click.option(
     "-c",
     "--config-case",
@@ -131,48 +139,49 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
 )
 @click.argument("ticket", type=int)
 @click.pass_context
-def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
+def run(
+    context: click.Context,
+    dry_run: bool,
+    config_case_path: click.Path,
+    ticket: bool,
+    sample: bool,
+    unique_id: Any,
+):
     """ Start microSALT with an order_id """
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
 
-    microsalt_bin = context.obj["microsalt"]["binary_path"]
-    microsalt_env = context.obj["microsalt"]["conda_env"]
-    fastq_path = Path(microsalt_analysis_api.root_dir / "fastq" / str(ticket))
+    if ticket and sample:
+        LOG.error("Flags -t and -s are mutually exclusive!")
+        raise click.Abort
+
+    if ticket:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_ticket(unique_id)
+
+    elif sample:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_sample(unique_id)
+
+    else:
+        case_id, sample_id = microsalt_analysis_api.get_case_id_from_case(unique_id)
+
+    fastq_path = Path(microsalt_analysis_api.root_dir, "fastq", case_id)
 
     if config_case_path:
         config_case_path = Path(config_case_path)
     else:
-        queries_path = Path(context.obj["microsalt"]["queries_path"])
-        config_case_path = (queries_path / str(ticket)).with_suffix(".json")
+        filename = sample_id or case_id
+        config_case_path = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
 
-    process = Process(binary=microsalt_bin, environment=microsalt_env)
     analyse_command = [
         "analyse",
-        str(config_case_path.absolute()),
+        config_case_path.absolute().as_posix(),
         "--input",
-        str(fastq_path.absolute()),
+        fastq_path.absolute().as_posix(),
     ]
-    process.run_command(parameters=analyse_command, dry_run=dry_run)
+    microsalt_analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
 
-    if not dry_run:
-        microsalt_analysis_api.set_statusdb_action(name=ticket, action="running")
-
-
-@microsalt.command()
-@click.pass_context
-def start(context, case_id: str, dry_run: bool):
-    # execute the analysis!
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
-    if not microsalt_analysis_api.has_flowcells_on_disk(ticket=ticket):
-        LOG.warning(
-            f"Ticket {ticket} not ready to run, requesting flowcells from long term storage!",
-        )
-        microsalt_analysis_api.request_removed_flowcells(ticket=ticket)
-        return
-    context.invoke(config_case, ticket=ticket, dry_run=dry_run)
-    context.invoke(link, ticket=ticket, dry_run=dry_run)
-    context.invoke(run, ticket=ticket, dry_run=dry_run)
+    if not sample_id and not dry_run:
+        microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
 
 microsalt.add_command(store_cmd)
