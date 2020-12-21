@@ -16,6 +16,12 @@ Try to use the following format:
 
 ### Changed
 
+## [16.16.0]
+
+### Changed
+
+- Use hermes for generating balsamic deliverables
+
 ## 16.15.1
 
 ### Fixed
