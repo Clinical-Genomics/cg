@@ -22,7 +22,7 @@ def test_without_options(cli_runner, balsamic_context: dict):
 
 def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     """Test command with invalid case to start with"""
-    caplog.set_level(logging.ERROR)
+    caplog.set_level(logging.WARNING)
     # GIVEN case_id not in database
     case_id = "soberelephant"
     assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)

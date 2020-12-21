@@ -13,8 +13,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-from cg.exc import (AnalysisUploadError, BalsamicStartError,
-                    BundleAlreadyAddedError, LimsDataError)
+from cg.exc import AnalysisUploadError, BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
@@ -165,6 +164,7 @@ def report_deliver(context, case_id, analysis_type, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Creating delivery report for {case_id}")
+        balsamic_analysis_api.get_case_object(case_id)
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
