@@ -224,7 +224,6 @@ def start(context, case_id, analysis_type, panel_bed, priority, dry):
 @click.pass_context
 def store(context, case_id, analysis_type, dry):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
-    balsamic_analysis_api: BalsamicAnalysisAPI = context.obj["BalsamicAnalysisAPI"]
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
     context.invoke(store_housekeeper, case_id=case_id)
