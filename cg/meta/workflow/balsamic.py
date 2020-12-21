@@ -9,7 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic.error_wrappers import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.balsamic.api import BalsamicAPI
@@ -53,7 +52,7 @@ class BalsamicAnalysisAPI:
 
     def get_case_object(self, case_id: str) -> models.Family:
         """Look up case ID in StoreDB and return result"""
-        LOG.info("Fetching case %s", case_id)
+        LOG.debug("Fetching case %s", case_id)
         case_object = self.store.family(case_id)
         if not case_object:
             raise BalsamicStartError(f"{case_id} not found in StatusDB!")
@@ -78,7 +77,7 @@ class BalsamicAnalysisAPI:
 
         (Optional) Checks if deliverables file exists
         """
-        LOG.info("Fetching deliverables file path for %s", case_id)
+        LOG.debug("Fetching deliverables file path for %s", case_id)
         deliverables_file_path = Path(
             self.balsamic_api.root_dir,
             case_id,
@@ -98,7 +97,7 @@ class BalsamicAnalysisAPI:
 
         (Optional) Checks if config file exists.
         """
-        LOG.info("Fetch balsamic config file for %s", case_id)
+        LOG.debug("Fetch balsamic config file for %s", case_id)
         config_path = Path(self.balsamic_api.root_dir, case_id, case_id + ".json")
         if check_exists and not config_path.exists():
             raise BalsamicStartError(
@@ -161,7 +160,7 @@ class BalsamicAnalysisAPI:
 
         Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
         """
-        LOG.info("Fetch analysis type for %s", case_id)
+        LOG.debug("Fetch analysis type for %s", case_id)
         sample_objects: List[models.FamilySample] = self.get_balsamic_sample_objects(
             case_id=case_id
         )
@@ -415,17 +414,17 @@ class BalsamicAnalysisAPI:
 
     def get_analysis_start(self, case_id: str) -> datetime:
         """Parse the analysis config and return the analysis date"""
-        LOG.info("Fetch analysis start for %s", case_id)
+        LOG.debug("Fetch analysis start for %s", case_id)
         sample_config = self.get_config_path(case_id=case_id, check_exists=True)
         config_data: dict = json.load(open(sample_config, "r"))
         analysis_start: datetime = datetime.strptime(
             config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M"
         )
-        LOG.info("Found analysis start %s", analysis_start)
+        LOG.debug("Found analysis start %s", analysis_start)
         return analysis_start
 
     def get_pipeline_version(self, case_id: str) -> str:
-        LOG.info("Fetch pipeline version")
+        LOG.debug("Fetch pipeline version")
         sample_config = self.get_config_path(case_id=case_id, check_exists=True)
         config_data: dict = json.load(open(sample_config, "r"))
         return config_data["analysis"]["BALSAMIC_version"]
