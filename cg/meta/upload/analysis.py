@@ -57,31 +57,3 @@ class UploadAnalysisApi:
 
     def __str__(self):
         return "UploadAnalysisApi()"
-
-
-if __name__ == "__main__":
-    deliverables_info = {
-        "bundle_id": "201116_hej",
-        "files": [
-            {
-                "path": "/castor/project/proj_nobackup/wharf/jesperei/jesperei-sens2019010/fluffy_header/fluffy/201116_hej/summary.csv",
-                "tags": ["metrics", "201116_hej", "nipt"],
-            },
-            {
-                "path": "/castor/project/proj_nobackup/wharf/jesperei/jesperei-sens2019010/fluffy_header/fluffy/201116_hej/multiqc_report.html",
-                "tags": ["multiqc-html", "201116_hej", "nipt"],
-            },
-            {
-                "path": "/castor/project/proj_nobackup/wharf/jesperei/jesperei-sens2019010/fluffy_header/fluffy/201116_hej/2020-23219-05/2020-23219-05.WCXpredict_aberrations.filt.bed",
-                "tags": ["wisecondor", "cnv", "2020-23219-05", "nipt"],
-            },
-            {
-                "path": "/castor/project/proj_nobackup/wharf/jesperei/jesperei-sens2019010/fluffy_header/fluffy/201116_hej/2020-23220-05/2020-23220-05.WCXpredict_aberrations.filt.bed",
-                "tags": ["wisecondor", "cnv", "2020-23220-05", "nipt"],
-            },
-        ],
-        "pipeline": "fluffy",
-    }
-    deliverables_obj = CGDeliverables(**deliverables_info)
-    hk_bundle = UploadAnalysisApi.create_housekeeper_bundle(deliverables_obj)
-    print(hk_bundle.dict())
