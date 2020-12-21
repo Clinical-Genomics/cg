@@ -12,7 +12,6 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.store.analysis import balsamic_cmd as store_balsamic_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

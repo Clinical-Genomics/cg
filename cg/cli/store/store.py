@@ -4,7 +4,6 @@ import logging
 
 import click
 
-from .analysis import analysis
 from .fastq import fastq
 
 LOG = logging.getLogger(__name__)

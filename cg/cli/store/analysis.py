@@ -5,7 +5,6 @@ import click
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import ANALYSIS_TYPES
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.analysis import UploadAnalysisApi
 
