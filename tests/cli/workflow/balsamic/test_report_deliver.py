@@ -40,12 +40,14 @@ def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "no_sample_case"
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=balsamic_context)
+
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
-    # THEN warning should be printed that no config file is found
-    assert NO_CONFIG_FOUND in caplog.text
+    # THEN warning should be printed that no samples exist in case
+    assert "number of samples is 0" in caplog.text
 
 
 def test_without_config(cli_runner, balsamic_context: dict, caplog):
