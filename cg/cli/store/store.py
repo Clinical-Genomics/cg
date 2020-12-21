@@ -17,4 +17,3 @@ def store():
 
 
 store.add_command(fastq)
-store.add_command(analysis)

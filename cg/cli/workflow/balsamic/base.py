@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.environ import environ_email
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
@@ -66,6 +67,7 @@ def balsamic(context):
         fastq_handler=FastqHandler(config),
         lims_api=LimsAPI(config),
         trailblazer_api=TrailblazerAPI(config),
+        hermes_api=HermesApi(config),
     )
 
 

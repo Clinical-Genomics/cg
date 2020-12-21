@@ -33,16 +33,3 @@ def fluffy_cmd(context, infile: Path):
     except AnalysisUploadError as err:
         LOG.warning(err)
         raise click.Abort
-
-
-@analysis.command(name="balsamic")
-@click.pass_context
-@click.argument("infile", type=click.Path(exists=True))
-@click.option(
-    "--analysis-type",
-    help="Specify the analysis type that was used",
-    type=click.Choice(ANALYSIS_TYPES),
-    required=True,
-)
-def balsamic_cmd(context, infile: Path, analysis_type: str):
-    upload_api = context.obj["upload_api"]
