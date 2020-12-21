@@ -7,13 +7,10 @@ from _io import TextIOWrapper
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
-from cg.exc import (
-    AnalysisDuplicationError,
-    BundleAlreadyAddedError,
-    MandatoryFilesMissing,
-    PipelineUnknownError,
-)
+from cg.constants import (HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS,
+                          Pipeline)
+from cg.exc import (AnalysisDuplicationError, BundleAlreadyAddedError,
+                    MandatoryFilesMissing, PipelineUnknownError)
 from cg.meta.store import mip as store_mip
 from cg.meta.store.microsalt import add_microbial_analysis
 from cg.store import Store, models

@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 
-from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.cli.workflow.balsamic.base import (balsamic, start, start_available,
+                                           store, store_available)
 
 EXIT_SUCCESS = 0
 
