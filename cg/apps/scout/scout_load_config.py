@@ -1,9 +1,10 @@
 """Class to hold information about scout load config"""
 
-from typing import Optional, List
-from typing_extensions import Literal
 from datetime import datetime
+from typing import List, Optional
+
 from pydantic import BaseModel
+from typing_extensions import Literal
 
 
 class ScoutIndividual(BaseModel):

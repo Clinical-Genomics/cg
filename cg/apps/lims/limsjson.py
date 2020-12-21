@@ -1,7 +1,7 @@
 from cg.apps.lims.orderform import CASE_PROJECT_TYPES, expand_case
+from cg.constants import Pipeline
 from cg.exc import OrderFormError
 from cg.meta.orders.status import StatusHandler
-from cg.constants import Pipeline
 
 OPTIONAL_KEYS = (
     "container_name",

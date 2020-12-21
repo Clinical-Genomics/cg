@@ -1,7 +1,9 @@
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from cg.apps.housekeeper import models as hk_models
 from cg.utils.commands import Process
 
 from .models import CGDeliverables
@@ -14,12 +16,6 @@ class HermesApi:
 
     def __init__(self, config: dict):
         self.process = Process(config["hermes"]["binary_path"])
-        self.dry_run: bool = False
-
-    def set_dry_run(self, dry_run: bool) -> None:
-        """Update dry run"""
-        LOG.info("Set dry run to %s", dry_run)
-        self.dry_run = dry_run
 
     def convert_deliverables(
         self, deliverables_file: Path, pipeline: str, analysis_type: Optional[str] = None
@@ -38,3 +34,31 @@ class HermesApi:
         self.process.run_command(convert_command)
 
         return CGDeliverables.parse_raw(self.process.stdout)
+
+    def create_housekeeper_bundle(
+        self,
+        deliverables: Path,
+        pipeline: str,
+        analysis_type: Optional[str],
+        created: Optional[datetime],
+    ) -> hk_models.InputBundle:
+        """Convert pipeline deliverables to housekeeper bundle ready to be inserted into hk"""
+        cg_deliverables: CGDeliverables = self.convert_deliverables(
+            deliverables_file=deliverables, pipeline=pipeline, analysis_type=analysis_type
+        )
+        return self.get_housekeeper_bundle(deliverables=cg_deliverables, created=created)
+
+    @staticmethod
+    def get_housekeeper_bundle(
+        deliverables: CGDeliverables, created: Optional[datetime] = None
+    ) -> hk_models.InputBundle:
+        """Convert a deliverables object to a housekeeper object"""
+        bundle_info = {
+            "name": deliverables.bundle_id,
+            "files": [file_info.dict() for file_info in deliverables.files],
+        }
+        if created:
+            bundle_info["created"] = created
+
+        bundle = hk_models.InputBundle(**bundle_info)
+        return bundle

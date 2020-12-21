@@ -72,12 +72,6 @@ def fixture_fluffy_hermes_output(
     return _output
 
 
-@pytest.fixture(name="hermes_process")
-def fixture_hermes_process() -> ProcessMock:
-    """Return a mocked hermes process"""
-    return ProcessMock(binary="hermes")
-
-
 @pytest.fixture(name="fluffy_process")
 def fixture_fluffy_process(hermes_process: ProcessMock, fluffy_hermes_output: dict) -> ProcessMock:
     """Return a process mock populated with some fluffy hermes output"""
@@ -87,9 +81,7 @@ def fixture_fluffy_process(hermes_process: ProcessMock, fluffy_hermes_output: di
 
 @pytest.fixture(name="populated_fluffy_context")
 def fixture_populated_fluffy_context(
-    housekeeper_api: HousekeeperAPI, fluffy_process: ProcessMock
+    housekeeper_api: HousekeeperAPI, fluffy_process: ProcessMock, hermes_api: HermesApi
 ) -> dict:
-    hermes_config = {"hermes": {"binary_path": "hermes"}}
-    hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = fluffy_process
     return {"upload_api": UploadAnalysisApi(hk_api=housekeeper_api, hermes_api=hermes_api)}

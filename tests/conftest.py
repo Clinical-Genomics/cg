@@ -13,6 +13,7 @@ import pytest
 import ruamel.yaml
 
 from cg.apps.gt import GenotypeAPI
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
@@ -623,6 +624,24 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
 def fixture_process() -> ProcessMock:
     """Returns a mocked process"""
     return ProcessMock()
+
+
+# Hermes mock
+
+
+@pytest.fixture(name="hermes_process")
+def fixture_hermes_process() -> ProcessMock:
+    """Return a mocked hermes process"""
+    return ProcessMock(binary="hermes")
+
+
+@pytest.fixture(name="hermes_api")
+def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
+    """Return a hermes api with a mocked process"""
+    hermes_config = {"hermes": {"binary_path": "hermes"}}
+    hermes_api = HermesApi(config=hermes_config)
+    hermes_api.process = hermes_process
+    return hermes_api
 
 
 # Scout fixtures

@@ -1,5 +1,6 @@
 """Api to upload analysis results to Housekeeper"""
 import logging
+from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Optional
@@ -40,12 +41,17 @@ class UploadAnalysisApi:
         self.hk_api.add_bundle(housekeeper_bundle.dict())
 
     @staticmethod
-    def create_housekeeper_bundle(deliverables: CGDeliverables) -> hk_models.InputBundle:
+    def create_housekeeper_bundle(
+        deliverables: CGDeliverables, created: Optional[datetime] = None
+    ) -> hk_models.InputBundle:
         """Convert a deliverables object to a housekeeper object"""
         bundle_info = {
             "name": deliverables.bundle_id,
             "files": [file_info.dict() for file_info in deliverables.files],
         }
+        if created:
+            bundle_info["created"] = created
+
         bundle = hk_models.InputBundle(**bundle_info)
         return bundle
 

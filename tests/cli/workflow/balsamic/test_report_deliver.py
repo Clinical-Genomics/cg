@@ -31,7 +31,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
     assert case_id in caplog.text
-    assert "not found" in caplog.text
+    assert "No config file found" in caplog.text
 
 
 def test_without_samples(cli_runner, balsamic_context: dict, caplog):
@@ -44,7 +44,7 @@ def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
-    assert "0" in caplog.text
+    assert "No config file found" in caplog.text
 
 
 def test_without_config(cli_runner, balsamic_context: dict, caplog):

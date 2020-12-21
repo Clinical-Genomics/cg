@@ -3,12 +3,11 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import List, Tuple, Iterable, Optional
+from typing import Iterable, List, Optional, Tuple
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-
 
 LOG = logging.getLogger(__name__)
 

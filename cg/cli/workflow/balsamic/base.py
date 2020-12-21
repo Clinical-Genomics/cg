@@ -3,6 +3,7 @@
 import logging
 
 import click
+from pydantic import ValidationError
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
@@ -183,13 +184,13 @@ def store_housekeeper(context, case_id):
         balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
         LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
-    except (BundleAlreadyAddedError, FileExistsError) as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+    except (BundleAlreadyAddedError, FileExistsError, ValidationError) as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
         balsamic_analysis_api.housekeeper_api.rollback()
         balsamic_analysis_api.store.rollback()
         raise click.Abort()
-    except BalsamicStartError as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+    except BalsamicStartError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
         raise click.Abort()
 
 
@@ -225,15 +226,7 @@ def store(context, case_id, analysis_type, dry):
     balsamic_analysis_api: BalsamicAnalysisAPI = context.obj["BalsamicAnalysisAPI"]
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
-    try:
-        deliverables_file: str = balsamic_analysis_api.get_deliverables_file_path(
-            case_id=case_id, check_exists=True
-        )
-    except BalsamicStartError as err:
-        LOG.warning(err)
-        raise click.Abort
-    analysis_type: str = balsamic_analysis_api.get_analysis_type(case_id=case_id)
-    context.invoke(store_balsamic_cmd, infile=deliverables_file, analysis_type=analysis_type)
+    context.invoke(store_housekeeper, case_id=case_id)
 
 
 @balsamic.command("start-available")

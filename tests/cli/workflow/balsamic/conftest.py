@@ -4,16 +4,19 @@ import datetime as dt
 import gzip
 import json
 from pathlib import Path
+from typing import List
 
 import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.process_mock import ProcessMock
 
 
 @pytest.fixture(name="balsamic_dir")
@@ -770,9 +773,12 @@ def balsamic_context(
     balsamic_store: Store,
     balsamic_lims: MockLimsAPI,
     balsamic_housekeeper: HousekeeperAPI,
+    hermes_api: HermesApi,
+    balsamic_hermes_process: ProcessMock,
     trailblazer_api,
 ) -> dict:
     """context to use in cli"""
+    hermes_api.process = balsamic_hermes_process
     balsamic_analysis_api = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(server_config),
         store=balsamic_store,
@@ -780,6 +786,7 @@ def balsamic_context(
         fastq_handler=FastqHandler(server_config),
         lims_api=balsamic_lims,
         trailblazer_api=trailblazer_api,
+        hermes_api=hermes_api,
     )
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,
@@ -812,16 +819,19 @@ def mock_config(balsamic_dir: Path) -> None:
     json.dump(config_data, open(config_path, "w"))
 
 
-@pytest.fixture
-def mock_deliverable(balsamic_dir: Path) -> None:
-    """Create deliverable file with dummy data and files to deliver"""
+@pytest.fixture(name="balsamic_case_id")
+def fixture_balsamic_case_id() -> str:
+    return "balsamic_case_wgs_single"
 
-    case_id = "balsamic_case_wgs_single"
+
+@pytest.fixture(name="deliverable_data")
+def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
+    case_id = balsamic_case_id
     samples = [
         "sample_case_wgs_single_tumor",
     ]
 
-    deliverable_data = {
+    _deliverable_data = {
         "files": [
             {
                 "path": f"{balsamic_dir}/{case_id}/multiqc_report.html",
@@ -849,6 +859,14 @@ def mock_deliverable(balsamic_dir: Path) -> None:
             },
         ]
     }
+    return _deliverable_data
+
+
+@pytest.fixture
+def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_id: str) -> None:
+    """Create deliverable file with dummy data and files to deliver"""
+    case_id = balsamic_case_id
+
     Path.mkdir(
         Path(balsamic_dir, case_id, "analysis", "delivery_report"),
         parents=True,
@@ -858,6 +876,28 @@ def mock_deliverable(balsamic_dir: Path) -> None:
         Path(report_entry["path"]).touch(exist_ok=True)
     hk_report_path = Path(balsamic_dir, case_id, "analysis", "delivery_report", case_id + ".hk")
     json.dump(deliverable_data, open(hk_report_path, "w"))
+
+
+@pytest.fixture(name="hermes_deliverables")
+def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
+    for file_info in deliverable_data["files"]:
+        tags: List[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        elif "fastq" in file_info["format"]:
+            tags.append("fastq")
+        elif "vcf" in file_info["format"]:
+            tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags})
+    return hermes_output
+
+
+@pytest.fixture(name="balsamic_hermes_process")
+def fixture_balsamic_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
+    """Return a process mock populated with some fluffy hermes output"""
+    process.set_stdout(text=json.dumps(hermes_deliverables))
+    return process
 
 
 @pytest.fixture

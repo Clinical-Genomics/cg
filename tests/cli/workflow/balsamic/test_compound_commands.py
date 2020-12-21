@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 
-from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.cli.workflow.balsamic.base import (balsamic, start, start_available,
+                                           store, store_available)
 
 EXIT_SUCCESS = 0
 
@@ -61,7 +62,7 @@ def test_store(
 
     # WHEN running command
     result = cli_runner.invoke(store, [case_id, "--dry-run"], obj=balsamic_context)
-
+    print(result.output)
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
