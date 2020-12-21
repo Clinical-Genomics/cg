@@ -320,6 +320,27 @@ class BalsamicAnalysisAPI:
             return None
         return normal_paths[0]
 
+    def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
+        sample_obj = (
+            self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.internal_id == case_id)
+            .filter(models.Sample.is_tumour == True)
+            .first()
+        )
+        if sample_obj:
+            return sample_obj.internal_id
+
+    def get_normal_sample_name(self, case_id: str) -> Optional[str]:
+
+        sample_obj = (
+            self.store.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.internal_id == case_id)
+            .filter(models.Sample.is_tumour == False)
+            .first()
+        )
+        if sample_obj:
+            return sample_obj.internal_id
+
     def get_verified_config_case_arguments(
         self,
         case_id: str,
@@ -353,6 +374,8 @@ class BalsamicAnalysisAPI:
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
+            "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
+            "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
         return arguments
 
