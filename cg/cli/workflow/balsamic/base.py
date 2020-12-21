@@ -13,7 +13,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
+from cg.exc import (AnalysisUploadError, BalsamicStartError,
+                    BundleAlreadyAddedError, LimsDataError)
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
@@ -185,7 +186,7 @@ def store_housekeeper(context, case_id):
         balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
         LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
-    except (BundleAlreadyAddedError, FileExistsError, ValidationError) as error:
+    except (BundleAlreadyAddedError, FileExistsError, AnalysisUploadError) as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
         balsamic_analysis_api.housekeeper_api.rollback()
         balsamic_analysis_api.store.rollback()
@@ -193,6 +194,10 @@ def store_housekeeper(context, case_id):
     except BalsamicStartError as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
         raise click.Abort()
+    except ValidationError as err:
+        LOG.warning("Deliverables file is malformed")
+        LOG.warning(err)
+        raise click.Abort
 
 
 @balsamic.command("start")

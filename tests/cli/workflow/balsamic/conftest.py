@@ -893,6 +893,13 @@ def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -
     return hermes_output
 
 
+@pytest.fixture(name="malformed_hermes_deliverables")
+def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+    hermes_deliverables.pop("pipeline")
+
+    return hermes_deliverables
+
+
 @pytest.fixture(name="balsamic_hermes_process")
 def fixture_balsamic_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
     """Return a process mock populated with some fluffy hermes output"""

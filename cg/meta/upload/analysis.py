@@ -34,7 +34,6 @@ class UploadAnalysisApi:
             )
         except CalledProcessError as err:
             LOG.warning("Something went wrong when validating the deliverables file")
-            LOG.info(err)
             raise AnalysisUploadError("Could not store deliverables")
         housekeeper_bundle: hk_models.InputBundle = self.create_housekeeper_bundle(cg_deliverables)
         LOG.info("Uploading analysis results from %s to housekeeper", deliverables_file)
