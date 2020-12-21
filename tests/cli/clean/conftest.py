@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -106,6 +107,7 @@ def balsamic_analysis_api(
     server_config: dict,
     balsamic_clean_store: Store,
     housekeeper_api: HousekeeperAPI,
+    hermes_api: HermesApi,
     trailblazer_api,
 ):
     return BalsamicAnalysisAPI(
@@ -115,6 +117,7 @@ def balsamic_analysis_api(
         fastq_handler="FastqHandler",
         lims_api="LIMS",
         trailblazer_api=trailblazer_api,
+        hermes_api=hermes_api,
     )
 
 
