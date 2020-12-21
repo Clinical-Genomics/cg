@@ -2,29 +2,13 @@ import logging
 
 import click
 
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.exc import CaseNotFoundError
-from cg.meta.compress import CompressAPI
-from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
-@click.pass_context
-def fastq(context):
-    """Command for storing files"""
-    housekeeper_api = HousekeeperAPI(context.obj)
-    crunchy_api = CrunchyAPI(context.obj)
-
-    compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)
-    context.obj["compress_api"] = compress_api
-    context.obj["status_db"] = Store(context.obj.get("database"))
-
-
-@fastq.command("sample")
+@click.command("sample")
 @click.argument("sample-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -41,7 +25,7 @@ def store_sample(context, sample_id, dry_run):
     return 1
 
 
-@fastq.command("case")
+@click.command("case")
 @click.argument("case-id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -60,7 +44,7 @@ def store_case(context, case_id, dry_run):
     LOG.info(f"Stored fastq files for {stored_inds} samples")
 
 
-@fastq.command("flowcell")
+@click.command("flowcell")
 @click.argument("flowcell_id", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
@@ -76,7 +60,7 @@ def store_flowcell(context, flowcell_id, dry_run):
     LOG.info(f"Stored fastq files for {stored_inds} samples")
 
 
-@fastq.command("ticket")
+@click.command("ticket")
 @click.argument("ticket_id", type=int)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context

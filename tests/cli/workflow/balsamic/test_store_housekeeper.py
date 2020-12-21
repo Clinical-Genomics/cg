@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.base import store_housekeeper
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from tests.mocks.process_mock import ProcessMock
 
 EXIT_SUCCESS = 0
 
