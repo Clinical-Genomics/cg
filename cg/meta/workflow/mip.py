@@ -7,7 +7,7 @@ from typing import Any, List
 
 from ruamel.yaml import safe_load
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
 from cg.apps.mip.base import MipAPI
@@ -16,10 +16,10 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import (
+    CASE_ACTIONS,
     COLLABORATORS,
     COMBOS,
     DEFAULT_CAPTURE_KIT,
-    CASE_ACTIONS,
     MASTER_LIST,
     Pipeline,
 )

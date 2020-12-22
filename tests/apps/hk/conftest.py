@@ -5,7 +5,7 @@ import datetime
 import pytest
 from housekeeper.store import models
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 
 
 @pytest.fixture(name="hk_config")

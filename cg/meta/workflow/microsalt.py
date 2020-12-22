@@ -7,19 +7,18 @@
     datetime.min"""
 import gzip
 import logging
-from pathlib import Path
 import re
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.microsalt.fastq import FastqHandler
 from cg.constants import CASE_ACTIONS
 from cg.exc import CgDataError
+from cg.store import Store, models
 from cg.store.models import Sample
-
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.store import models, Store
 
 LOG = logging.getLogger(__name__)
 

@@ -47,6 +47,12 @@ Try to use the following format:
 
 - This PR fixes the problem handling wells in json orders without ":" as separator, e.g. A1 instead of A:1
 
+## [16.16.0]
+
+### Changed
+
+- Use hermes for generating balsamic deliverables
+
 ## 16.15.1
 
 ### Fixed

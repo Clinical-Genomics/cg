@@ -5,16 +5,17 @@ import copy
 import datetime as dt
 import json
 import logging
-import shutil
 import os
+import shutil
 from pathlib import Path
 
 import pytest
 import ruamel.yaml
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
 from cg.apps.gt import GenotypeAPI
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
 from cg.models import CompressionData
 from cg.store import Store
@@ -22,11 +23,11 @@ from cg.store import Store
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.process_mock import ProcessMock
 from .mocks.scout import MockScoutAPI
+from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
-from .mocks.tb_mock import MockTB
-from .mocks.process_mock import ProcessMock
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -208,7 +209,7 @@ def fixture_fixtures_dir() -> Path:
 
 
 @pytest.fixture(name="analysis_dir")
-def fixture_analysis_dir(fixtures_dir) -> Path:
+def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir"""
     return fixtures_dir / "analysis"
 
@@ -623,6 +624,24 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
 def fixture_process() -> ProcessMock:
     """Returns a mocked process"""
     return ProcessMock()
+
+
+# Hermes mock
+
+
+@pytest.fixture(name="hermes_process")
+def fixture_hermes_process() -> ProcessMock:
+    """Return a mocked hermes process"""
+    return ProcessMock(binary="hermes")
+
+
+@pytest.fixture(name="hermes_api")
+def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
+    """Return a hermes api with a mocked process"""
+    hermes_config = {"hermes": {"binary_path": "hermes"}}
+    hermes_api = HermesApi(config=hermes_config)
+    hermes_api.process = hermes_process
+    return hermes_api
 
 
 # Scout fixtures

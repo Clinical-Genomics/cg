@@ -2,22 +2,21 @@
 
 import logging
 import re
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 import requests
+from housekeeper.store import models as hk_models
 from ruamel import yaml
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
+from cg.apps.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
-from cg.apps.scout.scout_load_config import ScoutLoadConfig, ScoutIndividual
-
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 

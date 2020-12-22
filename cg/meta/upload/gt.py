@@ -3,11 +3,11 @@ from pathlib import Path
 
 import ruamel.yaml
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.hk import models as housekeeper_models
 from cg.apps.gt import GenotypeAPI
-from cg.store import models
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.apps.mip.parse_qcmetrics import parse_qcmetrics
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
