@@ -11,6 +11,7 @@ from dateutil.parser import parse as parse_date
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scout_export import ScoutExportCase
@@ -34,6 +35,7 @@ def clean(context):
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["lims_api"] = LimsAPI(context.obj)
+    context.obj["hermes_api"] = HermesApi(context.obj)
 
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
@@ -42,6 +44,7 @@ def clean(context):
         fastq_handler=FastqHandler(context.obj),
         lims_api=context.obj["lims_api"],
         trailblazer_api=context.obj["trailblazer_api"],
+        hermes_api=context.obj["hermes_api"],
     )
     context.obj["MipAnalysisAPI"] = MipAnalysisAPI(
         db=context.obj["status_db"],
