@@ -36,16 +36,6 @@ def build_microbial_bundle(deliverables: dict, analysis_date: dt.date) -> dict:
     return data
 
 
-def microbial_deliverables_files(deliverables: dict) -> list:
-    """Get all deliverable files from the pipeline"""
-
-    pipeline_tags = HK_TAGS["microbial"]
-    analysis_type_tags = MICROSALT_TAGS
-    files = store_base.parse_files(deliverables, pipeline_tags, analysis_type_tags)
-
-    return files
-
-
 def _get_microbial_name(deliverables: dict) -> str:
     """ Get microbial id from deliverables """
     for file_ in deliverables["files"]:

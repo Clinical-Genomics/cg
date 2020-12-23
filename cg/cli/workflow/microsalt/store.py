@@ -36,7 +36,7 @@ def analysis(context, config_stream):
     hk_api = context.obj["housekeeper_api"]
 
     if not config_stream:
-        LOG.error("Please provide a config file")
+        LOG.error("Please provide a deliverables file")
         context.abort()
 
     try:

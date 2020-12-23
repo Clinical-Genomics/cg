@@ -25,7 +25,7 @@ ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,
     "wes": MIP_DNA_TAGS,
     "wts": MIP_RNA_TAGS,
-    "microbial": MICROSALT_TAGS,
+    "microsalt": MICROSALT_TAGS,
 }
 LOG = logging.getLogger(__name__)
 
@@ -109,8 +109,8 @@ def add_new_analysis(
 def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     """Get all deliverable files from the pipeline"""
 
-    pipeline_tags = HK_TAGS[analysis_type]
-    analysis_type_tags = ANALYSIS_TYPE_TAGS[analysis_type]
+    pipeline_tags = HK_TAGS[str(analysis_type)]
+    analysis_type_tags = ANALYSIS_TYPE_TAGS[str(analysis_type)]
 
     files = parse_files(deliverables, pipeline_tags, analysis_type_tags)
     _check_mandatory_tags(files, analysis_type_tags)
