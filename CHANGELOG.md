@@ -14,7 +14,21 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## 17.1.0
+## [17.2.1]
+
+
+### Fixed
+
+- HermesApi added to context when running cg clean
+
+## [17.2.0]
+
+### Changed
+
+- Using HermesApi to save Balsamic deliverables in Housekeeper
+
+
+## [17.1.0]
 
 ### Added
 
