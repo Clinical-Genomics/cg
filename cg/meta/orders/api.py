@@ -14,7 +14,7 @@ from typing import List
 import typing
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
 from .schema import OrderType, ORDER_SCHEMES
@@ -83,6 +83,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
                             message += ", " + sample.get("comment")
 
                     message += f"<br />"
+
+                    if project:
+                        message += f"<br />{project}."
+
+                    if data.get("delivery"):
+                        message += f"<br />{data.get('delivery')}."
 
                     if data.get("comment"):
                         message += f"<br />{data.get('comment')}."
@@ -200,6 +206,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             samples=status_data["samples"],
             comment=status_data["comment"],
             data_analysis=Pipeline(status_data["data_analysis"]),
+            data_delivery=DataDelivery(status_data["data_delivery"]),
         )
 
         return {"project": project_data, "records": samples}

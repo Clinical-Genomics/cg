@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List
 
 from cg.apps.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
@@ -180,13 +180,14 @@ class StoreHelpers:
         cleaned_at: datetime = None,
         pipeline: Pipeline = Pipeline.BALSAMIC,
         pipeline_version: str = "1.0",
+        data_delivery: DataDelivery = DataDelivery.QC,
         uploading: bool = False,
         config_path: str = None,
     ) -> models.Analysis:
         """Utility function to add an analysis for tests"""
 
         if not family:
-            family = self.add_family(store, data_analysis=pipeline)
+            family = self.add_family(store, data_analysis=pipeline, data_delivery=data_delivery)
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
@@ -305,6 +306,7 @@ class StoreHelpers:
         store: Store,
         family_id: str = "family_test",
         data_analysis: Pipeline = Pipeline.MIP_DNA,
+        data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         internal_id: str = None,
         customer_id: str = "cust000",
@@ -324,6 +326,7 @@ class StoreHelpers:
         if not family_obj:
             family_obj = store.add_family(
                 data_analysis=data_analysis,
+                data_delivery=data_delivery,
                 name=family_id,
                 panels=panels,
             )
@@ -337,11 +340,13 @@ class StoreHelpers:
         return family_obj
 
     def ensure_family(
-        self, store: Store, name: str, customer: models.Customer, data_analysis: Pipeline = None
+        self, store: Store, name: str, customer: models.Customer, data_analysis: Pipeline = None,
+            data_delivery: DataDelivery = None
     ):
         family = store.find_family(customer=customer, name=name)
         if not family:
-            family = store.add_family(name=name, panels=None, data_analysis=data_analysis)
+            family = store.add_family(name=name, panels=None, data_analysis=data_analysis,
+                                      data_delivery=data_delivery)
             family.customer = customer
         return family
 
@@ -362,6 +367,7 @@ class StoreHelpers:
             internal_id=family_info["internal_id"],
             ordered_at=ordered_at,
             data_analysis=family_info.get("data_analysis", str(Pipeline.MIP_DNA)),
+            data_delivery=family_info.get("data_delivery", str(DataDelivery.SCOUT)),
             created_at=created_at,
             action=family_info.get("action"),
         )

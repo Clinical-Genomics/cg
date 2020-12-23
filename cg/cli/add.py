@@ -1,7 +1,7 @@
 import logging
 import click
 
-from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, Pipeline
+from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, Pipeline, DataDelivery
 from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
@@ -157,6 +157,14 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     required=True,
     type=EnumChoice(Pipeline),
 )
+@click.option(
+    "-dd",
+    "--data-delivery",
+    "data_delivery",
+    help="Update case data delivery",
+    required=True,
+    type=EnumChoice(DataDelivery),
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
@@ -165,6 +173,7 @@ def family(
     priority: str,
     panels: [str],
     data_analysis: Pipeline,
+    data_delivery: DataDelivery,
     customer_id: str,
     name: str,
 ):
@@ -182,7 +191,7 @@ def family(
             context.abort()
 
     new_family = status.add_family(
-        data_analysis=data_analysis, name=name, panels=panels, priority=priority
+        data_analysis=data_analysis, data_delivery=data_delivery, name=name, panels=panels, priority=priority
     )
     new_family.customer = customer_obj
     status.add_commit(new_family)

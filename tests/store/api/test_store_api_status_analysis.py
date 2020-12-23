@@ -1,7 +1,7 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.store import Store
 
 
@@ -295,11 +295,12 @@ def add_family(
     action=None,
     priority=None,
     data_analysis=Pipeline.MIP_DNA,
+    data_delivery=DataDelivery.SCOUT,
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(data_analysis=data_analysis, name=family_id, panels=panel.name)
+    family = disk_store.add_family(data_analysis=data_analysis, data_delivery=data_delivery, name=family_id, panels=panel.name)
     family.customer = customer
     family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:

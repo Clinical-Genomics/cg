@@ -4,7 +4,7 @@ from typing import List
 
 import petname
 
-from cg.constants import PRIORITY_MAP, Pipeline
+from cg.constants import PRIORITY_MAP, Pipeline, DataDelivery
 from cg.store import models, utils
 from cg.store.api.base import BaseHandler
 
@@ -144,7 +144,8 @@ class AddHandler(BaseHandler):
         return new_sample
 
     def add_family(
-        self, data_analysis: Pipeline, name: str, panels: List[str], priority: str = "standard"
+        self, data_analysis: Pipeline, data_delivery: DataDelivery, name: str, panels: List[str],
+            priority: str = "standard"
     ) -> models.Family:
         """Build a new Family record."""
 

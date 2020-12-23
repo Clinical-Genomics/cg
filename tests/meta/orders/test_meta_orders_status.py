@@ -1,7 +1,7 @@
 import datetime as dt
 
 import pytest
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
 
@@ -225,6 +225,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
+        data_delivery=DataDelivery.QC,
     )
 
     # THEN it should store the samples under a case (family) and the used previously unknown
@@ -251,6 +252,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
+        data_delivery=DataDelivery.QC,
     )
 
     # THEN store the samples under a case with the microbial data_analysis type on case level
@@ -279,6 +281,7 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
             samples=microbial_status_data["samples"],
             comment="",
             data_analysis=Pipeline.MICROSALT,
+            data_delivery=DataDelivery.QC,
         )
 
 
@@ -296,6 +299,7 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
+        data_delivery=DataDelivery.QC,
     )
 
     # THEN it should store the sample priority

@@ -121,6 +121,7 @@ class StatusHandler:
             "order": data["name"],
             "comment": data.get("comment"),
             "data_analysis": data["samples"][0]["data_analysis"],
+            "data_delivery": data["samples"][0]["data_delivery"],
             "samples": [
                 {
                     "application": sample_data["application"],
@@ -146,11 +147,13 @@ class StatusHandler:
         for case_name, case_samples in cases.items():
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
+            data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
 
             panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
             case = {
                 # Set from first sample until order portal sets this on case level
                 "data_analysis": data_analysis,
+                "data_delivery": data_delivery,
                 "name": case_name,
                 "priority": priority,
                 "panels": list(panels),
@@ -159,7 +162,6 @@ class StatusHandler:
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
                         "comment": sample.get("comment"),
-                        "data_delivery": sample.get("data_delivery"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
                         "internal_id": sample.get("internal_id"),
@@ -200,6 +202,7 @@ class StatusHandler:
             else:
                 case_obj = self.status.add_family(
                     data_analysis=Pipeline(case["data_analysis"]),
+                    data_delivery=DataDelivery(case["data_delivery"]),
                     name=case["name"],
                     panels=case["panels"],
                     priority=case["priority"],
@@ -216,7 +219,6 @@ class StatusHandler:
                     new_sample = self.status.add_sample(
                         capture_kit=sample["capture_kit"],
                         comment=sample["comment"],
-                        data_delivery=sample["data_delivery"],
                         from_sample=sample["from_sample"],
                         internal_id=sample["internal_id"],
                         name=sample["name"],
@@ -276,7 +278,6 @@ class StatusHandler:
             for sample in samples:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
-                    data_delivery=sample["data_delivery"],
                     internal_id=sample["internal_id"],
                     name=sample["name"],
                     order=order,
@@ -296,6 +297,7 @@ class StatusHandler:
 
                 new_family = self.status.add_family(
                     data_analysis=Pipeline(sample["data_analysis"]),
+                    data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=None,
                     priority=sample["priority"],
@@ -344,6 +346,7 @@ class StatusHandler:
                 new_samples.append(new_sample)
                 new_family = self.status.add_family(
                     data_analysis=Pipeline.MIP_DNA,
+                    data_delivery=DataDelivery.SCOUT,
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
@@ -365,6 +368,7 @@ class StatusHandler:
         comment: str,
         customer: str,
         data_analysis: Pipeline,
+        data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
         samples: List[dict],
@@ -388,6 +392,7 @@ class StatusHandler:
                 if not case_obj:
                     case_obj = self.status.add_family(
                         data_analysis=data_analysis,
+                        data_delivery=data_delivery,
                         name=ticket,
                         panels=None,
                     )
@@ -457,6 +462,7 @@ class StatusHandler:
             if not case_obj:
                 case_obj = self.status.add_family(
                     data_analysis=Pipeline(pool["data_analysis"]),
+                    data_delivery=DataDelivery(pool["data_delivery"]),
                     name=pool["name"],
                     panels=None,
                 )

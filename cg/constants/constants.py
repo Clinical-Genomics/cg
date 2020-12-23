@@ -47,7 +47,7 @@ class Pipeline(StrEnum):
 class DataDelivery(StrEnum):
     FASTQ: str = "fastq"
     QC: str = "custom"
-
+    SCOUT: str = "scout"
 
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
 

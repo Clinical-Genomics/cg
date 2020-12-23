@@ -2,10 +2,11 @@
 from datetime import datetime
 
 import click
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.store import Store
 
 CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC
+CLI_OPTION_DELIVERY = DataDelivery.QC
 
 
 def test_add_family_required(invoke_cli, disk_store: Store):
@@ -28,6 +29,8 @@ def test_add_family_required(invoke_cli, disk_store: Store):
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
+            "--data-delivery",
+            CLI_OPTION_DELIVERY,
             customer_id,
             name,
         ]
@@ -61,6 +64,41 @@ def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
             panel_id,
             "--analysis",
             non_existing_analysis,
+            "--data-delivery",
+            CLI_OPTION_DELIVERY,
+            customer_id,
+            name,
+        ]
+    )
+
+    # THEN then it should not be added
+    assert result.exit_code != 0
+    assert disk_store.Family.query.count() == 0
+
+
+def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
+    """Test to add a family using only the required arguments"""
+    # GIVEN a database with a customer and an panel
+
+    # WHEN adding a family without data delivery
+    db_uri = disk_store.uri
+    customer_id = add_customer(disk_store)
+    panel_id = add_panel(disk_store)
+    non_existing_data_delivery = "aws"
+    name = "family_name"
+
+    result = invoke_cli(
+        [
+            "--database",
+            db_uri,
+            "add",
+            "family",
+            "--panel",
+            panel_id,
+            "--analysis",
+            CLI_OPTION_ANALYSIS,
+            "--data-delivery",
+            non_existing_data_delivery,
             customer_id,
             name,
         ]
@@ -90,6 +128,8 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
+            "--data-delivery",
+            CLI_OPTION_DELIVERY,
             customer_id,
             name,
         ]
@@ -119,6 +159,8 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
             panel_id,
             "--analysis",
             CLI_OPTION_ANALYSIS,
+            "--data-delivery",
+            CLI_OPTION_DELIVERY,
             customer_id,
             name,
         ]
@@ -153,6 +195,8 @@ def test_add_family_priority(invoke_cli, disk_store: Store):
             priority,
             "--analysis",
             CLI_OPTION_ANALYSIS,
+            "--data-delivery",
+            CLI_OPTION_DELIVERY,
             customer_id,
             name,
         ]
