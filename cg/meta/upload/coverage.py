@@ -1,9 +1,9 @@
 """Upload coverage API"""
 import logging
 
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.coverage import ChanjoAPI
-from cg.store import models, Store
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 

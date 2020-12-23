@@ -2,13 +2,13 @@
 
 from pathlib import Path
 from typing import List, Set
-from cg.store.models import Sample, FamilySample
-from cg.meta.deliver import DeliverAPI
-from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
 
 from housekeeper.store import models as hk_models
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.deliver import DeliverAPI
+from cg.store import Store
+from cg.store.models import FamilySample, Sample
 from tests.store_helpers import StoreHelpers
 
 

@@ -5,8 +5,11 @@ from typing import List
 
 from cg.apps.hk import HousekeeperAPI
 from cg.constants import Pipeline, DataDelivery
-from cg.store import Store, models
 from housekeeper.store import models as hk_models
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Pipeline
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 

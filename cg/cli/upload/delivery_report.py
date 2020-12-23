@@ -6,10 +6,10 @@ from pathlib import Path
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
-from cg.exc import DeliveryReportError, CgError
+from cg.exc import CgError, DeliveryReportError
 
 from .utils import suggest_cases_delivery_report
 
