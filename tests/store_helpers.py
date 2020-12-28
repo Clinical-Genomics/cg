@@ -3,12 +3,10 @@ import logging
 from datetime import datetime
 from typing import List
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline, DataDelivery
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
