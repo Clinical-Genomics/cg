@@ -144,8 +144,12 @@ class AddHandler(BaseHandler):
         return new_sample
 
     def add_family(
-        self, data_analysis: Pipeline, data_delivery: DataDelivery, name: str, panels: List[str],
-            priority: str = "standard"
+        self,
+        data_analysis: Pipeline,
+        data_delivery: DataDelivery,
+        name: str,
+        panels: List[str],
+        priority: str = "standard",
     ) -> models.Family:
         """Build a new Family record."""
 

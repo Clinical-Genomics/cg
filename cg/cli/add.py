@@ -191,7 +191,11 @@ def family(
             context.abort()
 
     new_family = status.add_family(
-        data_analysis=data_analysis, data_delivery=data_delivery, name=name, panels=panels, priority=priority
+        data_analysis=data_analysis,
+        data_delivery=data_delivery,
+        name=name,
+        panels=panels,
+        priority=priority,
     )
     new_family.customer = customer_obj
     status.add_commit(new_family)

@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from typing import List
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline, DataDelivery
 from housekeeper.store import models as hk_models
 
@@ -343,13 +343,18 @@ class StoreHelpers:
         return family_obj
 
     def ensure_family(
-        self, store: Store, name: str, customer: models.Customer, data_analysis: Pipeline = None,
-            data_delivery: DataDelivery = None
+        self,
+        store: Store,
+        name: str,
+        customer: models.Customer,
+        data_analysis: Pipeline = None,
+        data_delivery: DataDelivery = None,
     ):
         family = store.find_family(customer=customer, name=name)
         if not family:
-            family = store.add_family(name=name, panels=None, data_analysis=data_analysis,
-                                      data_delivery=data_delivery)
+            family = store.add_family(
+                name=name, panels=None, data_analysis=data_analysis, data_delivery=data_delivery
+            )
             family.customer = customer
         return family
 

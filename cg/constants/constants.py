@@ -49,6 +49,7 @@ class DataDelivery(StrEnum):
     QC: str = "custom"
     SCOUT: str = "scout"
 
+
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
 
 SEX_OPTIONS = ("male", "female", "unknown")
