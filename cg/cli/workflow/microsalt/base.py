@@ -181,6 +181,18 @@ def store(context: click.Context, unique_id: str):
         raise
 
 
+@microsalt.command()
+@ARGUMENT_UNIQUE_IDENTIFIER
+@OPTION_TICKET
+@OPTION_SAMPLE
+@click.pass_context
+def start(context: click.Context, ticket: bool, sample: bool, unique_id: str):
+    LOG.info("Starting Microsalt workflow for case or ticket %s", unique_id)
+    context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
+    context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id)
+    context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id)
+
+
 @microsalt.command("store-available")
 @click.pass_context
 def store_available(context: click.Context):
@@ -198,14 +210,17 @@ def store_available(context: click.Context):
 
 
 @microsalt.command("start-available")
+@OPTION_DRY_RUN
 @click.pass_context
-def start_available(context: click.Context):
+def start_available(context: click.Context, dry_run: bool):
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
     exit_code = EXIT_SUCCESS
     for case_obj in microsalt_analysis_api.db.cases_to_analyze(pipeline=Pipeline.MICROSALT):
+        if dry_run:
+            LOG.info("Would have started workflow for case %s", case_obj.internal_id)
+            continue
         try:
-            context.invoke(config_case, unique_id=case_obj.internal_id)
-            context.invoke(run, unique_id=case_obj.internal_id)
+            context.invoke(start, unique_id=case_obj.internal_id)
         except Exception as error:
             LOG.error(
                 "Error when starting analysis for case %s - %s",
