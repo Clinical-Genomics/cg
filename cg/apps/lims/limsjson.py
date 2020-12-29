@@ -60,6 +60,7 @@ def parse_json(indata: dict) -> dict:
     data = {
         "customer": customer_id,
         "items": items,
+        "name": indata.get("name"),
         "project_type": project_type,
         "comment": comment,
     }
