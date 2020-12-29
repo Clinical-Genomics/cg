@@ -9,7 +9,6 @@ import click
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 from cg.constants import Pipeline, EXIT_SUCCESS, EXIT_FAIL

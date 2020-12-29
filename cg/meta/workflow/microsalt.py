@@ -350,7 +350,7 @@ class MicrosaltAnalysisAPI:
         case_id = case_obj.internal_id
         return case_id, None
 
-    def store_microbial_analysis_housekeeper(self, case_id: str) -> Optional[dict]:
+    def store_microbial_analysis_housekeeper(self, case_id: str) -> None:
         """Gather information from microSALT analysis to store."""
         order_id = self.db.family(case_id).name
         deliverables_path = self.get_deliverables_file_path(order_id=order_id)

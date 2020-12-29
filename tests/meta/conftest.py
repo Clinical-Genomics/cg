@@ -7,7 +7,6 @@ from _pytest import tmpdir
 
 from cg.store import Store
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.microsalt.fastq import FastqHandler as MicrosaltFastqHandler
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -132,13 +131,6 @@ class MockBalsamicFastq(BalsamicFastqHandler):
 
     def __init__(self):
         super().__init__(config={"balsamic": {"root": tmpdir}})
-
-
-class MockMicrosaltFastq(MicrosaltFastqHandler):
-    """Mock FastqHandler for analysis_api"""
-
-    def __init__(self):
-        super().__init__(config={"microsalt": {"root": tmpdir}})
 
 
 @pytest.yield_fixture(scope="function", name="mip_hk_store")

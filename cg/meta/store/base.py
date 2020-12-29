@@ -14,7 +14,6 @@ from cg.exc import (
     MandatoryFilesMissing,
     BundleAlreadyAddedError,
 )
-from cg.meta.store.microsalt import add_microbial_analysis
 from cg.meta.store import mip as store_mip
 from cg.store import models, Store
 from cg.store.utils import reset_case_action
@@ -36,7 +35,6 @@ def gather_files_and_bundle_in_housekeeper(
     """Function to gather files and bundle in housekeeper"""
 
     add_analysis = {
-        Pipeline.MICROSALT: add_microbial_analysis,
         Pipeline.MIP_DNA: store_mip.add_mip_analysis,
     }
     bundle_data = add_analysis[workflow](config_stream)
@@ -48,7 +46,6 @@ def gather_files_and_bundle_in_housekeeper(
     bundle_obj, version_obj = results
 
     case_obj = {
-        Pipeline.MICROSALT: status.find_family_by_name(bundle_obj.name),
         Pipeline.MIP_DNA: status.family(bundle_obj.name),
     }
 

@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-from cg.apps.microsalt.fastq import FastqHandler
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
@@ -29,20 +28,14 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             db=microsalt_store,
             hk_api=housekeeper_api,
             lims_api=lims_api,
-            fastq_handler=fastq_handler,
+            config={
+                "root": tmpdir,
+                "queries_path": queries_path,
+                "binary_path": "/bin/true",
+                "conda_env": "root",
+            },
         ),
-        "microsalt": {
-            "root": tmpdir,
-            "queries_path": queries_path,
-            "binary_path": "/bin/true",
-            "conda_env": "root",
-        },
     }
-
-
-@pytest.fixture(scope="function")
-def fastq_handler() -> FastqHandler:
-    return FastqHandler({"obj": {"microsalt": {"root": "root"}}})
 
 
 @pytest.fixture(scope="function")
