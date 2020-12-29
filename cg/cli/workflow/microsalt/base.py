@@ -12,6 +12,7 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.microsalt.store import store as store_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
+from cg.constants import Pipeline, EXIT_SUCCESS, EXIT_FAIL
 
 LOG = logging.getLogger(__name__)
 
@@ -158,4 +159,62 @@ def run(
         microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
 
-microsalt.add_command(store_cmd)
+@microsalt.command()
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_context
+def store(context: click.Context, unique_id: str):
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+
+    case_obj = microsalt_analysis_api.db.family(unique_id)
+    if not case_obj:
+        LOG.error("Please provide a valid case id!")
+        raise click.Abort
+    try:
+        microsalt_analysis_api.store_microbial_analysis_housekeeper(case_id=unique_id)
+        microsalt_analysis_api.store_microbial_analysis_statusdb(case_id=unique_id)
+        microsalt_analysis_api.set_statusdb_action(case_id=unique_id, action=None)
+    except Exception as error:
+        microsalt_analysis_api.db.rollback()
+        microsalt_analysis_api.hk.rollback()
+        LOG.error(
+            "Error storing deliverables for case %s - %s", unique_id, error.__class__.__name__
+        )
+        raise
+
+
+@microsalt.command("store-available")
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_context
+def store_available(context: click.Context):
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    exit_code = EXIT_SUCCESS
+
+    for case_obj in microsalt_analysis_api.get_deliverables_to_store():
+        try:
+            context.invoke(store, unique_id=case_obj.internal_id)
+        except Exception:
+            exit_code = EXIT_FAIL
+
+    if exit_code:
+        raise click.Abort
+
+
+@microsalt.command("start-available")
+@click.pass_context
+def start_available(context: click.Context):
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    exit_code = EXIT_SUCCESS
+    for case_obj in microsalt_analysis_api.db.cases_to_analyze(pipeline=Pipeline.MICROSALT):
+        try:
+            context.invoke(config_case, unique_id=case_obj.internal_id)
+            context.invoke(run, unique_id=case_obj.internal_id)
+        except Exception as error:
+            LOG.error(
+                "Error when starting analysis for case %s - %s",
+                case_obj.internal_id,
+                error.__class__.__name__,
+            )
+            exit_code = EXIT_FAIL
+
+    if exit_code:
+        raise click.Abort

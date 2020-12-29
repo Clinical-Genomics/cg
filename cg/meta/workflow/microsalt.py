@@ -12,15 +12,19 @@ import re
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import click
+import ruamel_yaml
+import os
 
 from cg.constants import CASE_ACTIONS
-from cg.exc import CgDataError
+from cg.exc import CgDataError, BundleAlreadyAddedError
 from cg.store.models import Sample
 
 from cg.apps.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.store import models, Store
 from cg.utils import Process
+from cg.constants import Pipeline
+from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
 
@@ -276,13 +280,8 @@ class MicrosaltAnalysisAPI:
     def get_deliverables_to_store(self) -> List[Path]:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
-        deliverables_to_store = []
-        for case_object in self.db.cases_to_store(pipeline="microbial"):
-            deliverables_file = self.get_deliverables_file_path(order_id=case_object.name)
-            if not deliverables_file.exists():
-                continue
-            deliverables_to_store.append(deliverables_file)
-        return deliverables_to_store
+
+        return self.db.cases_to_store(pipeline="microbial")
 
     def get_deliverables_file_path(self, order_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
@@ -292,14 +291,17 @@ class MicrosaltAnalysisAPI:
             "results/reports/deliverables",
             order_id + "_deliverables.yaml",
         )
-        return deliverables_file_path
+        if deliverables_file_path.exists():
+            LOG.info("Found deliverables file %s", deliverables_file_path)
+            return deliverables_file_path
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
         """Sets action on case based on ticket number"""
         if action in [None, *CASE_ACTIONS]:
-            case_object = self.db.fqamily(case_id)
+            case_object = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
+            LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
@@ -347,3 +349,54 @@ class MicrosaltAnalysisAPI:
             raise click.Abort
         case_id = case_obj.internal_id
         return case_id, None
+
+    def store_microbial_analysis_housekeeper(self, case_id: str) -> Optional[dict]:
+        """Gather information from microSALT analysis to store."""
+        order_id = self.db.family(case_id).name
+        deliverables_path = self.get_deliverables_file_path(order_id=order_id)
+        if not deliverables_path:
+            LOG.warning(
+                "Deliverables file not found for %s, analysis may not be finished yet", case_id
+            )
+            raise click.Abort
+
+        deliverables = ruamel_yaml.safe_load(open(deliverables_path))
+        analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
+        files = store_base.deliverables_files(deliverables, analysis_type=Pipeline.MICROSALT)
+
+        bundle_data = {
+            "name": case_id,
+            "created": analysis_date,
+            "files": files,
+        }
+
+        bundle_result = self.hk.add_bundle(bundle_data=bundle_data)
+        if not bundle_result:
+            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
+        bundle_object, bundle_version = bundle_result
+        self.hk.include(bundle_version)
+        self.hk.add_commit(bundle_object, bundle_version)
+        LOG.info(
+            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+        )
+
+    def store_microbial_analysis_statusdb(self, case_id: str):
+
+        case_obj = self.db.family(case_id)
+        order_id = case_obj.name
+        deliverables_path = self.get_deliverables_file_path(order_id=order_id)
+        analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
+
+        new_analysis = self.db.add_analysis(
+            pipeline=Pipeline.MICROSALT,
+            started_at=analysis_date,
+            completed_at=datetime.now(),
+            primary=(len(case_obj.analyses) == 0),
+        )
+        new_analysis.family = case_obj
+        self.db.add_commit(new_analysis)
+        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
+
+    def get_date_from_deliverables_path(self, deliverables_path: Path) -> datetime.date:
+        """ Get date from deliverables path """
+        return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))
