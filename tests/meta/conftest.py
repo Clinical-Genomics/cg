@@ -6,7 +6,7 @@ import pytest
 from _pytest import tmpdir
 
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store

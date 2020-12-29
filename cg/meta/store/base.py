@@ -15,7 +15,6 @@ from cg.exc import (
     PipelineUnknownError,
 )
 from cg.meta.store import mip as store_mip
-from cg.meta.store.microsalt import add_microbial_analysis
 from cg.store import Store, models
 from cg.store.utils import reset_case_action
 
