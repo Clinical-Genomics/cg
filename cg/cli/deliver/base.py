@@ -1,20 +1,16 @@
 """CLI for delivering files with CG"""
 
 import logging
-
-from typing import List
 from pathlib import Path
+from typing import List
 
 import click
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 from cg.store.models import Family
-from cg.apps.hk import HousekeeperAPI
-from cg.constants.delivery import (
-    PIPELINE_ANALYSIS_OPTIONS,
-    PIPELINE_ANALYSIS_TAG_MAP,
-)
 
 LOG = logging.getLogger(__name__)
 

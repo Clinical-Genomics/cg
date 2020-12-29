@@ -1,14 +1,12 @@
 """Fixtures for backup tests"""
 
-from datetime import datetime
 from pathlib import Path
 
 import pytest
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
-
 from tests.store_helpers import StoreHelpers
 
 

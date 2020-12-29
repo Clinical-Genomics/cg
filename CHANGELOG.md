@@ -14,7 +14,21 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## 17.1.0
+## [17.2.1]
+
+
+### Fixed
+
+- HermesApi added to context when running cg clean
+
+## [17.2.0]
+
+### Changed
+
+- Using HermesApi to save Balsamic deliverables in Housekeeper
+
+
+## [17.1.0]
 
 ### Added
 
@@ -46,6 +60,12 @@ Try to use the following format:
 ### Fixed
 
 - This PR fixes the problem handling wells in json orders without ":" as separator, e.g. A1 instead of A:1
+
+## [16.16.0]
+
+### Changed
+
+- Use hermes for generating balsamic deliverables
 
 ## 16.15.1
 

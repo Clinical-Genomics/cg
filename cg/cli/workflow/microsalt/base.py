@@ -7,7 +7,7 @@ from typing import Any
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store

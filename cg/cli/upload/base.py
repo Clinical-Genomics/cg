@@ -8,11 +8,11 @@ import click
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.gt import GenotypeAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.madeline.api import MadelineAPI
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.report.api import ReportAPI
@@ -22,15 +22,11 @@ from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
 from .coverage import coverage
-from .delivery_report import (
-    delivery_report,
-    delivery_report_to_scout,
-    delivery_reports,
-)
+from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
 from .mutacc import process_solved, processed_solved
 from .observations import observations
-from .scout import scout, upload_case_to_scout, create_scout_load_config
+from .scout import create_scout_load_config, scout, upload_case_to_scout
 from .utils import suggest_cases_to_upload
 from .validate import validate
 

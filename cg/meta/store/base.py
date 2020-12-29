@@ -1,24 +1,23 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
-
 import logging
 from typing import List
 
+from _io import TextIOWrapper
 from housekeeper.store import models as hk_models
 
-from cg.apps.hk import HousekeeperAPI
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS, Pipeline
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
 from cg.exc import (
     AnalysisDuplicationError,
-    PipelineUnknownError,
-    MandatoryFilesMissing,
     BundleAlreadyAddedError,
+    MandatoryFilesMissing,
+    PipelineUnknownError,
 )
 from cg.meta.store import mip as store_mip
-from cg.store import models, Store
+from cg.meta.store.microsalt import add_microbial_analysis
+from cg.store import Store, models
 from cg.store.utils import reset_case_action
-
-from _io import TextIOWrapper
 
 ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,

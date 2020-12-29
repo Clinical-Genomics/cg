@@ -4,7 +4,7 @@ import logging
 import click
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 

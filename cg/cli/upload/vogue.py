@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from cg.apps.gt import GenotypeAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.vogue import VogueAPI
 from cg.cli.workflow.get_links import get_links
 from cg.constants import Pipeline

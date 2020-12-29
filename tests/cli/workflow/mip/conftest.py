@@ -1,20 +1,17 @@
-from typing import Any, Union
-
-import pytest
 import copy
 import datetime as dt
-
-from cg.constants import Pipeline
 from pathlib import Path
+
+import pytest
 from ruamel.yaml import YAML
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
+from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
-
-from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
 
 
 @pytest.fixture
