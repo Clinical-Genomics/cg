@@ -12,7 +12,7 @@ import re
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import click
-import ruamel_yaml
+import ruamel
 import os
 
 from cg.constants import CASE_ACTIONS
@@ -360,7 +360,7 @@ class MicrosaltAnalysisAPI:
             )
             raise click.Abort
 
-        deliverables = ruamel_yaml.safe_load(open(deliverables_path))
+        deliverables = ruamel.yaml.safe_load(open(deliverables_path))
         analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
         files = store_base.deliverables_files(deliverables, analysis_type=Pipeline.MICROSALT)
 
