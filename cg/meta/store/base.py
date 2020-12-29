@@ -109,7 +109,8 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     analysis_type_tags = ANALYSIS_TYPE_TAGS[str(analysis_type)]
 
     files = parse_files(deliverables, pipeline_tags, analysis_type_tags)
-    _check_mandatory_tags(files, analysis_type_tags)
+    if not analysis_type == Pipeline.MICROSALT:
+        _check_mandatory_tags(files, analysis_type_tags)
 
     return files
 
