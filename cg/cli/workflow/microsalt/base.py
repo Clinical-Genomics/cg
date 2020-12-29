@@ -182,7 +182,6 @@ def store(context: click.Context, unique_id: str):
 
 
 @microsalt.command("store-available")
-@ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def store_available(context: click.Context):
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
