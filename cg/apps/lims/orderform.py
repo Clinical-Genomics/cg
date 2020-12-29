@@ -1,3 +1,4 @@
+import os
 from typing import List, Dict
 
 from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES, Pipeline
@@ -81,7 +82,13 @@ def parse_orderform(excel_path: str) -> dict:
     elif customer_options != 1:
         raise OrderFormError(f"Samples have different customers: {customer_ids}")
 
-    data = {"customer": customer_ids.pop(), "items": items, "project_type": project_type}
+    filename_base = os.path.splitext(os.path.basename(excel_path))[0]
+
+    data = {"customer": customer_ids.pop(),
+            "items": items,
+            "project_type": project_type,
+            "name": filename_base,
+            }
 
     return data
 
