@@ -184,7 +184,7 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
     # Add sample, cases and relationships to db
 
     for case in mip_case_ids:
-        family = helpers.add_family(
+        family = helpers.add_case(
             store=_store,
             internal_id=case,
             family_id=mip_case_ids[case]["name"],

@@ -78,7 +78,6 @@ class StatusHandler:
                         {
                             "application": sample["application"],
                             "comment": sample.get("comment"),
-                            "data_delivery": sample.get("data_delivery"),
                             "name": sample["name"],
                             "priority": sample["priority"],
                         }
@@ -191,6 +190,7 @@ class StatusHandler:
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
+
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
@@ -198,9 +198,11 @@ class StatusHandler:
         for case in cases:
             case_obj = self.status.find_family(customer_obj, case["name"])
             if case_obj:
+                print("found case: ", case)
                 case_obj.panels = case["panels"]
             else:
-                case_obj = self.status.add_family(
+                print("create case: ", case)
+                case_obj = self.status.add_case(
                     data_analysis=Pipeline(case["data_analysis"]),
                     data_delivery=DataDelivery(case["data_delivery"]),
                     name=case["name"],
@@ -295,7 +297,7 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                new_family = self.status.add_family(
+                new_family = self.status.add_case(
                     data_analysis=Pipeline(sample["data_analysis"]),
                     data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
@@ -344,7 +346,7 @@ class StatusHandler:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                new_family = self.status.add_family(
+                new_family = self.status.add_case(
                     data_analysis=Pipeline.MIP_DNA,
                     data_delivery=DataDelivery.SCOUT,
                     name=sample["name"],
@@ -390,7 +392,7 @@ class StatusHandler:
                 case_obj = self.status.find_family(customer=customer_obj, name=ticket)
 
                 if not case_obj:
-                    case_obj = self.status.add_family(
+                    case_obj = self.status.add_case(
                         data_analysis=data_analysis,
                         data_delivery=data_delivery,
                         name=ticket,
@@ -458,9 +460,8 @@ class StatusHandler:
                 if application_version is None:
                     raise OrderError(f"Invalid application: {pool['application']}")
             case_obj = self.status.find_family(customer=customer_obj, name=ticket)
-
             if not case_obj:
-                case_obj = self.status.add_family(
+                case_obj = self.status.add_case(
                     data_analysis=Pipeline(pool["data_analysis"]),
                     data_delivery=DataDelivery(pool["data_delivery"]),
                     name=pool["name"],
@@ -483,7 +484,6 @@ class StatusHandler:
                     application_version=application_version,
                     comment=sample["comment"],
                     customer=customer_obj,
-                    data_delivery=sample["data_delivery"],
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
                     order=order,

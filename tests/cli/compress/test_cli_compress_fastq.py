@@ -41,7 +41,7 @@ def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, help
     # GIVEN a context with a family that can be compressed
     case_id = "chonkywombat"
 
-    valid_compressable_case = helpers.add_family(
+    valid_compressable_case = helpers.add_case(
         store=populated_compress_context["status_db"],
         family_id=case_id,
         internal_id=case_id,

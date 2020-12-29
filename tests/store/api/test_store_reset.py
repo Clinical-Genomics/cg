@@ -10,7 +10,7 @@ from cg.store import Store
 
 def test_reset_observation(store: Store):
     # GIVEN a store with a case with loqus-links
-    family = add_family(store)
+    family = add_case(store)
     sample = add_sample(store, loqusdb_links=True)
     store.relate_sample(family=family, sample=sample, status="unknown")
     assert sample.loqusdb_id is not None
@@ -94,7 +94,7 @@ def ensure_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
     return panel
 
 
-def add_family(
+def add_case(
     disk_store,
     family_id="family_test",
     customer_id="cust_test",
@@ -107,7 +107,7 @@ def add_family(
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(
+    family = disk_store.add_case(
         data_analysis=data_analysis, data_delivery=data_delivery, name=family_id, panels=panel.name
     )
     family.customer = customer

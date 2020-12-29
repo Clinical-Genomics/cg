@@ -346,7 +346,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     helpers.ensure_application_version(store=_store, application_tag="WESA", application_type="wes")
 
     # Create textbook case for WGS PAIRED with enough reads
-    case_wgs_paired_enough_reads = helpers.add_family(
+    case_wgs_paired_enough_reads = helpers.add_case(
         store=_store,
         internal_id="balsamic_case_wgs_paired_enough_reads",
         family_id="balsamic_case_wgs_paired_enough_reads",
@@ -380,7 +380,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create textbook case for WGS PAIRED
-    case_wgs_paired = helpers.add_family(
+    case_wgs_paired = helpers.add_case(
         store=_store,
         internal_id="balsamic_case_wgs_paired",
         family_id="balsamic_case_wgs_paired",
@@ -406,7 +406,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_normal)
 
     # Create textbook case for TGS PAIRED without enough reads
-    case_tgs_paired = helpers.add_family(
+    case_tgs_paired = helpers.add_case(
         _store,
         internal_id="balsamic_case_tgs_paired",
         family_id="balsamic_case_tgs_paired",
@@ -435,7 +435,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_normal)
 
     # Create textbook case for WGS TUMOR ONLY
-    case_wgs_single = helpers.add_family(
+    case_wgs_single = helpers.add_case(
         _store,
         internal_id="balsamic_case_wgs_single",
         family_id="balsamic_case_wgs_single",
@@ -452,7 +452,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     helpers.add_relationship(_store, family=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
     # Create textbook case for TGS TUMOR ONLY
-    case_tgs_single = helpers.add_family(
+    case_tgs_single = helpers.add_case(
         _store,
         internal_id="balsamic_case_tgs_single",
         family_id="balsamic_case_tgs_single",
@@ -469,7 +469,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     helpers.add_relationship(_store, family=case_tgs_single, sample=sample_case_tgs_single_tumor)
 
     # Create ERROR case for TGS NORMAL ONLY
-    case_tgs_single_error = helpers.add_family(
+    case_tgs_single_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_tgs_single_error",
         family_id="balsamic_case_tgs_single_error",
@@ -490,7 +490,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case for TGS TWO TUMOR ONE NORMAL
-    case_tgs_paired_error = helpers.add_family(
+    case_tgs_paired_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_tgs_paired_error",
         family_id="balsamic_case_tgs_paired_error",
@@ -537,7 +537,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case for MIXED application type
-    case_mixed_paired_error = helpers.add_family(
+    case_mixed_paired_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_mixed_paired_error",
         family_id="balsamic_case_mixed_paired_error",
@@ -570,7 +570,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case for MIXED application type NOT BALSAMIC APPLICATION
-    case_mixed_wgs_mic_paired_error = helpers.add_family(
+    case_mixed_wgs_mic_paired_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_mixed_wgs_mic_paired_error",
         family_id="balsamic_case_mixed_wgs_mic_paired_error",
@@ -603,7 +603,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case for MIXED TARGET BED
-    case_mixed_bed_paired_error = helpers.add_family(
+    case_mixed_bed_paired_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_mixed_bed_paired_error",
         family_id="balsamic_case_mixed_bed_paired_error",
@@ -637,7 +637,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case for WGS TUMOR ONLY MIP CLI_OPTION_ANALYSIS ONLY
-    mip_case_wgs_single = helpers.add_family(
+    mip_case_wgs_single = helpers.add_case(
         _store,
         internal_id="mip_case_wgs_single",
         family_id="mip_case_wgs_single",
@@ -657,7 +657,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case for WGS ONE TUMOR TWO NORMAL
-    case_wgs_paired_two_normal_error = helpers.add_family(
+    case_wgs_paired_two_normal_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_wgs_paired_two_normal_error",
         family_id="balsamic_case_wgs_paired_two_normal_error",
@@ -704,7 +704,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create WES case with 1 tumor sample
-    case_wes_tumor = helpers.add_family(
+    case_wes_tumor = helpers.add_case(
         _store,
         internal_id="balsamic_case_wes_tumor",
         family_id="balsamic_case_wes_tumor",
@@ -721,7 +721,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     helpers.add_relationship(_store, family=case_wes_tumor, sample=sample_case_wes_tumor)
 
     # Create ERROR case for WES when no panel is found
-    case_wes_panel_error = helpers.add_family(
+    case_wes_panel_error = helpers.add_case(
         _store,
         internal_id="balsamic_case_wes_panel_error",
         family_id="balsamic_case_wes_panel_error",
@@ -740,7 +740,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_family(_store, internal_id="no_sample_case", family_id="no_sample_case")
+    helpers.add_case(_store, internal_id="no_sample_case", family_id="no_sample_case")
 
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"

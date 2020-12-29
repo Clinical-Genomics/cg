@@ -10,7 +10,7 @@ SUCCESS = 0
 def test_set_family_without_options(cli_runner, base_context, base_store: Store, helpers):
     """Test to set a family using only the required arguments"""
     # GIVEN a database with a family
-    family_id = helpers.add_family(base_store).internal_id
+    family_id = helpers.add_case(base_store).internal_id
     assert base_store.Family.query.count() == 1
 
     # WHEN setting a family
@@ -38,7 +38,7 @@ def test_set_family_bad_panel(cli_runner, base_context, base_store: Store, helpe
 
     # WHEN setting a family
     panel_id = "dummy_panel"
-    family_id = helpers.add_family(base_store).internal_id
+    family_id = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(family, [family_id, "--panel", panel_id], obj=base_context)
 
     # THEN then it should complain in missing panel instead of setting a value
@@ -50,7 +50,7 @@ def test_set_family_panel(cli_runner, base_context, base_store: Store, helpers):
     """Test to set a family using an existing panel"""
     # GIVEN a database with a family and a panel not yet added to the family
     panel_id = helpers.ensure_panel(base_store, "a_panel").name
-    family_id = helpers.add_family(base_store).internal_id
+    family_id = helpers.add_case(base_store).internal_id
     assert panel_id not in base_store.Family.query.first().panels
 
     # WHEN setting a panel of a family
@@ -64,7 +64,7 @@ def test_set_family_panel(cli_runner, base_context, base_store: Store, helpers):
 def test_set_family_priority(cli_runner, base_context, base_store: Store, helpers):
     """Test that the added family gets the priority we send in"""
     # GIVEN a database with a family
-    family_id = helpers.add_family(base_store).internal_id
+    family_id = helpers.add_case(base_store).internal_id
     priority = "priority"
     assert base_store.Family.query.first().priority_human != priority
 
@@ -82,7 +82,7 @@ def test_set_family_customer(cli_runner, base_context, base_store: Store, helper
     """Test to set a family using an existing customer"""
     # GIVEN a database with a family and a customer not yet on the family
     customer_id = helpers.ensure_customer(base_store, customer_id="a_customer").internal_id
-    case = helpers.add_family(base_store)
+    case = helpers.add_case(base_store)
     assert customer_id != case.customer.internal_id
 
     # WHEN setting a customer of a family
@@ -101,7 +101,7 @@ def test_set_family_bad_data_analysis(cli_runner, base_context, base_store: Stor
 
     # WHEN setting a data_analysis on a family
     data_analysis = "dummy_pipeline"
-    family_id = helpers.add_family(base_store).internal_id
+    family_id = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(
         family, [family_id, "--data-analysis", data_analysis], obj=base_context
     )
@@ -116,7 +116,7 @@ def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, h
 
     # GIVEN a database with a family and a data_analysis not yet set on the case
     data_analysis = Pipeline.FASTQ
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     assert str(data_analysis) != case_obj.data_analysis
 
     # WHEN setting a data_analysis of a case
@@ -138,7 +138,7 @@ def test_set_family_bad_data_delivery(cli_runner, base_context, base_store: Stor
 
     # WHEN setting a data_delivery on a family
     data_delivery = "dummy_delivery"
-    family_id = helpers.add_family(base_store).internal_id
+    family_id = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(
         family, [family_id, "--data-delivery", data_delivery], obj=base_context
     )
@@ -153,7 +153,7 @@ def test_set_family_data_delivery(cli_runner, base_context, base_store: Store, h
 
     # GIVEN a database with a family and a data_delivery not yet set on the case
     data_delivery = DataDelivery.FASTQ
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     assert str(data_delivery) != case_obj.data_delivery
 
     # WHEN setting a data_delivery of a case

@@ -290,7 +290,7 @@ class PoolView(BaseView):
     """Admin view for Model.Pool"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["sequenced_at", "ticket_number"]
+    column_editable_list = ["ticket_number"]
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {"invoice": InvoiceView.view_invoice_link}
     column_searchable_list = ["name", "order", "ticket_number", "customer.internal_id"]

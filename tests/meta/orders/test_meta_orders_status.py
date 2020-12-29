@@ -21,6 +21,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert pool["name"] == "pool-1"
     assert pool["application"] == "RMLS05R150"
     assert pool["data_analysis"] == str(Pipeline.FLUFFY)
+    assert pool["data_delivery"] == str(DataDelivery.QC)
     assert len(pool["samples"]) == 2
     sample = pool["samples"][0]
     assert sample["name"] == "sample1"
@@ -55,6 +56,8 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert data["customer"] == "cust002"
     assert data["order"] == "Microbial samples"
     assert data["comment"] == "Order comment"
+    assert data["data_analysis"] == str(Pipeline.MICROSALT)
+    assert data["data_delivery"] == str(DataDelivery.FASTQ)
 
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data["samples"][0]
@@ -76,6 +79,7 @@ def test_families_to_status(mip_order_to_submit):
     family = data["families"][0]
     assert family["name"] == "family1"
     assert family["data_analysis"] == str(Pipeline.MIP_DNA)
+    assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == "standard"
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
@@ -119,10 +123,15 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
     assert new_pool.name == "pool-2"
     assert new_pool.application_version.application.tag == "RMLS05R150"
-    assert new_pool.data_analysis == str(Pipeline.FLUFFY)
+    assert not hasattr(new_pool, "data_analysis")
+
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
+
+    new_case = base_store.families(customer=None).first()
+    assert new_case.data_analysis == str(Pipeline.FLUFFY)
+    assert new_case.data_delivery == str(DataDelivery.QC)
 
 
 def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
@@ -169,9 +178,11 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
+    assert family_link.family.data_analysis == Pipeline.MIP_DNA
+    assert family_link.family.data_delivery == DataDelivery.SCOUT
 
 
-def test_store_samples_data_analysis_stored(orders_api, base_store, fastq_status_data):
+def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a fastq order
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
@@ -261,6 +272,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
 
     microbial_case = base_store.families().first()
     assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
+    assert microbial_case.data_delivery == str(DataDelivery.QC)
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
@@ -333,6 +345,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert len(new_family.links) == 3
     new_link = new_family.links[0]
     assert new_family.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_family.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
@@ -370,6 +383,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert len(new_casing.links) == 2
     new_link = new_casing.links[0]
     assert new_casing.data_analysis == str(Pipeline.MIP_RNA)
+    assert new_casing.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
     assert new_link.sample.time_point == 1
@@ -419,6 +433,7 @@ def test_store_external(orders_api, base_store, external_status_data):
     assert new_family == family_obj
     assert new_family.name == "fam2"
     assert new_family.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_family.data_delivery == str(DataDelivery.SCOUT)
     assert set(new_family.panels) == {"CTD", "CILM"}
     assert new_family.priority_human == "priority"
 
@@ -535,6 +550,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     new_family = new_families[0]
     assert new_family.name == "family1"
     assert new_family.data_analysis == str(Pipeline.BALSAMIC)
+    assert new_family.data_delivery == str(DataDelivery.QC)
     assert set(new_family.panels) == set()
     assert new_family.priority_human == "standard"
 

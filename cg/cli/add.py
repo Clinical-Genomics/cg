@@ -190,7 +190,7 @@ def family(
             LOG.error(f"{panel_id}: panel not found")
             context.abort()
 
-    new_family = status.add_family(
+    new_family = status.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,

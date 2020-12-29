@@ -30,7 +30,7 @@ def test_that_families_can_have_many_samples(base_store: Store):
         base_store, "test_family_50åäp+ölo0l", default_limit, sequenced=True
     )
     test_sample = add_sample(base_store, sequenced=True)
-    test_family = add_family(base_store, "family_one_sample")
+    test_family = add_case(base_store, "family_one_sample")
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
@@ -99,7 +99,7 @@ def test_specified_analysis_in_result(base_store: Store):
     # GIVEN a database with a family with one sequenced samples for MIP analysis
     pipeline = Pipeline.BALSAMIC
     test_sample = add_sample(base_store, sequenced=True)
-    test_family = add_family(base_store, data_analysis=pipeline)
+    test_family = add_case(base_store, data_analysis=pipeline)
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
@@ -116,7 +116,7 @@ def test_exclude_other_pipeline_analysis_from_result(base_store: Store):
 
     # GIVEN a database with a family with one sequenced samples for specified analysis
     test_sample = add_sample(base_store, sequenced=True)
-    test_family = add_family(base_store, data_analysis=Pipeline.BALSAMIC)
+    test_family = add_case(base_store, data_analysis=Pipeline.BALSAMIC)
     base_store.relate_sample(test_family, test_sample, "unknown")
 
     # WHEN getting families to analyse
@@ -131,7 +131,7 @@ def test_one_of_two_sequenced_samples(base_store: Store):
     families to analyse"""
 
     # GIVEN a database with a family with one of one sequenced samples and no analysis
-    test_family = add_family(base_store)
+    test_family = add_case(base_store)
     test_sample1 = add_sample(base_store, sequenced=True)
     test_sample2 = add_sample(base_store, sequenced=False)
     base_store.relate_sample(test_family, test_sample1, "unknown")
@@ -149,7 +149,7 @@ def test_one_of_one_sequenced_samples(base_store: Store):
     families to analyse"""
 
     # GIVEN a database with a family with one of one sequenced samples and no analysis
-    test_family = add_family(base_store)
+    test_family = add_case(base_store)
     test_sample = add_sample(base_store, sequenced=True)
     base_store.relate_sample(test_family, test_sample, "unknown")
     assert test_sample.sequenced_at is not None
@@ -255,7 +255,7 @@ def add_family_with_samples(base_store, family_name, n_samples, sequenced):
     """utility function to add one family with many samples to use in tests"""
 
     test_samples = add_samples(base_store, n_samples, sequenced=sequenced)
-    test_family = add_family(base_store, family_name)
+    test_family = add_case(base_store, family_name)
     relate_samples(base_store, test_family, test_samples)
     return test_family
 
@@ -287,7 +287,7 @@ def ensure_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
     return panel
 
 
-def add_family(
+def add_case(
     disk_store,
     family_id="family_test",
     customer_id="cust_test",
@@ -300,7 +300,7 @@ def add_family(
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(
+    family = disk_store.add_case(
         data_analysis=data_analysis, data_delivery=data_delivery, name=family_id, panels=panel.name
     )
     family.customer = customer
@@ -323,7 +323,7 @@ def add_analysis(
     if uploaded:
         analysis.uploaded_at = datetime.now()
 
-    family = add_family(store)
+    family = add_case(store)
 
     family.analyses.append(analysis)
     store.add_commit(analysis)

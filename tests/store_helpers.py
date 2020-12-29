@@ -188,7 +188,7 @@ class StoreHelpers:
         """Utility function to add an analysis for tests"""
 
         if not family:
-            family = self.add_family(store, data_analysis=pipeline, data_delivery=data_delivery)
+            family = self.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
@@ -302,7 +302,7 @@ class StoreHelpers:
             store.add_commit(panel)
         return panel
 
-    def add_family(
+    def add_case(
         self,
         store: Store,
         family_id: str = "family_test",
@@ -325,7 +325,7 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not family_obj:
-            family_obj = store.add_family(
+            family_obj = store.add_case(
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
                 name=family_id,
@@ -345,12 +345,12 @@ class StoreHelpers:
         store: Store,
         name: str,
         customer: models.Customer,
-        data_analysis: Pipeline = None,
-        data_delivery: DataDelivery = None,
+        data_analysis: Pipeline,
+        data_delivery: DataDelivery,
     ):
         family = store.find_family(customer=customer, name=name)
         if not family:
-            family = store.add_family(
+            family = store.add_case(
                 name=name, panels=None, data_analysis=data_analysis, data_delivery=data_delivery
             )
             family.customer = customer
@@ -378,7 +378,7 @@ class StoreHelpers:
             action=family_info.get("action"),
         )
 
-        family_obj = self.add_family(
+        family_obj = self.add_case(
             store, family_obj=family_obj, customer_id=customer_obj.internal_id
         )
 
@@ -483,7 +483,8 @@ class StoreHelpers:
         )
         sample.customer = customer
         case = self.ensure_family(
-            store=store, name=str(ticket), customer=customer, data_analysis=Pipeline.MICROSALT
+            store=store, name=str(ticket), customer=customer, data_analysis=Pipeline.MICROSALT,
+            data_delivery=DataDelivery.QC,
         )
         self.add_relationship(store=store, family=case, sample=sample)
         return sample

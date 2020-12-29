@@ -204,7 +204,7 @@ def test_multiple_analyses(analysis_store, helpers):
 
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
     timestamp = datetime.now()
-    family = helpers.add_family(analysis_store)
+    family = helpers.add_case(analysis_store)
     analysis_oldest = helpers.add_analysis(
         analysis_store,
         family=family,

@@ -44,7 +44,7 @@ def test_upload_fails_hard_on_faulty_analysis(invoke_cli, disk_store: Store, hel
     """Test that an upload for a missing analysis does fail hard """
 
     # GIVEN empty database
-    family_id = helpers.add_family(disk_store).internal_id
+    family_id = helpers.add_case(disk_store).internal_id
 
     # WHEN trying to upload with a analysis that doesn't exist
     result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])
@@ -59,7 +59,7 @@ def test_upload_doesnt_invoke_dually_for_same_case(invoke_cli, disk_store: Store
     """Test that a case that is already uploading can't be uploaded at the same time"""
 
     # GIVEN an analysis that is already uploading
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     helpers.add_analysis(disk_store, family=family, uploading=True)
 
@@ -76,7 +76,7 @@ def test_upload_started_long_time_ago_raises_exception(invoke_cli, disk_store: S
     """Test that an upload for a missing family does fail hard """
 
     # GIVEN an analysis that is already uploading since a week ago
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     today = datetime.now()
     upload_started = today - timedelta(hours=100)
@@ -94,7 +94,7 @@ def test_upload_force_restart(invoke_cli, disk_store: Store, helpers):
     """Test that a case that is already uploading can be force restarted"""
 
     # GIVEN an analysis that is already uploading
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
 
     helpers.add_analysis(disk_store, family=family, uploading=True)
@@ -110,7 +110,7 @@ def test_upload_uploaded_fails_hard(invoke_cli, disk_store: Store, helpers):
     """Test that a case that has already been uploaded can't be uploaded"""
 
     # GIVEN an analysis that has been uploaded
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
 
     helpers.add_analysis(disk_store, family=family, uploaded_at=datetime.now())

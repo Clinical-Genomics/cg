@@ -137,6 +137,7 @@ def test_parsing_external_orderform(external_orderform):
 
     assert wes_sample["capture_kit"] == "Agilent Sureselect V5"
     assert wes_sample["application"] == "EXXCUSR000"
+    assert wes_sample["data_analysis"] == str(Pipeline.MIP_DNA)
     assert wes_sample["sex"] == "male"
     # family name on family
     # priority on family
@@ -333,42 +334,3 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     # required for RNA samples
     assert first_sample["from_sample"] == "s1"
     assert first_sample["time_point"] == "0"
-
-
-def test_parse_mip_rna(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "mip-rna"
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is mip only
-    assert parsed_sample["data_analysis"] == str(Pipeline.MIP_RNA)
-
-
-def test_parse_mip_only(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with mip only value from orderform 1508 for data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "mip-dna"
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is mip only
-    assert parsed_sample["data_analysis"] == str(Pipeline.MIP_DNA)
-
-
-def test_parse_balsamic_only(skeleton_orderform_sample: dict):
-
-    # GIVEN a raw sample with balsamic only value from orderform 1508 for data_analysis
-    raw_sample = skeleton_orderform_sample
-    raw_sample["UDF/Data Analysis"] = "balsamic"
-
-    # WHEN parsing the sample
-    parsed_sample = orderform.parse_sample(raw_sample)
-
-    # THEN data_analysis is balsamic only
-    assert parsed_sample["data_analysis"] == str(Pipeline.BALSAMIC)

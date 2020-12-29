@@ -36,20 +36,20 @@ def fixture_analysis_store(base_store: Store, workflow_case_id, helpers) -> Stor
     """Store to be used in tests"""
     _store = base_store
 
-    case = helpers.add_family(_store, workflow_case_id, data_analysis=Pipeline.MIP_DNA)
+    case = helpers.add_case(_store, workflow_case_id, data_analysis=Pipeline.MIP_DNA)
 
     dna_sample = helpers.add_sample(
         _store, "dna_sample", is_rna=False, sequenced_at=datetime.now(), reads=10000000
     )
     helpers.add_relationship(_store, sample=dna_sample, family=case)
 
-    case = helpers.add_family(_store, "rna_case", data_analysis=Pipeline.MIP_RNA)
+    case = helpers.add_case(_store, "rna_case", data_analysis=Pipeline.MIP_RNA)
     rna_sample = helpers.add_sample(
         _store, "rna_sample", is_rna=True, sequenced_at=datetime.now(), reads=10000000
     )
     helpers.add_relationship(_store, sample=rna_sample, family=case)
 
-    case = helpers.add_family(_store, "dna_rna_mix_case", data_analysis=Pipeline.MIP_DNA)
+    case = helpers.add_case(_store, "dna_rna_mix_case", data_analysis=Pipeline.MIP_DNA)
     helpers.add_relationship(_store, sample=rna_sample, family=case)
     helpers.add_relationship(_store, sample=dna_sample, family=case)
 

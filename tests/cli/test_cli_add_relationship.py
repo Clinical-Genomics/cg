@@ -8,7 +8,7 @@ def test_add_relationship_required(invoke_cli, disk_store: Store, helpers):
     # GIVEN a database with a sample and an family
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     status = "affected"
 
@@ -41,7 +41,7 @@ def test_add_relationship_bad_sample(invoke_cli, disk_store: Store, helpers):
 
     # WHEN adding a relationship
     db_uri = disk_store.uri
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     sample_id = "dummy_sample"
     status = "affected"
@@ -101,7 +101,7 @@ def test_add_relationship_bad_status(invoke_cli, disk_store: Store, helpers):
 
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     status = "dummy_status"
 
@@ -130,7 +130,7 @@ def test_add_relationship_mother(invoke_cli, disk_store: Store, helpers):
     sample_id = sample.internal_id
     mother = helpers.add_sample(disk_store, sample_id="mother")
     mother_id = mother.internal_id
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     status = "affected"
 
@@ -164,7 +164,7 @@ def test_add_relationship_bad_mother(invoke_cli, disk_store: Store, helpers):
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
     mother_id = "dummy_mother"
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
     status = "affected"
 
@@ -200,7 +200,7 @@ def test_add_relationship_father(invoke_cli, disk_store: Store, helpers):
     father = helpers.add_sample(disk_store, sample_id="father", gender="male")
     father_id = father.internal_id
 
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
 
     status = "affected"
@@ -236,7 +236,7 @@ def test_add_relationship_bad_father(invoke_cli, disk_store: Store, helpers):
     sample_id = sample.internal_id
 
     father_id = "bad_father"
-    family = helpers.add_family(disk_store)
+    family = helpers.add_case(disk_store)
     family_id = family.internal_id
 
     status = "affected"

@@ -143,7 +143,7 @@ class AddHandler(BaseHandler):
         )
         return new_sample
 
-    def add_family(
+    def add_case(
         self,
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
@@ -153,7 +153,7 @@ class AddHandler(BaseHandler):
     ) -> models.Family:
         """Build a new Family record."""
 
-        # generate a unique family id
+        # generate a unique case id
         while True:
             internal_id = petname.Generate(2, separator="")
             if self.family(internal_id) is None:
@@ -162,14 +162,15 @@ class AddHandler(BaseHandler):
                 LOG.debug(f"{internal_id} already used - trying another id")
 
         priority_db = PRIORITY_MAP[priority]
-        new_family = self.Family(
+        new_case = self.Family(
             data_analysis=str(data_analysis),
+            data_delivery=str(data_delivery),
             internal_id=internal_id,
             name=name,
             priority=priority_db,
         )
-        new_family.panels = panels
-        return new_family
+        new_case.panels = panels
+        return new_case
 
     def relate_sample(
         self,

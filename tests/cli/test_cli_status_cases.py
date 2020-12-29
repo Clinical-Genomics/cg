@@ -8,7 +8,7 @@ def test_lists_sample_in_unreceived_samples(cli_runner, base_context, base_store
     """Test to that cases displays family in database"""
 
     # GIVEN a database with a family
-    family = helpers.add_family(base_store)
+    family = helpers.add_case(base_store)
     sample1 = helpers.add_sample(base_store, "sample1")
     helpers.add_relationship(base_store, family=family, sample=sample1)
 
@@ -25,7 +25,7 @@ def test_lists_samples_in_unreceived_samples(cli_runner, base_context, base_stor
     """Test to that cases displays family in database"""
 
     # GIVEN a database with a family
-    family = helpers.add_family(base_store)
+    family = helpers.add_case(base_store)
     sample1 = helpers.add_sample(base_store, "sample1")
     sample2 = helpers.add_sample(base_store, "sample2")
     helpers.add_relationship(base_store, family=family, sample=sample1)
@@ -44,7 +44,7 @@ def test_lists_family(cli_runner, base_context, base_store: Store, helpers):
     """Test to that cases displays family in database"""
 
     # GIVEN a database with a family
-    family = helpers.add_family(base_store)
+    family = helpers.add_case(base_store)
 
     # WHEN listing cases
     result = cli_runner.invoke(cases, obj=base_context)
