@@ -209,6 +209,7 @@ def store_available(context: click.Context):
     exit_code = EXIT_SUCCESS
 
     for case_obj in microsalt_analysis_api.get_deliverables_to_store():
+        LOG.info("Storing deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, unique_id=case_obj.internal_id)
         except Exception:

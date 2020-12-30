@@ -283,7 +283,7 @@ class MicrosaltAnalysisAPI:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
 
-        return self.db.cases_to_store(pipeline="microbial")
+        return self.db.cases_to_store(pipeline=Pipeline.MICROSALT)
 
     def get_deliverables_file_path(self, order_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
