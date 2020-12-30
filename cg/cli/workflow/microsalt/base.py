@@ -208,6 +208,7 @@ def store_available(context: click.Context):
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
     exit_code = EXIT_SUCCESS
 
+    LOG.info(microsalt_analysis_api.get_deliverables_to_store())
     for case_obj in microsalt_analysis_api.get_deliverables_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
         try:
