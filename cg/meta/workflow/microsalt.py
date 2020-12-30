@@ -200,7 +200,9 @@ class MicrosaltAnalysisAPI:
 
     def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
         if sample_id:
-            samples = [self.db.Sample(sample_id)]
+            samples = [
+                self.db.query(models.Sample).filter(models.Sample.internal_id == sample_id).first()
+            ]
         else:
             case_obj = self.db.family(case_id)
             samples = [link.sample for link in case_obj.links]
