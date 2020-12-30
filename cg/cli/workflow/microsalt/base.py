@@ -108,6 +108,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
 
     with open(outfilename, "w") as outfile:
         json.dump(parameters, outfile, indent=4, sort_keys=True)
+    LOG.info("Saved config %s", outfilename)
 
 
 @microsalt.command()
@@ -187,7 +188,7 @@ def store(context: click.Context, unique_id: str):
 @OPTION_SAMPLE
 @click.pass_context
 def start(context: click.Context, ticket: bool, sample: bool, unique_id: str):
-    LOG.info("Starting Microsalt workflow for case or ticket %s", unique_id)
+    LOG.info("Starting Microsalt workflow for %s", unique_id)
     context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id)
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id)

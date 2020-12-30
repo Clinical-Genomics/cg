@@ -334,11 +334,13 @@ class MicrosaltAnalysisAPI:
         return case_id, None
 
     def get_case_id_from_sample(self, unique_id: str) -> (str, str):
-        sample_obj = self.db.Sample(unique_id)
+        sample_obj = (
+            self.db.query(models.Sample).filter(models.Sample.internal_id == unique_id).all()
+        )
         if not sample_obj:
             LOG.error("No sample found with id: %s", unique_id)
             raise click.Abort
-        case_id = sample_obj.links[0].family.internal_id
+        case_id = sample_obj[0].links[0].family.internal_id
         sample_id = sample_obj.internal_id
         return case_id, sample_id
 
