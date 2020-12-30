@@ -147,12 +147,20 @@ def run(
         filename = sample_id or case_id
         config_case_path = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
 
-    analyse_command = [
-        "analyse",
-        config_case_path.absolute().as_posix(),
-        "--input",
-        fastq_path.absolute().as_posix(),
-    ]
+    if not sample_id:
+        analyse_command = [
+            "analyse",
+            config_case_path.absolute().as_posix(),
+            "--input",
+            fastq_path.absolute().as_posix(),
+        ]
+    else:
+        analyse_command = [
+            "analyse",
+            config_case_path.absolute().as_posix(),
+            "--input",
+            Path(fastq_path, sample_id).absolute().as_posix(),
+        ]
     microsalt_analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
 
     if not sample_id and not dry_run:
