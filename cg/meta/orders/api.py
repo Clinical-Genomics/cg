@@ -56,45 +56,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             # open and assign ticket to order
             try:
                 if self.osticket:
-                    message = f"data:text/html;charset=utf-8,New incoming samples: "
-
-                    for sample in data.get("samples"):
-                        message += "<br />" + sample.get("name")
-
-                        if sample.get("application"):
-                            message += f", application: {sample.get('application')}"
-
-                        if sample.get("family_name"):
-                            message += f", family: {sample.get('family_name')}"
-
-                        if sample.get("internal_id"):
-
-                            existing_sample = self.status.sample(sample.get("internal_id"))
-                            sample_customer = ""
-                            if existing_sample.customer_id != data["customer"]:
-                                sample_customer = " from " + existing_sample.customer.internal_id
-
-                            message += f" (already existing sample{sample_customer})"
-
-                        if sample.get("priority"):
-                            message += ", priority: " + sample.get("priority")
-
-                        if sample.get("comment"):
-                            message += ", " + sample.get("comment")
-
-                    message += f"<br />"
-
-                    if project:
-                        message += f"<br />{project}."
-
-                    if data.get("delivery"):
-                        message += f"<br />{data.get('delivery')}."
-
-                    if data.get("comment"):
-                        message += f"<br />{data.get('comment')}."
-
-                    if ticket.get("name"):
-                        message += f"<br />{ticket.get('name')}"
+                    message = self._create_message(data, ticket, project)
 
                     data["ticket"] = self.osticket.open_ticket(
                         name=ticket["name"],
@@ -113,12 +75,55 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = order_func(data)
         return result
 
-    def submit_rml(self, data: dict) -> dict:
+    def _create_message(self, data: dict, ticket: dict, project: str):
+        message = f"data:text/html;charset=utf-8,New incoming samples: "
+
+        for sample in data.get("samples"):
+            message += "<br />" + sample.get("name")
+
+            if sample.get("application"):
+                message += f", application: {sample.get('application')}"
+
+            if sample.get("family_name"):
+                message += f", family: {sample.get('family_name')}"
+
+            if sample.get("internal_id"):
+
+                existing_sample = self.status.sample(sample.get("internal_id"))
+                sample_customer = ""
+                if existing_sample.customer_id != data["customer"]:
+                    sample_customer = " from " + existing_sample.customer.internal_id
+
+                message += f" (already existing sample{sample_customer})"
+
+            if sample.get("priority"):
+                message += ", priority: " + sample.get("priority")
+
+            if sample.get("comment"):
+                message += ", " + sample.get("comment")
+
+        message += f"<br />"
+
+        if project:
+            message += f"<br />{project}."
+
+        if data.get("delivery"):
+            message += f"<br />{data.get('delivery')}."
+
+        if data.get("comment"):
+            message += f"<br />{data.get('comment')}."
+
+        if ticket.get("name"):
+            message += f"<br />{ticket.get('name')}"
+
+        return message
+
+    def _submit_rml(self, data: dict) -> dict:
         """Submit a batch of ready made libraries."""
         status_data = self.pools_to_status(data)
         project_data, lims_map = self.process_lims(data, data["samples"])
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
-        self.fill_in_sample_ids(samples, lims_map, id_key="internal_id")
+        self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
         new_records = self.store_rml(
             customer=status_data["customer"],
             order=status_data["order"],
@@ -128,11 +133,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
         )
         return {"project": project_data, "records": new_records}
 
-    def submit_fastq(self, data: dict) -> dict:
+    def _submit_fastq(self, data: dict) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
         status_data = self.samples_to_status(data)
         project_data, lims_map = self.process_lims(data, data["samples"])
-        self.fill_in_sample_ids(status_data["samples"], lims_map)
+        self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_fastq_samples(
             customer=status_data["customer"],
             order=status_data["order"],
@@ -140,14 +145,14 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ticket=data["ticket"],
             samples=status_data["samples"],
         )
-        self.add_missing_reads(new_samples)
+        self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
-    def submit_metagenome(self, data: dict) -> dict:
+    def _submit_metagenome(self, data: dict) -> dict:
         """Submit a batch of metagenome samples."""
         status_data = self.samples_to_status(data)
         project_data, lims_map = self.process_lims(data, data["samples"])
-        self.fill_in_sample_ids(status_data["samples"], lims_map)
+        self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_samples(
             customer=status_data["customer"],
             order=status_data["order"],
@@ -155,17 +160,17 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ticket=data["ticket"],
             samples=status_data["samples"],
         )
-        self.add_missing_reads(new_samples)
+        self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
-    def submit_external(self, data: dict) -> dict:
+    def _submit_external(self, data: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
-        result = self.process_family_samples(data)
+        result = self._process_family_samples(data)
         return result
 
-    def submit_case_samples(self, data: dict) -> dict:
+    def _submit_case_samples(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self.process_family_samples(data)
+        result = self._process_family_samples(data)
         for family_obj in result["records"]:
             LOG.info(f"{family_obj.name}: submit family samples")
             status_samples = [
@@ -173,30 +178,30 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 for link_obj in family_obj.links
                 if link_obj.sample.ticket_number == data["ticket"]
             ]
-            self.add_missing_reads(status_samples)
-        self.update_application(data["ticket"], result["records"])
+            self._add_missing_reads(status_samples)
+        self._update_application(data["ticket"], result["records"])
         return result
 
-    def submit_mip_dna(self, data: dict) -> dict:
+    def _submit_mip_dna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_case_samples(data)
+        return self._submit_case_samples(data)
 
-    def submit_balsamic(self, data: dict) -> dict:
+    def _submit_balsamic(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and balsamic analysis."""
-        return self.submit_case_samples(data)
+        return self._submit_case_samples(data)
 
-    def submit_mip_rna(self, data: dict) -> dict:
+    def _submit_mip_rna(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self.submit_case_samples(data)
+        return self._submit_case_samples(data)
 
-    def submit_microsalt(self, data: dict) -> dict:
+    def _submit_microsalt(self, data: dict) -> dict:
         """Submit a batch of microbial samples."""
         # prepare data for status database
         status_data = self.microbial_samples_to_status(data)
-        self.fill_in_sample_verified_organism(data["samples"])
+        self._fill_in_sample_verified_organism(data["samples"])
         # submit samples to LIMS
         project_data, lims_map = self.process_lims(data, data["samples"])
-        self.fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
+        self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
         # submit samples to Status
         samples = self.store_microbial_samples(
             customer=status_data["customer"],
@@ -211,7 +216,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         return {"project": project_data, "records": samples}
 
-    def process_family_samples(self, data: dict) -> dict:
+    def _process_family_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
         status_data = self.cases_to_status(data)
@@ -222,7 +227,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             project_data = lims_map = None
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
         if lims_map:
-            self.fill_in_sample_ids(samples, lims_map)
+            self._fill_in_sample_ids(samples, lims_map)
         new_families = self.store_cases(
             customer=status_data["customer"],
             order=status_data["order"],
@@ -232,7 +237,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         )
         return {"project": project_data, "records": new_families}
 
-    def update_application(self, ticket_number: int, families: List[models.Family]) -> None:
+    def _update_application(self, ticket_number: int, families: List[models.Family]) -> None:
         """Update application for trios if relevant."""
         reduced_map = {
             "EXOSXTR100": "EXTSXTR100",
@@ -265,7 +270,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                                 )
                                 sample_obj.application_version = reduced_version
 
-    def add_missing_reads(self, samples: List[models.Sample]):
+    def _add_missing_reads(self, samples: List[models.Sample]):
         """Add expected reads/reads missing."""
         for sample_obj in samples:
             LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
@@ -273,7 +278,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
     @staticmethod
-    def fill_in_sample_ids(samples: List[dict], lims_map: dict, id_key: str = "internal_id"):
+    def _fill_in_sample_ids(samples: List[dict], lims_map: dict, id_key: str = "internal_id"):
         """Fill in LIMS sample ids."""
         for sample in samples:
             LOG.debug(f"{sample['name']}: link sample to LIMS")
@@ -282,7 +287,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
 
-    def fill_in_sample_verified_organism(self, samples: List[dict]):
+    def _fill_in_sample_verified_organism(self, samples: List[dict]):
         for sample in samples:
             organism_id = sample["organism"]
             reference_genome = sample["reference_genome"]
@@ -319,8 +324,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
         """Get the submit method to call for the given type of project"""
 
         if project_type == OrderType.MIP_DNA:
-            return getattr(self, "submit_mip_dna")
+            return getattr(self, "_submit_mip_dna")
         if project_type == OrderType.MIP_RNA:
-            return getattr(self, "submit_mip_rna")
+            return getattr(self, "_submit_mip_rna")
 
-        return getattr(self, f"submit_{str(project_type)}")
+        return getattr(self, f"_submit_{str(project_type)}")
