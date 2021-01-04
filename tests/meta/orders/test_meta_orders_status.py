@@ -178,8 +178,8 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
-    assert family_link.family.data_analysis == Pipeline.MIP_DNA
-    assert family_link.family.data_delivery == DataDelivery.SCOUT
+    assert family_link.family.data_analysis == Pipeline.FASTQ
+    assert family_link.family.data_delivery == DataDelivery.FASTQ
 
 
 def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
