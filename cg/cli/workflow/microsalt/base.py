@@ -33,10 +33,7 @@ OPTION_TICKET = click.option(
     help="Start workflow by providing a ticket_id (By default case_id will be used)",
     is_flag=True,
 )
-ARGUMENT_UNIQUE_IDENTIFIER = click.argument(
-    "unique_id",
-    required=True,
-)
+ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=click.STRING)
 
 
 @click.group(invoke_without_command=True)
@@ -60,7 +57,7 @@ def microsalt(context: click.Context):
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
-def link(context: click.Context, ticket: bool, sample: bool, unique_id: Any):
+def link(context: click.Context, ticket: bool, sample: bool, unique_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
@@ -83,7 +80,7 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: Any):
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
-def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: Any):
+def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: str):
     """ Create a config file on case level for microSALT """
 
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]

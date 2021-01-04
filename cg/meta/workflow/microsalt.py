@@ -279,7 +279,7 @@ class MicrosaltAnalysisAPI:
         """Get LIMS project for a sample"""
         return self.lims.get_sample_project(sample_id)
 
-    def get_deliverables_to_store(self) -> List[Path]:
+    def get_deliverables_to_store(self) -> list:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
 

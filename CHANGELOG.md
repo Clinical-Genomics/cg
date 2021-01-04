@@ -14,6 +14,17 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.0.0]
+
+### Added
+- New commands for running cron jobs 
+
+### Changed
+- Changed cli commands for starting and storing microsalt workflows
+
+### Fixed
+- Full Microsalt can now be executed through cg interface
+
 ## [17.2.1]
 
 
