@@ -328,7 +328,6 @@ class StatusHandler:
         with self.status.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status.add_sample(
-                    data_delivery=str(DataDelivery.FASTQ),
                     name=sample["name"],
                     internal_id=sample["internal_id"],
                     sex=sample["sex"] or "unknown",
@@ -347,8 +346,8 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
                 new_family = self.status.add_case(
-                    data_analysis=Pipeline.MIP_DNA,
-                    data_delivery=DataDelivery.SCOUT,
+                    data_analysis=Pipeline(sample["data_analysis"]),
+                    data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
