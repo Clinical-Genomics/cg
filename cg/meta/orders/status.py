@@ -198,10 +198,8 @@ class StatusHandler:
         for case in cases:
             case_obj = self.status.find_family(customer_obj, case["name"])
             if case_obj:
-                print("found case: ", case)
                 case_obj.panels = case["panels"]
             else:
-                print("create case: ", case)
                 case_obj = self.status.add_case(
                     data_analysis=Pipeline(case["data_analysis"]),
                     data_delivery=DataDelivery(case["data_delivery"]),
