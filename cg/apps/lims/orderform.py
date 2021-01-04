@@ -84,11 +84,12 @@ def parse_orderform(excel_path: str) -> dict:
 
     filename_base = os.path.splitext(os.path.basename(excel_path))[0]
 
-    data = {"customer": customer_ids.pop(),
-            "items": items,
-            "project_type": project_type,
-            "name": filename_base,
-            }
+    data = {
+        "customer": customer_ids.pop(),
+        "items": items,
+        "project_type": project_type,
+        "name": filename_base,
+    }
 
     return data
 
