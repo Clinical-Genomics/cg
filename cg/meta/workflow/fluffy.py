@@ -50,6 +50,16 @@ class FluffyAnalysisAPI:
     def get_slurm_job_ids_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "output", "sacct", "submitted_jobs.yaml")
 
+    def get_priority(self, case_id: str) -> str:
+        """Returns priority for the case in clinical-db as text"""
+        case_object = self.status_db.family(case_id)
+        if case_object:
+            if case_object.high_priority:
+                return "high"
+            if case_object.low_priority:
+                return "low"
+        return "normal"
+
     def link_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """
         1. Get fastq from HK
