@@ -11,7 +11,7 @@ from cg.apps.environ import environ_email
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing", is_flag=True
+    "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
 )
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 
