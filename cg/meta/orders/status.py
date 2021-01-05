@@ -474,7 +474,6 @@ class StatusHandler:
                 ordered=ordered,
                 ticket=ticket,
                 application_version=application_version,
-                data_analysis=Pipeline(pool["data_analysis"]),
             )
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(

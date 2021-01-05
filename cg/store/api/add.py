@@ -246,7 +246,6 @@ class AddHandler(BaseHandler):
         order: str,
         ordered: dt.datetime,
         application_version: models.ApplicationVersion,
-        data_analysis: Pipeline,
         ticket: int = None,
         comment: str = None,
         received: dt.datetime = None,
@@ -262,7 +261,6 @@ class AddHandler(BaseHandler):
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,
-            data_analysis=str(data_analysis),
         )
         new_record.customer = customer
         new_record.application_version = application_version

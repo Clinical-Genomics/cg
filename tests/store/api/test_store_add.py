@@ -139,7 +139,6 @@ def test_add_pool(store: Store):
         order="Test",
         ordered=dt.today(),
         application_version=app_version,
-        data_analysis=Pipeline.FASTQ,
     )
     store.add_commit(new_pool)
 
