@@ -29,7 +29,7 @@ class FluffyAnalysisAPI:
         self.status_db = status_db
         self.lims_api = lims_api
         self.root_dir = Path(config["root_dir"])
-        self.process = Process(binary=config["binary"])
+        self.process = Process(binary=config["binary_path"])
         self.fluffy_config = Path(config["config_path"])
 
     def get_workdir_path(self, case_id: str) -> Path:
