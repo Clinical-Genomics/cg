@@ -27,6 +27,7 @@ class FluffyAnalysisAPI:
         self.trailblazer_api = trailblazer_api
         self.niptool_api = niptool_api
         self.status_db = status_db
+        self.lims_api = lims_api
         self.root_dir = Path(config["root_dir"])
         self.process = Process(binary=config["binary"])
         self.fluffy_config = Path(config["config_path"])
@@ -67,6 +68,7 @@ class FluffyAnalysisAPI:
 
     def get_concentrations_from_lims(self, sample_id: str) -> float:
         # placeholder
+        # When samplesheet is uploaded to lims on stage, replace with LIMS query
         return 50.0
 
     def add_concentrations_to_samplesheet(

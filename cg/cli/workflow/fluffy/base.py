@@ -32,8 +32,7 @@ def fluffy(context):
         lims_api=LimsAPI(config),
         niptool_api=NIPToolAPI(config),
         status_db=Store(config["database"]),
-        binary=config["Fluffy"]["binary_path"],
-        root_dir=config["Fluffy"]["root_dir"],
+        config=config["fluffy"],
     )
 
 
