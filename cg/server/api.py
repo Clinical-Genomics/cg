@@ -12,7 +12,7 @@ from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
 from cg.exc import DuplicateRecordError, OrderFormError, OrderError
-from cg.apps.lims import parse_orderform, parse_json
+from cg.apps.lims import parse_orderform, parse_json_order
 from cg.meta.orders import OrdersAPI, OrderType
 from .ext import db, lims, osticket
 
@@ -341,7 +341,7 @@ def orderform():
             project_data = parse_orderform(saved_path)
         else:
             json_data = json.load(input_file.stream)
-            project_data = parse_json(json_data)
+            project_data = parse_json_order(json_data)
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
 

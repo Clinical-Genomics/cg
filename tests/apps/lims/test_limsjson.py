@@ -6,7 +6,7 @@ def test_parsing_balsamic_json(balsamic_order_to_submit):
 
     # GIVEN an order form for a cancer order with 11 samples,
     # WHEN parsing the order form
-    data = limsjson.parse_json(balsamic_order_to_submit)
+    data = limsjson.parse_json_order(balsamic_order_to_submit)
 
     # THEN it should detect the type of project
     assert data["project_type"] == str(Pipeline.BALSAMIC)
@@ -58,10 +58,10 @@ def test_parsing_rml_json(rml_order_to_submit: dict) -> None:
     # GIVEN a path to a RML limsjson with 2 sample in a pool
 
     # WHEN parsing the file
-    data = limsjson.parse_json(rml_order_to_submit)
+    data = limsjson.parse_json_order(rml_order_to_submit)
 
     # THEN it should determine the type of project and customer
-    assert data["project_type"] == "rml"
+    assert data["project_type"] == "fluffy"
     assert data["customer"] == "cust000"
     assert data["comment"] == "order comment"
 
@@ -92,7 +92,7 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
 
     # GIVEN an order form for a Scout order with samples, 1 trio, in a plate
     # WHEN parsing the order form
-    data = limsjson.parse_json(mip_json_order_to_submit)
+    data = limsjson.parse_json_order(mip_json_order_to_submit)
 
     # THEN it should detect the type of project
     assert data["project_type"] == "mip-dna"
