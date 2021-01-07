@@ -12,12 +12,8 @@ def get_project_type(samples: [dict]) -> str:
     if len(data_analyses) > 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
 
-    if data_analyses == {"mip-dna"}:
-        return "mip-dna"
-    elif data_analyses == {"fluffy"}:
-        return "fluffy"
-    elif data_analyses == {"balsamic"}:
-        return "balsamic"
+    if data_analyses in [{"mip-dna"}, {"fluffy"}, {"balsamic"}]:
+        return data_analyses.pop()
 
     raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
 
