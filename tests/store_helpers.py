@@ -226,7 +226,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         customer_name: str = None,
         reads: int = None,
-        loqus_id: str = None,
+        loqusdb_id: str = None,
         ticket: int = None,
         **kwargs,
     ) -> models.Sample:
@@ -254,8 +254,8 @@ class StoreHelpers:
         sample.customer = customer
         sample.is_external = is_external
 
-        if loqus_id:
-            sample.loqusdb_id = loqus_id
+        if loqusdb_id:
+            sample.loqusdb_id = loqusdb_id
 
         if kwargs.get("delivered_at"):
             sample.delivered_at = kwargs["delivered_at"]
@@ -340,8 +340,8 @@ class StoreHelpers:
         store.add_commit(family_obj)
         return family_obj
 
+    @staticmethod
     def ensure_family(
-        self,
         store: Store,
         name: str,
         customer: models.Customer,

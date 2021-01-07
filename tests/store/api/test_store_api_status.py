@@ -58,7 +58,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has been uploaded to loqusdb
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = helpers.add_sample(sample_store, loqus_id="uploaded_to_loqus")
+    sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -89,7 +89,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
 
 
 def test_case_in_observations_to_upload(helpers, sample_store):
-    # GIVEN a case with completed analysis and samples w/o loqus_id
+    # GIVEN a case with completed analysis and samples w/o loqusdb_id
     analysis = helpers.add_analysis(store=sample_store)
 
     sample = helpers.add_sample(sample_store)
@@ -106,10 +106,10 @@ def test_case_in_observations_to_upload(helpers, sample_store):
 
 
 def test_case_not_in_observations_to_upload(helpers, sample_store):
-    # GIVEN a case with completed analysis and samples w loqus_id
+    # GIVEN a case with completed analysis and samples w loqusdb_id
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = helpers.add_sample(sample_store, loqus_id="uploaded_to_loqus")
+    sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
