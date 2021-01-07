@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
@@ -28,6 +29,9 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             db=microsalt_store,
             hk_api=housekeeper_api,
             lims_api=lims_api,
+            hermes_api=HermesApi(
+                {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+            ),
             config={
                 "root": tmpdir,
                 "queries_path": queries_path,
