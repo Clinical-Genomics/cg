@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import click
+from cg.apps.hermes.hermes_api import HermesApi
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -47,6 +48,7 @@ def microsalt(context: click.Context):
         db=Store(context.obj["database"]),
         hk_api=HousekeeperAPI(context.obj),
         lims_api=LimsAPI(context.obj),
+        hermes_api=HermesApi(context.obj),
         config=context.obj["microsalt"],
     )
     context.obj["microsalt_analysis_api"] = microsalt_analysis_api

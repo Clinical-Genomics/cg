@@ -12,9 +12,10 @@ import re
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import click
-import ruamel
 import os
 
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.models import InputBundle
 from cg.constants import CASE_ACTIONS
 from cg.exc import CgDataError, BundleAlreadyAddedError
 from cg.store.models import Sample
@@ -24,7 +25,6 @@ from cg.apps.lims import LimsAPI
 from cg.store import models, Store
 from cg.utils import Process
 from cg.constants import Pipeline
-from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
 
@@ -37,11 +37,13 @@ class MicrosaltAnalysisAPI:
         db: Store,
         hk_api: HousekeeperAPI,
         lims_api: LimsAPI,
+        hermes_api: HermesApi,
         config: Optional[dict] = {},
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
+        self.hermes_api = hermes_api
         self.root_dir = config["root"]
         self.queries_path = config["queries_path"]
         self.process = Process(binary=config["binary_path"], environment=config["conda_env"])
@@ -364,17 +366,16 @@ class MicrosaltAnalysisAPI:
             )
             raise click.Abort
 
-        deliverables = ruamel.yaml.safe_load(open(deliverables_path))
         analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
-        files = store_base.deliverables_files(deliverables, analysis_type=Pipeline.MICROSALT)
 
-        bundle_data = {
-            "name": case_id,
-            "created": analysis_date,
-            "files": files,
-        }
+        bundle_data: InputBundle = self.hermes_api.create_housekeeper_bundle(
+            deliverables=deliverables_path,
+            pipeline="microsalt",
+            created=analysis_date,
+            analysis_type=None,
+        )
 
-        bundle_result = self.hk.add_bundle(bundle_data=bundle_data)
+        bundle_result = self.hk.add_bundle(bundle_data=bundle_data.dict())
         if not bundle_result:
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
