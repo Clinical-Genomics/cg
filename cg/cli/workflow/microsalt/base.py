@@ -191,25 +191,28 @@ def store(context: click.Context, unique_id: str):
 
 @microsalt.command()
 @ARGUMENT_UNIQUE_IDENTIFIER
+@OPTION_DRY_RUN
 @OPTION_TICKET
 @OPTION_SAMPLE
 @click.pass_context
-def start(context: click.Context, ticket: bool, sample: bool, unique_id: str):
+def start(context: click.Context, ticket: bool, sample: bool, unique_id: str, dry_run: bool):
     LOG.info("Starting Microsalt workflow for %s", unique_id)
     context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
-    context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id)
-    context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id)
+    context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
+    context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
 
 
 @microsalt.command("store-available")
+@OPTION_DRY_RUN
 @click.pass_context
-def store_available(context: click.Context):
+def store_available(context: click.Context, dry_run: bool):
     microsalt_analysis_api = context.obj["microsalt_analysis_api"]
     exit_code = EXIT_SUCCESS
 
-    LOG.info(microsalt_analysis_api.get_deliverables_to_store())
     for case_obj in microsalt_analysis_api.get_deliverables_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        if dry_run:
+            continue
         try:
             context.invoke(store, unique_id=case_obj.internal_id)
         except Exception:

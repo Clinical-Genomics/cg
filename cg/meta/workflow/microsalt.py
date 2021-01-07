@@ -373,9 +373,10 @@ class MicrosaltAnalysisAPI:
             pipeline="microsalt",
             created=analysis_date,
             analysis_type=None,
-        )
+        ).dict()
+        bundle_data["name"] = case_id
 
-        bundle_result = self.hk.add_bundle(bundle_data=bundle_data.dict())
+        bundle_result = self.hk.add_bundle(bundle_data=bundle_data)
         if not bundle_result:
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
