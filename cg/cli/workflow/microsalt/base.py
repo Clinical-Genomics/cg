@@ -62,7 +62,7 @@ def microsalt(context: click.Context):
 def link(context: click.Context, ticket: bool, sample: bool, unique_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
     case_id, sample_id = microsalt_analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
@@ -85,7 +85,7 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: str):
 def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: str):
     """ Create a config file on case level for microSALT """
 
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
     case_id, sample_id = microsalt_analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
@@ -134,7 +134,7 @@ def run(
 ):
     """ Start microSALT with an order_id """
 
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
     case_id, sample_id = microsalt_analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
@@ -170,7 +170,7 @@ def run(
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def store(context: click.Context, unique_id: str):
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
     case_obj = microsalt_analysis_api.db.family(unique_id)
     if not case_obj:
@@ -206,8 +206,8 @@ def start(context: click.Context, ticket: bool, sample: bool, unique_id: str, dr
 @OPTION_DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool):
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
-    exit_code = EXIT_SUCCESS
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
+    exit_code: int = EXIT_SUCCESS
 
     for case_obj in microsalt_analysis_api.get_deliverables_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
@@ -226,8 +226,8 @@ def store_available(context: click.Context, dry_run: bool):
 @OPTION_DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool):
-    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
-    exit_code = EXIT_SUCCESS
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
+    exit_code: int = EXIT_SUCCESS
     for case_obj in microsalt_analysis_api.db.cases_to_analyze(pipeline=Pipeline.MICROSALT):
         if dry_run:
             LOG.info("Would have started workflow for case %s", case_obj.internal_id)

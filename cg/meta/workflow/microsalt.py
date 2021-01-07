@@ -15,10 +15,8 @@ import click
 import os
 
 from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.models import InputBundle
 from cg.constants import CASE_ACTIONS
 from cg.exc import CgDataError, BundleAlreadyAddedError
-from cg.store.models import Sample
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -206,7 +204,7 @@ class MicrosaltAnalysisAPI:
                 self.db.query(models.Sample).filter(models.Sample.internal_id == sample_id).first()
             ]
         else:
-            case_obj = self.db.family(case_id)
+            case_obj: models.Family = self.db.family(case_id)
             samples = [link.sample for link in case_obj.links]
         return samples
 
@@ -246,7 +244,7 @@ class MicrosaltAnalysisAPI:
 
         return organism
 
-    def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
+    def get_parameters(self, sample_obj: models.Sample) -> Dict[str, str]:
         """Fill a dict with case config information for one sample """
 
         sample_id = sample_obj.internal_id
@@ -302,7 +300,7 @@ class MicrosaltAnalysisAPI:
     def set_statusdb_action(self, case_id: str, action: str) -> None:
         """Sets action on case based on ticket number"""
         if action in [None, *CASE_ACTIONS]:
-            case_object = self.db.family(case_id)
+            case_object: models.Family = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
             LOG.info("Action %s set for case %s", action, case_id)
@@ -330,7 +328,7 @@ class MicrosaltAnalysisAPI:
         return case_id, sample_id
 
     def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
-        case_obj = self.db.find_family_by_name(unique_id)
+        case_obj: models.Family = self.db.find_family_by_name(unique_id)
         if not case_obj:
             LOG.error("No case found for ticket number:  %s", unique_id)
             raise click.Abort
@@ -338,7 +336,7 @@ class MicrosaltAnalysisAPI:
         return case_id, None
 
     def get_case_id_from_sample(self, unique_id: str) -> (str, str):
-        sample_obj = (
+        sample_obj: models.Sample = (
             self.db.query(models.Sample).filter(models.Sample.internal_id == unique_id).first()
         )
         if not sample_obj:
@@ -349,7 +347,7 @@ class MicrosaltAnalysisAPI:
         return case_id, sample_id
 
     def get_case_id_from_case(self, unique_id: str) -> (str, None):
-        case_obj = self.db.family(unique_id)
+        case_obj: models.Family = self.db.family(unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
             raise click.Abort
@@ -358,7 +356,8 @@ class MicrosaltAnalysisAPI:
 
     def store_microbial_analysis_housekeeper(self, case_id: str) -> None:
         """Gather information from microSALT analysis to store."""
-        order_id = self.db.family(case_id).name
+        case_obj: models.Family = self.db.family(case_id)
+        order_id = case_obj.name
         deliverables_path = self.get_deliverables_file_path(order_id=order_id)
         if not deliverables_path:
             LOG.warning(
@@ -368,7 +367,7 @@ class MicrosaltAnalysisAPI:
 
         analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
 
-        bundle_data: InputBundle = self.hermes_api.create_housekeeper_bundle(
+        bundle_data = self.hermes_api.create_housekeeper_bundle(
             deliverables=deliverables_path,
             pipeline="microsalt",
             created=analysis_date,
@@ -388,12 +387,12 @@ class MicrosaltAnalysisAPI:
 
     def store_microbial_analysis_statusdb(self, case_id: str):
 
-        case_obj = self.db.family(case_id)
+        case_obj: models.Family = self.db.family(case_id)
         order_id = case_obj.name
         deliverables_path = self.get_deliverables_file_path(order_id=order_id)
         analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
 
-        new_analysis = self.db.add_analysis(
+        new_analysis: models.Analysis = self.db.add_analysis(
             pipeline=Pipeline.MICROSALT,
             started_at=analysis_date,
             completed_at=datetime.now(),
