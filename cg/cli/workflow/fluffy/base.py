@@ -42,12 +42,24 @@ def fluffy(context):
 @click.pass_context
 def link(context, case_id, dry_run):
     """
-    Link fastq and samplesheet files from Housekeeper to analysis folder
+    Link fastq files from Housekeeper to analysis folder
+
+    """
+    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
+    fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
+
+
+@fluffy.command()
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.pass_context
+def create_samplesheet(context, case_id, dry_run):
+    """
+    Link samplesheet files from Housekeeper to analysis folder
 
     """
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
-    fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
 @fluffy.command()
@@ -85,6 +97,7 @@ def run(context, case_id, dry_run):
 def start(context, case_id, dry_run):
     """Run link and run commands"""
     context.invoke(link, case_id=case_id, dry_run=dry_run)
+    context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
     context.invoke(run, case_id=case_id, dry_run=dry_run)
 
 
