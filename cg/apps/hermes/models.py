@@ -33,3 +33,7 @@ class CGDeliverables(BaseModel):
             LOG.info("Optional file %s not found, removing from bundle", file.path)
             return
         return file
+
+    @validator("files")
+    def remove_invalid(cls, value):
+        return [item for item in value if item]
