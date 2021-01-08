@@ -29,7 +29,7 @@ class CGDeliverables(BaseModel):
         if file.mandatory:
             assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
             return file
-        elif not Path(file.path).exists():
+        if not Path(file.path).exists():
             LOG.info("Optional file %s not found, removing from bundle", file.path)
             return
         return file
