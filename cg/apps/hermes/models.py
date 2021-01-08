@@ -1,8 +1,12 @@
 """Models used by hermes <-> cg interactions"""
+from pathlib import Path
+from typing import List, Optional
 
-from typing import List
+from pydantic import BaseModel, validator
+import logging
 
-from pydantic import BaseModel
+
+LOG = logging.getLogger(__name__)
 
 
 class CGTag(BaseModel):
@@ -10,6 +14,7 @@ class CGTag(BaseModel):
 
     path: str
     tags: List[str]
+    mandatory: Optional[bool]
 
 
 class CGDeliverables(BaseModel):
@@ -18,3 +23,13 @@ class CGDeliverables(BaseModel):
     pipeline: str
     bundle_id: str
     files: List[CGTag]
+
+    @validator("files", each_item=True)
+    def check_mandatory_exists(cls, file):
+        if file.mandatory:
+            assert Path(file.path).exists(), f"Mandatory file cannot be found at {file.path}"
+            return file
+        elif not Path(file.path).exists():
+            LOG.info("Optional file %s not found, removing from bundle", file.path)
+            return
+        return file

@@ -372,6 +372,7 @@ class MicrosaltAnalysisAPI:
             pipeline="microsalt",
             created=analysis_date,
             analysis_type=None,
+            bundle_name=case_id,
         ).dict()
         bundle_data["name"] = case_id
 
