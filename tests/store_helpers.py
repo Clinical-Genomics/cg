@@ -351,7 +351,10 @@ class StoreHelpers:
         family = store.find_family(customer=customer, name=name)
         if not family:
             family = store.add_case(
-                name=name, panels=None, data_analysis=data_analysis, data_delivery=data_delivery
+                data_analysis=data_analysis,
+                data_delivery=data_delivery,
+                name=name,
+                panels=None,
             )
             family.customer = customer
         return family
