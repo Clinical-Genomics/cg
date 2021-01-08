@@ -14,7 +14,7 @@ class CGTag(BaseModel):
 
     path: str
     tags: List[str]
-    mandatory: Optional[bool]
+    mandatory: Optional[bool] = False
 
 
 class CGDeliverables(BaseModel):

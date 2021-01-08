@@ -63,5 +63,4 @@ class HermesApi:
         if created:
             bundle_info["created"] = created
 
-        bundle = hk_models.InputBundle(**bundle_info)
-        return bundle
+        return hk_models.InputBundle(**bundle_info)

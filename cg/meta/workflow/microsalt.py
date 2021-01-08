@@ -199,17 +199,19 @@ class MicrosaltAnalysisAPI:
                 LOG.debug("Destination path already exists: %s, skipping", linked_fastq_path)
 
     def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
+        """Returns a list of samples to configure
+        If sample_id is specified, will return a list with only this sample_id.
+        Otherwise, returns all samples in given case"""
         if sample_id:
-            samples = [
+            return [
                 self.db.query(models.Sample).filter(models.Sample.internal_id == sample_id).first()
             ]
-        else:
-            case_obj: models.Family = self.db.family(case_id)
-            samples = [link.sample for link in case_obj.links]
-        return samples
+
+        case_obj: models.Family = self.db.family(case_id)
+        return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
-        """ returns the comment associated with a sample stored in lims"""
+        """ Returns the comment associated with a sample stored in lims"""
         comment = self.lims.get_sample_comment(sample_id) or ""
         if re.match(r"\w{4}\d{2,3}", comment):
             return comment
@@ -256,7 +258,7 @@ class MicrosaltAnalysisAPI:
             method_sequencing, _ = method_sequencing.split(" ", 1)
         priority = "research" if sample_obj.priority == 0 else "standard"
 
-        parameter_dict = {
+        return {
             "CG_ID_project": self.get_project(sample_id),
             "Customer_ID_project": sample_obj.ticket_number,
             "CG_ID_sample": sample_obj.internal_id,
@@ -272,8 +274,6 @@ class MicrosaltAnalysisAPI:
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
         }
-
-        return parameter_dict
 
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
@@ -312,6 +312,7 @@ class MicrosaltAnalysisAPI:
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any
     ) -> (str, Optional[str]):
+        """Resolve case_id and sample_id w based on input arguments. """
         if ticket and sample:
             LOG.error("Flags -t and -s are mutually exclusive!")
             raise click.Abort
@@ -328,6 +329,8 @@ class MicrosaltAnalysisAPI:
         return case_id, sample_id
 
     def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
+        """If ticked is provided as argument, finds the corresponding case_id and returns it.
+        Since sample_id is not specified, nothing is returned as sample_id"""
         case_obj: models.Family = self.db.find_family_by_name(unique_id)
         if not case_obj:
             LOG.error("No case found for ticket number:  %s", unique_id)
@@ -336,6 +339,9 @@ class MicrosaltAnalysisAPI:
         return case_id, None
 
     def get_case_id_from_sample(self, unique_id: str) -> (str, str):
+        """If sample is specified, finds the corresponding case_id to which this sample belongs.
+        The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
+        """
         sample_obj: models.Sample = (
             self.db.query(models.Sample).filter(models.Sample.internal_id == unique_id).first()
         )
@@ -347,6 +353,7 @@ class MicrosaltAnalysisAPI:
         return case_id, sample_id
 
     def get_case_id_from_case(self, unique_id: str) -> (str, None):
+        """If case_id is specified, validates the presence of case_id in database and returns it"""
         case_obj: models.Family = self.db.family(unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
@@ -387,7 +394,7 @@ class MicrosaltAnalysisAPI:
         )
 
     def store_microbial_analysis_statusdb(self, case_id: str):
-
+        """Creates an analysis object in StatusDB"""
         case_obj: models.Family = self.db.family(case_id)
         order_id = case_obj.name
         deliverables_path = self.get_deliverables_file_path(order_id=order_id)
@@ -404,5 +411,5 @@ class MicrosaltAnalysisAPI:
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
 
     def get_date_from_deliverables_path(self, deliverables_path: Path) -> datetime.date:
-        """ Get date from deliverables path """
+        """ Get date from deliverables path using date created metadata """
         return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))
