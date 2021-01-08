@@ -77,7 +77,6 @@ class ReportAPI:
         delivery_report = self.create_delivery_report(
             case_id=case_id, accept_missing_data=accept_missing_data, analysis_date=analysis_date
         )
-
         file_path.mkdir(parents=True, exist_ok=True)
         report_file_path = Path(file_path / "delivery-report.html")
         delivery_report_file = open(report_file_path, "w")

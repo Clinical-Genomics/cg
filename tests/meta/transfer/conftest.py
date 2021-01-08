@@ -22,7 +22,7 @@ def fixture_data():
     }
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def store_stats():
     """Setup base CGStats store."""
     _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
@@ -31,7 +31,7 @@ def store_stats():
     _store.drop_all()
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def base_store_stats(store_stats, data):
     """Setup CGStats store with sample data."""
     demuxes = {}
@@ -69,7 +69,7 @@ def base_store_stats(store_stats, data):
     yield store_stats
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def flowcell_store(base_store, data):
     """Setup store with sample data for testing flowcell transfer."""
     for sample_data in data["samples"]:
@@ -84,14 +84,14 @@ def flowcell_store(base_store, data):
     yield base_store
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def transfer_flowcell_api(flowcell_store, housekeeper_api, base_store_stats):
     """Setup flowcell transfer API."""
     transfer_api = TransferFlowcell(flowcell_store, base_store_stats, housekeeper_api)
     yield transfer_api
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def transfer_lims_api(sample_store):
     """Setup flowcell transfer API."""
     transfer_api = TransferLims(sample_store, MockLims(config=""))

@@ -15,7 +15,7 @@ def fixture_hk_config(root_path) -> dict:
     return config
 
 
-@pytest.yield_fixture(scope="function", name="housekeeper_api")
+@pytest.fixture(scope="function", name="housekeeper_api")
 def fixture_housekeeper_api(hk_config):
     """Setup Housekeeper store."""
     _api = HousekeeperAPI(hk_config)
@@ -24,7 +24,7 @@ def fixture_housekeeper_api(hk_config):
     _api.destroy_db()
 
 
-@pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
+@pytest.fixture(scope="function", name="populated_housekeeper_api")
 def fixture_populated_housekeeper_api(housekeeper_api, bundle_data):
     """Setup Housekeeper store."""
     _api = housekeeper_api
