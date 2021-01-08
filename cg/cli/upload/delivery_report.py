@@ -189,7 +189,7 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
         suggest_cases_delivery_report(context)
         context.abort()
 
-    status_api = context.obj["status"]
+    status_api = context.obj["status_db"]
 
     if not analysis_started_at:
         analysis_started_at = status_api.family(family_id).analyses[0].started_at

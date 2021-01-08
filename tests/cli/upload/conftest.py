@@ -113,12 +113,13 @@ def fixture_base_cli_context(
 ) -> dict:
     """context to use in cli"""
     return {
+        "housekeeper_api": housekeeper_api,
+        "mip-rd-dna": {"root": tempdir},
+        "report_api": MockReportApi(),
         "scout_api": MockScoutApi(),
         "scout_upload_api": upload_scout_api,
-        "housekeeper_api": housekeeper_api,
-        "trailblazer_api": trailblazer_api,
         "status_db": analysis_store,
-        "mip-rd-dna": {"root": "hej"},
+        "trailblazer_api": trailblazer_api,
     }
 
 
