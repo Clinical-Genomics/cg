@@ -1,8 +1,9 @@
 import logging
 import click
 
-from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS
+from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, Pipeline
 from cg.store import Store
+from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
@@ -148,11 +149,25 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     "--priority", type=click.Choice(PRIORITY_OPTIONS), default="standard", help="analysis priority"
 )
 @click.option("-p", "--panel", "panels", multiple=True, required=True, help="default gene panels")
-@click.option("-a", "--analysis", required=True, help="Analysis workflow")
+@click.option(
+    "-a",
+    "--analysis",
+    "data_analysis",
+    help="Analysis workflow",
+    required=True,
+    type=EnumChoice(Pipeline),
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
-def family(context, priority, panels, analysis, customer_id, name):
+def family(
+    context: click.Context,
+    priority: str,
+    panels: [str],
+    data_analysis: Pipeline,
+    customer_id: str,
+    name: str,
+):
     """Add a family to CUSTOMER_ID with a NAME."""
     status = context.obj["status_db"]
     customer_obj = status.customer(customer_id)
@@ -167,7 +182,7 @@ def family(context, priority, panels, analysis, customer_id, name):
             context.abort()
 
     new_family = status.add_family(
-        data_analysis=analysis, name=name, panels=panels, priority=priority
+        data_analysis=data_analysis, name=name, panels=panels, priority=priority
     )
     new_family.customer = customer_obj
     status.add_commit(new_family)

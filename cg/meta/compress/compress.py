@@ -7,8 +7,8 @@ from pathlib import Path
 
 from housekeeper.store import models as housekeeper_models
 
-from cg.apps.hk import HousekeeperAPI
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 

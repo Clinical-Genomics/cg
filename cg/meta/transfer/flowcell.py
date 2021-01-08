@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.stats import StatsAPI
 from cg.store import Store, models
 

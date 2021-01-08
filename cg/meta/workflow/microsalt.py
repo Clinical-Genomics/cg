@@ -7,19 +7,18 @@
     datetime.min"""
 import gzip
 import logging
-from pathlib import Path
 import re
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List
 
-from cg.apps.microsalt.fastq import FastqHandler
-from cg.constants import FAMILY_ACTIONS
-from cg.exc import CgDataError
-from cg.store.models import Sample
-
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.store import models, Store
+from cg.apps.microsalt.fastq import FastqHandler
+from cg.constants import CASE_ACTIONS
+from cg.exc import CgDataError
+from cg.store import Store, models
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -277,7 +276,7 @@ class MicrosaltAnalysisAPI:
 
     def set_statusdb_action(self, name: str, action: str) -> None:
         """Sets action on case based on ticket number"""
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.find_family(name)
             case_object.action = action
             self.db.commit()

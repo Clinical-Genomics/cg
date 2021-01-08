@@ -4,7 +4,7 @@ PROP2UDF = {
     "capture_kit": "Capture Library version",
     "comment": "Comment",
     "concentration": "Concentration (nM)",
-    "concentration_weight": "Sample Conc.",
+    "concentration_sample": "Sample Conc.",
     "customer": "customer",
     "data_analysis": "Data Analysis",
     "elution_buffer": "Sample Buffer",

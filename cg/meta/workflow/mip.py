@@ -7,7 +7,7 @@ from typing import Any, List
 
 from ruamel.yaml import safe_load
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
 from cg.apps.mip.base import MipAPI
@@ -16,10 +16,10 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import (
+    CASE_ACTIONS,
     COLLABORATORS,
     COMBOS,
     DEFAULT_CAPTURE_KIT,
-    FAMILY_ACTIONS,
     MASTER_LIST,
     Pipeline,
 )
@@ -403,7 +403,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return False
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.family(case_id)
             case_object.action = action
             self.db.commit()

@@ -4,22 +4,21 @@ from pathlib import Path
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import (
-    AnalysisNotFinishedError,
     AnalysisDuplicationError,
+    AnalysisNotFinishedError,
     BundleAlreadyAddedError,
-    PipelineUnknownError,
     MandatoryFilesMissing,
+    PipelineUnknownError,
 )
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
-
 
 LOG = logging.getLogger(__name__)
 

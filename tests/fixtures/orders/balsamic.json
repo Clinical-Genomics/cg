@@ -19,10 +19,11 @@
       "well_position": "A:1",
       "quantity": "2",
       "family_name": "family1",
+      "elution_buffer": "Other (specify in 'Comments')",
       "formalin_fixation_time": "1",
       "post_formalin_fixation_time": "2",
       "tissue_block_size": "small",
-      "comment": "comment"
+      "comment": "other Elution buffer"
     }
   ]
 }

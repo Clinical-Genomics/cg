@@ -4,14 +4,15 @@ from pathlib import Path
 from typing import Iterable
 
 import click
+from housekeeper.store import models as hk_models
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family
-from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
-from housekeeper.store import models as hk_models
+
 from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)

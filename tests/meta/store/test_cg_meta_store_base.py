@@ -1,18 +1,16 @@
 """Test store base module: MIP get files and build bundle"""
 import mock
 import pytest
-
 from snapshottest import Snapshot
 
-from cg.constants import MIP_RNA_TAGS, MIP_DNA_TAGS, Pipeline
-from cg.meta.store.base import get_tags
 import cg.meta.store.base as store_base
-
-from cg.exc import AnalysisDuplicationError, PipelineUnknownError, BundleAlreadyAddedError
+from cg.constants import MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
+from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError, PipelineUnknownError
+from cg.meta.store.base import get_tags
 
 
 @mock.patch("cg.store.Store")
-@mock.patch("cg.apps.hk.HousekeeperAPI")
+@mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.mip.add_mip_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_already_added(
     mock_add_mip_analysis, mock_housekeeper, mock_cg_store, config_stream, bundle_data
@@ -38,7 +36,7 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
-@mock.patch("cg.apps.hk.HousekeeperAPI")
+@mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.meta.store.base.reset_case_action")
 @mock.patch("cg.meta.store.base.add_new_analysis")
 @mock.patch("cg.meta.store.mip.add_mip_analysis")

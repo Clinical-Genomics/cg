@@ -14,7 +14,7 @@
             "priority": "standard",
             "container_name": "Platen",
             "well_position": "A:1",
-            "concentration_weight": "2",
+            "concentration_sample": "2",
             "quantity": "10",
             "extraction_method": "best",
             "comment": "5 on the chart"
@@ -30,7 +30,7 @@
             "priority": "priority",
             "container_name": "Tuben",
             "well_position": "",
-            "concentration_weight": "1",
+            "concentration_sample": "1",
             "quantity": "2",
             "extraction_method": "unknown",
             "comment": "test"
