@@ -5,16 +5,18 @@ from pathlib import Path
 
 import click
 
-from cg.apps import gt, hk
-from cg.apps import vogue as vogue_api
+from cg.apps.gt import GenotypeAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.vogue import VogueAPI
 from cg.cli.workflow.get_links import get_links
+from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = ["mip"]
+VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA)]
 
 
 @click.group()
@@ -24,12 +26,12 @@ def vogue(context):
 
     click.echo(click.style("----------------- TRENDING -----------------------"))
 
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["vogue_api"] = vogue_api.VogueAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["vogue_api"] = VogueAPI(context.obj)
     context.obj["vogue_upload_api"] = UploadVogueAPI(
-        genotype_api=gt.GenotypeAPI(context.obj),
+        genotype_api=GenotypeAPI(context.obj),
         vogue_api=context.obj["vogue_api"],
-        store=context.obj["status"],
+        store=context.obj["status_db"],
     )
 
 
@@ -125,8 +127,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
     hk_api = context.obj["housekeeper_api"]
-    status_api = context.obj["status"]
-    store = context.obj["db"]
+    store = context.obj["status_db"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
@@ -151,7 +152,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
     # Get workflow_name and workflow_version
-    workflow_name, workflow_version = _get_analysis_workflow_details(status_api, case_name)
+    workflow_name, workflow_version = _get_analysis_workflow_details(store, case_name)
     if workflow_name not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
@@ -181,7 +182,7 @@ def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     hk_api = context.obj["housekeeper_api"]
-    store = context.obj["db"]
+    store = context.obj["status_db"]
     cases = store.families()
     for case in cases:
         case_name = case.internal_id
@@ -208,7 +209,7 @@ def bioinfo_all(context, dry):
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 
-def _get_multiqc_latest_file(hk_api: hk.HousekeeperAPI, case_name: str) -> str:
+def _get_multiqc_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:
     """Get latest multiqc_data.json path for a case_name
     Args:
         case_name(str): onemite

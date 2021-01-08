@@ -1,57 +1,55 @@
+import datetime as dt
 import gzip
 import logging
 import re
 from pathlib import Path
-from typing import List, Any
-from ruamel.yaml import safe_load
-import datetime as dt
+from typing import Any, List
 
-from cg.apps import tb, hk, scoutapi, lims
+from ruamel.yaml import safe_load
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.mip import parse_trending
 from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.meta.deliver import DeliverAPI
-from cg.store import models, Store
-from cg.exc import CgDataError, LimsDataError
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import (
-    COMBOS,
+    CASE_ACTIONS,
     COLLABORATORS,
-    MASTER_LIST,
+    COMBOS,
     DEFAULT_CAPTURE_KIT,
-    FAMILY_ACTIONS,
+    MASTER_LIST,
+    Pipeline,
 )
+from cg.exc import CgDataError, LimsDataError
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
-class AnalysisAPI(ConfigHandler, MipAPI):
+class MipAnalysisAPI(ConfigHandler, MipAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
     def __init__(
         self,
         db: Store,
-        hk_api: hk.HousekeeperAPI,
-        scout_api: scoutapi.ScoutAPI,
-        tb_api: tb.TrailblazerAPI,
-        lims_api: lims.LimsAPI,
-        deliver_api: DeliverAPI,
+        hk_api: HousekeeperAPI,
+        scout_api: ScoutAPI,
+        tb_api: TrailblazerAPI,
+        lims_api: LimsAPI,
         script: str,
         pipeline: str,
         conda_env: str,
         root: str,
-        yaml_loader=safe_load,
-        path_api=Path,
-        logger=logging.getLogger(__name__),
     ):
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
         self.scout = scout_api
         self.lims = lims_api
-        self.deliver = deliver_api
-        self.yaml_loader = yaml_loader
-        self.pather = path_api
-        self.log = logger
         self.script = script
         self.pipeline = pipeline
         self.conda_env = conda_env
@@ -62,26 +60,36 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         flowcells = self.db.flowcells(family=family_obj)
         statuses = []
         for flowcell_obj in flowcells:
-            self.log.debug("%s: checking flowcell", flowcell_obj.name)
+            LOG.debug("%s: checking flowcell", flowcell_obj.name)
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                self.log.info("%s: requesting removed flowcell", flowcell_obj.name)
+                LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
                 flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
-                self.log.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
+                LOG.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
         return all(status == "ondisk" for status in statuses)
 
     @staticmethod
     def get_priority(family_obj: models.Family) -> str:
         """Fetch priority for case id"""
-        if family_obj.priority == 0:
+        if not family_obj.priority:
             return "low"
-        if family_obj.priority > 1:
-            return "high"
-        return "normal"
+        if isinstance(family_obj.priority, int):
+            if family_obj.priority == 0:
+                return "low"
+            if family_obj.priority > 1:
+                return "high"
+            return "normal"
+        return family_obj.priority
+
+    def get_pedigree_config_path(self, case_id: str) -> Path:
+        return Path(self.root, case_id, "pedigree.yaml")
+
+    def get_case_config_path(self, case_id: str) -> Path:
+        return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
 
     def pedigree_config(
-        self, family_obj: models.Family, pipeline: str, panel_bed: str = None
+        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
     ) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
@@ -110,7 +118,9 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def build_config(self, family_obj: models.Family, pipeline: str, panel_bed: str = None) -> dict:
+    def build_config(
+        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
+    ) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
@@ -146,8 +156,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
             return sample_data
 
         dispatch = {
-            "mip-dna": config_dna_sample,
-            "mip-rna": config_rna_sample,
+            Pipeline.MIP_DNA: config_dna_sample,
+            Pipeline.MIP_RNA: config_rna_sample,
         }
 
         data = {
@@ -320,13 +330,14 @@ class AnalysisAPI(ConfigHandler, MipAPI):
     def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
         """Get a python object file for a tag and a family ."""
 
-        analysis_files = self.deliver.get_post_analysis_files(
-            case=family_id, version=False, tags=[tag]
-        )
+        last_version = self.hk.last_version(bundle=family_id)
+
+        analysis_files = self.hk.files(bundle=family_id, version=last_version.id, tags=[tag]).all()
+
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
         else:
-            raise self.log.warning(
+            raise LOG.warning(
                 "No post analysis files received from DeliverAPI for '%s'",
                 family_id,
             )
@@ -336,10 +347,8 @@ class AnalysisAPI(ConfigHandler, MipAPI):
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = self.pather(self.deliver.get_post_analysis_files_root_dir()).joinpath(
-            relative_file_path
-        )
-        open_file = self.yaml_loader(self.pather(full_file_path).open())
+        full_file_path = Path(self.hk.get_root_dir()).joinpath(relative_file_path)
+        open_file = safe_load(open(full_file_path))
         return open_file
 
     def get_latest_metadata(self, family_id: str) -> dict:
@@ -351,13 +360,18 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         trending = dict()
         if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
             try:
-                trending = self.tb.get_trending(
+                trending = parse_trending.parse_mip_analysis(
                     mip_config_raw=mip_config_raw,
                     qcmetrics_raw=qcmetrics_raw,
                     sampleinfo_raw=sampleinfo_raw,
                 )
             except KeyError as error:
-                self.log.warning(
+                LOG.warning(
+                    "get_latest_metadata failed for '%s', missing key: %s",
+                    family_id,
+                    error.args[0],
+                )
+                LOG.warning(
                     "get_latest_metadata failed for '%s', missing key: %s",
                     family_id,
                     error.args[0],
@@ -374,13 +388,14 @@ class AnalysisAPI(ConfigHandler, MipAPI):
                 return False
         return True
 
-    def get_skip_evaluation_flag(self, case_obj: models.Family) -> bool:
+    @staticmethod
+    def get_skip_evaluation_flag(case_obj: models.Family) -> bool:
         """If any sample in this case is downsampled or external, returns true"""
         for link_obj in case_obj.links:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
             if downsampled or external:
-                self.log.info(
+                LOG.info(
                     "%s: downsampled/external - skip evaluation",
                     link_obj.sample.internal_id,
                 )
@@ -388,11 +403,95 @@ class AnalysisAPI(ConfigHandler, MipAPI):
         return False
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
             return
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
+        )
+
+    def get_application_type(self, case_id: str) -> str:
+        pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id)))
+        analysis_types = set(
+            [
+                sample.get("analysis_type")
+                for sample in pedigree_config_dict["samples"]
+                if sample.get("analysis_type")
+            ]
+        )
+        if len(analysis_types) == 1:
+            return analysis_types.pop()
+        return "wgs"
+
+    def get_case_output_path(self, case_id: str) -> Path:
+        return Path(self.root, case_id)
+
+    def get_case_object(self, case_id: str) -> models.Family:
+        return self.db.family(case_id)
+
+    def get_analyses_to_clean(self, before: dt.datetime) -> list:
+        analyses_to_clean = self.db.analyses_to_clean(pipeline=Pipeline.MIP_DNA, before=before)
+        return analyses_to_clean.all()
+
+    def get_slurm_job_ids_path(self, case_id: str) -> Path:
+        return Path(self.get_case_output_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
+
+    # TrailblazerAPI inherited methods
+    def is_latest_analysis_ongoing(self, case_id: str) -> bool:
+        return self.tb.is_latest_analysis_ongoing(case_id=case_id)
+
+    def has_latest_analysis_started(self, case_id: str) -> bool:
+        return self.tb.has_latest_analysis_started(case_id=case_id)
+
+    def mark_analyses_deleted(self, case_id: str) -> list:
+        return self.tb.mark_analyses_deleted(case_id=case_id)
+
+    def add_pending_analysis(
+        self,
+        case_id: str,
+        email: str,
+        type: str,
+        out_dir: str,
+        config_path: str,
+        priority: str,
+        data_analysis: Pipeline,
+    ) -> TrailblazerAnalysis:
+
+        return self.tb.add_pending_analysis(
+            case_id=case_id,
+            email=email,
+            type=type,
+            out_dir=out_dir,
+            config_path=config_path,
+            priority=priority,
+            data_analysis=data_analysis,
+        )
+
+    def get_latest_analysis_status(self, case_id: str) -> str:
+        return self.tb.get_latest_analysis_status(case_id=case_id)
+
+    def get_analyses_from_trailblazer(
+        self,
+        case_id: str = None,
+        query: str = None,
+        status: str = None,
+        deleted: bool = None,
+        temp: bool = False,
+        before: dt.datetime = None,
+        is_visible: bool = None,
+        family: str = None,
+        data_analysis: Pipeline = None,
+    ) -> list:
+        return self.tb.analyses(
+            case_id=case_id,
+            query=query,
+            status=status,
+            deleted=deleted,
+            temp=temp,
+            before=before,
+            is_visible=is_visible,
+            family=family,
+            data_analysis=data_analysis,
         )

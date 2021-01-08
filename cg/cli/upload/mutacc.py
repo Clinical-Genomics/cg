@@ -1,10 +1,13 @@
 """Code that handles uploading to mutacc from the CLI"""
 import logging
+from typing import List
 
 import click
 
-from cg.apps import mutacc_auto
+from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.scout.scout_export import ScoutExportCase
 
 LOG = logging.getLogger(__name__)
 
@@ -19,14 +22,15 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     """Process cases with mutacc that has been marked as solved in scout.
     This prepares them to be uploaded to the mutacc database"""
 
-    click.echo(click.style("----------------- PROCESS-SOLVED ----------------"))
+    LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    scout_api = context.obj["scout_api"]
-    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    scout_api: ScoutAPI = context.obj["scout_api"]
+    mutacc_auto_api = MutaccAutoAPI(context.obj)
 
     mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
+    finished_cases: List[ScoutExportCase] = []
     if case_id is not None:
         finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
     elif days_ago is not None:
@@ -38,15 +42,14 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
     for case in finished_cases:
 
         number_processed += 1
-        if customers:
-            if case["owner"] not in customers:
-                LOG.info("skipping %s: Not valid customer %s", case["_id"], case["owner"])
-                continue
+        if customers and case.owner not in customers:
+            LOG.info("skipping %s: Not valid customer %s", case.id, case.owner)
+            continue
         if dry_run:
-            LOG.info("Would process case %s with mutacc", case["_id"])
+            LOG.info("Would process case %s with mutacc", case.id)
             continue
 
-        LOG.info("Start processing case %s with mutacc", case["_id"])
+        LOG.info("Start processing case %s with mutacc", case.id)
         mutacc_upload.extract_reads(case)
 
     if number_processed == 0:
@@ -58,9 +61,9 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 def processed_solved(context):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
-    click.echo(click.style("----------------- PROCESSED-SOLVED ----------------"))
+    LOG.info("----------------- PROCESSED-SOLVED ----------------")
 
     LOG.info("Uploading processed cases by mutacc to the mutacc database")
 
-    mutacc_auto_api = mutacc_auto.MutaccAutoAPI(context.obj)
+    mutacc_auto_api = MutaccAutoAPI(context.obj)
     mutacc_auto_api.import_reads()

@@ -1,6 +1,5 @@
 import logging
-
-from typing import List, Dict
+from typing import Dict, List
 
 from cg.utils.commands import Process
 
@@ -45,6 +44,8 @@ class BalsamicAPI:
                 "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
+                "--tumor-sample-name": arguments.get("tumor_sample_name"),
+                "--normal-sample-name": arguments.get("normal_sample_name"),
             }
         )
         parameters = command + options
@@ -67,6 +68,7 @@ class BalsamicAPI:
                 "--qos": arguments.get("priority", self.qos),
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
+                "--disable-variant-caller": arguments.get("disable_variant_caller"),
             }
         )
         parameters = command + options + run_analysis

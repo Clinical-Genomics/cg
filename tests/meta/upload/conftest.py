@@ -8,6 +8,7 @@ from datetime import datetime
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
+from cg.constants import Pipeline
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -15,7 +16,9 @@ from cg.meta.upload.scoutapi import UploadScoutAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import models
 from cg.store import Store
+from cg.apps.scout.scout_export import ScoutExportCase
 
+from tests.cli.upload.conftest import fixture_scout_load_object
 
 # Mocks
 
@@ -139,6 +142,67 @@ class MockLims:
         return None
 
 
+@pytest.fixture(name="scout_export_case_data")
+def fixture_scout_export_case_data() -> dict:
+    """Return information in the form of a scout export case"""
+    case_data = {
+        "_id": "internal_id",
+        "owner": "cust000",
+        "analysis_date": "2020-11-18T15:02:03.554000",
+        "causatives": ["variant_id"],
+        "individuals": [
+            {
+                "individual_id": "individual_1",
+                "bam_file": "",
+                "sex": "1",
+                "father": "individual_2",
+                "mother": "individual_3",
+                "phenotype": 2,
+            },
+            {
+                "individual_id": "individual_2",
+                "bam_file": "",
+                "sex": "1",
+                "father": "0",
+                "mother": "0",
+                "phenotype": 1,
+            },
+            {
+                "individual_id": "individual_3",
+                "bam_file": "",
+                "sex": "2",
+                "father": "0",
+                "mother": "0",
+                "phenotype": 1,
+            },
+        ],
+    }
+    return case_data
+
+
+@pytest.fixture(name="scout_export_case")
+def fixture_scout_export_case(scout_export_case_data: dict) -> ScoutExportCase:
+    """ Returns a export case object """
+
+    return ScoutExportCase(**scout_export_case_data)
+
+
+@pytest.fixture(name="scout_export_case_missing_bam")
+def fixture_scout_export_case_missing_bam(scout_export_case_data: dict) -> ScoutExportCase:
+    """ Returns a export case object where one individual is missing bam file """
+    scout_export_case_data["individuals"][1].pop("bam_file")
+
+    return ScoutExportCase(**scout_export_case_data)
+
+
+@pytest.fixture(name="scout_export_case_no_causatives")
+def fixture_scout_export_case_no_causatives(scout_export_case_data: dict) -> ScoutExportCase:
+    """ Returns a export case object without causatives """
+    scout_export_case_data.pop("causatives")
+
+    return ScoutExportCase(**scout_export_case_data)
+
+
 @pytest.fixture(name="lims_family")
 def fixture_lims_family():
     """ Returns a lims-like family of samples """
@@ -180,15 +244,10 @@ def fixture_analysis_obj(
 
 @pytest.yield_fixture(name="upload_genotypes_api")
 def fixture_upload_genotypes_api(
-    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, analysis_obj, helpers
+    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers
 ) -> UploadGenotypesAPI:
     """Create a upload genotypes api"""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
-    hk_version = real_housekeeper_api.version(
-        analysis_obj.family.internal_id, analysis_obj.started_at
-    )
-    real_housekeeper_api.include(hk_version)
-
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle, include=True)
     _api = UploadGenotypesAPI(
         hk_api=real_housekeeper_api,
         gt_api=genotype_api,
@@ -269,9 +328,10 @@ def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
 
 
 @pytest.yield_fixture(scope="function")
-def analysis(analysis_store, case_id):
+def analysis(analysis_store, case_id, timestamp):
     """Fixture to mock an analysis"""
-    _analysis = analysis_store.add_analysis(pipeline="pipeline", version="version")
+    _analysis = analysis_store.add_analysis(pipeline=Pipeline.BALSAMIC, version="version")
     _analysis.family = analysis_store.family(case_id)
     _analysis.config_path = "dummy_path"
+    _analysis.completed_at = timestamp
     yield _analysis

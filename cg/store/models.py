@@ -6,11 +6,15 @@ import alchy
 from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
 
 from cg.constants import (
-    REV_PRIORITY_MAP,
-    PRIORITY_MAP,
-    FAMILY_ACTIONS,
+    DataDelivery,
+    CASE_ACTIONS,
     FLOWCELL_STATUS,
+    Pipeline,
     PREP_CATEGORIES,
+    PRIORITY_MAP,
+    REV_PRIORITY_MAP,
+    SEX_OPTIONS,
+    STATUS_OPTIONS,
 )
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
@@ -49,8 +53,6 @@ class PriorityMixin:
 class Application(Model):
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
-    # DEPRECATED, use prep_category instead
-    category = Column(types.Enum("wgs", "wes", "tga", "rna", "mic", "rml"))
     prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
     is_external = Column(types.Boolean, nullable=False, default=False)
     description = Column(types.String(256), nullable=False)
@@ -61,6 +63,7 @@ class Application(Model):
     sequencing_depth = Column(types.Integer)
     min_sequencing_depth = Column(types.Integer)
     target_reads = Column(types.BigInteger, default=0)
+    percent_reads_guaranteed = Column(types.Integer, nullable=False)
     sample_amount = Column(types.Integer)
     sample_volume = Column(types.Text)
     sample_concentration = Column(types.Text)
@@ -127,7 +130,7 @@ class ApplicationVersion(Model):
 
 class Analysis(Model):
     id = Column(types.Integer, primary_key=True)
-    pipeline = Column(types.String(32), nullable=False)
+    pipeline = Column(types.Enum(*list(Pipeline)))
     pipeline_version = Column(types.String(32))
     started_at = Column(types.DateTime)
     completed_at = Column(types.DateTime)
@@ -252,12 +255,14 @@ class Delivery(Model):
 class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action = Column(types.Enum(*FAMILY_ACTIONS))
+    action = Column(types.Enum(*CASE_ACTIONS))
     analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
+    data_analysis = Column(types.Enum(*list(Pipeline)))
+    data_delivery = Column(types.Enum(*list(DataDelivery)))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -299,9 +304,7 @@ class FamilySample(Model):
     id = Column(types.Integer, primary_key=True)
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
-    status = Column(
-        types.Enum("affected", "unaffected", "unknown"), default="unknown", nullable=False
-    )
+    status = Column(types.Enum(*STATUS_OPTIONS), default="unknown", nullable=False)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
@@ -396,7 +399,6 @@ class Pool(Model):
     application_version = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
-    capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -429,7 +431,6 @@ class Sample(Model, PriorityMixin):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
-    data_analysis = Column(types.String(16))
     delivered_at = Column(types.DateTime)
     deliveries = orm.relationship(Delivery, backref="sample")
     downsampled_to = Column(types.BigInteger)
@@ -454,7 +455,7 @@ class Sample(Model, PriorityMixin):
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
-    sex = Column(types.Enum("male", "female", "unknown"), nullable=False)
+    sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     ticket_number = Column(types.Integer)
     time_point = Column(types.Integer)
 

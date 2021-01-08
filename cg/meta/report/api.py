@@ -8,9 +8,9 @@ import ruamel.yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.scoutapi import ScoutAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.report.report_validator import ReportValidator
-from cg.meta.workflow.mip import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.report.report_helper import ReportHelper
 from cg.meta.report.presenter import Presenter
@@ -26,7 +26,7 @@ class ReportAPI:
         store: Store,
         lims_api: LimsAPI,
         chanjo_api: ChanjoAPI,
-        analysis_api: AnalysisAPI,
+        analysis_api: MipAnalysisAPI,
         scout_api: ScoutAPI,
         logger=logging.getLogger(__name__),
         yaml_loader=ruamel.yaml,
@@ -57,7 +57,7 @@ class ReportAPI:
 
     def _handle_missing_report_data(self, accept_missing_data, delivery_data, case_id):
         """Handle when some crucial data is missing in the report"""
-        if not self.report_validator.has_required_data(delivery_data):
+        if not self.report_validator.has_required_data(delivery_data, case_id):
             if not accept_missing_data:
                 raise DeliveryReportError(
                     f"Could not generate report data for {case_id}, "
@@ -196,6 +196,7 @@ class ReportAPI:
 
         delivery_data_samples = list()
         case_samples = self.store.family_samples(case_id)
+        case = self.store.family(case_id)
 
         for case_sample in case_samples:
             sample = case_sample.sample
@@ -216,7 +217,7 @@ class ReportAPI:
             )
 
             delivery_data_sample["capture_kit"] = sample.capture_kit
-            delivery_data_sample["data_analysis"] = sample.data_analysis
+            delivery_data_sample["data_analysis"] = case.data_analysis
             delivery_data_samples.append(delivery_data_sample)
 
         return delivery_data_samples
@@ -251,6 +252,7 @@ class ReportAPI:
 
         application_data["applications"] = applications
         application_data["accredited"] = bool(all(accreditations))
+
         return application_data
 
     def _fetch_panels_from_status_db(self, case_id: str) -> list:
@@ -293,6 +295,8 @@ class ReportAPI:
         presenter = Presenter(precision=2)
 
         _presentable_dict = presenter.process_dict(delivery_data)
+        _presentable_dict["accredited"] = delivery_data["accredited"]
+        _presentable_dict["scout_access"] = delivery_data["accredited"]
 
         for sample in delivery_data["samples"]:
             sample["mapped_reads"] = presenter.process_float_string(sample["mapped_reads"], 2)

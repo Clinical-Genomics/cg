@@ -2,9 +2,10 @@
 import logging
 import pathlib
 import tempfile
-from typing import List
+from typing import List, Iterable
 
 from cg.utils import Process
+
 
 LOG = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class MadelineAPI:
         self.process = Process(self.madeline_binary)
 
     @staticmethod
-    def make_ped(family_id: str, samples: List[dict]):
+    def make_ped(family_id: str, samples: List[dict]) -> Iterable[str]:
         """Yield lines that are used as madeline input."""
         columns = {
             "family": "FamilyId",
@@ -49,14 +50,14 @@ class MadelineAPI:
             yield "\t".join(row)
 
     @staticmethod
-    def strip_script_tag(content: str):
+    def strip_script_tag(content: str) -> str:
         """Strip away a script tag from a string"""
         script_tag = (
             '<script type="text/javascript" xlink:href=' '"javascript/madeline.js"></script>'
         )
         return content.replace(script_tag, "")
 
-    def run(self, family_id: str, samples: List[dict], out_path: str = None):
+    def run(self, family_id: str, samples: List[dict], out_path: str = None) -> pathlib.Path:
         """Run madeline and generate a file with the results."""
         if out_path:
             out_path = pathlib.Path(out_path)
@@ -65,7 +66,6 @@ class MadelineAPI:
             out_path = output_dir / "madeline.xml"
 
         output_prefix = str(out_path.with_suffix(""))
-        out_path = str(out_path)
         LOG.info("Generate madeline output to %s", out_path)
 
         ped_stream = self.make_ped(family_id, samples)
@@ -95,5 +95,4 @@ class MadelineAPI:
         return out_path
 
     def __repr__(self):
-        """Uniqe representation of instance"""
         return f"MadelineApi({self.madeline_binary})"

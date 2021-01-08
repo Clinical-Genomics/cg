@@ -164,7 +164,6 @@ We convert all the info that we get from LIMS/`genologics` to dictionaries befor
 
 Interface to Trailblazer.
 
-- Starts the MIP dna pipeline
 - Monitor analysis pipeline status
 
 #### Genotype (gt)

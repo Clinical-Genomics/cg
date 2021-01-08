@@ -44,7 +44,7 @@ def before_request():
             return abort(403, "no JWT token found on request")
         try:
             user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
-        except ValueError as error:
+        except ValueError:
             return abort(make_response(jsonify(message="outdated login certificate"), 403))
         user_obj = db.user(user_data["email"])
         if user_obj is None:
@@ -61,7 +61,7 @@ def submit_order(order_type):
     LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
         ticket = {"name": g.current_user.name, "email": g.current_user.email}
-        result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
+        result = api.submit(OrderType(order_type), post_data, ticket=ticket)
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
@@ -163,7 +163,7 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(401)
     if request.args.get("status") == "incoming":
-        samples_q = db.samples_to_recieve()
+        samples_q = db.samples_to_receive()
     elif request.args.get("status") == "labprep":
         samples_q = db.samples_to_prepare()
     elif request.args.get("status") == "sequencing":

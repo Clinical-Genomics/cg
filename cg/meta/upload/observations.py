@@ -2,13 +2,14 @@
     API for uploading observations
 """
 
-from pathlib import Path
 import logging
+from pathlib import Path
 from typing import List
 
-from cg.apps import hk, loqus
-from cg.exc import DuplicateRecordError, DuplicateSampleError, CaseNotFoundError
-from cg.store import models, Store
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.loqus import LoqusdbAPI
+from cg.exc import CaseNotFoundError, DuplicateRecordError, DuplicateSampleError
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class UploadObservationsAPI:
 
     """API to upload observations to LoqusDB."""
 
-    def __init__(self, status_api: Store, hk_api: hk.HousekeeperAPI, loqus_api: loqus.LoqusdbAPI):
+    def __init__(self, status_api: Store, hk_api: HousekeeperAPI, loqus_api: LoqusdbAPI):
         self.status = status_api
         self.housekeeper = hk_api
         self.loqusdb = loqus_api

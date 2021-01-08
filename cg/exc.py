@@ -96,7 +96,7 @@ class BundleAlreadyAddedError(CgError):
 
 class PipelineUnknownError(CgError):
     """
-    Exception raised when a sample in a case has no data anlysis type
+    Exception raised when a sample in a case has no data analysis type
     """
 
 
@@ -139,3 +139,11 @@ class PedigreeConfigError(CgError):
     def __init__(self, message, errors=None):
         self.message = message
         self.errors = errors
+
+
+class TrailblazerAPIHTTPError(CgError):
+    """Raised when Trailblazer REST API response code is not 200"""
+
+
+class TrailblazerMissingAnalysisError(CgError):
+    """Raised when Trailblazer REST API response code is not 200"""

@@ -7,19 +7,21 @@ import coloredlogs
 import ruamel.yaml
 
 import cg
+from cg.cli.set.base import set_cmd
+from cg.cli.store.store import store as store_cmd
 from cg.store import Store
 
 from .add import add
 from .backup import backup
 from .clean import clean
 from .compress.base import compress, decompress
+from .deliver.base import deliver as deliver_cmd
+from .deploy.base import deploy as deploy_cmd
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
 from .reset import reset_cmd
-from .set import set_cmd
 from .status import status
-from .store import store as store_cmd
 from .transfer import transfer
 from .upload import vogue as vogue_command
 from .upload.base import upload
@@ -35,11 +37,16 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.option(
     "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
 )
+@click.option("--verbose", is_flag=True, help="Show full log information, time stamp etc")
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
-def base(context, config, database, log_level):
+def base(context, config, database, log_level, verbose):
     """cg - interface between tools at Clinical Genomics."""
-    log_format = "%(message)s" if sys.stdout.isatty() else None
+    if verbose:
+        log_format = "%(asctime)s %(hostname)s %(name)s[%(process)d] %(levelname)s %(message)s"
+    else:
+        log_format = "%(message)s" if sys.stdout.isatty() else None
+
     coloredlogs.install(level=log_level, fmt=log_format)
     context.obj = ruamel.yaml.safe_load(config) if config else {}
     if database:
@@ -82,4 +89,7 @@ base.add_command(transfer)
 base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
+base.add_command(deploy_cmd)
+base.add_command(deliver_cmd)
+
 upload.add_command(vogue_command)

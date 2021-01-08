@@ -1,12 +1,13 @@
 {
   "name": "MIP order",
-  "customer": "cust003",
+  "customer": "cust000",
   "comment": "",
   "samples": [
     {
       "name": "sample1",
       "application": "WGTPCFC030",
-      "data_analysis": "MIP",
+      "comment": "comment",
+      "data_analysis": "mip-dna",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "A:1",
@@ -27,7 +28,7 @@
     {
       "name": "sample2",
       "application": "WGTPCFC030",
-      "data_analysis": "MIP",
+      "data_analysis": "mip-dna",
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
@@ -47,7 +48,7 @@
     {
       "name": "sample3",
       "application": "WGTPCFC030",
-      "data_analysis": "MIP",
+      "data_analysis": "mip-dna",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "C:1",
@@ -66,7 +67,7 @@
     {
       "name": "sample4",
       "application": "WGTPCFC030",
-      "data_analysis": "MIP",
+      "data_analysis": "mip-dna",
       "container": "96 well plate",
       "container_name": "CMMS",
       "well_position": "D:1",

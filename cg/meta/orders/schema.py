@@ -1,6 +1,5 @@
 from collections import Iterable
-from enum import Enum
-
+from cg.utils.StrEnum import StrEnum
 from pyschemes import Scheme, validators
 
 from cg.constants import (
@@ -9,19 +8,19 @@ from cg.constants import (
     STATUS_OPTIONS,
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
+    Pipeline,
 )
 
 
-class OrderType(Enum):
-    MIP_RNA = "mip_rna"
-    EXTERNAL = "external"
-    FASTQ = "fastq"
-    RML = "rml"
-    MIP = "mip"
-    MICROBIAL = "microbial"
-    METAGENOME = "metagenome"
-    BALSAMIC = "balsamic"
-    MIP_BALSAMIC = "mip_balsamic"
+class OrderType(StrEnum):
+    BALSAMIC: str = str(Pipeline.BALSAMIC)
+    EXTERNAL: str = "external"
+    FASTQ: str = "fastq"
+    METAGENOME: str = "metagenome"
+    MICROSALT: str = str(Pipeline.MICROSALT)
+    MIP_DNA: str = str(Pipeline.MIP_DNA)
+    MIP_RNA: str = str(Pipeline.MIP_RNA)
+    RML: str = "rml"
 
 
 class ListValidator(validators.Validator):
@@ -96,6 +95,8 @@ MIP_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     # customer
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
@@ -135,6 +136,7 @@ BALSAMIC_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
@@ -159,14 +161,13 @@ BALSAMIC_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
 
-MIP_BALSAMIC_SAMPLE = {**BALSAMIC_SAMPLE, **MIP_SAMPLE}
-
 MIP_RNA_SAMPLE = {
     "internal_id": OptionalNone(TypeValidatorNone(str)),
     # "required for new samples"
     "name": validators.RegexValidator(NAME_PATTERN),
     # customer
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
@@ -184,7 +185,7 @@ MIP_RNA_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     # Orderform 1508:19
     "from_sample": validators.RegexValidator(NAME_PATTERN),
-    "time_point": TypeValidatorNone(str),
+    "time_point": OptionalNone(TypeValidatorNone(str)),
 }
 
 EXTERNAL_SAMPLE = {
@@ -192,6 +193,7 @@ EXTERNAL_SAMPLE = {
     # Order portal specific
     "internal_id": OptionalNone(TypeValidatorNone(str)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     # "required for new samples"
     "name": validators.RegexValidator(NAME_PATTERN),
     "capture_kit": OptionalNone(TypeValidatorNone(str)),
@@ -221,6 +223,7 @@ FASTQ_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     # todo: implement in OP or remove from OF
@@ -245,7 +248,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:9 Orderform Ready made libraries (RML)
+    # 1604:10 Orderform Ready made libraries (RML)
     # Order portal specific
     "priority": str,
     # "This information is required"
@@ -253,8 +256,10 @@ RML_SAMPLE = {
     "pool": str,
     "application": str,
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "volume": str,
     "concentration": str,
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "index": str,
     "index_number": OptionalNone(TypeValidatorNone(str)),  # optional for NoIndex
     # "Required if Plate"
@@ -264,16 +269,16 @@ RML_SAMPLE = {
     "index_sequence": OptionalNone(TypeValidatorNone(str)),
     # "Not required"
     "comment": OptionalNone(TypeValidatorNone(str)),
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
 }
 
-MICROBIAL_SAMPLE = {
+MICROSALT_SAMPLE = {
     # 1603:6 Orderform Microbial WGS
     # "These fields are required"
     "name": validators.RegexValidator(NAME_PATTERN),
     "organism": str,
     "reference_genome": str,
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "require_qcok": bool,
     "elution_buffer": str,
@@ -286,7 +291,7 @@ MICROBIAL_SAMPLE = {
     # "Required if "Other" is chosen in column "Species""
     "organism_other": OptionalNone(TypeValidatorNone(str)),
     # "These fields are not required"
-    "concentration_weight": OptionalNone(TypeValidatorNone(str)),
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
@@ -297,6 +302,7 @@ METAGENOME_SAMPLE = {
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "data_analysis": str,
+    "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "require_qcok": bool,
     "elution_buffer": str,
@@ -306,7 +312,7 @@ METAGENOME_SAMPLE = {
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # "This information is not required"
-    "concentration_weight": OptionalNone(TypeValidatorNone(str)),
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "extraction_method": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
@@ -316,20 +322,17 @@ ORDER_SCHEMES = {
     OrderType.EXTERNAL: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(EXTERNAL_SAMPLE, min_items=1)}
     ),
-    OrderType.MIP: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
+    OrderType.MIP_DNA: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
     OrderType.BALSAMIC: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(BALSAMIC_SAMPLE, min_items=1)}
-    ),
-    OrderType.MIP_BALSAMIC: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(MIP_BALSAMIC_SAMPLE, min_items=1)}
     ),
     OrderType.MIP_RNA: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MIP_RNA_SAMPLE, min_items=1)}
     ),
     OrderType.FASTQ: Scheme({**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}),
     OrderType.RML: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
-    OrderType.MICROBIAL: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(MICROBIAL_SAMPLE, min_items=1)}
+    OrderType.MICROSALT: Scheme(
+        {**BASE_PROJECT, "samples": ListValidator(MICROSALT_SAMPLE, min_items=1)}
     ),
     OrderType.METAGENOME: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(METAGENOME_SAMPLE, min_items=1)}

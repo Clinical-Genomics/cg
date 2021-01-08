@@ -1,3 +1,4 @@
+from cg.constants import Pipeline
 from cg.store import Store
 from datetime import datetime as dt
 
@@ -118,6 +119,7 @@ def test_add_pool(store: Store):
         category="rml",
         description="Ready-made",
         percent_kth=80,
+        percent_reads_guaranteed=75,
         sequencing_depth=0,
     )
     store.add_commit(application)
@@ -137,7 +139,7 @@ def test_add_pool(store: Store):
         order="Test",
         ordered=dt.today(),
         application_version=app_version,
-        data_analysis="fastq",
+        data_analysis=Pipeline.FASTQ,
     )
     store.add_commit(new_pool)
 

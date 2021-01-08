@@ -1,14 +1,15 @@
 """Fixtures for store tests"""
 import datetime as dt
-
+from pathlib import Path
 import pytest
 
 # Files fixtures
+from cg.constants import Pipeline
 from cg.store import Store
 
 
 @pytest.fixture
-def application_versions_file(fixtures_dir):
+def application_versions_file(fixtures_dir: Path) -> str:
     """"application version import file"""
     _file = fixtures_dir / "store/api/application_versions.xlsx"
     return str(_file)
@@ -60,8 +61,8 @@ def fixture_microbial_submitted_order():
             organism=organism,
             reference_genome=ref_genomes[organism],
             extraction_method="MagNaPure 96 (contact Clinical Genomics before " "submission)",
-            analysis="fastq",
-            concentration_weight="1",
+            analysis=str(Pipeline.FASTQ),
+            concentration_sample="1",
             mother=None,
             father=None,
         )

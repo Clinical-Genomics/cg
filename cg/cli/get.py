@@ -19,7 +19,7 @@ FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Statu
 @click.pass_context
 def get(context: click.Context, identifier: str):
     """Get information about records in the database."""
-    context.obj["status"] = Store(context.obj["database"])
+    context.obj["status_db"] = Store(context.obj["database"])
     if identifier and re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):
         context.invoke(sample, sample_ids=[identifier])
     elif identifier and re.match(r"^[a-z]*$", identifier):
@@ -41,8 +41,8 @@ def get(context: click.Context, identifier: str):
 def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: List[str]):
     """Get information about a sample."""
     for sample_id in sample_ids:
-        LOG.debug("{sample_id}: get info about sample")
-        sample_obj = context.obj["status"].sample(sample_id)
+        LOG.debug("%s: get info about sample", sample_id)
+        sample_obj = context.obj["status_db"].sample(sample_id)
         if sample_obj is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
             continue
@@ -71,7 +71,7 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 def relations(context: click.Context, family_id: str):
     """Get information about a family relations."""
 
-    family_obj = context.obj["status"].family(family_id)
+    family_obj = context.obj["status_db"].family(family_id)
     if family_obj is None:
         LOG.error("%s: family doesn't exist", family_id)
         context.abort()
@@ -105,15 +105,15 @@ def family(
 ):
     """Get information about a family."""
     if name:
-        customer_obj = context.obj["status"].customer(customer)
+        customer_obj = context.obj["status_db"].customer(customer)
         if customer_obj is None:
             LOG.error(f"{customer}: customer not found")
             context.abort()
-        families = context.obj["status"].families(customer=customer_obj, enquiry=family_ids[-1])
+        families = context.obj["status_db"].families(customer=customer_obj, enquiry=family_ids[-1])
     else:
         families = []
         for family_id in family_ids:
-            family_obj = context.obj["status"].family(family_id)
+            family_obj = context.obj["status_db"].family(family_id)
             if family_obj is None:
                 LOG.error(f"{family_id}: family doesn't exist")
                 context.abort()
@@ -143,7 +143,7 @@ def family(
 @click.pass_context
 def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
-    flowcell_obj = context.obj["status"].flowcell(flowcell_id)
+    flowcell_obj = context.obj["status_db"].flowcell(flowcell_id)
     if flowcell_obj is None:
         LOG.error(f"{flowcell_id}: flowcell not found")
         context.abort()

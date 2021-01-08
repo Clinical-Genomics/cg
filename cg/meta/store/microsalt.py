@@ -1,13 +1,13 @@
 """ Microsalt specific functionality for storing files in Housekeeper """
 import datetime as dt
 import logging
-from pathlib import Path
+import os
 import ruamel.yaml
 
 from _io import TextIOWrapper
 
-from cg.constants import HK_TAGS, MICROSALT_TAGS
-import cg.meta.store.base as store_base
+from cg.constants import HK_TAGS, MICROSALT_TAGS, Pipeline
+from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
 
@@ -16,20 +16,21 @@ def add_microbial_analysis(config_stream: TextIOWrapper) -> dict:
     """Gather information from microSALT analysis to store."""
 
     deliverables = ruamel.yaml.safe_load(config_stream)
-    new_bundle = build_microbial_bundle(deliverables)
+    analysis_date = _get_date_from_deliverables_path(config_stream.name)
+    new_bundle = build_microbial_bundle(deliverables, analysis_date)
 
     return new_bundle
 
 
-def build_microbial_bundle(deliverables: dict) -> dict:
+def build_microbial_bundle(deliverables: dict, analysis_date: dt.date) -> dict:
     """Create a new bundle to store in Housekeeper"""
 
     project_name = _get_microbial_name(deliverables)
-    files = store_base.deliverables_files(deliverables, analysis_type="microbial")
+    files = store_base.deliverables_files(deliverables, analysis_type=Pipeline.MICROSALT)
 
     data = {
         "name": str(project_name),
-        "created": _get_date_from_results_path(deliverables),
+        "created": analysis_date,
         "files": files,
     }
     return data
@@ -53,11 +54,6 @@ def _get_microbial_name(deliverables: dict) -> str:
     return None
 
 
-def _get_date_from_results_path(deliverables: dict) -> dt.datetime:
-    """ Get date from results path """
-    first_file, *_ = deliverables["files"]
-    results_dir = Path(first_file["path"]).parent.name
-    [_, date, time] = results_dir.split("_")
-    [year, month, day] = list(map(int, date.split(".")))
-    [hour, minutes, seconds] = list(map(int, time.split(".")))
-    return dt.datetime(year, month, day, hour, minutes, seconds)
+def _get_date_from_deliverables_path(deliverables_path: str) -> dt.date:
+    """ Get date from deliverables path """
+    return dt.datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))

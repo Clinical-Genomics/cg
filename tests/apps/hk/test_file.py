@@ -1,6 +1,8 @@
 """Test how the api handles files"""
 from pathlib import Path
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):
     """Test to create a new file with the housekeeper api"""
@@ -71,6 +73,38 @@ def test_get_files(populated_housekeeper_api, case_id, tags, small_helpers):
 
     # THEN assert all files where fetched
     assert small_helpers.length_of_iterable(files) == nr_files
+
+
+def test_get_file(populated_housekeeper_api: HousekeeperAPI):
+    """Test to fetch a file from the database"""
+    # GIVEN a housekeeper api with a file
+    file_obj = populated_housekeeper_api.files().first()
+    assert file_obj
+
+    # GIVEN the id of a file that exists in HK
+    file_id = file_obj.id
+
+    # WHEN fetching the file with get_file
+    hk_file = populated_housekeeper_api.get_file(file_id)
+
+    # THEN assert a file was returned
+    assert hk_file is not None
+
+
+def test_delete_file(populated_housekeeper_api: HousekeeperAPI):
+    """Test to fetch a file from the database"""
+    # GIVEN a housekeeper api with a file
+    file_obj = populated_housekeeper_api.files().first()
+    assert file_obj
+
+    # GIVEN the id of a file that exists in HK
+    file_id = file_obj.id
+
+    # WHEN deleting the file
+    populated_housekeeper_api.delete_file(file_id)
+
+    # THEN assert a file was removed
+    assert populated_housekeeper_api.get_file(file_id) is None
 
 
 def test_get_included_path(populated_housekeeper_api, case_id):

@@ -158,3 +158,21 @@ def test_priority_clinical(cli_runner, balsamic_context: dict, caplog):
     # THEN dry-print should include the the option-value
     assert "--qos" in caplog.text
     assert option_value in caplog.text
+
+
+def test_run_wes_application(cli_runner, balsamic_context: dict, caplog):
+    """Test command with case_id that has WES application set in statusdb"""
+    caplog.set_level(logging.INFO)
+    # GIVEN valid case-id
+    case_id = "balsamic_case_wes_tumor"
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).parent, exist_ok=True
+    )
+    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id)).touch(exist_ok=True)
+    # WHEN dry running with option specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should show option disabling mutect in balsamic
+    assert "--disable-variant-caller mutect" in caplog.text

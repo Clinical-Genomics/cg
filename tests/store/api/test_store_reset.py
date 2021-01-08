@@ -1,4 +1,7 @@
 """Tests for reset part of the store API"""
+from cg.constants import Pipeline
+
+"""Tests for reset part of the store API"""
 
 from datetime import datetime, timedelta
 
@@ -28,6 +31,7 @@ def ensure_application_version(disk_store, application_tag="dummy_tag"):
             category="wgs",
             description="dummy_description",
             percent_kth=80,
+            percent_reads_guaranteed=75,
         )
         disk_store.add_commit(application)
 
@@ -97,11 +101,12 @@ def add_family(
     ordered_days_ago=0,
     action=None,
     priority=None,
+    data_analysis=Pipeline.MIP_DNA,
 ):
     """utility function to add a family to use in tests"""
     panel = ensure_panel(disk_store)
     customer = ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(name=family_id, panels=panel.name)
+    family = disk_store.add_family(data_analysis=data_analysis, name=family_id, panels=panel.name)
     family.customer = customer
     family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:

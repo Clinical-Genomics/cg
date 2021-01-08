@@ -4,7 +4,7 @@ from typing import List
 
 import petname
 
-from cg.constants import PRIORITY_MAP
+from cg.constants import PRIORITY_MAP, Pipeline
 from cg.store import models, utils
 from cg.store.api.base import BaseHandler
 
@@ -59,6 +59,7 @@ class AddHandler(BaseHandler):
         category: str,
         description: str,
         percent_kth: int,
+        percent_reads_guaranteed: int,
         is_accredited: bool = False,
         **kwargs,
     ) -> models.Application:
@@ -70,6 +71,7 @@ class AddHandler(BaseHandler):
             description=description,
             is_accredited=is_accredited,
             percent_kth=percent_kth,
+            percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
         return new_record
@@ -141,7 +143,9 @@ class AddHandler(BaseHandler):
         )
         return new_sample
 
-    def add_family(self, name: str, panels: List[str], priority: str = "standard") -> models.Family:
+    def add_family(
+        self, data_analysis: Pipeline, name: str, panels: List[str], priority: str = "standard"
+    ) -> models.Family:
         """Build a new Family record."""
 
         # generate a unique family id
@@ -153,7 +157,12 @@ class AddHandler(BaseHandler):
                 LOG.debug(f"{internal_id} already used - trying another id")
 
         priority_db = PRIORITY_MAP[priority]
-        new_family = self.Family(internal_id=internal_id, name=name, priority=priority_db)
+        new_family = self.Family(
+            data_analysis=str(data_analysis),
+            internal_id=internal_id,
+            name=name,
+            priority=priority_db,
+        )
         new_family.panels = panels
         return new_family
 
@@ -186,7 +195,7 @@ class AddHandler(BaseHandler):
 
     def add_analysis(
         self,
-        pipeline: str,
+        pipeline: Pipeline,
         version: str = None,
         completed_at: dt.datetime = None,
         primary: bool = False,
@@ -197,7 +206,7 @@ class AddHandler(BaseHandler):
         """Build a new Analysis record."""
 
         new_record = self.Analysis(
-            pipeline=pipeline,
+            pipeline=str(pipeline),
             pipeline_version=version,
             completed_at=completed_at,
             is_primary=primary,
@@ -231,7 +240,7 @@ class AddHandler(BaseHandler):
         order: str,
         ordered: dt.datetime,
         application_version: models.ApplicationVersion,
-        data_analysis: str,
+        data_analysis: Pipeline,
         ticket: int = None,
         comment: str = None,
         received: dt.datetime = None,
@@ -247,7 +256,7 @@ class AddHandler(BaseHandler):
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,
-            data_analysis=data_analysis,
+            data_analysis=str(data_analysis),
         )
         new_record.customer = customer
         new_record.application_version = application_version

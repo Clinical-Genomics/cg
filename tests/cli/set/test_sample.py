@@ -1,7 +1,8 @@
 """Test methods for cg/cli/set/sample"""
 import pytest
+import logging
 
-from cg.cli.set import sample
+from cg.cli.set.base import sample
 from cg.store import Store
 
 SUCCESS = 0
@@ -34,49 +35,51 @@ def test_skip_lims(cli_runner, base_context, base_store: Store, helpers):
 
     # THEN update sample should have no recorded update key and value
     assert result.exit_code == SUCCESS
-    assert base_context["lims"].get_updated_sample_key() != key
-    assert base_context["lims"].get_updated_sample_value() != new_value
+    assert base_context["lims_api"].get_updated_sample_key() != key
+    assert base_context["lims_api"].get_updated_sample_value() != new_value
 
 
-def test_help_without_sample(cli_runner, base_context, base_store: Store, helpers):
+def test_help_without_sample(cli_runner, base_context, base_store: Store, helpers, caplog):
     # GIVEN a database with no sample
 
     # WHEN setting sample but asking for help
-    result = cli_runner.invoke(sample, ["--help"], obj=base_context)
+    with caplog.at_level(logging.INFO):
+        result = cli_runner.invoke(sample, ["--help"], obj=base_context)
 
     # THEN it should fail on not having a sample as argument
     assert result.exit_code != SUCCESS
 
     # THEN the flags should have been mentioned in the output
-    assert "-kv" in result.output
-    assert "--skip-lims" in result.output
-    assert "-y" in result.output
+    assert "-kv" in caplog.text
+    assert "--skip-lims" in caplog.text
+    assert "-y" in caplog.text
 
     # THEN the name property should have been mentioned
-    assert "name" in result.output
+    assert "name" in caplog.text
 
 
-def test_help_with_sample(cli_runner, base_context, base_store: Store, helpers):
+def test_help_with_sample(cli_runner, base_context, base_store: Store, helpers, caplog):
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
 
     # WHEN setting sample but skipping lims
-    result = cli_runner.invoke(sample, [sample_obj.internal_id, "--help"], obj=base_context)
+    with caplog.at_level(logging.INFO):
+        result = cli_runner.invoke(sample, [sample_obj.internal_id, "--help"], obj=base_context)
 
     # THEN it should not fail on not having a sample as argument
     assert result.exit_code == SUCCESS
 
     # THEN the flags should have been mentioned in the output
-    assert "-kv" in result.output
-    assert "--skip-lims" in result.output
-    assert "-y" in result.output
+    assert "-kv" in caplog.text
+    assert "--skip-lims" in caplog.text
+    assert "-y" in caplog.text
 
     # THEN the name property should have been mentioned
-    assert "name" in result.output
+    assert "name" in caplog.text
 
     # THEN the name value should have been mentioned
-    assert sample_obj.name in result.output
+    assert sample_obj.name in caplog.text
 
 
 @pytest.mark.parametrize("key", ["name", "capture_kit"])
@@ -89,14 +92,17 @@ def test_set_sample(cli_runner, base_context, base_store: Store, key, helpers):
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
-        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+        sample,
+        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        obj=base_context,
+        catch_exceptions=False,
     )
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, key) == new_value
-    assert base_context["lims"].get_updated_sample_key() == key
-    assert base_context["lims"].get_updated_sample_value() == new_value
+    assert base_context["lims_api"].get_updated_sample_key() == key
+    assert base_context["lims_api"].get_updated_sample_value() == new_value
 
 
 def test_sex(cli_runner, base_context, base_store: Store, helpers):
@@ -115,8 +121,49 @@ def test_sex(cli_runner, base_context, base_store: Store, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, key) == new_value
-    assert base_context["lims"].get_updated_sample_key() == key
-    assert base_context["lims"].get_updated_sample_value() == new_value
+    assert base_context["lims_api"].get_updated_sample_key() == key
+    assert base_context["lims_api"].get_updated_sample_value() == new_value
+
+
+def test_priority_text(cli_runner, base_context, base_store: Store, helpers):
+    # GIVEN a database with a sample
+    sample_obj = helpers.add_sample(base_store, gender="female")
+    key = "priority"
+    new_value = "express"
+    assert sample_obj.priority_human != new_value
+
+    # WHEN setting key on sample to new_value
+    result = cli_runner.invoke(
+        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+    )
+
+    # THEN then it should have new_value as attribute key on the sample and in LIMS
+    assert result.exit_code == SUCCESS
+    assert sample_obj.priority_human == new_value
+    assert base_context["lims_api"].get_updated_sample_key() == key
+    assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
+
+
+def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
+    # GIVEN a database with a sample
+    sample_obj = helpers.add_sample(base_store, gender="female")
+    key = "priority"
+    new_value = 2
+    assert sample_obj.priority != new_value
+
+    # WHEN setting key on sample to new_value
+    result = cli_runner.invoke(
+        sample,
+        [sample_obj.internal_id, "-kv", key, new_value, "-y"],
+        obj=base_context,
+        catch_exceptions=False,
+    )
+
+    # THEN then it should have new_value as attribute key on the sample and in LIMS
+    assert result.exit_code == SUCCESS
+    assert sample_obj.priority == new_value
+    assert base_context["lims_api"].get_updated_sample_key() == key
+    assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
 
 
 def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
@@ -231,11 +278,13 @@ def test_application(cli_runner, base_context, base_store: Store, helpers):
             "application_version",
             application_tag,
             "-y",
-            "--skip-lims",
         ],
         obj=base_context,
     )
 
-    # THEN then the application should have been set
+    # THEN then the application should have been set in status db
     assert result.exit_code == SUCCESS
     assert sample_obj.application_version.application.tag == application_tag
+    # THEN then the application should have been set in LIMS
+    assert base_context["lims_api"].get_updated_sample_key() == "application"
+    assert base_context["lims_api"].get_updated_sample_value() == application_tag

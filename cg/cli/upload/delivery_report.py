@@ -2,11 +2,14 @@
 import datetime as dt
 import logging
 import sys
+from pathlib import Path
 
 import click
 
-from cg.apps import hk, scoutapi
-from cg.exc import DeliveryReportError, CgError
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants import Pipeline
+from cg.exc import CgError, DeliveryReportError
 from cg.store import Store
 
 from .utils import suggest_cases_delivery_report
@@ -32,7 +35,9 @@ def delivery_reports(context, print_console, force_report):
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
 
     exit_code = SUCCESS
-    for analysis_obj in context.obj["status"].analyses_to_delivery_report(pipeline="mip"):
+    for analysis_obj in context.obj["status_db"].analyses_to_delivery_report(
+        pipeline=Pipeline.MIP_DNA
+    ):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading delivery report for case: %s", case_id)
         try:
@@ -100,6 +105,7 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
 
     status-db:
         family
+        family.data_analysis        missing on most re-runs
         customer_name
         applications
         accredited
@@ -113,7 +119,6 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
         sample.received_at
         sample.sequenced_at         for rml and in-house sequenced samples
         sample.delivered_at
-        sample.data_analysis        missing on most re-runs
 
     lims:
         sample.name
@@ -148,7 +153,7 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
     def _add_delivery_report_to_hk(
-        delivery_report_file, hk_api: hk.HousekeeperAPI, family_id, analysis_date
+        delivery_report_file: Path, hk_api: HousekeeperAPI, family_id: str, analysis_date: str
     ):
         delivery_report_tag_name = "delivery-report"
 
@@ -172,7 +177,7 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
 
         return None
 
-    def _update_delivery_report_date(status_api: Store, case_id, analysis_date):
+    def _update_delivery_report_date(status_api: Store, case_id: str, analysis_date: str):
 
         analysis_obj = status_api.analysis(case_id, analysis_date)
         analysis_obj.delivery_report_created_at = dt.datetime.now()
@@ -197,18 +202,17 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
         click.echo(delivery_report_html)
         return
 
-    tb_api = context.obj["tb_api"]
-    status_api = context.obj["status"]
+    status_api = context.obj["status_db"]
+    mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
 
     delivery_report_file = report_api.create_delivery_report_file(
         family_id,
-        file_path=tb_api.get_family_root_dir(family_id),
+        file_path=Path(mip_dna_root_dir, family_id),
         accept_missing_data=force_report,
         analysis_date=analysis_started_at,
     )
 
     hk_api = context.obj["housekeeper_api"]
-
     added_file = _add_delivery_report_to_hk(
         delivery_report_file, hk_api, family_id, analysis_started_at
     )
@@ -232,14 +236,14 @@ def delivery_report(context, family_id, print_console, force_report, analysis_st
     help="run command without uploading to scout",
 )
 @click.pass_context
-def delivery_report_to_scout(context, case_id, dry_run):
+def delivery_report_to_scout(context, case_id: str, dry_run: bool):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
 
-    def _add_delivery_report_to_scout(context, path, case_id):
-        scout_api = scoutapi.ScoutAPI(context.obj)
+    def _add_delivery_report_to_scout(context, path: Path, case_id: str):
+        scout_api = ScoutAPI(context.obj)
         scout_api.upload_delivery_report(path, case_id, update=True)
 
-    def _get_delivery_report_from_hk(hk_api: hk.HousekeeperAPI, family_id):
+    def _get_delivery_report_from_hk(hk_api: HousekeeperAPI, family_id):
         delivery_report_tag_name = "delivery-report"
         version_obj = hk_api.last_version(family_id)
         uploaded_delivery_report_files = hk_api.get_files(

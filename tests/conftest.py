@@ -3,26 +3,29 @@
 """
 import copy
 import datetime as dt
+import json
 import logging
+import os
 import shutil
 from pathlib import Path
 
 import pytest
 import ruamel.yaml
-from trailblazer.mip import files as mip_dna_files_api
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.mip_rna import files as mip_rna_files_api
-from cg.meta.store import mip as store_mip
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.gt import GenotypeAPI
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
+from cg.constants import Pipeline
 from cg.models import CompressionData
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.process_mock import ProcessMock
 from .mocks.scout import MockScoutAPI
+from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 
@@ -41,24 +44,36 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="case_id")
-def fixture_case_id():
+def fixture_case_id() -> str:
     """Return a case id"""
     return "yellowhog"
 
 
-@pytest.yield_fixture(scope="function", name="family_name")
+@pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
     """Return a family name"""
     return "family"
 
 
+@pytest.fixture(name="customer_id")
+def fixture_customer_id() -> str:
+    """Return a customer id"""
+    return "cust000"
+
+
+@pytest.fixture(name="ticket_nr")
+def fixture_ticket_nr() -> int:
+    """Return a ticket nr"""
+    return 123456
+
+
 @pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id, family_name):
+def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Build an example family."""
     family = {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": "mip",
+        "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "samples": [
@@ -67,10 +82,9 @@ def fixture_analysis_family_single(case_id, family_name):
                 "sex": "male",
                 "internal_id": "ADM1",
                 "status": "affected",
-                "ticket_number": 123456,
-                "reads": 5000000,
+                "ticket_number": ticket_nr,
+                "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
-                "data_analysis": "PIM",
             }
         ],
     }
@@ -78,12 +92,12 @@ def fixture_analysis_family_single(case_id, family_name):
 
 
 @pytest.yield_fixture(scope="function", name="analysis_family")
-def fixture_analysis_family(case_id, family_name) -> dict:
+def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Return a dictionary with information from a analysis family"""
     family = {
         "name": family_name,
         "internal_id": case_id,
-        "data_analysis": "mip",
+        "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
         "samples": [
@@ -91,11 +105,10 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "name": "child",
                 "sex": "male",
                 "internal_id": "ADM1",
-                "data_analysis": "mip",
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -103,9 +116,8 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "name": "father",
                 "sex": "male",
                 "internal_id": "ADM2",
-                "data_analysis": "mip",
                 "status": "unaffected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -113,9 +125,8 @@ def fixture_analysis_family(case_id, family_name) -> dict:
                 "name": "mother",
                 "sex": "female",
                 "internal_id": "ADM3",
-                "data_analysis": "mip",
                 "status": "unaffected",
-                "ticket_number": 123456,
+                "ticket_number": ticket_nr,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -151,20 +162,6 @@ def fixture_hk_config_dict(root_path):
     return _config
 
 
-@pytest.fixture(name="tb_config_dict")
-def fixture_tb_config_dict(analysis_dir: Path) -> dict:
-    """Return a dictionary with trailblazer configs"""
-    _config = {
-        "trailblazer": {
-            "database": "sqlite:///:memory:",
-            "root": str(analysis_dir),
-            "script": ".",
-            "mip_config": ".",
-        }
-    }
-    return _config
-
-
 @pytest.fixture(name="genotype_config")
 def fixture_genotype_config() -> dict:
     """
@@ -193,15 +190,6 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     return _genotype_api
 
 
-@pytest.yield_fixture(name="trailblazer_api")
-def fixture_trailblazer_api(tb_config_dict: dict) -> TrailblazerAPI:
-    """Setup Trailblazer api."""
-    _store = TrailblazerAPI(tb_config_dict)
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
 @pytest.yield_fixture(scope="function")
 def madeline_api(madeline_output):
     """madeline_api fixture"""
@@ -221,7 +209,7 @@ def fixture_fixtures_dir() -> Path:
 
 
 @pytest.fixture(name="analysis_dir")
-def fixture_analysis_dir(fixtures_dir) -> Path:
+def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir"""
     return fixtures_dir / "analysis"
 
@@ -259,6 +247,47 @@ def fixture_orderform(fixtures_dir: Path) -> Path:
     return _path
 
 
+@pytest.fixture(name="mip_dna_store_files")
+def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
+    """Return the path to the directory with mip dna store files"""
+    _path = apps_dir / "mip" / "dna" / "store"
+    return _path
+
+
+@pytest.fixture(name="mip_analysis_dir")
+def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with mip analysis files"""
+    _path = analysis_dir / "mip"
+    return _path
+
+
+@pytest.fixture(name="mip_dna_analysis_dir")
+def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
+    """Return the path to the directory with mip dna analysis files"""
+    _path = mip_analysis_dir / "dna"
+    return _path
+
+
+@pytest.fixture(name="sample1_cram")
+def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for sample 1"""
+    _path = mip_dna_analysis_dir / "adm1.cram"
+    return _path
+
+
+@pytest.fixture(name="mip_deliverables_file")
+def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
+    """Fixture for general deliverables file in mip"""
+    return mip_dna_store_files / "case_id_deliverables.yaml"
+
+
+@pytest.fixture(name="vcf_file")
+def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
+    """Return the path to to a vcf file"""
+    _path = mip_dna_store_files / "yellowhog_clinical_selected.vcf"
+    return _path
+
+
 # Orderform fixtures
 
 
@@ -270,9 +299,10 @@ def microbial_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def rml_orderform():
+def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return "tests/fixtures/orderforms/1604.9.rml.xlsx"
+    _file = orderforms / "1604.10.rml.xlsx"
+    return str(_file)
 
 
 @pytest.fixture(name="madeline_output")
@@ -280,6 +310,60 @@ def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
     _file = apps_dir / "madeline/madeline.xml"
     return str(_file)
+
+
+@pytest.fixture
+def mip_order_to_submit() -> dict:
+    """Load an example scout order."""
+    return json.load(open("tests/fixtures/orders/mip.json"))
+
+
+@pytest.fixture
+def mip_json_order_to_submit() -> dict:
+    """Load an example json scout order."""
+    return json.load(open("tests/fixtures/orders/mip-json.json"))
+
+
+@pytest.fixture
+def mip_rna_order_to_submit() -> dict:
+    """Load an example rna order."""
+    return json.load(open("tests/fixtures/orders/mip_rna.json"))
+
+
+@pytest.fixture
+def external_order_to_submit() -> dict:
+    """Load an example external order."""
+    return json.load(open("tests/fixtures/orders/external.json"))
+
+
+@pytest.fixture
+def fastq_order_to_submit() -> dict:
+    """Load an example fastq order."""
+    return json.load(open("tests/fixtures/orders/fastq.json"))
+
+
+@pytest.fixture
+def rml_order_to_submit() -> dict:
+    """Load an example rml order."""
+    return json.load(open("tests/fixtures/orders/rml.json"))
+
+
+@pytest.fixture
+def metagenome_order_to_submit() -> dict:
+    """Load an example metagenome order."""
+    return json.load(open("tests/fixtures/orders/metagenome.json"))
+
+
+@pytest.fixture
+def microbial_order_to_submit() -> dict:
+    """Load an example microbial order."""
+    return json.load(open("tests/fixtures/orders/microsalt.json"))
+
+
+@pytest.fixture
+def balsamic_order_to_submit() -> dict:
+    """Load an example cancer order."""
+    return json.load(open("tests/fixtures/orders/balsamic.json"))
 
 
 # Compression fixtures
@@ -321,7 +405,7 @@ def fixture_compression_object(
 @pytest.fixture(name="case_qc_metrics")
 def fixture_case_qc_metrics(apps_dir: Path) -> Path:
     """Return the path to a qc metrics file with case data"""
-    return apps_dir / "tb" / "case" / "case_qc_metrics.yaml"
+    return Path("tests/fixtures/apps/mip/case_qc_metrics.yaml")
 
 
 @pytest.fixture(name="bcf_file")
@@ -334,9 +418,9 @@ def fixture_bcf_file(apps_dir: Path) -> Path:
 def fixture_files():
     """Trailblazer api for mip files"""
     return {
-        "config": "tests/fixtures/apps/tb/case/case_config.yaml",
-        "sampleinfo": "tests/fixtures/apps/tb/case/case_qc_sample_info.yaml",
-        "qcmetrics": "tests/fixtures/apps/tb/case/case_qc_metrics.yaml",
+        "config": "tests/fixtures/apps/mip/dna/store/case_config.yaml",
+        "sampleinfo": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+        "qcmetrics": "tests/fixtures/apps/mip/case_qc_metrics.yaml",
         "rna_config": "tests/fixtures/apps/mip/rna/case_config.yaml",
         "rna_sampleinfo": "tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml",
         "rna_config_store": "tests/fixtures/apps/mip/rna/store/case_config.yaml",
@@ -374,15 +458,19 @@ def fixture_files_raw(files):
 def files_data(files_raw):
     """Get some data files"""
     return {
-        "config": mip_dna_files_api.parse_config(files_raw["config"]),
-        "sampleinfo": mip_dna_files_api.parse_sampleinfo(files_raw["sampleinfo"]),
-        "qcmetrics": mip_dna_files_api.parse_qcmetrics(files_raw["qcmetrics"]),
-        "rna_config": mip_dna_files_api.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": mip_rna_files_api.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
-        "rna_config_store": store_mip.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["rna_sampleinfo_store"]),
-        "dna_config_store": store_mip.parse_config(files_raw["dna_config_store"]),
-        "dna_sampleinfo_store": store_mip.parse_sampleinfo(files_raw["dna_sampleinfo_store"]),
+        "config": parse_sampleinfo.parse_config(files_raw["config"]),
+        "sampleinfo": parse_sampleinfo.parse_sampleinfo(files_raw["sampleinfo"]),
+        "qcmetrics": parse_qcmetrics.parse_qcmetrics(files_raw["qcmetrics"]),
+        "rna_config": parse_sampleinfo.parse_config(files_raw["rna_config"]),
+        "rna_sampleinfo": parse_sampleinfo.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
+        "rna_config_store": parse_sampleinfo.parse_config(files_raw["rna_config_store"]),
+        "rna_sampleinfo_store": parse_sampleinfo.parse_sampleinfo(
+            files_raw["rna_sampleinfo_store"]
+        ),
+        "dna_config_store": parse_sampleinfo.parse_config(files_raw["dna_config_store"]),
+        "dna_sampleinfo_store": parse_sampleinfo.parse_sampleinfo(
+            files_raw["dna_sampleinfo_store"]
+        ),
     }
 
 
@@ -486,6 +574,12 @@ def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_fil
     second_fastq = compression_object.fastq_second
     for fastq_file in [first_fastq, second_fastq]:
         fastq_file.touch()
+        # We need to set the time to an old date
+        # Create a older date
+        # Convert the date to a float
+        before_timestamp = dt.datetime.timestamp(dt.datetime(2020, 1, 1))
+        # Update the utime so file looks old
+        os.utime(fastq_file, (before_timestamp, before_timestamp))
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
@@ -521,6 +615,33 @@ def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
     """Get a housekeeper version object"""
     _version = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
     return _version
+
+
+# Process Mock
+
+
+@pytest.fixture(name="process")
+def fixture_process() -> ProcessMock:
+    """Returns a mocked process"""
+    return ProcessMock()
+
+
+# Hermes mock
+
+
+@pytest.fixture(name="hermes_process")
+def fixture_hermes_process() -> ProcessMock:
+    """Return a mocked hermes process"""
+    return ProcessMock(binary="hermes")
+
+
+@pytest.fixture(name="hermes_api")
+def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
+    """Return a hermes api with a mocked process"""
+    hermes_config = {"hermes": {"binary_path": "hermes"}}
+    hermes_api = HermesApi(config=hermes_config)
+    hermes_api.process = hermes_process
+    return hermes_api
 
 
 # Scout fixtures
@@ -581,7 +702,7 @@ def fixture_customer_group() -> str:
 
 @pytest.yield_fixture(scope="function", name="customer_production")
 def fixture_customer_production(customer_group) -> dict:
-    """Return a dictionary with infomation about the prod customer"""
+    """Return a dictionary with information about the prod customer"""
     _cust = dict(
         customer_id="cust000",
         name="Production",
@@ -605,6 +726,7 @@ def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
         application_type="wgs",
         description="External WGS",
         is_external=True,
+        target_reads=10,
     )
     return _info
 
@@ -623,6 +745,7 @@ def fixture_external_wes_info(external_wes_application_tag) -> dict:
         application_type="wes",
         description="External WES",
         is_external=True,
+        target_reads=10,
     )
     return _info
 
@@ -643,6 +766,7 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
         sequencing_depth=30,
         is_external=True,
         is_accredited=True,
+        target_reads=10,
     )
     return _info
 
@@ -705,6 +829,8 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
+            target_reads=10,
         ),
         store.add_application(
             tag="EXXCUSR000",
@@ -713,6 +839,8 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
+            target_reads=10,
         ),
         store.add_application(
             tag="WGSPCFC060",
@@ -721,6 +849,8 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=30,
             accredited=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
+            target_reads=10,
         ),
         store.add_application(
             tag="RMLS05R150",
@@ -728,6 +858,8 @@ def fixture_base_store(store) -> Store:
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
+            target_reads=10,
         ),
         store.add_application(
             tag="WGTPCFC030",
@@ -735,25 +867,28 @@ def fixture_base_store(store) -> Store:
             description="WGS trio",
             is_accredited=True,
             sequencing_depth=30,
-            target_reads=300000000,
+            target_reads=30,
             limitations="some",
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METLIFR020",
             category="wgs",
             description="Whole genome metagenomics",
             sequencing_depth=0,
-            target_reads=40000000,
+            target_reads=400000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METNXTR020",
             category="wgs",
             description="Metagenomics",
             sequencing_depth=0,
-            target_reads=20000000,
+            target_reads=200000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="MWRNXTR003",
@@ -761,14 +896,18 @@ def fixture_base_store(store) -> Store:
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
+            target_reads=10,
         ),
         store.add_application(
             tag="RNAPOAR025",
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
+            percent_reads_guaranteed=75,
             sequencing_depth=25,
             accredited=True,
+            target_reads=10,
         ),
     ]
 
@@ -852,3 +991,8 @@ def disk_store(cli_runner, invoke_cli) -> Store:
         assert len(Store(database_uri).engine.table_names()) > 0
 
         yield Store(database_uri)
+
+
+@pytest.fixture(scope="function", name="trailblazer_api")
+def fixture_trailblazer_api() -> MockTB:
+    return MockTB()

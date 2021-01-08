@@ -1,25 +1,23 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
-
 import logging
 from typing import List
 
+from _io import TextIOWrapper
 from housekeeper.store import models as hk_models
 
-from cg.apps.hk import HousekeeperAPI
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
 from cg.exc import (
     AnalysisDuplicationError,
-    PipelineUnknownError,
-    MandatoryFilesMissing,
     BundleAlreadyAddedError,
+    MandatoryFilesMissing,
+    PipelineUnknownError,
 )
+from cg.meta.store import mip as store_mip
 from cg.meta.store.microsalt import add_microbial_analysis
-import cg.meta.store.mip as store_mip
-from cg.store import models, Store
+from cg.store import Store, models
 from cg.store.utils import reset_case_action
-
-from _io import TextIOWrapper
 
 ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,
@@ -31,13 +29,13 @@ LOG = logging.getLogger(__name__)
 
 
 def gather_files_and_bundle_in_housekeeper(
-    config_stream: TextIOWrapper, hk_api: HousekeeperAPI, status: Store, workflow: str
+    config_stream: TextIOWrapper, hk_api: HousekeeperAPI, status: Store, workflow: Pipeline
 ) -> models.Analysis:
     """Function to gather files and bundle in housekeeper"""
 
     add_analysis = {
-        "microsalt": add_microbial_analysis,
-        "mip": store_mip.add_mip_analysis,
+        Pipeline.MICROSALT: add_microbial_analysis,
+        Pipeline.MIP_DNA: store_mip.add_mip_analysis,
     }
     bundle_data = add_analysis[workflow](config_stream)
 
@@ -48,12 +46,12 @@ def gather_files_and_bundle_in_housekeeper(
     bundle_obj, version_obj = results
 
     case_obj = {
-        "microsalt": status.find_family_by_name(bundle_obj.name),
-        "mip": status.family(bundle_obj.name),
+        Pipeline.MICROSALT: status.find_family_by_name(bundle_obj.name),
+        Pipeline.MIP_DNA: status.family(bundle_obj.name),
     }
 
     reset_case_action(case_obj[workflow])
-    new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj, workflow)
+    new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj)
     version_date = version_obj.created_at.date()
 
     LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
@@ -82,13 +80,12 @@ def add_new_analysis(
     case_obj: models.Family,
     status: Store,
     version_obj: hk_models.Version,
-    workflow: str,
 ) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
-    pipeline = case_obj.links[0].sample.data_analysis
-
-    if not pipeline:
+    try:
+        pipeline = Pipeline(case_obj.data_analysis)
+    except ValueError:
         raise PipelineUnknownError(f"No pipeline specified in {case_obj}")
 
     if status.analysis(family=case_obj, started_at=version_obj.created_at):

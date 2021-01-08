@@ -6,7 +6,9 @@ from pathlib import Path
 import pytest
 
 from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 
@@ -24,13 +26,38 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         internal_id="balsamic_sample_clean",
         is_tumour=True,
         application_type="wgs",
-        data_analysis="balsamic",
+        data_analysis=Pipeline.BALSAMIC,
     )
     helpers.add_relationship(store, family=case_to_clean, sample=sample_case_to_clean)
 
     helpers.add_analysis(
         store,
         family=case_to_clean,
+        pipeline=Pipeline.BALSAMIC,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
+
+    # Create textbook case not for cleaning
+    case_to_not_clean = helpers.add_family(
+        store=store, internal_id="balsamic_case_not_clean", family_id="balsamic_case_not_clean"
+    )
+    case_to_not_clean.action = "running"
+    store.commit()
+
+    sample_case_to_not_clean = helpers.add_sample(
+        store,
+        internal_id="balsamic_sample_not_clean",
+        is_tumour=True,
+        application_type="wgs",
+        data_analysis="balsamic",
+    )
+    helpers.add_relationship(store, family=case_to_not_clean, sample=sample_case_to_not_clean)
+
+    helpers.add_analysis(
+        store,
+        family=case_to_not_clean,
         pipeline="balsamic",
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
@@ -77,7 +104,11 @@ def server_config(balsamic_dir: Path) -> dict:
 
 @pytest.fixture
 def balsamic_analysis_api(
-    server_config: dict, balsamic_clean_store: Store, housekeeper_api: HousekeeperAPI
+    server_config: dict,
+    balsamic_clean_store: Store,
+    housekeeper_api: HousekeeperAPI,
+    hermes_api: HermesApi,
+    trailblazer_api,
 ):
     return BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(server_config),
@@ -85,7 +116,8 @@ def balsamic_analysis_api(
         housekeeper_api=housekeeper_api,
         fastq_handler="FastqHandler",
         lims_api="LIMS",
-        fastq_api="FastqAPI",
+        trailblazer_api=trailblazer_api,
+        hermes_api=hermes_api,
     )
 
 
@@ -100,37 +132,7 @@ def clean_context(
     """context to use in cli"""
 
     return {
-        "hk_api": housekeeper_api,
-        "store_api": balsamic_clean_store,
-        "BalsamicAnalysisAPI": balsamic_analysis_api,
-    }
-
-
-@pytest.fixture
-def balsamic_analysis_api(
-    server_config: dict, balsamic_clean_store: Store, housekeeper_api: HousekeeperAPI
-):
-    return BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(server_config),
-        store=balsamic_clean_store,
-        housekeeper_api=housekeeper_api,
-        fastq_handler="FastqHandler",
-        lims_api="LIMS",
-    )
-
-
-@pytest.fixture
-def clean_context(
-    base_store: Store,
-    housekeeper_api: HousekeeperAPI,
-    balsamic_analysis_api: BalsamicAnalysisAPI,
-    helpers,
-    tmpdir,
-) -> dict:
-    """context to use in cli"""
-
-    return {
-        "hk_api": housekeeper_api,
+        "housekeeper_api": housekeeper_api,
         "store_api": balsamic_clean_store,
         "BalsamicAnalysisAPI": balsamic_analysis_api,
     }

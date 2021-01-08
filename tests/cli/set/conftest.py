@@ -9,7 +9,7 @@ from cg.store import Store
 @pytest.fixture
 def base_context(base_store: Store) -> dict:
     """context to use in cli"""
-    return {"lims": MockLims(), "status": base_store}
+    return {"lims_api": MockLims(), "status_db": base_store}
 
 
 class MockLims(LimsAPI):

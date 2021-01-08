@@ -1,10 +1,10 @@
-""" MIP specific functionality for storing files in Houskeeper """
+""" MIP specific functionality for storing files in Housekeeper """
 import logging
 from pathlib import Path
 import ruamel.yaml
 
 from cg.exc import AnalysisNotFinishedError
-import cg.meta.store.base as store_base
+from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
 
@@ -15,9 +15,6 @@ def add_mip_analysis(config_stream):
     config_data = parse_config(config_raw)
     sampleinfo_raw = ruamel.yaml.safe_load(Path(config_data["sampleinfo_path"]).open())
     sampleinfo_data = parse_sampleinfo(sampleinfo_raw)
-
-    if sampleinfo_data["is_finished"] is False:
-        raise AnalysisNotFinishedError("analysis not finished")
 
     deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
     new_bundle = store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)

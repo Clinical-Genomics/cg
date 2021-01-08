@@ -6,10 +6,10 @@ from pathlib import Path
 
 import click
 
-from cg.apps import hk, lims
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
 from cg.apps.microsalt.fastq import FastqHandler
 from cg.cli.workflow.microsalt.store import store as store_cmd
-from cg.cli.workflow.microsalt.deliver import deliver as deliver_cmd
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 from cg.utils.commands import Process
@@ -23,16 +23,17 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def microsalt(context: click.Context, ticket: str, dry_run: bool):
     """Microbial workflow"""
-    context.obj["db"] = Store(context.obj["database"])
-    hk_api = hk.HousekeeperAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    hk_api = HousekeeperAPI(context.obj)
+    lims_api = LimsAPI(context.obj)
     analysis_api = MicrosaltAnalysisAPI(
-        db=context.obj["db"],
+        db=context.obj["status_db"],
         hk_api=hk_api,
         lims_api=lims_api,
         fastq_handler=FastqHandler(context.obj),
+        config=context.obj["microsalt"],
     )
-    context.obj["analysis_api"] = analysis_api
+    context.obj["microsalt_analysis_api"] = analysis_api
 
     if context.invoked_subcommand:
         return
@@ -54,7 +55,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
     context.invoke(run, ticket=ticket, dry_run=dry_run)
 
 
-@microsalt.command()
+@click.command()
 @click.option("-d", "--dry-run", is_flag=True, help="only print to console")
 @click.option("-t", "--ticket", help="link all microbial samples for a ticket")
 @click.argument("sample_id", required=False)
@@ -62,7 +63,7 @@ def microsalt(context: click.Context, ticket: str, dry_run: bool):
 def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     """Link microbial FASTQ files for a SAMPLE_ID"""
 
-    analysis_api = context.obj["analysis_api"]
+    analysis_api = context.obj["microsalt_analysis_api"]
 
     if not any([ticket, sample_id]):
         LOG.error("provide ticket and/or sample")
@@ -74,7 +75,7 @@ def link(context: click.Context, dry_run: bool, ticket: str, sample_id: str):
     analysis_api.link_samples(ticket=ticket, sample_id=sample_id)
 
 
-@microsalt.command("config-case")
+@click.command("config-case")
 @click.option("-d", "--dry-run", is_flag=True, help="print config to console")
 @click.option("-t", "--ticket", help="create config-case all microbial samples for an order")
 @click.argument("sample_id", required=False)
@@ -86,14 +87,15 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         LOG.error("Provide ticket and/or sample")
         context.abort()
 
-    sample_objs = context.obj["analysis_api"].get_samples(ticket, sample_id)
+    sample_objs = context.obj["microsalt_analysis_api"].get_samples(ticket, sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
         context.abort()
 
     parameters = [
-        context.obj["analysis_api"].get_parameters(sample_obj) for sample_obj in sample_objs
+        context.obj["microsalt_analysis_api"].get_parameters(sample_obj)
+        for sample_obj in sample_objs
     ]
 
     filename = str(ticket) if ticket else sample_id
@@ -106,7 +108,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
         json.dump(parameters, outfile, indent=4, sort_keys=True)
 
 
-@microsalt.command()
+@click.command()
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
 @click.option(
     "-c",
@@ -120,6 +122,8 @@ def config_case(context: click.Context, dry_run: bool, ticket: int, sample_id: s
 @click.pass_context
 def run(context: click.Context, dry_run: bool, config_case_path: click.Path, ticket: int):
     """ Start microSALT with an order_id """
+
+    microbial_api = context.obj["microsalt_analysis_api"]
 
     microsalt_bin = context.obj["microsalt"]["binary_path"]
     microsalt_env = context.obj["microsalt"]["conda_env"]
@@ -140,8 +144,11 @@ def run(context: click.Context, dry_run: bool, config_case_path: click.Path, tic
     ]
     process.run_command(parameters=analyse_command, dry_run=dry_run)
 
+    if not dry_run:
+        microbial_api.set_statusdb_action(name=ticket, action="running")
 
-microsalt.add_command(config_case)
-microsalt.add_command(deliver_cmd)
-microsalt.add_command(run)
+
 microsalt.add_command(store_cmd)
+microsalt.add_command(run)
+microsalt.add_command(config_case)
+microsalt.add_command(link)

@@ -1,14 +1,12 @@
 """Click commands to store microSALT analyses"""
 import logging
 
+import _io
 import click
 
-from cg.apps import hk, tb
-from cg.exc import (
-    AnalysisDuplicationError,
-    BundleAlreadyAddedError,
-    MandatoryFilesMissing,
-)
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
@@ -19,9 +17,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from microSALT in housekeeper."""
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+    context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
 @store.command()
@@ -29,8 +26,8 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    status = context.obj["db"]
-    hk_api = context.obj["hk_api"]
+    status = context.obj["status_db"]
+    hk_api = context.obj["housekeeper_api"]
 
     if not config_stream:
         LOG.error("Please provide a config file")
@@ -38,7 +35,7 @@ def analysis(context, config_stream):
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream, hk_api, status, workflow="microsalt"
+            config_stream, hk_api, status, workflow=Pipeline.MICROSALT
         )
     except (AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing) as error:
         click.echo(click.style(error.message, fg="red"))
@@ -54,5 +51,16 @@ def analysis(context, config_stream):
 @store.command()
 @click.pass_context
 def completed(context):
-    """Store all completed analyses."""
-    pass
+    """Store all completed analyses"""
+    microsalt_analysis_api = context.obj["microsalt_analysis_api"]
+    exit_code = EXIT_SUCCESS
+    for deliverables_file in microsalt_analysis_api.get_deliverables_to_store():
+        try:
+            context.invoke(analysis, config_stream=_io.open(deliverables_file))
+        except click.Abort:
+            exit_code = EXIT_FAIL
+        except Exception as error:
+            LOG.error("Unspecified error occurred - %s", error.__class__.__name__)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort

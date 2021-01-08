@@ -7,11 +7,480 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
+
 ## [x.x.x]
 
 ### Added
 ### Changed
 ### Fixed
+
+## [17.2.1]
+
+
+### Fixed
+
+- HermesApi added to context when running cg clean
+
+## [17.2.0]
+
+### Changed
+
+- Using HermesApi to save Balsamic deliverables in Housekeeper
+
+
+## [17.1.0]
+
+### Added
+
+- Added support for Balsamic-orderforms as json-file
+
+### Changed
+
+## [17.0.0]
+
+### Added
+- Lims ID is sent to Balsamic during case config
+
+
+## [16.17.1]
+
+### Added
+
+### Fixed
+- Fixed exporting reduced mt_bam to scout config
+### Changed
+
+## 16.17.0
+
+### Changed
+- Update Scout config output for images from chromograph
+
+## 16.16.1
+
+### Fixed
+
+- This PR fixes the problem handling wells in json orders without ":" as separator, e.g. A1 instead of A:1
+
+## [16.16.0]
+
+### Changed
+
+- Use hermes for generating balsamic deliverables
+
+## 16.15.1
+
+### Fixed
+- The problem handling mip-json without specified data_analysis
+
+## [16.16.0]
+
+### Added
+
+- Validation models for excel files in `cg/store/api/import_func.py`
+
+### Fixed
+
+- Removes dependency on deprecated excel-parser `xlrd`
+
+
+## 16.15.0
+
+### Added
+- cg deploy hermes
+
+## 16.14.0
+
+### Added
+- cg deploy fluffy
+
+
+## 16.13.0
+
+### Added
+
+- Stop on bad values for analysis (pipeline) when adding family through CLI
+
+## 16.12.1
+
+### Fixed
+- Save in Family and Analysis Admin views
+
+## 16.12.0
+
+### Added
+
+- Added support for RML-orderforms as json-file
+
+## [16.11.1]
+
+### Fixed
+
+- Lock dependency for xlrd so that we can parse modern excel files
+
+
+## 16.11.0
+
+### Added
+- cg set family [CASEID] now has the option --data-delivery
+
+## [16.10.4]
+
+### Fixed
+- Bug when building tag definition for balsamic-analysis delivery
+
+## [16.10.3]
+
+### Fixed
+- Use `--json` when exporting causative variants from scout
+
+## [16.10.2]
+
+### Fixed
+- Use correct pipeline name when cleaning mip analysis dirs
+
+## [16.10.1]
+
+### Added
+
+- Adds new mip-dna tags to hk
+
+## [16.10.0]
+
+### Added
+
+- Adds new delivery type to balsamic-analysis
+
+## [16.9.0]
+
+### Added
+
+- column percent_reads_guaranteed to application table
+
+## [16.8.1]
+
+### Fixed
+
+- Bug in the interactions with Scout when cleaning Scout cases
+- Bug in the interaction with scout in command export_causatives
+
+## [16.8.0]
+
+### Added
+
+- Adds adding samplesheet to HK flowcell bundle to cg transfer flowcell
+
+## [16.7.1]
+
+### Fixed
+
+- Mutacc looks for 'id' instead of '_id' in case export
+- Convert 'other' to '0' for sex in case export
+
+## 16.7.0
+
+### Added
+- Show sample priorities in created ticket
+
+## [16.6.0]
+
+### Changed
+
+- Split generating config into its own command
+- Delete old load config when running `cg upload scout --re-upload`
+
+## [16.5.0]
+
+### Added
+
+- Functionality to deploy scout with cg
+
+## [16.4.3]
+
+### Fixed
+
+- Bug that madeline output files where not uploaded to scout
+- Bug when exporting panels with `cg workflow mip-dna panel`
+
+## [16.4.2]
+
+### Fixed
+
+- Bug that display_name was used instead of sample_name
+
+## [16.4.1]
+
+### Fixed
+
+- Change compression query to be both satisfactory syntax for flake and to be working on our version of sql server
+
+## [16.4.0]
+
+### Added
+- Use Pydantic models to validate Scout input/output
+
+### Changed
+- Decouples scout from CG
+
+## [16.3.4]
+
+### Fixed
+
+- Fixed documentation on Trailblazers purpose
+
+## [16.3.3]
+
+### Fixed
+
+- Fixed setting of priority in statusDB and LIMS for samples
+
+## [16.3.2]
+
+### Fixed
+
+- Fixed setting of apptag in LIMS for samples
+
+## [16.3.1]
+
+### Fixed
+
+- Fixed a bug in naming of "default_gene_panels" in Scout load config
+
+
+## [16.3.0]
+
+### Changed
+- Changed logic for which cases are to be compressed. Now compression will be run on all cases older then 60 days provided their fastq files have not been decompressed less than 21 days prior
+
+
+## [16.2.0]
+
+### Changed
+
+- Use CLI to upload to Scout
+
+## [16.1.1]
+
+### Fixed
+- Accreditation logotype only shown on new delivery reports for accredited analyses
+
+
+## [16.1.0]
+
+### Changed
+- Changed the way cg cleans cases. Now it only uses StatusDB and family status
+
+### Added
+- Added one-time script to iterate over mip directories, and set cleaned_at timestamp on very old cases that were already cleaned
+
+
+## [16.0.6]
+
+### Fixed
+- 'cg upload auto --pipeline' to accept 'mip-dna' as pipeline
+
+## [16.0.5]
+
+### Fixed
+- Trailblazer integration fixed
+
+## [16.0.4]
+
+### Fixed
+- Case database entities (Family) can only have specific values for data_analysis
+- Analysis database entities can only have specific values for pipeline
+- Enum used for pipeline as arguments
+
+## [16.0.3]
+
+### Fixed
+- Microbial config-case now correctly imports reference from customer provided reference
+
+## [16.0.2]
+
+### Added
+- Added case intentmayfly to list of cases to except from SPRING compression
+
+## [16.0.1]
+
+### Added
+- Updated PR template to include implementation plan
+
+## [16.0.0]
+
+### Added
+- Deliver analysis based on case-id or ticket
+
+### Changed
+- Deliver commands merged into new command `cg deliver analysis`
+
+## [15.0.4]
+### Fixed
+- fixed failing `cg microsalt store completed` cronjob
+
+## [15.0.3]
+### Fixed
+- Fixed path where microsalt deliverables files are located
+
+## [15.0.2]
+### Fixed
+- Wrap more cg workflow mip-dna store code in try-except in order to not cause future production blocks
+
+## [15.0.1]
+### Fixed
+- Fix bug in compress clean command
+
+## [15.0.0]
+
+### Added
+- New command: cg store ticket <ticket_id>
+- New command: cg store flowcell <flowcell_id>
+- New command: cg store case <case_id>
+- New command: cg store sample <sample_id>
+
+### Removed
+- Old command: cg store fastq <case_id>
+
+## [14.0.1]
+
+### Fixed
+- Removed unused options form cg workflow balsamic base command
+
+
+## [14.0.0]
+
+### Added
+- New command: cg decompress ticket <ticket_id>
+- New command: cg decompress flowcell <flowcell_id>
+- New command: cg decompress case <case_id>
+- New command: cg decompress sample <sample_id>
+
+### Removed
+- Old command: cg compress decompress spring <case_id>
+
+## [13.18.0]
+
+
+### Changed
+- Changed condition for which cases should be stored in CG. This fixes a bug where cg would try to store cases which already have been stored due to mismatch in timestamp stored in Trailblazer and Housekeeper
+
+## [13.17.2]
+
+### Changed
+- Only fastq files older than three weeks will be compressed
+
+
+## [13.17.1]
+
+### Added
+- Added new value to lims constants
+- Moved lims constants to a constants directory
+
+
+## [13.17.0]
+
+
+### Changed
+- Workflow mip-dna store no longer needs analysisrunstatus to be completed to attempt storing bundle
+
+
+## [13.16.2]
+
+### Fixed
+
+- Fixed bug where parse_mip_config() only returned values for primary analysis, breaking Upload Delivery Report
+
+
+## [13.16.1]
+
+### Fixed
+
+ - Fix bug where cg workflow mip store still relied on Trailblazer to find case_config.yaml (Where it can no longer be found)
+ - Fix bug where microsalt cli lost its store command in merge conflict
+
+
+## [13.16.0]
+
+### Added
+- New REST-based TrailblazerAPI
+### Changed
+- Trailblazer support for Balsamic
+### Fixed
+- Naming convention for API harmonized
+
+
+## [13.15.0]
+
+### Added
+- New query to get all cases in ticket
+
+## [13.14.3]
+
+### Changed
+
+- Refactors constants file
+
+## [13.14.2]
+
+### Fixed
+
+ - Fixed bug where CalledProcessError class could not be represented as string, and broke workflows.
+ - Rephrased query used for compression. The query output is unchanged
+ - Fixed typo in query name
+
+
+## [13.14.1]
+### Removed
+- Remove data_analysis from sample since it is deprecated
+
+## [13.14.0]
+### Changed
+- Move data_analysis from sample level to case level to enable samples to be analysed differently in different cases
+
+## [13.12.0]
+### Added
+- Store all available completed microbial analyses in HK
+
+## [13.11.0]
+
+### Changed
+- Balsamic always skips mutect when application is WES
+- SPRING compression is set to run on oldest families first
+
+### Fixed
+- Format print statements
+
+## [13.10.2]
+
+### Fixed
+- Storing chromograph, upd and rhocall files in housekeeper
+
+## [13.10.1]
+
+### Fixed
+- Repaired automation query for storing Balsamic cases in Housekeeper
+
+## [13.10]
+
+### Added
+- Functionality to deploy `genotype` with CG on hasta
+
+### Fixed
+- Stored completed not parsing through all completed entries
+
+## [13.9]
+
+### Added
+- Deployment command
+- Functionality to deploy `shipping` with CG
+
+
+## [13.8.0]
+### Added
+- Functionality to change multiple families in one go, e.g. cg set families --sample-identifier ticket_number 123456 --priority research
+
+## [13.7.0]
+### Fixed
+- Set flowcell status to `ondisk` when retrieving archived flowcell from PDC has finished.
 
 ## [13.6.0]
 
@@ -57,19 +526,19 @@ Made unidirectional links to ApplicationVersion (instead of bi) to speed up view
 ## [13.3.0]
 
 ### Added
-- Added new cases to skip during compression 
+- Added new cases to skip during compression
 
 ## [13.2.0]
 
 ### Changed
-- Only talk to genotype via subprocess and CLI 
+- Only talk to genotype via subprocess and CLI
 
 
 ## [13.1.0]
 
 ### Changed
 - Added cases for all microbial samples
-- Add a case when a new microbial order is received 
+- Add a case when a new microbial order is received
 
 ## [13.0.0]
 
@@ -132,7 +601,7 @@ Made unidirectional links to ApplicationVersion (instead of bi) to speed up view
 ## [12.3.4]
 
 ### Fixed
-- Fixes bug where  upload_started_at and uploaded_at timestamps were not being updated in StatusDB upon successful Scout upload. 
+- Fixes bug where  upload_started_at and uploaded_at timestamps were not being updated in StatusDB upon successful Scout upload.
 This bug was happening because several instances of Store were instantiated in the same context
 
 ## [12.3.3]
@@ -166,7 +635,7 @@ This bug was happening because several instances of Store were instantiated in t
 ## [12.3.1]
 
 ### Fixed
- 
+
 - Fixed bug where AnalysisAPI in cg upload auto was not updated to recent class changes
 
 ## [12.3.0]

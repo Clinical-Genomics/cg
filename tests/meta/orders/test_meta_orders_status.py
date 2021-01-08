@@ -1,6 +1,8 @@
 import datetime as dt
 
 import pytest
+
+from cg.constants import Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
 
@@ -10,14 +12,21 @@ def test_pools_to_status(rml_order_to_submit):
     # WHEN parsing for status
     data = StatusHandler.pools_to_status(rml_order_to_submit)
     # THEN it should pick out the general information
-    assert data["customer"] == "cust001"
+    assert data["customer"] == "cust000"
     assert data["order"] == "ctDNA sequencing - order 9"
+    assert data["comment"] == "order comment"
+
     # ... and information about the pool(s)
-    assert len(data["pools"]) == 1
-    assert data["pools"][0]["name"] == "pool-1"
-    assert data["pools"][0]["application"] == "RMLS05R150"
-    assert data["pools"][0]["data_analysis"] == "fastq"
-    assert data["pools"][0]["capture_kit"] == "Agilent Sureselect CRE"
+    assert len(data["pools"]) == 2
+    pool = data["pools"][0]
+    assert pool["name"] == "pool-1"
+    assert pool["application"] == "RMLS05R150"
+    assert pool["data_analysis"] == str(Pipeline.FLUFFY)
+    assert len(pool["samples"]) == 2
+    sample = pool["samples"][0]
+    assert sample["name"] == "sample1"
+    assert sample["comment"] == "test comment"
+    assert sample["priority"] == "research"
 
 
 def test_samples_to_status(fastq_order_to_submit):
@@ -29,7 +38,6 @@ def test_samples_to_status(fastq_order_to_submit):
     first_sample = data["samples"][0]
     assert first_sample["name"] == "prov1"
     assert first_sample["application"] == "WGSPCFC060"
-    assert first_sample["data_analysis"] == "fastq"
     assert first_sample["priority"] == "priority"
     assert first_sample["tumour"] is False
 
@@ -57,7 +65,6 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data["organism_id"] == "M.upium"
     assert sample_data["reference_genome"] == "NC_111"
     assert sample_data["application"] == "MWRNXTR003"
-    assert sample_data["data_analysis"] == "microbial|fastq"
     assert sample_data["comment"] == "plate comment"
 
 
@@ -69,6 +76,7 @@ def test_families_to_status(mip_order_to_submit):
     assert len(data["families"]) == 2
     family = data["families"][0]
     assert family["name"] == "family1"
+    assert family["data_analysis"] == str(Pipeline.MIP_DNA)
     assert family["priority"] == "standard"
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
@@ -76,7 +84,6 @@ def test_families_to_status(mip_order_to_submit):
     first_sample = family["samples"][0]
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGTPCFC030"
-    assert first_sample["data_analysis"] == "MIP"
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
     assert first_sample["mother"] == "sample2"
@@ -90,8 +97,11 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
+    assert base_store.families(customer=None).count() == 0
+    assert base_store.samples(customer=None).count() == 0
+
     # WHEN storing the order
-    new_pools = orders_api.store_pools(
+    new_pools = orders_api.store_rml(
         customer=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
@@ -99,14 +109,18 @@ def test_store_rml(orders_api, base_store, rml_status_data):
         pools=rml_status_data["pools"],
     )
     # THEN it should update the database with new pools
-    assert len(new_pools) == 1
-    assert base_store.pools(customer=None).count() == 1
+    assert len(new_pools) == 2
+
+    assert base_store.pools(customer=None).count() == 2
+    assert base_store.families(customer=None).count() == 2
+    assert base_store.samples(customer=None).count() == 4
     new_pool = base_store.pools(customer=None).first()
-    assert new_pool == new_pools[0]
-    assert new_pool.name == "pool-1"
+
+    assert new_pool == new_pools[1]
+
+    assert new_pool.name == "pool-2"
     assert new_pool.application_version.application.tag == "RMLS05R150"
-    assert new_pool.data_analysis == "fastq"
-    assert new_pool.capture_kit == "Agilent Sureselect CRE"
+    assert new_pool.data_analysis == str(Pipeline.FLUFFY)
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
@@ -123,7 +137,7 @@ def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_pools(
+        orders_api.store_rml(
             customer=rml_status_data["customer"],
             order=rml_status_data["order"],
             ordered=dt.datetime.now(),
@@ -146,15 +160,14 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         samples=fastq_status_data["samples"],
     )
 
-    # THEN it should store the samples and create a "fake" family for
-    # the non-tumour sample
+    # THEN it should store the samples and create a family for each sample
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
-    assert base_store.families().count() == 1
+    assert base_store.families().count() == 2
     first_sample = new_samples[0]
     assert len(first_sample.links) == 1
     family_link = first_sample.links[0]
-    assert family_link.family == base_store.families().first()
+    assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
 
@@ -173,8 +186,8 @@ def test_store_samples_data_analysis_stored(orders_api, base_store, fastq_status
         samples=fastq_status_data["samples"],
     )
 
-    # THEN the data_analysis should be stored
-    assert new_samples[0].data_analysis == "fastq"
+    # THEN the sample sex should be stored
+    assert new_samples[0].sex == "male"
 
 
 def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
@@ -211,6 +224,8 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=microbial_status_data["samples"],
+        comment="",
+        data_analysis=Pipeline.MICROSALT,
     )
 
     # THEN it should store the samples under a case (family) and the used previously unknown
@@ -222,9 +237,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
     assert base_store.organisms().count() == 3
 
 
-def test_store_microbial_samples_data_analysis_stored(
-    orders_api, base_store, microbial_status_data
-):
+def test_store_microbial_case_data_analysis_stored(orders_api, base_store, microbial_status_data):
 
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.samples().count() == 0
@@ -237,12 +250,16 @@ def test_store_microbial_samples_data_analysis_stored(
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=microbial_status_data["samples"],
+        comment="",
+        data_analysis=Pipeline.MICROSALT,
     )
 
-    # THEN it should store the samples under a case with the microbial data_analysis type
+    # THEN store the samples under a case with the microbial data_analysis type on case level
     assert base_store.samples().count() > 0
-    assert base_store.families().count() > 0
-    assert new_samples[0].data_analysis == "microbial|fastq"
+    assert base_store.families().count() == 1
+
+    microbial_case = base_store.families().first()
+    assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
@@ -261,6 +278,8 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
             ordered=dt.datetime.now(),
             ticket=1234348,
             samples=microbial_status_data["samples"],
+            comment="",
+            data_analysis=Pipeline.MICROSALT,
         )
 
 
@@ -276,6 +295,8 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
         ordered=dt.datetime.now(),
         ticket=1234348,
         samples=microbial_status_data["samples"],
+        comment="",
+        data_analysis=Pipeline.MICROSALT,
     )
 
     # THEN it should store the sample priority
@@ -308,13 +329,13 @@ def test_store_mip(orders_api, base_store, mip_status_data):
 
     assert len(new_family.links) == 3
     new_link = new_family.links[0]
+    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
     assert new_link.sample.name == "sample1"
     assert new_link.sample.sex == "female"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
-    assert new_link.sample.data_analysis == "MIP"
     assert new_link.sample.is_tumour
     assert isinstance(new_family.links[1].sample.comment, str)
 
@@ -345,9 +366,9 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
 
     assert len(new_casing.links) == 2
     new_link = new_casing.links[0]
-    assert new_link.sample.name == "sample1_rna_t1"
+    assert new_casing.data_analysis == str(Pipeline.MIP_RNA)
+    assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
-    assert new_link.sample.data_analysis == "MIP_RNA"
     assert new_link.sample.time_point == 1
     assert new_link.sample.from_sample == "sample1"
 
@@ -394,6 +415,7 @@ def test_store_external(orders_api, base_store, external_status_data):
     new_family = new_families[0]
     assert new_family == family_obj
     assert new_family.name == "fam2"
+    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
     assert set(new_family.panels) == {"CTD", "CILM"}
     assert new_family.priority_human == "priority"
 
@@ -466,8 +488,8 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         samples=metagenome_status_data["samples"],
     )
 
-    # THEN it should store the samples
-    assert base_store.samples().first().data_analysis == "fastq"
+    # THEN it should have stored the samples
+    assert base_store.samples().count() > 0
 
 
 def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):
@@ -509,6 +531,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert len(new_families) == 1
     new_family = new_families[0]
     assert new_family.name == "family1"
+    assert new_family.data_analysis == str(Pipeline.BALSAMIC)
     assert set(new_family.panels) == set()
     assert new_family.priority_human == "standard"
 
@@ -517,8 +540,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
-    assert new_link.sample.data_analysis == "Balsamic"
-    assert new_link.sample.comment == "comment"
+    assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 
     assert base_store.deliveries().count() == base_store.samples().count()
