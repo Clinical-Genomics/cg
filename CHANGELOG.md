@@ -14,8 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [17.2.1]
+## [NG.NG.NG]
 
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
+## [17.2.1]
 
 ### Fixed
 
