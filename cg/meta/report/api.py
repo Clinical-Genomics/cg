@@ -2,6 +2,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import TextIO
 
 import requests
 import ruamel.yaml
@@ -44,7 +45,7 @@ class ReportAPI:
         self.report_validator = ReportValidator(store)
 
     def create_delivery_report(
-        self, case_id: str, analysis_date, accept_missing_data: bool = False
+        self, case_id: str, analysis_date: datetime, accept_missing_data: bool = False
     ) -> str:
         """Generate the html contents of a delivery report."""
 
@@ -70,8 +71,12 @@ class ReportAPI:
             )
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date, accept_missing_data: bool = False
-    ):
+        self,
+        case_id: str,
+        file_path: Path,
+        analysis_date: datetime,
+        accept_missing_data: bool = False,
+    ) -> TextIO:
         """Generate a temporary file containing a delivery report."""
 
         delivery_report = self.create_delivery_report(
@@ -85,7 +90,7 @@ class ReportAPI:
 
         return delivery_report_file
 
-    def _get_delivery_data(self, case_id: str, analysis_date) -> dict:
+    def _get_delivery_data(self, case_id: str, analysis_date: datetime) -> dict:
         """Fetch all data needed to render a delivery report."""
 
         report_data = dict()
@@ -120,7 +125,9 @@ class ReportAPI:
         """Fetch a case object from the status database."""
         return self.store.family(case_id)
 
-    def _get_analysis_from_statusdb(self, case: models.Family, analysis_date) -> models.Analysis:
+    def _get_analysis_from_statusdb(
+        self, case: models.Family, analysis_date: datetime
+    ) -> models.Analysis:
         """Fetch an analysis object from the status database."""
         return self.store.analysis(case, analysis_date)
 

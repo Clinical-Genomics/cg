@@ -94,7 +94,7 @@ def test_create_delivery_report_contains_delivery_data(report_store, report_api)
 
     # WHEN creating delivery report
     delivery_report = report_api.create_delivery_report(
-        case_id, analysis_date=case.analyses[0].started_at
+        case_id=case_id, analysis_date=case.analyses[0].started_at
     )
 
     # THEN
