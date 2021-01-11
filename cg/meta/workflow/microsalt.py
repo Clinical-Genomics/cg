@@ -416,6 +416,7 @@ class MicrosaltAnalysisAPI:
         self.db.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
 
-    def get_date_from_deliverables_path(self, deliverables_path: Path) -> datetime.date:
+    @staticmethod
+    def get_date_from_deliverables_path(deliverables_path: Path) -> datetime.date:
         """ Get date from deliverables path using date created metadata """
         return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))
