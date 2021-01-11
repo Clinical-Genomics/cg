@@ -27,13 +27,8 @@ def test_dry_arguments(
     caplog.set_level(logging.INFO)
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(run, ["--dry-run", microbial_ticket], obj=base_context)
+    result = cli_runner.invoke(run, [microbial_ticket, "-t", "-d"], obj=base_context)
 
     # THEN command should mention missing arguments
     assert result.exit_code == EXIT_SUCCESS
-
-    outfilename = queries_path / microbial_ticket
-    outfilename = outfilename.with_suffix(".json")
-
-    fastq_path = fastq_path / str(microbial_ticket)
-    assert f"/bin/true analyse {outfilename} --input {fastq_path}" in caplog.text
+    assert f"Running command" in caplog.text
