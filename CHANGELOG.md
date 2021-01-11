@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Added
+- Customer in the ticket created for an order from the Orderportal
+
 ## [18.0.0]
 
 ### Added
@@ -27,7 +32,6 @@ Try to use the following format:
 
 ## [17.2.1]
 
-
 ### Fixed
 
 - HermesApi added to context when running cg clean
@@ -37,7 +41,6 @@ Try to use the following format:
 ### Changed
 
 - Using HermesApi to save Balsamic deliverables in Housekeeper
-
 
 ## [17.1.0]
 
@@ -52,14 +55,10 @@ Try to use the following format:
 ### Added
 - Lims ID is sent to Balsamic during case config
 
-
 ## [16.17.1]
-
-### Added
 
 ### Fixed
 - Fixed exporting reduced mt_bam to scout config
-### Changed
 
 ## 16.17.0
 
