@@ -73,6 +73,12 @@ class MicrosaltAnalysisAPI:
 
         return list(flowcells)
 
+    def get_case_fastq_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, "fastq", case_id)
+
+    def get_config_path(self, filename: str) -> Path:
+        return Path(self.queries_path, filename).with_suffix(".json")
+
     @staticmethod
     def generate_fastq_name(
         lane: str, flowcell: str, sample: str, read: str, more: dict = None
@@ -141,7 +147,7 @@ class MicrosaltAnalysisAPI:
 
     def link_samples(self, case_id: str, sample_id: Optional[str] = None) -> None:
 
-        case_dir = Path(self.root_dir, "fastq", case_id)
+        case_dir: Path = self.get_case_fastq_path(case_id=case_id)
         case_dir.mkdir(parents=True, exist_ok=True)
 
         samples = self.get_samples(case_id=case_id, sample_id=sample_id)
@@ -297,7 +303,7 @@ class MicrosaltAnalysisAPI:
             LOG.info("Found deliverables file %s", deliverables_file_path)
             return deliverables_file_path
 
-    def set_statusdb_action(self, case_id: str, action: str) -> None:
+    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
         """Sets action on case based on ticket number"""
         if action in [None, *CASE_ACTIONS]:
             case_object: models.Family = self.db.family(case_id)

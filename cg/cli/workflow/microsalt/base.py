@@ -100,14 +100,14 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
     parameters = [microsalt_analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
 
     filename = sample_id or case_id
-    outfilename = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
+    config_case_path: Path = microsalt_analysis_api.get_config_path(filename=filename)
     if dry_run:
         click.echo(json.dumps(parameters, indent=4, sort_keys=True))
         return
 
-    with open(outfilename, "w") as outfile:
+    with open(config_case_path, "w") as outfile:
         json.dump(parameters, outfile, indent=4, sort_keys=True)
-    LOG.info("Saved config %s", outfilename)
+    LOG.info("Saved config %s", config_case_path)
 
 
 @microsalt.command()
@@ -140,11 +140,11 @@ def run(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
 
-    fastq_path = Path(microsalt_analysis_api.root_dir, "fastq", case_id)
+    fastq_path: Path = microsalt_analysis_api.get_case_fastq_path(case_id=case_id)
 
     if not config_case_path:
         filename = sample_id or case_id
-        config_case_path = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
+        config_case_path: Path = microsalt_analysis_api.get_config_path(filename=filename)
 
     if not sample_id:
         analyse_command = [

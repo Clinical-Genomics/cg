@@ -39,11 +39,11 @@ def test_no_sample_found(cli_runner, base_context, caplog):
         assert f"No sample found with id: {microbial_sample_id}" in caplog.text
 
 
-def test_no_order_found(cli_runner, base_context, caplog):
+def test_no_order_found(cli_runner, base_context, caplog, invalid_ticket_number):
     """Test missing order command """
 
     # GIVEN a not existing ticket
-    ticket = "123000"
+    ticket = invalid_ticket_number
 
     # WHEN dry running a order name
     result = cli_runner.invoke(config_case, [ticket, "-t"], obj=base_context)

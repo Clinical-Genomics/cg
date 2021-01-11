@@ -21,7 +21,7 @@ def fastq_path(tmpdir):
 
 
 @pytest.fixture(scope="function")
-def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api):
+def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api, hermes_api):
     """ The click context for the microsalt cli """
     return {
         "db": microsalt_store,
@@ -29,9 +29,7 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             db=microsalt_store,
             hk_api=housekeeper_api,
             lims_api=lims_api,
-            hermes_api=HermesApi(
-                {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
-            ),
+            hermes_api=hermes_api,
             config={
                 "root": tmpdir,
                 "queries_path": queries_path,
@@ -137,3 +135,8 @@ def lims_api():
 
     _lims_api = LimsFactory.produce()
     return _lims_api
+
+
+@pytest.fixture(scope="function")
+def invalid_ticket_number() -> str:
+    return "1234560000"
