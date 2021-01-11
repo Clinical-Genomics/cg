@@ -14,7 +14,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## 18.1.0
 
 ### Added
 - Customer in the ticket created for an order from the Orderportal
