@@ -15,8 +15,14 @@ from cg.apps.mip.confighandler import ConfigHandler
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import (CASE_ACTIONS, COLLABORATORS, COMBOS,
-                          DEFAULT_CAPTURE_KIT, MASTER_LIST, Pipeline)
+from cg.constants import (
+    CASE_ACTIONS,
+    COLLABORATORS,
+    COMBOS,
+    DEFAULT_CAPTURE_KIT,
+    MASTER_LIST,
+    Pipeline,
+)
 from cg.exc import CgDataError, LimsDataError
 from cg.store import Store, models
 
