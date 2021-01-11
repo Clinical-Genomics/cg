@@ -102,7 +102,7 @@ def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: boo
     filename = sample_id or case_id
     outfilename = Path(microsalt_analysis_api.queries_path, filename).with_suffix(".json")
     if dry_run:
-        print(json.dumps(parameters, indent=4, sort_keys=True))
+        click.echo(json.dumps(parameters, indent=4, sort_keys=True))
         return
 
     with open(outfilename, "w") as outfile:
