@@ -166,6 +166,12 @@ def delivery_report(
         case_id: str,
         analysis_date: dt.datetime,
     ) -> Optional[housekeeper.store.models.File]:
+        """
+        Add a delivery report to a analysis bundle for a case in Housekeeper
+
+        If there is already a delivery report for the bundle doesn't add to it
+        If successful the method returns a pointer to the new file in Housekeeper
+        """
         delivery_report_tag_name = "delivery-report"
 
         version_obj = hk_api.version(case_id, analysis_date)
@@ -191,6 +197,7 @@ def delivery_report(
     def _update_delivery_report_date(
         status_api: Store, case_id: str, analysis_date: dt.datetime
     ) -> None:
+        """Update date on analysis when delivery report was created"""
 
         analysis_obj = status_api.analysis(case_id, analysis_date)
         analysis_obj.delivery_report_created_at = dt.datetime.now()
