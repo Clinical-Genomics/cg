@@ -8,15 +8,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
-from .fastq import (
-    clean_fastq,
-    decompress_case,
-    decompress_flowcell,
-    decompress_sample,
-    decompress_ticket,
-    fastq_cmd,
-    fix_spring,
-)
+from .fastq import (clean_fastq, decompress_case, decompress_flowcell,
+                    decompress_sample, decompress_ticket, fastq_cmd,
+                    fix_spring)
 
 LOG = logging.getLogger(__name__)
 

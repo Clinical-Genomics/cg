@@ -6,7 +6,8 @@ import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError, MandatoryFilesMissing
+from cg.exc import (AnalysisDuplicationError, BundleAlreadyAddedError,
+                    MandatoryFilesMissing)
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.store import Store
 
