@@ -1,6 +1,5 @@
 """ Test the CLI for run mip-dna """
 import logging
-import os
 from pathlib import Path
 
 from cg.cli.workflow.mip_dna.base import run
@@ -13,7 +12,8 @@ def test_cg_dry_run(cli_runner, mip_context, caplog, case_id, email_adress):
 
     pedigree_path = mip_context.get("dna_api").get_pedigree_config_path(case_id=case_id)
     Path.mkdir(pedigree_path.parent, parents=True, exist_ok=True)
-    os.link("tests/fixtures/apps/mip/dna/store/pedigree.yaml", pedigree_path)
+    pedigree_file_fixture = Path("tests/fixtures/apps/mip/dna/store/pedigree.yaml")
+    pedigree_file_fixture.link_to(pedigree_path)
 
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
