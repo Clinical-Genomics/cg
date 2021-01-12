@@ -1,7 +1,9 @@
 from cg.apps.lims.orderform import CASE_PROJECT_TYPES, expand_case
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderFormError
 from cg.meta.orders.status import StatusHandler
+
+ACCEPTED_DATA_ANALYSES = [{str(Pipeline.MIP_DNA)}, {str(Pipeline.FLUFFY)}, {str(Pipeline.BALSAMIC)}]
 
 
 def get_project_type(samples: [dict]) -> str:
@@ -12,7 +14,7 @@ def get_project_type(samples: [dict]) -> str:
     if len(data_analyses) > 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
 
-    if data_analyses in [{"mip-dna"}, {"fluffy"}, {"balsamic"}]:
+    if data_analyses in ACCEPTED_DATA_ANALYSES:
         return data_analyses.pop()
 
     raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
@@ -21,12 +23,13 @@ def get_project_type(samples: [dict]) -> str:
 def get_data_delivery(samples: [dict]) -> str:
     """Determine the order_data delivery type."""
 
-    data_deliveries = set(sample.get("data_delivery", "").lower() for sample in samples)
+    NO_VALUE = "no_value"
+    data_deliveries = set(sample.get("data_delivery", NO_VALUE).lower() for sample in samples)
 
     if len(data_deliveries) > 1:
         raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
-    if data_deliveries == {""}:
+    if data_deliveries == {NO_VALUE}:
         return ""
 
     try:
