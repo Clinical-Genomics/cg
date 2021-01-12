@@ -127,7 +127,7 @@ def run(
 @click.argument("case_id")
 @click.pass_context
 def config_case(context: click.Context, case_id: str, dry_run: bool = False):
-    """Generate a config for the case_id"""
+    """Generate a pedigree config for the case"""
     rna_api = context.obj["rna_api"]
 
     case_obj = rna_api.db.family(case_id)
@@ -136,7 +136,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
         context.abort()
     config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)
     if dry_run:
-        print(config_data)
+        click.echo(config_data)
         return
     out_path = rna_api.write_pedigree_config(
         data=config_data,
