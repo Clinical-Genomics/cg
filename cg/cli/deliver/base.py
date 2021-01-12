@@ -7,7 +7,8 @@ from typing import List
 import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.delivery import (PIPELINE_ANALYSIS_OPTIONS,
+                                   PIPELINE_ANALYSIS_TAG_MAP)
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 from cg.store.models import Family
