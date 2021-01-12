@@ -13,8 +13,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-from cg.exc import (AnalysisUploadError, BalsamicStartError,
-                    BundleAlreadyAddedError, LimsDataError)
+from cg.exc import AnalysisUploadError, BalsamicStartError, BundleAlreadyAddedError, LimsDataError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
 

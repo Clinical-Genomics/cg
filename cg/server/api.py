@@ -5,8 +5,7 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 
-from flask import (Blueprint, abort, current_app, g, jsonify, make_response,
-                   request)
+from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
