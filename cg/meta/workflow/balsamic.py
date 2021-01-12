@@ -465,6 +465,7 @@ class BalsamicAnalysisAPI:
             pipeline="balsamic",
             analysis_type=self.get_analysis_type(case_id=case_id),
             created=analysis_date,
+            bundle_name=case_id,
         )
 
         bundle_result = self.housekeeper_api.add_bundle(bundle_data=hk_bundle.dict())

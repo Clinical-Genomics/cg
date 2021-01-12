@@ -56,39 +56,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             # open and assign ticket to order
             try:
                 if self.osticket:
-                    message = f"data:text/html;charset=utf-8,New incoming samples: "
-
-                    for sample in data.get("samples"):
-                        message += "<br />" + sample.get("name")
-
-                        if sample.get("application"):
-                            message += f", application: {sample.get('application')}"
-
-                        if sample.get("family_name"):
-                            message += f", family: {sample.get('family_name')}"
-
-                        if sample.get("internal_id"):
-
-                            existing_sample = self.status.sample(sample.get("internal_id"))
-                            sample_customer = ""
-                            if existing_sample.customer_id != data["customer"]:
-                                sample_customer = " from " + existing_sample.customer.internal_id
-
-                            message += f" (already existing sample{sample_customer})"
-
-                        if sample.get("priority"):
-                            message += ", priority: " + sample.get("priority")
-
-                        if sample.get("comment"):
-                            message += ", " + sample.get("comment")
-
-                    message += f"<br />"
-
-                    if data.get("comment"):
-                        message += f"<br />{data.get('comment')}."
-
-                    if ticket.get("name"):
-                        message += f"<br />{ticket.get('name')}"
+                    message = self._create_new_ticket_message(data, ticket)
 
                     data["ticket"] = self.osticket.open_ticket(
                         name=ticket["name"],
@@ -317,3 +285,43 @@ class OrdersAPI(LimsHandler, StatusHandler):
             return getattr(self, "submit_mip_rna")
 
         return getattr(self, f"submit_{str(project_type)}")
+
+    def _create_new_ticket_message(self, data: dict, ticket: dict) -> str:
+        message = f"data:text/html;charset=utf-8,New incoming samples: "
+
+        for sample in data.get("samples"):
+            message += "<br />" + sample.get("name")
+
+            if sample.get("application"):
+                message += f", application: {sample.get('application')}"
+
+            if sample.get("family_name"):
+                message += f", family: {sample.get('family_name')}"
+
+            if sample.get("internal_id"):
+
+                existing_sample = self.status.sample(sample.get("internal_id"))
+                sample_customer = ""
+                if existing_sample.customer_id != data["customer"]:
+                    sample_customer = " from " + existing_sample.customer.internal_id
+
+                message += f" (already existing sample{sample_customer})"
+
+            if sample.get("priority"):
+                message += ", priority: " + sample.get("priority")
+
+            if sample.get("comment"):
+                message += ", " + sample.get("comment")
+
+        message += f"<br />"
+
+        if data.get("comment"):
+            message += f"<br />{data.get('comment')}."
+
+        if ticket.get("name"):
+            message += f"<br />{ticket.get('name')}"
+
+        if data.get("customer"):
+            message += f" {data.get('customer')}"
+
+        return message

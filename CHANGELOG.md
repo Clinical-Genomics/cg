@@ -14,15 +14,30 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [17.2.2]
 
+## [18.1.1]
 
 ### Fixed
 
 - Updates balsamic deliver tags to align with the ones specified in hermes
 
-## [17.2.1]
+## 18.1.0
 
+### Added
+- Customer in the ticket created for an order from the Orderportal
+
+## [18.0.0]
+
+### Added
+- New commands for running cron jobs 
+
+### Changed
+- Changed cli commands for starting and storing microsalt workflows
+
+### Fixed
+- Full Microsalt can now be executed through cg interface
+
+## [17.2.1]
 
 ### Fixed
 
@@ -33,7 +48,6 @@ Try to use the following format:
 ### Changed
 
 - Using HermesApi to save Balsamic deliverables in Housekeeper
-
 
 ## [17.1.0]
 
@@ -48,14 +62,10 @@ Try to use the following format:
 ### Added
 - Lims ID is sent to Balsamic during case config
 
-
 ## [16.17.1]
-
-### Added
 
 ### Fixed
 - Fixed exporting reduced mt_bam to scout config
-### Changed
 
 ## 16.17.0
 
