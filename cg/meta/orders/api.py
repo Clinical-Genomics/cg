@@ -56,7 +56,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             # open and assign ticket to order
             try:
                 if self.osticket:
-                    message = self._create_message(data, ticket, project)
+                    message = self._create_new_ticket_message(data, ticket, project)
 
                     data["ticket"] = self.osticket.open_ticket(
                         name=ticket["name"],
@@ -75,7 +75,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = order_func(data)
         return result
 
-    def _create_message(self, data: dict, ticket: dict, project: str):
+    def _create_new_ticket_message(self, data: dict, ticket: dict, project: str) -> str:
         message = f"data:text/html;charset=utf-8,New incoming samples: "
 
         for sample in data.get("samples"):
@@ -116,7 +116,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
         if ticket.get("name"):
             message += f"<br />{ticket.get('name')}"
 
+        if data.get("customer"):
+            message += f" {data.get('customer')}"
+
         return message
+
 
     def _submit_rml(self, data: dict) -> dict:
         """Submit a batch of ready made libraries."""

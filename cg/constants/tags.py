@@ -4,7 +4,7 @@ HK_TAGS = {
     "wes": ["mip-dna", "wes"],
     "wgs": ["mip-dna", "wgs"],
     "wts": ["mip-rna"],
-    "microbial": ["microsalt"],
+    "microsalt": ["microsalt"],
 }
 HK_FASTQ_TAGS = ["fastq"]
 
