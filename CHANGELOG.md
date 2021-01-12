@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 18.1.1
+
+### Fixed
+- cg workflow mip-rna config-case command
+ 
 ## 18.1.0
 
 ### Added
