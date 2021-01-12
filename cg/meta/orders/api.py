@@ -121,7 +121,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         return message
 
-
     def _submit_rml(self, data: dict) -> dict:
         """Submit a batch of ready made libraries."""
         status_data = self.pools_to_status(data)
