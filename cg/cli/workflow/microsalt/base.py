@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import Any
 
 import click
-from cg.apps.hermes.hermes_api import HermesApi
 
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
-from cg.constants import Pipeline, EXIT_SUCCESS, EXIT_FAIL
 
 LOG = logging.getLogger(__name__)
 

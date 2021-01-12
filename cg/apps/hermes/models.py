@@ -1,10 +1,9 @@
 """Models used by hermes <-> cg interactions"""
+import logging
 from pathlib import Path
 from typing import List, Optional
 
 from pydantic import BaseModel, validator
-import logging
-
 
 LOG = logging.getLogger(__name__)
 

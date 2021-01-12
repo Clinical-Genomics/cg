@@ -3,48 +3,47 @@
 import copy
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
-    {"cnv", "annotated-somatic-vcf-all", "vcf-all", "cnvkit"},
-    {"cnv", "annotated-somatic-vcf-all-index", "vcf-all", "cnvkit"},
-    {"cnv-cnr", "cnr"},
-    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "vardict"},
-    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "vardict"},
-    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnscope"},
-    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "tnscope"},
-    {"snv", "annotated-somatic-vcf-pass", "vcf-pass", "tnhaplotyper"},
-    {"snv", "annotated-somatic-vcf-pass-index", "vcf-pass", "tnhaplotyper"},
-    {"sv", "annotated-somatic-vcf-pass", "vcf-pass", "manta"},
-    {"sv", "annotated-somatic-vcf-pass-index", "vcf-pass", "manta"},
-    {"cnv-scatter"},
-    {"cnv-diagram"},
+    {"cnvkit", "sv-vcf", "tumor"},
+    {"cnvkit", "sv-vcf-index", "tumor"},
+    {"cnvkit", "regions"},
+    {"vcf-snv-clinical", "vardict", "filtered"},
+    {"vcf-snv-clinical-index", "vardict", "filtered"},
+    {"vcf-snv-clinical", "scope", "filtered", "sention"},
+    {"vcf-snv-clinical-index", "scope", "filtered", "sention"},
+    {"vcf", "sention", "haplotype-caller", "filtered"},
+    {"vcf-index", "sention", "haplotype-caller", "filtered"},
+    {"vcf-sv-clinical", "manta", "filtered"},
+    {"vcf-sv-clinical-index", "manta", "filtered"},
+    {"cnvkit", "visualization"},
+    {"cnvkit", "visualization", "diagram"},
     {"multiqc-html"},
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS = copy.deepcopy(BALSAMIC_ANALYSIS_ONLY_CASE_TAGS)
 BALSAMIC_ANALYSIS_CASE_TAGS.extend(
     [
-        {"normal-cram"},
-        {"normal-cram-index"},
-        {"tumor-cram"},
-        {"tumor-cram-index"},
+        {"cram", "normal"},
+        {"cram-index"},
+        {"cram", "tumor"},
+        {"cram-index", "tumor"},
     ]
 )
 
 BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
-    {"normal-cram"},
-    {"normal-cram-index"},
-    {"tumor-cram"},
-    {"tumor-cram-index"},
+    {"cram", "normal"},
+    {"cram-index"},
+    {"cram", "tumor"},
+    {"cram-index", "tumor"},
     {"bam"},
-    {"quality-trimmed-fastq-read1"},
-    {"quality-trimmed-fastq-read2"},
+    {"bam-index"},
+    {"fastq"},
 ]
 
 BALSAMIC_QC_CASE_TAGS = [
     {"multiqc-html"},
 ]
 BALSAMIC_QC_SAMPLE_TAGS = [
-    {"quality-trimmed-fastq-read1"},
-    {"quality-trimmed-fastq-read2"},
+    {"fastq"},
 ]
 
 

@@ -9,16 +9,17 @@ be validated and if passing all checks be accepted as new samples.
 import datetime as dt
 import logging
 import re
+import typing
 from typing import List
 
-import typing
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.constants import Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
-from .schema import OrderType, ORDER_SCHEMES
+
 from .lims import LimsHandler
+from .schema import ORDER_SCHEMES, OrderType
 from .status import StatusHandler
 
 LOG = logging.getLogger(__name__)
