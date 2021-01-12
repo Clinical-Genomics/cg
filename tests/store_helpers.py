@@ -381,9 +381,7 @@ class StoreHelpers:
             action=family_info.get("action"),
         )
 
-        case_obj = self.add_case(
-            store, case_obj=case_obj, customer_id=customer_obj.internal_id
-        )
+        case_obj = self.add_case(store, case_obj=case_obj, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGTPCFC030"
         app_type = family_info.get("application_type", "wgs")
