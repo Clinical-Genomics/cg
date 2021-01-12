@@ -174,11 +174,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def _submit_case_samples(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self._process_family_samples(data)
-        for family_obj in result["records"]:
-            LOG.info(f"{family_obj.name}: submit family samples")
+        for case_obj in result["records"]:
+            LOG.info(f"{case_obj.name}: submit family samples")
             status_samples = [
                 link_obj.sample
-                for link_obj in family_obj.links
+                for link_obj in case_obj.links
                 if link_obj.sample.ticket_number == data["ticket"]
             ]
             self._add_missing_reads(status_samples)

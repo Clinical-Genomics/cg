@@ -8,18 +8,18 @@ from cg.store import Store
 def test_all_samples_are_non_tumor(analysis_store, case_id):
     """Test that all samples are non tumor"""
 
-    family_obj = analysis_store.family(case_id)
-    assert LinkHelper.all_samples_are_non_tumour(family_obj.links)
+    case_obj = analysis_store.family(case_id)
+    assert LinkHelper.all_samples_are_non_tumour(case_obj.links)
 
 
 def test_all_samples_list_analyses(analysis_store, case_id):
     """Test that all samples have an analysis type"""
 
     # GIVEN family obj where each sample is wgs analysis
-    family_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.family(case_id)
 
     # WHEN looking up the analysis type for the samples in the family
-    analysis_types = LinkHelper.get_analysis_type_for_each_link(family_obj.links)
+    analysis_types = LinkHelper.get_analysis_type_for_each_link(case_obj.links)
 
     # THEN all the samples should have analysis type 'wgs'
     assert len(set(analysis_types)) == 1 and analysis_types[0] == "wgs"

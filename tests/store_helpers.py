@@ -370,7 +370,7 @@ class StoreHelpers:
     ):
         """Load a family with samples and link relations"""
         customer_obj = self.ensure_customer(store)
-        family_obj = store.Family(
+        case_obj = store.Family(
             name=family_info["name"],
             panels=family_info["panels"],
             internal_id=family_info["internal_id"],
@@ -381,8 +381,8 @@ class StoreHelpers:
             action=family_info.get("action"),
         )
 
-        family_obj = self.add_case(
-            store, case_obj=family_obj, customer_id=customer_obj.internal_id
+        case_obj = self.add_case(
+            store, case_obj=case_obj, customer_id=customer_obj.internal_id
         )
 
         app_tag = app_tag or "WGTPCFC030"
@@ -415,7 +415,7 @@ class StoreHelpers:
                 mother = sample_objs[sample_data["mother"]]
             self.add_relationship(
                 store,
-                family=family_obj,
+                family=case_obj,
                 sample=sample_obj,
                 status=sample_data.get("status", "unknown"),
                 father=father,
@@ -425,10 +425,10 @@ class StoreHelpers:
         self.add_analysis(
             store,
             pipeline=Pipeline.MIP_DNA,
-            family=family_obj,
+            family=case_obj,
             completed_at=completed_at or datetime.now(),
         )
-        return family_obj
+        return case_obj
 
     @staticmethod
     def add_organism(

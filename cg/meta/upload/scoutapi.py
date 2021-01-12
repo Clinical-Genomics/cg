@@ -266,7 +266,7 @@ class UploadScoutAPI:
     def _is_multi_sample_case(data) -> bool:
         return len(data["samples"]) > 1
 
-    def _run_madeline(self, family_obj: models.Family) -> Path:
+    def _run_madeline(self, case_obj: models.Family) -> Path:
         """Generate a madeline file for an analysis."""
         samples = [
             {
@@ -276,9 +276,9 @@ class UploadScoutAPI:
                 "mother": link_obj.mother.name if link_obj.mother else None,
                 "status": link_obj.status,
             }
-            for link_obj in family_obj.links
+            for link_obj in case_obj.links
         ]
-        svg_path: Path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
+        svg_path: Path = self.madeline_api.run(family_id=case_obj.name, samples=samples)
         return svg_path
 
     @staticmethod

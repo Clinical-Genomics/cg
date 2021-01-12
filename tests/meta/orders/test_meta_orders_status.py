@@ -427,10 +427,10 @@ def test_store_external(orders_api, base_store, external_status_data):
     )
 
     # THEN it should create and link samples and the family
-    family_obj = base_store.families().first()
+    case_obj = base_store.families().first()
     assert len(new_families) == 1
     new_family = new_families[0]
-    assert new_family == family_obj
+    assert new_family == case_obj
     assert new_family.name == "fam2"
     assert new_family.data_analysis == str(Pipeline.MIP_DNA)
     assert new_family.data_delivery == str(DataDelivery.SCOUT)

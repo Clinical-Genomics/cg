@@ -112,7 +112,7 @@ def families():
         )
         count = families_q.count()
         records = families_q.limit(30)
-    data = [family_obj.to_dict(links=True) for family_obj in records]
+    data = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=data, total=count)
 
 
@@ -125,35 +125,35 @@ def families_in_customer_group():
     )
     count = families_q.count()
     records = families_q.limit(30)
-    data = [family_obj.to_dict(links=True) for family_obj in records]
+    data = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=data, total=count)
 
 
 @BLUEPRINT.route("/families/<family_id>")
 def family(family_id):
     """Fetch a family with links."""
-    family_obj = db.family(family_id)
-    if family_obj is None:
+    case_obj = db.family(family_id)
+    if case_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != family_obj.customer):
+    elif not g.current_user.is_admin and (g.current_user.customer != case_obj.customer):
         return abort(401)
 
-    data = family_obj.to_dict(links=True, analyses=True)
+    data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
 
 @BLUEPRINT.route("/families_in_customer_group/<family_id>")
 def family_in_customer_group(family_id):
     """Fetch a family with links."""
-    family_obj = db.family(family_id)
-    if family_obj is None:
+    case_obj = db.family(family_id)
+    if case_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-        g.current_user.customer.customer_group != family_obj.customer.customer_group
+        g.current_user.customer.customer_group != case_obj.customer.customer_group
     ):
         return abort(401)
 
-    data = family_obj.to_dict(links=True, analyses=True)
+    data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
 

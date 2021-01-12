@@ -9,8 +9,8 @@ from cg.meta.upload.coverage import UploadCoverageApi
 class MockAnalysis:
     """ Mock Analysis object """
 
-    def __init__(self, family_obj):
-        self.family_obj = family_obj
+    def __init__(self, case_obj):
+        self.case_obj = case_obj
 
     @property
     def started_at(self):
@@ -20,7 +20,7 @@ class MockAnalysis:
     @property
     def family(self):
         """ mock family """
-        return self.family_obj
+        return self.case_obj
 
 
 def test_data(coverage_upload_api, analysis_store, case_id):
@@ -28,8 +28,8 @@ def test_data(coverage_upload_api, analysis_store, case_id):
     # GIVEN a coverage api and an analysis object
     coverage_api = coverage_upload_api
     family_name = case_id
-    family_obj = analysis_store.family(family_name)
-    analysis_obj = MockAnalysis(family_obj=family_obj)
+    case_obj = analysis_store.family(family_name)
+    analysis_obj = MockAnalysis(case_obj=case_obj)
 
     # WHEN using the data method
     results = coverage_api.data(analysis_obj=analysis_obj)
@@ -50,8 +50,8 @@ def test_upload(chanjo_config_dict, populated_housekeeper_api, analysis_store, m
     chanjo_api = ChanjoAPI(config=chanjo_config_dict)
     coverage_api = UploadCoverageApi(status_api=None, hk_api=hk_api, chanjo_api=chanjo_api)
     family_name = case_id
-    family_obj = analysis_store.family(family_name)
-    analysis_obj = MockAnalysis(family_obj=family_obj)
+    case_obj = analysis_store.family(family_name)
+    analysis_obj = MockAnalysis(case_obj=case_obj)
     data = coverage_api.data(analysis_obj=analysis_obj)
 
     # WHEN uploading samples in data dictionary

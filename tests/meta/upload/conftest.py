@@ -237,8 +237,8 @@ def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> models.Analysis:
     """Return a analysis object with a trio"""
-    family_obj = analysis_store_trio.family(case_id)
-    helpers.add_analysis(store=analysis_store_trio, family=family_obj, started_at=timestamp)
+    case_obj = analysis_store_trio.family(case_id)
+    helpers.add_analysis(store=analysis_store_trio, family=case_obj, started_at=timestamp)
     return analysis_store_trio.family(case_id).analyses[0]
 
 

@@ -56,8 +56,8 @@ def status(context):
 def analysis(context):
     """Which families will be analyzed?"""
     records = context.obj["status_db"].cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-    for family_obj in records:
-        click.echo(family_obj)
+    for case_obj in records:
+        click.echo(case_obj)
 
 
 def present_bool(a_dict, param, show_false=False):
@@ -375,13 +375,13 @@ def families(context, skip):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     records = context.obj["status_db"].families().offset(skip).limit(30)
-    for family_obj in records:
-        color = "red" if family_obj.priority > 1 else "blue"
-        message = f"{family_obj.internal_id} ({family_obj.priority})"
-        if family_obj.analyses:
-            message += f" {family_obj.analyses[0].completed_at.date()}"
+    for case_obj in records:
+        color = "red" if case_obj.priority > 1 else "blue"
+        message = f"{case_obj.internal_id} ({case_obj.priority})"
+        if case_obj.analyses:
+            message += f" {case_obj.analyses[0].completed_at.date()}"
             color = "green"
-        if family_obj.action:
-            message += f" [{family_obj.action.upper()}]"
+        if case_obj.action:
+            message += f" [{case_obj.action.upper()}]"
             color = "yellow"
         click.echo(click.style(message, fg=color))

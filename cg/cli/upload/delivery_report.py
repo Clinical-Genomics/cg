@@ -172,8 +172,8 @@ def delivery_report(context, family_id, print_console, force_report):
         return None
 
     def _update_delivery_report_date(status_api, case_id: str):
-        family_obj = status_api.family(case_id)
-        analysis_obj = family_obj.analyses[0]
+        case_obj = status_api.family(case_id)
+        analysis_obj = case_obj.analyses[0]
         analysis_obj.delivery_report_created_at = dt.datetime.now()
         status_api.commit()
 

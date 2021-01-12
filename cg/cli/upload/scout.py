@@ -50,8 +50,8 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     LOG.info("----------------- CREATE CONFIG -----------------------")
     status_api: Store = context.obj["status_db"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
-    family_obj: Family = status_api.family(case_id)
-    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
+    case_obj: Family = status_api.family(case_id)
+    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     mip_dna_root_dir: Path = Path(context.obj["mip-rd-dna"]["root"])
 
     if print_console:

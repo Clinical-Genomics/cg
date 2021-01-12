@@ -96,7 +96,7 @@ class MockPath:
 
 
 class MockAnalysis:
-    def panel(self, family_obj) -> [str]:
+    def panel(self, case_obj) -> [str]:
         """Create the aggregated panel file."""
         return [""]
 

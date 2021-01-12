@@ -121,6 +121,6 @@ def fixture_analysis_obj(analysis_store):
 
 
 @pytest.yield_fixture(scope="function")
-def family_obj(analysis_obj):
+def case_obj(analysis_obj):
     """Return a family models object."""
     return analysis_obj.family

@@ -214,8 +214,8 @@ def relationship(context, mother, father, status, family_id, sample_id):
     status_db = context.obj["status_db"]
     mother_obj = None
     father_obj = None
-    family_obj = status_db.family(family_id)
-    if family_obj is None:
+    case_obj = status_db.family(family_id)
+    if case_obj is None:
         LOG.error("%s: family not found", family_id)
         context.abort()
 
@@ -237,7 +237,7 @@ def relationship(context, mother, father, status, family_id, sample_id):
             context.abort()
 
     new_record = status_db.relate_sample(
-        family_obj, sample_obj, status, mother=mother_obj, father=father_obj
+        case_obj, sample_obj, status, mother=mother_obj, father=father_obj
     )
     status_db.add_commit(new_record)
-    LOG.info(f"related {family_obj.internal_id} to {sample_obj.internal_id}")
+    LOG.info(f"related {case_obj.internal_id} to {sample_obj.internal_id}")
