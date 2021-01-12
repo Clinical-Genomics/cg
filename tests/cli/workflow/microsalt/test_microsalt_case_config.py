@@ -3,9 +3,9 @@
 import logging
 from pathlib import Path
 
-from cg.apps.lims import LimsAPI
 from snapshottest import Snapshot
 
+from cg.apps.lims import LimsAPI
 from cg.cli.workflow.microsalt.base import config_case
 
 EXIT_SUCCESS = 0
