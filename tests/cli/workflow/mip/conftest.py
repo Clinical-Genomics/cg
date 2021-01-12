@@ -183,22 +183,22 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
 
     # Add sample, cases and relationships to db
 
-    for case in mip_case_ids:
-        family = helpers.add_case(
+    for case_id in mip_case_ids:
+        case_obj = helpers.add_case(
             store=_store,
-            internal_id=case,
-            family_id=mip_case_ids[case]["name"],
+            internal_id=case_id,
+            family_id=mip_case_ids[case_id]["name"],
         )
         sample = helpers.add_sample(
             store=_store,
-            sample=mip_case_ids[case]["internal_id"],
+            sample=mip_case_ids[case_id]["internal_id"],
             data_analysis=Pipeline.MIP_DNA,
             customer_name="cust000",
             application_tag="WGSA",
             application_type="wgs",
             gender="unknown",
         )
-        helpers.add_relationship(store=_store, sample=sample, family=family, status="affected")
+        helpers.add_relationship(store=_store, sample=sample, family=case_obj, status="affected")
 
     return _store
 

@@ -44,14 +44,14 @@ def test_upload_fails_hard_on_faulty_analysis(invoke_cli, disk_store: Store, hel
     """Test that an upload for a missing analysis does fail hard """
 
     # GIVEN empty database
-    family_id = helpers.add_case(disk_store).internal_id
+    case_id = helpers.add_case(disk_store).internal_id
 
     # WHEN trying to upload with a analysis that doesn't exist
-    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])
+    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
 
     # THEN it fails hard and reports that it is missing the analysis
     assert result.exit_code != 0
-    assert family_id in result.output
+    assert case_id in result.output
     assert "no analysis exists" in result.output
 
 
@@ -59,12 +59,12 @@ def test_upload_doesnt_invoke_dually_for_same_case(invoke_cli, disk_store: Store
     """Test that a case that is already uploading can't be uploaded at the same time"""
 
     # GIVEN an analysis that is already uploading
-    family = helpers.add_case(disk_store)
-    family_id = family.internal_id
-    helpers.add_analysis(disk_store, family=family, uploading=True)
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
+    helpers.add_analysis(disk_store, family=case, uploading=True)
 
     # WHEN trying to upload it again
-    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])
+    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
 
     # THEN it gracefully skips and reports that it is already uploading
     assert result.exit_code == 0
@@ -73,17 +73,17 @@ def test_upload_doesnt_invoke_dually_for_same_case(invoke_cli, disk_store: Store
 
 
 def test_upload_started_long_time_ago_raises_exception(invoke_cli, disk_store: Store, helpers):
-    """Test that an upload for a missing family does fail hard """
+    """Test that an upload for a missing case does fail hard """
 
     # GIVEN an analysis that is already uploading since a week ago
-    family = helpers.add_case(disk_store)
-    family_id = family.internal_id
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
     today = datetime.now()
     upload_started = today - timedelta(hours=100)
-    helpers.add_analysis(disk_store, family=family, uploading=True, upload_started=upload_started)
+    helpers.add_analysis(disk_store, family=case, uploading=True, upload_started=upload_started)
 
     # WHEN trying to upload an analysis that was started a long time ago
-    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])
+    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
 
     # THEN an exception should have be thrown
     assert result.exit_code != 0
@@ -94,13 +94,13 @@ def test_upload_force_restart(invoke_cli, disk_store: Store, helpers):
     """Test that a case that is already uploading can be force restarted"""
 
     # GIVEN an analysis that is already uploading
-    family = helpers.add_case(disk_store)
-    family_id = family.internal_id
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
 
-    helpers.add_analysis(disk_store, family=family, uploading=True)
+    helpers.add_analysis(disk_store, family=case, uploading=True)
 
     # WHEN trying to upload it again with the force restart flag
-    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id, "-r"])
+    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id, "-r"])
 
     # THEN it tries to restart the upload
     assert "already started" not in result.output
@@ -110,13 +110,13 @@ def test_upload_uploaded_fails_hard(invoke_cli, disk_store: Store, helpers):
     """Test that a case that has already been uploaded can't be uploaded"""
 
     # GIVEN an analysis that has been uploaded
-    family = helpers.add_case(disk_store)
-    family_id = family.internal_id
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
 
-    helpers.add_analysis(disk_store, family=family, uploaded_at=datetime.now())
+    helpers.add_analysis(disk_store, family=case, uploaded_at=datetime.now())
 
     # WHEN trying to upload it again
-    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])
+    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
 
     # THEN it fails hard and reports that it is already uploaded
     assert result.exit_code != 0

@@ -295,18 +295,18 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                new_family = self.status.add_case(
+                new_case = self.status.add_case(
                     data_analysis=Pipeline(sample["data_analysis"]),
                     data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=None,
                     priority=sample["priority"],
                 )
-                new_family.customer = customer_obj
-                self.status.add(new_family)
+                new_case.customer = customer_obj
+                self.status.add(new_case)
 
                 new_relationship = self.status.relate_sample(
-                    family=new_family, sample=new_sample, status=sample["status"] or "unknown"
+                    family=new_case, sample=new_sample, status=sample["status"] or "unknown"
                 )
                 self.status.add(new_relationship)
 
@@ -343,17 +343,17 @@ class StatusHandler:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                new_family = self.status.add_case(
+                new_case = self.status.add_case(
                     data_analysis=Pipeline(sample["data_analysis"]),
                     data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
                 )
-                new_family.customer = production_customer
-                self.status.add(new_family)
+                new_case.customer = production_customer
+                self.status.add(new_case)
                 new_relationship = self.status.relate_sample(
-                    family=new_family, sample=new_sample, status=sample["status"] or "unknown"
+                    family=new_case, sample=new_sample, status=sample["status"] or "unknown"
                 )
                 self.status.add(new_relationship)
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)

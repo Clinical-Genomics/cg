@@ -612,9 +612,9 @@ def transfer(admin, housekeeper, config_file):
     # status.commit()
 
     # # set all families to analyze "on hold"
-    # for family_obj in status.families_to_analyze(limit=1000):
-    #     LOG.info(f"setting family on hold: {family_obj.name}")
-    #     family_obj.action = 'hold'
+    # for case_obj in status.families_to_analyze(limit=1000):
+    #     LOG.info(f"setting family on hold: {case_obj.name}")
+    #     case_obj.action = 'hold'
     # status.commit()
 
 

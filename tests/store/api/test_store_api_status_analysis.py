@@ -28,20 +28,20 @@ def test_that_families_can_have_many_samples(base_store: Store, helpers):
     # GIVEN a database with two families one with 50 sequenced samples
     # the other family with one
     default_limit = 50
-    test_family_50 = add_family_with_samples(
-        base_store, helpers, "test_family_50åäp+ölo0l", default_limit, sequenced_at=datetime.now()
+    test_case_50 = add_family_with_samples(
+        base_store, helpers, "test_case_50åäp+ölo0l", default_limit, sequenced_at=datetime.now()
     )
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    test_family = helpers.add_case(base_store, "family_one_sample")
-    base_store.relate_sample(test_family, test_sample, "unknown")
+    test_case = helpers.add_case(base_store, "family_one_sample")
+    base_store.relate_sample(test_case, test_sample, "unknown")
 
     # WHEN getting families to analyse
     families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN families should contain the test family
     assert families
-    assert test_family_50 in families
-    assert test_family in families
+    assert test_case_50 in families
+    assert test_case in families
 
 
 def test_external_sample_to_re_analyse(base_store: Store, helpers):
@@ -63,7 +63,7 @@ def test_external_sample_to_re_analyse(base_store: Store, helpers):
     assert test_analysis.family in families
 
 
-def test_family_to_re_analyse(base_store: Store, helpers):
+def test_case_to_re_analyse(base_store: Store, helpers):
     """Test that a family marked for re-analyse with one sample that has been sequenced and
     with completed analysis do show up among the families to analyse"""
 
@@ -109,15 +109,15 @@ def test_specified_analysis_in_result(base_store: Store, helpers):
     # GIVEN a database with a family with one sequenced samples for MIP analysis
     pipeline = Pipeline.BALSAMIC
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    test_family = helpers.add_case(base_store, data_analysis=pipeline)
-    base_store.relate_sample(test_family, test_sample, "unknown")
+    test_case = helpers.add_case(base_store, data_analysis=pipeline)
+    base_store.relate_sample(test_case, test_sample, "unknown")
 
     # WHEN getting families to analyse
     families = base_store.cases_to_analyze(pipeline=pipeline)
 
     # THEN families should contain the test family
     assert families
-    assert test_family in families
+    assert test_case in families
 
 
 def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers):
@@ -126,8 +126,8 @@ def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers)
 
     # GIVEN a database with a family with one sequenced samples for specified analysis
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    test_family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
-    base_store.relate_sample(test_family, test_sample, "unknown")
+    test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
+    base_store.relate_sample(test_case, test_sample, "unknown")
 
     # WHEN getting families to analyse
     families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -141,11 +141,11 @@ def test_one_of_two_sequenced_samples(base_store: Store, helpers):
     families to analyse"""
 
     # GIVEN a database with a family with one of one sequenced samples and no analysis
-    test_family = helpers.add_case(base_store)
+    test_case = helpers.add_case(base_store)
     test_sample1 = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_sample2 = helpers.add_sample(base_store, sequenced_at=None)
-    base_store.relate_sample(test_family, test_sample1, "unknown")
-    base_store.relate_sample(test_family, test_sample2, "unknown")
+    base_store.relate_sample(test_case, test_sample1, "unknown")
+    base_store.relate_sample(test_case, test_sample2, "unknown")
 
     # WHEN getting families to analyse
     families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -159,9 +159,9 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers):
     families to analyse"""
 
     # GIVEN a database with a family with one of one sequenced samples and no analysis
-    test_family = helpers.add_case(base_store)
+    test_case = helpers.add_case(base_store)
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(test_family, test_sample, "unknown")
+    base_store.relate_sample(test_case, test_sample, "unknown")
     assert test_sample.sequenced_at is not None
 
     # WHEN getting families to analyse
@@ -169,7 +169,7 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers):
 
     # THEN families should contain the test family
     assert families
-    assert test_family in families
+    assert test_case in families
 
 
 def relate_samples(base_store, family, samples):
@@ -185,9 +185,9 @@ def add_family_with_samples(base_store, helpers, family_name, n_samples, sequenc
     test_samples = helpers.add_samples(base_store, n_samples)
     for sample in test_samples:
         sample.sequenced_at = sequenced_at
-    test_family = helpers.add_case(base_store, family_name)
-    relate_samples(base_store, test_family, test_samples)
-    return test_family
+    test_case = helpers.add_case(base_store, family_name)
+    relate_samples(base_store, test_case, test_samples)
+    return test_case
 
 
 def add_families_with_samples(base_store, helpers, n_families, sequenced_at):

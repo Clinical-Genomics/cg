@@ -1494,17 +1494,17 @@ def add_case(
     data_analysis=Pipeline.BALSAMIC,
     data_delivery=DataDelivery.SCOUT,
 ):
-    """utility function to add a family to use in tests"""
+    """utility function to add a case to use in tests"""
     panel = helpers.ensure_panel(disk_store)
     customer = helpers.ensure_customer(disk_store, customer_id)
-    family = disk_store.add_case(
+    case = disk_store.add_case(
         data_analysis=data_analysis, data_delivery=data_delivery, name=family_id, panels=panel.name
     )
-    family.customer = customer
-    family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
+    case.customer = customer
+    case.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:
-        family.action = action
+        case.action = action
     if priority:
-        family.priority = priority
-    disk_store.add_commit(family)
-    return family
+        case.priority = priority
+    disk_store.add_commit(case)
+    return case

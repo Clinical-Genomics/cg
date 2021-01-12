@@ -190,16 +190,16 @@ def family(
             LOG.error(f"{panel_id}: panel not found")
             context.abort()
 
-    new_family = status.add_case(
+    new_case = status.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
         panels=panels,
         priority=priority,
     )
-    new_family.customer = customer_obj
-    status.add_commit(new_family)
-    LOG.info(f"{new_family.internal_id}: new family added")
+    new_case.customer = customer_obj
+    status.add_commit(new_case)
+    LOG.info(f"{new_case.internal_id}: new case added")
 
 
 @add.command()
