@@ -15,13 +15,19 @@ Try to use the following format:
 ### Fixed
 
 
+## [18.1.2]
+
+### Fixed
+
+- cg workflow mip-rna config-case command
+ 
 ## [18.1.1]
 
 ### Fixed
 
 - Updates balsamic deliver tags to align with the ones specified in hermes
 
-## 18.1.0
+## [18.1.0]
 
 ### Added
 - Customer in the ticket created for an order from the Orderportal
