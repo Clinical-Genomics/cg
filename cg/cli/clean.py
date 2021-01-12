@@ -3,6 +3,7 @@ import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import click
 from dateutil.parser import parse as parse_date
@@ -10,15 +11,16 @@ from dateutil.parser import parse as parse_date
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ def clean(context):
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["crunchy_api"] = CrunchyAPI(context.obj)
     context.obj["lims_api"] = LimsAPI(context.obj)
+    context.obj["hermes_api"] = HermesApi(context.obj)
 
     context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
         balsamic_api=BalsamicAPI(context.obj),
@@ -41,6 +44,7 @@ def clean(context):
         fastq_handler=FastqHandler(context.obj),
         lims_api=context.obj["lims_api"],
         trailblazer_api=context.obj["trailblazer_api"],
+        hermes_api=context.obj["hermes_api"],
     )
     context.obj["MipAnalysisAPI"] = MipAnalysisAPI(
         db=context.obj["status_db"],
@@ -136,6 +140,9 @@ def mip_run_dir(context, yes, case_id, dry_run: bool = False):
 @click.pass_context
 def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
+    if bundle is None:
+        LOG.info("Please select a bundle")
+        raise click.Abort
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(context.obj["housekeeper_api"].get_files(bundle=bundle, tags=[tag]))
@@ -170,15 +177,17 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
 def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Clean up of solved and archived scout cases"""
     bundles = []
-    for status in "archived", "solved":
-        cases = context.obj["scout_api"].get_cases(status=status, reruns=False)
+    for status in ["archived", "solved"]:
+        cases: List[ScoutExportCase] = context.obj["scout_api"].get_cases(
+            status=status, reruns=False
+        )
         cases_added = 0
         for case in cases:
-            x_days_ago = datetime.now() - case.get("analysis_date")
+            x_days_ago = datetime.now() - case.analysis_date
             if x_days_ago.days > days_old:
-                bundles.append(case.get("_id"))
+                bundles.append(case.id)
                 cases_added += 1
-        LOG.info(f"{cases_added} cases marked for bam removal")
+        LOG.info("%s cases marked for bam removal", cases_added)
 
     for bundle in bundles:
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)

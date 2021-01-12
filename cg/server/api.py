@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import tempfile
 from functools import wraps
 from pathlib import Path
-import tempfile
 
-from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
-from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
+from flask import (Blueprint, abort, current_app, g, jsonify, make_response,
+                   request)
 from google.auth import jwt
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
-from cg.exc import DuplicateRecordError, OrderFormError, OrderError
-from cg.apps.lims import parse_orderform, parse_json
+from cg.apps.lims import parse_json, parse_orderform
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
+
 from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)
@@ -44,7 +46,7 @@ def before_request():
             return abort(403, "no JWT token found on request")
         try:
             user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
-        except ValueError as error:
+        except ValueError:
             return abort(make_response(jsonify(message="outdated login certificate"), 403))
         user_obj = db.user(user_data["email"])
         if user_obj is None:

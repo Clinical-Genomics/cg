@@ -1,9 +1,11 @@
 import logging
 
 import click
+
+from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS
+from cg.store import Store, models
+
 from .family import family
-from cg.constants import FAMILY_ACTIONS, PRIORITY_OPTIONS
-from cg.store import models, Store
 
 CONFIRM = "Continue?"
 
@@ -39,7 +41,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
     multiple=True,
     help="Give an identifier on sample and the value to use it with, e.g. -id name Prov52",
 )
-@click.option("-a", "--action", type=click.Choice(FAMILY_ACTIONS), help="update family action")
+@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
 @click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")

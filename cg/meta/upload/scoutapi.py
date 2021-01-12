@@ -1,23 +1,22 @@
 """File includes api to uploading data into Scout"""
 
 import logging
-from pathlib import Path
+import re
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 import requests
+from housekeeper.store import models as hk_models
 from ruamel import yaml
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
+from cg.apps.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
-from cg.apps.scout.scout_load_config import ScoutLoadConfig, ScoutIndividual
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -39,14 +38,21 @@ class UploadScoutAPI:
         self.analysis = analysis_api
         self.lims = lims_api
 
-    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None) -> str:
-        """"Fetch files from housekeeper"""
-        tags = [tag, sample_id]
-        hk_file: hk_models.File = self.housekeeper.files(version=hk_version_id, tags=tags).first()
-        file_path = None
+    def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None) -> Optional[str]:
+        """"Fetch files from housekeeper matchin one tag string"""
+        return self.fetch_file_path_from_tags(
+            tags=[tag], sample_id=sample_id, hk_version_id=hk_version_id
+        )
+
+    def fetch_file_path_from_tags(
+        self, tags: list, sample_id: str, hk_version_id: int = None
+    ) -> str:
+        """Fetch files from housekeeper matching a list of tags """
+        tags.append(sample_id)
+        hk_file = self.housekeeper.files(version=hk_version_id, tags=tags).first()
         if hk_file:
-            file_path = hk_file.full_path
-        return file_path
+            return hk_file.full_path
+        return ""
 
     def build_samples(
         self, analysis_obj: models.Analysis, hk_version_id: int = None, analysis_type: str = "rare"
@@ -61,10 +67,8 @@ class UploadScoutAPI:
                 sample_id = link_obj.sample.internal_id
             bam_path = self.fetch_file_path("bam", sample_id, hk_version_id)
             alignment_file_path = self.fetch_file_path("cram", sample_id, hk_version_id)
-            chromograph_path = self.fetch_file_path("chromograph", sample_id, hk_version_id)
             mt_bam_path = self.fetch_file_path("bam-mt", sample_id, hk_version_id)
             vcf2cytosure_path = self.fetch_file_path("vcf2cytosure", sample_id, hk_version_id)
-
             lims_sample = dict()
             try:
                 lims_sample = self.lims.sample(sample_id) or {}
@@ -75,7 +79,6 @@ class UploadScoutAPI:
                 "bam_path": bam_path,
                 "capture_kit": None,
                 "alignment_path": alignment_file_path,
-                "chromograph": chromograph_path,
                 "father": link_obj.father.internal_id if link_obj.father else "0",
                 "mother": link_obj.mother.internal_id if link_obj.mother else "0",
                 "mt_bam": mt_bam_path,
@@ -86,6 +89,7 @@ class UploadScoutAPI:
                 "tissue_type": lims_sample.get("source", "unknown"),
                 "vcf2cytosure": vcf2cytosure_path,
             }
+            sample["chromograph_images"] = self._get_chromograph_images(sample_id, hk_version_id)
             scout_sample = ScoutIndividual(**sample)
             yield scout_sample.dict(exclude_none=True)
 
@@ -122,6 +126,7 @@ class UploadScoutAPI:
             "samples": list(),
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
+
         for sample in self.build_samples(analysis_obj, hk_version.id):
             data["samples"].append(sample)
         self._include_mandatory_files(data, hk_version)
@@ -230,6 +235,30 @@ class UploadScoutAPI:
                 else:
                     raise FileNotFoundError(f"missing file: {scout_key}")
 
+    def _get_chromograph_images(self, sample_id: str, hk_version: int) -> dict:
+        autozyg_regions_image = self.fetch_file_path_from_tags(
+            ["chromograph", "autozyg"], sample_id, hk_version
+        )
+        coverage_image = self.fetch_file_path_from_tags(
+            ["chromograph", "tcov"], sample_id, hk_version
+        )
+        upd_regions_image = self.fetch_file_path_from_tags(
+            ["chromograph", "regions"], sample_id, hk_version
+        )
+        upd_sites_image = self.fetch_file_path_from_tags(
+            ["chromograph", "sites"], sample_id, hk_version
+        )
+        coverage_path = self._extract_generic_filepath(coverage_image)
+        upd_regions_path = self._extract_generic_filepath(upd_regions_image)
+        upd_sites_path = self._extract_generic_filepath(upd_sites_image)
+
+        return {
+            "autozyg": autozyg_regions_image,
+            "coverage": coverage_path,
+            "upd_regions": upd_regions_path,
+            "upd_sites": upd_sites_path,
+        }
+
     @staticmethod
     def _is_family_case(data: dict) -> bool:
         """Check if there are any linked individuals in a case"""
@@ -258,3 +287,13 @@ class UploadScoutAPI:
         ]
         svg_path: Path = self.madeline_api.run(family_id=family_obj.name, samples=samples)
         return svg_path
+
+    @staticmethod
+    def _extract_generic_filepath(file_path: str) -> str:
+        """Remove a file's suffix and identifying integer or X/Y
+        Example:
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png` becomes
+        `/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_`"""
+        if file_path is None:
+            return ""
+        return re.split("(\d+|X|Y)\.png", file_path)[0]

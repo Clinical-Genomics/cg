@@ -1,6 +1,8 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime
 
+import click
+
 from cg.constants import Pipeline
 from cg.store import Store
 
@@ -37,6 +39,37 @@ def test_add_family_required(invoke_cli, disk_store: Store):
     assert disk_store.Family.query.count() == 1
     assert disk_store.Family.query.first().name == name
     assert disk_store.Family.query.first().panels == [panel_id]
+
+
+def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
+    """Test to add a family using only the required arguments"""
+    # GIVEN a database with a customer and an panel
+
+    # WHEN adding a family
+    db_uri = disk_store.uri
+    customer_id = add_customer(disk_store)
+    panel_id = add_panel(disk_store)
+    non_existing_analysis = "epigenentic_alterations"
+    name = "family_name"
+
+    result = invoke_cli(
+        [
+            "--database",
+            db_uri,
+            "add",
+            "family",
+            "--panel",
+            panel_id,
+            "--analysis",
+            non_existing_analysis,
+            customer_id,
+            name,
+        ]
+    )
+
+    # THEN then it should not be added
+    assert result.exit_code != 0
+    assert disk_store.Family.query.count() == 0
 
 
 def test_add_family_bad_customer(invoke_cli, disk_store: Store):
@@ -168,6 +201,7 @@ def add_application(disk_store, application_tag="dummy_tag"):
         category="wgs",
         description="dummy_description",
         percent_kth=80,
+        percent_reads_guaranteed=75,
     )
     disk_store.add_commit(application)
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}

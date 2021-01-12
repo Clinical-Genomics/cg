@@ -1,8 +1,7 @@
 """Test how the api handles files"""
-import logging
 from pathlib import Path
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):

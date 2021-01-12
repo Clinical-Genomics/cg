@@ -2,15 +2,15 @@
 import logging
 import os
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterator
 
 from housekeeper.store import models as hk_models
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
-from cg.store import Store, models
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 

@@ -3,19 +3,11 @@ import datetime as dt
 from typing import List
 
 import alchy
-from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
-from cg.constants import (
-    DataDelivery,
-    FAMILY_ACTIONS,
-    FLOWCELL_STATUS,
-    Pipeline,
-    PREP_CATEGORIES,
-    PRIORITY_MAP,
-    REV_PRIORITY_MAP,
-    SEX_OPTIONS,
-    STATUS_OPTIONS,
-)
+from cg.constants import (CASE_ACTIONS, FLOWCELL_STATUS, PREP_CATEGORIES,
+                          PRIORITY_MAP, REV_PRIORITY_MAP, SEX_OPTIONS,
+                          STATUS_OPTIONS, DataDelivery, Pipeline)
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -63,6 +55,7 @@ class Application(Model):
     sequencing_depth = Column(types.Integer)
     min_sequencing_depth = Column(types.Integer)
     target_reads = Column(types.BigInteger, default=0)
+    percent_reads_guaranteed = Column(types.Integer, nullable=False)
     sample_amount = Column(types.Integer)
     sample_volume = Column(types.Text)
     sample_concentration = Column(types.Text)
@@ -254,7 +247,7 @@ class Delivery(Model):
 class Family(Model, PriorityMixin):
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
-    action = Column(types.Enum(*FAMILY_ACTIONS))
+    action = Column(types.Enum(*CASE_ACTIONS))
     analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -398,7 +391,6 @@ class Pool(Model):
     application_version = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
-    capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)

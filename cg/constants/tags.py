@@ -4,7 +4,7 @@ HK_TAGS = {
     "wes": ["mip-dna", "wes"],
     "wgs": ["mip-dna", "wgs"],
     "wts": ["mip-rna"],
-    "microbial": ["microsalt"],
+    "microsalt": ["microsalt"],
 }
 HK_FASTQ_TAGS = ["fastq"]
 
@@ -13,12 +13,14 @@ HK_FASTQ_TAGS = ["fastq"]
 # mandatory flag
 MIP_DNA_TAGS = {
     ("chanjo_sexcheck",): {"tags": ["chanjo", "sex-check"], "is_mandatory": False},
+    ("chromograph_cov", "tcov"): {"tags": ["chromograph", "tcov"], "is_mandatory": False},
+    ("chromograph_rhoviz", "autozyg"): {"tags": ["chromograph", "autozyg"], "is_mandatory": False},
+    ("chromograph_rhoviz", "fracsnp"): {"tags": ["chromograph", "fracsnp"], "is_mandatory": False},
     ("chromograph_upd", "sites"): {"tags": ["chromograph", "upd", "sites"], "is_mandatory": False},
     ("chromograph_upd", "regions"): {
         "tags": ["chromograph", "upd", "regions"],
         "is_mandatory": False,
     },
-    ("chromograph_cov", "tcov"): {"tags": ["chromograph", "tcov"], "is_mandatory": False},
     ("endvariantannotationblock", "clinical"): {
         "tags": ["vcf-snv-clinical"],
         "index_tags": ["vcf-snv-clinical-index"],

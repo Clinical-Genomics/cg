@@ -3,17 +3,19 @@
 """
 import copy
 import datetime as dt
+import json
 import logging
-import shutil
 import os
+import shutil
 from pathlib import Path
 
 import pytest
 import ruamel.yaml
 
-from cg.apps.hk import HousekeeperAPI
-from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
 from cg.apps.gt import GenotypeAPI
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
 from cg.models import CompressionData
 from cg.store import Store
@@ -21,11 +23,11 @@ from cg.store import Store
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.process_mock import ProcessMock
 from .mocks.scout import MockScoutAPI
+from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
-from .mocks.tb_mock import MockTB
-from .mocks.process_mock import ProcessMock
 
 CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 CRUNCHY_CONFIG = {
@@ -207,7 +209,7 @@ def fixture_fixtures_dir() -> Path:
 
 
 @pytest.fixture(name="analysis_dir")
-def fixture_analysis_dir(fixtures_dir) -> Path:
+def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir"""
     return fixtures_dir / "analysis"
 
@@ -297,9 +299,10 @@ def microbial_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def rml_orderform():
+def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return "tests/fixtures/orderforms/1604.9.rml.xlsx"
+    _file = orderforms / "1604.10.rml.xlsx"
+    return str(_file)
 
 
 @pytest.fixture(name="madeline_output")
@@ -307,6 +310,60 @@ def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
     _file = apps_dir / "madeline/madeline.xml"
     return str(_file)
+
+
+@pytest.fixture
+def mip_order_to_submit() -> dict:
+    """Load an example scout order."""
+    return json.load(open("tests/fixtures/orders/mip.json"))
+
+
+@pytest.fixture
+def mip_json_order_to_submit() -> dict:
+    """Load an example json scout order."""
+    return json.load(open("tests/fixtures/orders/mip-json.json"))
+
+
+@pytest.fixture
+def mip_rna_order_to_submit() -> dict:
+    """Load an example rna order."""
+    return json.load(open("tests/fixtures/orders/mip_rna.json"))
+
+
+@pytest.fixture
+def external_order_to_submit() -> dict:
+    """Load an example external order."""
+    return json.load(open("tests/fixtures/orders/external.json"))
+
+
+@pytest.fixture
+def fastq_order_to_submit() -> dict:
+    """Load an example fastq order."""
+    return json.load(open("tests/fixtures/orders/fastq.json"))
+
+
+@pytest.fixture
+def rml_order_to_submit() -> dict:
+    """Load an example rml order."""
+    return json.load(open("tests/fixtures/orders/rml.json"))
+
+
+@pytest.fixture
+def metagenome_order_to_submit() -> dict:
+    """Load an example metagenome order."""
+    return json.load(open("tests/fixtures/orders/metagenome.json"))
+
+
+@pytest.fixture
+def microbial_order_to_submit() -> dict:
+    """Load an example microbial order."""
+    return json.load(open("tests/fixtures/orders/microsalt.json"))
+
+
+@pytest.fixture
+def balsamic_order_to_submit() -> dict:
+    """Load an example cancer order."""
+    return json.load(open("tests/fixtures/orders/balsamic.json"))
 
 
 # Compression fixtures
@@ -569,6 +626,24 @@ def fixture_process() -> ProcessMock:
     return ProcessMock()
 
 
+# Hermes mock
+
+
+@pytest.fixture(name="hermes_process")
+def fixture_hermes_process() -> ProcessMock:
+    """Return a mocked hermes process"""
+    return ProcessMock(binary="hermes")
+
+
+@pytest.fixture(name="hermes_api")
+def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
+    """Return a hermes api with a mocked process"""
+    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+    hermes_api = HermesApi(config=hermes_config)
+    hermes_api.process = hermes_process
+    return hermes_api
+
+
 # Scout fixtures
 
 
@@ -754,6 +829,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -763,6 +839,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             is_external=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -772,6 +849,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=30,
             accredited=True,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -780,6 +858,7 @@ def fixture_base_store(store) -> Store:
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -791,6 +870,7 @@ def fixture_base_store(store) -> Store:
             target_reads=30,
             limitations="some",
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METLIFR020",
@@ -799,6 +879,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             target_reads=400000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="METNXTR020",
@@ -807,6 +888,7 @@ def fixture_base_store(store) -> Store:
             sequencing_depth=0,
             target_reads=200000,
             percent_kth=80,
+            percent_reads_guaranteed=75,
         ),
         store.add_application(
             tag="MWRNXTR003",
@@ -814,6 +896,7 @@ def fixture_base_store(store) -> Store:
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
         store.add_application(
@@ -821,6 +904,7 @@ def fixture_base_store(store) -> Store:
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
+            percent_reads_guaranteed=75,
             sequencing_depth=25,
             accredited=True,
             target_reads=10,

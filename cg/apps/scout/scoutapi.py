@@ -1,16 +1,16 @@
 """Code for talking to Scout regarding uploads"""
 
-import logging
-from typing import List, Optional
-from pathlib import Path
-import yaml
 import json
-
+import logging
+from pathlib import Path
 from subprocess import CalledProcessError
+from typing import List, Optional
 
-from cg.utils.commands import Process
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
+import yaml
+
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
+from cg.apps.scout.scout_load_config import ScoutLoadConfig
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -121,7 +121,7 @@ class ScoutAPI:
         Get causative variants for a case
         """
         # These commands can be run with `scout export variants`
-        get_causatives_command = ["export", "variants", "case-id", case_id]
+        get_causatives_command = ["export", "variants", "--json", "--case-id", case_id]
         try:
             self.process.run_command(get_causatives_command)
             if not self.process.stdout:

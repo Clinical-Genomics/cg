@@ -3,17 +3,20 @@
 import logging
 
 import click
+from pydantic import ValidationError
 
-from cg.apps.environ import environ_email
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.environ import environ_email
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.exc import BalsamicStartError, BundleAlreadyAddedError, LimsDataError
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.exc import (AnalysisUploadError, BalsamicStartError,
+                    BundleAlreadyAddedError, LimsDataError)
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -64,6 +67,7 @@ def balsamic(context):
         fastq_handler=FastqHandler(config),
         lims_api=LimsAPI(config),
         trailblazer_api=TrailblazerAPI(config),
+        hermes_api=HermesApi(config),
     )
 
 
@@ -161,7 +165,7 @@ def report_deliver(context, case_id, analysis_type, dry):
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Creating delivery report for {case_id}")
-        case_object = balsamic_analysis_api.get_case_object(case_id)
+        balsamic_analysis_api.get_case_object(case_id)
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
@@ -183,14 +187,18 @@ def store_housekeeper(context, case_id):
         balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
         LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
         balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
-    except (BundleAlreadyAddedError, FileExistsError) as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+    except (BundleAlreadyAddedError, FileExistsError, AnalysisUploadError) as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
         balsamic_analysis_api.housekeeper_api.rollback()
         balsamic_analysis_api.store.rollback()
         raise click.Abort()
-    except BalsamicStartError as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}!")
+    except BalsamicStartError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
         raise click.Abort()
+    except ValidationError as err:
+        LOG.warning("Deliverables file is malformed")
+        LOG.warning(err)
+        raise click.Abort
 
 
 @balsamic.command("start")

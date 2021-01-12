@@ -4,16 +4,15 @@ import logging
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-
-from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.constants import Pipeline
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 

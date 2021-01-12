@@ -39,8 +39,10 @@ def test_to_lims_external(external_order_to_submit):
 
 def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
+
     # WHEN parsing the order to format for LIMS
     samples = LimsHandler.to_lims(customer="dummyCust", samples=fastq_order_to_submit["samples"])
+
     # THEN should "work"
     assert len(samples) == 2
     # ... and pick out relevant UDF values
@@ -49,17 +51,19 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
 
 def test_to_lims_rml(rml_order_to_submit):
-    # GIVEN a rml order for three samples
+    # GIVEN a rml order for four samples
+
     # WHEN parsing for LIMS
     samples = LimsHandler.to_lims(customer="dummyCust", samples=rml_order_to_submit["samples"])
+
     # THEN it should "work"
-    assert len(samples) == 2
+    assert len(samples) == 4
     # ... and pick out relevant UDFs
     first_sample = samples[0]
     assert first_sample["udfs"]["pool"] == "pool-1"
     assert first_sample["udfs"]["volume"] == "30"
     assert first_sample["udfs"]["concentration"] == "5"
-    assert first_sample["udfs"]["index"] == "TruSeq DNA HT Dual-index (D7-D5)"
+    assert first_sample["udfs"]["index"] == "IDT DupSeq 10 bp Set B"
     assert first_sample["udfs"]["index_number"] == "1"
 
 
@@ -119,4 +123,4 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["udfs"]["tissue_block_size"] == "small"
 
     assert first_sample["udfs"]["quantity"] == "2"
-    assert first_sample["udfs"]["comment"] == "comment"
+    assert first_sample["udfs"]["comment"] == "other Elution buffer"

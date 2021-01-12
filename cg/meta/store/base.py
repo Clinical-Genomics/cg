@@ -1,31 +1,25 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
-
 import logging
 from typing import List
 
+from _io import TextIOWrapper
 from housekeeper.store import models as hk_models
 
-from cg.apps.hk import HousekeeperAPI
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, MICROSALT_TAGS, Pipeline
-from cg.exc import (
-    AnalysisDuplicationError,
-    PipelineUnknownError,
-    MandatoryFilesMissing,
-    BundleAlreadyAddedError,
-)
-from cg.meta.store.microsalt import add_microbial_analysis
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import (HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS,
+                          Pipeline)
+from cg.exc import (AnalysisDuplicationError, BundleAlreadyAddedError,
+                    MandatoryFilesMissing, PipelineUnknownError)
 from cg.meta.store import mip as store_mip
-from cg.store import models, Store
+from cg.store import Store, models
 from cg.store.utils import reset_case_action
-
-from _io import TextIOWrapper
 
 ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,
     "wes": MIP_DNA_TAGS,
     "wts": MIP_RNA_TAGS,
-    "microbial": MICROSALT_TAGS,
+    "microsalt": MICROSALT_TAGS,
 }
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +30,6 @@ def gather_files_and_bundle_in_housekeeper(
     """Function to gather files and bundle in housekeeper"""
 
     add_analysis = {
-        Pipeline.MICROSALT: add_microbial_analysis,
         Pipeline.MIP_DNA: store_mip.add_mip_analysis,
     }
     bundle_data = add_analysis[workflow](config_stream)
@@ -48,7 +41,6 @@ def gather_files_and_bundle_in_housekeeper(
     bundle_obj, version_obj = results
 
     case_obj = {
-        Pipeline.MICROSALT: status.find_family_by_name(bundle_obj.name),
         Pipeline.MIP_DNA: status.family(bundle_obj.name),
     }
 
@@ -108,13 +100,10 @@ def add_new_analysis(
 
 def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     """Get all deliverable files from the pipeline"""
-
-    pipeline_tags = HK_TAGS[analysis_type]
-    analysis_type_tags = ANALYSIS_TYPE_TAGS[analysis_type]
-
+    pipeline_tags = HK_TAGS[str(analysis_type)]
+    analysis_type_tags = ANALYSIS_TYPE_TAGS[str(analysis_type)]
     files = parse_files(deliverables, pipeline_tags, analysis_type_tags)
     _check_mandatory_tags(files, analysis_type_tags)
-
     return files
 
 

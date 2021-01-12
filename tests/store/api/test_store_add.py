@@ -1,6 +1,7 @@
+from datetime import datetime as dt
+
 from cg.constants import Pipeline
 from cg.store import Store
-from datetime import datetime as dt
 
 
 def test_add_customer(store: Store):
@@ -119,6 +120,7 @@ def test_add_pool(store: Store):
         category="rml",
         description="Ready-made",
         percent_kth=80,
+        percent_reads_guaranteed=75,
         sequencing_depth=0,
     )
     store.add_commit(application)

@@ -1,6 +1,7 @@
 import datetime as dt
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
@@ -11,14 +12,21 @@ def test_pools_to_status(rml_order_to_submit):
     # WHEN parsing for status
     data = StatusHandler.pools_to_status(rml_order_to_submit)
     # THEN it should pick out the general information
-    assert data["customer"] == "cust001"
+    assert data["customer"] == "cust000"
     assert data["order"] == "ctDNA sequencing - order 9"
+    assert data["comment"] == "order comment"
+
     # ... and information about the pool(s)
-    assert len(data["pools"]) == 1
-    assert data["pools"][0]["name"] == "pool-1"
-    assert data["pools"][0]["application"] == "RMLS05R150"
-    assert data["pools"][0]["data_analysis"] == str(Pipeline.FASTQ)
-    assert data["pools"][0]["capture_kit"] == "Agilent Sureselect CRE"
+    assert len(data["pools"]) == 2
+    pool = data["pools"][0]
+    assert pool["name"] == "pool-1"
+    assert pool["application"] == "RMLS05R150"
+    assert pool["data_analysis"] == str(Pipeline.FLUFFY)
+    assert len(pool["samples"]) == 2
+    sample = pool["samples"][0]
+    assert sample["name"] == "sample1"
+    assert sample["comment"] == "test comment"
+    assert sample["priority"] == "research"
 
 
 def test_samples_to_status(fastq_order_to_submit):
@@ -89,8 +97,11 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
+    assert base_store.families(customer=None).count() == 0
+    assert base_store.samples(customer=None).count() == 0
+
     # WHEN storing the order
-    new_pools = orders_api.store_pools(
+    new_pools = orders_api.store_rml(
         customer=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
@@ -98,14 +109,18 @@ def test_store_rml(orders_api, base_store, rml_status_data):
         pools=rml_status_data["pools"],
     )
     # THEN it should update the database with new pools
-    assert len(new_pools) == 1
-    assert base_store.pools(customer=None).count() == 1
+    assert len(new_pools) == 2
+
+    assert base_store.pools(customer=None).count() == 2
+    assert base_store.families(customer=None).count() == 2
+    assert base_store.samples(customer=None).count() == 4
     new_pool = base_store.pools(customer=None).first()
-    assert new_pool == new_pools[0]
-    assert new_pool.name == "pool-1"
+
+    assert new_pool == new_pools[1]
+
+    assert new_pool.name == "pool-2"
     assert new_pool.application_version.application.tag == "RMLS05R150"
-    assert new_pool.data_analysis == str(Pipeline.FASTQ)
-    assert new_pool.capture_kit == "Agilent Sureselect CRE"
+    assert new_pool.data_analysis == str(Pipeline.FLUFFY)
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
@@ -122,7 +137,7 @@ def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_pools(
+        orders_api.store_rml(
             customer=rml_status_data["customer"],
             order=rml_status_data["order"],
             ordered=dt.datetime.now(),
@@ -525,7 +540,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
-    assert new_link.sample.comment == "comment"
+    assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 
     assert base_store.deliveries().count() == base_store.samples().count()

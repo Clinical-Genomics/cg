@@ -7,7 +7,7 @@ from typing import Any, List
 
 from ruamel.yaml import safe_load
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
 from cg.apps.mip.base import MipAPI
@@ -15,14 +15,8 @@ from cg.apps.mip.confighandler import ConfigHandler
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    DEFAULT_CAPTURE_KIT,
-    FAMILY_ACTIONS,
-    MASTER_LIST,
-    Pipeline,
-)
+from cg.constants import (CASE_ACTIONS, COLLABORATORS, COMBOS,
+                          DEFAULT_CAPTURE_KIT, MASTER_LIST, Pipeline)
 from cg.exc import CgDataError, LimsDataError
 from cg.store import Store, models
 
@@ -403,7 +397,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return False
 
     def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *FAMILY_ACTIONS]:
+        if action in [None, *CASE_ACTIONS]:
             case_object = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
@@ -432,7 +426,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return self.db.family(case_id)
 
     def get_analyses_to_clean(self, before: dt.datetime) -> list:
-        analyses_to_clean = self.db.analyses_to_clean(pipeline="mip", before=before)
+        analyses_to_clean = self.db.analyses_to_clean(pipeline=Pipeline.MIP_DNA, before=before)
         return analyses_to_clean.all()
 
     def get_slurm_job_ids_path(self, case_id: str) -> Path:

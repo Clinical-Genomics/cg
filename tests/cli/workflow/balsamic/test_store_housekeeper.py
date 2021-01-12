@@ -1,11 +1,13 @@
-from pathlib import Path
 import json
 import logging
-import pytest
+from pathlib import Path
 
+import pytest
+from pydantic import ValidationError
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.base import store_housekeeper
-from cg.exc import BalsamicStartError, BundleAlreadyAddedError
-from cg.apps.hk import HousekeeperAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 EXIT_SUCCESS = 0
 
@@ -91,6 +93,40 @@ def test_case_without_deliverables_file(
 
     # THEN warning should be printed that no analysis_finish is found
     assert "No deliverables file found" in caplog.text
+
+
+def test_case_with_malformed_deliverables_file(
+    cli_runner,
+    balsamic_context: dict,
+    mock_config: dict,
+    mock_deliverable,
+    malformed_hermes_deliverables: dict,
+    caplog,
+):
+    """Test command with case_id and config file and analysis_finish but malformed deliverables output"""
+    caplog.set_level(logging.WARNING)
+    # GIVEN a malformed output from hermes
+    analysis_api: BalsamicAnalysisAPI = balsamic_context["BalsamicAnalysisAPI"]
+    analysis_api.hermes_api.process.set_stdout(text=json.dumps(malformed_hermes_deliverables))
+
+    # GIVEN that the output is malformed
+    with pytest.raises(ValidationError):
+        analysis_api.hermes_api.convert_deliverables(
+            deliverables_file=Path("a_file"), pipeline="balsamic"
+        )
+
+    # GIVEN case-id
+    case_id = "balsamic_case_wgs_single"
+
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
+
+    # THEN command should NOT execute successfully
+    assert result.exit_code != EXIT_SUCCESS
+
+    # THEN information that the file is malformed should be communicated
+    assert "Deliverables file is malformed" in caplog.text
+    assert "field required" in caplog.text
 
 
 def test_valid_case(

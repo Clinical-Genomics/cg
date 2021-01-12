@@ -1,15 +1,11 @@
 from collections import Iterable
-from cg.utils.StrEnum import StrEnum
+
 from pyschemes import Scheme, validators
 
-from cg.constants import (
-    PRIORITY_OPTIONS,
-    SEX_OPTIONS,
-    STATUS_OPTIONS,
-    CAPTUREKIT_OPTIONS,
-    CONTAINER_OPTIONS,
-    Pipeline,
-)
+from cg.constants import (CAPTUREKIT_OPTIONS, CONTAINER_OPTIONS,
+                          PRIORITY_OPTIONS, SEX_OPTIONS, STATUS_OPTIONS,
+                          Pipeline)
+from cg.utils.StrEnum import StrEnum
 
 
 class OrderType(StrEnum):
@@ -96,6 +92,7 @@ MIP_SAMPLE = {
     # customer
     "data_analysis": str,
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
@@ -247,7 +244,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:9 Orderform Ready made libraries (RML)
+    # 1604:10 Orderform Ready made libraries (RML)
     # Order portal specific
     "priority": str,
     # "This information is required"
@@ -258,6 +255,7 @@ RML_SAMPLE = {
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "volume": str,
     "concentration": str,
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "index": str,
     "index_number": OptionalNone(TypeValidatorNone(str)),  # optional for NoIndex
     # "Required if Plate"
@@ -267,7 +265,6 @@ RML_SAMPLE = {
     "index_sequence": OptionalNone(TypeValidatorNone(str)),
     # "Not required"
     "comment": OptionalNone(TypeValidatorNone(str)),
-    "capture_kit": OptionalNone(validators.Any(CAPTUREKIT_OPTIONS)),
 }
 
 MICROSALT_SAMPLE = {
@@ -290,7 +287,7 @@ MICROSALT_SAMPLE = {
     # "Required if "Other" is chosen in column "Species""
     "organism_other": OptionalNone(TypeValidatorNone(str)),
     # "These fields are not required"
-    "concentration_weight": OptionalNone(TypeValidatorNone(str)),
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
@@ -311,7 +308,7 @@ METAGENOME_SAMPLE = {
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # "This information is not required"
-    "concentration_weight": OptionalNone(TypeValidatorNone(str)),
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "extraction_method": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
