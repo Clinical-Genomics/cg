@@ -55,11 +55,8 @@ def link(context: click.Context, case_id: str, sample_id: str):
         LOG.info(
             "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.family.data_analysis
         )
-        if "mip + rna" in link_obj.family.data_analysis.lower():
-            rna_api.link_sample(
-                sample=link_obj.sample,
-                case_id=case_id,
-            )
+        if link_obj.family.data_analysis == str(Pipeline.MIP_RNA):
+            rna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
 
 
 @mip_rna.command()
