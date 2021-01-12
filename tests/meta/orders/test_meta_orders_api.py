@@ -38,7 +38,7 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
     order_ticket = {"name": "Paul Anderson", "email": "paul@magnolia.com"}
     result = orders_api.submit(order_type, data=order_data, ticket=order_ticket)
 
-    # THEN it should work
+    # THEN the result should contain the ticket number for the order
     for record in result["records"]:
         if isinstance(record, models.Pool) or isinstance(record, models.Sample):
             assert record.ticket_number == ticket_number
