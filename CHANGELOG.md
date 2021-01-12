@@ -14,6 +14,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [18.1.1]
+
+### Fixed
+
+- Updates balsamic deliver tags to align with the ones specified in hermes
+
 ## 18.1.0
 
 ### Added
