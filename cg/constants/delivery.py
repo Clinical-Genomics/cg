@@ -3,8 +3,8 @@
 import copy
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
-    {"cnvkit", "sv-vcf", "tumor"},
-    {"cnvkit", "sv-vcf-index", "tumor"},
+    {"cnvkit", "filtered", "sv-vcf", "tumor"},
+    {"cnvkit", "filtered", "sv-vcf-index", "tumor"},
     {"cnvkit", "regions"},
     {"vcf-snv-clinical", "vardict", "filtered"},
     {"vcf-snv-clinical-index", "vardict", "filtered"},
