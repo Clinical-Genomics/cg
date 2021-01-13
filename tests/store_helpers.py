@@ -3,10 +3,11 @@ import logging
 from datetime import datetime
 from typing import List
 
-from cg.apps.hk import HousekeeperAPI
+from housekeeper.store import models as hk_models
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.store import Store, models
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -73,14 +74,36 @@ class StoreHelpers:
             store.add_commit(version)
         return version
 
+    def ensure_application(
+        self,
+        store: Store,
+        tag: str,
+        application_type: str = "wgs",
+        description: str = "dummy_description",
+        is_archived: bool = False,
+    ) -> models.Application:
+        """Ensure that application exists in store"""
+        application: models.Application = store.application(tag=tag)
+        if not application:
+            application: models.Application = self.add_application(
+                store=store,
+                application_tag=tag,
+                application_type=application_type,
+                description=description,
+                is_archived=is_archived,
+            )
+        return application
+
     @staticmethod
     def add_application(
         store: Store,
         application_tag: str = "dummy_tag",
         application_type: str = "wgs",
         description: str = None,
+        is_archived: bool = False,
         is_accredited: bool = False,
         is_external: bool = False,
+        min_sequencing_depth: int = 30,
         **kwargs,
     ) -> models.Application:
         """Utility function to add a application to a store"""
@@ -94,11 +117,13 @@ class StoreHelpers:
             tag=application_tag,
             category=application_type,
             description=description,
+            is_archived=is_archived,
             percent_kth=80,
             percent_reads_guaranteed=75,
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
+            min_sequencing_depth=min_sequencing_depth,
             **kwargs,
         )
         store.add_commit(application)

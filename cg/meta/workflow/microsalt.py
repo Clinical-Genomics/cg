@@ -7,19 +7,21 @@
     datetime.min"""
 import gzip
 import logging
-from pathlib import Path
+import os
 import re
 from datetime import datetime
-from typing import Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from cg.apps.microsalt.fastq import FastqHandler
-from cg.constants import FAMILY_ACTIONS
-from cg.exc import CgDataError
-from cg.store.models import Sample
+import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.store import models, Store
+from cg.constants import CASE_ACTIONS, Pipeline
+from cg.exc import BundleAlreadyAddedError, CgDataError
+from cg.store import Store, models
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -32,28 +34,61 @@ class MicrosaltAnalysisAPI:
         db: Store,
         hk_api: HousekeeperAPI,
         lims_api: LimsAPI,
-        fastq_handler: FastqHandler,
-        config: dict = None,
+        hermes_api: HermesApi,
+        config: Optional[dict] = {},
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
-        self.fastq_handler = fastq_handler
-        self.root_dir = config.get("root") if config else None
+        self.hermes_api = hermes_api
+        self.root_dir = config["root"]
+        self.queries_path = config["queries_path"]
+        self.process = Process(binary=config["binary_path"], environment=config["conda_env"])
 
-    def has_flowcells_on_disk(self, ticket: int) -> bool:
-        """Check stuff before starting the analysis."""
+    def check_flowcells_on_disk(self, case_id: str, sample_id: Optional[str] = None) -> bool:
+        """Check if flowcells are on disk for sample before starting the analysis.
+        Flowcells not on disk will be requested
+        """
 
-        flowcells = self.get_flowcells(ticket=ticket)
+        flowcells = self.get_flowcells(case_id=case_id, sample_id=sample_id)
         statuses = []
         for flowcell_obj in flowcells:
             LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: flowcell not on disk")
+                LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
+                flowcell_obj.status = "requested"
             elif flowcell_obj.status != "ondisk":
                 LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        self.db.commit()
         return all(status == "ondisk" for status in statuses)
+
+    def get_flowcells(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Flowcell]:
+        """Get all flowcells for all samples in a ticket"""
+        flowcells = set()
+        for sample in self.get_samples(case_id=case_id, sample_id=sample_id):
+            for flowcell in sample.flowcells:
+                flowcells.add(flowcell)
+
+        return list(flowcells)
+
+    def get_case_fastq_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, "fastq", case_id)
+
+    def get_config_path(self, filename: str) -> Path:
+        return Path(self.queries_path, filename).with_suffix(".json")
+
+    @staticmethod
+    def generate_fastq_name(
+        lane: str, flowcell: str, sample: str, read: str, more: dict = None
+    ) -> str:
+        """Name a FASTQ file following usalt conventions. Naming must be
+        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+
+        undetermined = more.get("undetermined", None)
+        # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
 
     @staticmethod
     def fastq_header(line: str) -> dict:
@@ -109,23 +144,27 @@ class MicrosaltAnalysisAPI:
 
         return rs
 
-    def link_samples(self, ticket: int, sample_id: str):
+    def link_samples(self, case_id: str, sample_id: Optional[str] = None) -> None:
 
-        sample_objs = self.get_samples(ticket, sample_id)
+        case_dir: Path = self.get_case_fastq_path(case_id=case_id)
+        case_dir.mkdir(parents=True, exist_ok=True)
 
-        if not sample_objs:
-            raise Exception("Could not find any samples to link")
+        samples = self.get_samples(case_id=case_id, sample_id=sample_id)
 
-        for sample_obj in sample_objs:
-            LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-            self.link_sample(
-                ticket=ticket,
-                sample=sample_obj.internal_id,
+        for sample in samples:
+            LOG.info("%s: link FASTQ files", sample.internal_id)
+            self.link_fastq(
+                case_dir,
+                sample_id=sample.internal_id,
             )
 
-    def link_sample(self, sample: str, ticket: int) -> None:
+    def link_fastq(self, case_dir: Path, sample_id: str) -> None:
         """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=sample, tags=["fastq"])
+
+        fastq_dir = Path(case_dir, sample_id)
+        fastq_dir.mkdir(exist_ok=True, parents=True)
+
+        file_objs = self.hk.files(bundle=sample_id, tags=["fastq"])
         files = []
 
         for file_obj in file_objs:
@@ -147,20 +186,37 @@ class MicrosaltAnalysisAPI:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             files.append(data)
 
-        self.fastq_handler.link(ticket=ticket, sample=sample, files=files)
+        for fastq_data in files:
+            original_fastq_path = Path(fastq_data["path"])
+            linked_fastq_name = self.generate_fastq_name(
+                lane=fastq_data["lane"],
+                flowcell=fastq_data["flowcell"],
+                sample=sample_id,
+                read=fastq_data["read"],
+                more={"undetermined": fastq_data["undetermined"]},
+            )
+            linked_fastq_path = Path(fastq_dir, linked_fastq_name)
 
-    def get_samples(self, ticket: int = None, sample_id: str = None) -> [models.Sample]:
-        ids = {}
-        if ticket:
-            ids["ticket_number"] = ticket
-            samples = self.db.samples_by_ids(**ids).all()
+            if not linked_fastq_path.exists():
+                LOG.info("Linking: %s -> %s", original_fastq_path, linked_fastq_path)
+                linked_fastq_path.symlink_to(original_fastq_path)
+            else:
+                LOG.debug("Destination path already exists: %s, skipping", linked_fastq_path)
+
+    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
+        """Returns a list of samples to configure
+        If sample_id is specified, will return a list with only this sample_id.
+        Otherwise, returns all samples in given case"""
         if sample_id:
-            sample = self.db.sample(internal_id=sample_id)
-            samples = [sample] if sample else []
-        return samples
+            return [
+                self.db.query(models.Sample).filter(models.Sample.internal_id == sample_id).first()
+            ]
+
+        case_obj: models.Family = self.db.family(case_id)
+        return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
-        """ returns the comment associated with a sample stored in lims"""
+        """ Returns the comment associated with a sample stored in lims"""
         comment = self.lims.get_sample_comment(sample_id) or ""
         if re.match(r"\w{4}\d{2,3}", comment):
             return comment
@@ -195,7 +251,7 @@ class MicrosaltAnalysisAPI:
 
         return organism
 
-    def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
+    def get_parameters(self, sample_obj: models.Sample) -> Dict[str, str]:
         """Fill a dict with case config information for one sample """
 
         sample_id = sample_obj.internal_id
@@ -207,7 +263,7 @@ class MicrosaltAnalysisAPI:
             method_sequencing, _ = method_sequencing.split(" ", 1)
         priority = "research" if sample_obj.priority == 0 else "standard"
 
-        parameter_dict = {
+        return {
             "CG_ID_project": self.get_project(sample_id),
             "Customer_ID_project": sample_obj.ticket_number,
             "CG_ID_sample": sample_obj.internal_id,
@@ -224,46 +280,15 @@ class MicrosaltAnalysisAPI:
             "method_sequencing": method_sequencing or "Not in LIMS",
         }
 
-        return parameter_dict
-
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
         return self.lims.get_sample_project(sample_id)
 
-    def get_flowcells(self, ticket: int) -> [models.Flowcell]:
-        """Get all flowcells for all samples in a ticket"""
-
-        flowcells = set()
-
-        for sample in self.get_samples(ticket=ticket):
-            for flowcell in sample.flowcells:
-                flowcells.add(flowcell)
-
-        return list(flowcells)
-
-    def request_removed_flowcells(self, ticket):
-        """Check stuff before starting the analysis."""
-
-        flowcells = self.get_flowcells(ticket=ticket)
-        for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking if flowcell should be requested")
-            if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
-        self.db.commit()
-
-    def get_deliverables_to_store(self) -> List[Path]:
+    def get_deliverables_to_store(self) -> list:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
-        deliverables_to_store = []
-        for case_object in self.db.cases_to_store(pipeline="microbial"):
-            deliverables_file = self.get_deliverables_file_path(order_id=case_object.name)
-            if not deliverables_file.exists():
-                continue
-            deliverables_to_store.append(deliverables_file)
-        return deliverables_to_store
+
+        return self.db.cases_to_store(pipeline=Pipeline.MICROSALT)
 
     def get_deliverables_file_path(self, order_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
@@ -273,15 +298,124 @@ class MicrosaltAnalysisAPI:
             "results/reports/deliverables",
             order_id + "_deliverables.yaml",
         )
-        return deliverables_file_path
+        if deliverables_file_path.exists():
+            LOG.info("Found deliverables file %s", deliverables_file_path)
+            return deliverables_file_path
 
-    def set_statusdb_action(self, name: str, action: str) -> None:
+    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
         """Sets action on case based on ticket number"""
-        if action in [None, *FAMILY_ACTIONS]:
-            case_object = self.db.find_family(name)
+        if action in [None, *CASE_ACTIONS]:
+            case_object: models.Family = self.db.family(case_id)
             case_object.action = action
             self.db.commit()
+            LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(
-            f"Action '{action}' not permitted by StatusDB and will not be set for case {name}"
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
+
+    def resolve_case_sample_id(
+        self, sample: bool, ticket: bool, unique_id: Any
+    ) -> (str, Optional[str]):
+        """Resolve case_id and sample_id w based on input arguments. """
+        if ticket and sample:
+            LOG.error("Flags -t and -s are mutually exclusive!")
+            raise click.Abort
+
+        if ticket:
+            case_id, sample_id = self.get_case_id_from_ticket(unique_id)
+
+        elif sample:
+            case_id, sample_id = self.get_case_id_from_sample(unique_id)
+
+        else:
+            case_id, sample_id = self.get_case_id_from_case(unique_id)
+
+        return case_id, sample_id
+
+    def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
+        """If ticked is provided as argument, finds the corresponding case_id and returns it.
+        Since sample_id is not specified, nothing is returned as sample_id"""
+        case_obj: models.Family = self.db.find_family_by_name(unique_id)
+        if not case_obj:
+            LOG.error("No case found for ticket number:  %s", unique_id)
+            raise click.Abort
+        case_id = case_obj.internal_id
+        return case_id, None
+
+    def get_case_id_from_sample(self, unique_id: str) -> (str, str):
+        """If sample is specified, finds the corresponding case_id to which this sample belongs.
+        The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
+        """
+        sample_obj: models.Sample = (
+            self.db.query(models.Sample).filter(models.Sample.internal_id == unique_id).first()
+        )
+        if not sample_obj:
+            LOG.error("No sample found with id: %s", unique_id)
+            raise click.Abort
+        case_id = sample_obj.links[0].family.internal_id
+        sample_id = sample_obj.internal_id
+        return case_id, sample_id
+
+    def get_case_id_from_case(self, unique_id: str) -> (str, None):
+        """If case_id is specified, validates the presence of case_id in database and returns it"""
+        case_obj: models.Family = self.db.family(unique_id)
+        if not case_obj:
+            LOG.error("No case found with the id:  %s", unique_id)
+            raise click.Abort
+        case_id = case_obj.internal_id
+        return case_id, None
+
+    def store_microbial_analysis_housekeeper(self, case_id: str) -> None:
+        """Gather information from microSALT analysis to store."""
+        case_obj: models.Family = self.db.family(case_id)
+        order_id = case_obj.name
+        deliverables_path = self.get_deliverables_file_path(order_id=order_id)
+        if not deliverables_path:
+            LOG.warning(
+                "Deliverables file not found for %s, analysis may not be finished yet", case_id
+            )
+            raise click.Abort
+
+        analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
+
+        bundle_data = self.hermes_api.create_housekeeper_bundle(
+            deliverables=deliverables_path,
+            pipeline="microsalt",
+            created=analysis_date,
+            analysis_type=None,
+            bundle_name=case_id,
+        ).dict()
+        bundle_data["name"] = case_id
+
+        bundle_result = self.hk.add_bundle(bundle_data=bundle_data)
+        if not bundle_result:
+            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
+        bundle_object, bundle_version = bundle_result
+        self.hk.include(bundle_version)
+        self.hk.add_commit(bundle_object, bundle_version)
+        LOG.info(
+            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+        )
+
+    def store_microbial_analysis_statusdb(self, case_id: str):
+        """Creates an analysis object in StatusDB"""
+        case_obj: models.Family = self.db.family(case_id)
+        order_id = case_obj.name
+        deliverables_path = self.get_deliverables_file_path(order_id=order_id)
+        analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
+
+        new_analysis: models.Analysis = self.db.add_analysis(
+            pipeline=Pipeline.MICROSALT,
+            started_at=analysis_date,
+            completed_at=datetime.now(),
+            primary=(len(case_obj.analyses) == 0),
+        )
+        new_analysis.family = case_obj
+        self.db.add_commit(new_analysis)
+        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
+
+    @staticmethod
+    def get_date_from_deliverables_path(deliverables_path: Path) -> datetime.date:
+        """ Get date from deliverables path using date created metadata """
+        return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))

@@ -15,6 +15,24 @@ class MockScoutApi(ScoutAPI):
         self.process = ProcessMock(binary=binary_path, config=config_path)
 
 
+@pytest.fixture(name="sample_dict")
+def fixture_sample_dict() -> dict:
+    sample_dict = {
+        "analysis_type": "wgs",
+        "bam_path": "/path/to/sample.bam",
+        "mt_bam": "/path/to/reduced_mt.bam",
+        "capture_kit": None,
+        "father": "0",
+        "mother": "0",
+        "sample_id": "sample_id",
+        "sample_name": "sample_name",
+        "sex": "male",
+        "tissue_type": "unknown",
+        "phenotype": "affected",
+    }
+    return dict(sample_dict)
+
+
 @pytest.fixture(name="scout_dir")
 def fixture_scout_dir(apps_dir: Path) -> Path:
     """Return the path to the scout fixtures dir"""

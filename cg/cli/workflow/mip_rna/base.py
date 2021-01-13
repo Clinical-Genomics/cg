@@ -4,16 +4,15 @@ import logging
 
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-
-from cg.apps.environ import environ_email
 from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.constants import Pipeline
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -124,21 +123,26 @@ def run(
 
 
 @mip_rna.command("config-case")
-@click.option("-d", "--dry", is_flag=True, help="Print config to console")
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="Print pedigree config to console")
 @click.argument("case_id")
 @click.pass_context
-def config_case(context: click.Context, case_id: str, dry: bool = False):
-    """Generate a config for the case_id"""
+def config_case(context: click.Context, case_id: str, dry_run: bool = False):
+    """Generate a pedigree config for the case"""
     rna_api = context.obj["rna_api"]
 
     case_obj = rna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
+        LOG.error("Case %s does not exist!", case_id)
         context.abort()
     config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)
-    if dry:
-        print(config_data)
+    if dry_run:
+        click.echo(config_data)
         return
-    out_path = rna_api.write_pedigree_config(config_data)
+    out_path = rna_api.write_pedigree_config(
+        data=config_data,
+        out_dir=rna_api.get_case_output_path(case_id),
+        pedigree_config_path=rna_api.get_pedigree_config_path(case_id),
+    )
     LOG.info(f"Config saved to: {out_path}")
 
 

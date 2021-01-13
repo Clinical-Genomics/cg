@@ -24,7 +24,7 @@ class LimsHandler:
                         "capture_kit": sample.get("capture_kit"),
                         "comment": sample.get("comment"),
                         "concentration": sample.get("concentration"),
-                        "concentration_weight": sample.get("concentration_weight"),
+                        "concentration_sample": sample.get("concentration_sample"),
                         "customer": customer,
                         "data_analysis": sample.get("data_analysis"),
                         "elution_buffer": sample.get("elution_buffer"),

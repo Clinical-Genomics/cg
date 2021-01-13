@@ -3,7 +3,8 @@
 from pathlib import Path
 
 import pytest
-from cg.apps.microsalt.fastq import FastqHandler
+
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
@@ -21,7 +22,7 @@ def fastq_path(tmpdir):
 
 
 @pytest.fixture(scope="function")
-def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api):
+def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api, hermes_api):
     """ The click context for the microsalt cli """
     return {
         "db": microsalt_store,
@@ -29,20 +30,15 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             db=microsalt_store,
             hk_api=housekeeper_api,
             lims_api=lims_api,
-            fastq_handler=fastq_handler,
+            hermes_api=hermes_api,
+            config={
+                "root": tmpdir,
+                "queries_path": queries_path,
+                "binary_path": "/bin/true",
+                "conda_env": "root",
+            },
         ),
-        "microsalt": {
-            "root": tmpdir,
-            "queries_path": queries_path,
-            "binary_path": "/bin/true",
-            "conda_env": "root",
-        },
     }
-
-
-@pytest.fixture(scope="function")
-def fastq_handler() -> FastqHandler:
-    return FastqHandler({"obj": {"microsalt": {"root": "root"}}})
 
 
 @pytest.fixture(scope="function")
@@ -140,3 +136,8 @@ def lims_api():
 
     _lims_api = LimsFactory.produce()
     return _lims_api
+
+
+@pytest.fixture(scope="function")
+def invalid_ticket_number() -> str:
+    return "1234560000"

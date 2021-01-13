@@ -30,7 +30,7 @@ COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
-FAMILY_ACTIONS = ("analyze", "running", "hold")
+CASE_ACTIONS = ("analyze", "running", "hold")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 
@@ -38,6 +38,7 @@ FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
 class Pipeline(StrEnum):
     BALSAMIC: str = "balsamic"
     FASTQ: str = "fastq"
+    FLUFFY: str = "fluffy"
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
@@ -53,3 +54,4 @@ PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
 SEX_OPTIONS = ("male", "female", "unknown")
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
+ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]

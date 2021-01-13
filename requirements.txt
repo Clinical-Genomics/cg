@@ -24,13 +24,13 @@ petname
 marshmallow>3               # due to code expects behaviour from >3
 pydantic
 pyschemes
-xlrd
 openpyxl
 tabulate
 lxml
 python-dateutil
 colorclass
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
+typing_extensions
 dataclasses<0.8
 
 # apps

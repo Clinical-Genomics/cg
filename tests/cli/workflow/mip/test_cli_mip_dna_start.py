@@ -6,11 +6,11 @@ from cg.constants import EXIT_SUCCESS, Pipeline
 
 
 def test_dry(cli_runner, mip_context):
-    """Test command with --dry option"""
+    """Test start command with --dry option"""
 
-    # GIVEN case-id
+    # GIVEN a mip_context
 
-    # WHEN dry running
+    # WHEN using dry running
     result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
 
     # THEN command should have accepted the option happily
@@ -19,6 +19,8 @@ def test_dry(cli_runner, mip_context):
 
 def test_dna_case_included(cli_runner, mip_context, dna_case, caplog):
     """Test command with a dna case"""
+
+    caplog.set_level(logging.INFO)
 
     # GIVEN a case that is ready for MIP DNA analysis
     #   -> has a sample that is sequenced and has an dna-application (non-wts)
@@ -29,8 +31,7 @@ def test_dna_case_included(cli_runner, mip_context, dna_case, caplog):
     assert not dna_case.analyses
 
     # WHEN running command
-    with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS

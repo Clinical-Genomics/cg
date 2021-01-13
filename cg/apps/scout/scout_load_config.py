@@ -1,9 +1,10 @@
 """Class to hold information about scout load config"""
 
-from typing import Optional, List
-from typing_extensions import Literal
 from datetime import datetime
+from typing import List, Optional
+
 from pydantic import BaseModel
+from typing_extensions import Literal
 
 
 class ScoutIndividual(BaseModel):
@@ -15,7 +16,8 @@ class ScoutIndividual(BaseModel):
     phenotype: Literal["affected", "unaffected", "unknown"]
     capture_kit: Optional[str] = None
     alignment_path: Optional[str] = None
-    chromograph: Optional[str] = None
+    mt_bam: Optional[str] = None
+    chromograph_images: Optional[dict] = None
     rhocall_bed: Optional[str] = None
     rhocall_wig: Optional[str] = None
     tiddit_coverage_wig: Optional[str] = None

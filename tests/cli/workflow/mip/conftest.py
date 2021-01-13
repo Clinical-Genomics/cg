@@ -1,20 +1,17 @@
-from typing import Any, Union
-
-import pytest
 import copy
 import datetime as dt
-
-from cg.constants import Pipeline
 from pathlib import Path
+
+import pytest
 from ruamel.yaml import YAML
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
+from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
-from cg.apps.hk import HousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
-
-from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
 
 
 @pytest.fixture
@@ -233,9 +230,25 @@ def fixture_populated_mip_tb_api(
     return _tb_api
 
 
+@pytest.fixture(name="mip_rna_conda_env_name")
+def fixture_mip_rna_conda_env_name() -> str:
+    return "S_mip_rd-rna"
+
+
+@pytest.fixture(name="mip_dna_conda_env_name")
+def fixture_mip_dna_conda_env_name() -> str:
+    return "S_mip_rd-dna"
+
+
 @pytest.fixture
 def mip_context(
-    analysis_store_single_case, trailblazer_api, housekeeper_api, mip_lims, mock_root_folder
+    analysis_store_single_case,
+    trailblazer_api,
+    housekeeper_api,
+    mip_lims,
+    mock_root_folder,
+    mip_rna_conda_env_name,
+    mip_dna_conda_env_name,
 ):
     return {
         "dna_api": MipAnalysisAPI(
@@ -261,14 +274,14 @@ def mip_context(
             root=mock_root_folder,
         ),
         "mip-rd-dna": {
-            "conda_env": "S_mip_rd-dna",
+            "conda_env": mip_dna_conda_env_name,
             "mip_config": "config.yaml",
             "pipeline": "analyse rd_dna",
             "root": mock_root_folder,
             "script": "echo",
         },
         "mip-rd-rna": {
-            "conda_env": "S_mip_rd-rna",
+            "conda_env": mip_rna_conda_env_name,
             "mip_config": "config.yaml",
             "pipeline": "analyse rd_rna",
             "root": mock_root_folder,

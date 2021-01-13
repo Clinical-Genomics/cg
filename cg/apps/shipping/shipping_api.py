@@ -34,6 +34,7 @@ class ShippingAPI:
         LOG.info("Deploying the %s software", app_name)
         deploy_args = []
         if app_config:
+            LOG.info("Use app config %s", app_config)
             deploy_args.extend(["--app-config", str(app_config)])
         else:
             deploy_args.extend(["--tool-name", app_name])
