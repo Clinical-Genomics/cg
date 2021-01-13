@@ -323,6 +323,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
             message += f"<br />{ticket.get('name')}"
 
         if data.get("customer"):
-            message += f" {data.get('customer')}"
+            customer_id = data.get("customer")
+            customer_name = self.status.customer(customer_id)
+
+            message += f" {customer_name} ({customer_id})"
 
         return message
