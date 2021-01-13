@@ -1,7 +1,7 @@
 import logging
 import click
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.NIPTool import NIPToolAPI
