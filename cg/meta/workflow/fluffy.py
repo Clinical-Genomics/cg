@@ -33,7 +33,7 @@ class FluffyAnalysisAPI:
         self.fluffy_config = Path(config["config_path"])
 
     def get_workdir_path(self, case_id: str) -> Path:
-        return Path(self.root_dir, case_id)
+        return Path(self.root_dir, case_id, "fastq")
 
     def get_samplesheet_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "SampleSheet.csv")
