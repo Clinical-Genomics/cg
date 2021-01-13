@@ -1,7 +1,7 @@
 """This script tests the cli methods to set families to status-db"""
 
 from cg.cli.set.family import family
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.store import Store
 
 SUCCESS = 0

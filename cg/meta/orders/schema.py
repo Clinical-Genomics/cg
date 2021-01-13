@@ -1,15 +1,11 @@
 from collections import Iterable
-from cg.utils.StrEnum import StrEnum
+
 from pyschemes import Scheme, validators
 
-from cg.constants import (
-    PRIORITY_OPTIONS,
-    SEX_OPTIONS,
-    STATUS_OPTIONS,
-    CAPTUREKIT_OPTIONS,
-    CONTAINER_OPTIONS,
-    Pipeline,
-)
+from cg.constants import (CAPTUREKIT_OPTIONS, CONTAINER_OPTIONS,
+                          PRIORITY_OPTIONS, SEX_OPTIONS, STATUS_OPTIONS,
+                          Pipeline)
+from cg.utils.StrEnum import StrEnum
 
 
 class OrderType(StrEnum):

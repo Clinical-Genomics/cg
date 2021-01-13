@@ -1,16 +1,12 @@
 from typing import Iterable, List
-from cg.store import Store, models
-from cg.store.api.models import ApplicationVersionSchema, ApplicationSchema
-
-from tests.store_helpers import StoreHelpers
 
 import pytest
 
-from cg.store.api.import_func import (
-    parse_application_versions,
-    versions_are_same,
-    parse_applications,
-)
+from cg.store import Store, models
+from cg.store.api.import_func import (parse_application_versions,
+                                      parse_applications, versions_are_same)
+from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
+from tests.store_helpers import StoreHelpers
 
 
 class StoreCheckers:

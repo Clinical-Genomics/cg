@@ -8,7 +8,8 @@ from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.exc import CaseNotFoundError, DuplicateRecordError, DuplicateSampleError
+from cg.exc import (CaseNotFoundError, DuplicateRecordError,
+                    DuplicateSampleError)
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)

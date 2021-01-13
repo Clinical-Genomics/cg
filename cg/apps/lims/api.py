@@ -10,9 +10,9 @@ from genologics.entities import Process, Project, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF
 from cg.exc import LimsDataError
 
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF
 from .order import OrderHandler
 
 requests_cache.install_cache(backend="memory")
