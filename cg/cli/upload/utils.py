@@ -3,6 +3,7 @@ import logging
 from typing import List
 
 import click
+from cg.constants import Pipeline
 
 from cg.store import models
 
@@ -23,15 +24,15 @@ class LinkHelper:
         return [link.sample.application_version.application.analysis_type for link in links]
 
 
-def suggest_cases_to_upload(context):
+def suggest_cases_to_upload(context: click.Context, pipeline: Pipeline) -> None:
     LOG.warning("provide a case, suggestions:")
-    records = context.obj["status_db"].analyses_to_upload()[:50]
+    records = context.obj["status_db"].analyses_to_upload(pipeline=pipeline)[:50]
     for family_obj in records:
         click.echo(family_obj)
 
 
-def suggest_cases_delivery_report(context):
+def suggest_cases_delivery_report(context: click.Context, pipeline: Pipeline) -> None:
     LOG.error("provide a case, suggestions:")
-    records = context.obj["status_db"].analyses_to_delivery_report()[:50]
+    records = context.obj["status_db"].analyses_to_delivery_report(pipeline=pipeline)[:50]
     for family_obj in records:
         click.echo(family_obj)

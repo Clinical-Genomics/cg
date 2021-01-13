@@ -1,18 +1,15 @@
 """Code for uploading delivery report from the CLI"""
-import datetime as dt
+
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
-import housekeeper
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.exc import CgError, DeliveryReportError
-from cg.store import Store
 
 from .utils import suggest_cases_delivery_report
 
@@ -160,53 +157,10 @@ def delivery_report(
 
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
-    def _add_delivery_report_to_hk(
-        delivery_report_file: Path,
-        hk_api: HousekeeperAPI,
-        case_id: str,
-        analysis_date: dt.datetime,
-    ) -> Optional[housekeeper.store.models.File]:
-        """
-        Add a delivery report to a analysis bundle for a case in Housekeeper
-
-        If there is already a delivery report for the bundle doesn't add to it
-        If successful the method returns a pointer to the new file in Housekeeper
-        """
-        delivery_report_tag_name = "delivery-report"
-
-        version_obj = hk_api.version(case_id, analysis_date)
-
-        uploaded_delivery_report_files = hk_api.get_files(
-            bundle=case_id,
-            tags=[delivery_report_tag_name],
-            version=version_obj.id,
-        )
-        number_of_delivery_reports = len(uploaded_delivery_report_files.all())
-        is_bundle_missing_delivery_report = number_of_delivery_reports == 0
-
-        if is_bundle_missing_delivery_report:
-            file_obj = hk_api.add_file(
-                delivery_report_file.name, version_obj, delivery_report_tag_name
-            )
-            hk_api.include_file(file_obj, version_obj)
-            hk_api.add_commit(file_obj)
-            return file_obj
-
-        return None
-
-    def _update_delivery_report_date(
-        status_api: Store, case_id: str, analysis_date: dt.datetime
-    ) -> None:
-        """Update date on analysis when delivery report was created"""
-
-        analysis_obj = status_api.analysis(case_id, analysis_date)
-        analysis_obj.delivery_report_created_at = dt.datetime.now()
-        status_api.commit()
-
     report_api = context.obj["report_api"]
 
     if not case_id:
-        suggest_cases_delivery_report(context)
+        suggest_cases_delivery_report(context, pipeline=Pipeline.MIP_DNA)
         context.abort()
 
     status_api = context.obj["status_db"]
@@ -233,7 +187,7 @@ def delivery_report(
     )
 
     hk_api = context.obj["housekeeper_api"]
-    added_file = _add_delivery_report_to_hk(
+    added_file = report_api.add_delivery_report_to_hk(
         delivery_report_file, hk_api, case_id, analysis_started_at
     )
 
@@ -243,7 +197,7 @@ def delivery_report(
         click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
 
     context.invoke(delivery_report_to_scout, case_id=case_id)
-    _update_delivery_report_date(status_api, case_id, analysis_date=analysis_started_at)
+    report_api.update_delivery_report_date(status_api, case_id, analysis_date=analysis_started_at)
 
 
 @click.command("delivery-report-to-scout")
@@ -263,26 +217,13 @@ def delivery_report_to_scout(context, case_id: str, dry_run: bool):
         scout_api = ScoutAPI(context.obj)
         scout_api.upload_delivery_report(path, case_id, update=True)
 
-    def _get_delivery_report_from_hk(hk_api: HousekeeperAPI, family_id):
-        delivery_report_tag_name = "delivery-report"
-        version_obj = hk_api.last_version(family_id)
-        uploaded_delivery_report_files = hk_api.get_files(
-            bundle=family_id,
-            tags=[delivery_report_tag_name],
-            version=version_obj.id,
-        )
-
-        if uploaded_delivery_report_files.count() == 0:
-            raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
-
-        return uploaded_delivery_report_files[0].full_path
-
     if not case_id:
-        suggest_cases_delivery_report(context)
+        suggest_cases_delivery_report(context, pipeline=Pipeline.MIP_DNA)
         context.abort()
 
     hk_api = context.obj["housekeeper_api"]
-    report = _get_delivery_report_from_hk(hk_api, case_id)
+    report_api = context.obj["report_api"]
+    report = report_api.get_delivery_report_from_hk(hk_api, case_id)
 
     LOG.info("uploading delivery report %s to scout for case: %s", report, case_id)
     if not dry_run:

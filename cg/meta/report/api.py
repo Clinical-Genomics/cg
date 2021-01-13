@@ -2,21 +2,23 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import TextIO
+from typing import TextIO, Optional
 
+import housekeeper
 import requests
 import ruamel.yaml
-from jinja2 import Environment, PackageLoader, select_autoescape
 from cg.apps.coverage import ChanjoAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.meta.report.report_validator import ReportValidator
-from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.meta.report.sample_calculator import SampleCalculator
-from cg.meta.report.report_helper import ReportHelper
-from cg.meta.report.presenter import Presenter
-from cg.store import Store, models
 from cg.exc import DeliveryReportError
+from cg.meta.report.presenter import Presenter
+from cg.meta.report.report_helper import ReportHelper
+from cg.meta.report.report_validator import ReportValidator
+from cg.meta.report.sample_calculator import SampleCalculator
+from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.store import Store, models
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 class ReportAPI:
@@ -56,20 +58,6 @@ class ReportAPI:
         rendered_report = self._render_delivery_report(report_data)
         return rendered_report
 
-    def _handle_missing_report_data(self, accept_missing_data, delivery_data, case_id):
-        """Handle when some crucial data is missing in the report"""
-        if not self.report_validator.has_required_data(delivery_data, case_id):
-            if not accept_missing_data:
-                raise DeliveryReportError(
-                    f"Could not generate report data for {case_id}, "
-                    f"missing data:"
-                    f" {self.report_validator.get_missing_attributes()}"
-                )
-
-            self.log.warning(
-                "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
-            )
-
     def create_delivery_report_file(
         self,
         case_id: str,
@@ -89,6 +77,79 @@ class ReportAPI:
         delivery_report_file.close()
 
         return delivery_report_file
+
+    @staticmethod
+    def add_delivery_report_to_hk(
+        delivery_report_file: Path,
+        hk_api: HousekeeperAPI,
+        case_id: str,
+        analysis_date: datetime,
+    ) -> Optional[housekeeper.store.models.File]:
+        """
+        Add a delivery report to a analysis bundle for a case in Housekeeper
+
+        If there is already a delivery report for the bundle doesn't add to it
+        If successful the method returns a pointer to the new file in Housekeeper
+        """
+        delivery_report_tag_name = "delivery-report"
+
+        version_obj = hk_api.version(case_id, analysis_date)
+
+        uploaded_delivery_report_files = hk_api.get_files(
+            bundle=case_id,
+            tags=[delivery_report_tag_name],
+            version=version_obj.id,
+        )
+        number_of_delivery_reports = len(uploaded_delivery_report_files.all())
+        is_bundle_missing_delivery_report = number_of_delivery_reports == 0
+
+        if is_bundle_missing_delivery_report:
+            file_obj = hk_api.add_file(
+                delivery_report_file.name, version_obj, delivery_report_tag_name
+            )
+            hk_api.include_file(file_obj, version_obj)
+            hk_api.add_commit(file_obj)
+            return file_obj
+
+        return None
+
+    def get_delivery_report_from_hk(hk_api: HousekeeperAPI, family_id):
+        delivery_report_tag_name = "delivery-report"
+        version_obj = hk_api.last_version(family_id)
+        uploaded_delivery_report_files = hk_api.get_files(
+            bundle=family_id,
+            tags=[delivery_report_tag_name],
+            version=version_obj.id,
+        )
+
+        if uploaded_delivery_report_files.count() == 0:
+            raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
+
+        return uploaded_delivery_report_files[0].full_path
+
+    @staticmethod
+    def update_delivery_report_date(
+        status_api: Store, case_id: str, analysis_date: datetime
+    ) -> None:
+        """Update date on analysis when delivery report was created"""
+
+        analysis_obj = status_api.analysis(case_id, analysis_date)
+        analysis_obj.delivery_report_created_at = datetime.now()
+        status_api.commit()
+
+    def _handle_missing_report_data(self, accept_missing_data, delivery_data, case_id):
+        """Handle when some crucial data is missing in the report"""
+        if not self.report_validator.has_required_data(delivery_data, case_id):
+            if not accept_missing_data:
+                raise DeliveryReportError(
+                    f"Could not generate report data for {case_id}, "
+                    f"missing data:"
+                    f" {self.report_validator.get_missing_attributes()}"
+                )
+
+            self.log.warning(
+                "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
+            )
 
     def _get_delivery_data(self, case_id: str, analysis_date: datetime) -> dict:
         """Fetch all data needed to render a delivery report."""
