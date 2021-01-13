@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store

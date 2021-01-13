@@ -7,22 +7,21 @@
     datetime.min"""
 import gzip
 import logging
-from pathlib import Path
+import os
 import re
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import click
-import os
 
 from cg.apps.hermes.hermes_api import HermesApi
-from cg.constants import CASE_ACTIONS
-from cg.exc import CgDataError, BundleAlreadyAddedError
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.store import models, Store
+from cg.constants import CASE_ACTIONS, Pipeline
+from cg.exc import BundleAlreadyAddedError, CgDataError
+from cg.store import Store, models
 from cg.utils import Process
-from cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 

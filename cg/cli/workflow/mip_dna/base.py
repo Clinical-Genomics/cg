@@ -132,7 +132,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
 
 @mip_dna.command("config-case")
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="Print pedigree config to console")
 @click.option(
     "-p",
     "--panel-bed",

@@ -103,6 +103,7 @@ class StoreHelpers:
         is_archived: bool = False,
         is_accredited: bool = False,
         is_external: bool = False,
+        min_sequencing_depth: int = 30,
         **kwargs,
     ) -> models.Application:
         """Utility function to add a application to a store"""
@@ -122,6 +123,7 @@ class StoreHelpers:
             is_accredited=is_accredited,
             limitations="A limitation",
             is_external=is_external,
+            min_sequencing_depth=min_sequencing_depth,
             **kwargs,
         )
         store.add_commit(application)

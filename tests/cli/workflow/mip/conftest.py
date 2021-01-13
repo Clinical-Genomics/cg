@@ -230,9 +230,25 @@ def fixture_populated_mip_tb_api(
     return _tb_api
 
 
+@pytest.fixture(name="mip_rna_conda_env_name")
+def fixture_mip_rna_conda_env_name() -> str:
+    return "S_mip_rd-rna"
+
+
+@pytest.fixture(name="mip_dna_conda_env_name")
+def fixture_mip_dna_conda_env_name() -> str:
+    return "S_mip_rd-dna"
+
+
 @pytest.fixture
 def mip_context(
-    analysis_store_single_case, trailblazer_api, housekeeper_api, mip_lims, mock_root_folder
+    analysis_store_single_case,
+    trailblazer_api,
+    housekeeper_api,
+    mip_lims,
+    mock_root_folder,
+    mip_rna_conda_env_name,
+    mip_dna_conda_env_name,
 ):
     return {
         "dna_api": MipAnalysisAPI(
@@ -258,14 +274,14 @@ def mip_context(
             root=mock_root_folder,
         ),
         "mip-rd-dna": {
-            "conda_env": "S_mip_rd-dna",
+            "conda_env": mip_dna_conda_env_name,
             "mip_config": "config.yaml",
             "pipeline": "analyse rd_dna",
             "root": mock_root_folder,
             "script": "echo",
         },
         "mip-rd-rna": {
-            "conda_env": "S_mip_rd-rna",
+            "conda_env": mip_rna_conda_env_name,
             "mip_config": "config.yaml",
             "pipeline": "analyse rd_rna",
             "root": mock_root_folder,

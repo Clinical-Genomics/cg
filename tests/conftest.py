@@ -43,6 +43,11 @@ LOG = logging.getLogger(__name__)
 # Case fixtures
 
 
+@pytest.fixture(name="email_adress")
+def fixture_email_adress() -> str:
+    return "james.holden@scilifelab.se"
+
+
 @pytest.fixture(name="case_id")
 def fixture_case_id() -> str:
     """Return a case id"""
