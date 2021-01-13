@@ -5,7 +5,7 @@ from ruamel.yaml import safe_load
 import datetime as dt
 from cg.utils import Process
 from cg.apps.NIPTool import NIPToolAPI
-from cg.apps.housekeeper import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.lims import LimsAPI
 from cg.store import Store
