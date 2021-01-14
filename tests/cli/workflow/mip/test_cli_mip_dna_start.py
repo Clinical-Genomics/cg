@@ -5,20 +5,20 @@ from cg.cli.workflow.mip_dna.base import start
 from cg.constants import EXIT_SUCCESS, Pipeline
 
 
-def test_dry(cli_runner, mip_context):
-    """Test start command with --dry option"""
+def test_dry(cli_runner, dna_mip_context):
+    """Test mip dna start with --dry option"""
 
-    # GIVEN a mip_context
+    # GIVEN a dna_mip_context
 
     # WHEN using dry running
-    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=dna_mip_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dna_case_included(cli_runner, mip_context, dna_case, caplog):
-    """Test command with a dna case"""
+def test_dna_case_included(cli_runner, caplog, dna_case, dna_mip_context):
+    """Test mip dna start with a DNA case"""
 
     caplog.set_level(logging.INFO)
 
@@ -31,7 +31,7 @@ def test_dna_case_included(cli_runner, mip_context, dna_case, caplog):
     assert not dna_case.analyses
 
     # WHEN running command
-    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=dna_mip_context)
 
     # THEN command should have printed the case id
     assert result.exit_code == EXIT_SUCCESS
@@ -43,8 +43,8 @@ def test_dna_case_included(cli_runner, mip_context, dna_case, caplog):
     assert case_mentioned
 
 
-def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog):
-    """Test command with a rna case"""
+def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, rna_case):
+    """Test mip dna start with a RNA case"""
 
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
@@ -55,7 +55,7 @@ def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog):
         assert sample.sequenced_at
 
     # WHEN running command
-    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=dna_mip_context)
 
     # THEN command should not mention the rna-case
     assert result.exit_code == EXIT_SUCCESS
@@ -68,8 +68,8 @@ def test_rna_case_excluded(cli_runner, mip_context, rna_case, caplog):
     assert not case_mentioned
 
 
-def test_rna_case_excluded(cli_runner, mip_context, dna_rna_mix_case, caplog, tb_api):
-    """Test command with a mixed dna/rna case"""
+def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, dna_rna_mix_case):
+    """Test mip dna start with a mixed DNA/RNA case"""
 
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
@@ -89,7 +89,7 @@ def test_rna_case_excluded(cli_runner, mip_context, dna_rna_mix_case, caplog, tb
     assert non_rna_sample_found
 
     # WHEN running command
-    result = cli_runner.invoke(start, ["--dry-run"], obj=mip_context)
+    result = cli_runner.invoke(start, ["--dry-run"], obj=dna_mip_context)
 
     # THEN command should info about it starting the case but warn about skipping
     assert result.exit_code == EXIT_SUCCESS
