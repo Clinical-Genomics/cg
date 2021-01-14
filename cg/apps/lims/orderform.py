@@ -1,12 +1,12 @@
-from typing import List, Dict
+from typing import Dict, List
 
-from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES, Pipeline
-
-from cg.exc import OrderFormError
-from cg.meta.orders import OrderType
 import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
+
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.exc import OrderFormError
+from cg.meta.orders import OrderType
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}

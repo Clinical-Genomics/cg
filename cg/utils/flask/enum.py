@@ -1,6 +1,7 @@
-from enum import EnumMeta, Enum
-from wtforms import SelectMultipleField
+from enum import Enum, EnumMeta
+
 from flask_admin.form import Select2Field
+from wtforms import SelectMultipleField
 from wtforms.compat import text_type
 
 
