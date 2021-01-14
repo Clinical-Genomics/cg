@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.1.5]
+
+### Fixed
+
+- cg workflow mip-rna link command
+
 ## [18.1.4]
 
 ### Fixed
