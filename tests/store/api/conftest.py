@@ -3,8 +3,12 @@ from typing import Iterable, List
 import pytest
 
 from cg.store import Store, models
-from cg.store.api.import_func import (parse_application_versions,
-                                      parse_applications, versions_are_same)
+from cg.store.api.import_func import (
+    parse_application_versions,
+    parse_applications,
+    versions_are_same,
+)
+
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
 

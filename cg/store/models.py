@@ -5,9 +5,18 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
-from cg.constants import (CASE_ACTIONS, FLOWCELL_STATUS, PREP_CATEGORIES,
-                          PRIORITY_MAP, REV_PRIORITY_MAP, SEX_OPTIONS,
-                          STATUS_OPTIONS, DataDelivery, Pipeline)
+
+from cg.constants import (
+    CASE_ACTIONS,
+    FLOWCELL_STATUS,
+    PREP_CATEGORIES,
+    PRIORITY_MAP,
+    REV_PRIORITY_MAP,
+    SEX_OPTIONS,
+    STATUS_OPTIONS,
+    DataDelivery,
+    Pipeline,
+)
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 

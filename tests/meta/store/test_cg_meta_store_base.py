@@ -3,10 +3,10 @@ import mock
 import pytest
 from snapshottest import Snapshot
 
+
 import cg.meta.store.base as store_base
 from cg.constants import MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
-from cg.exc import (AnalysisDuplicationError, BundleAlreadyAddedError,
-                    PipelineUnknownError)
+from cg.exc import AnalysisDuplicationError, BundleAlreadyAddedError, PipelineUnknownError
 from cg.meta.store.base import get_tags
 
 
