@@ -14,6 +14,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.1.4]
+
+### Fixed
+
+- Better help text for microsalt cli commands
+
+
 ## [18.1.3]
 
 ### Fixed
