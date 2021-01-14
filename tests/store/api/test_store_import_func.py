@@ -12,7 +12,6 @@ from cg.store.api.import_func import (
     prices_are_same,
     versions_are_same,
 )
-
 from cg.store.api.models import ApplicationVersionSchema
 from tests.store.api.conftest import StoreCheckers
 

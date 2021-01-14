@@ -9,7 +9,6 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-
 from cg.exc import (
     AnalysisDuplicationError,
     AnalysisNotFinishedError,

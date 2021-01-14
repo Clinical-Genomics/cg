@@ -5,7 +5,6 @@ from typing import List
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
-
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
