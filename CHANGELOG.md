@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.1.3]
+
+### Fixed
+
+- deliver filtered cnvkit file for balsamic
 
 ## [18.1.2]
 

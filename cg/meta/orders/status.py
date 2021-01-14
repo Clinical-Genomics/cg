@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.store import models
 
