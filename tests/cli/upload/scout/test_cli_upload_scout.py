@@ -1,10 +1,9 @@
 """Test the cli for uploading to scout"""
 import logging
-import json
-
 from pathlib import Path
-from cg.cli.upload.scout import scout, upload_case_to_scout, create_scout_load_config
+
 from cg.apps.scout.scout_load_config import ScoutLoadConfig
+from cg.cli.upload.scout import create_scout_load_config, scout
 
 
 def check_log(caplog, string=None, warning=None):
