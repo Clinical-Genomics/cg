@@ -1,7 +1,6 @@
 """Tests for running the delivery command"""
 
 import logging
-
 from pathlib import Path
 
 from click.testing import CliRunner
