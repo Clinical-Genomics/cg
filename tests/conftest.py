@@ -785,8 +785,13 @@ def fixture_store() -> Store:
     _store.drop_all()
 
 
+@pytest.fixture(name="apptag_rna")
+def fixture_apptag_rna() -> str:
+    return "RNAPOAR025"
+
+
 @pytest.yield_fixture(scope="function", name="base_store")
-def fixture_base_store(store) -> Store:
+def fixture_base_store(store: Store, apptag_rna: str) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group("all_customers", "all customers")
 
@@ -905,7 +910,7 @@ def fixture_base_store(store) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RNAPOAR025",
+            tag=apptag_rna,
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
