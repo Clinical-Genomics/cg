@@ -25,24 +25,23 @@ def deliver(context):
 
 
 @click.command(name="analysis")
-@click.option("-c", "--case-id")
-@click.option("-t", "--ticket-id", type=int)
-@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
+@click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
-    "-i",
-    "--inbox",
-    help="customer inbox",
+    "-t", "--ticket-id", type=int, help="Deliver the files for ALL cases connected to a ticket"
 )
+@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def deliver_analysis(
-    context, case_id: str, ticket_id: int, delivery_type: str, inbox: str, dry_run: bool
-):
-    """Deliver analysis files to customer inbox"""
+def deliver_analysis(context, case_id: str, ticket_id: int, delivery_type: str, dry_run: bool):
+    """Deliver analysis files to customer inbox
+
+    Files can be delivered either on case level or for all cases connected to a ticket.
+    Any of those needs to be specified.
+    """
     if not (case_id or ticket_id):
         LOG.info("Please provide a case-id or ticket-id")
         return
-    inbox = inbox or context.obj.get("delivery_path")
+    inbox = context.obj["delivery_path"]
     if not inbox:
         LOG.info("Please specify the root path for where files should be delivered")
         return
