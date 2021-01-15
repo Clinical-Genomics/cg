@@ -41,7 +41,8 @@ def deliver_analysis(context, case_id: str, ticket_id: int, delivery_type: str, 
     if not (case_id or ticket_id):
         LOG.info("Please provide a case-id or ticket-id")
         return
-    inbox = context.obj["delivery_path"]
+
+    inbox = context.obj.get("delivery_path")
     if not inbox:
         LOG.info("Please specify the root path for where files should be delivered")
         return
