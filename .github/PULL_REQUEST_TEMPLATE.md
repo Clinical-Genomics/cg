@@ -3,7 +3,7 @@ This PR adds/fixes ...
 ### How to prepare for test
 - [ ] ssh to relevant server (depending on type of change)
 - [ ] Use stage: `us`
-- [ ] paxa the environenmt: `paxa`
+- [ ] paxa the environment: `paxa`
 - [ ] install on stage (example for hasta):
 `bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-cg-stage.sh [THIS-BRANCH-NAME]`
 

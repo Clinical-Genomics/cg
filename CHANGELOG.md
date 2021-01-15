@@ -14,6 +14,16 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.2]
+
+### Changed
+
+- Remove option to specify delivery path when delivering data
+
+### Fixed
+
+- Improved usage of `cg deliver analysis` command
+
 ## [18.1.5]
 
 ### Fixed
