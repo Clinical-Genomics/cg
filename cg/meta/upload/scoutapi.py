@@ -15,6 +15,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
 
