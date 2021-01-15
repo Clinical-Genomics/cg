@@ -2,7 +2,8 @@
 import logging
 
 import click
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline, DataDelivery
+
+from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, DataDelivery, Pipeline
 from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)

@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import tempfile
 from functools import wraps
 from pathlib import Path
-import tempfile
 
-from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
-from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
+from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderFormError, OrderError
 from cg.apps.lims import parse_orderform, parse_json_order
 from cg.meta.orders import OrdersAPI, OrderType
+
 from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)
@@ -105,13 +106,13 @@ def families():
         count = len(records)
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        families_q = db.families(
+        case_q = db.families(
             enquiry=request.args.get("enquiry"),
             customer=customer_obj,
             action=request.args.get("action"),
         )
-        count = families_q.count()
-        records = families_q.limit(30)
+        count = case_q.count()
+        records = case_q.limit(30)
     data = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=data, total=count)
 

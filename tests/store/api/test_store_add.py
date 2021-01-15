@@ -1,6 +1,7 @@
+from datetime import datetime as dt
+
 from cg.constants import Pipeline
 from cg.store import Store
-from datetime import datetime as dt
 
 
 def test_add_customer(store: Store):

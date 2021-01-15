@@ -18,6 +18,25 @@ Try to use the following format:
 
 ### Added support for delivery type in the Order Portal
 
+## [18.1.5]
+
+### Fixed
+
+- cg workflow mip-rna link command
+
+## [18.1.4]
+
+### Fixed
+
+- Better help text for microsalt cli commands
+
+
+## [18.1.3]
+
+### Fixed
+
+- deliver filtered cnvkit file for balsamic
+
 ## [18.1.2]
 
 ### Fixed

@@ -1,4 +1,5 @@
 import logging
+
 import click
 
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, Pipeline, DataDelivery
