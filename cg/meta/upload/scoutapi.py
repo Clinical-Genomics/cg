@@ -4,7 +4,7 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Iterable, Optional, Set, Tuple
 
 import requests
 from housekeeper.store import models as hk_models
@@ -15,6 +15,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
@@ -40,7 +41,7 @@ class UploadScoutAPI:
         self.lims = lims_api
 
     def fetch_file_path(self, tag: str, sample_id: str, hk_version_id: int = None) -> Optional[str]:
-        """"Fetch files from housekeeper matchin one tag string"""
+        """"Fetch files from housekeeper matching one tag string"""
         return self.fetch_file_path_from_tags(
             tags=[tag], sample_id=sample_id, hk_version_id=hk_version_id
         )
@@ -101,6 +102,9 @@ class UploadScoutAPI:
         LOG.info("Generate scout load config")
         analysis_date: datetime = analysis_obj.started_at or analysis_obj.completed_at
         LOG.debug("Found analysis date %s", analysis_date)
+        analysis_type = "rare"
+        if analysis_obj.pipeline == Pipeline.BALSAMIC:
+            analysis_type = "cancer"
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
         hk_version: hk_models.Version = self.housekeeper.last_version(
@@ -109,7 +113,7 @@ class UploadScoutAPI:
         LOG.debug("Found housekeeper version %s", hk_version.id)
         analysis_data: dict = self.analysis.get_latest_metadata(analysis_obj.family.internal_id)
         genome_build = "38" if "38" in analysis_data.get("genome_build", "") else "37"
-        data = {
+        case_data = {
             "analysis_date": analysis_obj.completed_at,
             "default_gene_panels": analysis_obj.family.panels,
             "family": analysis_obj.family.internal_id,
@@ -128,16 +132,20 @@ class UploadScoutAPI:
             "sv_rank_model_version": analysis_data.get("sv_rank_model_version"),
         }
 
-        for sample in self.build_samples(analysis_obj, hk_version.id):
-            data["samples"].append(sample)
-        self._include_mandatory_files(data, hk_version)
-        self._include_peddy_files(data, hk_version)
-        self._include_optional_files(data, hk_version)
+        samples: Iterable[dict] = self.build_samples(
+            analysis_obj=analysis_obj, hk_version_id=hk_version.id, analysis_type=analysis_type
+        )
+        for sample in samples:
+            case_data["samples"].append(sample)
 
-        if self._is_multi_sample_case(data):
-            if self._is_family_case(data):
+        self._include_rare_vcf_files(case_data, hk_version)
+        self._include_peddy_files(case_data, hk_version)
+        self._include_optional_files(case_data, hk_version)
+
+        if self._is_multi_sample_case(case_data):
+            if self._is_family_case(case_data):
                 svg_path: Path = self._run_madeline(analysis_obj.family)
-                data["madeline"] = str(svg_path)
+                case_data["madeline"] = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
@@ -145,7 +153,7 @@ class UploadScoutAPI:
 
         # Validate that the config is correct
 
-        scout_case = ScoutLoadConfig(**data)
+        scout_case = ScoutLoadConfig(**case_data)
 
         return scout_case
 
@@ -190,7 +198,7 @@ class UploadScoutAPI:
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
 
-    def _include_optional_files(self, data: dict, hk_version) -> None:
+    def _include_optional_files(self, case_data: dict, hk_version: int) -> None:
         """"Optional files on case level"""
         scout_hk_map = [
             ("delivery_report", "delivery-report"),
@@ -198,7 +206,7 @@ class UploadScoutAPI:
             ("vcf_str", "vcf-str"),
             ("smn_tsv", "smn-calling"),
         ]
-        self._include_files(data, hk_version, scout_hk_map)
+        self._include_files(case_data, hk_version, scout_hk_map)
 
     def _include_peddy_files(self, data, hk_version) -> None:
         scout_hk_map = [
@@ -208,16 +216,24 @@ class UploadScoutAPI:
         ]
         self._include_files(data, hk_version, scout_hk_map, extra_tag="peddy")
 
-    def _include_mandatory_files(self, data, hk_version) -> None:
-        scout_hk_map = {
+    def _include_rare_vcf_files(self, case_data: dict, hk_version: int) -> None:
+        """Includes the mandatory vcf files for a rare disease scout upload"""
+        rare_vcf_to_tag = {
             ("vcf_snv", "vcf-snv-clinical"),
             ("vcf_snv_research", "vcf-snv-research"),
             ("vcf_sv", "vcf-sv-clinical"),
             ("vcf_sv_research", "vcf-sv-research"),
         }
-        self._include_files(data, hk_version, scout_hk_map, skip_missing=False)
+        self._include_files(
+            case_data=case_data,
+            hk_version=hk_version,
+            scout_hk_map=rare_vcf_to_tag,
+            skip_missing=False,
+        )
 
-    def _include_files(self, data, hk_version, scout_hk_map, **kwargs) -> None:
+    def _include_files(
+        self, case_data: dict, hk_version: int, scout_hk_map: Set[Tuple[str, str]], **kwargs
+    ) -> None:
         extra_tag = kwargs.get("extra_tag")
         skip_missing = kwargs.get("skip_missing", True)
         for scout_key, hk_tag in scout_hk_map:
@@ -229,7 +245,7 @@ class UploadScoutAPI:
 
             hk_file = self.housekeeper.files(version=hk_version.id, tags=tags).first()
             if hk_file:
-                data[scout_key] = str(hk_file.full_path)
+                case_data[scout_key] = str(hk_file.full_path)
             else:
                 if skip_missing:
                     LOG.debug("skipping missing file: %s", scout_key)
