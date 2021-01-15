@@ -138,7 +138,10 @@ class UploadScoutAPI:
         for sample in samples:
             case_data["samples"].append(sample)
 
-        self._include_rare_vcf_files(case_data, hk_version)
+        if analysis_type == "rare":
+            self._include_rare_vcf_files(case_data, hk_version)
+        else:
+            self._include_cancer_vcf_files(case_data, hk_version)
         self._include_peddy_files(case_data, hk_version)
         self._include_optional_files(case_data, hk_version)
 
@@ -228,6 +231,21 @@ class UploadScoutAPI:
             case_data=case_data,
             hk_version=hk_version,
             scout_hk_map=rare_vcf_to_tag,
+            skip_missing=False,
+        )
+
+    def _include_cancer_vcf_files(self, case_data: dict, hk_version: int) -> None:
+        """Includes the mandatory vcf files for a rare disease scout upload"""
+        cancer_vcf_to_tag = {
+            ("vcf_cancer", "vcf-snv-clinical"),
+            ("vcf_cancer_sv", "vcf-sv-clinical"),
+            # ("vcf_cancer_research", "vcf-snv-research"),
+            # ("vcf_cancer_sv_research", "vcf-sv-research"),
+        }
+        self._include_files(
+            case_data=case_data,
+            hk_version=hk_version,
+            scout_hk_map=cancer_vcf_to_tag,
             skip_missing=False,
         )
 
