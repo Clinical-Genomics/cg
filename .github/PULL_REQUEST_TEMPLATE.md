@@ -1,15 +1,13 @@
 This PR adds/fixes ...
 
 ### How to prepare for test
-- [ ] ssh to hasta (depending on type of change)
-- [ ] install on stage:
+- [ ] ssh to relevant server (depending on type of change)
+- [ ] Use stage: `us`
+- [ ] paxa the environenmt: `paxa`
+- [ ] install on stage (example for hasta):
 `bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-cg-stage.sh [THIS-BRANCH-NAME]`
-- [ ] ssh to clinical-db (depending on type of change)
-- [ ] install on stage:
-`bash /home/proj/production/servers/resources/clinical-db.scilifelab.se/update-clinical-api-stage.sh [THIS-BRANCH-NAME]`
 
 ### How to test
-- [ ] login to ...
 - [ ] do ...
 
 ### Expected test outcome
