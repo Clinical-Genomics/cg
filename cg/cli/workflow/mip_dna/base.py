@@ -158,6 +158,8 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
 
+    panel_bed = mip_dna.resolve_panel_bed(panel_bed=panel_bed)
+
     try:
         config_data = dna_api.pedigree_config(
             case_obj, panel_bed=panel_bed, pipeline=Pipeline.MIP_DNA
