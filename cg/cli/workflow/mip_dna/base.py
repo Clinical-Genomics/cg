@@ -31,7 +31,7 @@ OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", is_flag=True, help="Print to console instead of executing"
 )
 OPTION_PANEL_BED = click.option(
-    "-p",
+    "-pb",
     "--panel-bed",
     type=str,
     help="Set this option to override fetching of panel name from LIMS",
