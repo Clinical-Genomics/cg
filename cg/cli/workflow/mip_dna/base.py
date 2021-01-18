@@ -45,6 +45,7 @@ ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
 @PRIORITY_OPTION
 @OPTION_PANEL_BED
 @START_WITH_PROGRAM
+@OPTION_DRY
 @click.option(
     "-c",
     "--case",
@@ -60,6 +61,7 @@ def mip_dna(
     priority: str,
     panel_bed: str,
     start_with: str,
+    dry_run: bool,
 ):
     """Rare disease DNA workflow"""
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
@@ -104,14 +106,10 @@ def mip_dna(
 
     # Invoke full workflow
     context.invoke(link, case_id=case_id)
-    context.invoke(panel, case_id=case_id)
-    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed)
+    context.invoke(panel, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
     context.invoke(
-        run,
-        case_id=case_id,
-        priority=priority,
-        email=email,
-        start_with=start_with,
+        run, case_id=case_id, priority=priority, email=email, start_with=start_with, dry_run=dry_run
     )
 
 
