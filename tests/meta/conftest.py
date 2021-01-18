@@ -13,7 +13,7 @@ from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store")
+@pytest.fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer("cust000")
@@ -132,7 +132,7 @@ class MockBalsamicFastq(BalsamicFastqHandler):
         super().__init__(config={"balsamic": {"root": tmpdir}})
 
 
-@pytest.yield_fixture(scope="function", name="mip_hk_store")
+@pytest.fixture(scope="function", name="mip_hk_store")
 def fixture_mip_hk_store(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
@@ -210,7 +210,7 @@ def fixture_mip_hk_store(
     return real_housekeeper_api
 
 
-@pytest.yield_fixture(scope="function", name="analysis_api")
+@pytest.fixture(scope="function", name="analysis_api")
 def fixture_analysis_api(
     analysis_store: Store, mip_hk_store: HousekeeperAPI, scout_api: ScoutAPI
 ) -> MipAnalysisAPI:
