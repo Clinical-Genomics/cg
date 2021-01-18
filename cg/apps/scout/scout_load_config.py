@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing_extensions import Literal
 
 # Individual classes
@@ -96,3 +96,9 @@ class MipLoadConfig(ScoutLoadConfig):
     peddy_ped: Optional[str] = None
     peddy_sex: Optional[str] = None
     peddy_check: Optional[str] = None
+
+    @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
+    def sample_name_is_some(cls, v):
+        if v is None:
+            raise ValueError("Sample name can not be None")
+        return v

@@ -20,12 +20,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
 
-from .files import (
-    CASE_TAG_MAP,
-    include_files,
-    include_mip_optional_sample_files,
-    include_sample_alignment_file,
-)
+from .files import BalsamicFileHandler, MipFileHandler, ScoutFileHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +45,7 @@ class UploadScoutAPI:
     def build_sample(
         self,
         sample_obj: models.FamilySample,
-        hk_version_obj: hk_models.Version,
+        file_handler: ScoutFileHandler,
         sample_name: Optional[str] = None,
     ) -> ScoutIndividual:
         """Build the base of a sample that is common for different analysis types"""
@@ -70,34 +65,33 @@ class UploadScoutAPI:
             sample_name=sample_name or sample_obj.sample.name,
             tissue_type=lims_sample.get("source", "unknown"),
         )
-        include_sample_alignment_file(sample=sample_data, hk_version_obj=hk_version_obj)
+        file_handler.include_sample_alignment_file(sample=sample_data)
+        file_handler.include_sample_files()
 
         return sample_data
 
     def build_mip_sample(
-        self, sample_obj: models.FamilySample, hk_version_obj: hk_models.Version
+        self, sample_obj: models.FamilySample, file_handler: MipFileHandler
     ) -> ScoutIndividual:
         """Build a sample with mip specific information"""
 
         sample_data: ScoutIndividual = self.build_sample(
-            sample_obj=sample_obj, hk_version_obj=hk_version_obj
+            sample_obj=sample_obj, file_handler=file_handler
         )
         sample_data.father = sample_obj.father.internal_id if sample_obj.father else "0"
         sample_data.mother = sample_obj.mother.internal_id if sample_obj.mother else "0"
 
-        include_mip_optional_sample_files(sample=sample_data, hk_version_obj=hk_version_obj)
-
         return sample_data
 
     def build_balsamic_sample(
-        self, sample_obj: models.FamilySample, hk_version_obj: hk_models.Version
+        self, sample_obj: models.FamilySample, file_handler: BalsamicFileHandler
     ) -> ScoutIndividual:
         """Build a sample with mip specific information"""
 
         # This will be tumor or normal
         sample_name: str = BalsamicAnalysisAPI.get_sample_type(sample_obj)
         sample_data: ScoutIndividual = self.build_sample(
-            sample_obj=sample_obj, hk_version_obj=hk_version_obj, sample_name=sample_name
+            sample_obj=sample_obj, file_handler=file_handler, sample_name=sample_name
         )
         return sample_data
 
@@ -121,6 +115,7 @@ class UploadScoutAPI:
         rank_score_threshold: int,
     ) -> dict:
         LOG.info("Generate load config for mip case")
+        file_handler: MipFileHandler(hk_version_obj=hk_version_obj)
         config_data: ScoutLoadConfig = self.get_config_case(analysis_obj)
 
         analysis_data: dict = self.mip_analysis_api.get_latest_metadata(
@@ -140,18 +135,7 @@ class UploadScoutAPI:
             or None
         )
         LOG.debug("Including the mip specific vcf files")
-        include_files(
-            data=config_data,
-            hk_version_obj=hk_version_obj,
-            hk_tag_map=CASE_TAG_MAP["rare_vcf_to_tag"],
-        )
-        LOG.debug("Including the peddy files")
-        include_files(
-            data=config_data,
-            hk_version_obj=hk_version_obj,
-            hk_tag_map=CASE_TAG_MAP["peddy_file_to_tag"],
-            extra_tag="peddy",
-        )
+
         LOG.debug("Including optional mip files")
         include_files(
             data=config_data,
