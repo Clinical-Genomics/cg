@@ -250,6 +250,11 @@ def run(
     if mip_dry_run:
         LOG.info("Executed MIP in dry-run mode")
         return
+
+    if dry_run:
+        LOG.info("Running in dry-run mode. Analysis not submitted to Trailblazer")
+        return
+
     try:
         dna_api.mark_analyses_deleted(case_id=case_id)
         dna_api.add_pending_analysis(
