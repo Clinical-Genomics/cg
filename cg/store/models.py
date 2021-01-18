@@ -314,8 +314,8 @@ class FamilySample(Model):
 
     family = orm.relationship("Family", backref="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id])
-    father = orm.relationship("Sample", foreign_keys=[father_id])
+    mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
+    father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
