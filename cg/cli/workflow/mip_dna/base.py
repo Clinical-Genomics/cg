@@ -9,7 +9,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
@@ -158,7 +157,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
 
-    panel_bed = mip_dna.resolve_panel_bed(panel_bed=panel_bed)
+    panel_bed = dna_api.resolve_panel_bed(panel_bed=panel_bed)
 
     try:
         config_data = dna_api.pedigree_config(

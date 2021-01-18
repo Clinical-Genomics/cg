@@ -14,6 +14,15 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.3.0]
+
+### Changed
+
+- cg workflow mip-dna -p option can be given when executing full workflow
+- Changed logic for how case links are retrieved in order to support linking of very old cases
+
+
+
 ## [18.2]
 
 ### Changed
