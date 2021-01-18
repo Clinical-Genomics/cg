@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 from cg.apps.scout.scout_load_config import ScoutLoadConfig
-from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 
 CASE_FILE_PATHS = ["multiqc"]

@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, List, Optional, Set, Tuple
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
@@ -96,6 +96,24 @@ class HousekeeperAPI:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
+    @staticmethod
+    def fetch_file_from_version(
+        version_obj: models.Version, tags: Set[str]
+    ) -> Optional[models.File]:
+        """Fetch file that includes at least all tags in 'tags'
+
+        Return None if no file could be found
+        """
+        LOG.debug("Fetch files from version with tags %s", tags)
+        file_obj: models.File
+        for file_obj in version_obj.files:
+            tag: models.Tag
+            file_tags = {tag.name for tag in file_obj.tags}
+            if tags.issubset(file_tags):
+                LOG.debug("Found file %s", file_obj)
+                return file_obj
+        LOG.debug("Could not find any files matching the tags")
+
     def rollback(self):
         """ Wrap method in Housekeeper Store """
         return self._store.rollback()
@@ -148,10 +166,12 @@ class HousekeeperAPI:
 
     def version(self, bundle: str, date: dt.datetime) -> models.Version:
         """ Fetch a version """
+        LOG.info("Fetch version %s from bundle %s", date, bundle)
         return self._store.version(bundle, date)
 
     def last_version(self, bundle: str) -> models.Version:
         """Gets the latest version of a bundle"""
+        LOG.info("Fetch latest version from bundle %s", bundle)
         return (
             self._store.Version.query.join(models.Version.bundle)
             .filter(models.Bundle.name == bundle)

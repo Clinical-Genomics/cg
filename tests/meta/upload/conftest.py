@@ -1,24 +1,20 @@
 """Fixtures for meta/upload tests"""
 
 import json
-
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.scout.scout_export import ScoutExportCase
 from cg.constants import Pipeline
 from cg.meta.upload.coverage import UploadCoverageApi
+from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.observations import UploadObservationsAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.store import models
-from cg.store import Store
-from cg.apps.scout.scout_export import ScoutExportCase
-
-from tests.cli.upload.conftest import fixture_scout_load_object
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.store import Store, models
 
 # Mocks
 
