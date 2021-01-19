@@ -43,7 +43,7 @@ class ScoutIndividual(BaseModel):
 
 class ScoutMipIndividual(ScoutIndividual):
     mt_bam: Optional[str] = None
-    chromograph_images: ChromographImages = None
+    chromograph_images: ChromographImages = ChromographImages()
     rhocall_bed: Optional[str] = None
     rhocall_wig: Optional[str] = None
     tiddit_coverage_wig: Optional[str] = None

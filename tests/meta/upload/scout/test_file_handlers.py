@@ -3,7 +3,7 @@ from typing import Optional
 
 from housekeeper.store import models as hk_models
 
-from cg.apps.scout.scout_load_config import ScoutLoadConfig, ScoutMipIndividual
+from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.meta.upload.scout.files import BalsamicFileHandler, MipFileHandler
 from cg.meta.upload.scout.hk_tags import BalsamicCaseTags, MipCaseTags
 
@@ -76,3 +76,33 @@ def test_include_alignment_file_individual(
 
     # THEN assert that the delivery report was added
     assert mip_individual.alignment_path == alignment_file.full_path
+
+
+def test_include_mip_case_files(mip_analysis_hk_version: hk_models.Version):
+    # GIVEN a housekeeper version bundle with some mip analysis files
+    # GIVEN a case load object
+    load_case = MipLoadConfig()
+    # GIVEN a mip file handler
+    file_handler = MipFileHandler(hk_version_obj=mip_analysis_hk_version)
+
+    # WHEN including the case level files
+    file_handler.include_case_files(case=load_case)
+
+    # THEN assert that the mandatory snv vcf was added
+    assert load_case.vcf_snv
+
+
+def test_include_mip_sample_files(mip_analysis_hk_version: hk_models.Version, sample_id: str):
+    # GIVEN a housekeeper version bundle with some mip analysis files
+    # GIVEN a case load object
+    mip_sample = ScoutMipIndividual(sample_id=sample_id)
+    # GIVEN that there are no sample level mt_bam
+    mip_sample.mt_bam is None
+    # GIVEN a mip file handler
+    file_handler = MipFileHandler(hk_version_obj=mip_analysis_hk_version)
+
+    # WHEN including the case level files
+    file_handler.include_sample_files(sample=mip_sample)
+
+    # THEN assert that the mandatory snv vcf was added
+    assert mip_sample.mt_bam is not None

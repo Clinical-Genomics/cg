@@ -135,6 +135,11 @@ def fixture_mip_analysis_hk_bundle_data(
                 "archive": False,
                 "tags": ["delivery-report"],
             },
+            {
+                "path": str(mip_dna_analysis_dir / "adm1.mt.bam"),
+                "archive": False,
+                "tags": ["bam-mt", sample_id],
+            },
         ],
     }
     return data
