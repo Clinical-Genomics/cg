@@ -17,19 +17,28 @@ class ChromographImages(BaseModel):
 
 
 class ScoutIndividual(BaseModel):
-    sample_id: str
+    sample_id: str = None
     father: Optional[str] = None
     mother: Optional[str] = None
     sample_name: Optional[str] = None
-    sex: Literal["male", "female", "unknown"]
+    sex: Literal["male", "female", "unknown"] = None
     phenotype: Literal["affected", "unaffected", "unknown"] = None
     capture_kit: Optional[str] = None
     alignment_path: Optional[str] = None
-    analysis_type: Literal["wgs", "wes", "mixed", "unknown", "panel", "external"]
+    analysis_type: Literal["wgs", "wes", "mixed", "unknown", "panel", "external"] = None
     confirmed_sex: Optional[bool] = False
     confirmed_parent: Optional[bool] = False
 
     tissue_type: Optional[str] = None
+
+    @validator("sample_id", "sex", "analysis_type")
+    def field_not_none(cls, v):
+        if v is None:
+            raise ValueError("sample_id, sex and analysis_type can not be None")
+        return v
+
+    class Config:
+        validate_assignment = True
 
 
 class ScoutMipIndividual(ScoutIndividual):
@@ -65,7 +74,7 @@ class ScoutLoadConfig(BaseModel):
     rank_score_threshold: int = None
     sv_rank_model_version: Optional[str] = None
     analysis_date: datetime = None
-    samples: List[ScoutIndividual]
+    samples: List[ScoutIndividual] = []
 
     delivery_report: Optional[str] = None
     cnv_report: Optional[str] = None

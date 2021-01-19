@@ -15,6 +15,7 @@ from cg.meta.upload.scout.hk_tags import TagInfo
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 
 # Mocks
+from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.scout import MockScoutAPI
 
@@ -78,21 +79,73 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
     return lims_family["samples"]
 
 
-@pytest.fixture(name="upload_genotypes_hk_bundle")
-def fixture_upload_genotypes_hk_bundle(
-    case_id: str, timestamp: datetime, case_qc_metrics: Path, bcf_file: Path
+@pytest.fixture(name="sample_id")
+def fixture_sample_id() -> str:
+    """ Returns a sample id """
+    return "ADM1"
+
+
+@pytest.fixture(scope="function", name="mip_analysis_hk_bundle_data")
+def fixture_mip_analysis_hk_bundle_data(
+    case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, sample_id: str
 ) -> dict:
-    """ Returns a dictionary in hk format with files used in upload gt process"""
+    """Get some bundle data for housekeeper"""
     data = {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(case_qc_metrics), "archive": False, "tags": ["qcmetrics"]},
-            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
+            {
+                "path": str(mip_dna_analysis_dir / "snv.vcf"),
+                "archive": False,
+                "tags": ["vcf-snv-clinical"],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "sv.vcf"),
+                "archive": False,
+                "tags": ["vcf-sv-clinical"],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "snv_research.vcf"),
+                "archive": False,
+                "tags": ["vcf-snv-research"],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "sv_research.vcf"),
+                "archive": False,
+                "tags": ["vcf-sv-research"],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "str.vcf"),
+                "archive": False,
+                "tags": ["vcf-str"],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "smn.vcf"),
+                "archive": False,
+                "tags": ["smn-calling"],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "adm1.cram"),
+                "archive": False,
+                "tags": ["cram", sample_id],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "report.pdf"),
+                "archive": False,
+                "tags": ["delivery-report"],
+            },
         ],
     }
     return data
+
+
+@pytest.fixture(name="mip_analysis_hk_version")
+def fixture_mip_analysis_hk_version(
+    housekeeper_api: MockHousekeeperAPI, mip_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    _version = helpers.ensure_hk_version(housekeeper_api, mip_analysis_hk_bundle_data)
+    return _version
 
 
 @pytest.fixture(name="mip_file_handler")

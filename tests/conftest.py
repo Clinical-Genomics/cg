@@ -524,13 +524,13 @@ def fixture_timestamp_today() -> dt.datetime:
 
 
 @pytest.fixture(scope="function", name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_today) -> dt.datetime:
+def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
     """Return a time stamp of yesterdays date in date time format"""
     return timestamp_today - dt.timedelta(days=1)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id, bed_file, timestamp):
+def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
     """Get some bundle data for housekeeper"""
     data = {
         "name": case_id,
@@ -542,7 +542,7 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample, timestamp):
+def fixture_sample_hk_bundle_no_files(sample: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = {
         "name": sample,
@@ -555,7 +555,7 @@ def fixture_sample_hk_bundle_no_files(sample, timestamp):
 
 
 @pytest.fixture(scope="function", name="case_hk_bundle_no_files")
-def fixture_case_hk_bundle_no_files(case_id, timestamp):
+def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = {
         "name": case_id,
@@ -568,7 +568,9 @@ def fixture_case_hk_bundle_no_files(case_id, timestamp):
 
 
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
-def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
+def fixture_compress_hk_fastq_bundle(
+    compression_object: CompressionData, sample_hk_bundle_no_files: dict
+) -> dict:
     """Create a complete bundle mock for testing compression
 
     This bundle contains a pair of fastq files.
@@ -593,14 +595,14 @@ def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_fil
 
 
 @pytest.yield_fixture(scope="function", name="housekeeper_api")
-def fixture_housekeeper_api(hk_config_dict):
+def fixture_housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     """Setup Housekeeper store."""
     _api = MockHousekeeperAPI(hk_config_dict)
     yield _api
 
 
 @pytest.yield_fixture(scope="function", name="real_housekeeper_api")
-def fixture_real_housekeeper_api(hk_config_dict):
+def fixture_real_housekeeper_api(hk_config_dict: dict) -> HousekeeperAPI:
     """Setup a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
@@ -608,7 +610,9 @@ def fixture_real_housekeeper_api(hk_config_dict):
 
 
 @pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
-def fixture_populated_housekeeper_api(housekeeper_api, hk_bundle_data, helpers):
+def fixture_populated_housekeeper_api(
+    housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
     """Setup a Housekeeper store with some data."""
     hk_api = housekeeper_api
     helpers.ensure_hk_bundle(hk_api, hk_bundle_data)
@@ -616,7 +620,9 @@ def fixture_populated_housekeeper_api(housekeeper_api, hk_bundle_data, helpers):
 
 
 @pytest.yield_fixture(scope="function", name="hk_version_obj")
-def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
+def fixture_hk_version_obj(
+    housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
     """Get a housekeeper version object"""
     _version = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
     return _version
