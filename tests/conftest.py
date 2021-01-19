@@ -196,7 +196,7 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
 
 
 @pytest.yield_fixture(scope="function")
-def madeline_api(madeline_output):
+def madeline_api(madeline_output) -> MockMadelineAPI:
     """madeline_api fixture"""
     _api = MockMadelineAPI()
     _api.set_outpath(madeline_output)
@@ -653,7 +653,7 @@ def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
 
 
 @pytest.yield_fixture(scope="function", name="scout_api")
-def fixture_scout_api():
+def fixture_scout_api() -> MockScoutAPI:
     """Setup Scout api."""
     _api = MockScoutAPI()
     return _api

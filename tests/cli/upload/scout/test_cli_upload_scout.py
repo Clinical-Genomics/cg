@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.cli.upload.scout import create_scout_load_config, scout
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 
 
 def check_log(caplog, string=None, warning=None):
@@ -18,13 +19,17 @@ def check_log(caplog, string=None, warning=None):
 
 
 def test_upload_with_load_config(
-    base_context: dict, scout_load_config: Path, upload_scout_api, cli_runner, caplog
+    base_context: dict,
+    scout_load_config: Path,
+    upload_scout_api: UploadScoutAPI,
+    cli_runner,
+    caplog,
 ):
     """Test to upload a case to scout using a load config"""
-    # GIVEN a case with a scout load config in housekeeper
+    # GIVEN a case that exists in status
     case_id = base_context["status_db"].families().first().internal_id
     tag_name = upload_scout_api.get_load_config_tag()
-
+    # GIVEN  that a scout load config exists in housekeeper
     base_context["housekeeper_api"].add_file(
         path=str(scout_load_config), version_obj=None, tags=tag_name
     )

@@ -14,18 +14,20 @@ class HkTagMap(BaseModel):
 
 
 class CaseTags(BaseModel):
-    snv_vcf: TagInfo
+    snv_vcf: TagInfo = None
     snv_research_vcf: TagInfo = None
-    sv_vcf: TagInfo
+    sv_vcf: TagInfo = None
     sv_research_vcf: TagInfo = None
     multiqc_report: TagInfo = TagInfo(scout_field="multiqc", hk_tags={"multiqc-html"})
     delivery_report: TagInfo = TagInfo(scout_field="delivery_report", hk_tags={"delivery-report"})
 
 
 class MipCaseTags(CaseTags):
-    snv_vcf = TagInfo(scout_field="vcf_snv", hk_tags={"vcf-snv-clinical"})
-    snv_research_vcf = TagInfo(scout_field="vcf_snv_research", hk_tags={"vcf-snv-research"})
-    sv_vcf = (TagInfo(scout_field="vcf_sv", hk_tags={"vcf-sv-clinical"}),)
+    snv_vcf: TagInfo = TagInfo(scout_field="vcf_snv", hk_tags={"vcf-snv-clinical"})
+    snv_research_vcf: TagInfo = TagInfo(
+        scout_field="vcf_snv_research", hk_tags={"vcf-snv-research"}
+    )
+    sv_vcf: TagInfo = TagInfo(scout_field="vcf_sv", hk_tags={"vcf-sv-clinical"})
     sv_research_vcf = TagInfo(scout_field="vcf_sv_research", hk_tags={"vcf-sv-research"})
     vcf_str = TagInfo(scout_field="vcf_str", hk_tags={"vcf-str"})
     smn_tsv = TagInfo(scout_field="smn_tsv", hk_tags={"smn-calling"})

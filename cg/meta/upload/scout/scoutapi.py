@@ -194,7 +194,9 @@ class UploadScoutAPI:
         LOG.debug("Found housekeeper version %s", hk_version_obj.id)
 
         load_config: ScoutLoadConfig
+        track = "rare"
         if analysis_obj.pipeline == Pipeline.BALSAMIC:
+            track = "cancer"
             load_config = self.generate_balsamic_config(
                 analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
             )
@@ -202,6 +204,7 @@ class UploadScoutAPI:
             load_config = self.generate_mip_config(
                 analysis_obj=analysis_obj, hk_version_obj=hk_version_obj, rank_score_threshold=5
             )
+        load_config.track = track
 
         return load_config
 
