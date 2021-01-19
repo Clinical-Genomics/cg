@@ -18,7 +18,16 @@ Try to use the following format:
 
 ### Added
 
-- Add command 'delete' to remove cases from the database
+- Add command 'delete case' to remove case from the database
+- Add command 'delete cases' to remove multiple cases from the database
+
+## [18.3.0]
+
+### Changed
+
+- cg workflow mip-dna --panel-bed and --dry-run options can be set when executing full workflow
+- Changed logic for how case links are retrieved in order to support linking of very old cases
+- Analysis not submitted to Trailblazer if executing MIP workflow in dry-run
 
 ## [18.2]
 
