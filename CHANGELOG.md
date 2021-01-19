@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Added
+
+- Add command 'delete' to remove cases from the database
+
 ## [18.2]
 
 ### Changed
