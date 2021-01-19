@@ -51,26 +51,32 @@ class ScoutBalsamicIndividual(ScoutIndividual):
 
 
 class ScoutLoadConfig(BaseModel):
-    owner: str
-    family: str
+    owner: str = None
+    family: str = None
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
     phenotype_terms: Optional[List[str]] = None
     gene_panels: Optional[List[str]] = None
     default_gene_panels: List[str] = []
     cohorts: Optional[List[str]] = None
-    human_genome_build: str
+    human_genome_build: str = None
 
     rank_model_version: Optional[str] = None
     rank_score_threshold: int = None
     sv_rank_model_version: Optional[str] = None
-    analysis_date: datetime
+    analysis_date: datetime = None
     samples: List[ScoutIndividual]
 
     delivery_report: Optional[str] = None
     cnv_report: Optional[str] = None
     multiqc: Optional[str] = None
     track: Literal["rare", "cancer"] = "rare"
+
+    @validator("owner", "family")
+    def field_not_none(cls, v):
+        if v is None:
+            raise ValueError("Owner and family can not be None")
+        return v
 
     class Config:
         validate_assignment = True
@@ -82,6 +88,13 @@ class BalsamicLoadConfig(ScoutLoadConfig):
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
+    samples: List[ScoutBalsamicIndividual] = []
+
+    @validator("vcf_cancer")
+    def check_mandatory_files(cls, v):
+        if v is None:
+            raise ValueError("Vcf can not be none")
+        return v
 
 
 class MipLoadConfig(ScoutLoadConfig):
@@ -96,9 +109,11 @@ class MipLoadConfig(ScoutLoadConfig):
     peddy_ped: Optional[str] = None
     peddy_sex: Optional[str] = None
     peddy_check: Optional[str] = None
+    madeline: Optional[str] = None
+    samples: List[ScoutMipIndividual] = []
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
-    def sample_name_is_some(cls, v):
+    def check_mandatory_files(cls, v):
         if v is None:
-            raise ValueError("Sample name can not be None")
+            raise ValueError("Mandatory vcf can not be None")
         return v

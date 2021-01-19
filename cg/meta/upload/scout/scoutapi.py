@@ -13,7 +13,14 @@ from ruamel import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.apps.scout.scout_load_config import (
+    BalsamicLoadConfig,
+    MipLoadConfig,
+    ScoutBalsamicIndividual,
+    ScoutIndividual,
+    ScoutLoadConfig,
+    ScoutMipIndividual,
+)
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -42,13 +49,14 @@ class UploadScoutAPI:
         self.mip_analysis_api = analysis_api
         self.lims = lims_api
 
-    def build_sample(
+    def add_mandatory_sample_info(
         self,
+        sample: ScoutIndividual,
         sample_obj: models.FamilySample,
         file_handler: ScoutFileHandler,
         sample_name: Optional[str] = None,
-    ) -> ScoutIndividual:
-        """Build the base of a sample that is common for different analysis types"""
+    ) -> None:
+        """Add the information to a sample that is common for different analysis types"""
         sample_id: str = sample_obj.sample.internal_id
         LOG.info("Building sample %s", sample_id)
         lims_sample = dict()
@@ -57,67 +65,67 @@ class UploadScoutAPI:
         except requests.exceptions.HTTPError as ex:
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
-        sample_data = ScoutIndividual(
-            sample_id=sample_id,
-            sex=sample_obj.sample.sex,
-            phenotype=sample_obj.status,
-            analysis_type=sample_obj.sample.application_version.application.analysis_type,
-            sample_name=sample_name or sample_obj.sample.name,
-            tissue_type=lims_sample.get("source", "unknown"),
-        )
-        file_handler.include_sample_alignment_file(sample=sample_data)
-        file_handler.include_sample_files()
+        sample.sample_id = sample_id
+        sample.sex = sample_obj.sample.sex
+        sample.phenotype = sample_obj.status
+        sample.analysis_type = sample_obj.sample.application_version.application.analysis_type
+        sample.sample_name = sample_name or sample_obj.sample.name
+        sample.tissue_type = lims_sample.get("source", "unknown")
 
-        return sample_data
+        file_handler.include_sample_alignment_file(sample=sample)
+        file_handler.include_sample_files(sample=sample)
 
     def build_mip_sample(
         self, sample_obj: models.FamilySample, file_handler: MipFileHandler
-    ) -> ScoutIndividual:
+    ) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
-        sample_data: ScoutIndividual = self.build_sample(
-            sample_obj=sample_obj, file_handler=file_handler
+        sample = ScoutMipIndividual()
+        self.add_mandatory_sample_info(
+            sample=sample, sample_obj=sample_obj, file_handler=file_handler
         )
-        sample_data.father = sample_obj.father.internal_id if sample_obj.father else "0"
-        sample_data.mother = sample_obj.mother.internal_id if sample_obj.mother else "0"
+        sample.father = sample_obj.father.internal_id if sample_obj.father else "0"
+        sample.mother = sample_obj.mother.internal_id if sample_obj.mother else "0"
 
-        return sample_data
+        return sample
 
     def build_balsamic_sample(
         self, sample_obj: models.FamilySample, file_handler: BalsamicFileHandler
-    ) -> ScoutIndividual:
-        """Build a sample with mip specific information"""
-
+    ) -> ScoutBalsamicIndividual:
+        """Build a sample with balsamic specific information"""
+        sample = ScoutBalsamicIndividual()
         # This will be tumor or normal
         sample_name: str = BalsamicAnalysisAPI.get_sample_type(sample_obj)
-        sample_data: ScoutIndividual = self.build_sample(
-            sample_obj=sample_obj, file_handler=file_handler, sample_name=sample_name
+        self.add_mandatory_sample_info(
+            sample=sample, sample_obj=sample_obj, file_handler=file_handler, sample_name=sample_name
         )
-        return sample_data
+        return sample
 
     @staticmethod
-    def get_config_case(analysis_obj: models.Analysis) -> ScoutLoadConfig:
-        """Create a base for scout load config based on all information available in an analysis object"""
-        case_data = ScoutLoadConfig(
-            analysis_date=analysis_obj.completed_at,
-            default_gene_panels=analysis_obj.family.panels,
-            family=analysis_obj.family.internal_id,
-            family_name=analysis_obj.family.name,
-            owner=analysis_obj.family.customer.internal_id,
-            samples=list(),
-        )
-        return case_data
+    def add_mandatory_info_to_load_config(
+        analysis_obj: models.Analysis, load_config: ScoutLoadConfig, file_handler: ScoutFileHandler
+    ) -> None:
+        """Add the mandatory common information to a scout load config object"""
+        load_config.analysis_date = analysis_obj.completed_at
+        load_config.default_gene_panels = analysis_obj.family.panels
+        load_config.family = analysis_obj.family.internal_id
+        load_config.family_name = analysis_obj.family.name
+        load_config.owner = analysis_obj.family.customer.internal_id
+
+        file_handler.include_case_files(load_config)
 
     def generate_mip_config(
         self,
         hk_version_obj: hk_models.Version,
         analysis_obj: models.Analysis,
         rank_score_threshold: int,
-    ) -> dict:
+    ) -> MipLoadConfig:
+        """Create a MIP specific load config for uploading analysis to Scout"""
         LOG.info("Generate load config for mip case")
-        file_handler: MipFileHandler(hk_version_obj=hk_version_obj)
-        config_data: ScoutLoadConfig = self.get_config_case(analysis_obj)
+        file_handler = MipFileHandler(hk_version_obj=hk_version_obj)
+        config_data: MipLoadConfig = MipLoadConfig()
 
+        self.add_mandatory_info_to_load_config(analysis_obj=analysis_obj, load_config=config_data)
         analysis_data: dict = self.mip_analysis_api.get_latest_metadata(
             analysis_obj.family.internal_id
         )
@@ -134,64 +142,43 @@ class UploadScoutAPI:
             )
             or None
         )
-        LOG.debug("Including the mip specific vcf files")
 
-        LOG.debug("Including optional mip files")
-        include_files(
-            data=config_data,
-            hk_version_obj=hk_version_obj,
-            hk_tag_map=CASE_TAG_MAP["optional_mip_to_tag"],
-            skip_missing=True,
-        )
+        LOG.info("Building samples")
+        sample: models.FamilySample
+        for sample in analysis_obj.family.links:
+            config_data.samples.append(
+                self.build_mip_sample(sample_obj=sample, file_handler=file_handler)
+            )
 
         if self._is_multi_sample_case(config_data):
             if self._is_family_case(config_data):
                 svg_path: Path = self._run_madeline(analysis_obj.family)
-                config_data["madeline"] = str(svg_path)
+                config_data.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-        LOG.info("Building samples")
-        sample: models.FamilySample
-        config_data["samples"] = [
-            self.build_mip_sample(sample_obj=sample, hk_version_obj=hk_version_obj)
-            for sample in analysis_obj.family.links
-        ]
-
         return config_data
 
     def generate_balsamic_config(
         self, analysis_obj: models.Analysis, hk_version_obj: hk_models.Version
-    ) -> dict:
+    ) -> BalsamicLoadConfig:
         LOG.info("Generate load config for balsamic case")
-        config_data: dict = self.get_config_case(analysis_obj)
-        config_data["human_genome_build"] = "37"
-        config_data["rank_score_threshold"] = 0
+        file_handler = BalsamicFileHandler(hk_version_obj=hk_version_obj)
+        load_config: BalsamicLoadConfig = BalsamicLoadConfig()
+        self.add_mandatory_info_to_load_config(analysis_obj=analysis_obj, load_config=load_config)
+        load_config.human_genome_build = "37"
+        load_config.rank_score_threshold = 0
 
-        LOG.debug("Including the balsamic specific vcf files")
-        include_files(
-            data=config_data,
-            hk_version_obj=hk_version_obj,
-            hk_tag_map=CASE_TAG_MAP["cancer_vcf_to_tag"],
-        )
-
-        LOG.debug("Including optional balsamic files")
-        include_files(
-            data=config_data,
-            hk_version_obj=hk_version_obj,
-            hk_tag_map=CASE_TAG_MAP["optional_balsamic_to_tag"],
-            skip_missing=True,
-        )
         LOG.info("Building samples")
         sample: models.FamilySample
-        config_data["samples"] = [
-            self.build_balsamic_sample(sample_obj=sample, hk_version_obj=hk_version_obj)
-            for sample in analysis_obj.family.links
-        ]
+        for sample in analysis_obj.family.links:
+            load_config.samples.append(
+                self.build_balsamic_sample(sample_obj=sample, file_handler=file_handler)
+            )
 
-        return config_data
+        return load_config
 
     def generate_config(
         self, analysis_obj: models.Analysis, rank_score_threshold: int = 5
@@ -201,33 +188,22 @@ class UploadScoutAPI:
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version: hk_models.Version = self.housekeeper.last_version(
+        hk_version_obj: hk_models.Version = self.housekeeper.last_version(
             analysis_obj.family.internal_id
         )
-        LOG.debug("Found housekeeper version %s", hk_version.id)
+        LOG.debug("Found housekeeper version %s", hk_version_obj.id)
 
-        case_data: dict
-        analysis_type = "rare"
+        load_config: ScoutLoadConfig
         if analysis_obj.pipeline == Pipeline.BALSAMIC:
-            analysis_type = "cancer"
-            case_data = self.generate_balsamic_config(
-                analysis_obj=analysis_obj, hk_version_obj=hk_version
+            load_config = self.generate_balsamic_config(
+                analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
             )
         else:
-            case_data = self.generate_mip_config(
-                analysis_obj=analysis_obj, hk_version_obj=hk_version, rank_score_threshold=5
+            load_config = self.generate_mip_config(
+                analysis_obj=analysis_obj, hk_version_obj=hk_version_obj, rank_score_threshold=5
             )
 
-        samples: Iterable[dict] = self.build_samples(
-            analysis_obj=analysis_obj, hk_version_object=hk_version, analysis_type=analysis_type
-        )
-        for sample in samples:
-            case_data["samples"].append(sample)
-
-        # Validate that the config is correct
-        scout_case = ScoutLoadConfig(**case_data)
-
-        return scout_case
+        return load_config
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -247,7 +223,7 @@ class UploadScoutAPI:
     ) -> hk_models.File:
         """Add scout load config to hk bundle"""
         LOG.info("Adding load config to housekeeper")
-        tag_name: str = UploadScoutAPI.get_load_config_tag()
+        tag_name: str = self.get_load_config_tag()
         version_obj: hk_models.Version = self.housekeeper.last_version(bundle=case_id)
         uploaded_config_file: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
             version_obj=version_obj, tags={tag_name}
@@ -268,21 +244,22 @@ class UploadScoutAPI:
         return file_obj
 
     @staticmethod
-    def _is_family_case(data: dict) -> bool:
+    def _is_family_case(load_config: MipLoadConfig) -> bool:
         """Check if there are any linked individuals in a case"""
-        for sample in data["samples"]:
-            if sample["mother"] and sample["mother"] != "0":
+        sample: ScoutMipIndividual
+        for sample in load_config.samples:
+            if sample.mother and sample.mother != "0":
                 return True
-            if sample["father"] and sample["father"] != "0":
+            if sample.father and sample.father != "0":
                 return True
         return False
 
     @staticmethod
-    def _is_multi_sample_case(data) -> bool:
-        return len(data["samples"]) > 1
+    def _is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
+        return len(load_config.samples) > 1
 
     def _run_madeline(self, family_obj: models.Family) -> Path:
-        """Generate a madeline file for an analysis."""
+        """Generate a madeline file for an analysis. Use customer sample names"""
         samples = [
             {
                 "sample": link_obj.sample.name,
