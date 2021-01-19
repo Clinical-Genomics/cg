@@ -15,7 +15,15 @@ LOG = logging.getLogger(__name__)
 @click.option("--yes", is_flag=True)
 @click.pass_context
 def case(context, case_id: str, dry_run: bool, yes: bool):
-    """Delete case with links and samples"""
+    """Delete case with links and samples
+
+    The command will stop if the case has any analyses made on it.
+    The command will ask the user about deleting links between case and samples
+    If a sample has its last link removed the command will ask about deleting the sample
+    The command will not delete samples that has been processed (received etc.)
+    The command will not delete a sample that has been marked as mother or father to another
+    sample.
+    """
     if not case_id:
         LOG.info("Please provide a case-id")
         context.abort()

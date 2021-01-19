@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.group()
 @click.pass_context
 def delete(context):
-    """delete files with CG."""
+    """delete database records in CG."""
     LOG.info("Running CG delete")
     context.obj["status_db"] = Store(context.obj["database"])
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
