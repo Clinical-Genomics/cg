@@ -39,7 +39,8 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
     nargs=2,
     type=click.Tuple([str, str]),
     multiple=True,
-    help="Give an identifier on sample and the value to use it with, e.g. -id name Prov52",
+    help="Give an identifier on sample and the value to use it with, e.g. --sample-identifier "
+    "name Prov52",
 )
 @click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
