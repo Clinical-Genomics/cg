@@ -48,6 +48,21 @@ def test_delete_case_without_links(cli_runner, base_context, base_store: Store, 
     assert base_store.Family.query.count() == 0
 
 
+def test_delete_case_with_analysis(cli_runner, base_context, base_store: Store, helpers):
+    """Test that the delete case can't delete a case with analysis"""
+    # GIVEN a database with a case with an analysis
+    analysis_obj = helpers.add_analysis(base_store)
+    case_id = analysis_obj.family.internal_id
+
+    # WHEN deleting a case
+
+    result = cli_runner.invoke(case, [case_id, "--yes"], obj=base_context)
+
+    # THEN then it should have been deleted
+    assert result.exit_code != SUCCESS
+    assert base_store.Family.query.count() == 1
+
+
 def test_delete_case_with_dry_run(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete the case in dry-run mode """
     # GIVEN a database with a case
