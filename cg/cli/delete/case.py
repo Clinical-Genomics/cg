@@ -24,10 +24,6 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
     The command will not delete a sample that has been marked as mother or father to another
     sample.
     """
-    if not case_id:
-        LOG.info("Please provide a case-id")
-        context.abort()
-
     status_db: Store = context.obj["status_db"]
     case_obj = status_db.family(case_id)
     if not case_obj:
