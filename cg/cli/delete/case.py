@@ -32,8 +32,9 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
 
     context.invoke(print_case, family_ids=[case_id])
 
-    if case_obj.links and not (yes or click.confirm(f"Case {case_id} has links: "
-                                                    f"{case_obj.links}, Continue?")):
+    if case_obj.links and not (
+        yes or click.confirm(f"Case {case_id} has links: " f"{case_obj.links}, Continue?")
+    ):
         context.abort()
 
     _delete_links_and_samples(case_obj, context, dry_run, status_db, yes)
@@ -51,12 +52,7 @@ def _delete_links_and_samples(case_obj, context, dry_run, status_db, yes):
     """Delete all links from a case to samples"""
     for case_link in case_obj.links:
         sample = case_link.sample
-        if not (
-            yes
-            or click.confirm(
-                f"Do you want to delete link: {case_link}?"
-            )
-        ):
+        if not (yes or click.confirm(f"Do you want to delete link: {case_link}?")):
             context.abort()
         else:
             LOG.info("Deleting link: %s", case_link)
@@ -68,8 +64,13 @@ def _delete_links_and_samples(case_obj, context, dry_run, status_db, yes):
 
 def _delete_sample(dry_run, sample, status_db, yes):
 
-    if sample.received_at or sample.prepared_at or sample.sequenced_at or sample.delivered_at or \
-            sample.invoice_id:
+    if (
+        sample.received_at
+        or sample.prepared_at
+        or sample.sequenced_at
+        or sample.delivered_at
+        or sample.invoice_id
+    ):
         LOG.info("Can't delete processed sample: %s", sample.internal_id)
         LOG.info("sample was received: %s", sample.received_at)
         LOG.info("sample was prepared: %s", sample.prepared_at)
@@ -81,9 +82,9 @@ def _delete_sample(dry_run, sample, status_db, yes):
     if not sample.links and not sample.father_links and not sample.mother_links:
 
         if yes or click.confirm(
-                f"Sample {sample.internal_id} is not linked to anything, "
-                f"do you want to delete sample:"
-                f" {sample}?"
+            f"Sample {sample.internal_id} is not linked to anything, "
+            f"do you want to delete sample:"
+            f" {sample}?"
         ):
             LOG.info("Deleting sample: %s", sample)
             if not dry_run:
