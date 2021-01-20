@@ -412,7 +412,7 @@ class MicrosaltAnalysisAPI:
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def store_microbial_analysis_statusdb(self, case_id: str):
+    def store_microbial_analysis_statusdb(self, case_id: str) -> None:
         """Creates an analysis object in StatusDB"""
         deliverables_path = self.get_deliverables_file_path(case_id=case_id)
         analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
