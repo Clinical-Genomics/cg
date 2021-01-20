@@ -326,6 +326,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
             customer_id = data.get("customer")
             customer_name = self.status.customer(customer_id).name
 
-            message += f" {customer_name} ({customer_id})"
+            message += f", {customer_name} ({customer_id})"
 
         return message
