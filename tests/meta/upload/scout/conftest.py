@@ -213,6 +213,15 @@ def fixture_mip_analysis_hk_api(
     return housekeeper_api
 
 
+@pytest.fixture(name="balsamic_analysis_hk_api")
+def fixture_balsamic_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a housekeeper api populated with some mip analysis files"""
+    helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
 @pytest.fixture(name="mip_file_handler")
 def fixture_mip_file_handler(mip_analysis_hk_version: hk_models.Version) -> MipFileHandler:
     return MipFileHandler(hk_version_obj=mip_analysis_hk_version)
@@ -279,6 +288,28 @@ def fixture_upload_mip_analysis_scout_api(
 
     _api = UploadScoutAPI(
         hk_api=mip_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=analysis_mock,
+        lims_api=lims_api,
+    )
+
+    yield _api
+
+
+@pytest.yield_fixture(name="upload_balsamic_analysis_scout_api")
+def fixture_upload_balsamic_analysis_scout_api(
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: List[dict],
+    balsamic_analysis_hk_api: MockHousekeeperAPI,
+) -> UploadScoutAPI:
+    """Fixture for upload_scout_api"""
+    analysis_mock = MockAnalysis()
+    lims_api = MockLims(lims_samples)
+
+    _api = UploadScoutAPI(
+        hk_api=balsamic_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,

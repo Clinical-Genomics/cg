@@ -7,18 +7,6 @@ import yaml
 
 from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
-from cg.store import Store, models
-
-CASE_FILE_PATHS = ["multiqc"]
-
-RESULT_KEYS = [
-    "family",
-    "human_genome_build",
-    "rank_model_version",
-    "sv_rank_model_version",
-]
-
-SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
 def test_unlinked_family_is_linked(upload_scout_api: UploadScoutAPI):
@@ -54,54 +42,6 @@ def test_family_is_linked(upload_scout_api: UploadScoutAPI):
     res = upload_scout_api._is_family_case(family_data)
     # THEN assert that the test returns True
     assert res is True
-
-
-@pytest.mark.parametrize("result_key", RESULT_KEYS)
-def test_generate_config_adds_meta_result_key(
-    result_key: str,
-    mip_analysis_obj: models.Analysis,
-    upload_mip_analysis_scout_api: UploadScoutAPI,
-):
-    """Test that generate config adds the expected result keys"""
-    # GIVEN a status db and hk with an analysis
-    assert mip_analysis_obj
-
-    # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
-        analysis_obj=mip_analysis_obj
-    )
-
-    # THEN the config should contain the rank model version used
-    assert result_data.dict()[result_key]
-
-
-def test_generate_config_adds_sample_paths(
-    sample_id: str, mip_analysis_obj: models.Analysis, upload_mip_analysis_scout_api: UploadScoutAPI
-):
-    """Test that generate config adds vcf2cytosure file"""
-    # GIVEN a status db and hk with an analysis
-
-    # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_analysis_obj)
-
-    # THEN the config should contain the sample file path for each sample
-    sample: ScoutMipIndividual
-    for sample in result_data.samples:
-        if sample.sample_id == sample_id:
-            assert sample.vcf2cytosure
-
-
-def test_generate_config_adds_case_paths(
-    sample_id: str, mip_analysis_obj: Store.Analysis, upload_mip_analysis_scout_api: UploadScoutAPI
-):
-    """Test that generate config adds case file paths"""
-    # GIVEN a status db and hk with an analysis
-
-    # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_analysis_obj)
-
-    # THEN the config should contain the multiqc file path
-    assert result_data.multiqc
 
 
 def _file_exists_on_disk(file_path: Path):
