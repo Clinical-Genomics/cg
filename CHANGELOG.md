@@ -21,6 +21,12 @@ Try to use the following format:
 - Add command 'delete case' to remove case from the database
 - Add command 'delete cases' to remove multiple cases from the database
 
+## [18.5.1]
+
+### Fixed
+
+- Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
+
 ## [18.5.0]
 
 ### Added
