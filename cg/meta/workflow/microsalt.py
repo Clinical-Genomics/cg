@@ -89,10 +89,6 @@ class MicrosaltAnalysisAPI:
             self.root_dir, "results", "reports", "trailblazer", f"{order_id}_slurm_ids.yaml"
         )
 
-    def get_application_type(self, case_id: str) -> str:
-        case_obj: models.Family = self.db.family(case_id)
-        return case_obj.links[0].sample.application_version.application.prep_category
-
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
@@ -451,7 +447,7 @@ class MicrosaltAnalysisAPI:
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
-            type=self.get_application_type(case_id=case_id),
+            type="other",
             out_dir=self.get_deliverables_file_path(case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             priority=self.get_priority(case_id),
