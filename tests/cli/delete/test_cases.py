@@ -33,3 +33,24 @@ def test_set_cases_by_sample_identifiers(
     # THEN it should name the case to be changed
     assert case.internal_id in caplog.text
     assert case.name in caplog.text
+
+
+def test_delete_cases_with_dry_run(cli_runner, base_context, base_store: Store, helpers, caplog):
+    """Test that the delete cases will not delete the cases in dry-run mode """
+    # GIVEN a database with a case
+    case_obj = helpers.add_family(base_store)
+    case_id = case_obj.internal_id
+    sample = helpers.add_sample(base_store)
+    helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
+
+    # WHEN deleting a case
+    caplog.set_level(logging.DEBUG)
+    cli_runner.invoke(
+        cases,
+        ["--sample-identifier", "name", sample.name, "--dry-run"],
+        obj=base_context,
+    )
+
+    # THEN then it should not have been deleted
+    assert "Cases (that will NOT be deleted due to --dry-run):" in caplog.text
+    assert case_id in caplog.text

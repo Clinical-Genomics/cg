@@ -31,7 +31,7 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
         context.abort()
 
     if case_obj.analyses:
-        LOG.error("Can't delete case with analyses %s", case_obj.analyses)
+        LOG.error("Can NOT delete case with analyses %s", case_obj.analyses)
         context.abort()
 
     context.invoke(print_case, family_ids=[case_id])
@@ -43,51 +43,66 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
 
     _delete_links_and_samples(case_obj, context, dry_run, status_db, yes)
 
-    if not (yes or click.confirm(f"Do you want to delete case: {case_obj}?")):
+    if not (yes or click.confirm(f"Do you want to DELETE case: {case_obj}?")):
         context.abort()
 
-    LOG.info("Deleting case: %s", case_id)
+    if dry_run:
+        LOG.info("Case: %s was NOT deleted due to --dry-run", case_id)
+        return
 
-    if not dry_run:
-        status_db.delete_commit(case_obj)
+    LOG.info("Deleting case: %s", case_id)
+    status_db.delete_commit(case_obj)
 
 
 def _delete_links_and_samples(case_obj, context, dry_run, status_db, yes):
     """Delete all links from a case to samples"""
+    samples_to_delete = []
     for case_link in case_obj.links:
-        sample = case_link.sample
-        if not (yes or click.confirm(f"Do you want to delete link: {case_link}?")):
+        if not (yes or click.confirm(f"Do you want to DELETE link: {case_link}?")):
             context.abort()
+
+        samples_to_delete.append(case_link.sample)
+
+        if dry_run:
+            LOG.info("Link: %s was NOT deleted due to --dry-run", case_link)
         else:
             LOG.info("Deleting link: %s", case_link)
-            if not dry_run:
-                status_db.delete_commit(case_link)
+            status_db.delete_commit(case_link)
 
+    for sample in samples_to_delete:
         _delete_sample(dry_run, sample, status_db, yes)
 
 
 def _delete_sample(dry_run, sample, status_db, yes):
-    if _has_sample_been_processed(sample):
+    if _has_sample_been_lab_processed(sample):
         _log_sample_process_information(sample)
         return
 
     if _is_sample_linked(sample):
-        LOG.info("Can't delete sample: %s", sample.internal_id)
+        LOG.info("Can NOT delete sample: %s", sample.internal_id)
         _log_sample_links(sample)
         return
 
-    if yes or click.confirm(
-        f"Sample {sample.internal_id} is not linked to anything, "
-        f"do you want to delete sample:"
-        f" {sample}?"
+    if not (
+        yes
+        or click.confirm(
+            f"Sample {sample.internal_id} is not linked to anything, "
+            f"do you want to DELETE sample:"
+            f" {sample}?"
+        )
     ):
-        LOG.info("Deleting sample: %s", sample)
-        if not dry_run:
-            status_db.delete(sample)
+        return
+
+    if dry_run:
+        LOG.info("Sample: %s was NOT deleted due to --dry-run", sample)
+        return
+
+    LOG.info("Deleting sample: %s", sample)
+    status_db.delete(sample)
 
 
 def _log_sample_process_information(sample):
-    LOG.info("Can't delete processed sample: %s", sample.internal_id)
+    LOG.info("Can NOT delete processed sample: %s", sample.internal_id)
     LOG.info("Sample was received: %s", sample.received_at)
     LOG.info("Sample was prepared: %s", sample.prepared_at)
     LOG.info("Sample was sequenced: %s", sample.sequenced_at)
@@ -104,7 +119,7 @@ def _log_sample_links(sample):
         LOG.info("Sample is linked as father to: %s", sample_link.father.internal_id)
 
 
-def _has_sample_been_processed(sample: models.Sample):
+def _has_sample_been_lab_processed(sample: models.Sample):
     return (
         sample.received_at
         or sample.prepared_at

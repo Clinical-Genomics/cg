@@ -32,6 +32,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
 
 
 @click.command()
+@click.option("--dry-run", is_flag=True)
 @click.option(
     "--sample-identifier",
     "identifiers",
@@ -44,6 +45,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
 @click.pass_context
 def cases(
     context: click.Context,
+    dry_run: bool,
     identifiers: click.Tuple([str, str]),
 ):
     """Delete many cases of samples at the same time"""
@@ -54,7 +56,10 @@ def cases(
         LOG.error("No cases to delete!")
         raise click.Abort
 
-    LOG.info("Would delete cases:")
+    if dry_run:
+        LOG.info("Cases (that will NOT be deleted due to --dry-run):")
+    else:
+        LOG.info("Would DELETE cases:")
 
     for _case in _cases:
         LOG.info(_case)
@@ -66,4 +71,5 @@ def cases(
         context.invoke(
             case,
             case_id=_case.internal_id,
+            dry_run=dry_run,
         )
