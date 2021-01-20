@@ -1,10 +1,10 @@
 """CLI for deleting case with CG"""
 
 import logging
+
 import click
 from cg.cli.get import family as print_case
-
-from cg.store import Store
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
     context.invoke(print_case, family_ids=[case_id])
 
     if case_obj.links and not (
-        yes or click.confirm(f"Case {case_id} has links: " f"{case_obj.links}, Continue?")
+            yes or click.confirm(f"Case {case_id} has links: {case_obj.links}, Continue?")
     ):
         context.abort()
 
@@ -67,37 +67,50 @@ def _delete_links_and_samples(case_obj, context, dry_run, status_db, yes):
 
 
 def _delete_sample(dry_run, sample, status_db, yes):
-
-    if (
-        sample.received_at
-        or sample.prepared_at
-        or sample.sequenced_at
-        or sample.delivered_at
-        or sample.invoice_id
-    ):
-        LOG.info("Can't delete processed sample: %s", sample.internal_id)
-        LOG.info("sample was received: %s", sample.received_at)
-        LOG.info("sample was prepared: %s", sample.prepared_at)
-        LOG.info("sample was sequenced: %s", sample.sequenced_at)
-        LOG.info("sample was delivered: %s", sample.delivered_at)
-        LOG.info("sample has invoice: %s", sample.invoice_id)
+    if _has_sample_been_processed(sample):
+        _log_sample_process_information(sample)
         return
 
-    if not sample.links and not sample.father_links and not sample.mother_links:
+    if _is_sample_linked(sample):
+        LOG.info("Can't delete sample: %s", sample.internal_id)
+        _log_sample_links( sample )
+        return
 
-        if yes or click.confirm(
+    if yes or click.confirm(
             f"Sample {sample.internal_id} is not linked to anything, "
             f"do you want to delete sample:"
             f" {sample}?"
-        ):
-            LOG.info("Deleting sample: %s", sample)
-            if not dry_run:
-                status_db.delete(sample)
-    else:
-        LOG.info("Can't delete sample: %s", sample.internal_id)
-        for sample_link in sample.links:
-            LOG.info("sample is linked to: %s", sample_link.family.internal_id)
-        for sample_link in sample.mother_links:
-            LOG.info("sample is linked as mother to: %s", sample_link.mother.internal_id)
-        for sample_link in sample.father_links:
-            LOG.info("sample is linked as father to: %s", sample_link.father.internal_id)
+    ):
+        LOG.info("Deleting sample: %s", sample)
+        if not dry_run:
+            status_db.delete(sample)
+
+
+def _log_sample_process_information(sample):
+    LOG.info("Can't delete processed sample: %s", sample.internal_id)
+    LOG.info("sample was received: %s", sample.received_at)
+    LOG.info("sample was prepared: %s", sample.prepared_at)
+    LOG.info("sample was sequenced: %s", sample.sequenced_at)
+    LOG.info("sample was delivered: %s", sample.delivered_at)
+    LOG.info("sample has invoice: %s", sample.invoice_id)
+
+
+def _log_sample_links(sample):
+    for sample_link in sample.links:
+        LOG.info("sample is linked to: %s", sample_link.family.internal_id)
+    for sample_link in sample.mother_links:
+        LOG.info("sample is linked as mother to: %s", sample_link.mother.internal_id)
+    for sample_link in sample.father_links:
+        LOG.info("sample is linked as father to: %s", sample_link.father.internal_id)
+
+
+def _has_sample_been_processed(sample: models.Sample):
+    return (sample.received_at
+            or sample.prepared_at
+            or sample.sequenced_at
+            or sample.delivered_at
+            or sample.invoice_id)
+
+
+def _is_sample_linked(sample: models.Sample):
+    return sample.links or sample.father_links or sample.mother_links
