@@ -170,7 +170,7 @@ def run(
     microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
     try:
         microsalt_analysis_api.submit_trailblazer_analysis(case_id=case_id)
-    except:
+    except Exception:
         LOG.warning("Trailblazer warning: Could not track analysis progress for case %s!", case_id)
 
 
