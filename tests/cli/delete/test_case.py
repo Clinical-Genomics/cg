@@ -28,7 +28,6 @@ def test_delete_case_bad_case(cli_runner, base_context):
     result = cli_runner.invoke(case, [case_id], obj=base_context)
 
     # THEN then it should complain on missing case
-    print(result.output)
     assert result.exit_code != SUCCESS
 
 
