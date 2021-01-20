@@ -14,6 +14,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Added
+
+- Add command 'delete case' to remove case from the database
+- Add command 'delete cases' to remove multiple cases from the database
+
 ## [18.5.1]
 
 ### Fixed
@@ -38,8 +45,6 @@ Try to use the following format:
 - cg workflow mip-dna --panel-bed and --dry-run options can be set when executing full workflow
 - Changed logic for how case links are retrieved in order to support linking of very old cases
 - Analysis not submitted to Trailblazer if executing MIP workflow in dry-run
-
-
 
 ## [18.2]
 

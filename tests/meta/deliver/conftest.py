@@ -10,7 +10,7 @@ from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.yield_fixture(scope="function", name="deliver_api")
+@pytest.fixture(scope="function", name="deliver_api")
 def fixture_deliver_api(
     analysis_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path
 ) -> DeliverAPI:

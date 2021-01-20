@@ -105,7 +105,7 @@ class CompressionData:
         return self.fastq_second
 
 
-@pytest.yield_fixture(scope="function", name="compression_files")
+@pytest.fixture(scope="function", name="compression_files")
 def fixture_compression_files(compression_object):
     """Return a small class with compression files"""
     return CompressionData(
@@ -117,14 +117,14 @@ def fixture_compression_files(compression_object):
     )
 
 
-@pytest.yield_fixture(scope="function", name="real_crunchy_api")
+@pytest.fixture(scope="function", name="real_crunchy_api")
 def fixture_real_crunchy_api(crunchy_config_dict):
     """crunchy api fixture"""
 
     yield CrunchyAPI(crunchy_config_dict)
 
 
-@pytest.yield_fixture(scope="function", name="compress_api")
+@pytest.fixture(scope="function", name="compress_api")
 def fixture_compress_api(real_crunchy_api, housekeeper_api):
     """compress api fixture"""
     hk_api = housekeeper_api

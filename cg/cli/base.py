@@ -7,6 +7,7 @@ import coloredlogs
 import ruamel.yaml
 
 import cg
+from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd
 from cg.store import Store
@@ -79,6 +80,7 @@ base.add_command(backup)
 base.add_command(clean)
 base.add_command(compress)
 base.add_command(decompress)
+base.add_command(delete)
 base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)

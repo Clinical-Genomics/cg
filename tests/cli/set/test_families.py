@@ -1,4 +1,4 @@
-"""Test methods for cg/cli/set/samples"""
+"""Test methods for cg/cli/set/families"""
 import logging
 
 import pytest
@@ -28,7 +28,6 @@ def test_set_families_by_sample_identifiers(
         families,
         ["--sample-identifier", identifier_key, identifier_value],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN it should name the family to be changed
