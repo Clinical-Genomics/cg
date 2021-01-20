@@ -12,6 +12,7 @@ MASTER_LIST = (
     "NEURODEG",
     "NMD",
     "mcarta",
+    "MHT",
     "MIT",
     "MOVE",
     "mtDNA",

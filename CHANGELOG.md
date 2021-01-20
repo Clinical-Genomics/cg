@@ -21,6 +21,17 @@ Try to use the following format:
 - Add command 'delete case' to remove case from the database
 - Add command 'delete cases' to remove multiple cases from the database
 
+## [18.5.0]
+
+### Added
+- Added MHT to gene panel master-list
+
+## [18.4.0]
+
+### Added
+
+- Added submission of microsalt cases for tracking in Trailblazer
+
 ## [18.3.0]
 
 ### Changed
