@@ -14,6 +14,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [18.4.0]
+
+### Added
+
+- Added submission of microsalt cases for tracking in Trailblazer
+
 ## [18.3.0]
 
 ### Changed
