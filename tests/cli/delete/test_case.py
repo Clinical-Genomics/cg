@@ -178,32 +178,58 @@ def test_delete_case_with_father_links(cli_runner, base_context, base_store: Sto
     assert base_store.Sample.query.count() == 2
 
 
-def test_delete_case_with_mother_links(cli_runner, base_context, base_store: Store, helpers):
+def test_delete_mother_case(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete a sample linked to another case as mother"""
-    # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store, "first_case_linked_to_sample")
-    case_id = case_obj.internal_id
+    # GIVEN a database with a mother case and a child case with the mother as mother
+    case_mother = helpers.add_family(base_store, "case_mother")
+    case_mother_id = case_mother.internal_id
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_child = helpers.add_sample(base_store, "child")
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample_mother)
-    case_obj2 = helpers.add_family(base_store, "second_case_linked_to_sample")
+    helpers.add_relationship(store=base_store, family=case_mother, sample=sample_mother)
+    case_child = helpers.add_family(base_store, "case_child")
     helpers.add_relationship(
-        store=base_store, family=case_obj2, sample=sample_child, mother=sample_mother
+        store=base_store, family=case_child, sample=sample_child, mother=sample_mother
     )
 
     assert base_store.Family.query.count() == 2
     assert base_store.FamilySample.query.count() == 2
     assert base_store.Sample.query.count() == 2
 
-    # WHEN deleting a case
-    result = cli_runner.invoke(case, [case_id, "--yes"], obj=base_context)
+    # WHEN deleting the mother case
+    result = cli_runner.invoke(case, [case_mother_id, "--yes"], obj=base_context)
 
-    # THEN then the first case should be gone with its link to the sample but not the other or
-    # the mother sample
+    # THEN the mother sample is not deletable
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 1
     assert base_store.FamilySample.query.count() == 1
     assert base_store.Sample.query.count() == 2
+
+
+def test_delete_child_case(cli_runner, base_context, base_store: Store, helpers):
+    """Test that the delete case will not delete a sample linked to another case as mother"""
+    # GIVEN a database with a mother case and a child case with the mother as mother
+    case_mother = helpers.add_family(base_store, "case_mother")
+    sample_mother = helpers.add_sample(base_store, "mother")
+    sample_child = helpers.add_sample(base_store, "child")
+    helpers.add_relationship(store=base_store, family=case_mother, sample=sample_mother)
+    case_child = helpers.add_family(base_store, "case_child")
+    case_child_id = case_child.internal_id
+    helpers.add_relationship(
+        store=base_store, family=case_child, sample=sample_child, mother=sample_mother
+    )
+
+    assert base_store.Family.query.count() == 2
+    assert base_store.FamilySample.query.count() == 2
+    assert base_store.Sample.query.count() == 2
+
+    # WHEN deleting the child case
+    result = cli_runner.invoke(case, [case_child_id, "--yes"], obj=base_context)
+
+    # THEN the child sample is deletable
+    assert result.exit_code == SUCCESS
+    assert base_store.Family.query.count() == 1
+    assert base_store.FamilySample.query.count() == 1
+    assert base_store.Sample.query.count() == 1
 
 
 def test_delete_trio_case(cli_runner, base_context, base_store: Store, helpers):
