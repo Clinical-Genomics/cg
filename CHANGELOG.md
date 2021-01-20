@@ -14,7 +14,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## 18.5.0
 
 ### Added
 - Added MHT to gene panel master-list
