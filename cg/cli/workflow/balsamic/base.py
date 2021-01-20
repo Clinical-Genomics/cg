@@ -138,6 +138,9 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         balsamic_analysis_api.balsamic_api.run_analysis(
             arguments=arguments, run_analysis=run_analysis, dry=dry
         )
+        if dry:
+            return
+
         balsamic_analysis_api.trailblazer_api.mark_analyses_deleted(case_id=case_id)
         balsamic_analysis_api.trailblazer_api.add_pending_analysis(
             case_id=case_id,

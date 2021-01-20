@@ -10,6 +10,7 @@ import click
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
@@ -48,6 +49,7 @@ def microsalt(context: click.Context):
         db=Store(context.obj["database"]),
         hk_api=HousekeeperAPI(context.obj),
         lims_api=LimsAPI(context.obj),
+        trailblazer_api=TrailblazerAPI(context.obj),
         hermes_api=HermesApi(context.obj),
         config=context.obj["microsalt"],
     )
@@ -162,8 +164,14 @@ def run(
         ]
     microsalt_analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
 
-    if not sample_id and not dry_run:
-        microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    if sample_id or dry_run:
+        return
+
+    microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    try:
+        microsalt_analysis_api.submit_trailblazer_analysis(case_id=case_id)
+    except:
+        LOG.warning("Trailblazer warning: Could not track analysis progress for case %s!", case_id)
 
 
 @microsalt.command()
