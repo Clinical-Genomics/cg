@@ -88,20 +88,20 @@ def _delete_sample(dry_run, sample, status_db, yes):
 
 def _log_sample_process_information(sample):
     LOG.info("Can't delete processed sample: %s", sample.internal_id)
-    LOG.info("sample was received: %s", sample.received_at)
-    LOG.info("sample was prepared: %s", sample.prepared_at)
-    LOG.info("sample was sequenced: %s", sample.sequenced_at)
-    LOG.info("sample was delivered: %s", sample.delivered_at)
-    LOG.info("sample has invoice: %s", sample.invoice_id)
+    LOG.info("Sample was received: %s", sample.received_at)
+    LOG.info("Sample was prepared: %s", sample.prepared_at)
+    LOG.info("Sample was sequenced: %s", sample.sequenced_at)
+    LOG.info("Sample was delivered: %s", sample.delivered_at)
+    LOG.info("Sample has invoice: %s", sample.invoice_id)
 
 
 def _log_sample_links(sample):
     for sample_link in sample.links:
-        LOG.info("sample is linked to: %s", sample_link.family.internal_id)
+        LOG.info("Sample is linked to: %s", sample_link.family.internal_id)
     for sample_link in sample.mother_links:
-        LOG.info("sample is linked as mother to: %s", sample_link.mother.internal_id)
+        LOG.info("Sample is linked as mother to: %s", sample_link.mother.internal_id)
     for sample_link in sample.father_links:
-        LOG.info("sample is linked as father to: %s", sample_link.father.internal_id)
+        LOG.info("Sample is linked as father to: %s", sample_link.father.internal_id)
 
 
 def _has_sample_been_processed(sample: models.Sample):
