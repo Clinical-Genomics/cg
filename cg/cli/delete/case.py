@@ -37,7 +37,7 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
     context.invoke(print_case, family_ids=[case_id])
 
     if case_obj.links and not (
-            yes or click.confirm(f"Case {case_id} has links: {case_obj.links}, Continue?")
+        yes or click.confirm(f"Case {case_id} has links: {case_obj.links}, Continue?")
     ):
         context.abort()
 
@@ -73,13 +73,13 @@ def _delete_sample(dry_run, sample, status_db, yes):
 
     if _is_sample_linked(sample):
         LOG.info("Can't delete sample: %s", sample.internal_id)
-        _log_sample_links( sample )
+        _log_sample_links(sample)
         return
 
     if yes or click.confirm(
-            f"Sample {sample.internal_id} is not linked to anything, "
-            f"do you want to delete sample:"
-            f" {sample}?"
+        f"Sample {sample.internal_id} is not linked to anything, "
+        f"do you want to delete sample:"
+        f" {sample}?"
     ):
         LOG.info("Deleting sample: %s", sample)
         if not dry_run:
@@ -105,11 +105,13 @@ def _log_sample_links(sample):
 
 
 def _has_sample_been_processed(sample: models.Sample):
-    return (sample.received_at
-            or sample.prepared_at
-            or sample.sequenced_at
-            or sample.delivered_at
-            or sample.invoice_id)
+    return (
+        sample.received_at
+        or sample.prepared_at
+        or sample.sequenced_at
+        or sample.delivered_at
+        or sample.invoice_id
+    )
 
 
 def _is_sample_linked(sample: models.Sample):
