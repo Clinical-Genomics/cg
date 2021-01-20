@@ -9,15 +9,18 @@ from typing import List
 import pytest
 from housekeeper.store import models as hk_models
 
-from cg.apps.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutIndividual, ScoutLoadConfig
+from cg.constants import Pipeline
 from cg.meta.upload.scout.files import MipFileHandler, ScoutFileHandler
 from cg.meta.upload.scout.hk_tags import TagInfo
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.store import Store, models
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.scout import MockScoutAPI
+from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
 
@@ -140,9 +143,57 @@ def fixture_mip_analysis_hk_bundle_data(
                 "archive": False,
                 "tags": ["bam-mt", sample_id],
             },
+            {
+                "path": str(mip_dna_analysis_dir / "vcf2cytosure.txt"),
+                "archive": False,
+                "tags": ["vcf2cytosure", sample_id],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": ["multiqc-html", sample_id],
+            },
         ],
     }
     return data
+
+
+@pytest.fixture(scope="function", name="balsamic_analysis_hk_bundle_data")
+def fixture_balsamic_analysis_hk_bundle_data(
+    case_id: str, timestamp: datetime, balsamic_panel_analysis_dir: Path, sample_id: str
+) -> dict:
+    """Get some bundle data for housekeeper"""
+    data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(balsamic_panel_analysis_dir / "snv.vcf"),
+                "archive": False,
+                "tags": ["vcf-snv-clinical"],
+            },
+            {
+                "path": str(balsamic_panel_analysis_dir / "sv.vcf"),
+                "archive": False,
+                "tags": ["vcf-sv-clinical"],
+            },
+            {
+                "path": str(balsamic_panel_analysis_dir / "adm1.cram"),
+                "archive": False,
+                "tags": ["cram", sample_id],
+            },
+        ],
+    }
+    return data
+
+
+@pytest.fixture(name="balsamic_analysis_hk_version")
+def fixture_balsamic_analysis_hk_version(
+    housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    _version = helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    return _version
 
 
 @pytest.fixture(name="mip_analysis_hk_version")
@@ -153,21 +204,81 @@ def fixture_mip_analysis_hk_version(
     return _version
 
 
+@pytest.fixture(name="mip_analysis_hk_api")
+def fixture_mip_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, mip_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a housekeeper api populated with some mip analysis files"""
+    helpers.ensure_hk_version(housekeeper_api, mip_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
 @pytest.fixture(name="mip_file_handler")
-def fixture_mip_file_handler(hk_version_obj: hk_models.Version) -> MipFileHandler:
-    return MipFileHandler(hk_version_obj=hk_version_obj)
+def fixture_mip_file_handler(mip_analysis_hk_version: hk_models.Version) -> MipFileHandler:
+    return MipFileHandler(hk_version_obj=mip_analysis_hk_version)
 
 
-@pytest.yield_fixture(scope="function")
-def upload_scout_api(
-    scout_api: MockScoutAPI, madeline_api: MockMadelineAPI, lims_samples, populated_housekeeper_api
-):
+@pytest.fixture(name="mip_analysis_obj")
+def fixture_mip_analysis_obj(
+    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
+) -> models.Analysis:
+    family_obj: models.Family = analysis_store_trio.family(case_id)
+    analysis_obj: models.Analysis = helpers.add_analysis(
+        store=analysis_store_trio,
+        family=family_obj,
+        started_at=timestamp,
+        pipeline=Pipeline.MIP_DNA,
+        completed_at=timestamp,
+    )
+    return analysis_obj
+
+
+@pytest.fixture(name="mip_load_config")
+def fixture_mip_load_config(
+    mip_dna_analysis_dir: Path, case_id: str, customer_id: str
+) -> MipLoadConfig:
+    """Return a valid mip load_config"""
+    config = MipLoadConfig(
+        owner=customer_id, family=case_id, vcf_snv=str(mip_dna_analysis_dir / "snv.vcf")
+    )
+    return config
+
+
+@pytest.fixture(name="upload_scout_api")
+def fixture_upload_scout_api(
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: List[dict],
+    housekeeper_api: MockHousekeeperAPI,
+) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockAnalysis()
     lims_api = MockLims(lims_samples)
 
     _api = UploadScoutAPI(
-        hk_api=populated_housekeeper_api,
+        hk_api=housekeeper_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=analysis_mock,
+        lims_api=lims_api,
+    )
+
+    return _api
+
+
+@pytest.yield_fixture(name="upload_mip_analysis_scout_api")
+def fixture_upload_mip_analysis_scout_api(
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: List[dict],
+    mip_analysis_hk_api: MockHousekeeperAPI,
+) -> UploadScoutAPI:
+    """Fixture for upload_scout_api"""
+    analysis_mock = MockAnalysis()
+    lims_api = MockLims(lims_samples)
+
+    _api = UploadScoutAPI(
+        hk_api=mip_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,

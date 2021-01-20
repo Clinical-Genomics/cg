@@ -266,6 +266,20 @@ def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
     return _path
 
 
+@pytest.fixture(name="balsamic_analysis_dir")
+def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with balsamic analysis files"""
+    _path = analysis_dir / "balsamic"
+    return _path
+
+
+@pytest.fixture(name="balsamic_panel_analysis_dir")
+def fixture_balsamic_panel_analysis_dir(balsamic_analysis_dir: Path) -> Path:
+    """Return the path to the directory with balsamic analysis files"""
+    _path = balsamic_analysis_dir / "tn_panel"
+    return _path
+
+
 @pytest.fixture(name="mip_dna_analysis_dir")
 def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files"""

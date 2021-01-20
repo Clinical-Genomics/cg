@@ -7,7 +7,9 @@ from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import models
 
 
-def test_generate_mip_config(analysis_obj: models.Analysis, mip_file_handler: MipFileHandler):
+def test_add_mandatory_info_to_mip_config(
+    analysis_obj: models.Analysis, mip_file_handler: MipFileHandler
+):
     # GIVEN an cg analysis object
     # GIVEN a mip load config object
     load_config = MipLoadConfig()

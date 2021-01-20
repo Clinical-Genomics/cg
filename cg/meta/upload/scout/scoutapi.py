@@ -1,10 +1,8 @@
 """File includes api to uploading data into Scout"""
 
 import logging
-import re
-from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Optional
 
 import requests
 from housekeeper.store import models as hk_models
@@ -125,7 +123,9 @@ class UploadScoutAPI:
         file_handler = MipFileHandler(hk_version_obj=hk_version_obj)
         config_data: MipLoadConfig = MipLoadConfig()
 
-        self.add_mandatory_info_to_load_config(analysis_obj=analysis_obj, load_config=config_data)
+        self.add_mandatory_info_to_load_config(
+            analysis_obj=analysis_obj, load_config=config_data, file_handler=file_handler
+        )
         analysis_data: dict = self.mip_analysis_api.get_latest_metadata(
             analysis_obj.family.internal_id
         )
@@ -167,7 +167,9 @@ class UploadScoutAPI:
         LOG.info("Generate load config for balsamic case")
         file_handler = BalsamicFileHandler(hk_version_obj=hk_version_obj)
         load_config: BalsamicLoadConfig = BalsamicLoadConfig()
-        self.add_mandatory_info_to_load_config(analysis_obj=analysis_obj, load_config=load_config)
+        self.add_mandatory_info_to_load_config(
+            analysis_obj=analysis_obj, load_config=load_config, file_handler=file_handler
+        )
         load_config.human_genome_build = "37"
         load_config.rank_score_threshold = 0
 
@@ -195,6 +197,7 @@ class UploadScoutAPI:
 
         load_config: ScoutLoadConfig
         track = "rare"
+        LOG.info("Found pipeline %s", analysis_obj.pipeline)
         if analysis_obj.pipeline == Pipeline.BALSAMIC:
             track = "cancer"
             load_config = self.generate_balsamic_config(

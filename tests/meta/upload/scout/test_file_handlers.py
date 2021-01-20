@@ -3,7 +3,12 @@ from typing import Optional
 
 from housekeeper.store import models as hk_models
 
-from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
+from cg.apps.scout.scout_load_config import (
+    BalsamicLoadConfig,
+    MipLoadConfig,
+    ScoutLoadConfig,
+    ScoutMipIndividual,
+)
 from cg.meta.upload.scout.files import BalsamicFileHandler, MipFileHandler
 from cg.meta.upload.scout.hk_tags import BalsamicCaseTags, MipCaseTags
 
@@ -106,3 +111,33 @@ def test_include_mip_sample_files(mip_analysis_hk_version: hk_models.Version, sa
 
     # THEN assert that the mandatory snv vcf was added
     assert mip_sample.mt_bam is not None
+
+
+def test_include_balsamic_case_files(balsamic_analysis_hk_version: hk_models.Version):
+    # GIVEN a housekeeper version bundle with some balsamic analysis files
+    # GIVEN a case load object
+    load_case = BalsamicLoadConfig()
+    # GIVEN a balsamic file handler
+    file_handler = BalsamicFileHandler(hk_version_obj=balsamic_analysis_hk_version)
+
+    # WHEN including the case level files
+    file_handler.include_case_files(case=load_case)
+
+    # THEN assert that the mandatory snv vcf was added
+    assert load_case.vcf_cancer
+
+
+def test_extract_generic_filepath(hk_version_obj: hk_models.Version):
+    """Test that parsing of file path"""
+    file_handler = MipFileHandler(hk_version_obj)
+
+    # GIVEN files paths ending with
+    file_path1 = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png"
+    file_path2 = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_12.png"
+
+    # THEN calling extracting the generic path will remove numeric id and fuffix
+    generic_path = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_"
+
+    # THEN
+    assert file_handler.extract_generic_filepath(file_path1) == generic_path
+    assert file_handler.extract_generic_filepath(file_path2) == generic_path
