@@ -89,7 +89,7 @@ class MicrosaltAnalysisAPI:
             self.root_dir, "results", "reports", "trailblazer", f"{order_id}_slurm_ids.yaml"
         )
 
-    def get_deliverables_file_path(self, case_id: str) -> Path:
+    def get_deliverables_file_path(self, case_id: str) -> Optional[Path]:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
         case_obj: models.Family = self.db.family(case_id)
