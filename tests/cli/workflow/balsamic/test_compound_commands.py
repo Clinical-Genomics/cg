@@ -135,6 +135,9 @@ def test_store_available(
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
+    balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action = "running"
+    balsamic_context["BalsamicAnalysisAPI"].store.commit()
+
     # THEN command exits with 1 because one of the cases threw errors
     assert result.exit_code == 1
     assert case_id_success in caplog.text
