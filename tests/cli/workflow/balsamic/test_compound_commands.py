@@ -99,9 +99,6 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
 
-    # THEN action of the case should be set to running
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
-
     # THEN the ineligible case should NOT be ran
     assert case_id_fail not in caplog.text
 
@@ -156,9 +153,6 @@ def test_store_available(
 
     # THEN bundle added successfully and action set to None
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action is None
-
-    # THEN case id WITHOUT analysis_finish is still running
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action == "running"
 
     # THEN case has analyses
     assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).analyses
