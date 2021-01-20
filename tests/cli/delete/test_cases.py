@@ -24,7 +24,7 @@ def test_set_cases_by_sample_identifiers(
     caplog.set_level(logging.INFO)
 
     # WHEN calling delete cases with valid sample identifiers
-    result = cli_runner.invoke(
+    cli_runner.invoke(
         cases,
         ["--sample-identifier", identifier_key, identifier_value],
         obj=base_context,

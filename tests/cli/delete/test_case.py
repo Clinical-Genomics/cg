@@ -9,7 +9,7 @@ SUCCESS = 0
 def test_delete_case_without_options(cli_runner, base_context, base_store: Store, helpers):
     """Test to delete a case using only the required arguments"""
     # GIVEN a database with a case
-    case_id = helpers.add_family(base_store).internal_id
+    helpers.add_family(base_store).internal_id
     assert base_store.Family.query.count() == 1
 
     # WHEN deleting a case
