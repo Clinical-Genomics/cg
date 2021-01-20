@@ -57,7 +57,7 @@ def test_delete_case_with_analysis(cli_runner, base_context, base_store: Store, 
 
     result = cli_runner.invoke(case, [case_id, "--yes"], obj=base_context)
 
-    # THEN then it should have been deleted
+    # THEN then it should not have been deleted
     assert result.exit_code != SUCCESS
     assert base_store.Family.query.count() == 1
 
