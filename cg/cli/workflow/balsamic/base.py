@@ -53,7 +53,7 @@ OPTION_PRIORITY = click.option(
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def balsamic(context):
+def balsamic(context: click.Context):
     """Cancer analysis workflow """
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
@@ -73,7 +73,7 @@ def balsamic(context):
 @balsamic.command("link")
 @ARGUMENT_CASE_ID
 @click.pass_context
-def link(context, case_id):
+def link(context: click.Context, case_id: str):
     """
     Locates FASTQ files for given CASE_ID.
     The files are renamed, concatenated, and saved in BALSAMIC working directory
@@ -92,7 +92,7 @@ def link(context, case_id):
 @OPTION_PANEL_BED
 @OPTION_DRY
 @click.pass_context
-def config_case(context, panel_bed, case_id, dry):
+def config_case(context: click.Context, panel_bed: str, case_id: str, dry: bool):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
 
@@ -115,7 +115,14 @@ def config_case(context, panel_bed, case_id, dry):
 @OPTION_ANALYSIS_TYPE
 @OPTION_RUN_ANALYSIS
 @click.pass_context
-def run(context, analysis_type, run_analysis, priority, case_id, dry):
+def run(
+    context: click.Context,
+    analysis_type: str,
+    run_analysis: bool,
+    priority: str,
+    case_id: str,
+    dry: bool,
+):
     """Run balsamic analysis for given CASE ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
@@ -138,6 +145,9 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
         balsamic_analysis_api.balsamic_api.run_analysis(
             arguments=arguments, run_analysis=run_analysis, dry=dry
         )
+        if dry:
+            return
+
         balsamic_analysis_api.trailblazer_api.mark_analyses_deleted(case_id=case_id)
         balsamic_analysis_api.trailblazer_api.add_pending_analysis(
             case_id=case_id,
@@ -159,7 +169,7 @@ def run(context, analysis_type, run_analysis, priority, case_id, dry):
 @OPTION_DRY
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
-def report_deliver(context, case_id, analysis_type, dry):
+def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
@@ -178,7 +188,7 @@ def report_deliver(context, case_id, analysis_type, dry):
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
 @click.pass_context
-def store_housekeeper(context, case_id):
+def store_housekeeper(context: click.Context, case_id: str):
     """Store a finished analysis in Housekeeper and StatusDB."""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     try:
@@ -207,7 +217,14 @@ def store_housekeeper(context, case_id):
 @OPTION_DRY
 @OPTION_PANEL_BED
 @click.pass_context
-def start(context, case_id, analysis_type, panel_bed, priority, dry):
+def start(
+    context: click.Context,
+    case_id: str,
+    analysis_type: str,
+    panel_bed: str,
+    priority: str,
+    dry: bool,
+):
     """Start full workflow for CASE ID"""
     LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id)
@@ -227,7 +244,7 @@ def start(context, case_id, analysis_type, panel_bed, priority, dry):
 @OPTION_DRY
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
-def store(context, case_id, analysis_type, dry):
+def store(context: click.Context, case_id: str, analysis_type: str, dry: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
@@ -237,7 +254,7 @@ def store(context, case_id, analysis_type, dry):
 @balsamic.command("start-available")
 @OPTION_DRY
 @click.pass_context
-def start_available(context, dry):
+def start_available(context: click.Context, dry: bool):
     """Start full workflow for all available BALSAMIC cases"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     exit_code = EXIT_SUCCESS
@@ -256,7 +273,7 @@ def start_available(context, dry):
 @balsamic.command("store-available")
 @OPTION_DRY
 @click.pass_context
-def store_available(context, dry):
+def store_available(context: click.Context, dry: bool):
     """Store bundle data for all available Balsamic cases"""
     balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
     exit_code = EXIT_SUCCESS

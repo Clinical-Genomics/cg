@@ -1,9 +1,11 @@
 import logging
 
 import click
-from .family import family
+
 from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS
-from cg.store import models, Store
+from cg.store import Store, models
+
+from .family import family
 
 CONFIRM = "Continue?"
 

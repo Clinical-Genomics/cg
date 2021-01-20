@@ -10,6 +10,7 @@ import click
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
@@ -48,6 +49,7 @@ def microsalt(context: click.Context):
         db=Store(context.obj["database"]),
         hk_api=HousekeeperAPI(context.obj),
         lims_api=LimsAPI(context.obj),
+        trailblazer_api=TrailblazerAPI(context.obj),
         hermes_api=HermesApi(context.obj),
         config=context.obj["microsalt"],
     )
@@ -60,7 +62,7 @@ def microsalt(context: click.Context):
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def link(context: click.Context, ticket: bool, sample: bool, unique_id: str):
-    """Link microbial FASTQ files for a SAMPLE_ID"""
+    """Link microbial FASTQ files to dedicated analysis folder for a given case, ticket or sample"""
 
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
@@ -83,7 +85,7 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: str):
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def config_case(context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: str):
-    """ Create a config file on case level for microSALT """
+    """ Create a config file for a case or a sample analysis in microSALT """
 
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
@@ -132,7 +134,7 @@ def run(
     sample: bool,
     unique_id: Any,
 ):
-    """ Start microSALT with an order_id """
+    """ Start microSALT workflow by providing case, ticket or sample id """
 
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
@@ -162,14 +164,21 @@ def run(
         ]
     microsalt_analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
 
-    if not sample_id and not dry_run:
-        microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    if sample_id or dry_run:
+        return
+
+    microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    try:
+        microsalt_analysis_api.submit_trailblazer_analysis(case_id=case_id)
+    except Exception:
+        LOG.warning("Trailblazer warning: Could not track analysis progress for case %s!", case_id)
 
 
 @microsalt.command()
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def store(context: click.Context, unique_id: str):
+    """Store microSALT results in Housekeeper for given case"""
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
     case_obj = microsalt_analysis_api.db.family(unique_id)
@@ -196,6 +205,7 @@ def store(context: click.Context, unique_id: str):
 @OPTION_SAMPLE
 @click.pass_context
 def start(context: click.Context, ticket: bool, sample: bool, unique_id: str, dry_run: bool):
+    """Start whole microSALT workflow by providing case, ticket or sample id"""
     LOG.info("Starting Microsalt workflow for %s", unique_id)
     context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
@@ -206,6 +216,7 @@ def start(context: click.Context, ticket: bool, sample: bool, unique_id: str, dr
 @OPTION_DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool):
+    """Store all finished analyses in Housekeeper"""
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
     exit_code: int = EXIT_SUCCESS
 
@@ -226,6 +237,7 @@ def store_available(context: click.Context, dry_run: bool):
 @OPTION_DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool):
+    """Start whole microSALT workflow for all newly sequenced cases"""
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
     exit_code: int = EXIT_SUCCESS
     for case_obj in microsalt_analysis_api.db.cases_to_analyze(pipeline=Pipeline.MICROSALT):

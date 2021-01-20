@@ -1,7 +1,7 @@
 """Tests for transfer flowcell data"""
 import datetime as dt
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import mock
 from sqlalchemy import exc as sa_exc
