@@ -14,7 +14,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## 18.5.0
+## [18.5.1]
+
+### Fixed
+
+- Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
+
+## [18.5.0]
 
 ### Added
 - Added MHT to gene panel master-list
