@@ -33,3 +33,4 @@ def test_set_cases_by_sample_identifiers(
     # THEN it should name the case to be changed
     assert case.internal_id in caplog.text
     assert case.name in caplog.text
+    assert base_store.Family.query.count() == 0

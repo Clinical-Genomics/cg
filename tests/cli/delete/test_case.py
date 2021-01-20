@@ -67,7 +67,6 @@ def test_delete_case_with_dry_run(cli_runner, base_context, base_store: Store, h
     # GIVEN a database with a case
     case_obj = helpers.add_family(base_store)
     case_id = case_obj.internal_id
-    assert not case_obj.links
 
     # WHEN deleting a case
 
