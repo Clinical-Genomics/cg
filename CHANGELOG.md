@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 18.6.1
+
+### Added
+
+- Add functionality to upload balsamic analyses to scout
+
 ## 18.6.0
 
 ### Added
