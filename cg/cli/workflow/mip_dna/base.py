@@ -4,6 +4,7 @@ import logging
 
 import click
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -12,7 +13,9 @@ from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
+from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
 from cg.store.utils import case_exists
 
@@ -68,6 +71,13 @@ def mip_dna(
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["lims_api"] = LimsAPI(context.obj)
     context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["crunchy_api"] = CrunchyAPI(context.obj)
+    context.obj["compress_api"] = CompressAPI(
+        hk_api=context.obj["housekeeper_api"], crunchy_api=context.obj["crunchy_api"]
+    )
+    context.obj["prepare_fastq_api"] = PrepareFastqAPI(
+        context.obj["status_db"], context.obj["compress_api"]
+    )
 
     context.obj["dna_api"] = MipAnalysisAPI(
         db=context.obj["status_db"],
@@ -278,6 +288,7 @@ def run(
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
+    prepare_fastq_api = context.obj["prepare_fastq_api"]
     exit_code = EXIT_SUCCESS
     for case_obj in dna_api.db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
         if not dna_api.is_dna_only_case(case_obj):
@@ -291,6 +302,26 @@ def start(context: click.Context, dry_run: bool = False):
             status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
             LOG.warning(f"{case_obj.internal_id}: analysis is {status} - skipping")
             continue
+        decompression_needed = prepare_fastq_api.is_spring_decompression_needed(
+            case_obj.internal_id
+        )
+        if decompression_needed:
+            decompression_all_samples_started = prepare_fastq_api.start_spring_decompression(
+                case_obj.internal_id
+            )
+            if decompression_all_samples_started:
+                LOG.info(
+                    f"The analysis for {case_obj.internal_id} could not start, started decompression instead"
+                )
+                continue
+            if not decompression_all_samples_started:
+                LOG.warning(
+                    f"Neither the analysis, nor the decompression needed for every sample, could start for {case_obj.internal_id}"
+                )
+                continue
+        are_fastqs_linked = prepare_fastq_api.check_fastq_links(case_obj.internal_id)
+        if not are_fastqs_linked:
+            LOG.info(f"Linking fastq files in housekeeper for case {case_obj.internal_id}")
         if dry_run:
             continue
         try:
