@@ -82,12 +82,6 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
     return lims_family["samples"]
 
 
-@pytest.fixture(name="sample_id")
-def fixture_sample_id() -> str:
-    """ Returns a sample id """
-    return "ADM1"
-
-
 @pytest.fixture(scope="function", name="mip_analysis_hk_bundle_data")
 def fixture_mip_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, sample_id: str

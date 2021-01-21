@@ -45,7 +45,7 @@ def test_generate_balsamic_load_config(
     analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN a analysis object that have been run with balsamic
-    analysis_obj.pipeline == Pipeline.BALSAMIC
+    assert analysis_obj.pipeline == Pipeline.BALSAMIC
 
     # GIVEN a upload scout api with some balsamic information
 

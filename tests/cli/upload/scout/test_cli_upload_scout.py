@@ -2,9 +2,13 @@
 import logging
 from pathlib import Path
 
+from pydantic import ValidationError
+
 from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.cli.upload.scout import create_scout_load_config, scout
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.store import Store
+from tests.meta.upload.scout.conftest import fixture_mip_analysis_hk_bundle_data
 
 
 def check_log(caplog, string=None, warning=None):
@@ -36,9 +40,9 @@ def test_upload_with_load_config(
     load_config_file = base_context["housekeeper_api"].get_files(case_id, [tag_name])[0]
     assert load_config_file
 
-    def case_exists_in_status(case_id, store):
+    def case_exists_in_status(existing_case_id: str, store: Store):
         """Check if case exists in status database"""
-        return store.families().first().internal_id == case_id
+        return store.families().first().internal_id == existing_case_id
 
     assert case_exists_in_status(case_id, base_context["status_db"])
 
@@ -47,11 +51,11 @@ def test_upload_with_load_config(
         cli_runner.invoke(scout, [case_id], obj=base_context)
 
     # THEN assert that the case was loaded succesfully
-    def case_loaded_succesfully(caplog):
+    def case_loaded_succesfull(caplog):
         """Check output that case was loaded"""
         return check_log(caplog, string="Case loaded successfully to Scout")
 
-    assert case_loaded_succesfully(caplog)
+    assert case_loaded_succesfull(caplog)
 
     # THEN assert that the load config was used
     def load_file_mentioned_in_result(caplog, load_config_file: Path):
@@ -62,16 +66,15 @@ def test_upload_with_load_config(
 
 
 def test_produce_load_config(
-    base_context, cli_runner, case_id, scout_hk_bundle_data, helpers, caplog
+    base_context: dict, cli_runner, case_id: str, mip_analysis_hk_bundle_data: dict, helpers, caplog
 ):
     """Test create a scout load config with the scout upload api"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a singleton WGS case
     # GIVEN that the api generates a config
-    base_context["scout_upload_api"].mock_generate_config = False
     # GIVEN a housekeeper instance with some bundle information
     hk_mock = base_context["housekeeper_api"]
-    helpers.ensure_hk_bundle(hk_mock, scout_hk_bundle_data)
+    helpers.ensure_hk_bundle(hk_mock, mip_analysis_hk_bundle_data)
 
     # WHEN running cg upload scout -p <caseid>
     result = cli_runner.invoke(create_scout_load_config, [case_id, "--print"], obj=base_context)
@@ -88,7 +91,7 @@ def test_produce_load_config_no_delivery(
     """Test to produce a load config without a delivery report"""
     # GIVEN a singleton WGS case
 
-    base_context["scout_upload_api"].mock_generate_config = False
+    base_context["scout_upload_api"].config.delivery_report = None
     # GIVEN a populated hk mock
     hk_mock = base_context["housekeeper_api"]
     helpers.ensure_hk_bundle(hk_mock, scout_hk_bundle_data)
@@ -115,7 +118,7 @@ def test_produce_load_config_missing_mandatory_file(
 ):
     """Test to produce a load config when mandatory files are missing"""
     # GIVEN a singleton WGS case
-    base_context["scout_upload_api"].mock_generate_config = False
+    base_context["scout_upload_api"].missing_mandatory_field = True
 
     # GIVEN a populated hk mock
     hk_mock = base_context["housekeeper_api"]
@@ -131,7 +134,7 @@ def test_produce_load_config_missing_mandatory_file(
     # THEN assert the command failed since a mandatory file was missing
     assert result.exit_code != 0
     # THEN assert a FileNotFoundError was raised
-    assert isinstance(result.exception, FileNotFoundError)
+    assert isinstance(result.exception, ValidationError)
 
 
 def test_upload_scout_cli_file_exists(base_context, cli_runner, caplog, case_id):

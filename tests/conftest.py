@@ -54,6 +54,12 @@ def fixture_case_id() -> str:
     return "yellowhog"
 
 
+@pytest.fixture(name="sample_id")
+def fixture_sample_id() -> str:
+    """ Returns a sample id """
+    return "ADM1"
+
+
 @pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
     """Return a family name"""
