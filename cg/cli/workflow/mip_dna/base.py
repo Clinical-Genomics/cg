@@ -307,9 +307,11 @@ def start(context: click.Context, dry_run: bool = False):
         )
         if decompression_needed:
             decompression_all_samples_started = prepare_fastq_api.start_spring_decompression(
-                case_obj.internal_id
+                case_obj.internal_id, dry_run
             )
             if decompression_all_samples_started:
+                if dry_run:
+                    continue
                 LOG.info(
                     f"The analysis for {case_obj.internal_id} could not start, started decompression instead"
                 )

@@ -81,7 +81,7 @@ def test_spring_decompression_starts(
     )
 
     # WHEN starting spring decompression
-    res = prepare_fastq_api.start_spring_decompression(case_id)
+    res = prepare_fastq_api.start_spring_decompression(case_id=case_id, dry_run=False)
 
     # THEN assert that spring decompression started
     assert res is True
@@ -108,7 +108,7 @@ def test_spring_decompression_do_not_start(
     )
 
     # WHEN attempting to start spring decompression
-    res = prepare_fastq_api.start_spring_decompression(case_id)
+    res = prepare_fastq_api.start_spring_decompression(case_id=case_id, dry_run=False)
 
     # THEN assert that spring decompression did not run
     assert res is False

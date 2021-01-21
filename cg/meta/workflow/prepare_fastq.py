@@ -1,5 +1,6 @@
 """API to prepare fastq files for analysis"""
 
+import logging
 import os
 from typing import Dict
 from pathlib import Path
@@ -10,6 +11,8 @@ from cg.meta.compress import files
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import Store
 from housekeeper.store import models as hk_models
+
+LOG = logging.getLogger(__name__)
 
 
 class PrepareFastqAPI:
@@ -34,7 +37,7 @@ class PrepareFastqAPI:
                 return True
         return False
 
-    def start_spring_decompression(self, case_id: str) -> bool:
+    def start_spring_decompression(self, case_id: str, dry_run: bool) -> bool:
         """Starts spring decompression"""
         case_obj = self.store.family(case_id)
         for link in case_obj.links:
@@ -46,6 +49,11 @@ class PrepareFastqAPI:
                     return False
         for link in case_obj.links:
             sample_id = link.sample.internal_id
+            if dry_run:
+                LOG.info(
+                    f"This is a dry run, therefore decompression for {sample_id} won't be started"
+                )
+                return True
             decompression_started = self.compress_api.decompress_spring(sample_id)
             if not decompression_started:
                 return False
