@@ -614,6 +614,7 @@ def fixture_compress_hk_fastq_bundle(
     return hk_bundle_data
 
 
+@pytest.fixture(scope="function", name="housekeeper_api")
 def fixture_housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     """Setup Housekeeper store."""
     _api = MockHousekeeperAPI(hk_config_dict)
