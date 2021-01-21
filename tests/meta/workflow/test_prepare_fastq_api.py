@@ -11,22 +11,24 @@ from cg.meta.compress import files
 def test_is_spring_decompression_needed_when_true(
     populated_compress_spring_api: CompressAPI, analysis_store_single_case: Store, case_id: str
 ):
+    """Test when spring decompression is needed"""
+
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
-    # GIVEN a store with a case that have linked samples
+    # GIVEN a store with a case that has linked samples
     case_obj: Family = analysis_store_single_case.family(case_id)
     assert case_obj
-    # GIVEN that the case have linked samples
+    # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
     assert link_objects
-    # GIVEN a that there exists a version with spring file ony in housekeeper
+    # GIVEN a that there exists a version with only spring in housekeeper
     version_object = populated_compress_spring_api.get_latest_version("ADM1")
     for file in version_object.files:
         assert file.path.endswith(".spring")
 
-    # WHEN checking is spring decompression if needed
+    # WHEN checking if spring decompression is needed
     res = prepare_fastq_api.is_spring_decompression_needed(case_id)
 
     # THEN assert that spring decompression is needed since there are no fastq files
@@ -38,26 +40,23 @@ def test_is_spring_decompression_needed_when_false(
     analysis_store_single_case: Store,
     case_id: str,
 ):
+    """Test when spring decompression is not needed"""
+
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
         store=analysis_store_single_case, compress_api=populated_compress_api_fastq_spring
     )
-    # GIVEN a store with a case that have linked samples
+    # GIVEN a store with a case that has linked samples
     case_obj: Family = analysis_store_single_case.family(case_id)
     assert case_obj
-    # GIVEN that the case have linked samples
+    # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
     assert link_objects
-    # GIVEN a that there exists a version with spring file ony in housekeeper
-    version_object = populated_compress_api_fastq_spring.get_latest_version("ADM1")
-    print(version_object)
-    compression_objects = files.get_spring_paths(version_object)
-    print(compression_objects, compression_objects[0].pair_exists())
 
-    # WHEN checking is spring decompression if needed
+    # WHEN checking if spring decompression is needed
     res = prepare_fastq_api.is_spring_decompression_needed(case_id)
 
-    # THEN assert that spring decompression is needed since there are fastq files
+    # THEN assert that spring decompression is not needed since there are fastq files
     assert res is False
 
 
@@ -67,7 +66,9 @@ def test_spring_decompression_starts(
     case_id: str,
     mocker,
 ):
+    """Test starting spring decompression"""
 
+    # GIVEN spring decompression is possible
     mocker.patch.object(CompressAPI, "decompress_spring")
     CompressAPI.decompress_spring.return_value = True
 
@@ -79,10 +80,10 @@ def test_spring_decompression_starts(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
 
-    # WHEN checking is spring decompression if needed
+    # WHEN starting spring decompression
     res = prepare_fastq_api.start_spring_decompression(case_id)
 
-    # THEN assert that spring decompression is needed since there are no fastq files
+    # THEN assert that spring decompression started
     assert res is True
 
 
@@ -92,7 +93,9 @@ def test_spring_decompression_do_not_start(
     case_id: str,
     mocker,
 ):
+    """Test when spring decompression fail to start"""
 
+    # GIVEN spring decompression is not possible
     mocker.patch.object(CompressAPI, "decompress_spring")
     CompressAPI.decompress_spring.return_value = False
 
@@ -104,10 +107,10 @@ def test_spring_decompression_do_not_start(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
 
-    # WHEN checking is spring decompression if needed
+    # WHEN attempting to start spring decompression
     res = prepare_fastq_api.start_spring_decompression(case_id)
 
-    # THEN assert that spring decompression is needed since there are no fastq files
+    # THEN assert that spring decompression did not run
     assert res is False
 
 
@@ -116,26 +119,27 @@ def test_no_fastq_in_housekeeper(
     analysis_store_single_case: Store,
     case_id: str,
 ):
+    """Test when fastq needs to be added to housekeeper"""
 
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
         store=analysis_store_single_case, compress_api=populated_compress_spring_api
     )
-    # GIVEN a store with a case that have linked samples
+    # GIVEN a store with a case that has linked samples
     case_obj: Family = analysis_store_single_case.family(case_id)
     assert case_obj
-    # GIVEN that the case have linked samples
+    # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
     assert link_objects
-    # GIVEN a that there exists a version with spring file ony in housekeeper
+    # GIVEN a that there exists a version with only spring in housekeeper
     version_object = populated_compress_spring_api.get_latest_version("ADM1")
     for file in version_object.files:
         assert file.path.endswith(".spring")
 
-    # WHEN checking is spring decompression if needed
+    # WHEN checking if fastq files need to be added to housekeeper
     res = prepare_fastq_api.check_fastq_links(case_id)
 
-    # THEN assert that spring decompression is needed since there are no fastq files
+    # THEN assert that all fastq files are not there
     assert res is False
 
 
@@ -144,19 +148,21 @@ def test_fastq_in_housekeeper(
     analysis_store_single_case: Store,
     case_id: str,
 ):
+    """Test when fastq is already in housekeeper"""
+
     # GIVEN a populated prepare_fastq_api
     prepare_fastq_api = PrepareFastqAPI(
         store=analysis_store_single_case, compress_api=populated_compress_api_fastq_spring
     )
-    # GIVEN a store with a case that have linked samples
+    # GIVEN a store with a case that has both spring and fastq files
     case_obj: Family = analysis_store_single_case.family(case_id)
     assert case_obj
-    # GIVEN that the case have linked samples
+    # GIVEN that the case has linked samples
     link_objects = [link_obj for link_obj in case_obj.links]
     assert link_objects
 
-    # WHEN checking is spring decompression if needed
+    # WHEN checking if fastq files need to be added to housekeeper
     res = prepare_fastq_api.check_fastq_links(case_id)
 
-    # THEN assert that spring decompression is needed since there are no fastq files
+    # THEN assert that all fastq files are there
     assert res is True

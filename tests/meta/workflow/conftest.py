@@ -11,7 +11,7 @@ from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crun
 def fixture_populated_compress_spring_api(
     compress_api: CompressAPI, only_spring_bundle: dict, helpers
 ) -> CompressAPI:
-    """Populated compress api fixture"""
+    """Populated compress api fixture with only spring compressed fastq"""
     helpers.ensure_hk_bundle(compress_api.hk_api, only_spring_bundle)
 
     return compress_api
@@ -21,7 +21,7 @@ def fixture_populated_compress_spring_api(
 def fixture_populated_compress_api_fastq_spring(
     compress_api: CompressAPI, spring_fastq_mix: dict, helpers
 ) -> CompressAPI:
-    """Populated compress api fixture"""
+    """Populated compress api fixture with both spring and fastq"""
     helpers.ensure_hk_bundle(compress_api.hk_api, spring_fastq_mix)
 
     return compress_api

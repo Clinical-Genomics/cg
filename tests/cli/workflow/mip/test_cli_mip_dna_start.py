@@ -83,7 +83,7 @@ def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, rna_case, mocker
     assert not case_mentioned
 
 
-def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, dna_rna_mix_case, mocker):
+def test_mixed_dna_rna_case(cli_runner, caplog, dna_mip_context, dna_rna_mix_case, mocker):
     """Test mip dna start with a mixed DNA/RNA case"""
 
     # GIVEN spring decompression is needed
