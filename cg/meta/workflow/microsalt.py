@@ -15,9 +15,11 @@ from typing import Any, Dict, List, Optional
 
 import click
 
+from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError
 from cg.store import Store, models
@@ -35,12 +37,14 @@ class MicrosaltAnalysisAPI:
         hk_api: HousekeeperAPI,
         lims_api: LimsAPI,
         hermes_api: HermesApi,
+        trailblazer_api: TrailblazerAPI,
         config: Optional[dict] = {},
     ):
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
         self.hermes_api = hermes_api
+        self.trailblazer_api = trailblazer_api
         self.root_dir = config["root"]
         self.queries_path = config["queries_path"]
         self.process = Process(binary=config["binary_path"], environment=config["conda_env"])
@@ -77,6 +81,29 @@ class MicrosaltAnalysisAPI:
 
     def get_config_path(self, filename: str) -> Path:
         return Path(self.queries_path, filename).with_suffix(".json")
+
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        case_obj: models.Family = self.db.family(case_id)
+        order_id = case_obj.name
+        return Path(
+            self.root_dir, "results", "reports", "trailblazer", f"{order_id}_slurm_ids.yaml"
+        )
+
+    def get_deliverables_file_path(self, case_id: str) -> Path:
+        """Returns a path where the microSALT deliverables file for the order_id should be
+        located"""
+        case_obj: models.Family = self.db.family(case_id)
+        order_id = case_obj.name
+        deliverables_file_path = Path(
+            self.root_dir,
+            "results",
+            "reports",
+            "deliverables",
+            f"{order_id}_deliverables.yaml",
+        )
+        if deliverables_file_path.exists():
+            LOG.info("Found deliverables file %s", deliverables_file_path)
+        return deliverables_file_path
 
     @staticmethod
     def generate_fastq_name(
@@ -290,18 +317,6 @@ class MicrosaltAnalysisAPI:
 
         return self.db.cases_to_store(pipeline=Pipeline.MICROSALT)
 
-    def get_deliverables_file_path(self, order_id: str) -> Path:
-        """Returns a path where the microSALT deliverables file for the order_id should be
-        located"""
-        deliverables_file_path = Path(
-            self.root_dir,
-            "results/reports/deliverables",
-            order_id + "_deliverables.yaml",
-        )
-        if deliverables_file_path.exists():
-            LOG.info("Found deliverables file %s", deliverables_file_path)
-            return deliverables_file_path
-
     def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
         """Sets action on case based on ticket number"""
         if action in [None, *CASE_ACTIONS]:
@@ -368,10 +383,9 @@ class MicrosaltAnalysisAPI:
 
     def store_microbial_analysis_housekeeper(self, case_id: str) -> None:
         """Gather information from microSALT analysis to store."""
-        case_obj: models.Family = self.db.family(case_id)
-        order_id = case_obj.name
-        deliverables_path = self.get_deliverables_file_path(order_id=order_id)
-        if not deliverables_path:
+
+        deliverables_path = self.get_deliverables_file_path(case_id=case_id)
+        if not deliverables_path.exists():
             LOG.warning(
                 "Deliverables file not found for %s, analysis may not be finished yet", case_id
             )
@@ -398,12 +412,11 @@ class MicrosaltAnalysisAPI:
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def store_microbial_analysis_statusdb(self, case_id: str):
+    def store_microbial_analysis_statusdb(self, case_id: str) -> None:
         """Creates an analysis object in StatusDB"""
-        case_obj: models.Family = self.db.family(case_id)
-        order_id = case_obj.name
-        deliverables_path = self.get_deliverables_file_path(order_id=order_id)
+        deliverables_path = self.get_deliverables_file_path(case_id=case_id)
         analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
+        case_obj: models.Family = self.db.family(case_id)
 
         new_analysis: models.Analysis = self.db.add_analysis(
             pipeline=Pipeline.MICROSALT,
@@ -419,3 +432,24 @@ class MicrosaltAnalysisAPI:
     def get_date_from_deliverables_path(deliverables_path: Path) -> datetime.date:
         """ Get date from deliverables path using date created metadata """
         return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))
+
+    def get_priority(self, case_id: str) -> str:
+        """Returns priority for the case in clinical-db as text"""
+        case_object = self.db.family(case_id)
+        if case_object.high_priority:
+            return "high"
+        if case_object.low_priority:
+            return "low"
+        return "normal"
+
+    def submit_trailblazer_analysis(self, case_id: str) -> None:
+        self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
+        self.trailblazer_api.add_pending_analysis(
+            case_id=case_id,
+            email=environ_email(),
+            type="other",
+            out_dir=self.get_deliverables_file_path(case_id).parent.as_posix(),
+            config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
+            priority=self.get_priority(case_id),
+            data_analysis=Pipeline.MICROSALT,
+        )

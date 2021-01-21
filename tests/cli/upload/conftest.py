@@ -80,7 +80,7 @@ def fixture_upload_genotypes_hk_api(
     return real_housekeeper_api
 
 
-@pytest.yield_fixture(name="upload_genotypes_context")
+@pytest.fixture(name="upload_genotypes_context")
 def fixture_upload_genotypes_context(
     upload_genotypes_hk_api: HousekeeperAPI, genotype_api: GenotypeAPI, analysis_store_trio: Store
 ) -> dict:

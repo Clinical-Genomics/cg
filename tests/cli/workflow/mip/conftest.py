@@ -255,7 +255,7 @@ def fixture_mip_rna_pipeline() -> str:
     return "analyse rd_rna"
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store_rna_case")
+@pytest.fixture(scope="function", name="analysis_store_rna_case")
 def fixture_analysis_store_rna_case(
     base_store: Store, analysis_family_single_case: dict, apptag_rna: str, helpers
 ) -> Store:

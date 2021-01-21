@@ -147,7 +147,7 @@ def test_case_file_is_delivered(
     # WHEN running the deliver analysis command
     runner.invoke(
         deliver_analysis,
-        ["--case-id", case_id, "--delivery-type", "mip-dna", "--inbox", str(project_dir)],
+        ["--case-id", case_id, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 

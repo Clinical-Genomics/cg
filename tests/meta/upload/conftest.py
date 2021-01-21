@@ -3,7 +3,6 @@
 from datetime import datetime
 from pathlib import Path
 
-
 import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
@@ -11,7 +10,6 @@ from cg.constants import Pipeline
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
-
 from cg.store import Store, models
 
 
@@ -74,7 +72,7 @@ def fixture_analysis_obj(
     return analysis_store_trio.family(case_id).analyses[0]
 
 
-@pytest.yield_fixture(name="upload_genotypes_api")
+@pytest.fixture(name="upload_genotypes_api")
 def fixture_upload_genotypes_api(
     real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers
 ) -> UploadGenotypesAPI:
@@ -88,7 +86,7 @@ def fixture_upload_genotypes_api(
     return _api
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def upload_observations_api(analysis_store, populated_housekeeper_api):
     """ Create mocked UploadObservationsAPI object"""
 
@@ -103,7 +101,7 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
     yield _api
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
     """ Create mocked UploadObservationsAPI object"""
 
@@ -128,7 +126,7 @@ def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
     return _api
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def analysis(analysis_store, case_id, timestamp):
     """Fixture to mock an analysis"""
     _analysis = analysis_store.add_analysis(pipeline=Pipeline.BALSAMIC, version="version")

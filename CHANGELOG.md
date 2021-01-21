@@ -14,6 +14,48 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 18.6.0
+
+### Added
+
+- Add command 'delete case' to remove case from the database
+- Add command 'delete cases' to remove multiple cases from the database
+
+## [18.5.1]
+
+### Fixed
+
+- Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
+
+## [18.5.0]
+
+### Added
+- Added MHT to gene panel master-list
+
+## [18.4.0]
+
+### Added
+
+- Added submission of microsalt cases for tracking in Trailblazer
+
+## [18.3.0]
+
+### Changed
+
+- cg workflow mip-dna --panel-bed and --dry-run options can be set when executing full workflow
+- Changed logic for how case links are retrieved in order to support linking of very old cases
+- Analysis not submitted to Trailblazer if executing MIP workflow in dry-run
+
+## [18.2]
+
+### Changed
+
+- Remove option to specify delivery path when delivering data
+
+### Fixed
+
+- Improved usage of `cg deliver analysis` command
+
 ## [18.1.5]
 
 ### Fixed

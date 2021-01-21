@@ -85,7 +85,7 @@ def fixture_microbial_submitted_order():
     return order
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def microbial_store(base_store: Store, microbial_submitted_order):
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer(microbial_submitted_order["customer"])
@@ -115,13 +115,13 @@ def microbial_store(base_store: Store, microbial_submitted_order):
     yield base_store
 
 
-@pytest.yield_fixture(scope="function", name="analysis_obj")
+@pytest.fixture(scope="function", name="analysis_obj")
 def fixture_analysis_obj(analysis_store):
     """Fetch a analysis object from a populated store"""
     return analysis_store.analyses()[0]
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def family_obj(analysis_obj):
     """Return a family models object."""
     return analysis_obj.family

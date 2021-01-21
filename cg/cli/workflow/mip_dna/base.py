@@ -9,7 +9,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
@@ -18,7 +17,7 @@ from cg.store import Store
 from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
-EMAIL_OPTION = click.option("-e", "--email", help="email to send errors to", type=str)
+EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
 PRIORITY_OPTION = click.option(
     "-p",
     "--priority",
@@ -26,17 +25,26 @@ PRIORITY_OPTION = click.option(
     type=click.Choice(["low", "normal", "high"]),
 )
 START_WITH_PROGRAM = click.option(
-    "-sw", "--start-with", help="start mip from this program.", type=str
+    "-sw", "--start-with", help="Start mip from this program.", type=str
 )
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="print to console instead of executing"
+    "-d", "--dry-run", "dry_run", is_flag=True, help="Print to console instead of executing"
 )
+OPTION_PANEL_BED = click.option(
+    "--panel-bed",
+    type=str,
+    help="Set this option to override fetching of panel name from LIMS",
+)
+
+ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
 
 
 @click.group("mip-dna", invoke_without_command=True)
 @EMAIL_OPTION
 @PRIORITY_OPTION
+@OPTION_PANEL_BED
 @START_WITH_PROGRAM
+@OPTION_DRY
 @click.option(
     "-c",
     "--case",
@@ -50,7 +58,9 @@ def mip_dna(
     case_id: str,
     email: str,
     priority: str,
+    panel_bed: str,
     start_with: str,
+    dry_run: bool,
 ):
     """Rare disease DNA workflow"""
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
@@ -94,26 +104,22 @@ def mip_dna(
         return
 
     # Invoke full workflow
-    context.invoke(config_case, case_id=case_id)
     context.invoke(link, case_id=case_id)
-    context.invoke(panel, case_id=case_id)
+    context.invoke(panel, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
     context.invoke(
-        run,
-        case_id=case_id,
-        priority=priority,
-        email=email,
-        start_with=start_with,
+        run, case_id=case_id, priority=priority, email=email, start_with=start_with, dry_run=dry_run
     )
 
 
 @mip_dna.command()
-@click.option("-c", "--case", "case_id", help="link all samples for a case", type=str)
-@click.argument("sample_id", required=False)
+@ARGUMENT_CASE_ID
 @click.pass_context
-def link(context: click.Context, case_id: str, sample_id: str):
+def link(context: click.Context, case_id: str):
     """Link FASTQ files for a sample_id"""
     dna_api = context.obj["dna_api"]
-    link_objs = get_links(dna_api.db, case_id, sample_id)
+    case_obj = dna_api.db.family(case_id)
+    link_objs = case_obj.links
     for link_obj in link_objs:
         LOG.info(
             "%s: %s link FASTQ files",
@@ -132,14 +138,9 @@ def link(context: click.Context, case_id: str, sample_id: str):
 
 
 @mip_dna.command("config-case")
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="Print pedigree config to console")
-@click.option(
-    "-p",
-    "--panel-bed",
-    type=str,
-    help="Set this option to override fetching of panel name from LIMS",
-)
-@click.argument("case_id", required=False, type=str)
+@OPTION_DRY
+@OPTION_PANEL_BED
+@ARGUMENT_CASE_ID
 @click.pass_context
 def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool = False):
     """Generate a config for the case_id"""
@@ -152,6 +153,8 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
+
+    panel_bed = dna_api.resolve_panel_bed(panel_bed=panel_bed)
 
     try:
         config_data = dna_api.pedigree_config(
@@ -172,8 +175,8 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 
 
 @mip_dna.command()
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print output to console")
-@click.argument("case_id", required=False, type=str)
+@OPTION_DRY
+@ARGUMENT_CASE_ID
 @click.pass_context
 def panel(context: click.Context, case_id: str, dry_run: bool = False):
     """Write aggregated gene panel file"""
@@ -192,8 +195,8 @@ def panel(context: click.Context, case_id: str, dry_run: bool = False):
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
-@click.argument("case_id", required=False, type=str)
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@ARGUMENT_CASE_ID
+@OPTION_DRY
 @click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option(
     "--skip-evaluation",
@@ -246,6 +249,11 @@ def run(
     if mip_dry_run:
         LOG.info("Executed MIP in dry-run mode")
         return
+
+    if dry_run:
+        LOG.info("Running in dry-run mode. Analysis not submitted to Trailblazer")
+        return
+
     try:
         dna_api.mark_analyses_deleted(case_id=case_id)
         dna_api.add_pending_analysis(
@@ -265,7 +273,7 @@ def run(
 
 
 @mip_dna.command()
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
+@OPTION_DRY
 @click.pass_context
 def start(context: click.Context, dry_run: bool = False):
     """Start all cases that are ready for analysis"""
