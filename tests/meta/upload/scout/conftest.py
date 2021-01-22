@@ -11,7 +11,7 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutIndividual, ScoutLoadConfig
 from cg.constants import Pipeline
-from cg.meta.upload.scout.files import MipFileHandler, ScoutFileHandler
+from cg.meta.upload.scout.files import MipConfigBuilder, ScoutConfigBuilder
 from cg.meta.upload.scout.hk_tags import TagInfo
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store, models
@@ -217,8 +217,8 @@ def fixture_balsamic_analysis_hk_api(
 
 
 @pytest.fixture(name="mip_file_handler")
-def fixture_mip_file_handler(mip_analysis_hk_version: hk_models.Version) -> MipFileHandler:
-    return MipFileHandler(hk_version_obj=mip_analysis_hk_version)
+def fixture_mip_file_handler(mip_analysis_hk_version: hk_models.Version) -> MipConfigBuilder:
+    return MipConfigBuilder(hk_version_obj=mip_analysis_hk_version)
 
 
 @pytest.fixture(name="mip_analysis_obj")

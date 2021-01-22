@@ -9,7 +9,7 @@ from cg.apps.scout.scout_load_config import (
     ScoutMipIndividual,
 )
 from cg.constants import Pipeline
-from cg.meta.upload.scout.files import MipFileHandler
+from cg.meta.upload.scout.files import MipConfigBuilder
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store, models
 
@@ -24,7 +24,7 @@ SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
 def test_add_mandatory_info_to_mip_config(
-    analysis_obj: models.Analysis, mip_file_handler: MipFileHandler
+    analysis_obj: models.Analysis, mip_file_handler: MipConfigBuilder
 ):
     # GIVEN an cg analysis object
     # GIVEN a mip load config object
