@@ -457,7 +457,7 @@ class StatusHandler:
             if not case_obj:
                 case_obj = self.status.add_family(
                     data_analysis=Pipeline(pool["data_analysis"]),
-                    name=pool["name"],
+                    name=ticket,
                     panels=None,
                 )
                 case_obj.customer = customer_obj
