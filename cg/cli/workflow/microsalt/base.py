@@ -11,9 +11,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.vogue import VogueAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-from cg.store import Store
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -260,3 +261,63 @@ def start_available(context: click.Context, dry_run: bool):
 
     if exit_code:
         raise click.Abort
+
+
+@microsalt.command("upload-analysis-vogue")
+@OPTION_DRY_RUN
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_context
+def upload_vogue(context: click.Context, unique_id: str, dry_run: bool):
+
+    vogue_api = VogueAPI(context.obj)
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
+    case_obj = microsalt_analysis_api.db.family(unique_id)
+    if not case_obj or not case_obj.analyses:
+        LOG.error("No analysis available for %s", unique_id)
+        return
+
+    samples_string = ",".join(str(link_obj.sample.internal_id) for link_obj in case_obj.links)
+    microsalt_version = microsalt_analysis_api.get_microsalt_version()
+
+    if dry_run:
+        LOG.info(
+            "Would have loaded case %s, with samples %s, analyzed with pipeline version %s",
+            unique_id,
+            samples_string,
+            microsalt_version,
+        )
+    analysis_result_file = microsalt_analysis_api.hk.get_files(
+        bundle=unique_id, tags=["vogue"]
+    ).first()
+    if not analysis_result_file:
+        LOG.error("Vogue upload file not found in Housekeeper for case %s", unique_id)
+        raise click.Abort
+
+    vogue_load_args = {
+        "samples": samples_string,
+        "analysis_result_file": analysis_result_file,
+        "analysis_case_name": unique_id,
+        "analysis_type": "microsalt",
+        "analysis_workflow_name": "microsalt",
+        "analysis_workflow_version": microsalt_version,
+        "case_analysis_type": "microsalt",
+    }
+    vogue_api.load_bioinfo_raw(load_bioinfo_inputs=vogue_load_args)
+    vogue_api.load_bioinfo_process(load_bioinfo_inputs=vogue_load_args, cleanup_flag=False)
+    vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
+
+
+@microsalt.command("upload-latest-analyses-vogue")
+@OPTION_DRY_RUN
+@click.pass_context
+def upload_vogue(context: click.Context, dry_run: bool):
+
+    microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
+    latest_analyses = list(
+        microsalt_analysis_api.db.latest_analyses()
+        .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
+        .filter(models.Analysis.uploaded_at is None)
+    )
+    for analysis in latest_analyses:
+        unique_id = analysis.family.internal_id
+        context.invoke(upload_vogue, unique_id=unique_id, dry_run=dry_run)
