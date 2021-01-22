@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Fixed
+
+- Fix bug with name clash for created case when submitting RML-orders via Orderportal
+
 ## 18.6.0
 
 ### Added
