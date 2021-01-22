@@ -3,7 +3,7 @@ import gzip
 import logging
 import re
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 
 from ruamel.yaml import safe_load
 
@@ -23,7 +23,7 @@ from cg.constants import (
     MASTER_LIST,
     Pipeline,
 )
-from cg.exc import CgDataError, LimsDataError
+from cg.exc import CgDataError, LimsDataError, CgError
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -87,6 +87,15 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
 
     def get_case_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
+
+    def resolve_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
+        if panel_bed:
+            if panel_bed.endswith(".bed"):
+                return panel_bed
+            bed_version = self.db.bed_version(panel_bed)
+            if not bed_version:
+                raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
+            return bed_version.filename
 
     def pedigree_config(
         self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None

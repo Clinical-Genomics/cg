@@ -22,7 +22,9 @@ def fastq_path(tmpdir):
 
 
 @pytest.fixture(scope="function")
-def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api, hermes_api):
+def base_context(
+    microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api, hermes_api, trailblazer_api
+):
     """ The click context for the microsalt cli """
     return {
         "db": microsalt_store,
@@ -31,6 +33,7 @@ def base_context(microsalt_store, lims_api, tmpdir, queries_path, housekeeper_ap
             hk_api=housekeeper_api,
             lims_api=lims_api,
             hermes_api=hermes_api,
+            trailblazer_api=trailblazer_api,
             config={
                 "root": tmpdir,
                 "queries_path": queries_path,

@@ -114,8 +114,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     # THEN it should update the database with new pools
     assert len(new_pools) == 2
 
-    assert base_store.pools(customer=None).count() == 2
-    assert base_store.families(customer=None).count() == 2
+    assert base_store.pools(customer=None).count() == base_store.families(customer=None).count()
     assert base_store.samples(customer=None).count() == 4
     new_pool = base_store.pools(customer=None).first()
 
