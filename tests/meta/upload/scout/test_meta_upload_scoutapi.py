@@ -1,11 +1,10 @@
 """Tests for the scout upload API"""
-import logging
 from pathlib import Path
 
 import pytest
 import yaml
 
-from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
+from cg.meta.upload.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 
 

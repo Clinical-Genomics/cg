@@ -1,3 +1,5 @@
+"""Maps tag info from housekeeper tags to scout load config"""
+
 from typing import Set
 
 from pydantic import BaseModel, Field

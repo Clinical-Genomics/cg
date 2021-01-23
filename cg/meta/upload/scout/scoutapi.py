@@ -4,28 +4,20 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-import requests
 from housekeeper.store import models as hk_models
 from ruamel import yaml
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.scout.scout_load_config import (
-    BalsamicLoadConfig,
-    MipLoadConfig,
-    ScoutBalsamicIndividual,
-    ScoutIndividual,
-    ScoutLoadConfig,
-    ScoutMipIndividual,
-)
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
 
-from .files import BalsamicConfigBuilder, MipConfigBuilder, ScoutConfigBuilder
+from .balsamic_config_builder import BalsamicConfigBuilder
+from .mip_config_builder import MipConfigBuilder
 
 LOG = logging.getLogger(__name__)
 
@@ -47,9 +39,7 @@ class UploadScoutAPI:
         self.mip_analysis_api = analysis_api
         self.lims = lims_api
 
-    def generate_config(
-        self, analysis_obj: models.Analysis, rank_score_threshold: int = 5
-    ) -> ScoutLoadConfig:
+    def generate_config(self, analysis_obj: models.Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
 
@@ -61,22 +51,22 @@ class UploadScoutAPI:
         LOG.debug("Found housekeeper version %s", hk_version_obj.id)
 
         load_config: ScoutLoadConfig
-        track = "rare"
         LOG.info("Found pipeline %s", analysis_obj.pipeline)
         if analysis_obj.pipeline == Pipeline.BALSAMIC:
-            config_builder = BalsamicConfigBuilder(hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=self.lims)
-        
-
-            load_config = self.generate_balsamic_config(
-                analysis_obj=analysis_obj, hk_version_obj=hk_version_obj
+            config_builder = BalsamicConfigBuilder(
+                hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=self.lims
             )
         else:
-            load_config = self.generate_mip_config(
-                analysis_obj=analysis_obj, hk_version_obj=hk_version_obj, rank_score_threshold=5
+            config_builder = MipConfigBuilder(
+                hk_version_obj=hk_version_obj,
+                analysis_obj=analysis_obj,
+                mip_analysis_api=self.mip_analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
             )
-        load_config.track = track
+        config_builder.build_load_config()
 
-        return load_config
+        return config_builder.load_config
 
     @staticmethod
     def get_load_config_tag() -> str:
@@ -115,14 +105,3 @@ class UploadScoutAPI:
 
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
-
-    @staticmethod
-    def _is_family_case(load_config: MipLoadConfig) -> bool:
-        """Check if there are any linked individuals in a case"""
-        sample: ScoutMipIndividual
-        for sample in load_config.samples:
-            if sample.mother and sample.mother != "0":
-                return True
-            if sample.father and sample.father != "0":
-                return True
-        return False

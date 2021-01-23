@@ -9,10 +9,9 @@ from typing import List
 import pytest
 from housekeeper.store import models as hk_models
 
-from cg.apps.scout.scout_load_config import MipLoadConfig, ScoutIndividual, ScoutLoadConfig
 from cg.constants import Pipeline
-from cg.meta.upload.scout.files import MipConfigBuilder, ScoutConfigBuilder
-from cg.meta.upload.scout.hk_tags import TagInfo
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.scout_load_config import MipLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store, models
 
@@ -236,6 +235,11 @@ def fixture_mip_analysis_obj(
     return analysis_obj
 
 
+@pytest.fixture(name="balsamic_analysis_obj")
+def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    return analysis_obj
+
+
 @pytest.fixture(name="mip_load_config")
 def fixture_mip_load_config(
     mip_dna_analysis_dir: Path, case_id: str, customer_id: str
@@ -245,6 +249,16 @@ def fixture_mip_load_config(
         owner=customer_id, family=case_id, vcf_snv=str(mip_dna_analysis_dir / "snv.vcf")
     )
     return config
+
+
+@pytest.fixture(name="lims_api")
+def fixture_lims_api(lims_samples: List[dict]) -> MockLims:
+    return MockLims(lims_samples)
+
+
+@pytest.fixture(name="mip_analysis_api")
+def fixture_mip_analysis_api() -> MockAnalysis:
+    return MockAnalysis()
 
 
 @pytest.fixture(name="upload_scout_api")

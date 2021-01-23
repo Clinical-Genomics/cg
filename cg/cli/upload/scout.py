@@ -7,8 +7,8 @@ import click
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family

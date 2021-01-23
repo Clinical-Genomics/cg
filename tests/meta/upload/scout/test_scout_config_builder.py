@@ -3,34 +3,54 @@ from typing import Optional
 
 from housekeeper.store import models as hk_models
 
-from cg.apps.scout.scout_load_config import (
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
+from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
+from cg.meta.upload.scout.scout_load_config import (
     BalsamicLoadConfig,
     MipLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.meta.upload.scout.files import BalsamicConfigBuilder, MipConfigBuilder
-from cg.meta.upload.scout.hk_tags import BalsamicCaseTags, MipCaseTags
+from cg.store import models
+from tests.mocks.madeline import MockMadelineAPI
+from .conftest import MockLims, MockAnalysis
 
 
-def test_mip_file_handler(hk_version_obj: hk_models.Version):
+def test_mip_config_builder(
+    hk_version_obj: hk_models.Version,
+    mip_analysis_obj: models.Analysis,
+    lims_api: MockLims,
+    mip_analysis_api: MockAnalysis,
+    madeline_api: MockMadelineAPI,
+):
     # GIVEN a mip file handler
 
     # WHEN instantiating
-    file_handler = MipConfigBuilder(hk_version_obj=hk_version_obj)
+    file_handler = MipConfigBuilder(
+        hk_version_obj=hk_version_obj,
+        analysis_obj=mip_analysis_obj,
+        lims_api=lims_api,
+        mip_analysis_api=mip_analysis_api,
+        madeline_api=madeline_api,
+    )
 
     # THEN assert that the correct case tags was used
-    assert isinstance(file_handler.case_tags, MipCaseTags)
+    assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_balsamic_file_handler(hk_version_obj: hk_models.Version):
+def test_balsamic_config_builder(
+    hk_version_obj: hk_models.Version, balsamic_analysis_obj: models.Analysis, lims_api: MockLims
+):
     # GIVEN a balsamic file handler
 
     # WHEN instantiating
-    file_handler = BalsamicConfigBuilder(hk_version_obj=hk_version_obj)
+    file_handler = BalsamicConfigBuilder(
+        hk_version_obj=hk_version_obj, analysis_obj=balsamic_analysis_obj, lims_api=lims_api
+    )
 
     # THEN assert that the correct case tags was used
-    assert isinstance(file_handler.case_tags, BalsamicCaseTags)
+    assert isinstance(file_handler.case_tags, CaseTags)
 
 
 def test_include_delivery_report(mip_analysis_hk_version: hk_models.Version):

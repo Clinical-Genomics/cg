@@ -2,7 +2,7 @@
 import pytest
 from pydantic import ValidationError
 
-from cg.apps.scout import scout_load_config
+from cg.meta.upload.scout import scout_load_config
 
 
 def test_validate_individual_display_name(sample_dict):

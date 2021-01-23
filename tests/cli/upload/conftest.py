@@ -5,16 +5,14 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store, models
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 

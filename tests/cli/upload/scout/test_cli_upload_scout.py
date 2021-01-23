@@ -4,11 +4,10 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.cli.upload.scout import create_scout_load_config, scout
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
-from tests.meta.upload.scout.conftest import fixture_mip_analysis_hk_bundle_data
 
 
 def check_log(caplog, string=None, warning=None):
