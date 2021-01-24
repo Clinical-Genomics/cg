@@ -3,9 +3,9 @@ from typing import Optional
 
 from housekeeper.store import models as hk_models
 
-from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_load_config import (
     BalsamicLoadConfig,
     MipLoadConfig,
@@ -14,7 +14,8 @@ from cg.meta.upload.scout.scout_load_config import (
 )
 from cg.store import models
 from tests.mocks.madeline import MockMadelineAPI
-from .conftest import MockLims, MockAnalysis
+
+from .conftest import MockAnalysis, MockLims
 
 
 def test_mip_config_builder(
@@ -27,7 +28,7 @@ def test_mip_config_builder(
     # GIVEN a mip file handler
 
     # WHEN instantiating
-    file_handler = MipConfigBuilder(
+    config_builder = MipConfigBuilder(
         hk_version_obj=hk_version_obj,
         analysis_obj=mip_analysis_obj,
         lims_api=lims_api,
@@ -36,7 +37,7 @@ def test_mip_config_builder(
     )
 
     # THEN assert that the correct case tags was used
-    assert isinstance(file_handler.case_tags, CaseTags)
+    assert isinstance(config_builder.case_tags, CaseTags)
 
 
 def test_balsamic_config_builder(
@@ -53,103 +54,78 @@ def test_balsamic_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_include_delivery_report(mip_analysis_hk_version: hk_models.Version):
-    # GIVEN a housekeeper version object with a delivery report
-    file_obj: hk_models.File
-    report: Optional[hk_models.File] = None
-    for file_obj in mip_analysis_hk_version.files:
-        tag: hk_models.Tag
-        tags = {tag.name for tag in file_obj.tags}
-        if "delivery-report" in tags:
-            report = file_obj
-    assert report
-    # GIVEN a mip file handler
-    file_handler = MipConfigBuilder(hk_version_obj=mip_analysis_hk_version)
+def test_include_delivery_report(mip_config_builder: MipConfigBuilder):
+    # GIVEN a config builder with some data
 
-    # GIVEN a scout load case without a delivery report
-    load_case = ScoutLoadConfig()
-    assert load_case.delivery_report is None
+    # GIVEN a config without a delivery report
+    assert mip_config_builder.load_config.delivery_report is None
 
     # WHEN including the delivery report
-    file_handler.include_delivery_report(case=load_case)
+    mip_config_builder.include_delivery_report()
 
     # THEN assert that the delivery report was added
-    assert load_case.delivery_report == report.full_path
+    assert mip_config_builder.load_config.delivery_report is not None
 
 
-def test_include_alignment_file_individual(
-    mip_analysis_hk_version: hk_models.Version, sample_id: str
-):
-    # GIVEN a housekeeper version object with a cram file
-    file_obj: hk_models.File
-    alignment_file: Optional[hk_models.File] = None
-    for file_obj in mip_analysis_hk_version.files:
-        tag: hk_models.Tag
-        tags = {tag.name for tag in file_obj.tags}
-        if "cram" in tags:
-            alignment_file = file_obj
-    assert alignment_file
-    # GIVEN a mip file handler
-    file_handler = MipConfigBuilder(hk_version_obj=mip_analysis_hk_version)
+def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):
+    # GIVEN a mip config builder with some information
 
-    # GIVEN a scout load case without a delivery report
-    mip_individual = ScoutMipIndividual(sample_id=sample_id)
-    assert mip_individual.alignment_path is None
+    # WHEN building the scout load config
+    mip_config_builder.build_load_config()
 
-    # WHEN including the delivery report
-    file_handler.include_sample_alignment_file(sample=mip_individual)
-
-    # THEN assert that the delivery report was added
-    assert mip_individual.alignment_path == alignment_file.full_path
+    # THEN assert that the alignment file was added to sample id
+    file_found = False
+    for sample in mip_config_builder.load_config.samples:
+        if sample.sample_id == sample_id:
+            assert sample.alignment_path is not None
+            file_found = True
+    assert file_found
 
 
-def test_include_mip_case_files(mip_analysis_hk_version: hk_models.Version):
+def test_include_mip_case_files(mip_config_builder: MipConfigBuilder):
     # GIVEN a housekeeper version bundle with some mip analysis files
     # GIVEN a case load object
-    load_case = MipLoadConfig()
     # GIVEN a mip file handler
-    file_handler = MipConfigBuilder(hk_version_obj=mip_analysis_hk_version)
 
     # WHEN including the case level files
-    file_handler.include_case_files(load_config=load_case)
+    mip_config_builder.build_load_config()
 
     # THEN assert that the mandatory snv vcf was added
-    assert load_case.vcf_snv
+    assert mip_config_builder.load_config.vcf_snv
 
 
-def test_include_mip_sample_files(mip_analysis_hk_version: hk_models.Version, sample_id: str):
+def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_id: str):
     # GIVEN a housekeeper version bundle with some mip analysis files
     # GIVEN a case load object
-    mip_sample = ScoutMipIndividual(sample_id=sample_id)
     # GIVEN that there are no sample level mt_bam
-    mip_sample.mt_bam is None
+
     # GIVEN a mip file handler
-    file_handler = MipConfigBuilder(hk_version_obj=mip_analysis_hk_version)
 
     # WHEN including the case level files
-    file_handler.include_sample_files(sample=mip_sample)
+    mip_config_builder.build_load_config()
 
     # THEN assert that the mandatory snv vcf was added
-    assert mip_sample.mt_bam is not None
+    file_found = False
+    for sample in mip_config_builder.load_config.samples:
+        if sample.sample_id == sample_id:
+            assert sample.mt_bam is not None
+            file_found = True
+    assert file_found
 
 
-def test_include_balsamic_case_files(balsamic_analysis_hk_version: hk_models.Version):
+def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuilder):
     # GIVEN a housekeeper version bundle with some balsamic analysis files
     # GIVEN a case load object
-    load_case = BalsamicLoadConfig()
-    # GIVEN a balsamic file handler
-    file_handler = BalsamicConfigBuilder(hk_version_obj=balsamic_analysis_hk_version)
 
     # WHEN including the case level files
-    file_handler.include_case_files(load_config=load_case)
+    balsamic_config_builder.build_load_config()
 
     # THEN assert that the mandatory snv vcf was added
-    assert load_case.vcf_cancer
+    assert balsamic_config_builder.load_config.vcf_cancer
 
 
-def test_extract_generic_filepath(hk_version_obj: hk_models.Version):
+def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
     """Test that parsing of file path"""
-    file_handler = MipConfigBuilder(hk_version_obj)
 
     # GIVEN files paths ending with
     file_path1 = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_X.png"
@@ -159,5 +135,5 @@ def test_extract_generic_filepath(hk_version_obj: hk_models.Version):
     generic_path = "/some/path/gatkcomb_rhocall_vt_af_chromograph_sites_"
 
     # THEN
-    assert file_handler.extract_generic_filepath(file_path1) == generic_path
-    assert file_handler.extract_generic_filepath(file_path2) == generic_path
+    assert mip_config_builder.extract_generic_filepath(file_path1) == generic_path
+    assert mip_config_builder.extract_generic_filepath(file_path2) == generic_path

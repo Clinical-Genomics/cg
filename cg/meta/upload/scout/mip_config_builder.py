@@ -45,15 +45,15 @@ class MipConfigBuilder(ScoutConfigBuilder):
         LOG.info("Generate load config for mip case")
 
         self.add_mandatory_info_to_load_config()
-        analysis_data: dict = self.mip_analysis_api.get_latest_metadata(
+        mip_analysis_data: dict = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.family.internal_id
         )
         self.load_config.human_genome_build = (
-            "38" if "38" in analysis_data.get("genome_build", "") else "37"
+            "38" if "38" in mip_analysis_data.get("genome_build", "") else "37"
         )
         self.load_config.rank_score_threshold = rank_score_threshold
-        self.load_config.rank_model_version = analysis_data.get("rank_model_version")
-        self.load_config.sv_rank_model_version = analysis_data.get("sv_rank_model_version")
+        self.load_config.rank_model_version = mip_analysis_data.get("rank_model_version")
+        self.load_config.sv_rank_model_version = mip_analysis_data.get("sv_rank_model_version")
 
         self.load_config.gene_panels = (
             self.mip_analysis_api.convert_panels(
@@ -62,14 +62,18 @@ class MipConfigBuilder(ScoutConfigBuilder):
             or None
         )
 
+        self.include_case_files()
+
         LOG.info("Building samples")
         sample: models.FamilySample
         for sample in self.analysis_obj.family.links:
             self.load_config.samples.append(self.build_config_sample(sample_obj=sample))
+        self.include_pedigree_picture()
 
+    def include_pedigree_picture(self) -> None:
         if self.is_multi_sample_case(self.load_config):
             if self.is_family_case(self.load_config):
-                svg_path: Path = self._run_madeline(self.analysis_obj.family)
+                svg_path: Path = self.run_madeline(self.analysis_obj.family)
                 self.load_config.madeline = str(svg_path)
             else:
                 LOG.info("family of unconnected samples - skip pedigree graph")
@@ -86,7 +90,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
 
         return sample
 
-    def include_case_files(self, load_config: MipLoadConfig):
+    def include_case_files(self):
         """Include case level files for mip case"""
         LOG.info("Including MIP specific case level files")
         self.load_config.vcf_snv = self.fetch_file_from_hk(self.case_tags.snv_vcf)
@@ -137,6 +141,16 @@ class MipConfigBuilder(ScoutConfigBuilder):
         if file_path is None:
             return file_path
         return re.split("(\d+|X|Y)\.png", file_path)[0]
+
+    @staticmethod
+    def is_family_case(load_config: ScoutLoadConfig) -> bool:
+        """Check if there are any linked individuals in a case"""
+        for sample in load_config.samples:
+            if sample.mother and sample.mother != "0":
+                return True
+            if sample.father and sample.father != "0":
+                return True
+        return False
 
     @staticmethod
     def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:

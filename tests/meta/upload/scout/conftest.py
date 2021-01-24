@@ -10,6 +10,7 @@ import pytest
 from housekeeper.store import models as hk_models
 
 from cg.constants import Pipeline
+from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_load_config import MipLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
@@ -185,16 +186,14 @@ def fixture_balsamic_analysis_hk_bundle_data(
 def fixture_balsamic_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
-    _version = helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
-    return _version
+    return helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
 
 
 @pytest.fixture(name="mip_analysis_hk_version")
 def fixture_mip_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, mip_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
-    _version = helpers.ensure_hk_version(housekeeper_api, mip_analysis_hk_bundle_data)
-    return _version
+    return helpers.ensure_hk_version(housekeeper_api, mip_analysis_hk_bundle_data)
 
 
 @pytest.fixture(name="mip_analysis_hk_api")
@@ -240,15 +239,46 @@ def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analy
     return analysis_obj
 
 
+@pytest.fixture(name="mip_config_builder")
+def fixture_mip_config_builder(
+    mip_analysis_hk_version: hk_models.Version,
+    mip_analysis_obj: models.Analysis,
+    lims_api: MockLims,
+    mip_analysis_api: MockAnalysis,
+    madeline_api: MockMadelineAPI,
+) -> MipConfigBuilder:
+    return MipConfigBuilder(
+        hk_version_obj=mip_analysis_hk_version,
+        analysis_obj=mip_analysis_obj,
+        lims_api=lims_api,
+        mip_analysis_api=mip_analysis_api,
+        madeline_api=madeline_api,
+    )
+
+
+@pytest.fixture(name="balsamic_config_builder")
+def fixture_balsamic_config_builder(
+    balsamic_analysis_hk_version: hk_models.Version,
+    balsamic_analysis_obj: models.Analysis,
+    lims_api: MockLims,
+) -> BalsamicConfigBuilder:
+    return BalsamicConfigBuilder(
+        hk_version_obj=balsamic_analysis_hk_version,
+        analysis_obj=balsamic_analysis_obj,
+        lims_api=lims_api,
+    )
+
+
 @pytest.fixture(name="mip_load_config")
 def fixture_mip_load_config(
     mip_dna_analysis_dir: Path, case_id: str, customer_id: str
 ) -> MipLoadConfig:
     """Return a valid mip load_config"""
-    config = MipLoadConfig(
-        owner=customer_id, family=case_id, vcf_snv=str(mip_dna_analysis_dir / "snv.vcf")
+    return MipLoadConfig(
+        owner=customer_id,
+        family=case_id,
+        vcf_snv=str(mip_dna_analysis_dir / "snv.vcf"),
     )
-    return config
 
 
 @pytest.fixture(name="lims_api")
@@ -272,15 +302,13 @@ def fixture_upload_scout_api(
     analysis_mock = MockAnalysis()
     lims_api = MockLims(lims_samples)
 
-    _api = UploadScoutAPI(
+    return UploadScoutAPI(
         hk_api=housekeeper_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
     )
-
-    return _api
 
 
 @pytest.yield_fixture(name="upload_mip_analysis_scout_api")

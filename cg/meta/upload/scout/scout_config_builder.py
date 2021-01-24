@@ -8,10 +8,7 @@ from housekeeper.store import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.meta.upload.scout.scout_load_config import (
-    ScoutIndividual,
-    ScoutLoadConfig,
-)
+from cg.meta.upload.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -39,8 +36,6 @@ class ScoutConfigBuilder:
         self.load_config.family = self.analysis_obj.family.internal_id
         self.load_config.family_name = self.analysis_obj.family.name
         self.load_config.owner = self.analysis_obj.family.customer.internal_id
-
-        self.include_case_files()
 
     def add_mandatory_sample_info(
         self,
@@ -79,7 +74,7 @@ class ScoutConfigBuilder:
         """Include all files that are used on sample level in Scout"""
         raise NotImplementedError
 
-    def include_case_files(self, load_config: ScoutLoadConfig) -> None:
+    def include_case_files(self) -> None:
         """Include all files that are used on case level in scout"""
         raise NotImplementedError
 
@@ -116,7 +111,9 @@ class ScoutConfigBuilder:
         """Fetch a file from housekeeper and return the path as a string.
         If file does not exist return None
         """
+        LOG.info("Fetch file with tags %s", hk_tags)
         if not hk_tags:
+            LOG.debug("No tags provided, skipping")
             return None
         hk_file: Optional[hk_models.File] = HousekeeperAPI.fetch_file_from_version(
             version_obj=self.hk_version_obj, tags=hk_tags
