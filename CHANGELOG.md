@@ -19,11 +19,17 @@ Try to use the following format:
 ### Added
 - Support for creating delivery reports for analyses that are not the latest ones
 
-## 18.7.0
+## [18.7.1]
+
+### Fixed
+
+- clean_fastq command now also skips validation cases when cleaning fastq files
+
+## [18.7.0]
 
 ### Added customer name in order tickets
 
-## 18.6.1
+## [18.6.1]
 
 ### Fixed
 
