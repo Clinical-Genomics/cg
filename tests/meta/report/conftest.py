@@ -4,9 +4,9 @@ from typing import List
 
 import pytest
 
-from cg.apps.lims import LimsAPI
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
+from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
@@ -25,33 +25,6 @@ def report_samples(lims_family: List[dict]):
         sample["internal_id"] = sample["id"]
 
     return lims_family["samples"]
-
-
-class MockLims(LimsAPI):
-    def __init__(self, samples):
-        self._samples = samples
-
-    def get_prep_method(self, lims_id: str) -> str:
-        return (
-            "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free "
-            ""
-            "DNA)"
-        )
-
-    def get_sequencing_method(self, lims_id: str) -> str:
-        return "CG002 - Cluster Generation (HiSeq X)"
-
-    def get_delivery_method(self, lims_id: str) -> str:
-        return "CG002 - Delivery"
-
-    def sample(self, lims_id: str):
-        """Fetch information about a sample."""
-
-        for sample in self._samples:
-            if sample.get("id") == lims_id:
-                return sample
-
-        return None
 
 
 class MockFile:
@@ -201,7 +174,7 @@ def report_store(analysis_store, helpers):
 @pytest.fixture(scope="function")
 def report_api(report_store, lims_samples):
     db = MockDB(report_store)
-    lims = MockLims(lims_samples)
+    lims = MockLimsAPI(samples=lims_samples)
     chanjo = MockChanjo()
     analysis = MockAnalysis()
     scout = MockScout()
