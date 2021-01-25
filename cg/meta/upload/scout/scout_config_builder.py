@@ -39,12 +39,11 @@ class ScoutConfigBuilder:
 
     def add_mandatory_sample_info(
         self,
-        sample: ScoutIndividual,
-        sample_obj: models.FamilySample,
-        sample_name: Optional[str] = None,
+        config_sample: ScoutIndividual,
+        db_sample: models.FamilySample,
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
-        sample_id: str = sample_obj.sample.internal_id
+        sample_id: str = db_sample.sample.internal_id
         LOG.info("Building sample %s", sample_id)
         lims_sample = dict()
         try:
@@ -52,17 +51,17 @@ class ScoutConfigBuilder:
         except requests.exceptions.HTTPError as ex:
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
-        sample.sample_id = sample_id
-        sample.sex = sample_obj.sample.sex
-        sample.phenotype = sample_obj.status
-        sample.analysis_type = sample_obj.sample.application_version.application.analysis_type
-        sample.sample_name = sample_name or sample_obj.sample.name
-        sample.tissue_type = lims_sample.get("source", "unknown")
+        config_sample.sample_id = sample_id
+        config_sample.sex = db_sample.sample.sex
+        config_sample.phenotype = db_sample.status
+        config_sample.analysis_type = db_sample.sample.application_version.application.analysis_type
+        config_sample.sample_name = db_sample.sample.name
+        config_sample.tissue_type = lims_sample.get("source", "unknown")
 
-        self.include_sample_alignment_file(sample=sample)
-        self.include_sample_files(sample=sample)
+        self.include_sample_alignment_file(config_sample=config_sample)
+        self.include_sample_files(config_sample=config_sample)
 
-    def build_config_sample(self, sample_obj: models.FamilySample) -> ScoutIndividual:
+    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
         raise NotImplementedError
 
@@ -70,7 +69,7 @@ class ScoutConfigBuilder:
         """Build a load config for uploading a case to scout"""
         raise NotImplementedError
 
-    def include_sample_files(self, sample: ScoutIndividual) -> None:
+    def include_sample_files(self, config_sample: ScoutIndividual) -> None:
         """Include all files that are used on sample level in Scout"""
         raise NotImplementedError
 
@@ -86,18 +85,18 @@ class ScoutConfigBuilder:
         LOG.info("Include delivery report to case")
         self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
 
-    def include_sample_alignment_file(self, sample: ScoutIndividual) -> None:
+    def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the alignment file for a sample
 
         First add the bam.
         Cram is preferred so overwrite if found
         """
-        sample_id: str = sample.sample_id
-        sample.alignment_path = self.fetch_sample_file(
+        sample_id: str = config_sample.sample_id
+        config_sample.alignment_path = self.fetch_sample_file(
             hk_tags=self.sample_tags.bam_file, sample_id=sample_id
         )
 
-        sample.alignment_path = self.fetch_sample_file(
+        config_sample.alignment_path = self.fetch_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 

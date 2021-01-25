@@ -13,15 +13,16 @@ from cg.meta.upload.scout.scout_load_config import (
     ScoutMipIndividual,
 )
 from cg.store import models
+from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 
-from .conftest import MockAnalysis, MockLims
+from .conftest import MockAnalysis
 
 
 def test_mip_config_builder(
     hk_version_obj: hk_models.Version,
     mip_analysis_obj: models.Analysis,
-    lims_api: MockLims,
+    lims_api: MockLimsAPI,
     mip_analysis_api: MockAnalysis,
     madeline_api: MockMadelineAPI,
 ):
@@ -41,7 +42,7 @@ def test_mip_config_builder(
 
 
 def test_balsamic_config_builder(
-    hk_version_obj: hk_models.Version, balsamic_analysis_obj: models.Analysis, lims_api: MockLims
+    hk_version_obj: hk_models.Version, balsamic_analysis_obj: models.Analysis, lims_api: MockLimsAPI
 ):
     # GIVEN a balsamic file handler
 

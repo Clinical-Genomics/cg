@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta
+from typing import List
 
 import pytest
 
@@ -9,17 +10,17 @@ from cg.store import Store
 
 
 @pytest.fixture
-def lims_family():
+def lims_family() -> dict:
     return json.load(open("tests/fixtures/report/lims_family.json"))
 
 
 @pytest.fixture
-def lims_samples(lims_family):
+def lims_samples(lims_family: dict) -> List[dict]:
     return lims_family["samples"]
 
 
 @pytest.fixture
-def report_samples(lims_family):
+def report_samples(lims_family: List[dict]):
     for sample in lims_family["samples"]:
         sample["internal_id"] = sample["id"]
 

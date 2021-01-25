@@ -65,9 +65,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        sample: models.FamilySample
-        for sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(sample_obj=sample))
+        db_sample: models.FamilySample
+        for db_sample in self.analysis_obj.family.links:
+            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
         self.include_pedigree_picture()
 
     def include_pedigree_picture(self) -> None:
@@ -80,15 +80,15 @@ class MipConfigBuilder(ScoutConfigBuilder):
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-    def build_config_sample(self, sample_obj: models.FamilySample) -> ScoutMipIndividual:
+    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
-        sample = ScoutMipIndividual()
-        self.add_mandatory_sample_info(sample=sample, sample_obj=sample_obj)
-        sample.father = sample_obj.father.internal_id if sample_obj.father else "0"
-        sample.mother = sample_obj.mother.internal_id if sample_obj.mother else "0"
+        config_sample = ScoutMipIndividual()
+        self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
+        config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
+        config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
 
-        return sample
+        return config_sample
 
     def include_case_files(self):
         """Include case level files for mip case"""
@@ -105,28 +105,30 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_multiqc_report()
         self.include_delivery_report()
 
-    def include_sample_files(self, sample: ScoutMipIndividual) -> None:
+    def include_sample_files(self, config_sample: ScoutMipIndividual) -> None:
         """Include sample level files that are optional for mip samples"""
         LOG.info("Including MIP specific sample level files")
-        sample_id: str = sample.sample_id
-        sample.vcf2cytosure = self.fetch_sample_file(
+        sample_id: str = config_sample.sample_id
+        config_sample.vcf2cytosure = self.fetch_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
-        sample.mt_bam = self.fetch_sample_file(hk_tags=self.sample_tags.mt_bam, sample_id=sample_id)
-        sample.chromograph_images.autozyg = self.fetch_sample_file(
+        config_sample.mt_bam = self.fetch_sample_file(
+            hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
+        )
+        config_sample.chromograph_images.autozyg = self.fetch_sample_file(
             hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
         )
-        sample.chromograph_images.coverage = self.extract_generic_filepath(
+        config_sample.chromograph_images.coverage = self.extract_generic_filepath(
             file_path=self.fetch_sample_file(
                 hk_tags=self.sample_tags.chromograph_coverage, sample_id=sample_id
             )
         )
-        sample.chromograph_images.upd_regions = self.extract_generic_filepath(
+        config_sample.chromograph_images.upd_regions = self.extract_generic_filepath(
             file_path=self.fetch_sample_file(
                 hk_tags=self.sample_tags.chromograph_regions, sample_id=sample_id
             )
         )
-        sample.chromograph_images.upd_sites = self.extract_generic_filepath(
+        config_sample.chromograph_images.upd_sites = self.extract_generic_filepath(
             file_path=self.fetch_sample_file(
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )

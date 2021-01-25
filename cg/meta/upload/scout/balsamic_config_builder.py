@@ -30,18 +30,15 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.load_config.vcf_cancer_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
         self.include_multiqc_report()
 
-    def include_sample_files(self, sample: ScoutBalsamicIndividual):
+    def include_sample_files(self, config_sample: ScoutBalsamicIndividual):
         LOG.info("Including BALSAMIC specific sample level files")
 
-    def build_config_sample(self, sample_obj: models.FamilySample) -> ScoutBalsamicIndividual:
+    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
         """Build a sample with balsamic specific information"""
-        sample = ScoutBalsamicIndividual()
-        # This will be tumor or normal
-        sample_name: str = BalsamicAnalysisAPI.get_sample_type(sample_obj)
-        self.add_mandatory_sample_info(
-            sample=sample, sample_obj=sample_obj, sample_name=sample_name
-        )
-        return sample
+        config_sample = ScoutBalsamicIndividual()
+
+        self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
+        return config_sample
 
     def build_load_config(self) -> None:
         LOG.info("Build load config for balsamic case")
@@ -52,6 +49,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        sample: models.FamilySample
-        for sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(sample_obj=sample))
+        db_sample: models.FamilySample
+        for db_sample in self.analysis_obj.family.links:
+            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))

@@ -18,6 +18,7 @@ from cg.store import Store, models
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
@@ -33,7 +34,7 @@ class MockAnalysis:
         """Mock get_latest_metadata"""
         # Returns: dict: parsed data
         # Define output dict
-        outdata = {
+        out_data = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
             "family": family_id or "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
@@ -44,30 +45,13 @@ class MockAnalysis:
             "sample_ids": ["2018-20203", "2018-20204"],
             "sv_rank_model_version": "1.08",
         }
-        return outdata
+        return out_data
 
     @staticmethod
     def convert_panels(customer_id, panels):
         """Mock convert_panels"""
         _ = customer_id, panels
         return ""
-
-
-class MockLims:
-    """ Mock Lims API """
-
-    lims = None
-
-    def __init__(self, samples):
-        self.lims = self
-        self._samples = samples
-
-    def sample(self, sample_id):
-        """ Returns a lims sample matching the provided sample_id """
-        for sample in self._samples:
-            if sample["id"] == sample_id:
-                return sample
-        return None
 
 
 @pytest.fixture(name="lims_family")
@@ -243,7 +227,7 @@ def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analy
 def fixture_mip_config_builder(
     mip_analysis_hk_version: hk_models.Version,
     mip_analysis_obj: models.Analysis,
-    lims_api: MockLims,
+    lims_api: MockLimsAPI,
     mip_analysis_api: MockAnalysis,
     madeline_api: MockMadelineAPI,
 ) -> MipConfigBuilder:
@@ -260,7 +244,7 @@ def fixture_mip_config_builder(
 def fixture_balsamic_config_builder(
     balsamic_analysis_hk_version: hk_models.Version,
     balsamic_analysis_obj: models.Analysis,
-    lims_api: MockLims,
+    lims_api: MockLimsAPI,
 ) -> BalsamicConfigBuilder:
     return BalsamicConfigBuilder(
         hk_version_obj=balsamic_analysis_hk_version,
@@ -282,8 +266,8 @@ def fixture_mip_load_config(
 
 
 @pytest.fixture(name="lims_api")
-def fixture_lims_api(lims_samples: List[dict]) -> MockLims:
-    return MockLims(lims_samples)
+def fixture_lims_api(lims_samples: List[dict]) -> MockLimsAPI:
+    return MockLimsAPI(samples=lims_samples)
 
 
 @pytest.fixture(name="mip_analysis_api")
@@ -300,7 +284,7 @@ def fixture_upload_scout_api(
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockAnalysis()
-    lims_api = MockLims(lims_samples)
+    lims_api = MockLimsAPI(samples=lims_samples)
 
     return UploadScoutAPI(
         hk_api=housekeeper_api,
@@ -320,7 +304,7 @@ def fixture_upload_mip_analysis_scout_api(
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockAnalysis()
-    lims_api = MockLims(lims_samples)
+    lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(
         hk_api=mip_analysis_hk_api,
@@ -342,7 +326,7 @@ def fixture_upload_balsamic_analysis_scout_api(
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockAnalysis()
-    lims_api = MockLims(lims_samples)
+    lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(
         hk_api=balsamic_analysis_hk_api,

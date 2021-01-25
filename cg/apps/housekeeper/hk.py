@@ -112,7 +112,7 @@ class HousekeeperAPI:
             if tags.issubset(file_tags):
                 LOG.debug("Found file %s", file_obj)
                 return file_obj
-        LOG.debug("Could not find any files matching the tags")
+        LOG.info("Could not find any files matching the tags")
 
     def rollback(self):
         """ Wrap method in Housekeeper Store """
