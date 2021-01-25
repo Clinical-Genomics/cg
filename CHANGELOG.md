@@ -14,6 +14,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Added customer name in order tickets
+
 ## 18.6.1
 
 ### Fixed
