@@ -14,11 +14,29 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## 18.6.1
+
+## 18.8.0
 
 ### Added
 
 - Add functionality to upload balsamic analyses to scout
+
+## [18.7.1]
+
+### Fixed
+
+- clean_fastq command now also skips validation cases when cleaning fastq files
+
+## [18.7.0]
+
+### Added customer name in order tickets
+
+## [18.6.1]
+
+### Fixed
+
+- Fix bug with name clash for created case when submitting RML-orders via Orderportal
+
 
 ## 18.6.0
 
