@@ -89,7 +89,7 @@ class MicrosaltAnalysisAPI:
             self.root_dir, "results", "reports", "trailblazer", f"{order_id}_slurm_ids.yaml"
         )
 
-    def get_deliverables_file_path(self, case_id: str) -> Optional[Path]:
+    def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
         case_obj: models.Family = self.db.family(case_id)
@@ -103,7 +103,7 @@ class MicrosaltAnalysisAPI:
         )
         if deliverables_file_path.exists():
             LOG.info("Found deliverables file %s", deliverables_file_path)
-            return deliverables_file_path
+        return deliverables_file_path
 
     @staticmethod
     def generate_fastq_name(
@@ -385,7 +385,7 @@ class MicrosaltAnalysisAPI:
         """Gather information from microSALT analysis to store."""
 
         deliverables_path = self.get_deliverables_file_path(case_id=case_id)
-        if not deliverables_path:
+        if not deliverables_path.exists():
             LOG.warning(
                 "Deliverables file not found for %s, analysis may not be finished yet", case_id
             )

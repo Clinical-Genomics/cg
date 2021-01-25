@@ -18,7 +18,26 @@ Try to use the following format:
 
 ### Added customer name in order tickets
 
-## 18.5.0
+## 18.6.1
+
+### Fixed
+
+- Fix bug with name clash for created case when submitting RML-orders via Orderportal
+
+## 18.6.0
+
+### Added
+
+- Add command 'delete case' to remove case from the database
+- Add command 'delete cases' to remove multiple cases from the database
+
+## [18.5.1]
+
+### Fixed
+
+- Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
+
+## [18.5.0]
 
 ### Added
 - Added MHT to gene panel master-list
@@ -36,8 +55,6 @@ Try to use the following format:
 - cg workflow mip-dna --panel-bed and --dry-run options can be set when executing full workflow
 - Changed logic for how case links are retrieved in order to support linking of very old cases
 - Analysis not submitted to Trailblazer if executing MIP workflow in dry-run
-
-
 
 ## [18.2]
 

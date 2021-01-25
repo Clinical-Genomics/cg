@@ -2,10 +2,9 @@ import logging
 
 import click
 
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store, models
 
-from .family import family
+from .case import case
 
 CONFIRM = "Continue?"
 
@@ -23,16 +22,17 @@ def _get_samples_by_identifiers(
 def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Family]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id = _get_samples_by_identifiers(identifiers, store)
-    cases = set()
+    _cases = set()
     for sample in samples_by_id:
 
         for link in sample.links:
-            cases.add(link.family)
+            _cases.add(link.family)
 
-    return cases
+    return _cases
 
 
 @click.command()
+@click.option("--dry-run", is_flag=True)
 @click.option(
     "--sample-identifier",
     "identifiers",
@@ -42,41 +42,34 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
     help="Give an identifier on sample and the value to use it with, e.g. --sample-identifier "
     "name Prov52",
 )
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
-@click.option("-c", "--customer-id", type=click.STRING, help="update customer")
-@click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
-@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
 @click.pass_context
-def families(
+def cases(
     context: click.Context,
-    action,
-    priority,
-    panels,
-    customer_id,
+    dry_run: bool,
     identifiers: click.Tuple([str, str]),
 ):
-    """Set values on many samples at the same time"""
+    """Delete many cases of samples at the same time"""
     store = context.obj["status_db"]
-    cases = _get_cases(identifiers, store)
+    _cases = _get_cases(identifiers, store)
 
-    if not cases:
-        LOG.error("No cases to alter!")
+    if not _cases:
+        LOG.error("No cases to delete!")
         raise click.Abort
 
-    LOG.info("Would alter cases:")
+    if dry_run:
+        LOG.info("Cases (that will NOT be deleted due to --dry-run):")
+    else:
+        LOG.info("Would DELETE cases:")
 
-    for case in cases:
-        LOG.info(case)
+    for _case in _cases:
+        LOG.info(_case)
 
     if not (click.confirm(CONFIRM)):
         raise click.Abort
 
-    for case in cases:
+    for _case in _cases:
         context.invoke(
-            family,
-            action=action,
-            priority=priority,
-            panels=panels,
-            family_id=case.internal_id,
-            customer_id=customer_id,
+            case,
+            case_id=_case.internal_id,
+            dry_run=dry_run,
         )
