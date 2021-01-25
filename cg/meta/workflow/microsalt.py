@@ -459,7 +459,7 @@ class MicrosaltAnalysisAPI:
     def get_microsalt_version(self):
         try:
             self.process.run_command(["--version"])
-            return self.process.stdout_lines().split()[-1]
+            return list(self.process.stdout_lines())[0].split()[-1]
         except CalledProcessError:
             LOG.warning("Could not retrieve microsalt version!")
             return "0.0.0"
