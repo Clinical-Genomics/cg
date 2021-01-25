@@ -273,6 +273,7 @@ def start_available(context: click.Context, dry_run: bool) -> None:
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool) -> None:
+    """Upload the trending report for latest analysis of given case_id to Vogue"""
 
     vogue_api = VogueAPI(context.obj)
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
@@ -321,6 +322,7 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
 @OPTION_DRY_RUN
 @click.pass_context
 def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
+    """Upload the trending reports for all un-uploaded latest analyses to Vogue"""
 
     EXIT_CODE: int = EXIT_SUCCESS
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
