@@ -291,6 +291,8 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
             samples_string,
             microsalt_version,
         )
+        return
+
     analysis_result_file = microsalt_analysis_api.hk.get_files(
         bundle=unique_id, tags=["vogue"]
     ).first()
