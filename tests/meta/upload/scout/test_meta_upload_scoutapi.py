@@ -4,11 +4,12 @@ from pathlib import Path
 import pytest
 import yaml
 
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 
 
-def test_unlinked_family_is_linked(upload_scout_api: UploadScoutAPI):
+def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
     """Test that is_family check fails when samples are not linked"""
     # GIVEN a upload scout api and case data for a family without linked individuals
     family_data: MipLoadConfig = MipLoadConfig(
@@ -20,12 +21,12 @@ def test_unlinked_family_is_linked(upload_scout_api: UploadScoutAPI):
         }
     )
     # WHEN running the check if family is linked
-    res = upload_scout_api._is_family_case(family_data)
+    res = mip_config_builder.is_family_case(load_config=family_data)
     # THEN assert that the test returns False
     assert res is False
 
 
-def test_family_is_linked(upload_scout_api: UploadScoutAPI):
+def test_family_is_linked(mip_config_builder: MipConfigBuilder):
     """Test that is_family returns true when samples are linked"""
     # GIVEN a upload scout api and case data for a linked family
     family_data: MipLoadConfig = MipLoadConfig(
@@ -38,7 +39,7 @@ def test_family_is_linked(upload_scout_api: UploadScoutAPI):
         }
     )
     # WHEN running the check if family is linked
-    res = upload_scout_api._is_family_case(family_data)
+    res = mip_config_builder.is_family_case(family_data)
     # THEN assert that the test returns True
     assert res is True
 

@@ -24,21 +24,18 @@ SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
 def test_add_mandatory_info_to_mip_config(
-    analysis_obj: models.Analysis, mip_file_handler: MipConfigBuilder
+    analysis_obj: models.Analysis, mip_config_builder: MipConfigBuilder
 ):
     # GIVEN an cg analysis object
     # GIVEN a mip load config object
-    load_config = MipLoadConfig()
-    assert load_config.owner is None
+    assert mip_config_builder.load_config.owner is None
     # GIVEN a file handler with some housekeeper version data
 
     # WHEN adding the mandatory information
-    UploadScoutAPI.add_mandatory_info_to_load_config(
-        analysis_obj=analysis_obj, load_config=load_config, file_handler=mip_file_handler
-    )
+    mip_config_builder.add_mandatory_info_to_load_config()
 
     # THEN assert mandatory field owner was set
-    assert load_config.owner
+    assert mip_config_builder.load_config.owner
 
 
 def test_generate_balsamic_load_config(
