@@ -15,6 +15,7 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
 
 LOG = logging.getLogger(__name__)
 
