@@ -325,7 +325,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
     latest_analyses = list(
         microsalt_analysis_api.db.latest_analyses()
         .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
-        .filter(models.Analysis.uploaded_at is None)
+        .filter(models.Analysis.uploaded_at.is_(None))
     )
     for analysis in latest_analyses:
         unique_id = analysis.family.internal_id
