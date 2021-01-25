@@ -14,14 +14,19 @@ from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 
 
-@pytest.fixture
-def mip_lims():
+@pytest.fixture(name="mip_lims")
+def fixture_mip_lims() -> MockLimsAPI:
     mip_lims = MockLimsAPI({})
     return mip_lims
 
 
+@pytest.fixture(name="mock_mip_script")
+def fixture_mock_mip_script() -> str:
+    return "echo"
+
+
 @pytest.fixture
-def mock_root_folder(project_dir):
+def mock_root_folder(project_dir: Path) -> str:
     return Path(project_dir, "cases").as_posix()
 
 
@@ -230,48 +235,107 @@ def fixture_populated_mip_tb_api(
     return _tb_api
 
 
-@pytest.fixture
-def mip_context(
-    analysis_store_single_case, trailblazer_api, housekeeper_api, mip_lims, mock_root_folder
+@pytest.fixture(name="mip_rna_conda_env_name")
+def fixture_mip_rna_conda_env_name() -> str:
+    return "S_mip_rd-rna"
+
+
+@pytest.fixture(name="mip_dna_conda_env_name")
+def fixture_mip_dna_conda_env_name() -> str:
+    return "S_mip_rd-dna"
+
+
+@pytest.fixture(name="mip_dna_pipeline")
+def fixture_mip_dna_pipeline() -> str:
+    return "analyse rd_dna"
+
+
+@pytest.fixture(name="mip_rna_pipeline")
+def fixture_mip_rna_pipeline() -> str:
+    return "analyse rd_rna"
+
+
+@pytest.fixture(scope="function", name="analysis_store_rna_case")
+def fixture_analysis_store_rna_case(
+    base_store: Store, analysis_family_single_case: dict, apptag_rna: str, helpers
+) -> Store:
+    """Setup a store instance with a single ind RNA case for testing analysis API"""
+    analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
+    helpers.ensure_family_from_dict(
+        base_store, family_info=analysis_family_single_case, app_tag=apptag_rna
+    )
+
+    yield base_store
+
+
+@pytest.fixture(name="rna_mip_context")
+def fixture_rna_mip_context(
+    analysis_store_rna_case: Store,
+    trailblazer_api: TrailblazerAPI,
+    housekeeper_api: HousekeeperAPI,
+    mip_lims: MockLimsAPI,
+    mock_root_folder: str,
+    mock_mip_script: str,
+    mip_rna_conda_env_name: str,
+    mip_dna_conda_env_name: str,
+    mip_rna_pipeline: str,
 ):
-    return {
+    rna_mip_context = {
+        "rna_api": MipAnalysisAPI(
+            db=analysis_store_rna_case,
+            hk_api=housekeeper_api,
+            tb_api=trailblazer_api,
+            scout_api="scout_api",
+            lims_api=mip_lims,
+            script=mock_mip_script,
+            pipeline=mip_rna_pipeline,
+            conda_env=mip_rna_conda_env_name,
+            root=mock_root_folder,
+        ),
+        "mip-rd-rna": {
+            "conda_env": mip_rna_conda_env_name,
+            "mip_config": "config.yaml",
+            "pipeline": mip_rna_pipeline,
+            "root": mock_root_folder,
+            "script": mock_mip_script,
+        },
+    }
+    return rna_mip_context
+
+
+@pytest.fixture(name="dna_mip_context")
+def fixture_dna_mip_context(
+    analysis_store_single_case: Store,
+    trailblazer_api: TrailblazerAPI,
+    housekeeper_api: HousekeeperAPI,
+    mip_lims: MockLimsAPI,
+    mock_root_folder: str,
+    mock_mip_script: str,
+    mip_rna_conda_env_name: str,
+    mip_dna_conda_env_name: str,
+    mip_dna_pipeline: str,
+):
+    dna_mip_context = {
         "dna_api": MipAnalysisAPI(
             db=analysis_store_single_case,
             hk_api=housekeeper_api,
             tb_api=trailblazer_api,
             scout_api="scout_api",
             lims_api=mip_lims,
-            script="echo",
-            pipeline="analyse rd_dna",
-            conda_env="S_mip_rd-dna",
-            root=mock_root_folder,
-        ),
-        "rna_api": MipAnalysisAPI(
-            db=analysis_store_single_case,
-            hk_api=housekeeper_api,
-            tb_api=trailblazer_api,
-            scout_api="scout_api",
-            lims_api=mip_lims,
-            script="echo",
-            pipeline="analyse rd_rna",
-            conda_env="S_mip_rd-rna",
+            script=mock_mip_script,
+            pipeline=mip_dna_pipeline,
+            conda_env=mip_dna_conda_env_name,
             root=mock_root_folder,
         ),
         "mip-rd-dna": {
-            "conda_env": "S_mip_rd-dna",
+            "conda_env": mip_dna_conda_env_name,
             "mip_config": "config.yaml",
-            "pipeline": "analyse rd_dna",
+            "pipeline": mip_dna_pipeline,
             "root": mock_root_folder,
-            "script": "echo",
-        },
-        "mip-rd-rna": {
-            "conda_env": "S_mip_rd-rna",
-            "mip_config": "config.yaml",
-            "pipeline": "analyse rd_rna",
-            "root": mock_root_folder,
-            "script": "echo",
+            "script": mock_mip_script,
         },
     }
+    return dna_mip_context
 
 
 @pytest.fixture(name="mip_store_context")

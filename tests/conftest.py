@@ -43,6 +43,11 @@ LOG = logging.getLogger(__name__)
 # Case fixtures
 
 
+@pytest.fixture(name="email_adress")
+def fixture_email_adress() -> str:
+    return "james.holden@scilifelab.se"
+
+
 @pytest.fixture(name="case_id")
 def fixture_case_id() -> str:
     """Return a case id"""
@@ -638,7 +643,7 @@ def fixture_hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a hermes api with a mocked process"""
-    hermes_config = {"hermes": {"binary_path": "hermes"}}
+    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -780,8 +785,13 @@ def fixture_store() -> Store:
     _store.drop_all()
 
 
+@pytest.fixture(name="apptag_rna")
+def fixture_apptag_rna() -> str:
+    return "RNAPOAR025"
+
+
 @pytest.fixture(scope="function", name="base_store")
-def fixture_base_store(store) -> Store:
+def fixture_base_store(store: Store, apptag_rna: str) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group("all_customers", "all customers")
 
@@ -900,7 +910,7 @@ def fixture_base_store(store) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RNAPOAR025",
+            tag=apptag_rna,
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,

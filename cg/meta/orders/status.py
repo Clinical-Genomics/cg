@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List
 
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.store import models
 
@@ -452,12 +452,14 @@ class StatusHandler:
                 application_version = self.status.current_application_version(pool["application"])
                 if application_version is None:
                     raise OrderError(f"Invalid application: {pool['application']}")
-            case_obj = self.status.find_family(customer=customer_obj, name=ticket)
+
+            case_name = f"{ticket}-{pool['name']}"
+            case_obj = self.status.find_family(customer=customer_obj, name=case_name)
 
             if not case_obj:
                 case_obj = self.status.add_family(
                     data_analysis=Pipeline(pool["data_analysis"]),
-                    name=pool["name"],
+                    name=case_name,
                     panels=None,
                 )
                 case_obj.customer = customer_obj

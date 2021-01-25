@@ -133,13 +133,6 @@ class MockBalsamicFastq(BalsamicFastqHandler):
         super().__init__(config={"balsamic": {"root": tmpdir}})
 
 
-class MockMicrosaltFastq(MicrosaltFastqHandler):
-    """Mock FastqHandler for analysis_api"""
-
-    def __init__(self):
-        super().__init__(config={"microsalt": {"root": tmpdir}})
-
-
 @pytest.fixture(scope="function", name="mip_hk_store")
 def fixture_mip_hk_store(
     helpers: StoreHelpers,

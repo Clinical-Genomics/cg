@@ -37,6 +37,7 @@ class HermesApi:
 
     def create_housekeeper_bundle(
         self,
+        bundle_name: str,
         deliverables: Path,
         pipeline: str,
         analysis_type: Optional[str],
@@ -46,19 +47,20 @@ class HermesApi:
         cg_deliverables: CGDeliverables = self.convert_deliverables(
             deliverables_file=deliverables, pipeline=pipeline, analysis_type=analysis_type
         )
-        return self.get_housekeeper_bundle(deliverables=cg_deliverables, created=created)
+        return self.get_housekeeper_bundle(
+            deliverables=cg_deliverables, created=created, bundle_name=bundle_name
+        )
 
     @staticmethod
     def get_housekeeper_bundle(
-        deliverables: CGDeliverables, created: Optional[datetime] = None
+        deliverables: CGDeliverables, bundle_name: str, created: Optional[datetime] = None
     ) -> hk_models.InputBundle:
         """Convert a deliverables object to a housekeeper object"""
         bundle_info = {
-            "name": deliverables.bundle_id,
+            "name": bundle_name,
             "files": [file_info.dict() for file_info in deliverables.files],
         }
         if created:
             bundle_info["created"] = created
 
-        bundle = hk_models.InputBundle(**bundle_info)
-        return bundle
+        return hk_models.InputBundle(**bundle_info)

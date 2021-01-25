@@ -19,6 +19,105 @@ Try to use the following format:
 ### Added
 - Support for creating delivery reports for analyses that are not the latest ones
 
+## 18.7.0
+
+### Added customer name in order tickets
+
+## 18.6.1
+
+### Fixed
+
+- Fix bug with name clash for created case when submitting RML-orders via Orderportal
+
+## 18.6.0
+
+### Added
+
+- Add command 'delete case' to remove case from the database
+- Add command 'delete cases' to remove multiple cases from the database
+
+## [18.5.1]
+
+### Fixed
+
+- Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
+
+## [18.5.0]
+
+### Added
+- Added MHT to gene panel master-list
+
+## [18.4.0]
+
+### Added
+
+- Added submission of microsalt cases for tracking in Trailblazer
+
+## [18.3.0]
+
+### Changed
+
+- cg workflow mip-dna --panel-bed and --dry-run options can be set when executing full workflow
+- Changed logic for how case links are retrieved in order to support linking of very old cases
+- Analysis not submitted to Trailblazer if executing MIP workflow in dry-run
+
+## [18.2]
+
+### Changed
+
+- Remove option to specify delivery path when delivering data
+
+### Fixed
+
+- Improved usage of `cg deliver analysis` command
+
+## [18.1.5]
+
+### Fixed
+
+- cg workflow mip-rna link command
+
+## [18.1.4]
+
+### Fixed
+
+- Better help text for microsalt cli commands
+
+
+## [18.1.3]
+
+### Fixed
+
+- deliver filtered cnvkit file for balsamic
+
+## [18.1.2]
+
+### Fixed
+
+- cg workflow mip-rna config-case command
+ 
+## [18.1.1]
+
+### Fixed
+
+- Updates balsamic deliver tags to align with the ones specified in hermes
+
+## [18.1.0]
+
+### Added
+- Customer in the ticket created for an order from the Orderportal
+
+## [18.0.0]
+
+### Added
+- New commands for running cron jobs 
+
+### Changed
+- Changed cli commands for starting and storing microsalt workflows
+
+### Fixed
+- Full Microsalt can now be executed through cg interface
+
 ## [17.2.1]
 
 ### Fixed
@@ -30,7 +129,6 @@ Try to use the following format:
 ### Changed
 
 - Using HermesApi to save Balsamic deliverables in Housekeeper
-
 
 ## [17.1.0]
 
@@ -45,14 +143,10 @@ Try to use the following format:
 ### Added
 - Lims ID is sent to Balsamic during case config
 
-
 ## [16.17.1]
-
-### Added
 
 ### Fixed
 - Fixed exporting reduced mt_bam to scout config
-### Changed
 
 ## 16.17.0
 

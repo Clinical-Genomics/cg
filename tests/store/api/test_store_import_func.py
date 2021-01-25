@@ -4,13 +4,13 @@ from typing import List
 
 from cg.store import Store, models
 from cg.store.api.import_func import (
-    prices_are_same,
-    versions_are_same,
     add_application_version,
     import_application_versions,
     import_applications,
     import_apptags,
     parse_application_versions,
+    prices_are_same,
+    versions_are_same,
 )
 from cg.store.api.models import ApplicationVersionSchema
 from tests.store.api.conftest import StoreCheckers
