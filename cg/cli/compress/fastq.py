@@ -110,6 +110,8 @@ def clean_fastq(context, case_id, days_back, dry_run):
 
     cleaned_inds = 0
     for case_obj in cases:
+        if case_obj.internal_id in CASES_TO_IGNORE:
+            continue
         samples = get_fastq_individuals(store=store, case_id=case_obj.internal_id)
         for sample_id in samples:
             res = compress_api.clean_fastq(sample_id)
