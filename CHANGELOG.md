@@ -17,14 +17,19 @@ Try to use the following format:
 ## [18.8.0]
 
 ### Added
-- cg workflow microsalt upload-analysis-vogue [case_id] to upload specific analysis
+- cg workflow microsalt upload-analysis-vogue [case_id] to upload the latest analysis from specific case
 - cg workflow microsalt upload-latest-analyses-vogue to upload all latest analyses what haven't been uploaded
 
 
+## [18.7.1]
+
+### Fixed
+
+- clean_fastq command now also skips validation cases when cleaning fastq files
+
 ## [18.7.0]
 
-### Added 
-
+### Added
 -Added customer name in order tickets
 
 ## [18.6.1]

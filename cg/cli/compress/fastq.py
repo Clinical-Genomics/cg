@@ -12,68 +12,11 @@ from .helpers import (
     update_compress_api,
 )
 from cg.store.get.cases import ready_for_spring_compression
+from cg.constants.compression import CASES_TO_IGNORE
 
 LOG = logging.getLogger(__name__)
 
 # There is a list of problematic cases that we should skip
-PROBLEMATIC_CASES = [
-    "causalmite",
-    "deepcub",
-    "expertalien",
-    "fluenteagle",
-    "grandkoi",
-    "lovingmayfly",
-    "loyalegret",
-    "modernbee",
-    "proudcollie",
-    "richalien",
-    "suremako",
-    "wisestork",
-]
-
-# List of cases used for validation that we should skip
-VALIDATION_CASES = [
-    "bosssponge",
-    "busycolt",
-    "casualgannet",
-    "cleanshrimp",
-    "daringpony",
-    "easybeetle",
-    "epicasp",
-    "firstfawn",
-    "fleetjay",
-    "gamedeer",
-    "gladthrush",
-    "helpedfilly",
-    "hotskink",
-    "hotviper",
-    "intentcorgi",
-    "intentmayfly",
-    "keencalf",
-    "keenviper",
-    "lightprawn",
-    "livingox",
-    "meetpossum",
-    "mintbaboon",
-    "mintyeti",
-    "moralgoat",
-    "onemite",
-    "proeagle",
-    "propercoral",
-    "pumpedcat",
-    "rightmacaw",
-    "safeguinea",
-    "sharpparrot",
-    "sharppigeon",
-    "strongbison",
-    "strongman",
-    "topsrhino",
-    "unitedbeagle",
-    "usablemarten",
-    "vitalmouse",
-]
-
-CASES_TO_IGNORE = PROBLEMATIC_CASES + VALIDATION_CASES
 
 
 @click.command("fastq")
@@ -167,6 +110,8 @@ def clean_fastq(context, case_id, days_back, dry_run):
 
     cleaned_inds = 0
     for case_obj in cases:
+        if case_obj.internal_id in CASES_TO_IGNORE:
+            continue
         samples = get_fastq_individuals(store=store, case_id=case_obj.internal_id)
         for sample_id in samples:
             res = compress_api.clean_fastq(sample_id)
