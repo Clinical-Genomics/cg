@@ -300,7 +300,7 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
 
     vogue_load_args = {
         "samples": samples_string,
-        "analysis_result_file": analysis_result_file.path,
+        "analysis_result_file": analysis_result_file.full_path,
         "analysis_case_name": unique_id,
         "analysis_type": "microsalt",
         "analysis_workflow_name": "microsalt",
