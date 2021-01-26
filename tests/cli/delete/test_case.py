@@ -10,7 +10,7 @@ SUCCESS = 0
 def test_delete_case_without_options(cli_runner, base_context, base_store: Store, helpers):
     """Test to delete a case using only the required arguments"""
     # GIVEN a database with a case
-    helpers.add_family(base_store)
+    helpers.add_case(base_store)
     assert base_store.Family.query.count() == 1
 
     # WHEN deleting a case
@@ -35,7 +35,7 @@ def test_delete_case_bad_case(cli_runner, base_context):
 def test_delete_case_without_links(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case can delete a case without links"""
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     assert not case_obj.links
 
@@ -66,7 +66,7 @@ def test_delete_case_with_analysis(cli_runner, base_context, base_store: Store, 
 def test_delete_case_with_dry_run(cli_runner, base_context, base_store: Store, helpers, caplog):
     """Test that the delete case will not delete the case in dry-run mode """
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
@@ -92,7 +92,7 @@ def test_delete_case_with_dry_run(cli_runner, base_context, base_store: Store, h
 def test_delete_case_without_yes(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete the case in dry-run mode """
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     assert not case_obj.links
 
@@ -107,7 +107,7 @@ def test_delete_case_without_yes(cli_runner, base_context, base_store: Store, he
 def test_delete_case_with_links(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case can delete a case without links"""
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
@@ -128,11 +128,11 @@ def test_delete_case_with_links(cli_runner, base_context, base_store: Store, hel
 def test_delete_case_with_links_to_other_case(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete a sample linked to another case"""
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store, "first_case_linked_to_sample")
+    case_obj = helpers.add_case(base_store, "first_case_linked_to_sample")
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
-    case_obj2 = helpers.add_family(base_store, "second_case_linked_to_sample")
+    case_obj2 = helpers.add_case(base_store, "second_case_linked_to_sample")
     helpers.add_relationship(store=base_store, family=case_obj2, sample=sample)
 
     assert base_store.Family.query.count() == 2
@@ -153,12 +153,12 @@ def test_delete_case_with_links_to_other_case(cli_runner, base_context, base_sto
 def test_delete_case_with_father_links(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete a sample linked to another case as father"""
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store, "first_case_linked_to_sample")
+    case_obj = helpers.add_case(base_store, "first_case_linked_to_sample")
     case_id = case_obj.internal_id
     sample_father = helpers.add_sample(base_store, "father")
     sample_child = helpers.add_sample(base_store, "child")
     helpers.add_relationship(store=base_store, family=case_obj, sample=sample_father)
-    case_obj2 = helpers.add_family(base_store, "second_case_linked_to_sample")
+    case_obj2 = helpers.add_case(base_store, "second_case_linked_to_sample")
     helpers.add_relationship(
         store=base_store, family=case_obj2, sample=sample_child, father=sample_father
     )
@@ -181,12 +181,12 @@ def test_delete_case_with_father_links(cli_runner, base_context, base_store: Sto
 def test_delete_mother_case(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete a sample linked to another case as mother"""
     # GIVEN a database with a mother case and a child case with the mother as mother
-    case_mother = helpers.add_family(base_store, "case_mother")
+    case_mother = helpers.add_case(base_store, "case_mother")
     case_mother_id = case_mother.internal_id
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_child = helpers.add_sample(base_store, "child")
     helpers.add_relationship(store=base_store, family=case_mother, sample=sample_mother)
-    case_child = helpers.add_family(base_store, "case_child")
+    case_child = helpers.add_case(base_store, "case_child")
     helpers.add_relationship(
         store=base_store, family=case_child, sample=sample_child, mother=sample_mother
     )
@@ -208,11 +208,11 @@ def test_delete_mother_case(cli_runner, base_context, base_store: Store, helpers
 def test_delete_child_case(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will not delete a sample linked to another case as mother"""
     # GIVEN a database with a mother case and a child case with the mother as mother
-    case_mother = helpers.add_family(base_store, "case_mother")
+    case_mother = helpers.add_case(base_store, "case_mother")
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_child = helpers.add_sample(base_store, "child")
     helpers.add_relationship(store=base_store, family=case_mother, sample=sample_mother)
-    case_child = helpers.add_family(base_store, "case_child")
+    case_child = helpers.add_case(base_store, "case_child")
     case_child_id = case_child.internal_id
     helpers.add_relationship(
         store=base_store, family=case_child, sample=sample_child, mother=sample_mother
@@ -235,7 +235,7 @@ def test_delete_child_case(cli_runner, base_context, base_store: Store, helpers)
 def test_delete_trio_case(cli_runner, base_context, base_store: Store, helpers):
     """Test that the delete case will delete a trio"""
     # GIVEN a database with a trio case
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_father = helpers.add_sample(base_store, "father")

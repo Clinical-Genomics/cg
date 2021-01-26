@@ -507,7 +507,7 @@ class FamilyImporter(Store):
             else:
                 priority = "standard"
 
-        new_record = self.add_family(
+        new_record = self.add_case(
             data_analysis=data["data_analysis"],
             name=data["name"],
             priority=priority,

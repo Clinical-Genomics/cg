@@ -14,7 +14,7 @@ def copy_case(case: models.Family, store: Store) -> models.Family:
         new_case_name = f"{case.name}-copy-{i}"
         i += 1
 
-    new_case = store.add_family(
+    new_case = store.add_case(
         data_analysis=case.data_analysis, name=new_case_name, panels=case.panels
     )
 
@@ -241,7 +241,7 @@ def ensure_each_sample_has_a_case(store: Store) -> None:
             new_case_name = f"{sample.name}-{i}"
             i += 1
 
-        case = store.add_family(data_analysis=sample.data_analysis, panels=None, name=new_case_name)
+        case = store.add_case(data_analysis=sample.data_analysis, panels=None, name=new_case_name)
         sample.data_analysis = None
         case.comment = "created by data_analysis migration"
         case.customer_id = sample.customer.id
