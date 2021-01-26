@@ -38,6 +38,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutBalsamicIndividual()
 
         self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
+        if BalsamicAnalysisAPI.get_sample_type(db_sample) == "tumor":
+            config_sample.phenotype = "affected"
+        else:
+            config_sample.phenotype = "unaffected"
+
+        config_sample.analysis_type = BalsamicAnalysisAPI.get_application_type(db_sample)
         return config_sample
 
     def build_load_config(self) -> None:
@@ -50,5 +56,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         LOG.info("Building samples")
         db_sample: models.FamilySample
+
         for db_sample in self.analysis_obj.family.links:
             self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
