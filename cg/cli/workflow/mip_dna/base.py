@@ -88,6 +88,7 @@ def mip_dna(
 @ARGUMENT_CASE_ID
 @click.pass_context
 def ensure_flowcells_ondisk(context: click.Context, case_id: str):
+    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
     dna_api = context.obj["dna_api"]
     case_obj = dna_api.db.family(case_id)
     if not case_obj:
@@ -102,7 +103,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
         # Commit the updates to request flowcells
         dna_api.db.commit()
         raise FlowcellsNeededError(
-            "Analysis cannot be started: all flowcells need to be on dick to run the analysis"
+            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
         )
 
 
@@ -265,7 +266,7 @@ def run(
 @OPTION_DRY
 @click.pass_context
 def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
-    """Start all cases that are ready for analysis"""
+    """Handles cases where decompression is needed before starting analysis"""
     dna_api = context.obj["dna_api"]
     prepare_fastq_api = context.obj["prepare_fastq_api"]
     case_obj = dna_api.db.family(case_id)
@@ -362,6 +363,7 @@ def start(
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
+    """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
     exit_code: int = EXIT_SUCCESS
     for case_obj in dna_api.db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
