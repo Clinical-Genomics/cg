@@ -5,7 +5,7 @@ import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline, DataDelivery
 from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
 
@@ -63,6 +63,7 @@ def parse_orderform(excel_path: str) -> dict:
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
 
     project_type = get_project_type(document_title, parsed_samples)
+    delivery_type = get_data_delivery(parsed_samples, OrderType(project_type))
 
     if project_type in CASE_PROJECT_TYPES:
         parsed_cases = group_cases(parsed_samples)
@@ -88,6 +89,7 @@ def parse_orderform(excel_path: str) -> dict:
         "customer": customer_ids.pop(),
         "items": items,
         "project_type": project_type,
+        "delivery_type": delivery_type,
         "name": filename_base,
     }
 
@@ -133,6 +135,41 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
             raise OrderFormError(f"mixed 'Data Analysis' types: {project_type}")
 
     return project_type
+
+
+def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
+    """Determine the order_data delivery type."""
+
+    NO_VALUE = "no_value"
+    data_deliveries = get_data_deliveries(NO_VALUE, samples)
+
+    if len(data_deliveries) > 1:
+        raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
+
+    data_delivery = data_deliveries.pop()
+
+    if data_delivery == NO_VALUE:
+        if project_type == OrderType.METAGENOME:
+            return str(DataDelivery.FASTQ)
+        elif project_type == OrderType.FASTQ:
+            return str(DataDelivery.FASTQ)
+        elif project_type == OrderType.RML:
+            return str(DataDelivery.FASTQ)
+        elif project_type == OrderType.MIP_RNA:
+            return str(DataDelivery.ANALYSIS_FILES)
+        elif project_type == OrderType.FLUFFY:
+            return str(DataDelivery.NIPT_VIEWER)
+
+        return ""
+
+    try:
+        return str(DataDelivery(data_delivery))
+    except ValueError:
+        raise OrderFormError(f"Unsupported order_data delivery: {data_delivery}")
+
+
+def get_data_deliveries(NO_VALUE, samples):
+    return set((sample.get("data_delivery", NO_VALUE) or NO_VALUE).lower() for sample in samples)
 
 
 def expand_case(case_id: str, parsed_case: dict) -> tuple:

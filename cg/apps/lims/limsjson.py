@@ -1,6 +1,7 @@
 from cg.apps.lims.orderform import CASE_PROJECT_TYPES, expand_case
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderFormError
+from cg.meta.orders import OrderType
 from cg.meta.orders.status import StatusHandler
 
 ACCEPTED_DATA_ANALYSES = [{str(Pipeline.MIP_DNA)}, {str(Pipeline.FLUFFY)}, {str(Pipeline.BALSAMIC)}]
@@ -20,7 +21,7 @@ def get_project_type(samples: [dict]) -> str:
     raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
 
 
-def get_data_delivery(samples: [dict]) -> str:
+def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
     """Determine the order_data delivery type."""
 
     NO_VALUE = "no_value"
@@ -29,13 +30,26 @@ def get_data_delivery(samples: [dict]) -> str:
     if len(data_deliveries) > 1:
         raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
-    if data_deliveries == {NO_VALUE}:
+    data_delivery = data_deliveries.pop()
+
+    if data_delivery == NO_VALUE:
+        if project_type == OrderType.METAGENOME:
+            return str(DataDelivery.FASTQ)
+        elif project_type == OrderType.FASTQ:
+            return str(DataDelivery.FASTQ)
+        elif project_type == OrderType.RML:
+            return str(DataDelivery.FASTQ)
+        elif project_type == OrderType.MIP_RNA:
+            return str(DataDelivery.ANALYSIS_FILES)
+        elif project_type == OrderType.FLUFFY:
+            return str(DataDelivery.NIPT_VIEWER)
+
         return ""
 
     try:
-        return str(DataDelivery(data_deliveries.pop()))
+        return str(DataDelivery(data_delivery))
     except ValueError:
-        raise OrderFormError(f"Unsupported order_data delivery: {data_deliveries}")
+        raise OrderFormError(f"Unsupported order_data delivery: {data_delivery}")
 
 
 def parse_json_order(order_data: dict) -> dict:
@@ -47,7 +61,7 @@ def parse_json_order(order_data: dict) -> dict:
         raise OrderFormError("orderform doesn't contain any samples")
 
     project_type = get_project_type(samples)
-    data_delivery = get_data_delivery(samples)
+    data_delivery = get_data_delivery(samples, OrderType(project_type))
     customer_id = order_data["customer"].lower()
     comment = order_data.get("comment")
     order_name = order_data.get("name")
@@ -66,7 +80,7 @@ def parse_json_order(order_data: dict) -> dict:
         "items": items,
         "name": order_name,
         "project_type": project_type,
-        "delivery": data_delivery,
+        "delivery_type": str(data_delivery),
         "comment": comment,
     }
 

@@ -17,6 +17,7 @@ class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
     EXTERNAL: str = "external"
     FASTQ: str = "fastq"
+    FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"
     MICROSALT: str = str(Pipeline.MICROSALT)
     MIP_DNA: str = str(Pipeline.MIP_DNA)
