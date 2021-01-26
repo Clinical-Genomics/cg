@@ -46,7 +46,9 @@ class Pipeline(StrEnum):
 
 class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis-files"
+    ANALYSIS_BAM_FILES: str = "analysis-bam-files"
     FASTQ: str = "fastq"
+    NIPT_VIEWER: str = "nipt-viewer"
     QC: str = "custom"
     SCOUT: str = "scout"
 
