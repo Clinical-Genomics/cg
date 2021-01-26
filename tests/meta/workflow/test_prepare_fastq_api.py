@@ -140,29 +140,4 @@ def test_no_fastq_in_housekeeper(
     res = prepare_fastq_api.check_fastq_links(case_id)
 
     # THEN assert that all fastq files are not there
-    assert res is False
-
-
-def test_fastq_in_housekeeper(
-    populated_compress_api_fastq_spring: CompressAPI,
-    analysis_store_single_case: Store,
-    case_id: str,
-):
-    """Test when fastq is already in housekeeper"""
-
-    # GIVEN a populated prepare_fastq_api
-    prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case, compress_api=populated_compress_api_fastq_spring
-    )
-    # GIVEN a store with a case that has both spring and fastq files
-    case_obj: Family = analysis_store_single_case.family(case_id)
-    assert case_obj
-    # GIVEN that the case has linked samples
-    link_objects = [link_obj for link_obj in case_obj.links]
-    assert link_objects
-
-    # WHEN checking if fastq files need to be added to housekeeper
-    res = prepare_fastq_api.check_fastq_links(case_id)
-
-    # THEN assert that all fastq files are there
-    assert res is True
+    assert res is None
