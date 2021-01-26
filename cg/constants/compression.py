@@ -28,6 +28,7 @@ PROBLEMATIC_CASES = [
 
 # List of cases used for validation that we should skip
 VALIDATION_CASES = [
+    "bigdrum",
     "bosssponge",
     "busycolt",
     "casualgannet",
@@ -48,6 +49,7 @@ VALIDATION_CASES = [
     "keenviper",
     "lightprawn",
     "livingox",
+    "luckyhog",
     "meetpossum",
     "mintbaboon",
     "mintyeti",

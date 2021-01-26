@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.8.0]
+
+### Added
+- cg workflow microsalt upload-analysis-vogue [case_id] to upload the latest analysis from specific case
+- cg workflow microsalt upload-latest-analyses-vogue to upload all latest analyses what haven't been uploaded
+
 ## [18.7.2]
 
 ### Changed
@@ -28,7 +34,8 @@ Try to use the following format:
 
 ## [18.7.0]
 
-### Added customer name in order tickets
+### Added
+-Added customer name in order tickets
 
 ## [18.6.1]
 
@@ -36,7 +43,7 @@ Try to use the following format:
 
 - Fix bug with name clash for created case when submitting RML-orders via Orderportal
 
-## 18.6.0
+## [18.6.0]
 
 ### Added
 
