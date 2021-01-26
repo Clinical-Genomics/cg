@@ -288,8 +288,10 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
                 case_obj.internal_id,
             )
         raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
-    prepare_fastq_api.check_fastq_links(case_obj.internal_id)
+
     LOG.info("Linking fastq files in housekeeper for case %s", case_id)
+    prepare_fastq_api.check_fastq_links(case_obj.internal_id)
+
     LOG.info("Decompression for case %s not needed, starting analysis", case_id)
 
 
