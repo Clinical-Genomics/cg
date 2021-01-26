@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.7.2]
+
+### Changed
+
+- Skip deliver fastq files when delivering balsamic analysis
+
 ## [18.7.1]
 
 ### Fixed
