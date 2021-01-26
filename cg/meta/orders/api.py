@@ -118,7 +118,10 @@ class OrdersAPI(LimsHandler, StatusHandler):
             message += f"<br />{ticket.get('name')}"
 
         if data.get("customer"):
-            message += f" {data.get('customer')}"
+            customer_id = data.get("customer")
+            customer_name = self.status.customer(customer_id).name
+
+            message += f", {customer_name} ({customer_id})"
 
         return message
 
@@ -169,12 +172,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _submit_external(self, data: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
-        result = self._process_family_samples(data)
+        result = self._process_case_samples(data)
         return result
 
     def _submit_case_samples(self, data: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self._process_family_samples(data)
+        result = self._process_case_samples(data)
         for case_obj in result["records"]:
             LOG.info(f"{case_obj.name}: submit family samples")
             status_samples = [
@@ -220,7 +223,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         return {"project": project_data, "records": samples}
 
-    def _process_family_samples(self, data: dict) -> dict:
+    def _process_case_samples(self, data: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
         status_data = self.cases_to_status(data)
