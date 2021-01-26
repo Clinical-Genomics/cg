@@ -36,7 +36,6 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
     {"cram-index", "tumor"},
     {"bam"},
     {"bam-index"},
-    {"fastq"},
 ]
 
 BALSAMIC_QC_CASE_TAGS = [

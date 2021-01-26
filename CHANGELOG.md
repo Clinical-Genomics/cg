@@ -20,6 +20,11 @@ Try to use the following format:
 - cg workflow microsalt upload-analysis-vogue [case_id] to upload the latest analysis from specific case
 - cg workflow microsalt upload-latest-analyses-vogue to upload all latest analyses what haven't been uploaded
 
+## [18.7.2]
+
+### Changed
+
+- Skip deliver fastq files when delivering balsamic analysis
 
 ## [18.7.1]
 
