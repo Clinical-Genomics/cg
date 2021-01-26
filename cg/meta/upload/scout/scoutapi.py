@@ -85,7 +85,7 @@ class UploadScoutAPI:
         self, config_file_path: Path, case_id: str, delete: bool = False
     ) -> hk_models.File:
         """Add scout load config to hk bundle"""
-        LOG.info("Adding load config to housekeeper")
+        LOG.info("Adding load config %s to housekeeper", config_file_path)
         tag_name: str = self.get_load_config_tag()
         version_obj: hk_models.Version = self.housekeeper.last_version(bundle=case_id)
         uploaded_config_file: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
@@ -93,7 +93,7 @@ class UploadScoutAPI:
         )
         if uploaded_config_file:
             LOG.info("Found config file: %s", uploaded_config_file)
-            if delete is False:
+            if not delete:
                 raise FileExistsError("Upload config already exists")
             self.housekeeper.delete_file(uploaded_config_file.id)
 
