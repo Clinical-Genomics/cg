@@ -136,7 +136,7 @@ def link(context: click.Context, case_id: str):
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_context
-def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool = False):
+def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
     dna_api = context.obj["dna_api"]
 
@@ -169,7 +169,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_context
-def panel(context: click.Context, case_id: str, dry_run: bool = False):
+def panel(context: click.Context, case_id: str, dry_run: bool):
     """Write aggregated gene panel file"""
 
     dna_api = context.obj["dna_api"]
@@ -268,7 +268,7 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
     """Start all cases that are ready for analysis"""
     dna_api = context.obj["dna_api"]
     prepare_fastq_api = context.obj["prepare_fastq_api"]
-    case_obj = dna_api.family(case_id)
+    case_obj = dna_api.db.family(case_id)
     if not case_obj:
         LOG.error("Case %s does not exist in Status-DB", case_id)
         raise click.Abort
@@ -289,6 +289,7 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
             )
         raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
     prepare_fastq_api.check_fastq_links(case_obj.internal_id)
+    LOG.info("Linking fastq files in housekeeper for case %s", case_id)
     LOG.info("Decompression for case %s not needed, starting analysis", case_id)
 
 

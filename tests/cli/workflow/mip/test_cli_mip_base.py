@@ -4,7 +4,7 @@ import logging
 
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.cli.workflow.mip_dna.base import start
+from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.store.api.status import StatusHandler
 
 from tests.meta.conftest import fixture_analysis_api
@@ -36,7 +36,7 @@ def test_spring_decompression_needed_and_started(
     mocker.patch.object(PrepareFastqAPI, "start_spring_decompression")
     PrepareFastqAPI.start_spring_decompression.return_value = True
 
-    result = cli_runner.invoke(start, obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, obj=dna_mip_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
@@ -69,7 +69,7 @@ def test_spring_decompression_needed_and_start_failed(
     mocker.patch.object(PrepareFastqAPI, "start_spring_decompression")
     PrepareFastqAPI.start_spring_decompression.return_value = False
 
-    result = cli_runner.invoke(start, obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, obj=dna_mip_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
@@ -100,9 +100,14 @@ def test_case_needs_to_be_stored(
     PrepareFastqAPI.is_spring_decompression_needed.return_value = False
 
     mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
-    PrepareFastqAPI.check_fastq_links.return_value = False
+    PrepareFastqAPI.check_fastq_links.return_value = None
 
-    result = cli_runner.invoke(start, ["--dry-run"], obj=dna_mip_context)
+    mocker.patch.object(MipAnalysisAPI, "panel")
+    MipAnalysisAPI.panel.return_value = "bla"
+
+    result = cli_runner.invoke(
+        start, ["ADM1", "--panel-bed", "panel.bed", "--dry-run"], obj=dna_mip_context
+    )
 
     # THEN command should run without errors
     assert result.exit_code == 0
