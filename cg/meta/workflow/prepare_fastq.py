@@ -59,7 +59,7 @@ class PrepareFastqAPI:
                 return False
         return True
 
-    def check_fastq_links(self, case_id: str) -> bool:
+    def check_fastq_links(self, case_id: str) -> None:
         """Check if all fastq files are linked in housekeeper"""
         case_obj = self.store.family(case_id)
         for link in case_obj.links:
@@ -72,8 +72,5 @@ class PrepareFastqAPI:
             for compr_obj in compression_objs:
                 if compr_obj.fastq_first not in fastq_files:
                     self.compress_api.add_decompressed_fastq(sample_id)
-                    return False
                 if compr_obj.fastq_second not in fastq_files:
                     self.compress_api.add_decompressed_fastq(sample_id)
-                    return False
-        return True
