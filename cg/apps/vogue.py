@@ -21,7 +21,7 @@ class VogueAPI:
         self.vogue_binary = config["vogue"]["binary_path"]
         self.process = Process(binary=self.vogue_binary, config=self.vogue_config)
 
-    def load_genotype_data(self, genotype_dict: dict):
+    def load_genotype_data(self, genotype_dict: dict) -> None:
         """Load genotype data from a dict."""
 
         load_call = ["load", "genotype", "-s", json.dumps(genotype_dict)]
@@ -31,7 +31,7 @@ class VogueAPI:
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_apptags(self, apptag_list: list):
+    def load_apptags(self, apptag_list: list) -> None:
         """Add observations from a VCF."""
         load_call = ["load", "apptag", json.dumps(apptag_list)]
         self.process.run_command(parameters=load_call)
@@ -70,7 +70,7 @@ class VogueAPI:
         for line in self.process.stderr_lines():
             LOG.info("vogue output: %s", line)
 
-    def load_bioinfo_raw(self, load_bioinfo_inputs):
+    def load_bioinfo_raw(self, load_bioinfo_inputs: dict) -> None:
         """Running vogue load bioinfo raw."""
 
         load_bioinfo_raw_call = [
@@ -95,7 +95,7 @@ class VogueAPI:
 
         self.process.run_command(parameters=load_bioinfo_raw_call)
 
-    def load_bioinfo_process(self, load_bioinfo_inputs, cleanup_flag):
+    def load_bioinfo_process(self, load_bioinfo_inputs: dict, cleanup_flag: bool) -> None:
         """Running load bioinfo process."""
 
         load_bioinfo_process_call = [
@@ -119,7 +119,7 @@ class VogueAPI:
 
         self.process.run_command(parameters=load_bioinfo_process_call)
 
-    def load_bioinfo_sample(self, load_bioinfo_inputs):
+    def load_bioinfo_sample(self, load_bioinfo_inputs: dict) -> None:
         """Running load bioinfo sample."""
 
         load_bioinfo_sample_call = [
