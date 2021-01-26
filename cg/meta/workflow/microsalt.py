@@ -456,7 +456,7 @@ class MicrosaltAnalysisAPI:
             data_analysis=Pipeline.MICROSALT,
         )
 
-    def get_microsalt_version(self):
+    def get_microsalt_version(self) -> str:
         try:
             self.process.run_command(["--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
