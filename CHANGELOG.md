@@ -14,7 +14,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## 18.9.0
+## [18.9.0]
 
 ### Added
 
