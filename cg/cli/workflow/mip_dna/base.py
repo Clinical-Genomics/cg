@@ -261,7 +261,7 @@ def run(
         raise click.Abort
 
 
-@mip_dna.command()
+@mip_dna.command("resolve-compression")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
@@ -359,7 +359,7 @@ def start(
         LOG.error(e.message)
 
 
-@mip_dna.command()
+@mip_dna.command("start-available")
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
