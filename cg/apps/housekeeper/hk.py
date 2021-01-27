@@ -105,7 +105,6 @@ class HousekeeperAPI:
         Return None if no file could be found
         """
         LOG.debug("Fetch files from version with tags %s", tags)
-        file_obj: models.File
         for file_obj in version_obj.files:
             tag: models.Tag
             file_tags = {tag.name for tag in file_obj.tags}
