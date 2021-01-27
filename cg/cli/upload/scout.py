@@ -4,14 +4,13 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from housekeeper.store import models as hk_models
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family
+from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
 
@@ -125,4 +124,3 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
 
     LOG.info("uploaded to scout using load config %s", load_config)
     LOG.info("Case loaded succesfully to Scout")
-

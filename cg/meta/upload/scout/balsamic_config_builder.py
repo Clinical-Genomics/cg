@@ -1,8 +1,5 @@
 import logging
 
-from housekeeper.store import models as hk_models
-from typing_extensions import Literal
-
 from cg.apps.lims import LimsAPI
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
@@ -10,6 +7,8 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.upload.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import models
+from housekeeper.store import models as hk_models
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -44,7 +43,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         else:
             config_sample.phenotype = "unaffected"
 
-        analysis_type: Literal["wgs", "wes", "tgs"] =  BalsamicAnalysisAPI.get_application_type(db_sample)
+        analysis_type: Literal["wgs", "wes", "tgs"] = BalsamicAnalysisAPI.get_application_type(
+            db_sample
+        )
         if analysis_type == "tgs":
             analysis_type = "panel"
         config_sample.analysis_type = analysis_type

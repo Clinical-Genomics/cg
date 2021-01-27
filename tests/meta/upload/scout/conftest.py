@@ -7,14 +7,13 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from housekeeper.store import models as hk_models
-
 from cg.constants import Pipeline
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_load_config import MipLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -262,7 +261,7 @@ def fixture_mip_load_config(
         owner=customer_id,
         family=case_id,
         vcf_snv=str(mip_dna_analysis_dir / "snv.vcf"),
-        track="rare"
+        track="rare",
     )
 
 
