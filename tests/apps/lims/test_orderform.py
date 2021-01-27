@@ -1,5 +1,5 @@
 from cg.apps.lims import orderform
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 
 
 def test_parsing_rml_orderform(rml_orderform: str):
@@ -19,6 +19,7 @@ def test_parsing_rml_orderform(rml_orderform: str):
     assert sample_data["pool"] == "pool1"
     assert sample_data["application"] == "RMLP10R300"
     assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
+    assert sample_data["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
     assert sample_data["index"] == "IDT DupSeq 10 bp Set B"
@@ -46,7 +47,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data["project_type"] == str(Pipeline.FASTQ)
     # ... and find all samples
-    assert len(data["items"]) == 38
+    assert len(data["items"]) == 46
 
     # ... and collect relevant sample info
     normal_sample = data["items"][1]
@@ -54,12 +55,13 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample["name"] == "s2"
     assert normal_sample["container"] == "Tube"
     assert normal_sample["data_analysis"] == str(Pipeline.FASTQ)
-    assert normal_sample["application"] == "WGSLIFC030"
+    assert normal_sample["data_delivery"].lower() == str(DataDelivery.FASTQ)
+    assert normal_sample["application"] == "WGTPCFC030"
     assert normal_sample["sex"] == "female"
-    assert normal_sample["case"] == "family"
+    assert normal_sample["case"] == "c1"
     assert data["customer"] == "cust000"
     assert normal_sample["require_qcok"] is False
-    assert normal_sample["source"] == "blood"
+    assert normal_sample["source"] == "bone marrow"
     assert normal_sample["priority"] == "research"
 
     assert normal_sample["container_name"] == ""
@@ -68,9 +70,9 @@ def test_parsing_fastq_orderform(fastq_orderform):
     assert normal_sample["tumour"] is False
 
     assert tumour_sample["tumour"] is True
-    assert tumour_sample["source"] == "other"
+    assert tumour_sample["source"] == "tissue (FFPE)"
 
-    assert tumour_sample["quantity"] == "1"
+    assert tumour_sample["quantity"] == "4"
     assert tumour_sample["comment"] == "other Elution buffer"
 
 
@@ -85,12 +87,12 @@ def test_parsing_mip_orderform(mip_orderform):
     assert data["customer"] == "cust000"
 
     # ... and it should find and group all samples in families
-    assert len(data["items"]) == 36
+    assert len(data["items"]) == 44
 
     # ... and collect relevant data about the families
     trio_family = data["items"][0]
     assert len(trio_family["samples"]) == 3
-    assert trio_family["name"] == "family"
+    assert trio_family["name"] == "c1"
     assert trio_family["priority"] == "research"
     assert set(trio_family["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert trio_family["require_qcok"] is True
@@ -100,16 +102,17 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample["name"] == "s1"
     assert proband_sample["container"] == "96 well plate"
     assert proband_sample["data_analysis"] == str(Pipeline.MIP_DNA)
-    assert proband_sample["application"] == "WGSPCFC030"
+    assert proband_sample["data_delivery"].lower() == str(DataDelivery.SCOUT)
+    assert proband_sample["application"] == "EXOKTTR020"
     assert proband_sample["sex"] == "male"
-    assert proband_sample["source"] == "other"
+    assert proband_sample["source"] == "tissue (FFPE)"
     assert proband_sample["tumour"] is True
-    assert proband_sample["container_name"] == "plate"
+    assert proband_sample["container_name"] == "plate1"
     assert proband_sample["well_position"] == "A:1"
     assert proband_sample["status"] == "affected"
     assert proband_sample["mother"] == "s2"
     assert proband_sample["father"] == "s3"
-    assert proband_sample["quantity"] == "1"
+    assert proband_sample["quantity"] == "4"
     assert proband_sample["comment"] == "other Elution buffer"
 
 
@@ -138,6 +141,7 @@ def test_parsing_external_orderform(external_orderform):
     assert wes_sample["capture_kit"] == "Agilent Sureselect V5"
     assert wes_sample["application"] == "EXXCUSR000"
     assert wes_sample["data_analysis"] == str(Pipeline.MIP_DNA)
+    assert wes_sample["data_delivery"] == str(DataDelivery.SCOUT)
     assert wes_sample["sex"] == "male"
     # family name on family
     # priority on family
@@ -176,6 +180,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
     assert sample["name"] == "sample1"
     assert sample["source"] == "other"
     assert sample["data_analysis"] == str(Pipeline.FASTQ)
+    assert sample["data_delivery"] == str(DataDelivery.FASTQ)
     assert sample["application"] == "METPCFR030"
     assert sample["customer"] == "cust000"
     assert sample["require_qcok"] is True
@@ -215,6 +220,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data["organism"] == "other"
     assert sample_data["reference_genome"] == "NC_00001"
     assert sample_data["data_analysis"] == str(Pipeline.FASTQ)
+    assert sample_data["data_delivery"] == str(DataDelivery.FASTQ)
     assert sample_data["application"] == "MWRNXTR003"
     # customer on order (data)
     assert sample_data["require_qcok"] is True
@@ -243,30 +249,32 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert data["project_type"] == str(Pipeline.BALSAMIC)
 
     # ... and it should find and group all samples in case
-    assert len(data["items"]) == 36
+    assert len(data["items"]) == 45
 
     # ... and collect relevant data about the case
     # ... and collect relevant info about the samples
 
     case = data["items"][0]
     sample = case["samples"][0]
-    assert len(case["samples"]) == 3
+    assert len(case["samples"]) == 2
 
     # This information is required
 
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
     assert sample["data_analysis"] == str(Pipeline.BALSAMIC)
-    assert sample["application"] == "WGSPCFC030"
+    assert sample["data_delivery"] == str(DataDelivery.ANALYSIS_BAM_FILES)
+    assert sample["application"] == "EXOKTTR020"
     assert sample["sex"] == "male"
-    assert case["name"] == "family"
+    assert case["name"] == "c1"
     assert data["customer"] == "cust000"
     assert case["require_qcok"] is True
-    assert sample["source"] == "other"
+    assert sample["volume"] == "1"
+    assert sample["source"] == "tissue (FFPE)"
     assert case["priority"] == "research"
 
     # Required if Plate
-    assert sample["container_name"] == "plate"
+    assert sample["container_name"] == "plate1"
     assert sample["well_position"] == "A:1"
 
     # This information is required for panel- or exome analysis
@@ -274,15 +282,15 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
 
     # This information is required for Balsamic analysis (cancer)
     assert sample["tumour"] is True
-    assert sample["capture_kit"] == "LymphoMATIC"
+    assert sample["capture_kit"] == "GMCKsolid"
     assert sample["tumour_purity"] == "5"
 
-    assert sample["formalin_fixation_time"] == "1"
-    assert sample["post_formalin_fixation_time"] == "2"
+    assert sample["formalin_fixation_time"] == "2"
+    assert sample["post_formalin_fixation_time"] == "3"
     assert sample["tissue_block_size"] == "small"
 
     # This information is optional
-    assert sample["quantity"] == "1"
+    assert sample["quantity"] == "4"
     assert sample["comment"] == "other Elution buffer"
 
 
@@ -296,11 +304,11 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert data["project_type"] == str(Pipeline.MIP_RNA)
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in cases
-    assert len(data["items"]) == 36
+    assert len(data["items"]) == 44
     # ... and collect relevant data about the cases
     first_case = data["items"][0]
     assert len(first_case["samples"]) == 3
-    assert first_case["name"] == "family"
+    assert first_case["name"] == "c1"
     assert first_case["priority"] == "research"
     assert set(first_case["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
     assert first_case["require_qcok"] is True
@@ -310,14 +318,15 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_sample["name"] == "s1"
     assert first_sample["container"] == "96 well plate"
     assert first_sample["data_analysis"] == str(Pipeline.MIP_RNA)
+    assert first_sample["data_delivery"].lower() == str(DataDelivery.ANALYSIS_FILES)
     assert first_sample["application"] == "RNAPOAR025"
     assert first_sample["sex"] == "male"
     # case-id on the case
     # customer on the order (data)
     # require-qc-ok on the family
-    assert first_sample["source"] == "other"
+    assert first_sample["source"] == "tissue (FFPE)"
 
-    assert first_sample["container_name"] == "plate"
+    assert first_sample["container_name"] == "plate1"
     assert first_sample["well_position"] == "A:1"
 
     # panels on the family
@@ -328,7 +337,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
 
     assert first_sample["tumour"] is True
 
-    assert first_sample["quantity"] == "1"
+    assert first_sample["quantity"] == "4"
     assert first_sample["comment"] == "other Elution buffer"
 
     # required for RNA samples

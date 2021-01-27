@@ -106,6 +106,7 @@ MIP_SAMPLE = {
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     "require_qcok": bool,
+    "volume": str,
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
     "container_name": OptionalNone(TypeValidatorNone(str)),
@@ -143,6 +144,7 @@ BALSAMIC_SAMPLE = {
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "require_qcok": bool,
+    "volume": str,
     "tumour": bool,
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
@@ -175,6 +177,7 @@ MIP_RNA_SAMPLE = {
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
+    "volume": str,
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
     "container_name": OptionalNone(TypeValidatorNone(str)),
@@ -231,6 +234,7 @@ FASTQ_SAMPLE = {
     # todo: implement in OP or remove from OF
     # 'family_name': RegexValidator(NAME_PATTERN),
     "require_qcok": bool,
+    "volume": str,
     "source": str,
     "tumour": bool,
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),

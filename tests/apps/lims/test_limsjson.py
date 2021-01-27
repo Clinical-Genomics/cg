@@ -74,7 +74,7 @@ def test_parsing_rml_json(rml_order_to_submit: dict) -> None:
     assert sample_data["pool"] == "pool-2"
     assert sample_data["application"] == "RMLS05R150"
     assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
-    assert sample_data["data_delivery"] == str(DataDelivery.QC)
+    assert sample_data["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
     assert sample_data["volume"] == "30"
     assert sample_data["concentration"] == "5"
     assert sample_data["index"] == "IDT DupSeq 10 bp Set B"

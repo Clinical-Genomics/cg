@@ -21,7 +21,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert pool["name"] == "pool-1"
     assert pool["application"] == "RMLS05R150"
     assert pool["data_analysis"] == str(Pipeline.FLUFFY)
-    assert pool["data_delivery"] == str(DataDelivery.QC)
+    assert pool["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
     assert len(pool["samples"]) == 2
     sample = pool["samples"][0]
     assert sample["name"] == "sample1"
@@ -130,7 +130,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
     new_case = base_store.families(customer=None).first()
     assert new_case.data_analysis == str(Pipeline.FLUFFY)
-    assert new_case.data_delivery == str(DataDelivery.QC)
+    assert new_case.data_delivery == str(DataDelivery.NIPT_VIEWER)
 
 
 def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):

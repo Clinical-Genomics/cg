@@ -14,13 +14,13 @@ REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ["Tube", "96 well plate"]
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS = [
-    "1508:21",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
+    "1508:22",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
     "1603:9",  # Microbial WGS
     "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-
+NO_VALUE = "no_value"
 
 CASE_PROJECT_TYPES = [
     str(OrderType.MIP_DNA),
@@ -70,7 +70,7 @@ def parse_orderform(excel_path: str) -> dict:
         items = []
         customer_ids = set()
         for case_id, parsed_case in parsed_cases.items():
-            customer_id, case_data = expand_case(case_id, parsed_case)
+            customer_id, case_data = expand_case(case_id, parsed_case, delivery_type)
             customer_ids.add(customer_id)
             items.append(case_data)
     else:
@@ -130,9 +130,12 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
         if len(analyses) != 1:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
 
-        project_type = analyses.pop()
-        if "mip" in project_type and "balsamic" in project_type:
-            raise OrderFormError(f"mixed 'Data Analysis' types: {project_type}")
+        analysis = analyses.pop()
+
+        if analysis == "no analysis":
+            project_type = "fastq"
+        else:
+            project_type = analysis
 
     return project_type
 
@@ -140,8 +143,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
 def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
     """Determine the order_data delivery type."""
 
-    NO_VALUE = "no_value"
-    data_deliveries = get_data_deliveries(NO_VALUE, samples)
+    data_deliveries = parse_data_deliveries(samples)
 
     if len(data_deliveries) > 1:
         raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
@@ -165,14 +167,22 @@ def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
     try:
         return str(DataDelivery(data_delivery))
     except ValueError:
-        raise OrderFormError(f"Unsupported order_data delivery: {data_delivery}")
+        raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}")
 
 
-def get_data_deliveries(NO_VALUE, samples):
-    return set((sample.get("data_delivery", NO_VALUE) or NO_VALUE).lower() for sample in samples)
+def parse_data_deliveries(samples: [dict]) -> set:
+
+    data_deliveries = set()
+    for sample in samples:
+        data_delivery = (
+            (sample.get("data_delivery", NO_VALUE) or NO_VALUE).lower().replace(" ", "-")
+        )
+        data_deliveries.add(data_delivery)
+
+    return data_deliveries
 
 
-def expand_case(case_id: str, parsed_case: dict) -> tuple:
+def expand_case(case_id: str, parsed_case: dict, data_delivery: DataDelivery) -> tuple:
     """Fill-in information about families."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case["samples"]
@@ -199,6 +209,7 @@ def expand_case(case_id: str, parsed_case: dict) -> tuple:
             "sex": raw_sample["sex"],
             "application": raw_sample["application"],
             "source": raw_sample["source"],
+            "data_delivery": str(data_delivery),
         }
         if raw_sample.get("container") in CONTAINER_TYPES:
             new_sample["container"] = raw_sample["container"]
@@ -218,6 +229,7 @@ def expand_case(case_id: str, parsed_case: dict) -> tuple:
             "tissue_block_size",
             "tumour",
             "tumour_purity",
+            "volume",
             "well_position",
         ):
             if raw_sample.get(key):
@@ -261,7 +273,6 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         "container_name": raw_sample.get("Container/Name"),
         "custom_index": raw_sample.get("UDF/Custom index"),
         "customer": raw_sample["UDF/customer"],
-        "data_delivery": raw_sample.get("UDF/Data Delivery"),
         "elution_buffer": raw_sample.get("UDF/Sample Buffer"),
         "extraction_method": raw_sample.get("UDF/Extraction method"),
         "formalin_fixation_time": raw_sample.get("UDF/Formalin Fixation Time"),
@@ -291,23 +302,31 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
     }
 
     data_analysis = raw_sample.get("UDF/Data Analysis").lower()
+    data_delivery = raw_sample.get("UDF/Data Delivery", "").lower().replace(" ", "-")
 
     if data_analysis and "balsamic" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.BALSAMIC)
+        data_analysis = str(Pipeline.BALSAMIC)
     elif data_analysis and "rna" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.MIP_RNA)
+        data_analysis = str(Pipeline.MIP_RNA)
+        data_delivery = data_delivery or str(DataDelivery.ANALYSIS_FILES)
     elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.MIP_DNA)
+        data_analysis = str(Pipeline.MIP_DNA)
+        data_delivery = data_delivery or str(DataDelivery.SCOUT)
     elif data_analysis and "microbial" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.MICROSALT)
+        data_analysis = str(Pipeline.MICROSALT)
     elif data_analysis and "fluffy" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.FLUFFY)
-    elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
-        sample["data_analysis"] = str(Pipeline.FASTQ)
+        data_analysis = str(Pipeline.FLUFFY)
+        data_delivery = data_delivery or str(DataDelivery.NIPT_VIEWER)
+    elif data_analysis and data_analysis in ["no analysis", "fastq"]:
+        data_analysis = str(Pipeline.FASTQ)
+        data_delivery = data_delivery or str(DataDelivery.FASTQ)
     else:
         raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
 
-    numeric_values = [
+    sample["data_analysis"] = data_analysis
+    sample["data_delivery"] = data_delivery
+
+    numeric_attributes = [
         ("index_number", "UDF/Index number"),
         ("volume", "UDF/Volume (uL)"),
         ("quantity", "UDF/Quantity"),
@@ -315,7 +334,7 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         ("concentration_sample", "UDF/Sample Conc."),
         ("time_point", "UDF/time_point"),
     ]
-    for json_key, excel_key in numeric_values:
+    for json_key, excel_key in numeric_attributes:
         str_value = raw_sample.get(excel_key, "").rsplit(".0")[0]
         if str_value.replace(".", "").isnumeric():
             sample[json_key] = str_value
