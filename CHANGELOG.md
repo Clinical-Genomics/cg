@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.8.1]
+
+### Added
+- cg upload vogue bioinfo-all uploads both BALSAMIC as well.
+
 ## [18.8.0]
 
 ### Added
