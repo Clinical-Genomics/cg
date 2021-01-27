@@ -56,7 +56,7 @@ class ScoutBalsamicIndividual(ScoutIndividual):
     tumor_type: Optional[str] = None
     tmb: Optional[str] = None
     msi: Optional[str] = None
-    tumor_purity: Optional[float] = None
+    tumor_purity: float = 0
 
 
 class ScoutLoadConfig(BaseModel):
