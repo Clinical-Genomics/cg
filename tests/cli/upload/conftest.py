@@ -204,7 +204,7 @@ class MockScoutUploadApi(UploadScoutAPI):
 
         return self.config
 
-    def save_config_file(self, scout_config, file_path):
+    def save_config_file(self, upload_config, file_path):
         """docstring for save_config_file"""
         return
 

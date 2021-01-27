@@ -262,6 +262,7 @@ def fixture_mip_load_config(
         owner=customer_id,
         family=case_id,
         vcf_snv=str(mip_dna_analysis_dir / "snv.vcf"),
+        track="rare"
     )
 
 

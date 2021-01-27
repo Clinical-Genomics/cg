@@ -30,6 +30,7 @@ def test_upload_with_load_config(
     caplog,
 ):
     """Test to upload a case to scout using a load config"""
+    caplog.set_level(logging.DEBUG)
     # GIVEN a case that exists in status
     case_id = base_context["status_db"].families().first().internal_id
     tag_name = upload_scout_api.get_load_config_tag()
@@ -141,9 +142,8 @@ def test_upload_scout_cli_file_exists(base_context, cli_runner, caplog, case_id)
     """Test to upload a case when the load config already exists"""
     # GIVEN a case_id where the case exists in status db with at least one analysis
     # GIVEN that the analysis is done and exists in tb
+    assert isinstance(base_context["scout_upload_api"].generate_config("hej"), ScoutLoadConfig)
     # GIVEN that the upload file already exists
-    config = {"dummy": "data"}
-    base_context["scout_upload_api"].config = config
     base_context["scout_upload_api"].file_exists = True
 
     # WHEN uploading a case with the cli and printing the upload config
@@ -161,9 +161,7 @@ def test_upload_scout_cli(base_context, cli_runner, case_id, scout_load_config):
     """Test to upload a case to scout using cg upload scout command"""
     # GIVEN a case_id where the case exists in status db with at least one analysis
     # GIVEN that the analysis is done and exists in tb
-    config = {"dummy": "data"}
     tag_name = base_context["scout_upload_api"].get_load_config_tag()
-    base_context["scout_upload_api"].config = config
     base_context["housekeeper_api"].add_file(
         path=scout_load_config, version_obj=None, tags=tag_name
     )

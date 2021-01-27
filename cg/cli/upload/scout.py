@@ -50,12 +50,17 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     LOG.info("----------------- CREATE CONFIG -----------------------")
     status_api: Store = context.obj["status_db"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
+    LOG.info("Fetching family object")
     family_obj: Family = status_api.family(case_id)
+    LOG.info("Create load config")
     scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
+    LOG.info("Found load config %s", scout_load_config)
     analysis_context: str = "mip-rd-dna"
     if scout_load_config.track == "cancer":
+
         analysis_context = "balsamic"
     root_dir: Path = Path(context.obj[analysis_context]["root"])
+    LOG.info("Set root dir to %s", root_dir)
     file_path: Path = root_dir / case_id / "scout_load.yaml"
 
     if print_console:
@@ -73,9 +78,11 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
                 "You might remove the file and try again, consider that you might also have it in housekeeper"
             )
             raise click.Abort
+    LOG.info("Saving config file to disc")
     scout_upload_api.save_config_file(upload_config=scout_load_config, file_path=file_path)
 
     try:
+        LOG.info("Add config file to housekeeper")
         scout_upload_api.add_scout_config_to_hk(
             config_file_path=file_path, case_id=case_id, delete=re_upload
         )
@@ -117,3 +124,5 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
         scout_api.upload(scout_load_config=load_config, force=re_upload)
 
     LOG.info("uploaded to scout using load config %s", load_config)
+    LOG.info("Case loaded succesfully to Scout")
+
