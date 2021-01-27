@@ -1,7 +1,8 @@
 """Fixtures for cli compress functions"""
 
-import pytest
 import datetime as dt
+
+import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI

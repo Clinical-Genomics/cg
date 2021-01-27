@@ -1,6 +1,7 @@
 """CLI for deleting records in statusDB """
 
 import logging
+
 import click
 
 from cg.cli.delete.case import case

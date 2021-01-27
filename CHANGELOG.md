@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.9.0]
+
+### Added
+
+- Add functionality to upload balsamic analyses to scout
+
 ## [18.8.0]
 
 ### Added
@@ -25,6 +31,7 @@ Try to use the following format:
 ### Changed
 
 - Skip deliver fastq files when delivering balsamic analysis
+
 
 ## [18.7.1]
 
@@ -43,7 +50,9 @@ Try to use the following format:
 
 - Fix bug with name clash for created case when submitting RML-orders via Orderportal
 
+
 ## [18.6.0]
+
 
 ### Added
 

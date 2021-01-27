@@ -1,6 +1,5 @@
 """Import all constants here for easy access"""
 
-
 from .compression import (
     FASTQ_DELTA,
     FASTQ_FIRST_READ_SUFFIX,
