@@ -57,7 +57,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             # open and assign ticket to order
             try:
                 if self.osticket:
-                    message = self._create_new_ticket_message(data, ticket, project)
+                    message = self._create_new_ticket_message(data=data, ticket=ticket, project=project)
 
                     data["ticket"] = self.osticket.open_ticket(
                         name=ticket["name"],
