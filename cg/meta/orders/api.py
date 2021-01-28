@@ -83,7 +83,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             message += "<br />" + sample.get("name")
 
             if sample.get("application"):
-                message += f", application: {sample.get('application')}"
+                message += f", application: {sample['application']}"
 
             if sample.get("family_name"):
                 message += f", family: {sample.get('family_name')}"
