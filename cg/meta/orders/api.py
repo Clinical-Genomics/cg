@@ -23,6 +23,7 @@ from .schema import ORDER_SCHEMES, OrderType
 from .status import StatusHandler
 
 LOG = logging.getLogger(__name__)
+NEW_LINE = "<br />"
 
 
 class OrdersAPI(LimsHandler, StatusHandler):
@@ -80,7 +81,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         message = f"data:text/html;charset=utf-8,New incoming samples: "
 
         for sample in data.get("samples"):
-            message += "<br />" + sample.get("name")
+            message += NEW_LINE + sample.get("name")
 
             if sample.get("application"):
                 message += f", application: {sample['application']}"
@@ -103,19 +104,19 @@ class OrdersAPI(LimsHandler, StatusHandler):
             if sample.get("comment"):
                 message += ", " + sample.get("comment")
 
-        message += f"<br />"
+        message += NEW_LINE
 
         if project:
-            message += f"<br />{project}."
+            message += NEW_LINE + f"{project}."
 
         if data.get("delivery"):
-            message += f"<br />{data.get('delivery')}."
+            message += NEW_LINE + f"{data.get('delivery')}."
 
         if data.get("comment"):
-            message += f"<br />{data.get('comment')}."
+            message += NEW_LINE + f"{data.get('comment')}."
 
         if ticket.get("name"):
-            message += f"<br />{ticket.get('name')}"
+            message += NEW_LINE + f"{ticket.get('name')}"
 
         if data.get("customer"):
             customer_id = data.get("customer")
