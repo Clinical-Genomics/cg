@@ -186,8 +186,13 @@ class FamilyView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
     column_exclude_list = ["created_at"]
-    column_filters = ["customer.internal_id", "priority", "action", "data_analysis",
-                      "data_delivery"]
+    column_filters = [
+        "customer.internal_id",
+        "priority",
+        "action",
+        "data_analysis",
+        "data_delivery",
+    ]
     column_formatters = {"internal_id": view_family_sample_link, "priority": view_human_priority}
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
     form_extra_fields = {
