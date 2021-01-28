@@ -87,7 +87,7 @@ def parse_json_order(order_data: dict) -> dict:
         "comment": comment,
     }
 
-    return order_data
+    return order_project
 
 
 def expand_case(case_id: str, parsed_case: dict) -> dict:
