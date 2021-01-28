@@ -241,4 +241,4 @@ def relationship(context, mother, father, status, family_id, sample_id):
         case_obj, sample_obj, status, mother=mother_obj, father=father_obj
     )
     status_db.add_commit(new_record)
-    LOG.info(f"related {case_obj.internal_id} to {sample_obj.internal_id}")
+    LOG.info("related %s to %s", case_obj.internal_id, sample_obj.internal_id)
