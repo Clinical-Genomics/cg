@@ -336,15 +336,15 @@ def test_store_mip(orders_api, base_store, mip_status_data):
 
     # THEN it should create and link samples and the family
     assert len(new_families) == 2
-    new_family = new_families[0]
-    assert new_family.name == "family1"
-    assert set(new_family.panels) == {"IEM"}
-    assert new_family.priority_human == "standard"
+    new_case = new_families[0]
+    assert new_case.name == "family1"
+    assert set(new_case.panels) == {"IEM"}
+    assert new_case.priority_human == "standard"
 
-    assert len(new_family.links) == 3
-    new_link = new_family.links[0]
-    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
-    assert new_family.data_delivery == str(DataDelivery.SCOUT)
+    assert len(new_case.links) == 3
+    new_link = new_case.links[0]
+    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_case.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
@@ -352,10 +352,10 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.sex == "female"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
     assert new_link.sample.is_tumour
-    assert isinstance(new_family.links[1].sample.comment, str)
+    assert isinstance(new_case.links[1].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_family.links:
+    for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
 
@@ -428,25 +428,25 @@ def test_store_external(orders_api, base_store, external_status_data):
     # THEN it should create and link samples and the family
     case_obj = base_store.families().first()
     assert len(new_families) == 1
-    new_family = new_families[0]
-    assert new_family == case_obj
-    assert new_family.name == "fam2"
-    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
-    assert new_family.data_delivery == str(DataDelivery.SCOUT)
-    assert set(new_family.panels) == {"CTD", "CILM"}
-    assert new_family.priority_human == "priority"
+    new_case = new_families[0]
+    assert new_case == case_obj
+    assert new_case.name == "fam2"
+    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_case.data_delivery == str(DataDelivery.SCOUT)
+    assert set(new_case.panels) == {"CTD", "CILM"}
+    assert new_case.priority_human == "priority"
 
-    assert len(new_family.links) == 2
-    new_link = new_family.links[0]
+    assert len(new_case.links) == 2
+    new_link = new_case.links[0]
     assert new_link.status == "affected"
     assert new_link.sample.name == "sample1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.capture_kit == "Agilent Sureselect V5"
     assert new_link.sample.application_version.application.tag == "EXXCUSR000"
-    assert isinstance(new_family.links[0].sample.comment, str)
+    assert isinstance(new_case.links[0].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_family.links:
+    for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
 
@@ -546,15 +546,15 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
 
     # THEN it should create and link samples and the family
     assert len(new_families) == 1
-    new_family = new_families[0]
-    assert new_family.name == "family1"
-    assert new_family.data_analysis == str(Pipeline.BALSAMIC)
-    assert new_family.data_delivery == str(DataDelivery.QC)
-    assert set(new_family.panels) == set()
-    assert new_family.priority_human == "standard"
+    new_case = new_families[0]
+    assert new_case.name == "family1"
+    assert new_case.data_analysis == str(Pipeline.BALSAMIC)
+    assert new_case.data_delivery == str(DataDelivery.QC)
+    assert set(new_case.panels) == set()
+    assert new_case.priority_human == "standard"
 
-    assert len(new_family.links) == 1
-    new_link = new_family.links[0]
+    assert len(new_case.links) == 1
+    new_link = new_case.links[0]
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
@@ -562,5 +562,5 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_link.sample.is_tumour
 
     assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_family.links:
+    for link in new_case.links:
         assert len(link.sample.deliveries) == 1

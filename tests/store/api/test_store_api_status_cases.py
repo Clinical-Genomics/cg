@@ -1091,19 +1091,19 @@ def test_all_days(base_store: Store, helpers):
         assert family.internal_id in case.get("internal_id")
 
 
-def test_new_family_included(base_store: Store, helpers):
-    """Test to that cases filter in family in database"""
+def test_new_case_included(base_store: Store, helpers):
+    """Test to that cases filter in case from database"""
 
     # GIVEN a database with a family
-    family = add_case(helpers, base_store, ordered_days_ago=1)
+    new_case = add_case(helpers, base_store, ordered_days_ago=1)
 
     # WHEN getting active cases not older than two days
-    cases = base_store.cases(days=2)
+    result_cases = base_store.cases(days=2)
 
     # THEN cases should contain the family
-    assert cases
-    for case in cases:
-        assert family.internal_id in case.get("internal_id")
+    assert result_cases
+    for case in result_cases:
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_old_family_not_included(base_store: Store, helpers):
