@@ -339,11 +339,11 @@ def orderform():
             temp_dir = Path(tempfile.gettempdir())
             saved_path = str(temp_dir / filename)
             input_file.save(saved_path)
-            project_data = parse_orderform(saved_path)
+            parsed_order = parse_orderform(saved_path)
         else:
             json_data = json.load(input_file.stream)
-            project_data = parse_json_order(json_data)
+            parsed_order = parse_json_order(json_data)
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
 
-    return jsonify(**project_data)
+    return jsonify(**parsed_order)
