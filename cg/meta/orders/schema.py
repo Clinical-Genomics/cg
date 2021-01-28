@@ -189,7 +189,7 @@ MIP_RNA_SAMPLE = {
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
     # Orderform 1508:19
-    "from_sample": validators.RegexValidator(NAME_PATTERN),
+    "from_sample": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "time_point": OptionalNone(TypeValidatorNone(str)),
 }
 

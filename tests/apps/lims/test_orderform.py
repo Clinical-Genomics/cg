@@ -47,7 +47,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     # THEN it should determine the project type
     assert data["project_type"] == str(Pipeline.FASTQ)
     # ... and find all samples
-    assert len(data["items"]) == 46
+    assert len(data["items"]) == 36
 
     # ... and collect relevant sample info
     normal_sample = data["items"][1]
@@ -87,7 +87,7 @@ def test_parsing_mip_orderform(mip_orderform):
     assert data["customer"] == "cust000"
 
     # ... and it should find and group all samples in families
-    assert len(data["items"]) == 44
+    assert len(data["items"]) == 36
 
     # ... and collect relevant data about the families
     trio_family = data["items"][0]
@@ -103,7 +103,7 @@ def test_parsing_mip_orderform(mip_orderform):
     assert proband_sample["container"] == "96 well plate"
     assert proband_sample["data_analysis"] == str(Pipeline.MIP_DNA)
     assert proband_sample["data_delivery"].lower() == str(DataDelivery.SCOUT)
-    assert proband_sample["application"] == "EXOKTTR020"
+    assert proband_sample["application"] == "PANKTTR010"
     assert proband_sample["sex"] == "male"
     assert proband_sample["source"] == "tissue (FFPE)"
     assert proband_sample["tumour"] is True
@@ -249,7 +249,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert data["project_type"] == str(Pipeline.BALSAMIC)
 
     # ... and it should find and group all samples in case
-    assert len(data["items"]) == 45
+    assert len(data["items"]) == 36
 
     # ... and collect relevant data about the case
     # ... and collect relevant info about the samples
@@ -263,8 +263,8 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
     assert sample["data_analysis"] == str(Pipeline.BALSAMIC)
-    assert sample["data_delivery"] == str(DataDelivery.ANALYSIS_BAM_FILES)
-    assert sample["application"] == "EXOKTTR020"
+    assert sample["data_delivery"] == str(DataDelivery.SCOUT)
+    assert sample["application"] == "PANKTTR010"
     assert sample["sex"] == "male"
     assert case["name"] == "c1"
     assert data["customer"] == "cust000"
@@ -304,13 +304,13 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert data["project_type"] == str(Pipeline.MIP_RNA)
     assert data["customer"] == "cust000"
     # ... and it should find and group all samples in cases
-    assert len(data["items"]) == 44
+    assert len(data["items"]) == 12
     # ... and collect relevant data about the cases
     first_case = data["items"][0]
     assert len(first_case["samples"]) == 3
     assert first_case["name"] == "c1"
     assert first_case["priority"] == "research"
-    assert set(first_case["panels"]) == set(["AD-HSP", "Ataxi", "ATX"])
+    assert set(first_case["panels"]) == set()
     assert first_case["require_qcok"] is True
     # ... and collect relevant info about the samples
 
@@ -328,12 +328,6 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
 
     assert first_sample["container_name"] == "plate1"
     assert first_sample["well_position"] == "A:1"
-
-    # panels on the family
-    assert first_sample["status"] == "affected"
-
-    assert first_sample["mother"] == "s2"
-    assert first_sample["father"] == "s3"
 
     assert first_sample["tumour"] is True
 
