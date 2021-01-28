@@ -78,7 +78,7 @@ def parse_json_order(order_data: dict) -> dict:
     else:
         items = samples
 
-    order_data = {
+    order_project = {
         "customer": customer_id,
         "items": items,
         "name": order_name,
