@@ -79,12 +79,12 @@ def parse_json_order(order_data: dict) -> dict:
         items = samples
 
     order_project = {
+        "comment": comment,
         "customer": customer_id,
+        "delivery_type": str(data_delivery),
         "items": items,
         "name": order_name,
         "project_type": project_type,
-        "delivery_type": str(data_delivery),
-        "comment": comment,
     }
 
     return order_project

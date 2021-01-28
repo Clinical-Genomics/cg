@@ -87,10 +87,10 @@ def parse_orderform(excel_path: str) -> dict:
     filename_base = Path(excel_path).stem
     data = {
         "customer": customer_ids.pop(),
-        "items": items,
-        "project_type": project_type,
         "delivery_type": delivery_type,
+        "items": items,
         "name": filename_base,
+        "project_type": project_type,
     }
 
     return data
