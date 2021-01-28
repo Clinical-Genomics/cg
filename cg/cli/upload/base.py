@@ -16,7 +16,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.report.api import ReportAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice

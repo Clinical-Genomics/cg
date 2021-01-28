@@ -25,6 +25,7 @@ class StoreHelpers:
             if bundle.name != bundle_data["name"]:
                 continue
             bundle_exists = True
+            _bundle = bundle
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
             store.add_commit(_bundle, _version)
@@ -35,8 +36,7 @@ class StoreHelpers:
     def ensure_hk_version(self, store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
         """Utility function to return existing or create an version for tests"""
         _bundle = self.ensure_hk_bundle(store, bundle_data)
-        _version = store.last_version(_bundle.name)
-        return _version
+        return store.last_version(_bundle.name)
 
     def ensure_application_version(
         self,

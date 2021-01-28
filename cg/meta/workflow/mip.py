@@ -23,7 +23,7 @@ from cg.constants import (
     MASTER_LIST,
     Pipeline,
 )
-from cg.exc import CgDataError, LimsDataError, CgError
+from cg.exc import CgDataError, CgError, LimsDataError
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
