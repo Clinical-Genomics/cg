@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -167,6 +167,11 @@ class MockHousekeeperAPI:
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
     # Mock specific functions
+    def fetch_file_from_version(self, version_obj, tags):
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[0]
+
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""
         self._missing_tags.add(tag_name)

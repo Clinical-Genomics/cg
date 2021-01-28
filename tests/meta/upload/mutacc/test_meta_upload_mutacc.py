@@ -2,13 +2,8 @@
 
 import os
 
-from cg.meta.upload.mutacc import (
-    UploadToMutaccAPI,
-    resolve_sex,
-    resolve_parent,
-    resolve_phenotype,
-)
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.meta.upload.mutacc import UploadToMutaccAPI, resolve_parent, resolve_phenotype, resolve_sex
 
 
 def test_instantiate():
