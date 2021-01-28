@@ -152,13 +152,13 @@ def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
     if data_delivery == NO_VALUE:
         if project_type == OrderType.METAGENOME:
             return str(DataDelivery.FASTQ)
-        elif project_type == OrderType.FASTQ:
+        if project_type == OrderType.FASTQ:
             return str(DataDelivery.FASTQ)
-        elif project_type == OrderType.RML:
+        if project_type == OrderType.RML:
             return str(DataDelivery.FASTQ)
-        elif project_type == OrderType.MIP_RNA:
+        if project_type == OrderType.MIP_RNA:
             return str(DataDelivery.ANALYSIS_FILES)
-        elif project_type == OrderType.FLUFFY:
+        if project_type == OrderType.FLUFFY:
             return str(DataDelivery.NIPT_VIEWER)
 
         return ""
