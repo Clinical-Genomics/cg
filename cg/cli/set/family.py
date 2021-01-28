@@ -50,7 +50,7 @@ def family(
         LOG.error("Nothing to change")
         raise click.Abort
     if action:
-        LOG.info("Update action: %s -> %s", case_obj.action or 'NA', action)
+        LOG.info("Update action: %s -> %s", case_obj.action or "NA", action)
         case_obj.action = action
     if customer_id:
         customer_obj = context.obj["status_db"].customer(customer_id)
