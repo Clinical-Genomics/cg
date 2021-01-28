@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Dict, List
 
 import openpyxl
@@ -182,7 +183,7 @@ def parse_data_deliveries(samples: [dict]) -> set:
 
 
 def expand_case(case_id: str, parsed_case: dict, data_delivery: DataDelivery) -> tuple:
-    """Fill-in information about families."""
+    """Fill-in information about case."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case["samples"]
 

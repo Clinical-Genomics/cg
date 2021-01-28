@@ -1,3 +1,5 @@
+from typing import List, Set
+
 from cg.apps.lims.orderform import CASE_PROJECT_TYPES, expand_case
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderFormError
