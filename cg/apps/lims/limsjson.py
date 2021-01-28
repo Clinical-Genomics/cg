@@ -4,7 +4,7 @@ from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
 from cg.meta.orders.status import StatusHandler
 
-ACCEPTED_DATA_ANALYSES = [{str(Pipeline.MIP_DNA)}, {str(Pipeline.FLUFFY)}, {str(Pipeline.BALSAMIC)}]
+ACCEPTED_DATA_ANALYSES: List[str] = [str(Pipeline.MIP_DNA), str(Pipeline.FLUFFY), str(Pipeline.BALSAMIC)]
 
 
 def get_project_type(samples: [dict]) -> str:
