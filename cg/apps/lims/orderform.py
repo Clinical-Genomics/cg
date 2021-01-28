@@ -83,8 +83,7 @@ def parse_orderform(excel_path: str) -> dict:
     elif customer_options != 1:
         raise OrderFormError(f"Samples have different customers: {customer_ids}")
 
-    filename_base = os.path.splitext(os.path.basename(excel_path))[0]
-
+    filename_base = Path(excel_path).stem
     data = {
         "customer": customer_ids.pop(),
         "items": items,
