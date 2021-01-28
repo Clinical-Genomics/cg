@@ -86,7 +86,7 @@ def parse_orderform(excel_path: str) -> dict:
         raise OrderFormError(f"Samples have different customers: {customer_ids}")
 
     filename_base = Path(excel_path).stem
-    data = {
+    parsed_order = {
         "customer": customer_ids.pop(),
         "delivery_type": delivery_type,
         "items": items,
@@ -94,7 +94,7 @@ def parse_orderform(excel_path: str) -> dict:
         "project_type": project_type,
     }
 
-    return data
+    return parsed_order
 
 
 def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:

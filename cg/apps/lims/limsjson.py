@@ -78,7 +78,7 @@ def parse_json_order(order_data: dict) -> dict:
     else:
         items = samples
 
-    order_project = {
+    parsed_order = {
         "comment": comment,
         "customer": customer_id,
         "delivery_type": str(data_delivery),
@@ -87,7 +87,7 @@ def parse_json_order(order_data: dict) -> dict:
         "project_type": project_type,
     }
 
-    return order_project
+    return parsed_order
 
 
 def expand_case(case_id: str, parsed_case: dict) -> dict:
