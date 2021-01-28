@@ -136,7 +136,7 @@ def family(family_id):
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != case_obj.customer):
+    if not g.current_user.is_admin and (g.current_user.customer != case_obj.customer):
         return abort(401)
 
     data = case_obj.to_dict(links=True, analyses=True)

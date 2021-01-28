@@ -4,19 +4,20 @@ from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
 from cg.meta.orders.status import StatusHandler
 
-ACCEPTED_DATA_ANALYSES = [{str(Pipeline.MIP_DNA)}, {str(Pipeline.FLUFFY)}, {str(Pipeline.BALSAMIC)}]
+ACCEPTED_DATA_ANALYSES: List[str] = [str(Pipeline.MIP_DNA), str(Pipeline.FLUFFY), str(Pipeline.BALSAMIC)]
 
 
 def get_project_type(samples: [dict]) -> str:
     """Determine the project type."""
 
-    data_analyses = set(sample.get("data_analysis", "mip-dna").lower() for sample in samples)
+    data_analyses: Set[str] = set(sample.get("data_analysis", "mip-dna").lower() for sample in samples)
 
     if len(data_analyses) > 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
 
-    if data_analyses in ACCEPTED_DATA_ANALYSES:
-        return data_analyses.pop()
+    data_analysis: str = data_analyses.pop()
+    if data_analysis in ACCEPTED_DATA_ANALYSES:
+        return data_analysis
 
     raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
 
