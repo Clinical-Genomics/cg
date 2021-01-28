@@ -22,6 +22,7 @@ VALID_ORDERFORMS = [
     "1605:8",  # Microbial metagenomes
 ]
 NO_VALUE = "no_value"
+NO_ANALYSIS = "no analysis"
 
 CASE_PROJECT_TYPES = [
     str(OrderType.MIP_DNA),
