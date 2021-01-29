@@ -273,7 +273,6 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
     if not case_obj:
         LOG.error("Case %s does not exist in status-db", case_id)
         raise click.Abort
-
     decompression_needed = prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id)
     if decompression_needed:
         decompression_all_samples_started = prepare_fastq_api.start_spring_decompression(
@@ -281,7 +280,8 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
         )
         if decompression_all_samples_started:
             LOG.info(
-                "The analysis for %s could not start, started decompression instead", case_obj.internal_id
+                "The analysis for %s could not start, started decompression instead",
+                case_obj.internal_id,
             )
         else:
             LOG.warning(
