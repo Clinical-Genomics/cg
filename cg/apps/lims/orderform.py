@@ -192,10 +192,11 @@ def expand_case(case_id: str, parsed_case: dict, data_delivery: DataDelivery) ->
     new_case["require_qcok"] = True in require_qcoks
 
     priorities = set(raw_sample["priority"] for raw_sample in samples)
-    if len(priorities) == 1:
-        new_case["priority"] = priorities.pop()
-    else:
+
+    if len(priorities) != 1:
         raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
+
+    new_case["priority"] = priorities.pop()
 
     customers = set(raw_sample["customer"] for raw_sample in samples)
     if len(customers) != 1:
