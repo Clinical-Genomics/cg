@@ -74,7 +74,7 @@ def test_spring_decompression_needed_and_start_failed(
     # THEN command should run without errors
     assert result.exit_code == 0
 
-    assert "Neither the analysis, nor the decompression needed" in caplog.text
+    assert f"The decompression for {case_object.internal_id} could not start" in caplog.text
 
 
 def test_case_needs_to_be_stored(

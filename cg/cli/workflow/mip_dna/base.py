@@ -285,7 +285,11 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
             )
         else:
             LOG.warning(
-                "Neither the analysis, nor the decompression needed for every sample, could start for %s",
+                "The analysis for %s could not start",
+                case_obj.internal_id,
+            )
+            LOG.warning(
+                "The decompression for %s could not start",
                 case_obj.internal_id,
             )
         raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
