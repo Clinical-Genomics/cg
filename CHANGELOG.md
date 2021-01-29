@@ -14,6 +14,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.10.0]
+
+### Changed
+- destination server PDC retrieval novaseq flowcells thalamus -> hasta
+### Fixed
+- flowcell status after PDC retrieval ondisk -> retrieved
+
 ## [18.9.1]
 
 ### Added
