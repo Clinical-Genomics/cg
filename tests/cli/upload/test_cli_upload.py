@@ -15,10 +15,10 @@ def test_all_samples_are_non_tumor(analysis_store, case_id):
 def test_all_samples_list_analyses(analysis_store, case_id):
     """Test that all samples have an analysis type"""
 
-    # GIVEN family obj where each sample is wgs analysis
+    # GIVEN case obj where each sample is wgs analysis
     case_obj = analysis_store.family(case_id)
 
-    # WHEN looking up the analysis type for the samples in the family
+    # WHEN looking up the analysis type for the samples in the case
     analysis_types = LinkHelper.get_analysis_type_for_each_link(case_obj.links)
 
     # THEN all the samples should have analysis type 'wgs'
@@ -26,17 +26,17 @@ def test_all_samples_list_analyses(analysis_store, case_id):
 
 
 def test_upload_fails_hard_on_faulty_family(invoke_cli, disk_store: Store):
-    """Test that an upload for a missing family does fail hard """
+    """Test that an upload for a missing case does fail hard """
 
     # GIVEN empty database
-    family_id = "dummy_family"
+    case_id = "dummy_case"
 
-    # WHEN trying to upload with a family that doesn't exist
-    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", family_id])
+    # WHEN trying to upload with a case that doesn't exist
+    result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
 
-    # THEN it fails hard and reports that it is missing the family
+    # THEN it fails hard and reports that it is missing the case
     assert result.exit_code != 0
-    assert family_id in result.output
+    assert case_id in result.output
     assert "family not found" in result.output
 
 

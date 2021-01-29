@@ -415,7 +415,7 @@ class StoreHelpers:
                 mother = sample_objs[sample_data["mother"]]
             self.add_relationship(
                 store,
-                family=case_obj,
+                case=case_obj,
                 sample=sample_obj,
                 status=sample_data.get("status", "unknown"),
                 father=father,
@@ -492,7 +492,7 @@ class StoreHelpers:
             data_analysis=Pipeline.MICROSALT,
             data_delivery=DataDelivery.QC,
         )
-        self.add_relationship(store=store, family=case, sample=sample)
+        self.add_relationship(store=store, case=case, sample=sample)
         return sample
 
     def add_samples(self, store: Store, nr_samples: int = 5) -> list:
@@ -532,14 +532,14 @@ class StoreHelpers:
     def add_relationship(
         store: Store,
         sample: models.Sample,
-        family: models.Family,
+        case: models.Family,
         status: str = "unknown",
         father: models.Sample = None,
         mother: models.Sample = None,
     ) -> models.FamilySample:
-        """Utility function to link a sample to a family"""
+        """Utility function to link a sample to a case"""
         link = store.relate_sample(
-            sample=sample, family=family, status=status, father=father, mother=mother
+            sample=sample, family=case, status=status, father=father, mother=mother
         )
         store.add_commit(link)
         return link

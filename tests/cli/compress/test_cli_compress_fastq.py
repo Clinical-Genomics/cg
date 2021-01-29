@@ -38,7 +38,7 @@ def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, help
     """Test to run the compress command with a specified case id"""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a context with a family that can be compressed
+    # GIVEN a context with a case that can be compressed
     case_id = "chonkywombat"
 
     valid_compressable_case = helpers.add_case(
@@ -58,12 +58,12 @@ def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, help
     helpers.add_relationship(
         store=populated_compress_context["status_db"],
         sample=sample1,
-        family=valid_compressable_case,
+        case=valid_compressable_case,
     )
     helpers.add_relationship(
         store=populated_compress_context["status_db"],
         sample=sample2,
-        family=valid_compressable_case,
+        case=valid_compressable_case,
     )
     populated_compress_context["status_db"].commit()
 

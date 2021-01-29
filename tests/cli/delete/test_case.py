@@ -69,7 +69,7 @@ def test_delete_case_with_dry_run(cli_runner, base_context, base_store: Store, h
     case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
     assert base_store.Family.query.count() == 1
     assert base_store.FamilySample.query.count() == 1
     assert base_store.Sample.query.count() == 1
@@ -110,7 +110,7 @@ def test_delete_case_with_links(cli_runner, base_context, base_store: Store, hel
     case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
     assert base_store.Family.query.count() > 0
     assert base_store.FamilySample.query.count() > 0
     assert base_store.Sample.query.count() > 0
@@ -131,9 +131,9 @@ def test_delete_case_with_links_to_other_case(cli_runner, base_context, base_sto
     case_obj = helpers.add_case(base_store, "first_case_linked_to_sample")
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
     case_obj2 = helpers.add_case(base_store, "second_case_linked_to_sample")
-    helpers.add_relationship(store=base_store, family=case_obj2, sample=sample)
+    helpers.add_relationship(store=base_store, case=case_obj2, sample=sample)
 
     assert base_store.Family.query.count() == 2
     assert base_store.FamilySample.query.count() == 2
@@ -157,10 +157,10 @@ def test_delete_case_with_father_links(cli_runner, base_context, base_store: Sto
     case_id = case_obj.internal_id
     sample_father = helpers.add_sample(base_store, "father")
     sample_child = helpers.add_sample(base_store, "child")
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample_father)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_father)
     case_obj2 = helpers.add_case(base_store, "second_case_linked_to_sample")
     helpers.add_relationship(
-        store=base_store, family=case_obj2, sample=sample_child, father=sample_father
+        store=base_store, case=case_obj2, sample=sample_child, father=sample_father
     )
 
     assert base_store.Family.query.count() == 2
@@ -185,10 +185,10 @@ def test_delete_mother_case(cli_runner, base_context, base_store: Store, helpers
     case_mother_id = case_mother.internal_id
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_child = helpers.add_sample(base_store, "child")
-    helpers.add_relationship(store=base_store, family=case_mother, sample=sample_mother)
+    helpers.add_relationship(store=base_store, case=case_mother, sample=sample_mother)
     case_child = helpers.add_case(base_store, "case_child")
     helpers.add_relationship(
-        store=base_store, family=case_child, sample=sample_child, mother=sample_mother
+        store=base_store, case=case_child, sample=sample_child, mother=sample_mother
     )
 
     assert base_store.Family.query.count() == 2
@@ -211,11 +211,11 @@ def test_delete_child_case(cli_runner, base_context, base_store: Store, helpers)
     case_mother = helpers.add_case(base_store, "case_mother")
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_child = helpers.add_sample(base_store, "child")
-    helpers.add_relationship(store=base_store, family=case_mother, sample=sample_mother)
+    helpers.add_relationship(store=base_store, case=case_mother, sample=sample_mother)
     case_child = helpers.add_case(base_store, "case_child")
     case_child_id = case_child.internal_id
     helpers.add_relationship(
-        store=base_store, family=case_child, sample=sample_child, mother=sample_mother
+        store=base_store, case=case_child, sample=sample_child, mother=sample_mother
     )
 
     assert base_store.Family.query.count() == 2
@@ -240,11 +240,11 @@ def test_delete_trio_case(cli_runner, base_context, base_store: Store, helpers):
     sample_mother = helpers.add_sample(base_store, "mother")
     sample_father = helpers.add_sample(base_store, "father")
     sample_child = helpers.add_sample(base_store, "child")
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample_mother)
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample_father)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_mother)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_father)
     helpers.add_relationship(
         store=base_store,
-        family=case_obj,
+        case=case_obj,
         sample=sample_child,
         mother=sample_mother,
         father=sample_father,

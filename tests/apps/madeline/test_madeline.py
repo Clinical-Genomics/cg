@@ -20,14 +20,14 @@ def test_run_madeline(trio: dict, populated_madeline_api: MadelineAPI, project_d
     outfile.touch()
 
     # WHEN running the madeline command
-    out_path: Path = madeline_api.run("a family", trio, str(outfile))
+    out_path: Path = madeline_api.run("a case", trio, str(outfile))
     # THEN assert a madeline xml file is returned
     assert out_path.suffix == ".xml"
 
 
 def test_generate_madeline_input_no_mother(madeline_columns: dict, proband: dict):
     """Test generate input for madeline when mother is missing"""
-    # GIVEN a family id and a ind with unknown mother
+    # GIVEN a case id and a ind with unknown mother
     family_id = "test"
     proband.pop("mother")
     inds = [proband]
@@ -46,7 +46,7 @@ def test_generate_madeline_input_no_mother(madeline_columns: dict, proband: dict
 def test_generate_madeline_input_no_sex(madeline_columns, proband):
     """Test generate input for madeline when sex is missing"""
 
-    # GIVEN a family id and a ind with unknown sex
+    # GIVEN a case id and a ind with unknown sex
     family_id = "test"
     proband["sex"] = "unknown"
     inds = [proband]
@@ -65,7 +65,7 @@ def test_generate_madeline_input_no_sex(madeline_columns, proband):
 def test_generate_madeline_input(madeline_columns, proband):
     """Test generate input for madeline"""
 
-    # GIVEN a family id and a list of ind dicts
+    # GIVEN a case id and a list of ind dicts
     family_id = "test"
     inds = [proband]
     # WHEN generating madeline formated lines
@@ -75,8 +75,8 @@ def test_generate_madeline_input(madeline_columns, proband):
     # Convert line to dict
     ind_info = get_ind_info(madeline_columns.keys(), next(madeline_lines))
 
-    # THEN assert that the family id is included
-    assert ind_info["family"] == family_id
+    # THEN assert that the case id is included
+    assert ind_info["case"] == family_id
     # THEN assert that the ind id information is correct
     assert ind_info["sample"] == proband["sample"]
     # THEN assert that the is converted to madeline format
@@ -86,7 +86,7 @@ def test_generate_madeline_input(madeline_columns, proband):
 def test_generate_madeline_input_none_status(madeline_columns, proband):
     """Test generate input for madeline"""
 
-    # GIVEN a family id and a list of ind dicts
+    # GIVEN a case id and a list of ind dicts
     proband["status"] = None
     family_id = "test"
     inds = [proband]
@@ -108,7 +108,7 @@ def test_generate_madeline_input_non_existing_status(madeline_columns, proband):
     proband.pop("status")
     assert "status" not in proband
     family_id = "test"
-    # GIVEN a family id and a list of ind dicts
+    # GIVEN a case id and a list of ind dicts
     inds = [proband]
     # WHEN generating madeline formated lines
     madeline_lines = MadelineAPI.make_ped(family_id, inds)
@@ -124,7 +124,7 @@ def test_generate_madeline_input_non_existing_status(madeline_columns, proband):
 def test_generate_madeline_input_no_inds(madeline_columns):
     """Test generate input for madeline when no individuals"""
 
-    # GIVEN a family id and a empty list of inds
+    # GIVEN a case id and a empty list of inds
     family_id = "test"
     inds = []
     # WHEN generating madeline formated lines

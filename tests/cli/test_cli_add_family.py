@@ -10,10 +10,10 @@ CLI_OPTION_DELIVERY = DataDelivery.QC
 
 
 def test_add_family_required(invoke_cli, disk_store: Store):
-    """Test to add a family using only the required arguments"""
+    """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
 
-    # WHEN adding a family
+    # WHEN adding a case
     db_uri = disk_store.uri
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
@@ -44,10 +44,10 @@ def test_add_family_required(invoke_cli, disk_store: Store):
 
 
 def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
-    """Test to add a family using only the required arguments"""
+    """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
 
-    # WHEN adding a family
+    # WHEN adding a case
     db_uri = disk_store.uri
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
@@ -59,7 +59,7 @@ def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
             "--database",
             db_uri,
             "add",
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -77,10 +77,10 @@ def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
 
 
 def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
-    """Test to add a family using only the required arguments"""
+    """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
 
-    # WHEN adding a family without data delivery
+    # WHEN adding a case without data delivery
     db_uri = disk_store.uri
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
@@ -92,7 +92,7 @@ def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
             "--database",
             db_uri,
             "add",
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -110,10 +110,10 @@ def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
 
 
 def test_add_family_bad_customer(invoke_cli, disk_store: Store):
-    """Test to add a family using a non-existing customer"""
+    """Test to add a case using a non-existing customer"""
     # GIVEN an empty database
 
-    # WHEN adding a family
+    # WHEN adding a case
     db_uri = disk_store.uri
     panel_id = "dummy_panel"
     customer_id = "dummy_customer"
@@ -135,16 +135,16 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
         ]
     )
 
-    # THEN then it should complain about missing customer instead of adding a family
+    # THEN then it should complain about missing customer instead of adding a case
     assert result.exit_code == 1
     assert disk_store.Family.query.count() == 0
 
 
 def test_add_family_bad_panel(invoke_cli, disk_store: Store):
-    """Test to add a family using a non-existing panel"""
+    """Test to add a case using a non-existing panel"""
     # GIVEN a database with a customer
 
-    # WHEN adding a family
+    # WHEN adding a case
     db_uri = disk_store.uri
     panel_id = "dummy_panel"
     customer_id = add_customer(disk_store)
@@ -166,16 +166,16 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
         ]
     )
 
-    # THEN then it should complain about missing panel instead of adding a family
+    # THEN then it should complain about missing panel instead of adding a case
     assert result.exit_code == 1
     assert disk_store.Family.query.count() == 0
 
 
 def test_add_family_priority(invoke_cli, disk_store: Store):
-    """Test that the added family get the priority we send in"""
+    """Test that the added case get the priority we send in"""
     # GIVEN a database with a customer and an panel
 
-    # WHEN adding a family
+    # WHEN adding a case
     db_uri = disk_store.uri
 
     customer_id = add_customer(disk_store)

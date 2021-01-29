@@ -71,10 +71,10 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
 
 
 def test_families_to_status(mip_order_to_submit):
-    # GIVEN a scout order with a trio family
+    # GIVEN a scout order with a trio case
     # WHEN parsing for status
     data = StatusHandler.cases_to_status(mip_order_to_submit)
-    # THEN it should pick out the family
+    # THEN it should pick out the case
     assert len(data["families"]) == 2
     family = data["families"][0]
     assert family["name"] == "family1"
@@ -167,7 +167,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         samples=fastq_status_data["samples"],
     )
 
-    # THEN it should store the samples and create a family for each sample
+    # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
     assert base_store.families().count() == 2
@@ -238,7 +238,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         data_delivery=DataDelivery.QC,
     )
 
-    # THEN it should store the samples under a case (family) and the used previously unknown
+    # THEN it should store the samples under a case (case) and the used previously unknown
     # organisms
     assert new_samples
     assert base_store.families().count() == 1
@@ -334,7 +334,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
         cases=mip_status_data["families"],
     )
 
-    # THEN it should create and link samples and the family
+    # THEN it should create and link samples and the case
     assert len(new_families) == 2
     new_case = new_families[0]
     assert new_case.name == "family1"
@@ -425,7 +425,7 @@ def test_store_external(orders_api, base_store, external_status_data):
         cases=external_status_data["families"],
     )
 
-    # THEN it should create and link samples and the family
+    # THEN it should create and link samples and the case
     case_obj = base_store.families().first()
     assert len(new_families) == 1
     new_case = new_families[0]
@@ -544,7 +544,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
         cases=balsamic_status_data["families"],
     )
 
-    # THEN it should create and link samples and the family
+    # THEN it should create and link samples and the case
     assert len(new_families) == 1
     new_case = new_families[0]
     assert new_case.name == "family1"

@@ -117,16 +117,16 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
     assert sibling_sample["application"] == "WGSPCFC030"
     assert sibling_sample["sex"] == "female"
 
-    # family-id on the family
+    # case-id on the case
     # customer on the order (parsed_order)
-    # require-qc-ok on the family
+    # require-qc-ok on the case
     assert sibling_sample["source"] == "blood"
     assert sibling_sample.get("tumour") is None
     assert sibling_sample["container"] == "96 well plate"
     assert sibling_sample["container_name"] == "2020-16171-81"
     assert sibling_sample["well_position"] == "A:1"
 
-    # panels on the family
+    # panels on the case
     assert sibling_sample["status"] == "affected"
     assert sibling_sample["mother"] == ""
     assert sibling_sample["father"] == ""

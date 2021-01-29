@@ -138,7 +138,7 @@ def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store, helpe
     # GIVEN a database with a sample with related samples
     case = helpers.add_case(disk_store)
     sample = helpers.add_sample(disk_store)
-    link = helpers.add_relationship(disk_store, sample=sample, family=case)
+    link = helpers.add_relationship(disk_store, sample=sample, case=case)
     assert link in disk_store.Sample.query.first().links
     sample_id = sample.internal_id
 
@@ -175,7 +175,7 @@ def test_get_sample_families_with_family(invoke_cli, disk_store: Store, helpers)
     case = helpers.add_case(disk_store)
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
-    helpers.add_relationship(disk_store, sample=sample, family=case)
+    helpers.add_relationship(disk_store, sample=sample, case=case)
     assert disk_store.Sample.query.first().links
 
     # WHEN getting a sample with the --families flag

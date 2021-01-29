@@ -25,9 +25,9 @@ def test_decompress_spring_cli_no_family(compress_context, case_id, cli_runner, 
 
 
 def test_decompress_spring_cli_one_family(populated_compress_context, cli_runner, case_id, caplog):
-    """Test to run the decompress command with one family"""
+    """Test to run the decompress command with one case"""
     caplog.set_level(logging.DEBUG)
-    # GIVEN a context with a family
+    # GIVEN a context with a case
 
     # WHEN running the compress command
     res = cli_runner.invoke(decompress_case, [case_id], obj=populated_compress_context)

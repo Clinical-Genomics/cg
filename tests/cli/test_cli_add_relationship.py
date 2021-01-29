@@ -64,7 +64,7 @@ def test_add_relationship_bad_sample(invoke_cli, disk_store: Store, helpers):
 
 
 def test_add_relationship_bad_family(invoke_cli, disk_store: Store, helpers):
-    """Test to add a relationship using a non-existing family"""
+    """Test to add a relationship using a non-existing case"""
     # GIVEN a database with a sample
 
     # WHEN adding a relationship
@@ -87,7 +87,7 @@ def test_add_relationship_bad_family(invoke_cli, disk_store: Store, helpers):
         ]
     )
 
-    # THEN then it should complain in missing family instead of adding a relationship
+    # THEN then it should complain in missing case instead of adding a relationship
     assert result.exit_code == 1
     assert disk_store.FamilySample.query.count() == 0
 

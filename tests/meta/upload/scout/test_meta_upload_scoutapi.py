@@ -11,7 +11,7 @@ from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 
 def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
     """Test that is_family check fails when samples are not linked"""
-    # GIVEN a upload scout api and case data for a family without linked individuals
+    # GIVEN a upload scout api and case data for a case without linked individuals
     family_data: MipLoadConfig = MipLoadConfig(
         **{
             "samples": [
@@ -20,7 +20,7 @@ def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
             ]
         }
     )
-    # WHEN running the check if family is linked
+    # WHEN running the check if case is linked
     res = mip_config_builder.is_family_case(load_config=family_data)
     # THEN assert that the test returns False
     assert res is False
@@ -28,7 +28,7 @@ def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
 
 def test_family_is_linked(mip_config_builder: MipConfigBuilder):
     """Test that is_family returns true when samples are linked"""
-    # GIVEN a upload scout api and case data for a linked family
+    # GIVEN a upload scout api and case data for a linked case
     family_data: MipLoadConfig = MipLoadConfig(
         **{
             "samples": [
@@ -38,7 +38,7 @@ def test_family_is_linked(mip_config_builder: MipConfigBuilder):
             ]
         }
     )
-    # WHEN running the check if family is linked
+    # WHEN running the check if case is linked
     res = mip_config_builder.is_family_case(family_data)
     # THEN assert that the test returns True
     assert res is True

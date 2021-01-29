@@ -38,8 +38,8 @@ def test_get_samples(analysis_obj):
 
 
 def test_link(case_obj):
-    """Test function to get all samples from a family"""
-    # GIVEN an family object
+    """Test function to get all samples from a case"""
+    # GIVEN an case object
     # WHEN fetching all links
     link_objs = get_links(case_obj)
     # THEN assert the link objs are samples

@@ -79,7 +79,7 @@ class MockAnalysis:
         # Define output dict
         out_data = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "family": "yellowhog",
+            "case": "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
             "genome_build": "hg19",
             "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},

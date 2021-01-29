@@ -203,7 +203,7 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
             application_type="wgs",
             gender="unknown",
         )
-        helpers.add_relationship(store=_store, sample=sample, family=case_obj, status="affected")
+        helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
 
     return _store
 

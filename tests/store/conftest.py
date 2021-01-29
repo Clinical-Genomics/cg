@@ -123,5 +123,5 @@ def fixture_analysis_obj(analysis_store):
 
 @pytest.fixture(scope="function")
 def case_obj(analysis_obj):
-    """Return a family models object."""
+    """Return a case models object."""
     return analysis_obj.family

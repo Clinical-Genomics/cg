@@ -132,7 +132,7 @@ def test_parsing_external_orderform(external_orderform):
     assert family["name"] == "fam2"
     assert family["priority"] == "standard"
     assert set(family["panels"]) == set(["CILM", "CTD"])
-    # todo: assert set(family['additional_gene_list']) == set(['16PDEL'])
+    # todo: assert set(case['additional_gene_list']) == set(['16PDEL'])
 
     # ... and collect info about the samples
     wes_sample = family["samples"][0]
@@ -143,13 +143,13 @@ def test_parsing_external_orderform(external_orderform):
     assert wes_sample["data_analysis"] == str(Pipeline.MIP_DNA)
     assert wes_sample["data_delivery"] == str(DataDelivery.SCOUT)
     assert wes_sample["sex"] == "male"
-    # family name on family
-    # priority on family
+    # case name on case
+    # priority on case
     # customer on order (data)
     assert wes_sample["source"] == "blood"
 
-    # panels on family
-    # additional gene list on family
+    # panels on case
+    # additional gene list on case
     assert wes_sample["status"] == "affected"
 
     assert wes_sample["mother"] == "mother"
@@ -323,7 +323,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     assert first_sample["sex"] == "male"
     # case-id on the case
     # customer on the order (data)
-    # require-qc-ok on the family
+    # require-qc-ok on the case
     assert first_sample["source"] == "tissue (FFPE)"
 
     assert first_sample["container_name"] == "plate1"

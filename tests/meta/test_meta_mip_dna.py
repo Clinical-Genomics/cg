@@ -6,14 +6,14 @@ import logging
 
 def test_config(analysis_store: Store, analysis_api: MipAnalysisAPI):
 
-    # GIVEN a status db with a family
+    # GIVEN a status db with a case
     case_obj = analysis_store.families().first()
     assert case_obj is not None
     for link_obj in case_obj.links:
         link_obj.sample.application_version.application.min_sequencing_depth = 10
         analysis_store.commit()
 
-    # WHEN generating the MIP config for the family
+    # WHEN generating the MIP config for the case
     mip_config = analysis_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_DNA)
 
     # THEN it should fill in values accordingly
@@ -44,7 +44,7 @@ def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI, case_i
 def test_get_latest_metadata_logging(caplog, analysis_api: MipAnalysisAPI):
     # GIVEN an initialised report_api and the deliver_api does not have what we want
     family_id = "case_missing_data"
-    # WHEN failing to get latest trending data for a family
+    # WHEN failing to get latest trending data for a case
     latest_data = analysis_api.get_latest_metadata(family_id)
 
     with caplog.at_level(logging.WARNING):

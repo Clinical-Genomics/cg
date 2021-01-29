@@ -104,7 +104,7 @@ class MockTB:
         ### Define output dict
         outdata = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "family": "yellowhog",
+            "case": "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
             "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
             "mip_version": "v4.0.20",

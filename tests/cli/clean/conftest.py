@@ -28,7 +28,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         application_type="wgs",
         data_analysis=Pipeline.BALSAMIC,
     )
-    helpers.add_relationship(store, family=case_to_clean, sample=sample_case_to_clean)
+    helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
 
     helpers.add_analysis(
         store,
@@ -53,7 +53,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         application_type="wgs",
         data_analysis="balsamic",
     )
-    helpers.add_relationship(store, family=case_to_not_clean, sample=sample_case_to_not_clean)
+    helpers.add_relationship(store, case=case_to_not_clean, sample=sample_case_to_not_clean)
 
     helpers.add_analysis(
         store,

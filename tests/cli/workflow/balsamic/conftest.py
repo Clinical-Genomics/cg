@@ -370,12 +370,12 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_wgs_paired_enough_reads,
+        case=case_wgs_paired_enough_reads,
         sample=sample_case_wgs_paired_tumor_enough_reads,
     )
     helpers.add_relationship(
         _store,
-        family=case_wgs_paired_enough_reads,
+        case=case_wgs_paired_enough_reads,
         sample=sample_case_wgs_paired_normal_enough_reads,
     )
 
@@ -402,8 +402,8 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
-    helpers.add_relationship(_store, family=case_wgs_paired, sample=sample_case_wgs_paired_normal)
+    helpers.add_relationship(_store, case=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
+    helpers.add_relationship(_store, case=case_wgs_paired, sample=sample_case_wgs_paired_normal)
 
     # Create textbook case for TGS PAIRED without enough reads
     case_tgs_paired = helpers.add_case(
@@ -431,8 +431,8 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         reads=0,
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
-    helpers.add_relationship(_store, family=case_tgs_paired, sample=sample_case_tgs_paired_normal)
+    helpers.add_relationship(_store, case=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
+    helpers.add_relationship(_store, case=case_tgs_paired, sample=sample_case_tgs_paired_normal)
 
     # Create textbook case for WGS TUMOR ONLY
     case_wgs_single = helpers.add_case(
@@ -449,7 +449,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         reads=100,
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(_store, family=case_wgs_single, sample=sample_case_wgs_single_tumor)
+    helpers.add_relationship(_store, case=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
     # Create textbook case for TGS TUMOR ONLY
     case_tgs_single = helpers.add_case(
@@ -466,7 +466,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         application_type="tgs",
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(_store, family=case_tgs_single, sample=sample_case_tgs_single_tumor)
+    helpers.add_relationship(_store, case=case_tgs_single, sample=sample_case_tgs_single_tumor)
 
     # Create ERROR case for TGS NORMAL ONLY
     case_tgs_single_error = helpers.add_case(
@@ -485,7 +485,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_tgs_single_error,
+        case=case_tgs_single_error,
         sample=sample_case_tgs_single_normal_error,
     )
 
@@ -522,17 +522,17 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_tgs_paired_error,
+        case=case_tgs_paired_error,
         sample=sample_case_tgs_paired_tumor_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_tgs_paired_error,
+        case=case_tgs_paired_error,
         sample=sample_case_tgs_paired_tumor2_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_tgs_paired_error,
+        case=case_tgs_paired_error,
         sample=sample_case_tgs_paired_normal_error,
     )
 
@@ -560,12 +560,12 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_mixed_paired_error,
+        case=case_mixed_paired_error,
         sample=mixed_sample_case_wgs_paired_tumor_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_mixed_paired_error,
+        case=case_mixed_paired_error,
         sample=mixed_sample_case_tgs_paired_normal_error,
     )
 
@@ -593,12 +593,12 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_mixed_wgs_mic_paired_error,
+        case=case_mixed_wgs_mic_paired_error,
         sample=mixed_sample_case_wgs_mic_paired_tumor_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_mixed_wgs_mic_paired_error,
+        case=case_mixed_wgs_mic_paired_error,
         sample=mixed_sample_case_wgs_mic_paired_normal_error,
     )
 
@@ -627,12 +627,12 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_mixed_bed_paired_error,
+        case=case_mixed_bed_paired_error,
         sample=mixed_sample_case_mixed_bed_paired_tumor_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_mixed_bed_paired_error,
+        case=case_mixed_bed_paired_error,
         sample=mixed_sample_case_mixed_bed_paired_normal_error,
     )
 
@@ -652,7 +652,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=mip_case_wgs_single,
+        case=mip_case_wgs_single,
         sample=mip_sample_case_wgs_single_tumor,
     )
 
@@ -689,17 +689,17 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     )
     helpers.add_relationship(
         _store,
-        family=case_wgs_paired_two_normal_error,
+        case=case_wgs_paired_two_normal_error,
         sample=sample_case_wgs_paired_two_normal_tumor_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_wgs_paired_two_normal_error,
+        case=case_wgs_paired_two_normal_error,
         sample=sample_case_wgs_paired_two_normal_normal1_error,
     )
     helpers.add_relationship(
         _store,
-        family=case_wgs_paired_two_normal_error,
+        case=case_wgs_paired_two_normal_error,
         sample=sample_case_wgs_paired_two_normal_normal2_error,
     )
 
@@ -718,7 +718,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         application_type="wes",
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(_store, family=case_wes_tumor, sample=sample_case_wes_tumor)
+    helpers.add_relationship(_store, case=case_wes_tumor, sample=sample_case_wes_tumor)
 
     # Create ERROR case for WES when no panel is found
     case_wes_panel_error = helpers.add_case(
@@ -736,7 +736,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(
-        _store, family=case_wes_panel_error, sample=sample_case_wes_panel_error
+        _store, case=case_wes_panel_error, sample=sample_case_wes_panel_error
     )
 
     # Create ERROR case with NO SAMPLES

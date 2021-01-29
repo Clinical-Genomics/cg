@@ -19,7 +19,7 @@ class MockAnalysis:
 
     @property
     def family(self):
-        """ mock family """
+        """ mock case """
         return self.case_obj
 
 
@@ -27,15 +27,15 @@ def test_data(coverage_upload_api, analysis_store, case_id):
     """test getting data for chanjo"""
     # GIVEN a coverage api and an analysis object
     coverage_api = coverage_upload_api
-    family_name = case_id
-    case_obj = analysis_store.family(family_name)
+    case_name = case_id
+    case_obj = analysis_store.family(case_name)
     analysis_obj = MockAnalysis(case_obj=case_obj)
 
     # WHEN using the data method
     results = coverage_api.data(analysis_obj=analysis_obj)
 
     # THEN this returns the data needed to upload samples to chanjo
-    assert results["family"] == family_name
+    assert results["family"] == case_name
     for sample in results["samples"]:
         assert set(sample.keys()) == set(["coverage", "sample", "sample_name"])
 

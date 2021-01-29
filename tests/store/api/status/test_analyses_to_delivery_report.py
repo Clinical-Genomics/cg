@@ -72,7 +72,7 @@ def test_outdated_analysis(analysis_store, helpers):
     # GIVEN samples which has been delivered
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
 
-    # GIVEN a store sample family relation
+    # GIVEN a store sample case relation
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_delivery_report

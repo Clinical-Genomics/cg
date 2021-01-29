@@ -16,7 +16,7 @@ class Analysis:
 
     @property
     def family(self):
-        """ mock family """
+        """ mock case """
         return self.case_obj
 
 
@@ -29,7 +29,7 @@ def test_upload_observations_get_input(upload_observations_api, analysis_store, 
     # WHEN get_input method is used given the analysis_obj as argument
     input_data = upload_observations_api.get_input(analysis_obj)
 
-    # THEN input_data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
+    # THEN input_data is a dictionary with keys (case, vcf, sv_vcf, snv_gbcf, and pedigree)
     assert set(input_data.keys()) == {"family", "vcf", "sv_vcf", "snv_gbcf", "pedigree"}
     assert input_data["sv_vcf"] is not None
 
@@ -43,7 +43,7 @@ def test_upload_observations_get_input_wes(upload_observations_api_wes, analysis
     # WHEN get_input method is used given the analysis_obj as argument
     input_data = upload_observations_api_wes.get_input(analysis_obj)
 
-    # THEN input_data is a dictionary with keys (family, vcf, sv_vcf, snv_gbcf, and pedigree)
+    # THEN input_data is a dictionary with keys (case, vcf, sv_vcf, snv_gbcf, and pedigree)
     assert set(input_data.keys()) == {"family", "vcf", "sv_vcf", "snv_gbcf", "pedigree"}
     assert input_data["sv_vcf"] is None
 

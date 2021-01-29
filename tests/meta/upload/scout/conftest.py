@@ -35,7 +35,7 @@ class MockAnalysis:
         # Define output dict
         out_data = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "family": family_id or "yellowhog",
+            "case": family_id or "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
             "genome_build": "hg19",
             "rank_model_version": "1.18",
@@ -55,13 +55,13 @@ class MockAnalysis:
 
 @pytest.fixture(name="lims_family")
 def fixture_lims_family() -> dict:
-    """ Returns a lims-like family of samples """
+    """ Returns a lims-like case of samples """
     return json.load(open("tests/fixtures/report/lims_family.json"))
 
 
 @pytest.fixture(name="lims_samples")
 def fixture_lims_samples(lims_family: dict) -> List[dict]:
-    """ Returns the samples of a lims family """
+    """ Returns the samples of a lims case """
     return lims_family["samples"]
 
 
