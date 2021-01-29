@@ -281,7 +281,7 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
         )
         if decompression_all_samples_started:
             LOG.info(
-                f"The analysis for {case_obj.internal_id} could not start, started decompression instead"
+                "The analysis for %s could not start, started decompression instead", case_obj.internal_id
             )
         else:
             LOG.warning(
