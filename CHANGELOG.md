@@ -18,6 +18,11 @@ Try to use the following format:
 
 ### Added support for delivery type in the Order Portal
 
+## [18.9.1]
+
+### Added
+- cg upload vogue bioinfo-all uploads both BALSAMIC as well.
+
 ## [18.9.0]
 
 ### Added
