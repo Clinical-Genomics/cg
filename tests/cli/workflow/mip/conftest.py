@@ -192,7 +192,7 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
         case_obj = helpers.add_case(
             store=_store,
             internal_id=case_id,
-            family_id=mip_case_ids[case_id]["name"],
+            case_id=mip_case_ids[case_id]["name"],
         )
         sample = helpers.add_sample(
             store=_store,
@@ -262,7 +262,7 @@ def fixture_analysis_store_rna_case(
     """Setup a store instance with a single ind RNA case for testing analysis API"""
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
     helpers.ensure_case_from_dict(
-        base_store, family_info=analysis_family_single_case, app_tag=apptag_rna
+        base_store, case_info=analysis_family_single_case, app_tag=apptag_rna
     )
 
     yield base_store

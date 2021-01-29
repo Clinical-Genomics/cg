@@ -108,7 +108,7 @@ def fixture_populated_compress_store(store, helpers, compress_case_info, analysi
     # Make sure that there is a family where anaylsis is completer
     helpers.ensure_case_from_dict(
         store,
-        family_info=analysis_family,
+        case_info=analysis_family,
         app_tag=compress_case_info.application_tag,
         ordered_at=compress_case_info.timestamp,
         completed_at=compress_case_info.later_timestamp,
@@ -145,7 +145,7 @@ def fixture_populated_compress_multiple_store(
 
         helpers.ensure_case_from_dict(
             store,
-            family_info=analysis_family,
+            case_info=analysis_family,
             app_tag=compress_case_info.application_tag,
             ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,

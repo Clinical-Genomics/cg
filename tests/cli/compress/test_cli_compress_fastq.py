@@ -43,7 +43,7 @@ def test_compress_fastq_cli_case_id(populated_compress_context, cli_runner, help
 
     valid_compressable_case = helpers.add_case(
         store=populated_compress_context["status_db"],
-        family_id=case_id,
+        case_id=case_id,
         internal_id=case_id,
         data_analysis=Pipeline.MIP_DNA,
         action=None,

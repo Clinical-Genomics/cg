@@ -307,7 +307,7 @@ class StoreHelpers:
     def add_case(
         self,
         store: Store,
-        family_id: str = "family_test",
+        case_id: str = "case_test",
         data_analysis: Pipeline = Pipeline.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
@@ -330,7 +330,7 @@ class StoreHelpers:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
-                name=family_id,
+                name=case_id,
                 panels=panels,
             )
         if action:
@@ -350,47 +350,47 @@ class StoreHelpers:
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
     ):
-        family = store.find_family(customer=customer, name=name)
-        if not family:
-            family = store.add_case(
+        case = store.find_family(customer=customer, name=name)
+        if not case:
+            case = store.add_case(
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
                 name=name,
                 panels=None,
             )
-            family.customer = customer
-        return family
+            case.customer = customer
+        return case
 
     def ensure_case_from_dict(
         self,
         store: Store,
-        family_info: dict,
+        case_info: dict,
         app_tag: str = None,
         ordered_at: datetime = None,
         completed_at: datetime = None,
         created_at: datetime = datetime.now(),
     ):
-        """Load a family with samples and link relations"""
+        """Load a case with samples and link relations"""
         customer_obj = self.ensure_customer(store)
         case_obj = store.Family(
-            name=family_info["name"],
-            panels=family_info["panels"],
-            internal_id=family_info["internal_id"],
+            name=case_info["name"],
+            panels=case_info["panels"],
+            internal_id=case_info["internal_id"],
             ordered_at=ordered_at,
-            data_analysis=family_info.get("data_analysis", str(Pipeline.MIP_DNA)),
-            data_delivery=family_info.get("data_delivery", str(DataDelivery.SCOUT)),
+            data_analysis=case_info.get("data_analysis", str(Pipeline.MIP_DNA)),
+            data_delivery=case_info.get("data_delivery", str(DataDelivery.SCOUT)),
             created_at=created_at,
-            action=family_info.get("action"),
+            action=case_info.get("action"),
         )
 
         case_obj = self.add_case(store, case_obj=case_obj, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGTPCFC030"
-        app_type = family_info.get("application_type", "wgs")
+        app_type = case_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
 
         sample_objs = {}
-        for sample_data in family_info["samples"]:
+        for sample_data in case_info["samples"]:
             sample_id = sample_data["internal_id"]
             sample_obj = self.add_sample(
                 store,
@@ -405,7 +405,7 @@ class StoreHelpers:
             )
             sample_objs[sample_id] = sample_obj
 
-        for sample_data in family_info["samples"]:
+        for sample_data in case_info["samples"]:
             sample_obj = sample_objs[sample_data["internal_id"]]
             father = None
             if sample_data.get("father"):

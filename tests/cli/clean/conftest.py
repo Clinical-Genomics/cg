@@ -19,7 +19,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
 
     # Create textbook case for cleaning
     case_to_clean = helpers.add_case(
-        store=store, internal_id="balsamic_case_clean", family_id="balsamic_case_clean"
+        store=store, internal_id="balsamic_case_clean", case_id="balsamic_case_clean"
     )
     sample_case_to_clean = helpers.add_sample(
         store,
@@ -41,7 +41,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
 
     # Create textbook case not for cleaning
     case_to_not_clean = helpers.add_case(
-        store=store, internal_id="balsamic_case_not_clean", family_id="balsamic_case_not_clean"
+        store=store, internal_id="balsamic_case_not_clean", case_id="balsamic_case_not_clean"
     )
     case_to_not_clean.action = "running"
     store.commit()
