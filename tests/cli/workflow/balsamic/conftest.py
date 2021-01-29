@@ -735,9 +735,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
         application_type="wes",
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(
-        _store, case=case_wes_panel_error, sample=sample_case_wes_panel_error
-    )
+    helpers.add_relationship(_store, case=case_wes_panel_error, sample=sample_case_wes_panel_error)
 
     # Create ERROR case with NO SAMPLES
     helpers.add_case(_store, internal_id="no_sample_case", case_id="no_sample_case")
