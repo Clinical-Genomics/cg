@@ -133,7 +133,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
 
         analysis = analyses.pop()
 
-        if analysis == "no analysis":
+        if analysis == NO_ANALYSIS:
             project_type = "fastq"
         else:
             project_type = analysis
