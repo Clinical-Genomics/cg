@@ -81,7 +81,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
         message = (
-            f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} " f"samples: "
+            f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} samples: "
         )
 
         for sample in order.get("samples"):
