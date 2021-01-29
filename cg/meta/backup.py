@@ -77,9 +77,9 @@ class BackupApi:
                 flowcell_obj.name, flowcell_obj.sequencer_type, self.root_dir, dry_run
             )
             if not dry_run:
-                flowcell_obj.status = "retrieved"
+                flowcell_obj.status = "ondisk"
                 self.status.commit()
-                LOG.info('Status for flowcell %s set to "retrieved"', flowcell_obj.name)
+                LOG.info('Status for flowcell %s set to "ondisk"', flowcell_obj.name)
         except subprocess.CalledProcessError as error:
             LOG.error("%s: retrieval failed", flowcell_obj.name)
             if not dry_run:
