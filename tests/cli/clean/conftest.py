@@ -32,7 +32,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
 
     helpers.add_analysis(
         store,
-        family=case_to_clean,
+        case=case_to_clean,
         pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
@@ -57,7 +57,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
 
     helpers.add_analysis(
         store,
-        family=case_to_not_clean,
+        case=case_to_not_clean,
         pipeline="balsamic",
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,

@@ -61,7 +61,7 @@ def test_upload_doesnt_invoke_dually_for_same_case(invoke_cli, disk_store: Store
     # GIVEN an analysis that is already uploading
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
-    helpers.add_analysis(disk_store, family=case, uploading=True)
+    helpers.add_analysis(disk_store, case=case, uploading=True)
 
     # WHEN trying to upload it again
     result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
@@ -80,7 +80,7 @@ def test_upload_started_long_time_ago_raises_exception(invoke_cli, disk_store: S
     case_id = case.internal_id
     today = datetime.now()
     upload_started = today - timedelta(hours=100)
-    helpers.add_analysis(disk_store, family=case, uploading=True, upload_started=upload_started)
+    helpers.add_analysis(disk_store, case=case, uploading=True, upload_started=upload_started)
 
     # WHEN trying to upload an analysis that was started a long time ago
     result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])
@@ -97,7 +97,7 @@ def test_upload_force_restart(invoke_cli, disk_store: Store, helpers):
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
 
-    helpers.add_analysis(disk_store, family=case, uploading=True)
+    helpers.add_analysis(disk_store, case=case, uploading=True)
 
     # WHEN trying to upload it again with the force restart flag
     result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id, "-r"])
@@ -113,7 +113,7 @@ def test_upload_uploaded_fails_hard(invoke_cli, disk_store: Store, helpers):
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
 
-    helpers.add_analysis(disk_store, family=case, uploaded_at=datetime.now())
+    helpers.add_analysis(disk_store, case=case, uploaded_at=datetime.now())
 
     # WHEN trying to upload it again
     result = invoke_cli(["--database", disk_store.uri, "upload", "-f", case_id])

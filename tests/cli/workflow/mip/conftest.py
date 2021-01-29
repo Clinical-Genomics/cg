@@ -261,7 +261,7 @@ def fixture_analysis_store_rna_case(
 ) -> Store:
     """Setup a store instance with a single ind RNA case for testing analysis API"""
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
-    helpers.ensure_family_from_dict(
+    helpers.ensure_case_from_dict(
         base_store, family_info=analysis_family_single_case, app_tag=apptag_rna
     )
 

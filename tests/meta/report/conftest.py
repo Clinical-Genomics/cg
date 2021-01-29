@@ -165,9 +165,9 @@ class MockScout:
 
 @pytest.fixture(scope="function")
 def report_store(analysis_store, helpers):
-    family = analysis_store.families()[0]
-    helpers.add_analysis(analysis_store, family)
-    helpers.add_analysis(analysis_store, family)
+    case = analysis_store.families()[0]
+    helpers.add_analysis(analysis_store, case)
+    helpers.add_analysis(analysis_store, case)
     return analysis_store
 
 

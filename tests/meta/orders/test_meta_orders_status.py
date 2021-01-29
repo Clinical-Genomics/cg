@@ -549,7 +549,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     new_case = new_families[0]
     assert new_case.name == "family1"
     assert new_case.data_analysis == str(Pipeline.BALSAMIC)
-    assert new_case.data_delivery == str(DataDelivery.QC)
+    assert new_case.data_delivery == str(DataDelivery.SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == "standard"
 

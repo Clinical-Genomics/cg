@@ -174,7 +174,7 @@ class StoreHelpers:
     def add_analysis(
         self,
         store: Store,
-        family: models.Family = None,
+        case: models.Family = None,
         started_at: datetime = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
@@ -189,8 +189,8 @@ class StoreHelpers:
     ) -> models.Analysis:
         """Utility function to add an analysis for tests"""
 
-        if not family:
-            family = self.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
+        if not case:
+            case = self.add_case(store, data_analysis=pipeline, data_delivery=data_delivery)
 
         analysis = store.add_analysis(pipeline=pipeline, version=pipeline_version)
 
@@ -211,7 +211,7 @@ class StoreHelpers:
             analysis.pipeline = str(pipeline)
 
         analysis.limitations = "A limitation"
-        analysis.family = family
+        analysis.family = case
         store.add_commit(analysis)
         return analysis
 
@@ -343,7 +343,7 @@ class StoreHelpers:
         return case_obj
 
     @staticmethod
-    def ensure_family(
+    def ensure_case(
         store: Store,
         name: str,
         customer: models.Customer,
@@ -361,7 +361,7 @@ class StoreHelpers:
             family.customer = customer
         return family
 
-    def ensure_family_from_dict(
+    def ensure_case_from_dict(
         self,
         store: Store,
         family_info: dict,
@@ -425,7 +425,7 @@ class StoreHelpers:
         self.add_analysis(
             store,
             pipeline=Pipeline.MIP_DNA,
-            family=case_obj,
+            case=case_obj,
             completed_at=completed_at or datetime.now(),
         )
         return case_obj
@@ -485,7 +485,7 @@ class StoreHelpers:
             ticket=ticket,
         )
         sample.customer = customer
-        case = self.ensure_family(
+        case = self.ensure_case(
             store=store,
             name=str(ticket),
             customer=customer,

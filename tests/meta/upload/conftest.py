@@ -68,7 +68,7 @@ def fixture_analysis_obj(
 ) -> models.Analysis:
     """Return a analysis object with a trio"""
     case_obj = analysis_store_trio.family(case_id)
-    helpers.add_analysis(store=analysis_store_trio, family=case_obj, started_at=timestamp)
+    helpers.add_analysis(store=analysis_store_trio, case=case_obj, started_at=timestamp)
     return analysis_store_trio.family(case_id).analyses[0]
 
 

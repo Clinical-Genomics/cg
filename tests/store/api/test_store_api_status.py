@@ -207,7 +207,7 @@ def test_multiple_analyses(analysis_store, helpers):
     case = helpers.add_case(analysis_store)
     analysis_oldest = helpers.add_analysis(
         analysis_store,
-        family=case,
+        case=case,
         started_at=timestamp - timedelta(days=1),
         uploaded_at=timestamp - timedelta(days=1),
         delivery_reported_at=None,
@@ -215,7 +215,7 @@ def test_multiple_analyses(analysis_store, helpers):
     analysis_store.add_commit(analysis_oldest)
     analysis_newest = helpers.add_analysis(
         analysis_store,
-        family=case,
+        case=case,
         started_at=timestamp,
         uploaded_at=timestamp,
         delivery_reported_at=None,
