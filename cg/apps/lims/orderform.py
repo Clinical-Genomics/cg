@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Set
 
 import openpyxl
 from openpyxl.workbook import Workbook
@@ -144,7 +144,7 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
 def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
     """Determine the order_data delivery type."""
 
-    data_deliveries = parse_data_deliveries(samples)
+    data_deliveries: Set[str] = parse_data_deliveries(samples)
 
     if len(data_deliveries) > 1:
         raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
@@ -171,7 +171,7 @@ def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
         raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}")
 
 
-def parse_data_deliveries(samples: [dict]) -> set:
+def parse_data_deliveries(samples: [dict]) -> Set[str]:
 
     data_deliveries = set()
     for sample in samples:
