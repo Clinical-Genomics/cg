@@ -59,7 +59,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             try:
                 if self.osticket:
                     message = self._create_new_ticket_message(
-                        data=data, ticket=ticket, project=project
+                        order=data, ticket=ticket, project=project
                     )
 
                     data["ticket"] = self.osticket.open_ticket(
@@ -79,53 +79,97 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = order_func(data)
         return result
 
-    def _create_new_ticket_message(self, data: dict, ticket: dict, project: str) -> str:
-        message = f"data:text/html;charset=utf-8,New incoming samples: "
+    def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
+        message = f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} " \
+                  f"samples: "
 
-        for sample in data.get("samples"):
-            message += NEW_LINE + sample.get("name")
-
-            if sample.get("application"):
-                message += f", application: {sample['application']}"
-
-            if sample.get("family_name"):
-                message += f", family: {sample.get('family_name')}"
-
-            if sample.get("internal_id"):
-
-                existing_sample = self.status.sample(sample.get("internal_id"))
-                sample_customer = ""
-                if existing_sample.customer_id != data["customer"]:
-                    sample_customer = " from " + existing_sample.customer.internal_id
-
-                message += f" (already existing sample{sample_customer})"
-
-            if sample.get("priority"):
-                message += ", priority: " + sample.get("priority")
-
-            if sample.get("comment"):
-                message += ", " + sample.get("comment")
+        for sample in order.get("samples"):
+            message = self._add_sample_name_to_message(message, sample)
+            message = self._add_sample_apptag_to_message(message, sample)
+            message = self._add_sample_case_name_to_message(message, sample)
+            message = self._add_existing_sample_info_to_message(message, order, sample)
+            message = self._add_sample_priority_to_message(message, sample)
+            message = self._add_sample_comment_to_message(message, sample)
 
         message += NEW_LINE
+        message = self._add_project_to_message(message, project)
+        message = self._add_data_delivery_to_message(order, message)
+        message = self._add_comment_to_message(order, message)
+        message = self._add_user_name_to_message(message, ticket)
+        message = self._add_customer_to_message(order, message)
 
+        return message
+
+    @staticmethod
+    def _add_sample_name_to_message(message, sample):
+        message += NEW_LINE + sample.get("name")
+        return message
+
+    @staticmethod
+    def _add_sample_apptag_to_message(message, sample):
+        if sample.get("application"):
+            message += f", application: {sample['application']}"
+        return message
+
+    @staticmethod
+    def _add_sample_case_name_to_message(message, sample):
+        if sample.get("family_name"):
+            message += f", case: {sample.get('family_name')}"
+        return message
+
+    def _add_existing_sample_info_to_message(self, message, order, sample):
+        if sample.get("internal_id"):
+
+            existing_sample = self.status.sample(sample.get("internal_id"))
+            sample_customer = ""
+            if existing_sample.customer_id != order["customer"]:
+                sample_customer = " from " + existing_sample.customer.internal_id
+
+            message += f" (already existing sample{sample_customer})"
+        return message
+
+    @staticmethod
+    def _add_sample_priority_to_message(message, sample):
+        if sample.get("priority"):
+            message += ", priority: " + sample.get("priority")
+        return message
+
+    @staticmethod
+    def _add_sample_comment_to_message(message, sample):
+        if sample.get("comment"):
+            message += ", " + sample.get("comment")
+        return message
+
+    @staticmethod
+    def _add_project_to_message(message, project):
         if project:
             message += NEW_LINE + f"{project}."
+        return message
 
-        if data.get("delivery"):
-            message += NEW_LINE + f"{data.get('delivery')}."
+    @staticmethod
+    def _add_data_delivery_to_message(order, message):
+        if order.get("delivery"):
+            message += NEW_LINE + f"{order.get('delivery')}."
+        return message
 
-        if data.get("comment"):
-            message += NEW_LINE + f"{data.get('comment')}."
+    @staticmethod
+    def _add_comment_to_message(order, message):
+        if order.get("comment"):
+            message += NEW_LINE + f"{order.get('comment')}."
+        return message
 
+    @staticmethod
+    def _add_user_name_to_message(message, ticket):
         if ticket.get("name"):
             message += NEW_LINE + f"{ticket.get('name')}"
+        return message
 
-        if data.get("customer"):
-            customer_id = data.get("customer")
+    def _add_customer_to_message(self, order, message):
+        if order.get("customer"):
+            customer_id = order.get("customer")
             customer_name = self.status.customer(customer_id).name
 
             message += f", {customer_name} ({customer_id})"
-
         return message
 
     def _submit_rml(self, data: dict) -> dict:
