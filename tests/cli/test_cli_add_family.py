@@ -17,7 +17,7 @@ def test_add_family_required(invoke_cli, disk_store: Store):
     db_uri = disk_store.uri
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
-    name = "family_name"
+    name = "case_name"
 
     result = invoke_cli(
         [
@@ -52,7 +52,7 @@ def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
     non_existing_analysis = "epigenentic_alterations"
-    name = "family_name"
+    name = "case_name"
 
     result = invoke_cli(
         [
@@ -85,7 +85,7 @@ def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
     non_existing_data_delivery = "aws"
-    name = "family_name"
+    name = "case_name"
 
     result = invoke_cli(
         [
@@ -180,7 +180,7 @@ def test_add_family_priority(invoke_cli, disk_store: Store):
 
     customer_id = add_customer(disk_store)
     panel_id = add_panel(disk_store)
-    name = "family_name"
+    name = "case_name"
     priority = "priority"
 
     result = invoke_cli(

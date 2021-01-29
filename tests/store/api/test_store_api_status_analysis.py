@@ -1,52 +1,52 @@
-"""This script tests the cli methods to add families to status-db"""
+"""This script tests the cli methods to add cases to status-db"""
 from datetime import datetime, timedelta
 
 from cg.constants import Pipeline, DataDelivery
 from cg.store import Store
 
 
-def test_that_many_families_can_have_one_sample_each(base_store: Store, helpers):
-    """Test that tests that families are returned even if there are many result rows in the query"""
+def test_that_many_cases_can_have_one_sample_each(base_store: Store, helpers):
+    """Test that tests that cases are returned even if there are many result rows in the query"""
 
-    # GIVEN a database with two families one with 50 sequenced samples
+    # GIVEN a database with two cases one with 50 sequenced samples
     # the other case with one
-    n_test_families = 50
-    test_families = add_families_with_samples(
-        base_store, helpers, n_test_families, sequenced_at=datetime.now()
+    n_test_cases = 50
+    test_cases = add_cases_with_samples(
+        base_store, helpers, n_test_cases, sequenced_at=datetime.now()
     )
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    # THEN families should contain the test case
-    assert len(families) == len(test_families)
+    # THEN cases should contain the test case
+    assert len(cases) == len(test_cases)
 
 
-def test_that_families_can_have_many_samples(base_store: Store, helpers):
-    """Test that tests that families are returned even if there are many result rows in the query"""
+def test_that_cases_can_have_many_samples(base_store: Store, helpers):
+    """Test that tests that cases are returned even if there are many result rows in the query"""
 
-    # GIVEN a database with two families one with 50 sequenced samples
+    # GIVEN a database with two cases one with 50 sequenced samples
     # the other case with one
     default_limit = 50
-    test_case_50 = add_family_with_samples(
+    test_case_50 = add_case_with_samples(
         base_store, helpers, "test_case_50åäp+ölo0l", default_limit, sequenced_at=datetime.now()
     )
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_case = helpers.add_case(base_store, "family_one_sample")
     base_store.relate_sample(test_case, test_sample, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    # THEN families should contain the test case
-    assert families
-    assert test_case_50 in families
-    assert test_case in families
+    # THEN cases should contain the test case
+    assert cases
+    assert test_case_50 in cases
+    assert test_case in cases
 
 
 def test_external_sample_to_re_analyse(base_store: Store, helpers):
     """Test that a case marked for re-analyse with one sample external not sequenced inhouse and
-    with completed analysis do show up among the families to analyse"""
+    with completed analysis do show up among the cases to analyse"""
 
     # GIVEN a database with a case with one not sequenced external sample and completed analysis
     pipeline = Pipeline.MIP_DNA
@@ -55,17 +55,17 @@ def test_external_sample_to_re_analyse(base_store: Store, helpers):
     test_analysis.family.action = "analyze"
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=pipeline)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=pipeline)
 
-    # THEN families should contain the test case
-    assert families
-    assert test_analysis.family in families
+    # THEN cases should contain the test case
+    assert cases
+    assert test_analysis.family in cases
 
 
 def test_case_to_re_analyse(base_store: Store, helpers):
     """Test that a case marked for re-analyse with one sample that has been sequenced and
-    with completed analysis do show up among the families to analyse"""
+    with completed analysis do show up among the cases to analyse"""
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     pipeline = Pipeline.MIP_DNA
@@ -77,17 +77,17 @@ def test_case_to_re_analyse(base_store: Store, helpers):
     assert test_analysis.family.action == "analyze"
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=pipeline)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=pipeline)
 
-    # THEN families should contain the test case
-    assert families
-    assert test_analysis.family in families
+    # THEN cases should contain the test case
+    assert cases
+    assert test_analysis.family in cases
 
 
 def test_all_samples_and_analysis_completed(base_store: Store, helpers):
     """Test that a case with one sample that has been sequenced and with completed
-    analysis don't show up among the families to analyse"""
+    analysis don't show up among the cases to analyse"""
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
@@ -95,12 +95,12 @@ def test_all_samples_and_analysis_completed(base_store: Store, helpers):
     test_analysis.family.action = "analyze"
     base_store.relate_sample(test_analysis.family, test_sample, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    # THEN families should not contain the test case
+    # THEN cases should not contain the test case
 
-    assert not families
+    assert not cases
 
 
 def test_specified_analysis_in_result(base_store: Store, helpers):
@@ -112,12 +112,12 @@ def test_specified_analysis_in_result(base_store: Store, helpers):
     test_case = helpers.add_case(base_store, data_analysis=pipeline)
     base_store.relate_sample(test_case, test_sample, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=pipeline)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=pipeline)
 
-    # THEN families should contain the test case
-    assert families
-    assert test_case in families
+    # THEN cases should contain the test case
+    assert cases
+    assert test_case in cases
 
 
 def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers):
@@ -129,16 +129,16 @@ def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers)
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
     base_store.relate_sample(test_case, test_sample, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    # THEN families should not contain the test case
-    assert not families
+    # THEN cases should not contain the test case
+    assert not cases
 
 
 def test_one_of_two_sequenced_samples(base_store: Store, helpers):
     """Test that a case with one of one samples that has been sequenced shows up among the
-    families to analyse"""
+    cases to analyse"""
 
     # GIVEN a database with a case with one of one sequenced samples and no analysis
     test_case = helpers.add_case(base_store)
@@ -147,16 +147,16 @@ def test_one_of_two_sequenced_samples(base_store: Store, helpers):
     base_store.relate_sample(test_case, test_sample1, "unknown")
     base_store.relate_sample(test_case, test_sample2, "unknown")
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    # THEN families should not contain the test case
-    assert not families
+    # THEN cases should not contain the test case
+    assert not cases
 
 
 def test_one_of_one_sequenced_samples(base_store: Store, helpers):
     """Test that a case with one of one samples that has been sequenced shows up among the
-    families to analyse"""
+    cases to analyse"""
 
     # GIVEN a database with a case with one of one sequenced samples and no analysis
     test_case = helpers.add_case(base_store)
@@ -164,12 +164,12 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers):
     base_store.relate_sample(test_case, test_sample, "unknown")
     assert test_sample.sequenced_at is not None
 
-    # WHEN getting families to analyse
-    families = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    # THEN families should contain the test case
-    assert families
-    assert test_case in families
+    # THEN cases should contain the test case
+    assert cases
+    assert test_case in cases
 
 
 def relate_samples(base_store, family, samples):
@@ -179,22 +179,22 @@ def relate_samples(base_store, family, samples):
         base_store.relate_sample(family, sample, "unknown")
 
 
-def add_family_with_samples(base_store, helpers, family_name, n_samples, sequenced_at):
+def add_case_with_samples(base_store, helpers, case_name, n_samples, sequenced_at):
     """utility function to add one case with many samples to use in tests"""
 
     test_samples = helpers.add_samples(base_store, n_samples)
     for sample in test_samples:
         sample.sequenced_at = sequenced_at
-    test_case = helpers.add_case(base_store, family_name)
+    test_case = helpers.add_case(base_store, case_name)
     relate_samples(base_store, test_case, test_samples)
     return test_case
 
 
-def add_families_with_samples(base_store, helpers, n_families, sequenced_at):
-    """utility function to add many families with two samples to use in tests"""
+def add_cases_with_samples(base_store, helpers, n_cases, sequenced_at):
+    """utility function to add many cases with two samples to use in tests"""
 
-    families = []
-    for i in range(n_families):
-        family = add_family_with_samples(base_store, helpers, f"f{i}", 2, sequenced_at=sequenced_at)
-        families.append(family)
-    return families
+    cases = []
+    for i in range(n_cases):
+        family = add_case_with_samples(base_store, helpers, f"f{i}", 2, sequenced_at=sequenced_at)
+        cases.append(family)
+    return cases
