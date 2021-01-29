@@ -195,6 +195,6 @@ def add_cases_with_samples(base_store, helpers, n_cases, sequenced_at):
 
     cases = []
     for i in range(n_cases):
-        family = add_case_with_samples(base_store, helpers, f"f{i}", 2, sequenced_at=sequenced_at)
-        cases.append(family)
+        case = add_case_with_samples(base_store, helpers, f"f{i}", 2, sequenced_at=sequenced_at)
+        cases.append(case)
     return cases

@@ -43,11 +43,11 @@ def test_get_latest_data_rank_model_version(analysis_api: MipAnalysisAPI, case_i
 
 def test_get_latest_metadata_logging(caplog, analysis_api: MipAnalysisAPI):
     # GIVEN an initialised report_api and the deliver_api does not have what we want
-    family_id = "case_missing_data"
+    case_id = "case_missing_data"
     # WHEN failing to get latest trending data for a case
-    latest_data = analysis_api.get_latest_metadata(family_id)
+    latest_data = analysis_api.get_latest_metadata(case_id)
 
     with caplog.at_level(logging.WARNING):
-        assert family_id in caplog.text
+        assert case_id in caplog.text
     # THEN there should be a log entry about this
     assert not latest_data

@@ -69,7 +69,7 @@ def test_add_relationship_bad_family(invoke_cli, disk_store: Store, helpers):
 
     # WHEN adding a relationship
     db_uri = disk_store.uri
-    family_id = "dummy_family"
+    case_id = "dummy_family"
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
 
@@ -80,7 +80,7 @@ def test_add_relationship_bad_family(invoke_cli, disk_store: Store, helpers):
             db_uri,
             "add",
             "relationship",
-            family_id,
+            case_id,
             sample_id,
             "-s",
             status,
