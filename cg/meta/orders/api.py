@@ -35,48 +35,48 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.status = status
         self.osticket = osticket
 
-    def submit(self, project: OrderType, data: dict, ticket: dict) -> dict:
+    def submit(self, project: OrderType, order: dict, ticket: dict) -> dict:
         """Submit a batch of samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
         try:
-            ORDER_SCHEMES[project].validate(data)
+            ORDER_SCHEMES[project].validate(order)
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
 
-        self._validate_customer_on_imported_samples(project, data)
+        self._validate_customer_on_imported_samples(project, order)
 
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6})", data["name"])
+        ticket_match = re.fullmatch(r"#([0-9]{6})", order["name"])
 
         if ticket_match:
             ticket_number = int(ticket_match.group(1))
             LOG.info(f"{ticket_number}: detected ticket in order name")
-            data["ticket"] = ticket_number
+            order["ticket"] = ticket_number
         else:
             # open and assign ticket to order
             try:
                 if self.osticket:
                     message = self._create_new_ticket_message(
-                        order=data, ticket=ticket, project=project
+                        order=order, ticket=ticket, project=project
                     )
 
-                    data["ticket"] = self.osticket.open_ticket(
+                    order["ticket"] = self.osticket.open_ticket(
                         name=ticket["name"],
                         email=ticket["email"],
-                        subject=data["name"],
+                        subject=order["name"],
                         message=message,
                     )
 
-                    LOG.info(f"{data['ticket']}: opened new ticket")
+                    LOG.info(f"{order['ticket']}: opened new ticket")
                 else:
-                    data["ticket"] = None
+                    order["ticket"] = None
             except TicketCreationError as error:
                 LOG.warning(error.message)
-                data["ticket"] = None
+                order["ticket"] = None
         order_func = self._get_submit_func(project.value)
-        result = order_func(data)
+        result = order_func(order)
         return result
 
     def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
@@ -172,96 +172,96 @@ class OrdersAPI(LimsHandler, StatusHandler):
             message += f", {customer_name} ({customer_id})"
         return message
 
-    def _submit_rml(self, data: dict) -> dict:
+    def _submit_rml(self, order: dict) -> dict:
         """Submit a batch of ready made libraries."""
-        status_data = self.pools_to_status(data)
-        project_data, lims_map = self.process_lims(data, data["samples"])
+        status_data = self.pools_to_status(order)
+        project_data, lims_map = self.process_lims(order, order["samples"])
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
         self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
         new_records = self.store_rml(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=data["ticket"],
+            ticket=order["ticket"],
             pools=status_data["pools"],
         )
         return {"project": project_data, "records": new_records}
 
-    def _submit_fastq(self, data: dict) -> dict:
+    def _submit_fastq(self, order: dict) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
-        status_data = self.samples_to_status(data)
-        project_data, lims_map = self.process_lims(data, data["samples"])
+        status_data = self.samples_to_status(order)
+        project_data, lims_map = self.process_lims(order, order["samples"])
         self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_fastq_samples(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=data["ticket"],
+            ticket=order["ticket"],
             samples=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
-    def _submit_metagenome(self, data: dict) -> dict:
+    def _submit_metagenome(self, order: dict) -> dict:
         """Submit a batch of metagenome samples."""
-        status_data = self.samples_to_status(data)
-        project_data, lims_map = self.process_lims(data, data["samples"])
+        status_data = self.samples_to_status(order)
+        project_data, lims_map = self.process_lims(order, order["samples"])
         self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_samples(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=data["ticket"],
+            ticket=order["ticket"],
             samples=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
-    def _submit_external(self, data: dict) -> dict:
+    def _submit_external(self, order: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
-        result = self._process_case_samples(data)
+        result = self._process_case_samples(order)
         return result
 
-    def _submit_case_samples(self, data: dict) -> dict:
+    def _submit_case_samples(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        result = self._process_case_samples(data)
+        result = self._process_case_samples(order)
         for case_obj in result["records"]:
             LOG.info(f"{case_obj.name}: submit family samples")
             status_samples = [
                 link_obj.sample
                 for link_obj in case_obj.links
-                if link_obj.sample.ticket_number == data["ticket"]
+                if link_obj.sample.ticket_number == order["ticket"]
             ]
             self._add_missing_reads(status_samples)
-        self._update_application(data["ticket"], result["records"])
+        self._update_application(order["ticket"], result["records"])
         return result
 
-    def _submit_mip_dna(self, data: dict) -> dict:
+    def _submit_mip_dna(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self._submit_case_samples(data)
+        return self._submit_case_samples(order)
 
-    def _submit_balsamic(self, data: dict) -> dict:
+    def _submit_balsamic(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and balsamic analysis."""
-        return self._submit_case_samples(data)
+        return self._submit_case_samples(order)
 
-    def _submit_mip_rna(self, data: dict) -> dict:
+    def _submit_mip_rna(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        return self._submit_case_samples(data)
+        return self._submit_case_samples(order)
 
-    def _submit_microsalt(self, data: dict) -> dict:
+    def _submit_microsalt(self, order: dict) -> dict:
         """Submit a batch of microbial samples."""
-        # prepare data for status database
-        status_data = self.microbial_samples_to_status(data)
-        self._fill_in_sample_verified_organism(data["samples"])
+        # prepare order for status database
+        status_data = self.microbial_samples_to_status(order)
+        self._fill_in_sample_verified_organism(order["samples"])
         # submit samples to LIMS
-        project_data, lims_map = self.process_lims(data, data["samples"])
+        project_data, lims_map = self.process_lims(order, order["samples"])
         self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
         # submit samples to Status
         samples = self.store_microbial_samples(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket=data["ticket"],
+            ticket=order["ticket"],
             samples=status_data["samples"],
             comment=status_data["comment"],
             data_analysis=Pipeline(status_data["data_analysis"]),
@@ -270,13 +270,13 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         return {"project": project_data, "records": samples}
 
-    def _process_case_samples(self, data: dict) -> dict:
+    def _process_case_samples(self, order: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
-        status_data = self.cases_to_status(data)
-        new_samples = [sample for sample in data["samples"] if sample.get("internal_id") is None]
+        status_data = self.cases_to_status(order)
+        new_samples = [sample for sample in order["samples"] if sample.get("internal_id") is None]
         if new_samples:
-            project_data, lims_map = self.process_lims(data, new_samples)
+            project_data, lims_map = self.process_lims(order, new_samples)
         else:
             project_data = lims_map = None
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
@@ -286,7 +286,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket=data["ticket"],
+            ticket=order["ticket"],
             cases=status_data["families"],
         )
         return {"project": project_data, "records": new_families}
@@ -351,8 +351,8 @@ class OrdersAPI(LimsHandler, StatusHandler):
             )
             sample["verified_organism"] = is_verified
 
-    def _validate_customer_on_imported_samples(self, project, data):
-        for sample in data.get("samples"):
+    def _validate_customer_on_imported_samples(self, project: OrderType, order: dict):
+        for sample in order.get("samples"):
 
             if sample.get("internal_id"):
 
@@ -369,7 +369,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     )
 
                 existing_sample = self.status.sample(sample.get("internal_id"))
-                data_customer = self.status.customer(data["customer"])
+                data_customer = self.status.customer(order["customer"])
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")
