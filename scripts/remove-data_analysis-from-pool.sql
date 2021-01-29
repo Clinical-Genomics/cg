@@ -10,3 +10,5 @@ ALTER TABLE `family` CHANGE `data_delivery` `data_delivery` ENUM('analysis', 'an
  COLLATE latin1_swedish_ci
  NULL
  DEFAULT NULL;
+
+Update `family` SET data_delivery = 'fastq_qc' where data_delivery = 'custom';

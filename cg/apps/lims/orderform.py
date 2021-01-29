@@ -22,7 +22,7 @@ VALID_ORDERFORMS = [
     "1605:8",  # Microbial metagenomes
 ]
 NO_VALUE = "no_value"
-NO_ANALYSIS = "no analysis"
+NO_ANALYSIS = "no-analysis"
 
 CASE_PROJECT_TYPES = [
     str(OrderType.MIP_DNA),
@@ -126,12 +126,12 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif "1605" in document_title:
         project_type = "metagenome"
     elif "1508" in document_title:
-        analyses = set(sample["data_analysis"].lower() for sample in parsed_samples)
+        analyses = set(sample["data_analysis"] for sample in parsed_samples)
 
         if len(analyses) != 1:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
 
-        analysis = analyses.pop()
+        analysis = analyses.pop().lower().replace(" ", "-")
 
         if analysis == NO_ANALYSIS:
             project_type = "fastq"
@@ -141,46 +141,70 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     return project_type
 
 
-def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
+def _parse_data_analysis(samples) -> str:
+    data_analyses = set()
+    for sample in samples:
+        data_analyses.add(sample["data_analysis"])
+
+    if len(data_analyses) > 1:
+        raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
+
+    return data_analyses.pop().lower().replace(" ", "-")
+
+
+def _is_from_orderform_without_data_delivery(data_delivery: str) -> bool:
+    return data_delivery == NO_VALUE
+
+
+def get_data_delivery(samples: [dict], project_type: OrderType) -> DataDelivery:
     """Determine the order_data delivery type."""
 
-    data_deliveries: Set[str] = parse_data_deliveries(samples)
+    data_delivery: str = _parse_data_delivery(samples)
 
-    if len(data_deliveries) > 1:
-        raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
+    if _is_from_orderform_without_data_delivery(data_delivery):
 
-    data_delivery = data_deliveries.pop()
-
-    if data_delivery == NO_VALUE:
-        if project_type == OrderType.METAGENOME:
-            return str(DataDelivery.FASTQ)
-        if project_type == OrderType.FASTQ:
-            return str(DataDelivery.FASTQ)
-        if project_type == OrderType.RML:
-            return str(DataDelivery.FASTQ)
-        if project_type == OrderType.MIP_RNA:
-            return str(DataDelivery.ANALYSIS_FILES)
         if project_type == OrderType.FLUFFY:
-            return str(DataDelivery.NIPT_VIEWER)
+            return DataDelivery.NIPT_VIEWER
 
-        return ""
+        if project_type == OrderType.METAGENOME:
+            return DataDelivery.FASTQ
+
+        if project_type == OrderType.MICROSALT:
+            data_analysis: str = _parse_data_analysis(samples)
+
+            if data_analysis == "fastq":
+                return DataDelivery.FASTQ
+            if data_analysis == "custom":
+                return DataDelivery.FASTQ_QC
+
+        if project_type == OrderType.RML:
+            return DataDelivery.FASTQ
+
+        if project_type == OrderType.EXTERNAL:
+            return DataDelivery.SCOUT
+
+        raise OrderFormError(f"Could not determine value for Data Delivery")
+
+    if data_delivery == "analysis+bam":
+        return DataDelivery.ANALYSIS_BAM_FILES
 
     try:
-        return str(DataDelivery(data_delivery))
+        return DataDelivery(data_delivery)
     except ValueError:
         raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}")
 
 
-def parse_data_deliveries(samples: [dict]) -> Set[str]:
+def _parse_data_delivery(samples: [dict]) -> str:
 
     data_deliveries = set()
     for sample in samples:
-        data_delivery = (
-            (sample.get("data_delivery", NO_VALUE) or NO_VALUE).lower().replace(" ", "-")
-        )
+        data_delivery = sample.get("data_delivery", NO_VALUE) or NO_VALUE
         data_deliveries.add(data_delivery)
 
-    return data_deliveries
+    if len(data_deliveries) > 1:
+        raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
+
+    return data_deliveries.pop().lower().replace(" ", "-")
 
 
 def expand_case(case_id: str, parsed_case: dict, data_delivery: DataDelivery) -> tuple:
@@ -275,6 +299,8 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         "container_name": raw_sample.get("Container/Name"),
         "custom_index": raw_sample.get("UDF/Custom index"),
         "customer": raw_sample["UDF/customer"],
+        "data_analysis": raw_sample["UDF/Data Analysis"],
+        "data_delivery": raw_sample.get("UDF/Data Delivery"),
         "elution_buffer": raw_sample.get("UDF/Sample Buffer"),
         "extraction_method": raw_sample.get("UDF/Extraction method"),
         "formalin_fixation_time": raw_sample.get("UDF/Formalin Fixation Time"),
@@ -302,31 +328,6 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         "well_position": raw_sample.get("Sample/Well Location"),
         "well_position_rml": raw_sample.get("UDF/RML well position"),
     }
-
-    data_analysis = raw_sample.get("UDF/Data Analysis").lower()
-    data_delivery = raw_sample.get("UDF/Data Delivery", "").lower().replace(" ", "-")
-
-    if data_analysis and "balsamic" in data_analysis:
-        data_analysis = str(Pipeline.BALSAMIC)
-    elif data_analysis and "rna" in data_analysis:
-        data_analysis = str(Pipeline.MIP_RNA)
-        data_delivery = data_delivery or str(DataDelivery.ANALYSIS_FILES)
-    elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        data_analysis = str(Pipeline.MIP_DNA)
-        data_delivery = data_delivery or str(DataDelivery.SCOUT)
-    elif data_analysis and "microbial" in data_analysis:
-        data_analysis = str(Pipeline.MICROSALT)
-    elif data_analysis and "fluffy" in data_analysis:
-        data_analysis = str(Pipeline.FLUFFY)
-        data_delivery = data_delivery or str(DataDelivery.NIPT_VIEWER)
-    elif data_analysis and data_analysis in ["no analysis", "fastq"]:
-        data_analysis = str(Pipeline.FASTQ)
-        data_delivery = data_delivery or str(DataDelivery.FASTQ)
-    else:
-        raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
-
-    sample["data_analysis"] = data_analysis
-    sample["data_delivery"] = data_delivery
 
     numeric_attributes = [
         ("index_number", "UDF/Index number"),

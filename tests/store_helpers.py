@@ -183,7 +183,7 @@ class StoreHelpers:
         cleaned_at: datetime = None,
         pipeline: Pipeline = Pipeline.BALSAMIC,
         pipeline_version: str = "1.0",
-        data_delivery: DataDelivery = DataDelivery.QC,
+        data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
     ) -> models.Analysis:
@@ -490,7 +490,7 @@ class StoreHelpers:
             name=str(ticket),
             customer=customer,
             data_analysis=Pipeline.MICROSALT,
-            data_delivery=DataDelivery.QC,
+            data_delivery=DataDelivery.FASTQ_QC,
         )
         self.add_relationship(store=store, case=case, sample=sample)
         return sample

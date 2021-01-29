@@ -49,7 +49,7 @@ class DataDelivery(StrEnum):
     ANALYSIS_BAM_FILES: str = "analysis-bam"
     FASTQ: str = "fastq"
     NIPT_VIEWER: str = "nipt-viewer"
-    QC: str = "custom"
+    FASTQ_QC: str = "fastq_qc"
     SCOUT: str = "scout"
 
 

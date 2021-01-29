@@ -18,8 +18,7 @@ def test_parsing_rml_orderform(rml_orderform: str):
     assert sample_data["name"] == "sample1"
     assert sample_data["pool"] == "pool1"
     assert sample_data["application"] == "RMLP10R300"
-    assert sample_data["data_analysis"] == str(Pipeline.FLUFFY)
-    assert sample_data["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
+    assert sample_data["data_analysis"].lower() == str(Pipeline.FLUFFY)
     assert sample_data["volume"] == "1"
     assert sample_data["concentration"] == "2"
     assert sample_data["index"] == "IDT DupSeq 10 bp Set B"
@@ -54,7 +53,7 @@ def test_parsing_fastq_orderform(fastq_orderform):
     tumour_sample = data["items"][0]
     assert normal_sample["name"] == "s2"
     assert normal_sample["container"] == "Tube"
-    assert normal_sample["data_analysis"] == str(Pipeline.FASTQ)
+    assert normal_sample["data_analysis"] == "No analysis"
     assert normal_sample["data_delivery"].lower() == str(DataDelivery.FASTQ)
     assert normal_sample["application"] == "WGTPCFC030"
     assert normal_sample["sex"] == "female"
@@ -101,7 +100,7 @@ def test_parsing_mip_orderform(mip_orderform):
     proband_sample = trio_family["samples"][0]
     assert proband_sample["name"] == "s1"
     assert proband_sample["container"] == "96 well plate"
-    assert proband_sample["data_analysis"] == str(Pipeline.MIP_DNA)
+    assert proband_sample["data_analysis"] == "MIP DNA"
     assert proband_sample["data_delivery"].lower() == str(DataDelivery.SCOUT)
     assert proband_sample["application"] == "PANKTTR010"
     assert proband_sample["sex"] == "male"
@@ -140,8 +139,7 @@ def test_parsing_external_orderform(external_orderform):
 
     assert wes_sample["capture_kit"] == "Agilent Sureselect V5"
     assert wes_sample["application"] == "EXXCUSR000"
-    assert wes_sample["data_analysis"] == str(Pipeline.MIP_DNA)
-    assert wes_sample["data_delivery"] == str(DataDelivery.SCOUT)
+    assert wes_sample["data_analysis"] == "scout"
     assert wes_sample["sex"] == "male"
     # case name on case
     # priority on case
@@ -179,8 +177,7 @@ def test_parsing_metagenome_orderform(metagenome_orderform):
 
     assert sample["name"] == "sample1"
     assert sample["source"] == "other"
-    assert sample["data_analysis"] == str(Pipeline.FASTQ)
-    assert sample["data_delivery"] == str(DataDelivery.FASTQ)
+    assert sample["data_analysis"].lower() == str(Pipeline.FASTQ)
     assert sample["application"] == "METPCFR030"
     assert sample["customer"] == "cust000"
     assert sample["require_qcok"] is True
@@ -219,8 +216,7 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data.get("internal_id") is None
     assert sample_data["organism"] == "other"
     assert sample_data["reference_genome"] == "NC_00001"
-    assert sample_data["data_analysis"] == str(Pipeline.FASTQ)
-    assert sample_data["data_delivery"] == str(DataDelivery.FASTQ)
+    assert sample_data["data_analysis"].lower() == str(Pipeline.FASTQ)
     assert sample_data["application"] == "MWRNXTR003"
     # customer on order (data)
     assert sample_data["require_qcok"] is True
@@ -262,7 +258,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
 
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
-    assert sample["data_analysis"] == str(Pipeline.BALSAMIC)
+    assert sample["data_analysis"].lower() == str(Pipeline.BALSAMIC)
     assert sample["data_delivery"] == str(DataDelivery.SCOUT)
     assert sample["application"] == "PANKTTR010"
     assert sample["sex"] == "male"
@@ -317,7 +313,7 @@ def test_parsing_mip_rna_orderform(mip_rna_orderform):
     first_sample = first_case["samples"][0]
     assert first_sample["name"] == "s1"
     assert first_sample["container"] == "96 well plate"
-    assert first_sample["data_analysis"] == str(Pipeline.MIP_RNA)
+    assert first_sample["data_analysis"] == "MIP RNA"
     assert first_sample["data_delivery"].lower() == str(DataDelivery.ANALYSIS_FILES)
     assert first_sample["application"] == "RNAPOAR025"
     assert first_sample["sex"] == "male"

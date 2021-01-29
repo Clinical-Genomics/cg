@@ -6,7 +6,7 @@ from cg.constants import Pipeline, DataDelivery
 from cg.store import Store
 
 CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC
-CLI_OPTION_DELIVERY = DataDelivery.QC
+CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 
 def test_add_family_required(invoke_cli, disk_store: Store):

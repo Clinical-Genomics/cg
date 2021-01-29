@@ -235,7 +235,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
-        data_delivery=DataDelivery.QC,
+        data_delivery=DataDelivery.FASTQ_QC,
     )
 
     # THEN it should store the samples under a case (case) and the used previously unknown
@@ -262,7 +262,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
-        data_delivery=DataDelivery.QC,
+        data_delivery=DataDelivery.FASTQ_QC,
     )
 
     # THEN store the samples under a case with the microbial data_analysis type on case level
@@ -271,7 +271,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
 
     microbial_case = base_store.families().first()
     assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
-    assert microbial_case.data_delivery == str(DataDelivery.QC)
+    assert microbial_case.data_delivery == str(DataDelivery.FASTQ_QC)
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
@@ -292,7 +292,7 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
             samples=microbial_status_data["samples"],
             comment="",
             data_analysis=Pipeline.MICROSALT,
-            data_delivery=DataDelivery.QC,
+            data_delivery=DataDelivery.FASTQ_QC,
         )
 
 
@@ -310,7 +310,7 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
-        data_delivery=DataDelivery.QC,
+        data_delivery=DataDelivery.FASTQ_QC,
     )
 
     # THEN it should store the sample priority
