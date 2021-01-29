@@ -267,11 +267,11 @@ def test_fetch_flowcell_retrieve_next_flowcell(
     # THEN the process to retrieve the flowcell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flowcell is set to "ondisk"
+    # AND when done the status of that flowcell is set to "retrieved"
     assert (
-        f'Status for flowcell {mock_pop_flowcell.return_value.name} set to "ondisk"' in caplog.text
+        f'Status for flowcell {mock_pop_flowcell.return_value.name} set to "retrieved"' in caplog.text
     )
-    assert mock_pop_flowcell.return_value.status == "ondisk"
+    assert mock_pop_flowcell.return_value.status == "retrieved"
 
     # AND status-db is updated with the new status
     assert mock_store.commit.called
@@ -309,9 +309,9 @@ def test_fetch_flowcell_retrieve_specified_flowcell(
     # THEN the process to retrieve the flowcell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flowcell is set to "ondisk"
-    assert f'Status for flowcell {mock_flowcell.name} set to "ondisk"' in caplog.text
-    assert mock_flowcell.status == "ondisk"
+    # AND when done the status of that flowcell is set to "retrieved"
+    assert f'Status for flowcell {mock_flowcell.name} set to "retrieved"' in caplog.text
+    assert mock_flowcell.status == "retrieved"
 
     # AND status-db is updated with the new status
     assert mock_store.commit.called
