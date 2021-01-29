@@ -25,6 +25,8 @@ def test_parsing_balsamic_json(balsamic_order_to_submit):
 
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
+    assert sample["data_analysis"] == str(Pipeline.BALSAMIC)
+    assert sample["data_delivery"] == str(DataDelivery.SCOUT)
     assert sample["application"] == "WGTPCFC030"
     assert sample["sex"] == "male"
     assert case["name"] == "family1"
