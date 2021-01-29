@@ -106,13 +106,13 @@ def families():
         count = len(records)
     else:
         customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        case_q = db.families(
+        case_query = db.families(
             enquiry=request.args.get("enquiry"),
             customer=customer_obj,
             action=request.args.get("action"),
         )
-        count = case_q.count()
-        records = case_q.limit(30)
+        count = case_query.count()
+        records = case_query.limit(30)
     data = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=data, total=count)
 
