@@ -271,7 +271,7 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
     prepare_fastq_api = context.obj["prepare_fastq_api"]
     case_obj = dna_api.db.family(case_id)
     if not case_obj:
-        LOG.error("Case %s does not exist in Status-DB", case_id)
+        LOG.error("Case %s does not exist in status-db", case_id)
         raise click.Abort
 
     decompression_needed = prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id)
