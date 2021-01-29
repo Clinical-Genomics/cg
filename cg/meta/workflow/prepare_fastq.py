@@ -30,9 +30,10 @@ class PrepareFastqAPI:
             version_obj = self.compress_api.get_latest_version(sample_id)
             compression_objects = files.get_spring_paths(version_obj)
             for compression_object in compression_objects:
-                if self.crunchy_api.is_compression_pending(compression_object):
-                    continue
-                if compression_object.pair_exists():
+                if (
+                    self.crunchy_api.is_compression_pending(compression_object)
+                    or compression_object.pair_exists()
+                ):
                     continue
                 return True
         return False
@@ -69,8 +70,8 @@ class PrepareFastqAPI:
                 tags=["fastq"], version_obj=version_obj
             )
             compression_objs = files.get_spring_paths(version_obj)
-            for compr_obj in compression_objs:
-                if compr_obj.fastq_first not in fastq_files:
+            for compression_obj in compression_objs:
+                if compression_obj.fastq_first not in fastq_files:
                     self.compress_api.add_decompressed_fastq(sample_id)
-                if compr_obj.fastq_second not in fastq_files:
+                if compression_obj.fastq_second not in fastq_files:
                     self.compress_api.add_decompressed_fastq(sample_id)
