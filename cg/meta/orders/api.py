@@ -80,8 +80,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
         return result
 
     def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
-        message = f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} " \
-                  f"samples: "
+        message = (
+            f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} " f"samples: "
+        )
 
         for sample in order.get("samples"):
             message = self._add_sample_name_to_message(message, sample)
