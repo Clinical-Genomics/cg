@@ -85,10 +85,10 @@ class FluffyAnalysisAPI:
                     Path(sample_path / Path(file.full_path).name).symlink_to(file.full_path)
                 LOG.info(f"Linking {file.full_path} to {sample_path / Path(file.full_path).name}")
 
-    def get_concentrations_from_lims(self, sample_id: str) -> float:
+    def get_concentrations_from_lims(self, sample_id: str) -> str:
         # placeholder
         # When samplesheet is uploaded to lims on stage, replace with LIMS query
-        return 50.0
+        return self.lims_api.get_sample_attribute(lims_id=sample_id, key="Concentration")
 
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
