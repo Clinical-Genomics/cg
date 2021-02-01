@@ -16,7 +16,7 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA)]
+VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
 
 
 @click.group()
@@ -236,9 +236,7 @@ def _get_samples(store: Store, case_name: str) -> str:
     """
 
     link_objs = get_links(store, case_name)
-    sample_ids = set()
-    for link_obj in link_objs:
-        sample_ids.add(link_obj.sample.internal_id)
+    sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 
 

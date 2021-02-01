@@ -54,6 +54,12 @@ def fixture_case_id() -> str:
     return "yellowhog"
 
 
+@pytest.fixture(name="sample_id")
+def fixture_sample_id() -> str:
+    """ Returns a sample id """
+    return "ADM1"
+
+
 @pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
     """Return a family name"""
@@ -96,7 +102,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: in
     return family
 
 
-@pytest.yield_fixture(scope="function", name="analysis_family")
+@pytest.fixture(scope="function", name="analysis_family")
 def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Return a dictionary with information from a analysis family"""
     family = {
@@ -195,13 +201,13 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     return _genotype_api
 
 
-@pytest.yield_fixture(scope="function")
-def madeline_api(madeline_output):
+@pytest.fixture(scope="function")
+def madeline_api(madeline_output) -> MockMadelineAPI:
     """madeline_api fixture"""
     _api = MockMadelineAPI()
     _api.set_outpath(madeline_output)
 
-    yield _api
+    return _api
 
 
 # Files fixtures
@@ -263,6 +269,20 @@ def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
 def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with mip analysis files"""
     _path = analysis_dir / "mip"
+    return _path
+
+
+@pytest.fixture(name="balsamic_analysis_dir")
+def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with balsamic analysis files"""
+    _path = analysis_dir / "balsamic"
+    return _path
+
+
+@pytest.fixture(name="balsamic_panel_analysis_dir")
+def fixture_balsamic_panel_analysis_dir(balsamic_analysis_dir: Path) -> Path:
+    """Return the path to the directory with balsamic analysis files"""
+    _path = balsamic_analysis_dir / "tn_panel"
     return _path
 
 
@@ -524,13 +544,13 @@ def fixture_timestamp_today() -> dt.datetime:
 
 
 @pytest.fixture(scope="function", name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_today) -> dt.datetime:
+def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
     """Return a time stamp of yesterdays date in date time format"""
     return timestamp_today - dt.timedelta(days=1)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id, bed_file, timestamp):
+def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
     """Get some bundle data for housekeeper"""
     data = {
         "name": case_id,
@@ -542,7 +562,7 @@ def fixture_hk_bundle_data(case_id, bed_file, timestamp):
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample, timestamp):
+def fixture_sample_hk_bundle_no_files(sample: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = {
         "name": sample,
@@ -555,7 +575,7 @@ def fixture_sample_hk_bundle_no_files(sample, timestamp):
 
 
 @pytest.fixture(scope="function", name="case_hk_bundle_no_files")
-def fixture_case_hk_bundle_no_files(case_id, timestamp):
+def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     hk_bundle_data = {
         "name": case_id,
@@ -568,7 +588,9 @@ def fixture_case_hk_bundle_no_files(case_id, timestamp):
 
 
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
-def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_files):
+def fixture_compress_hk_fastq_bundle(
+    compression_object: CompressionData, sample_hk_bundle_no_files: dict
+) -> dict:
     """Create a complete bundle mock for testing compression
 
     This bundle contains a pair of fastq files.
@@ -592,31 +614,34 @@ def fixture_compress_hk_fastq_bundle(compression_object, sample_hk_bundle_no_fil
     return hk_bundle_data
 
 
-@pytest.yield_fixture(scope="function", name="housekeeper_api")
-def fixture_housekeeper_api(hk_config_dict):
+@pytest.fixture(name="housekeeper_api")
+def fixture_housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     """Setup Housekeeper store."""
-    _api = MockHousekeeperAPI(hk_config_dict)
-    yield _api
+    return MockHousekeeperAPI(hk_config_dict)
 
 
-@pytest.yield_fixture(scope="function", name="real_housekeeper_api")
-def fixture_real_housekeeper_api(hk_config_dict):
+@pytest.fixture(scope="function", name="real_housekeeper_api")
+def fixture_real_housekeeper_api(hk_config_dict: dict) -> HousekeeperAPI:
     """Setup a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
     yield _api
 
 
-@pytest.yield_fixture(scope="function", name="populated_housekeeper_api")
-def fixture_populated_housekeeper_api(housekeeper_api, hk_bundle_data, helpers):
+@pytest.fixture(scope="function", name="populated_housekeeper_api")
+def fixture_populated_housekeeper_api(
+    housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
     """Setup a Housekeeper store with some data."""
     hk_api = housekeeper_api
     helpers.ensure_hk_bundle(hk_api, hk_bundle_data)
     return hk_api
 
 
-@pytest.yield_fixture(scope="function", name="hk_version_obj")
-def fixture_hk_version_obj(housekeeper_api, hk_bundle_data, helpers):
+@pytest.fixture(scope="function", name="hk_version_obj")
+def fixture_hk_version_obj(
+    housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
     """Get a housekeeper version object"""
     _version = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
     return _version
@@ -652,8 +677,8 @@ def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
 # Scout fixtures
 
 
-@pytest.yield_fixture(scope="function", name="scout_api")
-def fixture_scout_api():
+@pytest.fixture(scope="function", name="scout_api")
+def fixture_scout_api() -> MockScoutAPI:
     """Setup Scout api."""
     _api = MockScoutAPI()
     return _api
@@ -662,7 +687,7 @@ def fixture_scout_api():
 # Crunchy fixtures
 
 
-@pytest.yield_fixture(scope="function", name="crunchy_api")
+@pytest.fixture(scope="function", name="crunchy_api")
 def fixture_crunchy_api():
     """Setup Crunchy api."""
     _api = MockCrunchyAPI()
@@ -672,7 +697,7 @@ def fixture_crunchy_api():
 # Store fixtures
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store")
+@pytest.fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(
     base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
 ):
@@ -684,14 +709,14 @@ def fixture_analysis_store(
     yield base_store
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store_trio")
+@pytest.fixture(scope="function", name="analysis_store_trio")
 def fixture_analysis_store_trio(analysis_store):
     """Setup a store instance with a trion loaded for testing analysis API."""
 
     yield analysis_store
 
 
-@pytest.yield_fixture(scope="function", name="analysis_store_single_case")
+@pytest.fixture(scope="function", name="analysis_store_single_case")
 def fixture_analysis_store_single(base_store, analysis_family_single_case, helpers):
     """Setup a store instance with a single ind case for testing analysis API."""
     helpers.ensure_family_from_dict(base_store, family_info=analysis_family_single_case)
@@ -699,13 +724,13 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case, helpe
     yield base_store
 
 
-@pytest.yield_fixture(scope="function", name="customer_group")
+@pytest.fixture(scope="function", name="customer_group")
 def fixture_customer_group() -> str:
     """Return a default customer group"""
     return "all_customers"
 
 
-@pytest.yield_fixture(scope="function", name="customer_production")
+@pytest.fixture(scope="function", name="customer_production")
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with information about the prod customer"""
     _cust = dict(
@@ -717,13 +742,13 @@ def fixture_customer_production(customer_group) -> dict:
     return _cust
 
 
-@pytest.yield_fixture(scope="function", name="external_wgs_application_tag")
+@pytest.fixture(scope="function", name="external_wgs_application_tag")
 def fixture_external_wgs_application_tag() -> str:
     """Return the external wgs app tag"""
     return "WGXCUSC000"
 
 
-@pytest.yield_fixture(scope="function", name="external_wgs_info")
+@pytest.fixture(scope="function", name="external_wgs_info")
 def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
     """Return a dictionary with information external WGS application"""
     _info = dict(
@@ -736,13 +761,13 @@ def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
     return _info
 
 
-@pytest.yield_fixture(scope="function", name="external_wes_application_tag")
+@pytest.fixture(scope="function", name="external_wes_application_tag")
 def fixture_external_wes_application_tag() -> str:
     """Return the external whole exome sequencing app tag"""
     return "EXXCUSR000"
 
 
-@pytest.yield_fixture(scope="function", name="external_wes_info")
+@pytest.fixture(scope="function", name="external_wes_info")
 def fixture_external_wes_info(external_wes_application_tag) -> dict:
     """Return a dictionary with information external WES application"""
     _info = dict(
@@ -755,13 +780,13 @@ def fixture_external_wes_info(external_wes_application_tag) -> dict:
     return _info
 
 
-@pytest.yield_fixture(scope="function", name="wgs_application_tag")
+@pytest.fixture(scope="function", name="wgs_application_tag")
 def fixture_wgs_application_tag() -> str:
     """Return the wgs app tag"""
     return "WGSPCFC060"
 
 
-@pytest.yield_fixture(scope="function", name="wgs_application_info")
+@pytest.fixture(scope="function", name="wgs_application_info")
 def fixture_wgs_application_info(wgs_application_tag) -> dict:
     """Return a dictionary with information the WGS application"""
     _info = dict(
@@ -776,7 +801,7 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
     return _info
 
 
-@pytest.yield_fixture(scope="function", name="store")
+@pytest.fixture(scope="function", name="store")
 def fixture_store() -> Store:
     """Fixture with a CG store"""
     _store = Store(uri="sqlite:///")
@@ -785,8 +810,13 @@ def fixture_store() -> Store:
     _store.drop_all()
 
 
-@pytest.yield_fixture(scope="function", name="base_store")
-def fixture_base_store(store) -> Store:
+@pytest.fixture(name="apptag_rna")
+def fixture_apptag_rna() -> str:
+    return "RNAPOAR025"
+
+
+@pytest.fixture(scope="function", name="base_store")
+def fixture_base_store(store: Store, apptag_rna: str) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group("all_customers", "all customers")
 
@@ -905,7 +935,7 @@ def fixture_base_store(store) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RNAPOAR025",
+            tag=apptag_rna,
             category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
@@ -978,7 +1008,7 @@ def sample_store(base_store) -> Store:
     return base_store
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def disk_store(cli_runner, invoke_cli) -> Store:
     """Store on disk"""
     database = "./test_db.sqlite3"

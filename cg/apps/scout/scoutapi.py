@@ -1,16 +1,16 @@
 """Code for talking to Scout regarding uploads"""
 
-import logging
-from typing import List, Optional
-from pathlib import Path
-import yaml
 import json
-
+import logging
+from pathlib import Path
 from subprocess import CalledProcessError
+from typing import List, Optional
 
-from cg.utils.commands import Process
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
+import yaml
+
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 

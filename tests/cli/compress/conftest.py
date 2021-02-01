@@ -1,7 +1,8 @@
 """Fixtures for cli compress functions"""
 
-import pytest
 import datetime as dt
+
+import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
@@ -39,7 +40,7 @@ def fixture_compress_api():
     return MockCompressAPI()
 
 
-@pytest.yield_fixture(scope="function", name="real_crunchy_api")
+@pytest.fixture(scope="function", name="real_crunchy_api")
 def fixture_real_crunchy_api(crunchy_config_dict):
     """crunchy api fixture"""
     _api = CrunchyAPI(crunchy_config_dict)

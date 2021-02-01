@@ -1,12 +1,12 @@
 """Module for Flask-Admin views"""
-from flask import redirect, url_for, request, session
+from flask import redirect, request, session, url_for
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
+from cg.constants.constants import DataDelivery, Pipeline
 from cg.server.ext import db
 from cg.utils.flask.enum import SelectEnumField
-from cg.constants.constants import Pipeline, DataDelivery
 
 
 class BaseView(ModelView):

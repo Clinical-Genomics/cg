@@ -3,15 +3,16 @@
 import logging
 import sys
 from datetime import datetime
-from typing import List, Optional, Iterable
+from typing import Iterable, List, Optional
 
 import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from cg.exc import CgError
-from cg.store import models, Store
 
-from .models import ApplicationVersionSchema, ApplicationSchema
+from cg.exc import CgError
+from cg.store import Store, models
+
+from .models import ApplicationSchema, ApplicationVersionSchema
 
 LOG = logging.getLogger(__name__)
 

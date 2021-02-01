@@ -10,3 +10,64 @@ SPRING_SUFFIX = ".spring"
 FASTQ_DELTA = 21
 # Get the fastq delta in datetime format
 FASTQ_DATETIME_DELTA = datetime.timedelta(days=FASTQ_DELTA)
+
+PROBLEMATIC_CASES = [
+    "causalmite",
+    "deepcub",
+    "expertalien",
+    "fluenteagle",
+    "grandkoi",
+    "lovingmayfly",
+    "loyalegret",
+    "modernbee",
+    "proudcollie",
+    "richalien",
+    "suremako",
+    "wisestork",
+]
+
+# List of cases used for validation that we should skip
+VALIDATION_CASES = [
+    "bigdrum",
+    "bosssponge",
+    "busycolt",
+    "casualgannet",
+    "cleanshrimp",
+    "daringpony",
+    "easybeetle",
+    "epicasp",
+    "firstfawn",
+    "fleetjay",
+    "gamedeer",
+    "gladthrush",
+    "helpedfilly",
+    "hotskink",
+    "hotviper",
+    "intentcorgi",
+    "intentmayfly",
+    "keencalf",
+    "keenviper",
+    "lightprawn",
+    "livingox",
+    "luckyhog",
+    "meetpossum",
+    "mintbaboon",
+    "mintyeti",
+    "moralgoat",
+    "onemite",
+    "proeagle",
+    "propercoral",
+    "pumpedcat",
+    "rightmacaw",
+    "safeguinea",
+    "sharpparrot",
+    "sharppigeon",
+    "strongbison",
+    "strongman",
+    "topsrhino",
+    "unitedbeagle",
+    "usablemarten",
+    "vitalmouse",
+]
+
+CASES_TO_IGNORE = PROBLEMATIC_CASES + VALIDATION_CASES

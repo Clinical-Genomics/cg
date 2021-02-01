@@ -4,7 +4,6 @@ from typing import Iterator
 
 import alchy
 import sqlalchemy as sqa
-
 from cgstats.db import api, models
 
 LOG = logging.getLogger(__name__)

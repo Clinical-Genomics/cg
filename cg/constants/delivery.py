@@ -3,8 +3,8 @@
 import copy
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
-    {"cnvkit", "sv-vcf", "tumor"},
-    {"cnvkit", "sv-vcf-index", "tumor"},
+    {"cnvkit", "filtered", "sv-vcf"},
+    {"cnvkit", "filtered", "sv-vcf-index"},
     {"cnvkit", "regions"},
     {"vcf-snv-clinical", "vardict", "filtered"},
     {"vcf-snv-clinical-index", "vardict", "filtered"},
@@ -36,7 +36,6 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
     {"cram-index", "tumor"},
     {"bam"},
     {"bam-index"},
-    {"fastq"},
 ]
 
 BALSAMIC_QC_CASE_TAGS = [

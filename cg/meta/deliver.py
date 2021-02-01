@@ -104,18 +104,23 @@ class DeliverAPI:
         if not self.dry_run:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
-        nr_files: int = 0
-        for nr_files, file_path in enumerate(
-            self.get_case_files_from_version(version_obj=version_obj, sample_ids=sample_ids), 1
+        number_linked_files: int = 0
+        for file_path in self.get_case_files_from_version(
+            version_obj=version_obj, sample_ids=sample_ids
         ):
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
+            if out_path.exists():
+                LOG.warning("File %s already exists!", out_path)
+                continue
+            number_linked_files += 1
             if self.dry_run:
                 LOG.info("Would hard link file %s to %s", file_path, out_path)
                 continue
             LOG.info("Hard link file %s to %s", file_path, out_path)
             os.link(file_path, out_path)
-        LOG.info("Linked %s files for case %s", nr_files, case_id)
+
+        LOG.info("Linked %s files for case %s", number_linked_files, case_id)
 
     def deliver_sample_files(
         self,
@@ -179,7 +184,7 @@ class DeliverAPI:
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
         if self.all_case_tags.isdisjoint(file_tags):
-            LOG.debug("No tags are mathing")
+            LOG.debug("No tags are matching")
             return False
 
         LOG.debug("Found file tags %s", ", ".join(file_tags))
@@ -192,6 +197,7 @@ class DeliverAPI:
         # Check if any of the file tags matches the case tags
         tags: Set[str]
         for tags in self.case_tags:
+            LOG.debug("check if %s is a subset of %s", tags, file_tags)
             if tags.issubset(file_tags):
                 return True
         LOG.debug("Could not find any tags matching file %s with tags %s", file_obj.path, file_tags)

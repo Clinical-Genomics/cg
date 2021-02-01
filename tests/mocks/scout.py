@@ -4,10 +4,12 @@ import logging
 from pathlib import Path
 from typing import List
 
+from cg.apps.scout.scoutapi import ScoutAPI
+
 LOG = logging.getLogger(__name__)
 
 
-class MockScoutAPI:
+class MockScoutAPI(ScoutAPI):
     """Mock class for Scout api"""
 
     def __init__(self, config=None):

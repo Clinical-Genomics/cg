@@ -3,18 +3,18 @@ import datetime as dt
 from typing import List
 
 import alchy
-from sqlalchemy import Column, ForeignKey, orm, types, UniqueConstraint, Table
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
 from cg.constants import (
-    DataDelivery,
     CASE_ACTIONS,
     FLOWCELL_STATUS,
-    Pipeline,
     PREP_CATEGORIES,
     PRIORITY_MAP,
     REV_PRIORITY_MAP,
     SEX_OPTIONS,
     STATUS_OPTIONS,
+    DataDelivery,
+    Pipeline,
 )
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
@@ -314,8 +314,8 @@ class FamilySample(Model):
 
     family = orm.relationship("Family", backref="links")
     sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id])
-    father = orm.relationship("Sample", foreign_keys=[father_id])
+    mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
+    father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""

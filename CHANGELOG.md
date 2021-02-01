@@ -14,6 +14,109 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.9.1]
+
+### Added
+- cg upload vogue bioinfo-all uploads both BALSAMIC as well.
+
+## [18.9.0]
+
+### Added
+
+- Add functionality to upload balsamic analyses to scout
+
+## [18.8.0]
+
+### Added
+- cg workflow microsalt upload-analysis-vogue [case_id] to upload the latest analysis from specific case
+- cg workflow microsalt upload-latest-analyses-vogue to upload all latest analyses what haven't been uploaded
+
+## [18.7.2]
+
+### Changed
+
+- Skip deliver fastq files when delivering balsamic analysis
+
+
+## [18.7.1]
+
+### Fixed
+
+- clean_fastq command now also skips validation cases when cleaning fastq files
+
+## [18.7.0]
+
+### Added
+-Added customer name in order tickets
+
+## [18.6.1]
+
+### Fixed
+
+- Fix bug with name clash for created case when submitting RML-orders via Orderportal
+
+
+## [18.6.0]
+
+
+### Added
+
+- Add command 'delete case' to remove case from the database
+- Add command 'delete cases' to remove multiple cases from the database
+
+## [18.5.1]
+
+### Fixed
+
+- Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
+
+## [18.5.0]
+
+### Added
+- Added MHT to gene panel master-list
+
+## [18.4.0]
+
+### Added
+
+- Added submission of microsalt cases for tracking in Trailblazer
+
+## [18.3.0]
+
+### Changed
+
+- cg workflow mip-dna --panel-bed and --dry-run options can be set when executing full workflow
+- Changed logic for how case links are retrieved in order to support linking of very old cases
+- Analysis not submitted to Trailblazer if executing MIP workflow in dry-run
+
+## [18.2]
+
+### Changed
+
+- Remove option to specify delivery path when delivering data
+
+### Fixed
+
+- Improved usage of `cg deliver analysis` command
+
+## [18.1.5]
+
+### Fixed
+
+- cg workflow mip-rna link command
+
+## [18.1.4]
+
+### Fixed
+
+- Better help text for microsalt cli commands
+
+
+## [18.1.3]
+
+### Fixed
+
+- deliver filtered cnvkit file for balsamic
 
 ## [18.1.2]
 
