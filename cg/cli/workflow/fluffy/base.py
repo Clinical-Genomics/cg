@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def fluffy(context):
+def fluffy(context: click.Context):
     """Fluffy workflow"""
     if context.invoked_subcommand is None:
         LOG.info(context.get_help())
@@ -40,7 +40,7 @@ def fluffy(context):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def link(context, case_id, dry_run):
+def link(context: click.Context, case_id: str, dry_run: bool):
     """
     Link fastq files from Housekeeper to analysis folder
 
@@ -53,7 +53,7 @@ def link(context, case_id, dry_run):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def create_samplesheet(context, case_id, dry_run):
+def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
     """
     Link samplesheet files from Housekeeper to analysis folder
 
@@ -66,7 +66,7 @@ def create_samplesheet(context, case_id, dry_run):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def run(context, case_id, dry_run):
+def run(context: click.Context, case_id: str, dry_run: bool):
     """Run fluffy analysis"""
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
@@ -94,7 +94,7 @@ def run(context, case_id, dry_run):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def start(context, case_id, dry_run):
+def start(context: click.Context, case_id: str, dry_run: bool):
     """Run link and run commands"""
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
@@ -104,7 +104,7 @@ def start(context, case_id, dry_run):
 @fluffy.command()
 @OPTION_DRY
 @click.pass_context
-def start_available(context, dry_run):
+def start_available(context: click.Context, dry_run: bool):
     """Run link and start commands for all cases/batches ready to be analyzed"""
     exit_code = EXIT_SUCCESS
     fluffy_analysis_api = context.obj["fluffy_analysis_api"]
@@ -123,15 +123,16 @@ def start_available(context, dry_run):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def store(context, case_id, dry_run):
-    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
+def store(context: click.Context, case_id: str, dry_run: bool):
+    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
+    fluffy_analysis_api.upload_bundle_statusdb(case_id=case_id)
 
 
 @fluffy.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def upload_niptool(context, case_id, dry_run):
+def upload_niptool(context: click.Context, case_id, dry_run):
     """Upload analysis to NIPT viewer"""
     pass
