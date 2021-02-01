@@ -8,7 +8,9 @@ from cg.apps.NIPTool import NIPToolAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.lims import LimsAPI
-from cg.store import Store
+from cg.store import Store, models
+import os
+from cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -154,10 +156,12 @@ class FluffyAnalysisAPI:
             bundle_files.append(bundle_file)
         return bundle_files
 
-    def upload_bundle_housekeeper(self, case_id: str):
+    def upload_bundle_housekeeper(self, case_id: str) -> None:
         bundle_data = {
             "name": case_id,
-            "created": dt.datetime.now(),
+            "created": self.get_date_from_file_path(
+                file_path=self.get_deliverables_path(case_id=case_id)
+            ),
             "files": self.parse_deliverables(case_id=case_id),
         }
         bundle_result = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
@@ -167,6 +171,29 @@ class FluffyAnalysisAPI:
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
+
+    def upload_bundle_statusdb(self, case_id: str) -> None:
+        case_obj: models.Family = self.status_db.family(case_id)
+        analysis_date = self.get_date_from_file_path(
+            deliverables_path=self.get_deliverables_path(case_id=case_id)
+        )
+
+        new_analysis: models.Analysis = self.status_db.add_analysis(
+            pipeline=Pipeline.FLUFFY,
+            started_at=self.get_date_from_file_path(
+                file_path=self.get_samplesheet_path(case_id=case_id)
+            ),
+            completed_at=dt.datetime.now(),
+            primary=(len(case_obj.analyses) == 0),
+        )
+        new_analysis.family = case_obj
+        self.status_db.add_commit(new_analysis)
+        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
+
+    @staticmethod
+    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
+        """ Get date from deliverables path using date created metadata """
+        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
     def upload_results(self, case_id):
         """Upload to NIPT viewer
