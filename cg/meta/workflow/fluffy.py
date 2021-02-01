@@ -38,8 +38,8 @@ class FluffyAnalysisAPI:
     def get_samplesheet_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "SampleSheet.csv")
 
-    def get_fastq_path(self, case_id: str, sample_id: str) -> Path:
-        return Path(self.root_dir, case_id, "fastq", sample_id)
+    def get_fastq_path(self, case_id: str, sample_name: str) -> Path:
+        return Path(self.root_dir, case_id, "fastq", sample_name)
 
     def get_output_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "output")
@@ -67,17 +67,15 @@ class FluffyAnalysisAPI:
         """
         case_obj = self.status_db.family(case_id)
         for familysample in case_obj.links:
-            sample_id = familysample.sample.internal_id
-            files = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
-            sample_path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
+            sample_name = familysample.sample.name
+            files = self.housekeeper_api.files(
+                bundle=familysample.sample.internal_id, tags=["fastq"]
+            )
+            sample_path: Path = self.get_fastq_path(case_id=case_id, sample_name=sample_name)
             for file in files:
                 if not dry_run:
-                    Path.mkdir(
-                        Path(sample_path / Path(file.full_path).name), exist_ok=True, parents=True
-                    )
-                    Path(sample_path / Path(file.full_path).name).symlink_to(
-                        file.full_path, target_is_directory=True
-                    )
+                    Path.mkdir(sample_path, exist_ok=True, parents=True)
+                    Path(sample_path / Path(file.full_path).name).symlink_to(file.full_path)
                 LOG.info(f"Linking {file.full_path} to {sample_path / Path(file.full_path).name}")
 
     def get_concentrations_from_lims(self, sample_id: str) -> float:
