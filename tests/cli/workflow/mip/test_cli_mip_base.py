@@ -102,6 +102,9 @@ def test_case_needs_to_be_stored(
     mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
     PrepareFastqAPI.check_fastq_links.return_value = None
 
+    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
+    PrepareFastqAPI.is_spring_decompression_running.return_value = False
+
     mocker.patch.object(MipAnalysisAPI, "panel")
     MipAnalysisAPI.panel.return_value = "bla"
 

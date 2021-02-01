@@ -22,32 +22,43 @@ class PrepareFastqAPI:
         self.compress_api: CompressAPI = compress_api
         self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
 
-    def is_spring_decompression_needed(self, case_id: str) -> bool:
-        """Check if spring decompression is needed"""
+    def get_compression_object(self, case_id: str) -> list:
+        """Return a list of compression objects"""
         case_obj = self.store.family(case_id)
+        compression_objects = []
         for link in case_obj.links:
             sample_id = link.sample.internal_id
             version_obj = self.compress_api.get_latest_version(sample_id)
-            compression_objects = files.get_spring_paths(version_obj)
-            for compression_object in compression_objects:
-                if (
-                    self.crunchy_api.is_compression_pending(compression_object)
-                    or compression_object.pair_exists()
-                ):
-                    continue
+            compression_objects.extend(files.get_spring_paths(version_obj))
+        return compression_objects
+
+    def is_spring_decompression_needed(self, case_id: str) -> bool:
+        """Check if spring decompression needs to be started"""
+        compression_objects = self.get_compression_object(case_id=case_id)
+        for compression_object in compression_objects:
+            if (
+                self.crunchy_api.is_compression_pending(compression_object)
+                or compression_object.pair_exists()
+            ):
+                continue
+            return True
+        return False
+
+    def is_spring_decompression_running(self, case_id: str) -> bool:
+        """Check if case is being decompressed"""
+        compression_objects = self.get_compression_object(case_id=case_id)
+        for compression_object in compression_objects:
+            if self.crunchy_api.is_compression_pending(compression_object):
                 return True
         return False
 
     def start_spring_decompression(self, case_id: str, dry_run: bool) -> bool:
         """Starts spring decompression"""
+        compression_objects = self.get_compression_object(case_id=case_id)
+        for compression_object in compression_objects:
+            if not self.crunchy_api.is_spring_decompression_possible(compression_object):
+                return False
         case_obj = self.store.family(case_id)
-        for link in case_obj.links:
-            sample_id = link.sample.internal_id
-            version_obj = self.compress_api.get_latest_version(sample_id)
-            compression_objs = files.get_spring_paths(version_obj)
-            for compr_obj in compression_objs:
-                if not self.crunchy_api.is_spring_decompression_possible(compr_obj):
-                    return False
         for link in case_obj.links:
             sample_id = link.sample.internal_id
             if dry_run:
