@@ -38,8 +38,8 @@ class FluffyAnalysisAPI:
     def get_samplesheet_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "SampleSheet.csv")
 
-    def get_fastq_path(self, case_id: str, sample_name: str) -> Path:
-        return Path(self.root_dir, case_id, "fastq", sample_name)
+    def get_fastq_path(self, case_id: str, sample_id: str) -> Path:
+        return Path(self.root_dir, case_id, "fastq", sample_id)
 
     def get_output_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "output")
@@ -60,6 +60,10 @@ class FluffyAnalysisAPI:
                 return "low"
         return "normal"
 
+    def get_sample_name_from_lims_id(self, lims_id: str) -> str:
+        sample_obj = self.status_db.sample(lims_id)
+        return sample_obj.name
+
     def link_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """
         1. Get fastq from HK
@@ -67,11 +71,9 @@ class FluffyAnalysisAPI:
         """
         case_obj = self.status_db.family(case_id)
         for familysample in case_obj.links:
-            sample_name = familysample.sample.name
-            files = self.housekeeper_api.files(
-                bundle=familysample.sample.internal_id, tags=["fastq"]
-            )
-            sample_path: Path = self.get_fastq_path(case_id=case_id, sample_name=sample_name)
+            sample_id = familysample.sample.internal_id
+            files = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
+            sample_path: Path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
             for file in files:
                 if not dry_run:
                     Path.mkdir(sample_path, exist_ok=True, parents=True)
@@ -86,21 +88,22 @@ class FluffyAnalysisAPI:
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
     ) -> None:
-        csv_reader = csv.reader(open(samplesheet_housekeeper_path, "r"), delimiter=",")
-        csv_writer = csv.writer(open(samplesheet_workdir_path, "w"), delimiter=",")
+        csv_reader = csv.reader(open(samplesheet_housekeeper_path, "r"))
+        csv_writer = csv.writer(open(samplesheet_workdir_path, "w"))
 
-        sampleid_index = None
-        csv_columns = None
+        sample_name_index = None
+        sample_id_index = None
         for row in csv_reader:
-            if not sampleid_index and "SampleID" in row:
-                sampleid_index = row.index("SampleID")
-                csv_columns = len(row)
-                csv_writer.writerow(row.append("Library_nM"))
-            if csv_columns and len(row) == csv_columns:
-                sample_id = row[sampleid_index]
-                csv_writer.writerow(
-                    row.append(self.get_concentrations_from_lims(sample_id=sample_id))
-                )
+            if not sample_name_index and "SampleName" in row:
+                sample_name_index = row.index("SampleName")
+                sample_id_index = row.index("SampleID")
+                row.append("Library_nM")
+                csv_writer.writerow(row)
+
+            sample_id = row[sample_id_index]
+            row[sample_name_index] = self.get_sample_name_from_lims_id(lims_id=sample_id)
+            row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
+            csv_writer.writerow(row)
 
     def make_samplesheet(self, case_id: str, dry_run: bool) -> None:
 
