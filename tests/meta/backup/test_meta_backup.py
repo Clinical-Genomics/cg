@@ -269,7 +269,8 @@ def test_fetch_flowcell_retrieve_next_flowcell(
 
     # AND when done the status of that flowcell is set to "retrieved"
     assert (
-        f'Status for flowcell {mock_pop_flowcell.return_value.name} set to "retrieved"' in caplog.text
+        f'Status for flowcell {mock_pop_flowcell.return_value.name} set to "retrieved"'
+        in caplog.text
     )
     assert mock_pop_flowcell.return_value.status == "retrieved"
 
