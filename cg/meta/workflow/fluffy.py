@@ -104,6 +104,7 @@ class FluffyAnalysisAPI:
                 sample_id_index = row.index("SampleID")
                 row.append("Library_nM")
                 csv_writer.writerow(row)
+                continue
             if sample_id_index:
                 sample_id = row[sample_id_index]
                 row[sample_name_index] = self.get_sample_name_from_lims_id(lims_id=sample_id)
