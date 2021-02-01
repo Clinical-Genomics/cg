@@ -72,9 +72,13 @@ class FluffyAnalysisAPI:
             sample_path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
             for file in files:
                 if not dry_run:
-                    Path.mkdir(sample_path, exist_ok=True, parents=True)
-                    Path(file.path).symlink_to(sample_path, target_is_directory=True)
-                LOG.info(f"Linking {file.path} to {sample_path / Path(file.path).name}")
+                    Path.mkdir(
+                        Path(sample_path / Path(file.full_path).name), exist_ok=True, parents=True
+                    )
+                    Path(sample_path / Path(file.full_path).name).symlink_to(
+                        file.full_path, target_is_directory=True
+                    )
+                LOG.info(f"Linking {file.full_path} to {sample_path / Path(file.full_path).name}")
 
     def get_concentrations_from_lims(self, sample_id: str) -> float:
         # placeholder
@@ -109,7 +113,7 @@ class FluffyAnalysisAPI:
         case_obj = self.status_db.family(case_id)
         flowcell_name = case_obj.links[0].sample.flowcells[0].name
         samplesheet_housekeeper_path = Path(
-            self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"])[0].path
+            self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"])[0].fullpath
         )
         samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
         LOG.info("Writing modified csv from to %s", samplesheet_workdir_path)
