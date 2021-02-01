@@ -111,7 +111,7 @@ class FluffyAnalysisAPI:
         case_obj = self.status_db.family(case_id)
         flowcell_name = case_obj.links[0].sample.flowcells[0].name
         samplesheet_housekeeper_path = Path(
-            self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"])[0].fullpath
+            self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"]).first().full_path
         )
         samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
         LOG.info("Writing modified csv from to %s", samplesheet_workdir_path)
