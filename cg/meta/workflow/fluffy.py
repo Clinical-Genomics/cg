@@ -1,6 +1,8 @@
 from pathlib import Path
 import logging
 import csv
+from subprocess import CalledProcessError
+
 from ruamel.yaml import safe_load
 import datetime as dt
 from cg.utils import Process
@@ -183,7 +185,10 @@ class FluffyAnalysisAPI:
             started_at=self.get_date_from_file_path(
                 file_path=self.get_samplesheet_path(case_id=case_id)
             ),
-            completed_at=dt.datetime.now(),
+            version=self.get_pipeline_version(),
+            completed_at=self.get_date_from_file_path(
+                file_path=self.get_deliverables_path(case_id=case_id)
+            ),
             primary=(len(case_obj.analyses) == 0),
         )
         new_analysis.family = case_obj
@@ -197,6 +202,14 @@ class FluffyAnalysisAPI:
 
     def get_cases_to_store(self) -> list:
         return self.status_db.cases_to_store(pipeline=Pipeline.FLUFFY)
+
+    def get_pipeline_version(self) -> str:
+        try:
+            self.process.run_command(["--version"])
+            return list(self.process.stdout_lines())[0].split()[-1]
+        except CalledProcessError:
+            LOG.warning("Could not retrieve fluffy version!")
+            return "0.0.0"
 
     def upload_results(self, case_id: str):
         """Upload to NIPT viewer
