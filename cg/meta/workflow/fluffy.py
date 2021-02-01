@@ -195,7 +195,10 @@ class FluffyAnalysisAPI:
         """ Get date from deliverables path using date created metadata """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def upload_results(self, case_id):
+    def get_cases_to_store(self) -> list:
+        return self.status_db.cases_to_store(pipeline=Pipeline.FLUFFY)
+
+    def upload_results(self, case_id: str):
         """Upload to NIPT viewer
         Needs:
 

@@ -6,7 +6,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.NIPTool import NIPToolAPI
 from cg.store import Store
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.apps.environ import environ_email
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 
@@ -45,7 +45,7 @@ def link(context: click.Context, case_id: str, dry_run: bool):
     Link fastq files from Housekeeper to analysis folder
 
     """
-    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
@@ -55,10 +55,10 @@ def link(context: click.Context, case_id: str, dry_run: bool):
 @click.pass_context
 def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
     """
-    Link samplesheet files from Housekeeper to analysis folder
+    Write modified samplesheet file to analysis folder
 
     """
-    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
 
 
@@ -68,7 +68,7 @@ def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
 @click.pass_context
 def run(context: click.Context, case_id: str, dry_run: bool):
     """Run fluffy analysis"""
-    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
     if dry_run:
         return
@@ -107,8 +107,8 @@ def start(context: click.Context, case_id: str, dry_run: bool):
 def start_available(context: click.Context, dry_run: bool):
     """Run link and start commands for all cases/batches ready to be analyzed"""
     exit_code = EXIT_SUCCESS
-    fluffy_analysis_api = context.obj["fluffy_analysis_api"]
-    cases_to_analyze = fluffy_analysis_api.status_db.cases_to_analyze(pipeline="fluffy")
+    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
+    cases_to_analyze = fluffy_analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.FLUFFY)
     for case_id in cases_to_analyze:
         try:
             context.invoke(start, case_id=case_id, dry_run=dry_run)
@@ -121,12 +121,32 @@ def start_available(context: click.Context, dry_run: bool):
 
 @fluffy.command()
 @ARGUMENT_CASE_ID
-@OPTION_DRY
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
+def store(context: click.Context, case_id: str):
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
     fluffy_analysis_api.upload_bundle_statusdb(case_id=case_id)
+
+
+@fluffy.command("store-available")
+@OPTION_DRY
+@click.pass_context
+def store_available(context: click.Context, dry_run: bool) -> None:
+    """Store all finished analyses in Housekeeper"""
+    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
+    exit_code: int = EXIT_SUCCESS
+
+    for case_obj in fluffy_analysis_api.get_cases_to_store():
+        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        if dry_run:
+            continue
+        try:
+            context.invoke(store, case_id=case_obj.internal_id)
+        except Exception:
+            exit_code = EXIT_FAIL
+
+    if exit_code:
+        raise click.Abort
 
 
 @fluffy.command()
