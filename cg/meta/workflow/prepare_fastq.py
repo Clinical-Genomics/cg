@@ -22,7 +22,7 @@ class PrepareFastqAPI:
         self.compress_api: CompressAPI = compress_api
         self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
 
-    def get_compression_object(self, case_id: str) -> list:
+    def get_compression_objects(self, case_id: str) -> list:
         """Return a list of compression objects"""
         case_obj = self.store.family(case_id)
         compression_objects = []
@@ -34,7 +34,7 @@ class PrepareFastqAPI:
 
     def is_spring_decompression_needed(self, case_id: str) -> bool:
         """Check if spring decompression needs to be started"""
-        compression_objects = self.get_compression_object(case_id=case_id)
+        compression_objects = self.get_compression_objects(case_id=case_id)
         for compression_object in compression_objects:
             if (
                 self.crunchy_api.is_compression_pending(compression_object)
@@ -46,7 +46,7 @@ class PrepareFastqAPI:
 
     def is_spring_decompression_running(self, case_id: str) -> bool:
         """Check if case is being decompressed"""
-        compression_objects = self.get_compression_object(case_id=case_id)
+        compression_objects = self.get_compression_objects(case_id=case_id)
         for compression_object in compression_objects:
             if self.crunchy_api.is_compression_pending(compression_object):
                 return True
@@ -54,7 +54,7 @@ class PrepareFastqAPI:
 
     def start_spring_decompression(self, case_id: str, dry_run: bool) -> bool:
         """Starts spring decompression"""
-        compression_objects = self.get_compression_object(case_id=case_id)
+        compression_objects = self.get_compression_objects(case_id=case_id)
         for compression_object in compression_objects:
             if not self.crunchy_api.is_spring_decompression_possible(compression_object):
                 return False
