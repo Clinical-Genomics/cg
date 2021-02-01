@@ -94,16 +94,16 @@ class FluffyAnalysisAPI:
         sample_name_index = None
         sample_id_index = None
         for row in csv_reader:
-            if not sample_name_index and "SampleName" in row:
+            if "SampleID" in row and not sample_id_index:
                 sample_name_index = row.index("SampleName")
                 sample_id_index = row.index("SampleID")
                 row.append("Library_nM")
                 csv_writer.writerow(row)
-
-            sample_id = row[sample_id_index]
-            row[sample_name_index] = self.get_sample_name_from_lims_id(lims_id=sample_id)
-            row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
-            csv_writer.writerow(row)
+            if sample_id_index:
+                sample_id = row[sample_id_index]
+                row[sample_name_index] = self.get_sample_name_from_lims_id(lims_id=sample_id)
+                row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
+                csv_writer.writerow(row)
 
     def make_samplesheet(self, case_id: str, dry_run: bool) -> None:
 
