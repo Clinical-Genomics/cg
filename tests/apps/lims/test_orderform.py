@@ -259,7 +259,7 @@ def test_parsing_balsamic_orderform(balsamic_orderform):
     assert sample["name"] == "s1"
     assert sample["container"] == "96 well plate"
     assert sample["data_analysis"].lower() == str(Pipeline.BALSAMIC)
-    assert sample["data_delivery"] == str(DataDelivery.SCOUT)
+    assert sample["data_delivery"] == str(DataDelivery.ANALYSIS_BAM_FILES)
     assert sample["application"] == "PANKTTR010"
     assert sample["sex"] == "male"
     assert case["name"] == "c1"

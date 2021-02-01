@@ -185,7 +185,7 @@ def get_data_delivery(samples: [dict], project_type: OrderType) -> DataDelivery:
 
         raise OrderFormError(f"Could not determine value for Data Delivery")
 
-    if data_delivery == "analysis+bam":
+    if data_delivery == "analysis-+-bam":
         return DataDelivery.ANALYSIS_BAM_FILES
 
     try:
