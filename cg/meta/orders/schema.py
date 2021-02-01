@@ -127,6 +127,9 @@ MIP_SAMPLE = {
     # "Not Required"
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": ListValidator(str, min_items=0),
+    "synopsis": ListValidator(str, min_items=0),
+    "phenotype_terms": ListValidator(str, min_items=0),
 }
 
 BALSAMIC_SAMPLE = {

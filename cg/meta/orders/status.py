@@ -158,6 +158,7 @@ class StatusHandler:
                     {
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
+                        "cohorts": list(sample.get("cohorts")),
                         "comment": sample.get("comment"),
                         "data_delivery": sample.get("data_delivery"),
                         "father": sample.get("father"),
@@ -165,8 +166,10 @@ class StatusHandler:
                         "internal_id": sample.get("internal_id"),
                         "mother": sample.get("mother"),
                         "name": sample["name"],
+                        "phenotype_terms": list(sample.get("phenotype_terms")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
+                        "synopsis": list(sample.get("synopsis")),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
@@ -215,6 +218,7 @@ class StatusHandler:
                 else:
                     new_sample = self.status.add_sample(
                         capture_kit=sample["capture_kit"],
+                        cohorts=sample["cohorts"],
                         comment=sample["comment"],
                         data_delivery=sample["data_delivery"],
                         from_sample=sample["from_sample"],
@@ -222,8 +226,10 @@ class StatusHandler:
                         name=sample["name"],
                         order=order,
                         ordered=ordered,
+                        phenotype_terms=sample["phenotype_terms"],
                         priority=case["priority"],
                         sex=sample["sex"],
+                        synopsis=sample["synopsis"],
                         ticket=ticket,
                         time_point=sample["time_point"],
                         tumour=sample["tumour"],

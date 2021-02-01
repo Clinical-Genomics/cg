@@ -23,7 +23,16 @@
         "IEM"
       ],
       "father": "sample3",
-      "mother": "sample2"
+      "mother": "sample2",
+      "synopsis": [
+        "synopsis"
+      ],
+      "phenotype_terms": [
+        "phenotype_terms"
+      ],
+      "cohorts": [
+        "cohorts"
+      ]
     },
     {
       "name": "sample2",
@@ -43,6 +52,15 @@
       "family_name": "family1",
       "panels": [
         "IEM"
+      ],
+            "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
       ]
     },
     {
@@ -62,6 +80,15 @@
       "family_name": "family1",
       "panels": [
         "IEM"
+      ],
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
       ]
     },
     {
@@ -81,6 +108,15 @@
       "family_name": "family2",
       "panels": [
         "IEM"
+      ],
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
       ]
     }
   ]

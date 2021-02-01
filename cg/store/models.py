@@ -427,6 +427,7 @@ class Sample(Model, PriorityMixin):
         ApplicationVersion, foreign_keys=[application_version_id]
     )
     capture_kit = Column(types.String(64))
+    _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -448,6 +449,7 @@ class Sample(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, nullable=False)
     organism_id = Column(ForeignKey("organism.id"))
     organism = orm.relationship("Organism", foreign_keys=[organism_id])
+    _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
     priority = Column(types.Integer, default=1, nullable=False)
     reads = Column(types.BigInteger, default=0)
@@ -455,12 +457,43 @@ class Sample(Model, PriorityMixin):
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
+    _synopsis = Column(types.Text)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     ticket_number = Column(types.Integer)
     time_point = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    @property
+    def cohorts(self) -> List[str]:
+        """Return a list of cohorts."""
+        panel_list = self._cohorts.split(",") if self._cohorts else []
+        return panel_list
+
+    @cohorts.setter
+    def cohorts(self, panel_list: List[str]):
+        self._cohorts = ",".join(panel_list) if panel_list else None
+
+    @property
+    def phenotype_terms(self) -> List[str]:
+        """Return a list of phenotype_terms."""
+        panel_list = self._phenotype_terms.split(",") if self._phenotype_terms else []
+        return panel_list
+
+    @phenotype_terms.setter
+    def phenotype_terms(self, panel_list: List[str]):
+        self._phenotype_terms = ",".join(panel_list) if panel_list else None
+
+    @property
+    def synopsis(self) -> List[str]:
+        """Return a list of synopsis."""
+        panel_list = self._synopsis.split(",") if self._synopsis else []
+        return panel_list
+
+    @synopsis.setter
+    def synopsis(self, panel_list: List[str]):
+        self._synopsis = ",".join(panel_list) if panel_list else None
 
     @property
     def state(self) -> str:

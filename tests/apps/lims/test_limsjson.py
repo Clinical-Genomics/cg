@@ -130,3 +130,12 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
     assert sibling_sample["father"] == ""
     assert sibling_sample["quantity"] == ""
     assert sibling_sample["comment"] == "F0018192-0 Data finns 2019-19202 duo med bror "
+
+    # cohort
+    assert sibling_sample["cohorts"] == ["cohorts"]
+
+    # synopsis
+    assert sibling_sample["synopsis"] == ["synopsis"]
+
+    # hpo-terms
+    assert sibling_sample["phenotype_terms"] == ["phenotype_terms"]

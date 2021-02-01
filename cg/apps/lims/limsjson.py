@@ -86,15 +86,16 @@ def expand_case(case_id: str, parsed_case: dict) -> dict:
             gene_panels.update(raw_sample["panels"])
 
         new_sample = {}
+
+        for key, value in raw_sample.items():
+            if key not in ["panels", "well_position"]:
+                new_sample[key] = value
+
         well_position_raw = raw_sample.get("well_position")
         if well_position_raw:
             new_sample["well_position"] = (
                 ":".join(well_position_raw) if ":" not in well_position_raw else well_position_raw
             )
-
-        for key, value in raw_sample.items():
-            if key not in ["panels", "well_position"]:
-                new_sample[key] = value
 
         new_case["samples"].append(new_sample)
 

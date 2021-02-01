@@ -338,6 +338,10 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.is_tumour
     assert isinstance(new_family.links[1].sample.comment, str)
 
+    assert set(new_link.sample.cohorts) == {"cohorts"}
+    assert set(new_link.sample.synopsis) == {"synopsis"}
+    assert set(new_link.sample.phenotype_terms) == {"phenotype_terms"}
+
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_family.links:
         assert len(link.sample.deliveries) == 1
