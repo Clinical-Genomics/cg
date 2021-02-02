@@ -6,7 +6,7 @@ Create Date: 2021-02-02 11:11:59.273754
 
 """
 from alembic import op
-import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 
 # revision identifiers, used by Alembic.
@@ -14,9 +14,6 @@ revision = "6d74453565f2"
 down_revision = None
 branch_labels = None
 depends_on = None
-
-from alembic import op
-from sqlalchemy.dialects import mysql
 
 old_options = ("ondisk", "removed", "requested", "processing")
 new_options = sorted(old_options + ("retrieved",))
