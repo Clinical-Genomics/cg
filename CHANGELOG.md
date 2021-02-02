@@ -14,7 +14,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [18.10.0]
 
 ### Added
  - Support for delivery type in the Order Portal
