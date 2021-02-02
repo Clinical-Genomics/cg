@@ -79,7 +79,7 @@ class FluffyAnalysisAPI:
         """
         case_obj = self.status_db.family(case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
-        if workdir_path.exists():
+        if workdir_path.exists() and not dry_run:
             workdir_path.rmdir()
         for familysample in case_obj.links:
             sample_id = familysample.sample.internal_id
@@ -123,6 +123,7 @@ class FluffyAnalysisAPI:
         1. Get samplesheet from HK
         2. Copy file to root_dir/case_id/samplesheet.csv
         """
+
         case_obj = self.status_db.family(case_id)
         flowcell_name = case_obj.links[0].sample.flowcells[0].name
         samplesheet_housekeeper_path = Path(
@@ -131,12 +132,12 @@ class FluffyAnalysisAPI:
             .full_path
         )
         samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
-        LOG.info(
-            "Writing modified csv from %s to %s",
-            samplesheet_housekeeper_path,
-            samplesheet_workdir_path,
-        )
         if not dry_run:
+            LOG.info(
+                "Writing modified csv from %s to %s",
+                samplesheet_housekeeper_path,
+                samplesheet_workdir_path,
+            )
             self.add_concentrations_to_samplesheet(
                 samplesheet_housekeeper_path=samplesheet_housekeeper_path,
                 samplesheet_workdir_path=samplesheet_workdir_path,

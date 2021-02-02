@@ -49,7 +49,7 @@ def link(context: click.Context, case_id: str, dry_run: bool):
     fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
-@fluffy.command()
+@fluffy.command("create-samplesheet")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
@@ -99,7 +99,7 @@ def start(context: click.Context, case_id: str, dry_run: bool):
     context.invoke(run, case_id=case_id, dry_run=dry_run)
 
 
-@fluffy.command()
+@fluffy.command("start-available")
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool):
