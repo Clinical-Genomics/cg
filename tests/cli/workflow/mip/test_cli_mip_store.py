@@ -1,11 +1,10 @@
 """This script tests the cli mip store functions"""
 import logging
 
-from click.testing import CliRunner
-
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.cli.workflow.mip.store import analysis, completed
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.apps.tb.models import TrailblazerAnalysis
+from click.testing import CliRunner
 
 
 def test_store_no_config(cli_runner: CliRunner, mip_store_context: dict, caplog):

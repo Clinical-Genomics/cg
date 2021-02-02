@@ -3,7 +3,6 @@
 import logging
 
 import click
-
 from cg.cli.delete.case import case
 from cg.cli.delete.cases import cases
 from cg.store import Store

@@ -1,8 +1,6 @@
 """Tests for the file handlers"""
 from typing import Optional
 
-from housekeeper.store import models as hk_models
-
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -13,6 +11,7 @@ from cg.meta.upload.scout.scout_load_config import (
     ScoutMipIndividual,
 )
 from cg.store import models
+from housekeeper.store import models as hk_models
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 

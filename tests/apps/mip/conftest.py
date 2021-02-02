@@ -3,7 +3,6 @@ import string
 from typing import List
 
 import pytest
-
 from cg.apps.mip import MipAPI
 
 

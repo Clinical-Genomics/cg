@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hermes.hermes_api import HermesApi

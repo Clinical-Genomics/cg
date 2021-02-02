@@ -3,12 +3,11 @@ from pathlib import Path
 from typing import Dict, List, Set
 
 import openpyxl
-from openpyxl.workbook import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
-
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline, DataDelivery
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, DataDelivery, Pipeline
 from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}

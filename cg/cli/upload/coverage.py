@@ -1,7 +1,6 @@
 """Code for uploading coverage reports via CLI"""
 
 import click
-
 from cg.apps.coverage import ChanjoAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 
