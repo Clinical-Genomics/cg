@@ -4,7 +4,6 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.NIPTool import NIPToolAPI
 from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.apps.environ import environ_email
@@ -30,7 +29,6 @@ def fluffy(context: click.Context):
         housekeeper_api=HousekeeperAPI(config),
         trailblazer_api=TrailblazerAPI(config),
         lims_api=LimsAPI(config),
-        niptool_api=NIPToolAPI(config),
         status_db=Store(config["database"]),
         config=config["fluffy"],
     )
@@ -147,12 +145,3 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     if exit_code:
         raise click.Abort
-
-
-@fluffy.command()
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@click.pass_context
-def upload_niptool(context: click.Context, case_id, dry_run):
-    """Upload analysis to NIPT viewer"""
-    pass

@@ -6,7 +6,6 @@ from subprocess import CalledProcessError
 from ruamel.yaml import safe_load
 import datetime as dt
 from cg.utils import Process
-from cg.apps.NIPTool import NIPToolAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.lims import LimsAPI
@@ -23,13 +22,11 @@ class FluffyAnalysisAPI:
         housekeeper_api: HousekeeperAPI,
         trailblazer_api: TrailblazerAPI,
         lims_api: LimsAPI,
-        niptool_api: NIPToolAPI,
         status_db: Store,
         config: dict,
     ):
         self.housekeeper_api = housekeeper_api
         self.trailblazer_api = trailblazer_api
-        self.niptool_api = niptool_api
         self.status_db = status_db
         self.lims_api = lims_api
         self.root_dir = Path(config["root_dir"])
@@ -88,7 +85,7 @@ class FluffyAnalysisAPI:
     def get_concentrations_from_lims(self, sample_id: str) -> str:
         # placeholder
         # When samplesheet is uploaded to lims on stage, replace with LIMS query
-        return self.lims_api.get_sample_attribute(lims_id=sample_id, key="Concentration")
+        return self.lims_api.get_sample_attribute(lims_id=sample_id, key="Sample Conc.")
 
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
@@ -212,17 +209,3 @@ class FluffyAnalysisAPI:
         except CalledProcessError:
             LOG.warning("Could not retrieve fluffy version!")
             return "0.0.0"
-
-    def upload_results(self, case_id: str):
-        """Upload to NIPT viewer
-        Needs:
-
-            StatusDB get project id
-
-            Hk api get samplesheet
-            Hk api get multiqc
-            Hk api get results csv
-
-
-        """
-        pass
