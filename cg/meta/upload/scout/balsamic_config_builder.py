@@ -55,7 +55,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         LOG.info("Build load config for balsamic case")
         self.add_mandatory_info_to_load_config()
         self.load_config.human_genome_build = "37"
-        self.load_config.rank_score_threshold = 0
+        self.load_config.rank_score_threshold = -100
 
         self.include_case_files()
 
