@@ -17,7 +17,6 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 from cg.store.models import Model
 
-# target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
 
 # other values from the config, defined by the needs of env.py,
