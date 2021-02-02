@@ -2,16 +2,20 @@ from pathlib import Path
 import logging
 import csv
 from subprocess import CalledProcessError
+from typing import Any, Optional
 
 from ruamel.yaml import safe_load
 import datetime as dt
+
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.exc import BundleAlreadyAddedError
 from cg.utils import Process
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.lims import LimsAPI
 from cg.store import Store, models
 import os
-from cg.constants import Pipeline
+from cg.constants import Pipeline, CASE_ACTIONS
 
 LOG = logging.getLogger(__name__)
 
@@ -21,6 +25,7 @@ class FluffyAnalysisAPI:
         self,
         housekeeper_api: HousekeeperAPI,
         trailblazer_api: TrailblazerAPI,
+        hermes_api: HermesApi,
         lims_api: LimsAPI,
         status_db: Store,
         config: dict,
@@ -29,6 +34,7 @@ class FluffyAnalysisAPI:
         self.trailblazer_api = trailblazer_api
         self.status_db = status_db
         self.lims_api = lims_api
+        self.hermes_api = hermes_api
         self.root_dir = Path(config["root_dir"])
         self.process = Process(binary=config["binary_path"])
         self.fluffy_config = Path(config["config_path"])
@@ -72,6 +78,9 @@ class FluffyAnalysisAPI:
         2. Copy sample fastq to root_dir/case_id/fastq/sample_id (from samplesheet)
         """
         case_obj = self.status_db.family(case_id)
+        workdir_path = self.get_workdir_path(case_id=case_id)
+        if workdir_path.exists():
+            workdir_path.rmdir()
         for familysample in case_obj.links:
             sample_id = familysample.sample.internal_id
             files = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
@@ -134,6 +143,11 @@ class FluffyAnalysisAPI:
             )
 
     def run_fluffy(self, case_id: str, dry_run: bool) -> None:
+
+        output_path: Path = self.get_output_path(case_id=case_id)
+        if output_path.exists():
+            LOG.info("Old working directory found, cleaning!")
+            output_path.rmdir()
         command_args = [
             "--config",
             self.fluffy_config.as_posix(),
@@ -147,25 +161,21 @@ class FluffyAnalysisAPI:
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def parse_deliverables(self, case_id) -> list:
-        deliverables_yaml = self.get_deliverables_path(case_id=case_id)
-        deliverables_dict = safe_load(open(deliverables_yaml))
-        deliverable_files = deliverables_dict["files"]
-        bundle_files = []
-        for entry in deliverable_files:
-            bundle_file = {"path": entry["path"], "archive": False, "tags": [entry["tag"]]}
-            bundle_files.append(bundle_file)
-        return bundle_files
-
     def upload_bundle_housekeeper(self, case_id: str) -> None:
-        bundle_data = {
-            "name": case_id,
-            "created": self.get_date_from_file_path(
-                file_path=self.get_deliverables_path(case_id=case_id)
-            ),
-            "files": self.parse_deliverables(case_id=case_id),
-        }
+        deliverables_path = self.get_deliverables_path(case_id=case_id)
+        analysis_date = self.get_date_from_file_path(file_path=deliverables_path)
+        bundle_data = self.hermes_api.create_housekeeper_bundle(
+            deliverables=deliverables_path,
+            pipeline="fluffy",
+            created=analysis_date,
+            analysis_type=None,
+            bundle_name=case_id,
+        ).dict()
+        bundle_data["name"] = case_id
+
         bundle_result = self.housekeeper_api.add_bundle(bundle_data=bundle_data)
+        if not bundle_result:
+            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
         self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
@@ -200,7 +210,11 @@ class FluffyAnalysisAPI:
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
     def get_cases_to_store(self) -> list:
-        return self.status_db.cases_to_store(pipeline=Pipeline.FLUFFY)
+        return [
+            case_obj
+            for case_obj in self.status_db.cases_to_store(pipeline=Pipeline.FLUFFY)
+            if self.get_deliverables_path(case_id=case_obj.internal_id).exists()
+        ]
 
     def get_pipeline_version(self) -> str:
         try:
@@ -209,3 +223,14 @@ class FluffyAnalysisAPI:
         except CalledProcessError:
             LOG.warning("Could not retrieve fluffy version!")
             return "0.0.0"
+
+    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
+        if action in [None, *CASE_ACTIONS]:
+            case_object: models.Family = self.status_db.family(case_id)
+            case_object.action = action
+            self.status_db.commit()
+            LOG.info("Action %s set for case %s", action, case_id)
+            return
+        LOG.warning(
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
+        )

@@ -1,6 +1,7 @@
 import logging
 import click
 
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.tb import TrailblazerAPI
@@ -28,6 +29,7 @@ def fluffy(context: click.Context):
     context.obj["fluffy_analysis_api"] = FluffyAnalysisAPI(
         housekeeper_api=HousekeeperAPI(config),
         trailblazer_api=TrailblazerAPI(config),
+        hermes_api=HermesApi(config),
         lims_api=LimsAPI(config),
         status_db=Store(config["database"]),
         config=config["fluffy"],
@@ -83,9 +85,7 @@ def run(context: click.Context, case_id: str, dry_run: bool):
     )
 
     # Update status_db to running
-    case_object = fluffy_analysis_api.status_db.family(case_id)
-    case_object.action = "running"
-    fluffy_analysis_api.status_db.commit()
+    fluffy_analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
 
 @fluffy.command()
@@ -124,6 +124,7 @@ def store(context: click.Context, case_id: str):
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
     fluffy_analysis_api.upload_bundle_statusdb(case_id=case_id)
+    fluffy_analysis_api.set_statusdb_action(case_id=case_id, action=None)
 
 
 @fluffy.command("store-available")
