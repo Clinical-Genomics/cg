@@ -16,7 +16,8 @@ Try to use the following format:
 
 ## [NG.NG.NG]
 
-### Added support for delivery type in the Order Portal
+### Added
+ - Support for delivery type in the Order Portal
 
 ## [18.9.1]
 
