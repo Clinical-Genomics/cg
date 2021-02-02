@@ -52,7 +52,11 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     LOG.info("Fetching family object")
     case_obj: Family = status_api.family(case_id)
     LOG.info("Create load config")
-    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
+    try:
+        scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
+    except IndexError:
+        LOG.warning("Could not find analyses for %s", case_id)
+        raise click.Abort
     LOG.info("Found load config %s", scout_load_config)
     analysis_context: str = "mip-rd-dna"
     if scout_load_config.track == "cancer":
