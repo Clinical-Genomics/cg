@@ -48,6 +48,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         )
         if analysis_type == "tgs":
             analysis_type = "panel"
+        if analysis_type == "wgs":
+            raise SyntaxError("Not allowed to upload WGS cancer cases")
+
         config_sample.analysis_type = analysis_type
         return config_sample
 

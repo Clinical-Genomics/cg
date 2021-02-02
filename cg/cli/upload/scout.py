@@ -59,6 +59,9 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     except IndexError:
         LOG.warning("Could not find analyses for %s", case_id)
         raise click.Abort
+    except SyntaxError as err:
+        LOG.warning("%s", err)
+        raise click.Abort
     LOG.info("Found load config %s", scout_load_config)
     analysis_context: str = "mip-rd-dna"
     if scout_load_config.track == "cancer":
