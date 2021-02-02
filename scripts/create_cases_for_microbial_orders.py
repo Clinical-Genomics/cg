@@ -81,7 +81,7 @@ def create_microbial_cases(config_file):
 
         ids = {"ticket_number": ticket}
         ticket_samples = store.samples_by_ids(**ids).all()
-        case = store.add_family(
+        case = store.add_case(
             name=str(ticket), panels=None, priority=microbial_sample.priority_human
         )
         case.customer_id = microbial_sample.customer_id

@@ -50,9 +50,9 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     status_api: Store = context.obj["status_db"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
     LOG.info("Fetching family object")
-    family_obj: Family = status_api.family(case_id)
+    case_obj: Family = status_api.family(case_id)
     LOG.info("Create load config")
-    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
+    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     LOG.info("Found load config %s", scout_load_config)
     analysis_context: str = "mip-rd-dna"
     if scout_load_config.track == "cancer":

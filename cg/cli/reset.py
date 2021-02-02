@@ -24,13 +24,13 @@ def observations(context, case_id):
     else:
         observations_uploaded = context.obj["status_db"].observations_uploaded()
 
-    for family_obj in observations_uploaded:
-        LOG.info("This would reset observation links for: %s", family_obj.internal_id)
+    for case_obj in observations_uploaded:
+        LOG.info("This would reset observation links for: %s", case_obj.internal_id)
 
     click.confirm("Do you want to continue?", abort=True)
 
-    for family_obj in observations_uploaded:
-        context.obj["status_db"].reset_observations(family_obj.internal_id)
-        LOG.info("Reset loqus observations for: %s", family_obj.internal_id)
+    for case_obj in observations_uploaded:
+        context.obj["status_db"].reset_observations(case_obj.internal_id)
+        LOG.info("Reset loqus observations for: %s", case_obj.internal_id)
 
     context.obj["status_db"].commit()

@@ -15,7 +15,7 @@ def test_get_family_by_name(invoke_cli, disk_store: Store):
     )
     disk_store.add_commit(customer)
 
-    # WHEN trying to get a non-existing family by name
+    # WHEN trying to get a non-existing case by name
     db_uri = disk_store.uri
     result = invoke_cli(
         [
@@ -26,7 +26,7 @@ def test_get_family_by_name(invoke_cli, disk_store: Store):
             "-c",
             customer_id,
             "-n",
-            "dummy-family-name",
+            "dummy-case-name",
         ]
     )
 

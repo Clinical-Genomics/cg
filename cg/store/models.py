@@ -403,20 +403,15 @@ class Pool(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
-    data_analysis = Column(types.String(16))
     delivered_at = Column(types.DateTime)
     deliveries = orm.relationship(Delivery, backref="pool")
     id = Column(types.Integer, primary_key=True)
     invoice_id = Column(ForeignKey("invoice.id"))
-    invoiced_at = Column(types.DateTime)  # DEPRECATED
-    lims_project = Column(types.Text)
     name = Column(types.String(32), nullable=False)
     no_invoice = Column(types.Boolean, default=False)
     order = Column(types.String(64), nullable=False)
     ordered_at = Column(types.DateTime, nullable=False)
-    reads = Column(types.BigInteger, default=0)
     received_at = Column(types.DateTime)
-    sequenced_at = Column(types.DateTime)
     ticket_number = Column(types.Integer)
 
 

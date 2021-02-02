@@ -70,7 +70,7 @@ class MockPath:
 
 
 class MockAnalysis:
-    def panel(self, family_obj) -> [str]:
+    def panel(self, case_obj) -> [str]:
         """Create the aggregated panel file."""
         return [""]
 
@@ -79,7 +79,7 @@ class MockAnalysis:
         # Define output dict
         out_data = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "family": "yellowhog",
+            "case": "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
             "genome_build": "hg19",
             "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
@@ -165,9 +165,9 @@ class MockScout:
 
 @pytest.fixture(scope="function")
 def report_store(analysis_store, helpers):
-    family = analysis_store.families()[0]
-    helpers.add_analysis(analysis_store, family)
-    helpers.add_analysis(analysis_store, family)
+    case = analysis_store.families()[0]
+    helpers.add_analysis(analysis_store, case)
+    helpers.add_analysis(analysis_store, case)
     return analysis_store
 
 

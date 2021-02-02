@@ -124,8 +124,8 @@ def cg_config(tmpdir):
 
 @pytest.fixture
 def link_family():
-    """mock family name"""
-    return "family"
+    """mock case name"""
+    return "case"
 
 
 @pytest.fixture

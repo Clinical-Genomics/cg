@@ -51,18 +51,18 @@ def upload(context, family_id, force_restart):
     context.obj["status_db"] = Store(context.obj["database"])
 
     if family_id:
-        family_obj = context.obj["status_db"].family(family_id)
-        if not family_obj:
+        case_obj = context.obj["status_db"].family(family_id)
+        if not case_obj:
             message = f"family not found: {family_id}"
             click.echo(click.style(message, fg="red"))
             context.abort()
 
-        if not family_obj.analyses:
+        if not case_obj.analyses:
             message = f"no analysis exists for family: {family_id}"
             click.echo(click.style(message, fg="red"))
             context.abort()
 
-        analysis_obj = family_obj.analyses[0]
+        analysis_obj = case_obj.analyses[0]
 
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
@@ -122,8 +122,8 @@ def upload(context, family_id, force_restart):
         suggest_cases_to_upload(context)
         context.abort()
 
-    family_obj = context.obj["status_db"].family(family_id)
-    analysis_obj = family_obj.analyses[0]
+    case_obj = context.obj["status_db"].family(family_id)
+    analysis_obj = case_obj.analyses[0]
     if analysis_obj.uploaded_at is not None:
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
         click.echo(click.style(message, fg="yellow"))
