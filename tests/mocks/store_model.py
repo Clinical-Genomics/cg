@@ -13,7 +13,7 @@ class Customer(models.Customer):
 
 
 class Family(models.Family):
-    """Mock a family object"""
+    """Mock a case object"""
 
     def __init__(self):
         self.id: int = 1

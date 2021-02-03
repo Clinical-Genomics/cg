@@ -121,6 +121,7 @@ class StatusHandler:
             "order": data["name"],
             "comment": data.get("comment"),
             "data_analysis": data["samples"][0]["data_analysis"],
+            "data_delivery": data["samples"][0]["data_delivery"],
             "samples": [
                 {
                     "application": sample_data["application"],
@@ -146,11 +147,13 @@ class StatusHandler:
         for case_name, case_samples in cases.items():
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
+            data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
 
             panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
             case = {
                 # Set from first sample until order portal sets this on case level
                 "data_analysis": data_analysis,
+                "data_delivery": data_delivery,
                 "name": case_name,
                 "priority": priority,
                 "panels": list(panels),
@@ -159,7 +162,6 @@ class StatusHandler:
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
                         "comment": sample.get("comment"),
-                        "data_delivery": sample.get("data_delivery"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
                         "internal_id": sample.get("internal_id"),
@@ -189,6 +191,7 @@ class StatusHandler:
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
+
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
@@ -198,8 +201,9 @@ class StatusHandler:
             if case_obj:
                 case_obj.panels = case["panels"]
             else:
-                case_obj = self.status.add_family(
+                case_obj = self.status.add_case(
                     data_analysis=Pipeline(case["data_analysis"]),
+                    data_delivery=DataDelivery(case["data_delivery"]),
                     name=case["name"],
                     panels=case["panels"],
                     priority=case["priority"],
@@ -216,7 +220,6 @@ class StatusHandler:
                     new_sample = self.status.add_sample(
                         capture_kit=sample["capture_kit"],
                         comment=sample["comment"],
-                        data_delivery=sample["data_delivery"],
                         from_sample=sample["from_sample"],
                         internal_id=sample["internal_id"],
                         name=sample["name"],
@@ -276,7 +279,6 @@ class StatusHandler:
             for sample in samples:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
-                    data_delivery=sample["data_delivery"],
                     internal_id=sample["internal_id"],
                     name=sample["name"],
                     order=order,
@@ -294,17 +296,18 @@ class StatusHandler:
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                new_family = self.status.add_family(
+                new_case = self.status.add_case(
                     data_analysis=Pipeline(sample["data_analysis"]),
+                    data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=None,
                     priority=sample["priority"],
                 )
-                new_family.customer = customer_obj
-                self.status.add(new_family)
+                new_case.customer = customer_obj
+                self.status.add(new_case)
 
                 new_relationship = self.status.relate_sample(
-                    family=new_family, sample=new_sample, status=sample["status"] or "unknown"
+                    family=new_case, sample=new_sample, status=sample["status"] or "unknown"
                 )
                 self.status.add(new_relationship)
 
@@ -324,7 +327,6 @@ class StatusHandler:
         with self.status.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status.add_sample(
-                    data_delivery=str(DataDelivery.FASTQ),
                     name=sample["name"],
                     internal_id=sample["internal_id"],
                     sex=sample["sex"] or "unknown",
@@ -342,16 +344,17 @@ class StatusHandler:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                new_family = self.status.add_family(
-                    data_analysis=Pipeline.MIP_DNA,
+                new_case = self.status.add_case(
+                    data_analysis=Pipeline(sample["data_analysis"]),
+                    data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
                 )
-                new_family.customer = production_customer
-                self.status.add(new_family)
+                new_case.customer = production_customer
+                self.status.add(new_case)
                 new_relationship = self.status.relate_sample(
-                    family=new_family, sample=new_sample, status=sample["status"] or "unknown"
+                    family=new_case, sample=new_sample, status=sample["status"] or "unknown"
                 )
                 self.status.add(new_relationship)
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
@@ -365,6 +368,7 @@ class StatusHandler:
         comment: str,
         customer: str,
         data_analysis: Pipeline,
+        data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
         samples: List[dict],
@@ -386,8 +390,9 @@ class StatusHandler:
                 case_obj = self.status.find_family(customer=customer_obj, name=ticket)
 
                 if not case_obj:
-                    case_obj = self.status.add_family(
+                    case_obj = self.status.add_case(
                         data_analysis=data_analysis,
+                        data_delivery=data_delivery,
                         name=ticket,
                         panels=None,
                     )
@@ -457,8 +462,9 @@ class StatusHandler:
             case_obj = self.status.find_family(customer=customer_obj, name=case_name)
 
             if not case_obj:
-                case_obj = self.status.add_family(
+                case_obj = self.status.add_case(
                     data_analysis=Pipeline(pool["data_analysis"]),
+                    data_delivery=DataDelivery(pool["data_delivery"]),
                     name=case_name,
                     panels=None,
                 )
@@ -472,14 +478,12 @@ class StatusHandler:
                 ordered=ordered,
                 ticket=ticket,
                 application_version=application_version,
-                data_analysis=Pipeline(pool["data_analysis"]),
             )
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
                     comment=sample["comment"],
                     customer=customer_obj,
-                    data_delivery=sample["data_delivery"],
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
                     order=order,

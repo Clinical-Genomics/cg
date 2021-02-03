@@ -134,11 +134,11 @@ def test_get_sample_no_families_without_family(invoke_cli, disk_store: Store, he
 
 
 def test_get_sample_no_families_with_family(invoke_cli, disk_store: Store, helpers):
-    """Test that the --no-families flag doesn't show family info"""
+    """Test that the --no-families flag doesn't show case info"""
     # GIVEN a database with a sample with related samples
-    family = helpers.add_family(disk_store)
+    case = helpers.add_case(disk_store)
     sample = helpers.add_sample(disk_store)
-    link = helpers.add_relationship(disk_store, sample=sample, family=family)
+    link = helpers.add_relationship(disk_store, sample=sample, case=case)
     assert link in disk_store.Sample.query.first().links
     sample_id = sample.internal_id
 
@@ -170,12 +170,12 @@ def test_get_sample_families_without_family(invoke_cli, disk_store: Store, helpe
 
 
 def test_get_sample_families_with_family(invoke_cli, disk_store: Store, helpers):
-    """Test that the --families flag does show family info"""
+    """Test that the --families flag does show case info"""
     # GIVEN a database with a sample with related samples
-    family = helpers.add_family(disk_store)
+    case = helpers.add_case(disk_store)
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
-    helpers.add_relationship(disk_store, sample=sample, family=family)
+    helpers.add_relationship(disk_store, sample=sample, case=case)
     assert disk_store.Sample.query.first().links
 
     # WHEN getting a sample with the --families flag

@@ -45,8 +45,12 @@ class Pipeline(StrEnum):
 
 
 class DataDelivery(StrEnum):
+    ANALYSIS_FILES: str = "analysis"
+    ANALYSIS_BAM_FILES: str = "analysis-bam"
     FASTQ: str = "fastq"
-    QC: str = "custom"
+    NIPT_VIEWER: str = "nipt-viewer"
+    FASTQ_QC: str = "fastq_qc"
+    SCOUT: str = "scout"
 
 
 PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
