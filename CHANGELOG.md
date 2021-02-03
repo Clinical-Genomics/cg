@@ -14,10 +14,15 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Added
+- Support for storing cohorts, phenotype_terms and synopsis from order json
+
 ## [18.10.0]
 
 ### Added
- - Support for delivery type in the Order Portal
+- Support for delivery type in the Order Portal
 
 ## [18.9.1]
 
