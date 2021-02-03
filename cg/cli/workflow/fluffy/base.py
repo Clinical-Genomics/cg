@@ -84,6 +84,7 @@ def run(context: click.Context, case_id: str, dry_run: bool):
             priority=fluffy_analysis_api.get_priority(case_id),
             data_analysis="FLUFFY",
         )
+        LOG.info("Submitted case %s to Trailblazer!", case_id)
     except Exception as e:
         LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", e)
 
@@ -97,6 +98,7 @@ def run(context: click.Context, case_id: str, dry_run: bool):
 @click.pass_context
 def start(context: click.Context, case_id: str, dry_run: bool):
     """Run link and run commands"""
+    LOG.info("Starting full Fluffy workflow for %s", case_id)
     context.invoke(link, case_id=case_id, dry_run=dry_run)
     context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
     context.invoke(run, case_id=case_id, dry_run=dry_run)
@@ -110,9 +112,9 @@ def start_available(context: click.Context, dry_run: bool):
     exit_code = EXIT_SUCCESS
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
     cases_to_analyze = fluffy_analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.FLUFFY)
-    for case_id in cases_to_analyze:
+    for case_obj in cases_to_analyze:
         try:
-            context.invoke(start, case_id=case_id, dry_run=dry_run)
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
             LOG.error(f"Exception occurred - {exception_object.__class__.__name__}")
             exit_code = EXIT_FAIL
