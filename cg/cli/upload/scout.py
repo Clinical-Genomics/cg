@@ -54,11 +54,11 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     LOG.info("Fetching family object")
     case_obj: Family = status_api.family(case_id)
     LOG.info("Create load config")
-    try:
-        scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
-    except IndexError:
+    if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)
         raise click.Abort
+    try:
+        scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     except SyntaxError as err:
         LOG.warning("%s", err)
         raise click.Abort
