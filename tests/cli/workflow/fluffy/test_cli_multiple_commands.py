@@ -1,5 +1,3 @@
-import random
-
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
@@ -26,7 +24,7 @@ def test_start_available(
     FluffyAnalysisAPI.get_samplesheet_housekeeper_path.return_value = samplesheet_fixture_path
 
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
-    FluffyAnalysisAPI.get_concentrations_from_lims.return_value = str(random.randint(1, 20))
+    FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "10"
 
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
