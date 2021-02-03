@@ -4,7 +4,7 @@ import csv
 from subprocess import CalledProcessError
 from typing import Any, Optional
 
-from ruamel.yaml import safe_load
+import shutil
 import datetime as dt
 
 from cg.apps.hermes.hermes_api import HermesApi
@@ -80,7 +80,7 @@ class FluffyAnalysisAPI:
         case_obj = self.status_db.family(case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
-            workdir_path.rmdir()
+            shutil.rmtree(workdir_path, ignore_errors=True)
         for familysample in case_obj.links:
             sample_id = familysample.sample.internal_id
             files = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
@@ -148,7 +148,7 @@ class FluffyAnalysisAPI:
         output_path: Path = self.get_output_path(case_id=case_id)
         if output_path.exists():
             LOG.info("Old working directory found, cleaning!")
-            output_path.rmdir()
+            shutil.rmtree(output_path, ignore_errors=True)
         command_args = [
             "--config",
             self.fluffy_config.as_posix(),
