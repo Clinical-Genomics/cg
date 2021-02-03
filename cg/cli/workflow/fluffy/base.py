@@ -74,15 +74,18 @@ def run(context: click.Context, case_id: str, dry_run: bool):
         return
 
     # Submit pending analysis to Trailblazer
-    fluffy_analysis_api.trailblazer_api.add_pending_analysis(
-        case_id=case_id,
-        email=environ_email(),
-        type="tgs",
-        out_dir=fluffy_analysis_api.get_output_path(case_id).as_posix(),
-        config_path=fluffy_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
-        priority=fluffy_analysis_api.get_priority(case_id),
-        data_analysis="FLUFFY",
-    )
+    try:
+        fluffy_analysis_api.trailblazer_api.add_pending_analysis(
+            case_id=case_id,
+            email=environ_email(),
+            type="tgs",
+            out_dir=fluffy_analysis_api.get_output_path(case_id).as_posix(),
+            config_path=fluffy_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
+            priority=fluffy_analysis_api.get_priority(case_id),
+            data_analysis="FLUFFY",
+        )
+    except Exception as e:
+        LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", e)
 
     # Update status_db to running
     fluffy_analysis_api.set_statusdb_action(case_id=case_id, action="running")
