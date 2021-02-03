@@ -39,11 +39,11 @@ class FluffyAnalysisAPI:
         self.process = Process(binary=config["binary_path"])
         self.fluffy_config = Path(config["config_path"])
 
-    def get_workdir_path(self, case_id: str) -> Path:
-        return Path(self.root_dir, case_id, "fastq")
-
     def get_samplesheet_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "SampleSheet.csv")
+
+    def get_workdir_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id, "fastq")
 
     def get_fastq_path(self, case_id: str, sample_id: str) -> Path:
         return Path(self.root_dir, case_id, "fastq", sample_id)
@@ -80,6 +80,7 @@ class FluffyAnalysisAPI:
         case_obj = self.status_db.family(case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
+            LOG.info("Fastq directory exists, removing and re-linking files!")
             shutil.rmtree(workdir_path, ignore_errors=True)
         for familysample in case_obj.links:
             sample_id = familysample.sample.internal_id
@@ -92,8 +93,7 @@ class FluffyAnalysisAPI:
                 LOG.info(f"Linking {file.full_path} to {sample_path / Path(file.full_path).name}")
 
     def get_concentrations_from_lims(self, sample_id: str) -> str:
-        # placeholder
-        # When samplesheet is uploaded to lims on stage, replace with LIMS query
+        """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
     def add_concentrations_to_samplesheet(
@@ -117,33 +117,35 @@ class FluffyAnalysisAPI:
                 row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
                 csv_writer.writerow(row)
 
-    def make_samplesheet(self, case_id: str, dry_run: bool) -> None:
-
-        """
-        1. Get samplesheet from HK
-        2. Copy file to root_dir/case_id/samplesheet.csv
-        """
-
-        case_obj = self.status_db.family(case_id)
-        flowcell_name = case_obj.links[0].sample.flowcells[0].name
-        samplesheet_housekeeper_path = Path(
+    def get_samplesheet_housekeeper_path(self, flowcell_name: str) -> Path:
+        return Path(
             self.housekeeper_api.files(bundle=flowcell_name, tags=["samplesheet"])
             .all()[0]
             .full_path
         )
+
+    def make_samplesheet(self, case_id: str, dry_run: bool) -> None:
+        """Create SampleSheet.csv file in working directory and add desired values to the file"""
+
+        case_obj = self.status_db.family(case_id)
+        flowcell_name = case_obj.links[0].sample.flowcells[0].name
+        samplesheet_housekeeper_path = self.get_samplesheet_housekeeper_path(
+            flowcell_name=flowcell_name
+        )
         samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
+        LOG.info(
+            "Writing modified csv from %s to %s",
+            samplesheet_housekeeper_path,
+            samplesheet_workdir_path,
+        )
         if not dry_run:
-            LOG.info(
-                "Writing modified csv from %s to %s",
-                samplesheet_housekeeper_path,
-                samplesheet_workdir_path,
-            )
             self.add_concentrations_to_samplesheet(
                 samplesheet_housekeeper_path=samplesheet_housekeeper_path,
                 samplesheet_workdir_path=samplesheet_workdir_path,
             )
 
     def run_fluffy(self, case_id: str, dry_run: bool) -> None:
+        """Call fluffy with the configured command-line arguments"""
 
         output_path: Path = self.get_output_path(case_id=case_id)
         if output_path.exists():
@@ -163,6 +165,7 @@ class FluffyAnalysisAPI:
         self.process.run_command(command_args, dry_run=dry_run)
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
+        """Save the completed analysis bundle in Housekeeper"""
         deliverables_path = self.get_deliverables_path(case_id=case_id)
         analysis_date = self.get_date_from_file_path(file_path=deliverables_path)
         bundle_data = self.hermes_api.create_housekeeper_bundle(
@@ -185,6 +188,7 @@ class FluffyAnalysisAPI:
         )
 
     def upload_bundle_statusdb(self, case_id: str) -> None:
+        """Create completed analysis object in StatusDB"""
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_date = self.get_date_from_file_path(
             deliverables_path=self.get_deliverables_path(case_id=case_id)
@@ -211,6 +215,7 @@ class FluffyAnalysisAPI:
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
     def get_cases_to_store(self) -> list:
+        """Get a list of cases with action 'running' and existing deliverables file"""
         return [
             case_obj
             for case_obj in self.status_db.cases_to_store(pipeline=Pipeline.FLUFFY)
@@ -218,6 +223,7 @@ class FluffyAnalysisAPI:
         ]
 
     def get_pipeline_version(self) -> str:
+        """Calls the pipeline to get the pipeline version number"""
         try:
             self.process.run_command(["--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
