@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.10.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
 ## [18.10.0]
 
 ### Added
