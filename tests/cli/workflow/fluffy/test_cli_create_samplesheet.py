@@ -1,4 +1,3 @@
-import random
 from pathlib import Path
 
 from cg.cli.workflow.fluffy.base import create_samplesheet
@@ -31,7 +30,7 @@ def test_create_samplesheet_success(
     FluffyAnalysisAPI.get_samplesheet_housekeeper_path.return_value = samplesheet_fixture_path
 
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
-    FluffyAnalysisAPI.get_concentrations_from_lims.return_value = str(random.randint(1, 20))
+    FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
 
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
