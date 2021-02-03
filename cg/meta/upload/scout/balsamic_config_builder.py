@@ -40,8 +40,10 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
         if BalsamicAnalysisAPI.get_sample_type(db_sample) == "tumor":
             config_sample.phenotype = "affected"
+            config_sample.sample_id = "TUMOR"
         else:
             config_sample.phenotype = "unaffected"
+            config_sample.sample_id = "NORMAL"
 
         analysis_type: Literal["wgs", "wes", "tgs"] = BalsamicAnalysisAPI.get_application_type(
             db_sample
