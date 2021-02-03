@@ -226,6 +226,7 @@ class BalsamicAnalysisAPI:
     @staticmethod
     def get_application_type(link_object: models.FamilySample) -> Literal["wgs", "wes", "tgs"]:
         """Returns application type of a sample."""
+
         return link_object.sample.application_version.application.prep_category
 
     def get_priority(self, case_id: str) -> str:

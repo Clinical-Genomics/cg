@@ -9,11 +9,13 @@ import pytest
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store, models
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
+from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from cg.meta.report.api import ReportAPI
 
@@ -97,7 +99,7 @@ def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadCon
     """Create a scout load config case object"""
     case_data = {
         "owner": "cust000",
-        "family": case_id,
+        "case": case_id,
         "human_genome_build": "37",
         "rank_score_threshold": 5,
         "analysis_date": timestamp,
@@ -132,10 +134,11 @@ def fixture_vogue_cli_context(vogue_api) -> dict:
 
 
 @pytest.fixture(scope="function", name="upload_scout_api")
-def fixture_upload_scout_api(housekeeper_api):
+def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
     api.housekeeper = housekeeper_api
+    api.config = mip_load_config
 
     return api
 
@@ -203,9 +206,10 @@ class MockScoutUploadApi(UploadScoutAPI):
         self.housekeeper = None
         self.madeline_api = MockMadelineAPI()
         self.analysis = MockAnalysisApi()
-        self.config = {}
+        self.config = ScoutLoadConfig()
         self.file_exists = False
         self.lims = MockLims()
+        self.missing_mandatory_field = False
 
     @pytest.fixture(autouse=True)
     def _request_analysis(self, analysis_store_single_case):
@@ -213,12 +217,12 @@ class MockScoutUploadApi(UploadScoutAPI):
 
     def generate_config(self, analysis_obj, **kwargs):
         """Mock the generate config"""
-        if self.mock_generate_config:
-            return self.config
+        if self.missing_mandatory_field:
+            self.config.vcf_snv = None
 
-        return super().generate_config(analysis_obj, **kwargs)
+        return self.config
 
-    def save_config_file(self, scout_config, file_path):
+    def save_config_file(self, upload_config, file_path):
         """docstring for save_config_file"""
         return
 
@@ -239,7 +243,7 @@ class MockLims:
 
     @staticmethod
     def lims_samples():
-        """ Return LIMS-like family samples """
+        """ Return LIMS-like case samples """
         lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
         return lims_family["samples"]
 

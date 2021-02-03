@@ -1,56 +1,30 @@
 import json
 from datetime import datetime, timedelta
+from typing import List
 
 import pytest
 
-from cg.apps.lims import LimsAPI
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
+from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
-def lims_family():
+def lims_family() -> dict:
     return json.load(open("tests/fixtures/report/lims_family.json"))
 
 
 @pytest.fixture
-def lims_samples(lims_family):
+def lims_samples(lims_family: dict) -> List[dict]:
     return lims_family["samples"]
 
 
 @pytest.fixture
-def report_samples(lims_family):
+def report_samples(lims_family: List[dict]):
     for sample in lims_family["samples"]:
         sample["internal_id"] = sample["id"]
 
     return lims_family["samples"]
-
-
-class MockLims(LimsAPI):
-    def __init__(self, samples):
-        self._samples = samples
-
-    def get_prep_method(self, lims_id: str) -> str:
-        return (
-            "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free "
-            ""
-            "DNA)"
-        )
-
-    def get_sequencing_method(self, lims_id: str) -> str:
-        return "CG002 - Cluster Generation (HiSeq X)"
-
-    def get_delivery_method(self, lims_id: str) -> str:
-        return "CG002 - Delivery"
-
-    def sample(self, lims_id: str):
-        """Fetch information about a sample."""
-
-        for sample in self._samples:
-            if sample.get("id") == lims_id:
-                return sample
-
-        return None
 
 
 class MockFile:
@@ -96,7 +70,7 @@ class MockPath:
 
 
 class MockAnalysis:
-    def panel(self, family_obj) -> [str]:
+    def panel(self, case_obj) -> [str]:
         """Create the aggregated panel file."""
         return [""]
 
@@ -192,7 +166,7 @@ class MockScout:
 @pytest.fixture(scope="function")
 def report_api(report_store, lims_samples):
     db = MockDB(report_store)
-    lims = MockLims(lims_samples)
+    lims = MockLimsAPI(samples=lims_samples)
     chanjo = MockChanjo()
     analysis = MockAnalysis()
     scout = MockScout()

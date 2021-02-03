@@ -25,9 +25,9 @@ def genotypes(context, re_upload, family_id):
     gt_api = context.obj["genotype_api"]
     hk_api = context.obj["housekeeper_api"]
     status_api = context.obj["status_db"]
-    family_obj = status_api.family(family_id)
+    case_obj = status_api.family(family_id)
     upload_genotypes_api = UploadGenotypesAPI(hk_api=hk_api, gt_api=gt_api)
-    results = upload_genotypes_api.data(family_obj.analyses[0])
+    results = upload_genotypes_api.data(case_obj.analyses[0])
 
     if results:
         upload_genotypes_api.upload(results, replace=re_upload)

@@ -1,7 +1,8 @@
 """Fixtures for cli compress functions"""
 
-import pytest
 import datetime as dt
+
+import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
@@ -104,10 +105,10 @@ def fixture_compress_case_info(
 @pytest.fixture(name="populated_compress_store")
 def fixture_populated_compress_store(store, helpers, compress_case_info, analysis_family):
     """Return a store populated with a completed analysis"""
-    # Make sure that there is a family where anaylsis is completer
-    helpers.ensure_family_from_dict(
+    # Make sure that there is a case where anaylsis is completer
+    helpers.ensure_case_from_dict(
         store,
-        family_info=analysis_family,
+        case_info=analysis_family,
         app_tag=compress_case_info.application_tag,
         ordered_at=compress_case_info.timestamp,
         completed_at=compress_case_info.later_timestamp,
@@ -142,9 +143,9 @@ def fixture_populated_compress_multiple_store(
                     [str(number), analysis_family["samples"][ind]["mother"]]
                 )
 
-        helpers.ensure_family_from_dict(
+        helpers.ensure_case_from_dict(
             store,
-            family_info=analysis_family,
+            case_info=analysis_family,
             app_tag=compress_case_info.application_tag,
             ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,
@@ -171,14 +172,14 @@ def fixture_store_fastq_context(compress_api, store):
 @pytest.fixture(name="populated_multiple_compress_context")
 def fixture_populated_multiple_compress_context(compress_api, populated_compress_multiple_store):
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where anaylis is completer
+    # Make sure that there is a case where anaylis is completer
     return {"compress_api": compress_api, "status_db": populated_compress_multiple_store}
 
 
 @pytest.fixture(name="populated_compress_context")
 def fixture_populated_compress_context(compress_api, populated_compress_store):
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where analysis is completed
+    # Make sure that there is a case where analysis is completed
     return {"compress_api": compress_api, "status_db": populated_compress_store}
 
 
@@ -187,7 +188,7 @@ def fixture_real_populated_compress_context(
     real_populated_compress_fastq_api, populated_compress_store
 ):
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where analysis is completed
+    # Make sure that there is a case where analysis is completed
     return {
         "compress_api": real_populated_compress_fastq_api,
         "status_db": populated_compress_store,

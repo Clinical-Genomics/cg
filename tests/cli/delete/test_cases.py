@@ -17,8 +17,8 @@ def test_set_cases_by_sample_identifiers(
     sample_obj = helpers.add_sample(base_store)
     sample_obj.ticket_number = 123456
     sample_obj.order = "An order"
-    case = helpers.add_family(base_store)
-    helpers.add_relationship(base_store, sample=sample_obj, family=case)
+    case = helpers.add_case(base_store)
+    helpers.add_relationship(base_store, sample=sample_obj, case=case)
     identifier_value = getattr(sample_obj, identifier_key)
 
     caplog.set_level(logging.INFO)
@@ -38,10 +38,10 @@ def test_set_cases_by_sample_identifiers(
 def test_delete_cases_with_dry_run(cli_runner, base_context, base_store: Store, helpers, caplog):
     """Test that the delete cases will not delete the cases in dry-run mode """
     # GIVEN a database with a case
-    case_obj = helpers.add_family(base_store)
+    case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, family=case_obj, sample=sample)
+    helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
 
     # WHEN deleting a case
     caplog.set_level(logging.DEBUG)

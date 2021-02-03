@@ -1,10 +1,12 @@
-from typing import Dict, List
+import os
+from pathlib import Path
+from typing import Dict, List, Set
 
 import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline, DataDelivery
 from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
 
@@ -13,13 +15,14 @@ REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
 CONTAINER_TYPES = ["Tube", "96 well plate"]
 SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS = [
-    "1508:21",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
+    "1508:22",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
     "1603:9",  # Microbial WGS
     "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
-
+NO_VALUE = "no_value"
+NO_ANALYSIS = "no-analysis"
 
 CASE_PROJECT_TYPES = [
     str(OrderType.MIP_DNA),
@@ -62,13 +65,14 @@ def parse_orderform(excel_path: str) -> dict:
     parsed_samples = [parse_sample(raw_sample) for raw_sample in raw_samples]
 
     project_type = get_project_type(document_title, parsed_samples)
+    delivery_type = get_data_delivery(parsed_samples, OrderType(project_type))
 
     if project_type in CASE_PROJECT_TYPES:
         parsed_cases = group_cases(parsed_samples)
         items = []
         customer_ids = set()
         for case_id, parsed_case in parsed_cases.items():
-            customer_id, case_data = expand_case(case_id, parsed_case)
+            customer_id, case_data = expand_case(case_id, parsed_case, delivery_type)
             customer_ids.add(customer_id)
             items.append(case_data)
     else:
@@ -81,9 +85,16 @@ def parse_orderform(excel_path: str) -> dict:
     elif customer_options != 1:
         raise OrderFormError(f"Samples have different customers: {customer_ids}")
 
-    data = {"customer": customer_ids.pop(), "items": items, "project_type": project_type}
+    filename_base = Path(excel_path).stem
+    parsed_order = {
+        "customer": customer_ids.pop(),
+        "delivery_type": delivery_type,
+        "items": items,
+        "name": filename_base,
+        "project_type": project_type,
+    }
 
-    return data
+    return parsed_order
 
 
 def get_document_title(workbook: Workbook, orderform_sheet: Worksheet) -> str:
@@ -115,20 +126,89 @@ def get_project_type(document_title: str, parsed_samples: List) -> str:
     elif "1605" in document_title:
         project_type = "metagenome"
     elif "1508" in document_title:
-        analyses = set(sample["data_analysis"].lower() for sample in parsed_samples)
+        analyses = set(sample["data_analysis"] for sample in parsed_samples)
 
         if len(analyses) != 1:
             raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
 
-        project_type = analyses.pop()
-        if "mip" in project_type and "balsamic" in project_type:
-            raise OrderFormError(f"mixed 'Data Analysis' types: {project_type}")
+        analysis = analyses.pop().lower().replace(" ", "-")
+
+        if analysis == NO_ANALYSIS:
+            project_type = "fastq"
+        else:
+            project_type = analysis
 
     return project_type
 
 
-def expand_case(case_id: str, parsed_case: dict) -> tuple:
-    """Fill-in information about families."""
+def _parse_data_analysis(samples) -> str:
+    data_analyses = set()
+    for sample in samples:
+        data_analyses.add(sample["data_analysis"])
+
+    if len(data_analyses) > 1:
+        raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
+
+    return data_analyses.pop().lower().replace(" ", "-")
+
+
+def _is_from_orderform_without_data_delivery(data_delivery: str) -> bool:
+    return data_delivery == NO_VALUE
+
+
+def get_data_delivery(samples: [dict], project_type: OrderType) -> DataDelivery:
+    """Determine the order_data delivery type."""
+
+    data_delivery: str = _parse_data_delivery(samples)
+
+    if _is_from_orderform_without_data_delivery(data_delivery):
+
+        if project_type == OrderType.FLUFFY:
+            return DataDelivery.NIPT_VIEWER
+
+        if project_type == OrderType.METAGENOME:
+            return DataDelivery.FASTQ
+
+        if project_type == OrderType.MICROSALT:
+            data_analysis: str = _parse_data_analysis(samples)
+
+            if data_analysis == "fastq":
+                return DataDelivery.FASTQ
+            if data_analysis == "custom":
+                return DataDelivery.FASTQ_QC
+
+        if project_type == OrderType.RML:
+            return DataDelivery.FASTQ
+
+        if project_type == OrderType.EXTERNAL:
+            return DataDelivery.SCOUT
+
+        raise OrderFormError(f"Could not determine value for Data Delivery")
+
+    if data_delivery == "analysis-+-bam":
+        return DataDelivery.ANALYSIS_BAM_FILES
+
+    try:
+        return DataDelivery(data_delivery)
+    except ValueError:
+        raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}")
+
+
+def _parse_data_delivery(samples: [dict]) -> str:
+
+    data_deliveries = set()
+    for sample in samples:
+        data_delivery = sample.get("data_delivery", NO_VALUE) or NO_VALUE
+        data_deliveries.add(data_delivery)
+
+    if len(data_deliveries) > 1:
+        raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
+
+    return data_deliveries.pop().lower().replace(" ", "-")
+
+
+def expand_case(case_id: str, parsed_case: dict, data_delivery: DataDelivery) -> tuple:
+    """Fill-in information about case."""
     new_case = {"name": case_id, "samples": []}
     samples = parsed_case["samples"]
 
@@ -136,10 +216,11 @@ def expand_case(case_id: str, parsed_case: dict) -> tuple:
     new_case["require_qcok"] = True in require_qcoks
 
     priorities = set(raw_sample["priority"] for raw_sample in samples)
-    if len(priorities) == 1:
-        new_case["priority"] = priorities.pop()
-    else:
+
+    if len(priorities) != 1:
         raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
+
+    new_case["priority"] = priorities.pop()
 
     customers = set(raw_sample["customer"] for raw_sample in samples)
     if len(customers) != 1:
@@ -154,6 +235,7 @@ def expand_case(case_id: str, parsed_case: dict) -> tuple:
             "sex": raw_sample["sex"],
             "application": raw_sample["application"],
             "source": raw_sample["source"],
+            "data_delivery": str(data_delivery),
         }
         if raw_sample.get("container") in CONTAINER_TYPES:
             new_sample["container"] = raw_sample["container"]
@@ -173,6 +255,7 @@ def expand_case(case_id: str, parsed_case: dict) -> tuple:
             "tissue_block_size",
             "tumour",
             "tumour_purity",
+            "volume",
             "well_position",
         ):
             if raw_sample.get(key):
@@ -216,6 +299,7 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         "container_name": raw_sample.get("Container/Name"),
         "custom_index": raw_sample.get("UDF/Custom index"),
         "customer": raw_sample["UDF/customer"],
+        "data_analysis": raw_sample["UDF/Data Analysis"],
         "data_delivery": raw_sample.get("UDF/Data Delivery"),
         "elution_buffer": raw_sample.get("UDF/Sample Buffer"),
         "extraction_method": raw_sample.get("UDF/Extraction method"),
@@ -245,24 +329,7 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         "well_position_rml": raw_sample.get("UDF/RML well position"),
     }
 
-    data_analysis = raw_sample.get("UDF/Data Analysis").lower()
-
-    if data_analysis and "balsamic" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.BALSAMIC)
-    elif data_analysis and "rna" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.MIP_RNA)
-    elif data_analysis and "mip" in data_analysis or "scout" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.MIP_DNA)
-    elif data_analysis and "microbial" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.MICROSALT)
-    elif data_analysis and "fluffy" in data_analysis:
-        sample["data_analysis"] = str(Pipeline.FLUFFY)
-    elif data_analysis and ("fastq" in data_analysis or "custom" in data_analysis):
-        sample["data_analysis"] = str(Pipeline.FASTQ)
-    else:
-        raise OrderFormError(f"unknown 'Data Analysis' for order: {data_analysis}")
-
-    numeric_values = [
+    numeric_attributes = [
         ("index_number", "UDF/Index number"),
         ("volume", "UDF/Volume (uL)"),
         ("quantity", "UDF/Quantity"),
@@ -270,7 +337,7 @@ def parse_sample(raw_sample: Dict[str, str]) -> dict:
         ("concentration_sample", "UDF/Sample Conc."),
         ("time_point", "UDF/time_point"),
     ]
-    for json_key, excel_key in numeric_values:
+    for json_key, excel_key in numeric_attributes:
         str_value = raw_sample.get(excel_key, "").rsplit(".0")[0]
         if str_value.replace(".", "").isnumeric():
             sample[json_key] = str_value

@@ -47,7 +47,7 @@ def test_process_run_command_with_params(ls_process):
     i = 0
     for i, line in enumerate(process.stdout.split("\n"), 1):
         if i > 1:
-            assert len(line.split()) == 9
+            assert len(line.split()) >= 9
     assert i > 1
 
 

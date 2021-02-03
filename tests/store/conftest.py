@@ -6,7 +6,7 @@ import pytest
 
 # Files fixtures
 from cg.constants import Pipeline
-from cg.store import Store
+from cg.store import Store, models
 
 
 @pytest.fixture
@@ -116,12 +116,12 @@ def microbial_store(base_store: Store, microbial_submitted_order):
 
 
 @pytest.fixture(scope="function", name="analysis_obj")
-def fixture_analysis_obj(analysis_store):
+def fixture_analysis_obj(analysis_store: Store) -> models.Analysis:
     """Fetch a analysis object from a populated store"""
     return analysis_store.analyses()[0]
 
 
 @pytest.fixture(scope="function")
-def family_obj(analysis_obj):
-    """Return a family models object."""
+def case_obj(analysis_obj: models.Analysis) -> models.Family:
+    """Return a case models object."""
     return analysis_obj.family

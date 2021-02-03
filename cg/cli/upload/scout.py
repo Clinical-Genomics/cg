@@ -1,17 +1,16 @@
 """Code for uploading to scout via CLI"""
 import logging
 from pathlib import Path
-from typing import Iterable
+from typing import Optional
 
 import click
-from housekeeper.store import models as hk_models
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scout_load_config import ScoutLoadConfig
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family
+from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
 
@@ -50,15 +49,23 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     LOG.info("----------------- CREATE CONFIG -----------------------")
     status_api: Store = context.obj["status_db"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
-    family_obj: Family = status_api.family(case_id)
-    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(family_obj.analyses[0])
-    mip_dna_root_dir: Path = Path(context.obj["mip-rd-dna"]["root"])
+    LOG.info("Fetching family object")
+    case_obj: Family = status_api.family(case_id)
+    LOG.info("Create load config")
+    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
+    LOG.info("Found load config %s", scout_load_config)
+    analysis_context: str = "mip-rd-dna"
+    if scout_load_config.track == "cancer":
+
+        analysis_context = "balsamic"
+    root_dir: Path = Path(context.obj[analysis_context]["root"])
+    LOG.info("Set root dir to %s", root_dir)
+    file_path: Path = root_dir / case_id / "scout_load.yaml"
 
     if print_console:
         click.echo(scout_load_config.json(exclude_none=True, indent=4))
+        LOG.info("Would save file to %s", file_path)
         return
-
-    file_path: Path = mip_dna_root_dir / case_id / "scout_load.yaml"
 
     if file_path.exists():
         LOG.warning("Scout load config %s already exists", file_path)
@@ -70,10 +77,11 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
                 "You might remove the file and try again, consider that you might also have it in housekeeper"
             )
             raise click.Abort
-    scout_upload_api.save_config_file(scout_load_config, file_path)
+    LOG.info("Saving config file to disc")
+    scout_upload_api.save_config_file(upload_config=scout_load_config, file_path=file_path)
 
     try:
-        LOG.info("Upload file to housekeeper: %s", file_path)
+        LOG.info("Add config file to housekeeper")
         scout_upload_api.add_scout_config_to_hk(
             config_file_path=file_path, case_id=case_id, delete=re_upload
         )
@@ -92,21 +100,22 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
 
     LOG.info("----------------- UPLOAD -----------------------")
 
-    def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id: str) -> str:
+    def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id: str) -> Path:
         tag_name = UploadScoutAPI.get_load_config_tag()
         version_obj = hk_api.last_version(case_id)
-        scout_config_files: Iterable[hk_models.File] = hk_api.get_files(
-            bundle=case_id, tags=[tag_name], version=version_obj.id
+        scout_config_file: Optional[hk_models.File] = hk_api.fetch_file_from_version(
+            version_obj=version_obj, tags={tag_name}
         )
-        if len(list(scout_config_files)) == 0:
+
+        if scout_config_file is None:
             raise FileNotFoundError(f"No scout load config was found in housekeeper for {case_id}")
 
-        return scout_config_files[0].full_path
+        return Path(scout_config_file.full_path)
 
     scout_api: ScoutAPI = context.obj["scout_api"]
     hk_api: HousekeeperAPI = context.obj["housekeeper_api"]
 
-    load_config = _get_load_config_from_hk(hk_api, case_id)
+    load_config: Path = _get_load_config_from_hk(hk_api, case_id)
 
     LOG.info("uploading case %s to scout", case_id)
 
@@ -114,3 +123,4 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
         scout_api.upload(scout_load_config=load_config, force=re_upload)
 
     LOG.info("uploaded to scout using load config %s", load_config)
+    LOG.info("Case loaded succesfully to Scout")

@@ -1,52 +1,79 @@
+from typing import List, Set
+
 from cg.apps.lims.orderform import CASE_PROJECT_TYPES, expand_case
-from cg.constants import Pipeline
+from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderFormError
+from cg.meta.orders import OrderType
 from cg.meta.orders.status import StatusHandler
 
-OPTIONAL_KEYS = (
-    "container_name",
-    "quantity",
-    "volume",
-    "concentration",
-    "status",
-    "comment",
-    "capture_kit",
-    "mother",
-    "father",
-)
+ACCEPTED_DATA_ANALYSES: List[str] = [
+    str(Pipeline.MIP_DNA),
+    str(Pipeline.FLUFFY),
+    str(Pipeline.BALSAMIC),
+]
 
 
 def get_project_type(samples: [dict]) -> str:
     """Determine the project type."""
 
-    data_analyses = set(sample.get("data_analysis", "mip-dna").lower() for sample in samples)
+    data_analyses: Set[str] = set(
+        sample.get("data_analysis", "mip-dna").lower() for sample in samples
+    )
 
-    if len(data_analyses) != 1:
+    if len(data_analyses) > 1:
         raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(data_analyses)}")
 
-    if data_analyses == {"mip-dna"}:
-        project_type = "mip-dna"
-    elif data_analyses == {"fluffy"}:
-        project_type = "rml"
-    elif data_analyses == {"balsamic"}:
-        project_type = "balsamic"
-    else:
-        raise OrderFormError(f"Unsupported json orderform: {data_analyses}")
+    data_analysis: str = data_analyses.pop()
+    if data_analysis in ACCEPTED_DATA_ANALYSES:
+        return data_analysis
 
-    return project_type
+    raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
 
 
-def parse_json(indata: dict) -> dict:
+def get_data_delivery(samples: [dict], project_type: OrderType) -> str:
+    """Determine the order_data delivery type."""
+
+    NO_VALUE = "no_value"
+    data_deliveries = set(sample.get("data_delivery", NO_VALUE).lower() for sample in samples)
+
+    if len(data_deliveries) > 1:
+        raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
+
+    data_delivery = data_deliveries.pop()
+
+    if data_delivery == NO_VALUE:
+        if project_type == OrderType.METAGENOME:
+            return str(DataDelivery.FASTQ)
+        if project_type == OrderType.FASTQ:
+            return str(DataDelivery.FASTQ)
+        if project_type == OrderType.RML:
+            return str(DataDelivery.FASTQ)
+        if project_type == OrderType.MIP_RNA:
+            return str(DataDelivery.ANALYSIS_FILES)
+        if project_type == OrderType.FLUFFY:
+            return str(DataDelivery.NIPT_VIEWER)
+
+        return ""
+
+    try:
+        return str(DataDelivery(data_delivery))
+    except ValueError:
+        raise OrderFormError(f"Unsupported order_data delivery: {data_delivery}")
+
+
+def parse_json_order(order_data: dict) -> dict:
     """Parse JSON from LIMS export."""
 
-    samples = indata.get("samples")
+    samples = order_data.get("samples")
 
     if not samples:
         raise OrderFormError("orderform doesn't contain any samples")
 
     project_type = get_project_type(samples)
-    customer_id = indata["customer"].lower()
-    comment = indata.get("comment")
+    data_delivery = get_data_delivery(samples, OrderType(project_type))
+    customer_id = order_data["customer"].lower()
+    comment = order_data.get("comment")
+    order_name = order_data.get("name")
 
     if project_type in CASE_PROJECT_TYPES:
         parsed_cases = StatusHandler.group_cases(samples)
@@ -57,14 +84,16 @@ def parse_json(indata: dict) -> dict:
     else:
         items = samples
 
-    data = {
-        "customer": customer_id,
-        "items": items,
-        "project_type": project_type,
+    parsed_order = {
         "comment": comment,
+        "customer": customer_id,
+        "delivery_type": str(data_delivery),
+        "items": items,
+        "name": order_name,
+        "project_type": project_type,
     }
 
-    return data
+    return parsed_order
 
 
 def expand_case(case_id: str, parsed_case: dict) -> dict:

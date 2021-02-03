@@ -507,7 +507,7 @@ class FamilyImporter(Store):
             else:
                 priority = "standard"
 
-        new_record = self.add_family(
+        new_record = self.add_case(
             data_analysis=data["data_analysis"],
             name=data["name"],
             priority=priority,
@@ -543,13 +543,13 @@ class AnalysisImporter(Store):
                 data = self.extract(hk_record)
 
                 customer_obj = self.customer(data["customer"])
-                family_obj = self.find_family(customer_obj, data["family"])
-                if family_obj is None:
+                case_obj = self.find_family(customer_obj, data["family"])
+                if case_obj is None:
                     LOG.error(f"family not found: {data['customer']} | {data['family']}")
                     continue
 
-                if not self.analysis(family_obj, data["analyzed"]):
-                    new_record = self.build(family_obj, data)
+                if not self.analysis(case_obj, data["analyzed"]):
+                    new_record = self.build(case_obj, data)
                     self.add(new_record)
         self.commit()
 
@@ -564,7 +564,7 @@ class AnalysisImporter(Store):
             "customer": hk_record.case.customer,
         }
 
-    def build(self, family_obj, data):
+    def build(self, case_obj, data):
         new_record = self.add_analysis(
             pipeline=data["pipeline"],
             version=data["version"],
@@ -572,7 +572,7 @@ class AnalysisImporter(Store):
             uploaded=data["uploaded"] or dt.datetime(1970, 1, 1),
             primary=data["primary"],
         )
-        new_record.family = family_obj
+        new_record.family = case_obj
         return new_record
 
 
@@ -612,9 +612,9 @@ def transfer(admin, housekeeper, config_file):
     # status.commit()
 
     # # set all families to analyze "on hold"
-    # for family_obj in status.families_to_analyze(limit=1000):
-    #     LOG.info(f"setting family on hold: {family_obj.name}")
-    #     family_obj.action = 'hold'
+    # for case_obj in status.families_to_analyze(limit=1000):
+    #     LOG.info(f"setting family on hold: {case_obj.name}")
+    #     case_obj.action = 'hold'
     # status.commit()
 
 

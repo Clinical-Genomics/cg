@@ -1,5 +1,4 @@
 """Code for uploading delivery report from the CLI"""
-
 import logging
 import sys
 from pathlib import Path
