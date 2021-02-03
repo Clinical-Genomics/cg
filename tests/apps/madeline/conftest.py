@@ -19,7 +19,7 @@ def fixture_madeline_output(apps_dir: Path) -> Path:
 def fixture_madeline_columns() -> Dict[str, str]:
     """return a dictionary with madeline columns"""
     columns = {
-        "family": "FamilyId",
+        "case": "FamilyId",
         "sample": "IndividualId",
         "sex": "Gender",
         "father": "Father",

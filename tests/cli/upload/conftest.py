@@ -97,7 +97,7 @@ def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadCon
     """Create a scout load config case object"""
     case_data = {
         "owner": "cust000",
-        "family": case_id,
+        "case": case_id,
         "human_genome_build": "37",
         "rank_score_threshold": 5,
         "analysis_date": timestamp,
@@ -225,7 +225,7 @@ class MockLims:
 
     @staticmethod
     def lims_samples():
-        """ Return LIMS-like family samples """
+        """ Return LIMS-like case samples """
         lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
         return lims_family["samples"]
 

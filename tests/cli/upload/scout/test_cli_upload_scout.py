@@ -186,4 +186,4 @@ def test_upload_scout_cli_print_console(
     # THEN assert that the call exits without errors
     assert result.exit_code == 0
 
-    assert case_id in result.output
+    assert case_id in caplog.text

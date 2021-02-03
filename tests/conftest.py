@@ -62,8 +62,8 @@ def fixture_sample_id() -> str:
 
 @pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
-    """Return a family name"""
-    return "family"
+    """Return a case name"""
+    return "case"
 
 
 @pytest.fixture(name="customer_id")
@@ -80,7 +80,7 @@ def fixture_ticket_nr() -> int:
 
 @pytest.fixture(scope="function", name="analysis_family_single_case")
 def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
-    """Build an example family."""
+    """Build an example case."""
     family = {
         "name": family_name,
         "internal_id": case_id,
@@ -104,7 +104,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: in
 
 @pytest.fixture(scope="function", name="analysis_family")
 def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> dict:
-    """Return a dictionary with information from a analysis family"""
+    """Return a dictionary with information from a analysis case"""
     family = {
         "name": family_name,
         "internal_id": case_id,
@@ -702,8 +702,8 @@ def fixture_analysis_store(
     base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
 ):
     """Setup a store instance for testing analysis API."""
-    helpers.ensure_family_from_dict(
-        base_store, family_info=analysis_family, app_tag=wgs_application_tag
+    helpers.ensure_case_from_dict(
+        base_store, case_info=analysis_family, app_tag=wgs_application_tag
     )
 
     yield base_store
@@ -719,7 +719,7 @@ def fixture_analysis_store_trio(analysis_store):
 @pytest.fixture(scope="function", name="analysis_store_single_case")
 def fixture_analysis_store_single(base_store, analysis_family_single_case, helpers):
     """Setup a store instance with a single ind case for testing analysis API."""
-    helpers.ensure_family_from_dict(base_store, family_info=analysis_family_single_case)
+    helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
 
     yield base_store
 

@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.10.0]
+
+### Added
+ - Support for delivery type in the Order Portal
+
 ## [18.9.1]
 
 ### Added
@@ -37,7 +42,6 @@ Try to use the following format:
 
 - Skip deliver fastq files when delivering balsamic analysis
 
-
 ## [18.7.1]
 
 ### Fixed
@@ -47,7 +51,7 @@ Try to use the following format:
 ## [18.7.0]
 
 ### Added
--Added customer name in order tickets
+- Added customer name in order tickets
 
 ## [18.6.1]
 

@@ -58,7 +58,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has been uploaded to loqusdb
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = helpers.add_sample(sample_store, loqus_id="uploaded_to_loqus")
+    sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -89,7 +89,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
 
 
 def test_case_in_observations_to_upload(helpers, sample_store):
-    # GIVEN a case with completed analysis and samples w/o loqus_id
+    # GIVEN a case with completed analysis and samples w/o loqusdb_id
     analysis = helpers.add_analysis(store=sample_store)
 
     sample = helpers.add_sample(sample_store)
@@ -106,10 +106,10 @@ def test_case_in_observations_to_upload(helpers, sample_store):
 
 
 def test_case_not_in_observations_to_upload(helpers, sample_store):
-    # GIVEN a case with completed analysis and samples w loqus_id
+    # GIVEN a case with completed analysis and samples w loqusdb_id
     analysis = helpers.add_analysis(store=sample_store)
 
-    sample = helpers.add_sample(sample_store, loqus_id="uploaded_to_loqus")
+    sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -204,10 +204,10 @@ def test_multiple_analyses(analysis_store, helpers):
 
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
     timestamp = datetime.now()
-    family = helpers.add_family(analysis_store)
+    case = helpers.add_case(analysis_store)
     analysis_oldest = helpers.add_analysis(
         analysis_store,
-        family=family,
+        case=case,
         started_at=timestamp - timedelta(days=1),
         uploaded_at=timestamp - timedelta(days=1),
         delivery_reported_at=None,
@@ -215,7 +215,7 @@ def test_multiple_analyses(analysis_store, helpers):
     analysis_store.add_commit(analysis_oldest)
     analysis_newest = helpers.add_analysis(
         analysis_store,
-        family=family,
+        case=case,
         started_at=timestamp,
         uploaded_at=timestamp,
         delivery_reported_at=None,
