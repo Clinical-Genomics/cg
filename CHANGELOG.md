@@ -14,10 +14,15 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.10.1]
+
+### Added
+- Allow existing trio-samples to be re-run as single samples 
+
 ## [18.10.0]
 
 ### Added
- - Support for delivery type in the Order Portal
+- Support for delivery type in the Order Portal
 
 ## [18.9.1]
 

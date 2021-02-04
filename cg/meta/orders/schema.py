@@ -106,7 +106,7 @@ MIP_SAMPLE = {
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     "require_qcok": bool,
-    "volume": str,
+    "volume": OptionalNone(TypeValidatorNone(str)),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
     "container_name": OptionalNone(TypeValidatorNone(str)),
