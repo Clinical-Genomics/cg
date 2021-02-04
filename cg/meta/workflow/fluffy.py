@@ -202,7 +202,8 @@ class FluffyAnalysisAPI:
         output_path: Path = self.get_output_path(case_id=case_id)
         if output_path.exists():
             LOG.info("Old working directory found, cleaning!")
-            shutil.rmtree(output_path, ignore_errors=True)
+            if not dry_run:
+                shutil.rmtree(output_path, ignore_errors=True)
         command_args = [
             "--config",
             self.fluffy_config.as_posix(),
