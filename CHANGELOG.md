@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Fixed
+- Samples of pools are now marked not to be invoiced, only the pool is invoiced
+
 ## [18.10.1]
 
 ### Added
