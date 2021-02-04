@@ -10,7 +10,7 @@ from typing_extensions import Literal
 
 
 class ChromographImages(BaseModel):
-    autozyg: Optional[str] = None
+    autozygous: Optional[str] = None
     coverage: Optional[str] = None
     upd_regions: Optional[str] = None
     upd_sites: Optional[str] = None

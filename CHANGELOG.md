@@ -13,6 +13,7 @@ Try to use the following format:
 ### Added
 ### Changed
 ### Fixed
+- Chromograph image tags back on track
 
 ## [18.10.0]
 
@@ -127,7 +128,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -142,7 +143,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows
