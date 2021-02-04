@@ -17,6 +17,7 @@ Try to use the following format:
 ## [NG.NG.NG]
 
 ### Fixed
+- FLUFFY now have a validation schema and can be submitted in the Order Portal again
 - Samples of pools are now marked not to be invoiced, only the pool is invoiced
 
 ## [18.10.1]
