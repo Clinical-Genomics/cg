@@ -127,9 +127,15 @@ def start_available(context: click.Context, dry_run: bool):
 @click.pass_context
 def store(context: click.Context, case_id: str):
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
-    fluffy_analysis_api.upload_bundle_statusdb(case_id=case_id)
-    fluffy_analysis_api.set_statusdb_action(case_id=case_id, action=None)
+    try:
+        fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        fluffy_analysis_api.upload_bundle_statusdb(case_id=case_id)
+        fluffy_analysis_api.set_statusdb_action(case_id=case_id, action=None)
+    except Exception as error:
+        fluffy_analysis_api.housekeeper_api.rollback()
+        fluffy_analysis_api.status_db.rollback()
+        LOG.error("Error storing deliverables for case %s - %s", case_id, error.__class__.__name__)
+        raise
 
 
 @fluffy.command("store-available")

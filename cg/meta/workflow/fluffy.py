@@ -227,7 +227,7 @@ class FluffyAnalysisAPI:
         try:
             self.process.run_command(["--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
-        except CalledProcessError:
+        except (Exception, CalledProcessError):
             LOG.warning("Could not retrieve fluffy version!")
             return "0.0.0"
 
