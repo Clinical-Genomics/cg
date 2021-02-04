@@ -14,7 +14,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [18.10.2]
 
 ### Fixed
 - FLUFFY now have a validation schema and can be submitted in the Order Portal again
