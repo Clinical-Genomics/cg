@@ -116,7 +116,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
         )
         config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
-            hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
+            file_path=self.fetch_sample_file(
+                hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
+            )
         )
         config_sample.chromograph_images.coverage = self.extract_generic_filepath(
             file_path=self.fetch_sample_file(
