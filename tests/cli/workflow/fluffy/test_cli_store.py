@@ -110,9 +110,11 @@ def test_cli_store_available_case_not_running(
 ):
 
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
-    fluffy_analysis_api.set_statusdb_action(case_id=fluffy_case_id_existing, action=None)
+    fluffy_analysis_api.status_db.family(fluffy_case_id_existing).action = None
+    fluffy_analysis_api.status_db.commit()
 
     caplog.set_level("INFO")
+
     mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_path")
     FluffyAnalysisAPI.get_deliverables_path.return_value = deliverables_yaml_fixture_path
 
