@@ -33,11 +33,3 @@ def test_start_available(
     assert result.exit_code == EXIT_SUCCESS
     assert "Starting full" in caplog.text
     assert fluffy_case_id_existing in caplog.text
-
-
-def store_available_dry():
-    pass
-
-
-def store_available():
-    pass
