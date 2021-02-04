@@ -14,7 +14,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [18.10.1]
 
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
