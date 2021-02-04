@@ -102,6 +102,9 @@ class FluffyAnalysisAPI:
             raise CgError
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
+        """
+        Retrieve sample name provided by customer for specific sample
+        """
         LOG.debug("Setting sample name for %s", lims_id)
         sample_obj = self.status_db.sample(lims_id)
         return sample_obj.name
