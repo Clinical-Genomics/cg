@@ -486,6 +486,7 @@ class StatusHandler:
                     customer=customer_obj,
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
+                    no_invoice=True,
                     order=order,
                     ordered=ordered,
                     priority=sample["priority"],
