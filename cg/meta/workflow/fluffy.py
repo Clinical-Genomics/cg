@@ -59,7 +59,7 @@ class FluffyAnalysisAPI:
         """
         Location in working directory to which fastq files are saved for each sample separately
         """
-        return Path(self.root_dir, case_id, "fastq", sample_id)
+        return Path(self.get_workdir_path(case_id), sample_id)
 
     def get_output_path(self, case_id: str) -> Path:
         """
@@ -72,7 +72,7 @@ class FluffyAnalysisAPI:
         Location in working directory where deliverables file will be stored upon completion of analysis.
         Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
         """
-        return Path(self.root_dir, case_id, "output", "deliverables.yaml")
+        return Path(self.get_output_path(case_id), "deliverables.yaml")
 
     def get_slurm_job_ids_path(self, case_id: str) -> Path:
         """
@@ -80,7 +80,7 @@ class FluffyAnalysisAPI:
         This file contains SLURM ID of jobs associated with current analysis ,
         is used as a config to be submitted to Trailblazer and track job progress in SLURM
         """
-        return Path(self.root_dir, case_id, "output", "sacct", "submitted_jobs.yaml")
+        return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
 
     def get_priority(self, case_id: str) -> str:
         """Returns priority for the case in clinical-db as text"""
