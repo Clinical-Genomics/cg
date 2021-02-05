@@ -3,7 +3,6 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-from ruamel.yaml import YAML
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -14,6 +13,7 @@ from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
+from ruamel.yaml import YAML
 from tests.mocks.limsmock import MockLimsAPI
 
 
@@ -191,22 +191,22 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
 
     # Add sample, cases and relationships to db
 
-    for case in mip_case_ids:
-        family = helpers.add_family(
+    for case_id in mip_case_ids:
+        case_obj = helpers.add_case(
             store=_store,
-            internal_id=case,
-            family_id=mip_case_ids[case]["name"],
+            internal_id=case_id,
+            case_id=mip_case_ids[case_id]["name"],
         )
         sample = helpers.add_sample(
             store=_store,
-            sample=mip_case_ids[case]["internal_id"],
+            sample=mip_case_ids[case_id]["internal_id"],
             data_analysis=Pipeline.MIP_DNA,
             customer_name="cust000",
             application_tag="WGSA",
             application_type="wgs",
             gender="unknown",
         )
-        helpers.add_relationship(store=_store, sample=sample, family=family, status="affected")
+        helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
 
     return _store
 
@@ -264,8 +264,8 @@ def fixture_analysis_store_rna_case(
 ) -> Store:
     """Setup a store instance with a single ind RNA case for testing analysis API"""
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
-    helpers.ensure_family_from_dict(
-        base_store, family_info=analysis_family_single_case, app_tag=apptag_rna
+    helpers.ensure_case_from_dict(
+        base_store, case_info=analysis_family_single_case, app_tag=apptag_rna
     )
 
     yield base_store

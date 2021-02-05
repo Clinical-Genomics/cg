@@ -1,7 +1,6 @@
 """Code for validating an upload via CLI"""
 
 import click
-
 from cg.apps.coverage import ChanjoAPI
 
 from .utils import suggest_cases_to_upload
@@ -19,10 +18,10 @@ def validate(context, family_id):
         suggest_cases_to_upload(context)
         context.abort()
 
-    family_obj = context.obj["status_db"].family(family_id)
+    case_obj = context.obj["status_db"].family(family_id)
     chanjo_api = ChanjoAPI(context.obj)
     chanjo_samples = []
-    for link_obj in family_obj.links:
+    for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id
         chanjo_sample = chanjo_api.sample(sample_id)
         if chanjo_sample is None:
@@ -34,7 +33,7 @@ def validate(context, family_id):
         return
 
     coverage_results = chanjo_api.omim_coverage(chanjo_samples)
-    for link_obj in family_obj.links:
+    for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id
         if sample_id in coverage_results:
             completeness = coverage_results[sample_id]["mean_completeness"]

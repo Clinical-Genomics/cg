@@ -27,6 +27,7 @@ class LimsHandler:
                         "concentration_sample": sample.get("concentration_sample"),
                         "customer": customer,
                         "data_analysis": sample.get("data_analysis"),
+                        "data_delivery": sample.get("data_delivery"),
                         "elution_buffer": sample.get("elution_buffer"),
                         "extraction_method": sample.get("extraction_method"),
                         "family_name": sample.get("family_name") or "NA",

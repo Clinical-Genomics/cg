@@ -3,8 +3,7 @@ import logging
 from typing import List
 
 import petname
-
-from cg.constants import PRIORITY_MAP, Pipeline
+from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
 from cg.store import models, utils
 from cg.store.api.base import BaseHandler
 
@@ -143,12 +142,17 @@ class AddHandler(BaseHandler):
         )
         return new_sample
 
-    def add_family(
-        self, data_analysis: Pipeline, name: str, panels: List[str], priority: str = "standard"
+    def add_case(
+        self,
+        data_analysis: Pipeline,
+        data_delivery: DataDelivery,
+        name: str,
+        panels: List[str],
+        priority: str = "standard",
     ) -> models.Family:
         """Build a new Family record."""
 
-        # generate a unique family id
+        # generate a unique case id
         while True:
             internal_id = petname.Generate(2, separator="")
             if self.family(internal_id) is None:
@@ -157,14 +161,15 @@ class AddHandler(BaseHandler):
                 LOG.debug(f"{internal_id} already used - trying another id")
 
         priority_db = PRIORITY_MAP[priority]
-        new_family = self.Family(
+        new_case = self.Family(
             data_analysis=str(data_analysis),
+            data_delivery=str(data_delivery),
             internal_id=internal_id,
             name=name,
             priority=priority_db,
         )
-        new_family.panels = panels
-        return new_family
+        new_case.panels = panels
+        return new_case
 
     def relate_sample(
         self,
@@ -240,7 +245,6 @@ class AddHandler(BaseHandler):
         order: str,
         ordered: dt.datetime,
         application_version: models.ApplicationVersion,
-        data_analysis: Pipeline,
         ticket: int = None,
         comment: str = None,
         received: dt.datetime = None,
@@ -256,7 +260,6 @@ class AddHandler(BaseHandler):
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,
-            data_analysis=str(data_analysis),
         )
         new_record.customer = customer
         new_record.application_version = application_version

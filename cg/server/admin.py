@@ -1,12 +1,11 @@
 """Module for Flask-Admin views"""
+from cg.constants.constants import DataDelivery, Pipeline
+from cg.server.ext import db
+from cg.utils.flask.enum import SelectEnumField
 from flask import redirect, request, session, url_for
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
-
-from cg.constants.constants import DataDelivery, Pipeline
-from cg.server.ext import db
-from cg.utils.flask.enum import SelectEnumField
 
 
 class BaseView(ModelView):
@@ -186,7 +185,13 @@ class FamilyView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
     column_exclude_list = ["created_at"]
-    column_filters = ["customer.internal_id", "priority", "action"]
+    column_filters = [
+        "customer.internal_id",
+        "priority",
+        "action",
+        "data_analysis",
+        "data_delivery",
+    ]
     column_formatters = {"internal_id": view_family_sample_link, "priority": view_human_priority}
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
     form_extra_fields = {
@@ -290,7 +295,7 @@ class PoolView(BaseView):
     """Admin view for Model.Pool"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["sequenced_at", "ticket_number"]
+    column_editable_list = ["ticket_number"]
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {"invoice": InvoiceView.view_invoice_link}
     column_searchable_list = ["name", "order", "ticket_number", "customer.internal_id"]

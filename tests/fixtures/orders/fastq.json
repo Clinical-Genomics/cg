@@ -17,6 +17,7 @@
             "source": "blood",
             "priority": "priority",
             "require_qcok": true,
+            "volume": "1",
             "elution_buffer": "Nuclease-free water"
         },
         {
@@ -33,6 +34,7 @@
             "source": "cell line",
             "priority": "priority",
             "require_qcok": false,
+            "volume": "2",
             "elution_buffer": "Nuclease-free water"
         }
     ]

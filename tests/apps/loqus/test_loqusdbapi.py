@@ -99,7 +99,7 @@ def test_load(loqusdbapi, loqusdb_output):
 
     """Test to load a case"""
     # GIVEN a loqusdb api and some info about a case
-    family_id = "test"
+    case_id = "test"
     ped_path = "a ped path"
     vcf_path = "a vcf path"
     vcf_sv_path = "a sv_vcf path"
@@ -108,7 +108,7 @@ def test_load(loqusdbapi, loqusdb_output):
     # WHEN uploading a case with 15 variants to loqusdb
     loqusdbapi.process.stderr = loqusdb_output.decode("utf-8")
 
-    data = loqusdbapi.load(family_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
+    data = loqusdbapi.load(case_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
 
     # THEN assert that the number of variants is 15
 

@@ -11,6 +11,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional
 
 import click
@@ -420,6 +421,7 @@ class MicrosaltAnalysisAPI:
 
         new_analysis: models.Analysis = self.db.add_analysis(
             pipeline=Pipeline.MICROSALT,
+            version=self.get_microsalt_version(),
             started_at=analysis_date,
             completed_at=datetime.now(),
             primary=(len(case_obj.analyses) == 0),
@@ -453,3 +455,11 @@ class MicrosaltAnalysisAPI:
             priority=self.get_priority(case_id),
             data_analysis=Pipeline.MICROSALT,
         )
+
+    def get_microsalt_version(self) -> str:
+        try:
+            self.process.run_command(["--version"])
+            return list(self.process.stdout_lines())[0].split()[-1]
+        except CalledProcessError:
+            LOG.warning("Could not retrieve microsalt version!")
+            return "0.0.0"

@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 import requests
-
 from cg.utils.commands import Process
 
 # File fixtures for the apps
@@ -13,7 +12,7 @@ from cg.utils.commands import Process
 @pytest.fixture
 def balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic samples"""
-    _file = orderforms / "1508.21.balsamic.xlsx"
+    _file = orderforms / "1508.22.balsamic.xlsx"
     return str(_file)
 
 
@@ -27,7 +26,7 @@ def external_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def fastq_orderform(orderforms: Path):
     """Orderform fixture for fastq samples"""
-    _file = orderforms / "1508.21.fastq.xlsx"
+    _file = orderforms / "1508.22.fastq.xlsx"
     return str(_file)
 
 
@@ -41,14 +40,14 @@ def metagenome_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples"""
-    _file = orderforms / "1508.21.mip.xlsx"
+    _file = orderforms / "1508.22.mip.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples"""
-    _file = orderforms / "1508.21.mip_rna.xlsx"
+    _file = orderforms / "1508.22.mip_rna.xlsx"
     return str(_file)
 
 

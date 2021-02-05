@@ -5,8 +5,6 @@ import re
 from pathlib import Path
 from typing import Any, List, Optional
 
-from ruamel.yaml import safe_load
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
@@ -23,8 +21,9 @@ from cg.constants import (
     MASTER_LIST,
     Pipeline,
 )
-from cg.exc import CgDataError, LimsDataError, CgError
+from cg.exc import CgDataError, CgError, LimsDataError
 from cg.store import Store, models
+from ruamel.yaml import safe_load
 
 LOG = logging.getLogger(__name__)
 
@@ -55,9 +54,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.conda_env = conda_env
         self.root = root
 
-    def check(self, family_obj: models.Family) -> bool:
+    def check(self, case_obj: models.Family) -> bool:
         """Check stuff before starting the analysis."""
-        flowcells = self.db.flowcells(family=family_obj)
+        flowcells = self.db.flowcells(family=case_obj)
         statuses = []
         for flowcell_obj in flowcells:
             LOG.debug("%s: checking flowcell", flowcell_obj.name)
@@ -70,17 +69,17 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return all(status == "ondisk" for status in statuses)
 
     @staticmethod
-    def get_priority(family_obj: models.Family) -> str:
+    def get_priority(case_obj: models.Family) -> str:
         """Fetch priority for case id"""
-        if not family_obj.priority:
+        if not case_obj.priority:
             return "low"
-        if isinstance(family_obj.priority, int):
-            if family_obj.priority == 0:
+        if isinstance(case_obj.priority, int):
+            if case_obj.priority == 0:
                 return "low"
-            if family_obj.priority > 1:
+            if case_obj.priority > 1:
                 return "high"
             return "normal"
-        return family_obj.priority
+        return case_obj.priority
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")
@@ -98,20 +97,20 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             return bed_version.filename
 
     def pedigree_config(
-        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
+        self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
     ) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
         Args:
-            family_obj (models.Family):
+            case_obj (models.Family):
             pipeline (str): the name of the pipeline to validate the config against
             panel_bed(str): Overrides default capture kit or bypassed getting panel BED from LIMS
 
         Returns:
             dict: config_data (MIP format)
         """
-        data = self.build_config(family_obj, pipeline=pipeline, panel_bed=panel_bed)
+        data = self.build_config(case_obj, pipeline=pipeline, panel_bed=panel_bed)
 
         # Validate and reformat to MIP pedigree config format
         config_data = self.make_pedigree_config(data=data, pipeline=pipeline)
@@ -128,7 +127,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         return bed_version_obj.filename
 
     def build_config(
-        self, family_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
+        self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
     ) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
@@ -170,11 +169,11 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         }
 
         data = {
-            "case": family_obj.internal_id,
-            "default_gene_panels": family_obj.panels,
+            "case": case_obj.internal_id,
+            "default_gene_panels": case_obj.panels,
         }
         config_sample = dispatch[pipeline]
-        data["samples"] = [config_sample(self, link_obj=link_obj) for link_obj in family_obj.links]
+        data["samples"] = [config_sample(self, link_obj=link_obj) for link_obj in case_obj.links]
         return data
 
     @staticmethod
@@ -301,9 +300,9 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             files=files,
         )
 
-    def panel(self, family_obj: models.Family) -> List[str]:
+    def panel(self, case_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
-        all_panels = self.convert_panels(family_obj.customer.internal_id, family_obj.panels)
+        all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
         bed_lines = self.scout.export_panels(all_panels)
         return bed_lines
 

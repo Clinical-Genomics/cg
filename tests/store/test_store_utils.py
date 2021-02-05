@@ -18,11 +18,11 @@ def test_case_exists_when_missing(case_id, caplog):
     assert f"{case_id}: case not found" in caplog.text
 
 
-def test_case_exists_when_present(family_obj, case_id):
+def test_case_exists_when_present(case_obj, case_id):
     """Test function when a case object is found """
     # GIVEN a case_id
     # WHEN case_obj is True
-    was_found = case_exists(family_obj, case_id)
+    was_found = case_exists(case_obj, case_id)
     # THEN case_exists should return True
     assert was_found
 
@@ -37,11 +37,11 @@ def test_get_samples(analysis_obj):
         assert isinstance(sample, FamilySample)
 
 
-def test_link(family_obj):
-    """Test function to get all samples from a family"""
-    # GIVEN an family object
+def test_link(case_obj):
+    """Test function to get all samples from a case"""
+    # GIVEN an case object
     # WHEN fetching all links
-    link_objs = get_links(family_obj)
+    link_objs = get_links(case_obj)
     # THEN assert the link objs are samples
     for link_obj in link_objs:
         assert isinstance(link_obj, FamilySample)

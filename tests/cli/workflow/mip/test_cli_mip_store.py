@@ -1,11 +1,10 @@
 """This script tests the cli mip store functions"""
 import logging
 
-from click.testing import CliRunner
-
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.cli.workflow.mip.store import analysis, completed
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.apps.tb.models import TrailblazerAnalysis
+from click.testing import CliRunner
 
 
 def test_store_no_config(cli_runner: CliRunner, mip_store_context: dict, caplog):
@@ -93,7 +92,7 @@ def test_store_completed_good_cases(
                 case_obj.action = "running"
                 status_db.commit()
             else:
-                helpers.add_family(store=status_db, internal_id=case_id, action="running")
+                helpers.add_case(store=status_db, internal_id=case_id, action="running")
 
         # WHEN we run store all completed cases
         result = cli_runner.invoke(completed, obj=mip_store_context)

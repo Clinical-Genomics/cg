@@ -1,7 +1,6 @@
 """Code for uploading coverage reports via CLI"""
 
 import click
-
 from cg.apps.coverage import ChanjoAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 
@@ -22,7 +21,7 @@ def coverage(context, re_upload, family_id):
         context.abort()
 
     chanjo_api = ChanjoAPI(context.obj)
-    family_obj = context.obj["status_db"].family(family_id)
+    case_obj = context.obj["status_db"].family(family_id)
     api = UploadCoverageApi(context.obj["status_db"], context.obj["housekeeper_api"], chanjo_api)
-    coverage_data = api.data(family_obj.analyses[0])
+    coverage_data = api.data(case_obj.analyses[0])
     api.upload(coverage_data, replace=re_upload)

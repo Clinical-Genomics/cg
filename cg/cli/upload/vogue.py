@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import click
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.vogue import VogueAPI
@@ -16,7 +15,7 @@ from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA)]
+VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
 
 
 @click.group()
@@ -236,9 +235,7 @@ def _get_samples(store: Store, case_name: str) -> str:
     """
 
     link_objs = get_links(store, case_name)
-    sample_ids = set()
-    for link_obj in link_objs:
-        sample_ids.add(link_obj.sample.internal_id)
+    sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 
 
@@ -251,11 +248,11 @@ def _get_analysis_workflow_details(status_api: Store, case_name: str) -> str:
         workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
-    family_obj = status_api.family(case_name)
+    case_obj = status_api.family(case_name)
     workflow_name = None
     workflow_version = None
-    if family_obj.analyses:
-        workflow_name = family_obj.analyses[0].pipeline
-        workflow_version = family_obj.analyses[0].pipeline_version
+    if case_obj.analyses:
+        workflow_name = case_obj.analyses[0].pipeline
+        workflow_version = case_obj.analyses[0].pipeline_version
 
     return workflow_name.lower(), workflow_version

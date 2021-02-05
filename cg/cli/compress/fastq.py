@@ -1,18 +1,14 @@
 """CLI function to compress FASTQ files into SPRING archives"""
 
-import logging
 import datetime as dt
+import logging
+
 import click
-
-from cg.exc import CaseNotFoundError
-
-from .helpers import (
-    correct_spring_paths,
-    get_fastq_individuals,
-    update_compress_api,
-)
-from cg.store.get.cases import ready_for_spring_compression
 from cg.constants.compression import CASES_TO_IGNORE
+from cg.exc import CaseNotFoundError
+from cg.store.get.cases import ready_for_spring_compression
+
+from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
 

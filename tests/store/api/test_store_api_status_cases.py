@@ -1,16 +1,16 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, DataDelivery, Pipeline
 from cg.store import Store
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
     """test that the estimated turnaround time is affected by the delivered_at date """
 
-    # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at,
+    # GIVEN a database with a case and a samples receive_at, prepared_at, sequenced_at,
     # delivered_at one week ago
-    family = add_family(helpers, base_store, ordered_days_ago=7)
+    new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
         base_store,
@@ -20,7 +20,7 @@ def test_delivered_at_affects_tat(base_store: Store, helpers):
         sequenced_at=one_week_ago,
         delivered_at=one_week_ago,
     )
-    base_store.relate_sample(family, one_week_old_sample, "unknown")
+    base_store.relate_sample(new_case, one_week_old_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -34,9 +34,9 @@ def test_delivered_at_affects_tat(base_store: Store, helpers):
 def test_sequenced_at_affects_tat(base_store: Store, helpers):
     """test that the estimated turnaround time is affected by the sequenced_at date """
 
-    # GIVEN a database with a family and a samples receive_at, prepared_at, sequenced_at one week
+    # GIVEN a database with a case and a samples receive_at, prepared_at, sequenced_at one week
     # ago
-    family = add_family(helpers, base_store, ordered_days_ago=7)
+    new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
         base_store,
@@ -45,7 +45,7 @@ def test_sequenced_at_affects_tat(base_store: Store, helpers):
         prepared_at=one_week_ago,
         sequenced_at=one_week_ago,
     )
-    base_store.relate_sample(family, one_week_old_sample, "unknown")
+    base_store.relate_sample(new_case, one_week_old_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -59,8 +59,8 @@ def test_sequenced_at_affects_tat(base_store: Store, helpers):
 def test_prepared_at_affects_tat(base_store: Store, helpers):
     """test that the estimated turnaround time is affected by the prepared_at date """
 
-    # GIVEN a database with a family and a samples receive_at, prepared_at one week ago
-    family = add_family(helpers, base_store, ordered_days_ago=7)
+    # GIVEN a database with a case and a samples receive_at, prepared_at one week ago
+    new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
         base_store,
@@ -68,7 +68,7 @@ def test_prepared_at_affects_tat(base_store: Store, helpers):
         received_at=one_week_ago,
         prepared_at=one_week_ago,
     )
-    base_store.relate_sample(family, one_week_old_sample, "unknown")
+    base_store.relate_sample(new_case, one_week_old_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -82,15 +82,15 @@ def test_prepared_at_affects_tat(base_store: Store, helpers):
 def test_received_at_affects_tat(base_store: Store, helpers):
     """test that the estimated turnaround time is affected by the received_at date """
 
-    # GIVEN a database with a family and a samples received one week ago
-    family = add_family(helpers, base_store, ordered_days_ago=7)
+    # GIVEN a database with a case and a samples received one week ago
+    new_case = add_case(helpers, base_store, ordered_days_ago=7)
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_old_sample = helpers.add_sample(
         base_store,
         ordered_at=one_week_ago,
         received_at=one_week_ago,
     )
-    base_store.relate_sample(family, one_week_old_sample, "unknown")
+    base_store.relate_sample(new_case, one_week_old_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -104,14 +104,14 @@ def test_received_at_affects_tat(base_store: Store, helpers):
 def test_samples_flowcell(base_store: Store, helpers):
     """Test to that cases displays the flowcell status """
 
-    # GIVEN a database with a family with a sample that belongs to a flowcell with status ondisk
+    # GIVEN a database with a case with a sample that belongs to a flowcell with status ondisk
     # and a sample not yet on a flowcell
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample_on_flowcell = helpers.add_sample(base_store)
     flowcell = helpers.add_flowcell(base_store, status="ondisk", samples=[sample_on_flowcell])
-    base_store.relate_sample(family, sample_on_flowcell, "unknown")
+    base_store.relate_sample(new_case, sample_on_flowcell, "unknown")
     sample_not_on_flowcell = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample_not_on_flowcell, "unknown")
+    base_store.relate_sample(new_case, sample_not_on_flowcell, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -127,10 +127,10 @@ def test_samples_flowcell(base_store: Store, helpers):
 def test_sample_flowcell(base_store: Store, helpers):
     """Test to that cases displays the flowcell status """
 
-    # GIVEN a database with a family with a sample that belongs to a flowcell with status ondisk
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case with a sample that belongs to a flowcell with status ondisk
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     flowcell = helpers.add_flowcell(base_store, status="ondisk", samples=[sample])
     assert flowcell.status
 
@@ -157,7 +157,7 @@ def test_case_action(base_store: Store, helpers):
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN cases should contain info on analysis (family) action
+    # THEN cases should contain info on analysis (case) action
     assert cases
     for case in cases:
         assert case.get("case_action") == analysis.family.action
@@ -185,14 +185,14 @@ def test_analysis_dates_for_rerun(base_store: Store, helpers):
 def test_received_at_is_newest_date(base_store: Store, helpers):
     """Test to that cases displays newest received date"""
 
-    # GIVEN a database with a family and two samples with different received dates
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and two samples with different received dates
+    new_case = add_case(helpers, base_store)
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, received_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, received_at=yesteryear)
-    base_store.relate_sample(family, newest_sample, "unknown")
-    base_store.relate_sample(family, oldest_sample, "unknown")
+    base_store.relate_sample(new_case, newest_sample, "unknown")
+    base_store.relate_sample(new_case, oldest_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -206,14 +206,14 @@ def test_received_at_is_newest_date(base_store: Store, helpers):
 def test_prepared_at_is_newest_date(base_store: Store, helpers):
     """Test to that cases displays newest prepared date"""
 
-    # GIVEN a database with a family and two samples with different prepared dates
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and two samples with different prepared dates
+    new_case = add_case(helpers, base_store)
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, prepared_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, prepared_at=yesteryear)
-    base_store.relate_sample(family, newest_sample, "unknown")
-    base_store.relate_sample(family, oldest_sample, "unknown")
+    base_store.relate_sample(new_case, newest_sample, "unknown")
+    base_store.relate_sample(new_case, oldest_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -227,14 +227,14 @@ def test_prepared_at_is_newest_date(base_store: Store, helpers):
 def test_sequenced_at_is_newest_date(base_store: Store, helpers):
     """Test to that cases displays newest sequenced date"""
 
-    # GIVEN a database with a family and two samples with different sequenced dates
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and two samples with different sequenced dates
+    new_case = add_case(helpers, base_store)
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, sequenced_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, sequenced_at=yesteryear)
-    base_store.relate_sample(family, newest_sample, "unknown")
-    base_store.relate_sample(family, oldest_sample, "unknown")
+    base_store.relate_sample(new_case, newest_sample, "unknown")
+    base_store.relate_sample(new_case, oldest_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -248,14 +248,14 @@ def test_sequenced_at_is_newest_date(base_store: Store, helpers):
 def test_delivered_at_is_newest_date(base_store: Store, helpers):
     """Test to that cases displays newest delivered date"""
 
-    # GIVEN a database with a family and two samples with different delivered dates
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and two samples with different delivered dates
+    new_case = add_case(helpers, base_store)
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store, delivered_at=yesterday)
     oldest_sample = helpers.add_sample(base_store, delivered_at=yesteryear)
-    base_store.relate_sample(family, newest_sample, "unknown")
-    base_store.relate_sample(family, oldest_sample, "unknown")
+    base_store.relate_sample(new_case, newest_sample, "unknown")
+    base_store.relate_sample(new_case, oldest_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -269,8 +269,8 @@ def test_delivered_at_is_newest_date(base_store: Store, helpers):
 def test_invoiced_at_is_newest_invoice_date(base_store: Store, helpers):
     """Test to that cases displays newest invoiced date"""
 
-    # GIVEN a database with a family and two samples with different invoiced dates
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and two samples with different invoiced dates
+    new_case = add_case(helpers, base_store)
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store)
@@ -281,8 +281,8 @@ def test_invoiced_at_is_newest_invoice_date(base_store: Store, helpers):
     invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     oldest_sample.invoice = invoice
     oldest_sample.invoice.invoiced_at = yesteryear
-    base_store.relate_sample(family, newest_sample, "unknown")
-    base_store.relate_sample(family, oldest_sample, "unknown")
+    base_store.relate_sample(new_case, newest_sample, "unknown")
+    base_store.relate_sample(new_case, oldest_sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -296,12 +296,12 @@ def test_invoiced_at_is_newest_invoice_date(base_store: Store, helpers):
 def test_invoiced_at(base_store: Store, helpers):
     """Test to that cases displays correct invoiced date"""
 
-    # GIVEN a database with a family and a invoiced date
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and a invoiced date
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
     sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     sample.invoice.invoiced_at = datetime.now()
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -315,10 +315,10 @@ def test_invoiced_at(base_store: Store, helpers):
 def test_delivered_at(base_store: Store, helpers):
     """Test to that cases displays correct delivered date"""
 
-    # GIVEN a database with a family and a delivered date
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and a delivered date
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, delivered_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -332,10 +332,10 @@ def test_delivered_at(base_store: Store, helpers):
 def test_sequenced_at(base_store: Store, helpers):
     """Test to that cases displays correct sequenced date"""
 
-    # GIVEN a database with a family and a sequenced date
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and a sequenced date
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -349,10 +349,10 @@ def test_sequenced_at(base_store: Store, helpers):
 def test_prepared_at(base_store: Store, helpers):
     """Test to that cases displays correct prepared date"""
 
-    # GIVEN a database with a family and a prepared date
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and a prepared date
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, prepared_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -366,10 +366,10 @@ def test_prepared_at(base_store: Store, helpers):
 def test_received_at(base_store: Store, helpers):
     """Test to that cases displays correct received date"""
 
-    # GIVEN a database with a family and a received date
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and a received date
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, received_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -383,10 +383,10 @@ def test_received_at(base_store: Store, helpers):
 def test_no_invoice_true(base_store: Store, helpers):
     """Test to that cases displays correct samples to invoice"""
 
-    # GIVEN a database with a family and one no_invoice sample
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and one no_invoice sample
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, no_invoice=True)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.no_invoice
 
     # WHEN getting active cases
@@ -401,10 +401,10 @@ def test_no_invoice_true(base_store: Store, helpers):
 def test_one_no_invoice_false(base_store: Store, helpers):
     """Test to that cases displays correct samples to invoice"""
 
-    # GIVEN a database with a family and one sample to invoice
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and one sample to invoice
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, no_invoice=False)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert not sample.no_invoice
 
     # WHEN getting active cases
@@ -419,10 +419,10 @@ def test_one_no_invoice_false(base_store: Store, helpers):
 def test_one_external_sample(base_store: Store, helpers):
     """Test to that cases displays correct internal/external samples"""
 
-    # GIVEN a database with a family and one external sample
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and one external sample
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, is_external=True)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.application_version.application.is_external
 
     # WHEN getting active cases
@@ -442,10 +442,10 @@ def test_one_external_sample(base_store: Store, helpers):
 def test_one_internal_sample(base_store: Store, helpers):
     """Test to that cases displays correct internal/external samples"""
 
-    # GIVEN a database with a family and one external sample
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case and one external sample
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, is_external=False)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert not sample.is_external
 
     # WHEN getting active cases
@@ -465,9 +465,9 @@ def test_include_case_by_sample_id(base_store: Store, helpers):
     """Test to that cases can be included by sample id"""
 
     # GIVEN a database with a sample with internal_id
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by sample id
     cases = base_store.cases(sample_id=sample.internal_id)
@@ -475,16 +475,16 @@ def test_include_case_by_sample_id(base_store: Store, helpers):
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_exclude_case_by_sample_id(base_store: Store, helpers):
     """Test to that cases can be excluded by sample id"""
 
     # GIVEN a database with a sample with internal_id
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by non-existing sample id
     cases = base_store.cases(sample_id="dummy_id")
@@ -496,9 +496,9 @@ def test_exclude_case_by_sample_id(base_store: Store, helpers):
 def test_include_case_by_exclude_customer(base_store: Store, helpers):
     """Test to that cases can be excluded by customer"""
 
-    # GIVEN a database with a family and a customer
+    # GIVEN a database with a case and a customer
     customer_id = "cust000"
-    family = add_family(helpers, base_store, customer_id=customer_id)
+    new_case = add_case(helpers, base_store, customer_id=customer_id)
 
     # WHEN getting active cases by customer
     cases = base_store.cases(exclude_customer_id="dummy_customer")
@@ -506,15 +506,15 @@ def test_include_case_by_exclude_customer(base_store: Store, helpers):
     # THEN cases should contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_exclude_case_by_exclude_customer(base_store: Store, helpers):
     """Test to that cases can be excluded by customer"""
 
-    # GIVEN a database with a family and a customer
+    # GIVEN a database with a case and a customer
     customer_id = "cust000"
-    add_family(helpers, base_store, customer_id=customer_id)
+    add_case(helpers, base_store, customer_id=customer_id)
 
     # WHEN getting active cases by customer
     cases = base_store.cases(exclude_customer_id=customer_id)
@@ -526,29 +526,29 @@ def test_exclude_case_by_exclude_customer(base_store: Store, helpers):
 def test_include_case_by_case_uppercase_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by uppercase data_analysis"""
 
-    # GIVEN a database with a family with data analysis set
+    # GIVEN a database with a case with data analysis set
     data_analysis = Pipeline.BALSAMIC
     assert str(data_analysis).upper() != str(data_analysis)
-    family = add_family(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=family.data_analysis.upper())
+    cases = base_store.cases(data_analysis=new_case.data_analysis.upper())
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_exclude_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be excluded by data_analysis"""
 
-    # GIVEN a database with a family with data analysis set
-    family = add_family(helpers, base_store, data_analysis=Pipeline.BALSAMIC)
+    # GIVEN a database with a case with data analysis set
+    new_case = add_case(helpers, base_store, data_analysis=Pipeline.BALSAMIC)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis="dummy_analysis")
@@ -560,11 +560,11 @@ def test_exclude_case_by_data_analysis(base_store: Store, helpers):
 def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
-    # GIVEN a database with a family with data analysis set
+    # GIVEN a database with a case with data analysis set
     data_analysis = Pipeline.BALSAMIC
-    family = add_family(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by partial data_analysis
     cases = base_store.cases(data_analysis=str(data_analysis)[:-1])
@@ -572,21 +572,21 @@ def test_include_case_by_partial_data_analysis(base_store: Store, helpers):
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_show_multiple_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
-    # GIVEN a database with a family with data analysis set
+    # GIVEN a database with a case with data analysis set
     data_analysis = Pipeline.BALSAMIC
-    family = add_family(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample1 = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample1, "unknown")
-    family2 = add_family(helpers, base_store, family_id="family2", data_analysis=data_analysis)
+    base_store.relate_sample(new_case, sample1, "unknown")
+    new_case2 = add_case(helpers, base_store, case_id="new_case2", data_analysis=data_analysis)
     sample2 = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample2, "unknown")
-    base_store.relate_sample(family2, sample2, "unknown")
+    base_store.relate_sample(new_case, sample2, "unknown")
+    base_store.relate_sample(new_case2, sample2, "unknown")
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis=str(data_analysis)[:-1])
@@ -594,17 +594,17 @@ def test_show_multiple_data_analysis(base_store: Store, helpers):
     # THEN cases should only contain these analyses
     assert cases
     for case in cases:
-        assert family2.internal_id or family.internal_id in case.get("internal_id")
+        assert new_case2.internal_id or new_case.internal_id in case.get("internal_id")
 
 
 def test_show_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
-    # GIVEN a database with a family with data analysis set
+    # GIVEN a database with a case with data analysis set
     data_analysis = Pipeline.BALSAMIC
-    family = add_family(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
     cases = base_store.cases(data_analysis=str(data_analysis))
@@ -612,32 +612,32 @@ def test_show_data_analysis(base_store: Store, helpers):
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_include_case_by_data_analysis(base_store: Store, helpers):
     """Test to that cases can be included by data_analysis"""
 
-    # GIVEN a database with a family with data analysis set
+    # GIVEN a database with a case with data analysis set
     data_analysis = Pipeline.BALSAMIC
-    family = add_family(helpers, base_store, data_analysis=data_analysis)
+    new_case = add_case(helpers, base_store, data_analysis=data_analysis)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases by data_analysis
-    cases = base_store.cases(data_analysis=family.data_analysis)
+    cases = base_store.cases(data_analysis=new_case.data_analysis)
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_exclude_case_by_customer(base_store: Store, helpers):
     """Test to that cases can be excluded by customer"""
 
-    # GIVEN a database with a family and a customer
-    add_family(helpers, base_store, customer_id="cust000")
+    # GIVEN a database with a case and a customer
+    add_case(helpers, base_store, customer_id="cust000")
 
     # WHEN getting active cases by customer
     cases = base_store.cases(customer_id="dummy_cust")
@@ -649,9 +649,9 @@ def test_exclude_case_by_customer(base_store: Store, helpers):
 def test_include_case_by_customer(base_store: Store, helpers):
     """Test to that cases can be included by customer"""
 
-    # GIVEN a database with a family
+    # GIVEN a database with a case
     customer_id = "cust000"
-    family = add_family(helpers, base_store, customer_id=customer_id)
+    new_case = add_case(helpers, base_store, customer_id=customer_id)
 
     # WHEN getting active cases by customer
     cases = base_store.cases(customer_id=customer_id)
@@ -659,14 +659,14 @@ def test_include_case_by_customer(base_store: Store, helpers):
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_exclude_case_by_name(base_store: Store, helpers):
     """Test to that cases can be excluded by name"""
 
-    # GIVEN a database with a family
-    add_family(helpers, base_store)
+    # GIVEN a database with a case
+    add_case(helpers, base_store)
 
     # WHEN getting active cases by name
     cases = base_store.cases(name="dummy_name")
@@ -678,38 +678,38 @@ def test_exclude_case_by_name(base_store: Store, helpers):
 def test_include_case_by_partial_name(base_store: Store, helpers):
     """Test to that cases can be included by name"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
 
     # WHEN getting active cases by partial name
-    cases = base_store.cases(name=family.name[1:-1])
+    cases = base_store.cases(name=new_case.name[1:-1])
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.name in case.get("name")
+        assert new_case.name in case.get("name")
 
 
 def test_include_case_by_name(base_store: Store, helpers):
     """Test to that cases can be included by name"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
 
     # WHEN getting active cases by name
-    cases = base_store.cases(name=family.name)
+    cases = base_store.cases(name=new_case.name)
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.name in case.get("name")
+        assert new_case.name in case.get("name")
 
 
 def test_excluded_by_priority(base_store: Store, helpers):
     """Test to that cases can be excluded by priority"""
 
-    # GIVEN a database with a family with a priority
-    add_family(helpers, base_store, priority=PRIORITY_OPTIONS[0])
+    # GIVEN a database with a case with a priority
+    add_case(helpers, base_store, priority=PRIORITY_OPTIONS[0])
 
     # WHEN getting active cases by priority
     cases = base_store.cases(priority=PRIORITY_OPTIONS[1])
@@ -721,23 +721,23 @@ def test_excluded_by_priority(base_store: Store, helpers):
 def test_included_by_priority(base_store: Store, helpers):
     """Test to that cases can be included by priority"""
 
-    # GIVEN a database with a family with a priority
-    family = add_family(helpers, base_store, priority=PRIORITY_OPTIONS[0])
+    # GIVEN a database with a case with a priority
+    new_case = add_case(helpers, base_store, priority=PRIORITY_OPTIONS[0])
 
     # WHEN getting active cases by priority
-    cases = base_store.cases(priority=family.action)
+    cases = base_store.cases(priority=new_case.action)
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_excluded_by_action(base_store: Store, helpers):
     """Test to that cases can be excluded by action"""
 
-    # GIVEN a database with a family with an action
-    add_family(helpers, base_store, action=CASE_ACTIONS[0])
+    # GIVEN a database with a case with an action
+    add_case(helpers, base_store, action=CASE_ACTIONS[0])
 
     # WHEN getting active cases by action
     cases = base_store.cases(case_action=CASE_ACTIONS[1])
@@ -749,23 +749,23 @@ def test_excluded_by_action(base_store: Store, helpers):
 def test_included_by_action(base_store: Store, helpers):
     """Test to that cases can be included by action"""
 
-    # GIVEN a database with a family with an action
-    family = add_family(helpers, base_store, action=CASE_ACTIONS[0])
+    # GIVEN a database with a case with an action
+    new_case = add_case(helpers, base_store, action=CASE_ACTIONS[0])
 
     # WHEN getting active cases by action
-    cases = base_store.cases(case_action=family.action)
+    cases = base_store.cases(case_action=new_case.action)
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_exclude_case_by_internal_id(base_store: Store, helpers):
     """Test to that cases can be excluded by internal_id"""
 
-    # GIVEN a database with a family
-    add_family(helpers, base_store)
+    # GIVEN a database with a case
+    add_case(helpers, base_store)
 
     # WHEN getting active cases by internal_id
     cases = base_store.cases(internal_id="dummy_id")
@@ -777,43 +777,43 @@ def test_exclude_case_by_internal_id(base_store: Store, helpers):
 def test_include_case_by_partial_internal_id(base_store: Store, helpers):
     """Test to that cases can be included by internal_id"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
 
     # WHEN getting active cases by partial internal_id
-    cases = base_store.cases(internal_id=family.internal_id[1:-1])
+    cases = base_store.cases(internal_id=new_case.internal_id[1:-1])
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_include_case_by_internal_id(base_store: Store, helpers):
     """Test to that cases can be included by internal_id"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
 
     # WHEN getting active cases by internal_id
-    cases = base_store.cases(internal_id=family.internal_id)
+    cases = base_store.cases(internal_id=new_case.internal_id)
 
     # THEN cases should only contain this case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_only_prepared_cases(base_store: Store, helpers):
     """Test to that sequenced cases can be included"""
 
     # GIVEN a database with an prepared case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, prepared_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
-    neg_family = add_family(helpers, base_store, "neg_family")
+    base_store.relate_sample(new_case, sample, "unknown")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding prepared
     cases = base_store.cases(only_prepared=True)
@@ -821,19 +821,19 @@ def test_only_prepared_cases(base_store: Store, helpers):
     # THEN cases should only contain the prepared case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_only_received_cases(base_store: Store, helpers):
     """Test to that sequenced cases can be included"""
 
     # GIVEN a database with an received case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, received_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
-    neg_family = add_family(helpers, base_store, "neg_family")
+    base_store.relate_sample(new_case, sample, "unknown")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding received
     cases = base_store.cases(only_received=True)
@@ -841,19 +841,19 @@ def test_only_received_cases(base_store: Store, helpers):
     # THEN cases should only contain the received case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_only_sequenced_cases(base_store: Store, helpers):
     """Test to that sequenced cases can be included"""
 
     # GIVEN a database with an sequenced case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
-    neg_family = add_family(helpers, base_store, "neg_family")
+    base_store.relate_sample(new_case, sample, "unknown")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding sequenced
     cases = base_store.cases(only_sequenced=True)
@@ -861,19 +861,19 @@ def test_only_sequenced_cases(base_store: Store, helpers):
     # THEN cases should only contain the sequenced case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_only_delivered_cases(base_store: Store, helpers):
     """Test to that delivered cases can be included"""
 
     # GIVEN a database with an delivered case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, delivered_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
-    neg_family = add_family(helpers, base_store, "neg_family")
+    base_store.relate_sample(new_case, sample, "unknown")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding delivered
     cases = base_store.cases(only_delivered=True)
@@ -881,7 +881,7 @@ def test_only_delivered_cases(base_store: Store, helpers):
     # THEN cases should only contain the delivered case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_only_uploaded_cases(base_store: Store, helpers):
@@ -889,9 +889,9 @@ def test_only_uploaded_cases(base_store: Store, helpers):
 
     # GIVEN a database with an uploaded analysis
     helpers.add_analysis(base_store, uploaded_at=datetime.now())
-    neg_family = add_family(helpers, base_store, "neg_family")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding uploaded
     cases = base_store.cases(only_uploaded=True)
@@ -899,7 +899,7 @@ def test_only_uploaded_cases(base_store: Store, helpers):
     # THEN cases should only contain the uploaded case
     assert cases
     for case in cases:
-        assert neg_family.internal_id not in case.get("internal_id")
+        assert neg_new_case.internal_id not in case.get("internal_id")
 
 
 def test_only_delivery_reported_cases(base_store: Store, helpers):
@@ -907,9 +907,9 @@ def test_only_delivery_reported_cases(base_store: Store, helpers):
 
     # GIVEN a database with an delivery-reported analysis
     helpers.add_analysis(base_store, delivery_reported_at=datetime.now())
-    neg_family = add_family(helpers, base_store, "neg_family")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding delivery_reported
     cases = base_store.cases(only_delivery_reported=True)
@@ -917,21 +917,21 @@ def test_only_delivery_reported_cases(base_store: Store, helpers):
     # THEN cases should only contain the delivery-reported case
     assert cases
     for case in cases:
-        assert neg_family.internal_id not in case.get("internal_id")
+        assert neg_new_case.internal_id not in case.get("internal_id")
 
 
 def test_only_invoiced_cases(base_store: Store, helpers):
     """Test to that invoiced cases can be included"""
 
     # GIVEN a database with an invoiced case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
     sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     sample.invoice.invoiced_at = datetime.now()
-    base_store.relate_sample(family, sample, "unknown")
-    neg_family = add_family(helpers, base_store, "neg_family")
+    base_store.relate_sample(new_case, sample, "unknown")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding invoiced
     cases = base_store.cases(only_invoiced=True)
@@ -939,7 +939,7 @@ def test_only_invoiced_cases(base_store: Store, helpers):
     # THEN cases should only contain the invoiced case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_only_analysed_cases(base_store: Store, helpers):
@@ -947,9 +947,9 @@ def test_only_analysed_cases(base_store: Store, helpers):
 
     # GIVEN a database with a completed analysis
     helpers.add_analysis(base_store, completed_at=datetime.now())
-    neg_family = add_family(helpers, base_store, "neg_family")
+    neg_new_case = add_case(helpers, base_store, "neg_new_case")
     neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
-    base_store.relate_sample(neg_family, neg_sample, "unknown")
+    base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding not analysed
     cases = base_store.cases(only_analysed=True)
@@ -957,16 +957,16 @@ def test_only_analysed_cases(base_store: Store, helpers):
     # THEN cases should only contain the completed case
     assert cases
     for case in cases:
-        assert neg_family.internal_id not in case.get("internal_id")
+        assert neg_new_case.internal_id not in case.get("internal_id")
 
 
 def test_exclude_prepared_cases(base_store: Store, helpers):
     """Test to that sequenced cases can be excluded"""
 
     # GIVEN a database with an prepared case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, prepared_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases excluding prepared
     cases = base_store.cases(exclude_prepared=True)
@@ -979,9 +979,9 @@ def test_exclude_received_cases(base_store: Store, helpers):
     """Test to that sequenced cases can be excluded"""
 
     # GIVEN a database with an received case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, received_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases excluding received
     cases = base_store.cases(exclude_received=True)
@@ -994,9 +994,9 @@ def test_exclude_sequenced_cases(base_store: Store, helpers):
     """Test to that sequenced cases can be excluded"""
 
     # GIVEN a database with an sequenced case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases excluding sequenced
     cases = base_store.cases(exclude_sequenced=True)
@@ -1009,9 +1009,9 @@ def test_exclude_delivered_cases(base_store: Store, helpers):
     """Test to that delivered cases can be excluded"""
 
     # GIVEN a database with an delivered case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, delivered_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases excluding delivered
     cases = base_store.cases(exclude_delivered=True)
@@ -1050,11 +1050,11 @@ def test_exclude_invoiced_cases(base_store: Store, helpers):
     """Test to that invoiced cases can be excluded"""
 
     # GIVEN a database with an invoiced case
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
     sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     sample.invoice.invoiced_at = datetime.now()
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases excluding invoiced
     cases = base_store.cases(exclude_invoiced=True)
@@ -1077,52 +1077,52 @@ def test_exclude_analysed_cases(base_store: Store, helpers):
 
 
 def test_all_days(base_store: Store, helpers):
-    """Test to that cases filter in family in database"""
+    """Test to that cases filter in case in database"""
 
-    # GIVEN a database with a really old family
-    family = add_family(helpers, base_store, ordered_days_ago=9999)
+    # GIVEN a database with a really old case
+    new_case = add_case(helpers, base_store, ordered_days_ago=9999)
 
     # WHEN getting active cases with days = all
     cases = base_store.cases(days=0)
 
-    # THEN cases should contain the family
+    # THEN cases should contain the case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
-def test_new_family_included(base_store: Store, helpers):
-    """Test to that cases filter in family in database"""
+def test_new_case_included(base_store: Store, helpers):
+    """Test to that cases filter in case from database"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store, ordered_days_ago=1)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store, ordered_days_ago=1)
 
     # WHEN getting active cases not older than two days
-    cases = base_store.cases(days=2)
+    result_cases = base_store.cases(days=2)
 
-    # THEN cases should contain the family
-    assert cases
-    for case in cases:
-        assert family.internal_id in case.get("internal_id")
+    # THEN cases should contain the case
+    assert result_cases
+    for case in result_cases:
+        assert new_case.internal_id in case.get("internal_id")
 
 
-def test_old_family_not_included(base_store: Store, helpers):
-    """Test to that cases filter out old family in database"""
+def test_old_case_not_included(base_store: Store, helpers):
+    """Test to that cases filter out old case in database"""
 
-    # GIVEN a database with a family
-    add_family(helpers, base_store, ordered_days_ago=2)
+    # GIVEN a database with a case
+    add_case(helpers, base_store, ordered_days_ago=2)
 
     # WHEN getting active cases not older than one day
     cases = base_store.cases(days=1)
 
-    # THEN cases should not contain the family
+    # THEN cases should not contain the case
     assert not cases
 
 
 def test_analysis_bool_true(base_store: Store, helpers):
     """Test to that cases displays correct booleans for samples"""
 
-    # GIVEN a database with a family
+    # GIVEN a database with a case
     helpers.add_analysis(base_store, completed_at=datetime.now(), uploaded_at=datetime.now())
 
     # WHEN getting active cases
@@ -1139,7 +1139,7 @@ def test_samples_bool_true(base_store: Store, helpers):
     """Test to that cases displays correct booleans for samples"""
 
     # GIVEN sample that is received, prepared, sequenced and delivered
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(
         base_store,
         received_at=datetime.now(),
@@ -1153,7 +1153,7 @@ def test_samples_bool_true(base_store: Store, helpers):
     assert sample.delivered_at
     sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     sample.invoice.invoiced_at = datetime.now()
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1171,10 +1171,10 @@ def test_samples_bool_true(base_store: Store, helpers):
 def test_bool_false(base_store: Store, helpers):
     """Test to that cases displays correct received samples"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1194,14 +1194,14 @@ def test_bool_false(base_store: Store, helpers):
 def test_one_invoiced_sample(base_store: Store, helpers):
     """Test to that cases displays correct invoiced samples"""
 
-    # GIVEN a database with a family with an invoiced sample
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case with an invoiced sample
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
 
     sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
     sample.invoice.invoiced_at = datetime.now()
 
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.invoice is not None
 
     # WHEN getting active cases
@@ -1250,9 +1250,9 @@ def test_samples_delivered(base_store: Store, helpers):
     """Test to that cases displays when they were delivered """
 
     # GIVEN a database with a sample that is delivered
-    family = add_family(helpers, base_store)
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, delivered_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.delivered_at is not None
 
     # WHEN getting active cases
@@ -1282,12 +1282,12 @@ def test_analysis_completed_at(base_store: Store, helpers):
         assert case.get("analysis_completed_at") is not None
 
 
-def test_family_ordered_date(base_store: Store, helpers):
+def test_case_ordered_date(base_store: Store, helpers):
     """Test to that cases displays when they were ordered """
 
-    # GIVEN a database with a family without samples and no analyses
-    family = add_family(helpers, base_store)
-    assert family.ordered_at is not None
+    # GIVEN a database with a case without samples and no analyses
+    new_case = add_case(helpers, base_store)
+    assert new_case.ordered_at is not None
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1301,12 +1301,12 @@ def test_family_ordered_date(base_store: Store, helpers):
 def test_one_of_two_samples_received(base_store: Store, helpers):
     """Test to that cases displays correct received samples"""
 
-    # GIVEN a database with a family with a received sample and one not received
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case with a received sample and one not received
+    new_case = add_case(helpers, base_store)
     sample_received = helpers.add_sample(base_store, "sample_received", received_at=datetime.now())
     sample_not_received = helpers.add_sample(base_store, "sample_not_received", received=False)
-    base_store.relate_sample(family, sample_received, "unknown")
-    base_store.relate_sample(family, sample_not_received, "unknown")
+    base_store.relate_sample(new_case, sample_received, "unknown")
+    base_store.relate_sample(new_case, sample_not_received, "unknown")
     assert sample_received.received_at is not None
     assert sample_not_received.received_at is None
 
@@ -1323,10 +1323,10 @@ def test_one_of_two_samples_received(base_store: Store, helpers):
 def test_one_sequenced_sample(base_store: Store, helpers):
     """Test to that cases displays correct sequenced samples"""
 
-    # GIVEN a database with a family with a sequenced sample
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case with a sequenced sample
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.sequenced_at is not None
 
     # WHEN getting active cases
@@ -1341,10 +1341,10 @@ def test_one_sequenced_sample(base_store: Store, helpers):
 def test_one_prepared_sample(base_store: Store, helpers):
     """Test to that cases displays correct prepared samples"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, prepared_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.prepared_at is not None
 
     # WHEN getting active cases
@@ -1359,10 +1359,10 @@ def test_one_prepared_sample(base_store: Store, helpers):
 def test_one_received_sample(base_store: Store, helpers):
     """Test to that cases displays correct received samples"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, received_at=datetime.now())
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.received_at is not None
 
     # WHEN getting active cases
@@ -1377,10 +1377,10 @@ def test_one_received_sample(base_store: Store, helpers):
 def test_one_sample(base_store: Store, helpers):
     """Test to that cases displays correct total samples"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    base_store.relate_sample(family, sample, "unknown")
+    base_store.relate_sample(new_case, sample, "unknown")
     assert sample.received_at is None
     assert sample.prepared_at is None
     assert sample.delivered_at is None
@@ -1400,13 +1400,13 @@ def test_one_sample(base_store: Store, helpers):
         assert case.get("samples_invoiced") == 0
 
 
-def test_family_without_samples(base_store: Store, helpers):
+def test_case_without_samples(base_store: Store, helpers):
     """Test to that cases displays correct number samples"""
 
-    # GIVEN a database with a family without samples and no analyses
-    family = add_family(helpers, base_store)
-    assert not family.links
-    assert not family.analyses
+    # GIVEN a database with a case without samples and no analyses
+    new_case = add_case(helpers, base_store)
+    assert not new_case.links
+    assert not new_case.analyses
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1432,26 +1432,26 @@ def test_family_without_samples(base_store: Store, helpers):
         assert case.get("samples_invoiced_bool") is None
 
 
-def test_family_included(base_store: Store, helpers):
-    """Test to that cases displays family in database"""
+def test_case_included(base_store: Store, helpers):
+    """Test to that cases displays case in database"""
 
-    # GIVEN a database with a family
-    family = add_family(helpers, base_store)
+    # GIVEN a database with a case
+    new_case = add_case(helpers, base_store)
 
     # WHEN getting active cases
     cases = base_store.cases()
 
-    # THEN cases should contain the family
+    # THEN cases should contain the case
     assert cases
     for case in cases:
-        assert family.internal_id in case.get("internal_id")
+        assert new_case.internal_id in case.get("internal_id")
 
 
 def test_structure(base_store: Store, helpers):
-    """Test to that cases displays family in database"""
+    """Test to that cases displays case in database"""
 
-    # GIVEN a database with a family
-    add_family(helpers, base_store)
+    # GIVEN a database with a case
+    add_case(helpers, base_store)
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -1483,25 +1483,28 @@ def test_structure(base_store: Store, helpers):
         assert "samples_invoiced" in case.keys()
 
 
-def add_family(
+def add_case(
     helpers,
     disk_store,
-    family_id="family_test",
+    case_id="case_test",
     customer_id="cust_test",
     ordered_days_ago=0,
     action=None,
     priority=None,
     data_analysis=Pipeline.BALSAMIC,
+    data_delivery=DataDelivery.SCOUT,
 ):
-    """utility function to add a family to use in tests"""
+    """utility function to add a case to use in tests"""
     panel = helpers.ensure_panel(disk_store)
     customer = helpers.ensure_customer(disk_store, customer_id)
-    family = disk_store.add_family(data_analysis=data_analysis, name=family_id, panels=panel.name)
-    family.customer = customer
-    family.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
+    case = disk_store.add_case(
+        data_analysis=data_analysis, data_delivery=data_delivery, name=case_id, panels=panel.name
+    )
+    case.customer = customer
+    case.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:
-        family.action = action
+        case.action = action
     if priority:
-        family.priority = priority
-    disk_store.add_commit(family)
-    return family
+        case.priority = priority
+    disk_store.add_commit(case)
+    return case

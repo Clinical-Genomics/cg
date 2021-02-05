@@ -2,11 +2,10 @@
 import copy
 import json
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import pytest
-
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
 

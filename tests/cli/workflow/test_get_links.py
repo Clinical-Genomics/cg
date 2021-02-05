@@ -2,7 +2,6 @@
 
 import click
 import pytest
-
 from cg.cli.workflow.get_links import get_links
 
 
@@ -37,7 +36,7 @@ def test_get_links_non_existing_case_id(analysis_store, caplog):
 def test_get_links_case_id_no_links(base_store, helpers, workflow_case_id, caplog):
     """Test to get links for a case id in a populated store where samples are NOT linked"""
     # GIVEN a populated store with unlinked samples
-    helpers.add_family(base_store, workflow_case_id)
+    helpers.add_case(base_store, workflow_case_id)
     helpers.add_sample(base_store, "dna_sample", is_rna=False)
 
     case_obj = base_store.Family.query.first()
@@ -76,7 +75,7 @@ def test_get_links_sample_id_and_case_id(analysis_store):
 def test_get_links_case_id_and_sample_id_no_links(base_store, helpers, workflow_case_id, caplog):
     """Test to get links for a case id in a populated store where samples are NOT linked"""
     # GIVEN a populated store with unlinked samples
-    helpers.add_family(base_store, workflow_case_id)
+    helpers.add_case(base_store, workflow_case_id)
     helpers.add_sample(base_store, "dna_sample", is_rna=False)
 
     case_obj = base_store.Family.query.first()

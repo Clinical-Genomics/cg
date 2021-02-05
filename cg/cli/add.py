@@ -1,8 +1,7 @@
 import logging
 
 import click
-
-from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, Pipeline
+from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
 from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
@@ -158,6 +157,14 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
     required=True,
     type=EnumChoice(Pipeline),
 )
+@click.option(
+    "-dd",
+    "--data-delivery",
+    "data_delivery",
+    help="Update case data delivery",
+    required=True,
+    type=EnumChoice(DataDelivery),
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
@@ -166,6 +173,7 @@ def family(
     priority: str,
     panels: [str],
     data_analysis: Pipeline,
+    data_delivery: DataDelivery,
     customer_id: str,
     name: str,
 ):
@@ -182,12 +190,16 @@ def family(
             LOG.error(f"{panel_id}: panel not found")
             context.abort()
 
-    new_family = status.add_family(
-        data_analysis=data_analysis, name=name, panels=panels, priority=priority
+    new_case = status.add_case(
+        data_analysis=data_analysis,
+        data_delivery=data_delivery,
+        name=name,
+        panels=panels,
+        priority=priority,
     )
-    new_family.customer = customer_obj
-    status.add_commit(new_family)
-    LOG.info(f"{new_family.internal_id}: new family added")
+    new_case.customer = customer_obj
+    status.add_commit(new_case)
+    LOG.info(f"{new_case.internal_id}: new case added")
 
 
 @add.command()
@@ -202,8 +214,8 @@ def relationship(context, mother, father, status, family_id, sample_id):
     status_db = context.obj["status_db"]
     mother_obj = None
     father_obj = None
-    family_obj = status_db.family(family_id)
-    if family_obj is None:
+    case_obj = status_db.family(family_id)
+    if case_obj is None:
         LOG.error("%s: family not found", family_id)
         context.abort()
 
@@ -225,7 +237,7 @@ def relationship(context, mother, father, status, family_id, sample_id):
             context.abort()
 
     new_record = status_db.relate_sample(
-        family_obj, sample_obj, status, mother=mother_obj, father=father_obj
+        case_obj, sample_obj, status, mother=mother_obj, father=father_obj
     )
     status_db.add_commit(new_record)
-    LOG.info(f"related {family_obj.internal_id} to {sample_obj.internal_id}")
+    LOG.info("related %s to %s", case_obj.internal_id, sample_obj.internal_id)

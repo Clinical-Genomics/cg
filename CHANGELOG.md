@@ -14,12 +14,67 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-
 ## [19.0.0]
 
 ### Added
 ### Changed
-- reserved
+- reserved for mip decompress
+
+## [18.11.2]
+
+### Fixed
+- Chromograph image tags back on track
+
+## [18.11.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+
+### Added
+- New Fluffy workflow for preparing, starting and storing of analyses
+
+
+## [18.10.2]
+
+### Fixed
+- FLUFFY now have a validation schema and can be submitted in the Order Portal again
+- Samples of pools are now marked not to be invoiced, only the pool is invoiced
+
+## [18.10.1]
+
+### Added
+- Allow existing trio-samples to be re-run as single samples 
+
+## [18.10.0]
+
+### Added
+- Support for delivery type in the Order Portal
+
+## [18.9.1]
+
+### Added
+- cg upload vogue bioinfo-all uploads both BALSAMIC as well.
+
+## [18.9.0]
+
+### Added
+
+- Add functionality to upload balsamic analyses to scout
+
+## [18.8.0]
+
+### Added
+- cg workflow microsalt upload-analysis-vogue [case_id] to upload the latest analysis from specific case
+- cg workflow microsalt upload-latest-analyses-vogue to upload all latest analyses what haven't been uploaded
+
+## [18.7.2]
+
+### Changed
+
+- Skip deliver fastq files when delivering balsamic analysis
 
 ## [18.7.1]
 
