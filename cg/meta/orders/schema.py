@@ -15,7 +15,7 @@ from pyschemes import Scheme, validators
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
     EXTERNAL: str = "external"
-    FASTQ: str = "fastq"
+    FASTQ: str = str(Pipeline.FASTQ)
     FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"
     MICROSALT: str = str(Pipeline.MICROSALT)
@@ -105,7 +105,7 @@ MIP_SAMPLE = {
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     "require_qcok": bool,
-    "volume": str,
+    "volume": OptionalNone(TypeValidatorNone(str)),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
     "container_name": OptionalNone(TypeValidatorNone(str)),
@@ -336,6 +336,7 @@ ORDER_SCHEMES = {
     ),
     OrderType.FASTQ: Scheme({**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}),
     OrderType.RML: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
+    OrderType.FLUFFY: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
     OrderType.MICROSALT: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MICROSALT_SAMPLE, min_items=1)}
     ),

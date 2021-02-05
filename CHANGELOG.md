@@ -14,16 +14,27 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [18.10.1]
+## [18.10.3]
 
 ### Fixed
  - Fix so that variants gets uploaded to scout for balsamic samples
  - Fix so that upload breaks if balsamic case is WGS
 
+## [18.10.2]
+
+### Fixed
+- FLUFFY now have a validation schema and can be submitted in the Order Portal again
+- Samples of pools are now marked not to be invoiced, only the pool is invoiced
+
+## [18.10.1]
+
+### Added
+- Allow existing trio-samples to be re-run as single samples
+
 ## [18.10.0]
 
 ### Added
- - Support for delivery type in the Order Portal
+- Support for delivery type in the Order Portal
 
 ## [18.9.1]
 

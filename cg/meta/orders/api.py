@@ -173,8 +173,15 @@ class OrdersAPI(LimsHandler, StatusHandler):
             message += f", {customer_name} ({customer_id})"
         return message
 
+    def _submit_fluffy(self, order: dict) -> dict:
+        """Submit a batch of ready made libraries for FLUFFY analysis."""
+        return self._submit_pools(order)
+
     def _submit_rml(self, order: dict) -> dict:
-        """Submit a batch of ready made libraries."""
+        """Submit a batch of ready made libraries for sequencing."""
+        return self._submit_pools(order)
+
+    def _submit_pools(self, order):
         status_data = self.pools_to_status(order)
         project_data, lims_map = self.process_lims(order, order["samples"])
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
