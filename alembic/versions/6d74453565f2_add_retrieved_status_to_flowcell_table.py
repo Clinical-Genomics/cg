@@ -23,8 +23,8 @@ new_enum = mysql.ENUM(*new_options)
 
 
 def upgrade():
-    op.alter_column("flowcell", "status", existing_type=new_enum)
+    op.alter_column("flowcell", "status", type_=new_enum)
 
 
 def downgrade():
-    op.alter_column("flowcell", "status", existing_type=old_enum)
+    op.alter_column("flowcell", "status", type_=old_enum)
