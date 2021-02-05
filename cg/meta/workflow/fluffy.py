@@ -252,7 +252,7 @@ class FluffyAnalysisAPI:
         """
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_date = self.get_date_from_file_path(
-            deliverables_path=self.get_deliverables_path(case_id=case_id)
+            file_path=self.get_deliverables_path(case_id=case_id)
         )
         new_analysis: models.Analysis = self.status_db.add_analysis(
             pipeline=Pipeline.FLUFFY,
