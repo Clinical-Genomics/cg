@@ -53,7 +53,7 @@ class DataDelivery(StrEnum):
     SCOUT: str = "scout"
 
 
-PREP_CATEGORIES = ('cov','mic','rml','tgs','wes','wgs','wts')
+PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
 SEX_OPTIONS = ("male", "female", "unknown")
 
