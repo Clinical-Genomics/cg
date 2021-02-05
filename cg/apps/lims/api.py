@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Generator
+from typing import Generator, Optional
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
@@ -47,8 +47,7 @@ class LimsAPI(Lims, OrderHandler):
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
         lims_sample = Sample(self, id=lims_id)
-        data = self._export_sample(lims_sample)
-        return data
+        return self._export_sample(lims_sample)
 
     def samples_in_pools(self, pool_name, projectname):
         """Fetch all samples from a pool"""
@@ -66,7 +65,7 @@ class LimsAPI(Lims, OrderHandler):
     def _export_sample(self, lims_sample):
         """Get data from a LIMS sample."""
         udfs = lims_sample.udf
-        data = {
+        return {
             "id": lims_sample.id,
             "name": lims_sample.name,
             "project": self._export_project(lims_sample.project),
@@ -88,7 +87,6 @@ class LimsAPI(Lims, OrderHandler):
             ),
             "comment": udfs.get("comment"),
         }
-        return data
 
     @staticmethod
     def _export_artifact(lims_artifact):
@@ -170,8 +168,7 @@ class LimsAPI(Lims, OrderHandler):
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
-            lims_map = {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
-            return lims_map
+            return {lims_sample.name: lims_sample.id for lims_sample in lims_samples}
 
         return lims_samples
 
@@ -278,7 +275,7 @@ class LimsAPI(Lims, OrderHandler):
 
         return self._get_methods(step_names_udfs, lims_id)
 
-    def get_processing_time(self, lims_id: str) -> dt.datetime:
+    def get_processing_time(self, lims_id: str) -> Optional[dt.timedelta]:
         """Get the time it takes to process a sample"""
         received_at = self.get_received_date(lims_id)
         delivery_date = self.get_delivery_date(lims_id)
@@ -368,24 +365,22 @@ class LimsAPI(Lims, OrderHandler):
         """
         get capture kit from parent process for non-TWIST samples
         """
-        capture_kits = set(
+        return {
             artifact.parent_process.udf.get(udf_key)
             for artifact in artifacts
             if artifact.parent_process.udf.get(udf_key) is not None
-        )
-        return capture_kits
+        }
 
     @staticmethod
     def _find_twist_capture_kits(artifacts, udf_key):
         """
         get capture kit from parent process for TWIST samples
         """
-        capture_kits = set(
+        return {
             artifact.udf.get(udf_key)
             for artifact in artifacts
             if artifact.udf.get(udf_key) is not None
-        )
-        return capture_kits
+        }
 
     def get_sample_comment(self, sample_id: str) -> str:
         """Get the comment of the sample"""

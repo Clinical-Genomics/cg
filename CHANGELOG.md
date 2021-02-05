@@ -14,11 +14,17 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [18.10.3]
+## [18.11.1]
 
 ### Fixed
  - Fix so that variants gets uploaded to scout for balsamic samples
  - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+
+### Added
+- New Fluffy workflow for preparing, starting and storing of analyses
+
 
 ## [18.10.2]
 
@@ -29,7 +35,7 @@ Try to use the following format:
 ## [18.10.1]
 
 ### Added
-- Allow existing trio-samples to be re-run as single samples
+- Allow existing trio-samples to be re-run as single samples 
 
 ## [18.10.0]
 
