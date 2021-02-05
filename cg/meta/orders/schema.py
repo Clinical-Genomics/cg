@@ -16,7 +16,7 @@ from cg.utils.StrEnum import StrEnum
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
     EXTERNAL: str = "external"
-    FASTQ: str = "fastq"
+    FASTQ: str = str(Pipeline.FASTQ)
     FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"
     MICROSALT: str = str(Pipeline.MICROSALT)
@@ -337,6 +337,7 @@ ORDER_SCHEMES = {
     ),
     OrderType.FASTQ: Scheme({**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}),
     OrderType.RML: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
+    OrderType.FLUFFY: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
     OrderType.MICROSALT: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MICROSALT_SAMPLE, min_items=1)}
     ),
