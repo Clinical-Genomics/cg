@@ -7,12 +7,16 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
-
 ## [x.x.x]
 
 ### Added
 ### Changed
 ### Fixed
+
+## [18.11.2]
+
+### Fixed
+- Chromograph image tags back on track
 
 ## [18.11.1]
 
@@ -150,7 +154,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -165,7 +169,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows
