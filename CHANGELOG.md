@@ -14,6 +14,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [18.11.0]
+
+### Added
+- New Fluffy workflow for preparing, starting and storing of analyses
+
+
 ## [18.10.2]
 
 ### Fixed
@@ -224,12 +230,12 @@ Try to use the following format:
 - Removes dependency on deprecated excel-parser `xlrd`
 
 
-## 16.15.0
+## [16.15.0]
 
 ### Added
 - cg deploy hermes
 
-## 16.14.0
+## [16.14.0]
 
 ### Added
 - cg deploy fluffy
@@ -241,7 +247,7 @@ Try to use the following format:
 
 - Stop on bad values for analysis (pipeline) when adding family through CLI
 
-## 16.12.1
+## [16.12.1]
 
 ### Fixed
 - Save in Family and Analysis Admin views
@@ -259,19 +265,11 @@ Try to use the following format:
 - Lock dependency for xlrd so that we can parse modern excel files
 
 
-## 16.11.0
+## [16.11.0]
 
 ### Added
 - cg set family [CASEID] now has the option --data-delivery
 
-## [x.x.x]
-
-### Added
-- Fluffy workflow start
-
-### Fixed
-
-### Changed
 
 ## [16.10.4]
 
@@ -326,7 +324,7 @@ Try to use the following format:
 - Mutacc looks for 'id' instead of '_id' in case export
 - Convert 'other' to '0' for sex in case export
 
-## 16.7.0
+## [16.7.0]
 
 ### Added
 - Show sample priorities in created ticket
