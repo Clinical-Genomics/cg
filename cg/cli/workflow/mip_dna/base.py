@@ -341,8 +341,8 @@ def start(
         raise click.Abort
     LOG.info("Starting full MIP-DNA analysis workflow for case %s", case_id)
 
-    has_started = dna_api.has_latest_analysis_started(case_id=case_obj.internal_id)
-    if has_started:
+    analysis_ongoing = dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id)
+    if analysis_ongoing:
         status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
         LOG.warning(f"{case_obj.internal_id}: analysis status is {status} - skipping")
         return
