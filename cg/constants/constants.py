@@ -32,7 +32,7 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 CASE_ACTIONS = ("analyze", "running", "hold")
 
-FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
+FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
 
 class Pipeline(StrEnum):
