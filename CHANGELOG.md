@@ -14,12 +14,32 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [18.10.0]
 
+## [18.11.0]
+
+### Added
+- alembic functionality
 ### Changed
 - destination server PDC retrieval novaseq flowcells thalamus -> hasta
 ### Fixed
 - flowcell status after PDC retrieval ondisk -> retrieved
+
+## [18.10.2]
+
+### Fixed
+- FLUFFY now have a validation schema and can be submitted in the Order Portal again
+- Samples of pools are now marked not to be invoiced, only the pool is invoiced
+
+## [18.10.1]
+
+### Added
+- Allow existing trio-samples to be re-run as single samples 
+
+## [18.10.0]
+
+### Added
+- Support for delivery type in the Order Portal
+
 
 ## [18.9.1]
 
@@ -44,7 +64,6 @@ Try to use the following format:
 
 - Skip deliver fastq files when delivering balsamic analysis
 
-
 ## [18.7.1]
 
 ### Fixed
@@ -54,7 +73,7 @@ Try to use the following format:
 ## [18.7.0]
 
 ### Added
--Added customer name in order tickets
+- Added customer name in order tickets
 
 ## [18.6.1]
 

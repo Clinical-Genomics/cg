@@ -7,7 +7,7 @@ class ResetHandler:
     def reset_observations(self, case_id: str):
         """Reset links to loqusdb for a case."""
 
-        family_obj = self.family(case_id)
+        case_obj = self.family(case_id)
 
-        for link in family_obj.links:
+        for link in case_obj.links:
             link.sample.loqusdb_id = None

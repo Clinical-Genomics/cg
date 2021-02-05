@@ -1,8 +1,7 @@
 import datetime as dt
 
 import pytest
-
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
 
@@ -22,6 +21,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert pool["name"] == "pool-1"
     assert pool["application"] == "RMLS05R150"
     assert pool["data_analysis"] == str(Pipeline.FLUFFY)
+    assert pool["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
     assert len(pool["samples"]) == 2
     sample = pool["samples"][0]
     assert sample["name"] == "sample1"
@@ -56,6 +56,8 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert data["customer"] == "cust002"
     assert data["order"] == "Microbial samples"
     assert data["comment"] == "Order comment"
+    assert data["data_analysis"] == str(Pipeline.MICROSALT)
+    assert data["data_delivery"] == str(DataDelivery.FASTQ)
 
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data["samples"][0]
@@ -69,14 +71,15 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
 
 
 def test_families_to_status(mip_order_to_submit):
-    # GIVEN a scout order with a trio family
+    # GIVEN a scout order with a trio case
     # WHEN parsing for status
     data = StatusHandler.cases_to_status(mip_order_to_submit)
-    # THEN it should pick out the family
+    # THEN it should pick out the case
     assert len(data["families"]) == 2
     family = data["families"][0]
     assert family["name"] == "family1"
     assert family["data_analysis"] == str(Pipeline.MIP_DNA)
+    assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == "standard"
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
@@ -94,7 +97,6 @@ def test_families_to_status(mip_order_to_submit):
 
 
 def test_store_rml(orders_api, base_store, rml_status_data):
-
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
     assert base_store.families(customer=None).count() == 0
@@ -119,14 +121,23 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
     assert new_pool.name == "pool-2"
     assert new_pool.application_version.application.tag == "RMLS05R150"
-    assert new_pool.data_analysis == str(Pipeline.FLUFFY)
+    assert not hasattr(new_pool, "data_analysis")
+
     # ... and add a delivery
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
 
+    new_case = base_store.families(customer=None).first()
+    assert new_case.data_analysis == str(Pipeline.FLUFFY)
+    assert new_case.data_delivery == str(DataDelivery.NIPT_VIEWER)
+
+    # and that the pool is set for invoicing but not the samples of the pool
+    assert not new_pool.no_invoice
+    for link in new_case.links:
+        assert link.sample.no_invoice
+
 
 def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
-
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
 
@@ -159,7 +170,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         samples=fastq_status_data["samples"],
     )
 
-    # THEN it should store the samples and create a family for each sample
+    # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
     assert base_store.families().count() == 2
@@ -169,9 +180,11 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
+    assert family_link.family.data_analysis == Pipeline.FASTQ
+    assert family_link.family.data_delivery == DataDelivery.FASTQ
 
 
-def test_store_samples_data_analysis_stored(orders_api, base_store, fastq_status_data):
+def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a fastq order
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
@@ -210,7 +223,6 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
 
 
 def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
-
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
@@ -225,9 +237,10 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
+        data_delivery=DataDelivery.FASTQ_QC,
     )
 
-    # THEN it should store the samples under a case (family) and the used previously unknown
+    # THEN it should store the samples under a case (case) and the used previously unknown
     # organisms
     assert new_samples
     assert base_store.families().count() == 1
@@ -237,7 +250,6 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
 
 
 def test_store_microbial_case_data_analysis_stored(orders_api, base_store, microbial_status_data):
-
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
@@ -251,6 +263,7 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
+        data_delivery=DataDelivery.FASTQ_QC,
     )
 
     # THEN store the samples under a case with the microbial data_analysis type on case level
@@ -259,10 +272,10 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
 
     microbial_case = base_store.families().first()
     assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
+    assert microbial_case.data_delivery == str(DataDelivery.FASTQ_QC)
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
-
     # GIVEN a basic store missing the application on the samples
 
     for sample in microbial_status_data["samples"]:
@@ -279,11 +292,11 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
             samples=microbial_status_data["samples"],
             comment="",
             data_analysis=Pipeline.MICROSALT,
+            data_delivery=DataDelivery.FASTQ_QC,
         )
 
 
 def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
-
     # GIVEN a basic store with no samples
     assert base_store.samples().count() == 0
 
@@ -296,6 +309,7 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
         samples=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
+        data_delivery=DataDelivery.FASTQ_QC,
     )
 
     # THEN it should store the sample priority
@@ -319,16 +333,17 @@ def test_store_mip(orders_api, base_store, mip_status_data):
         cases=mip_status_data["families"],
     )
 
-    # THEN it should create and link samples and the family
+    # THEN it should create and link samples and the case
     assert len(new_families) == 2
-    new_family = new_families[0]
-    assert new_family.name == "family1"
-    assert set(new_family.panels) == {"IEM"}
-    assert new_family.priority_human == "standard"
+    new_case = new_families[0]
+    assert new_case.name == "family1"
+    assert set(new_case.panels) == {"IEM"}
+    assert new_case.priority_human == "standard"
 
-    assert len(new_family.links) == 3
-    new_link = new_family.links[0]
-    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
+    assert len(new_case.links) == 3
+    new_link = new_case.links[0]
+    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_case.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
@@ -336,10 +351,10 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.sex == "female"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
     assert new_link.sample.is_tumour
-    assert isinstance(new_family.links[1].sample.comment, str)
+    assert isinstance(new_case.links[1].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_family.links:
+    for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
 
@@ -366,6 +381,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert len(new_casing.links) == 2
     new_link = new_casing.links[0]
     assert new_casing.data_analysis == str(Pipeline.MIP_RNA)
+    assert new_casing.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
     assert new_link.sample.time_point == 1
@@ -394,7 +410,6 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
 
 
 def test_store_external(orders_api, base_store, external_status_data):
-
     # GIVEN a basic store with no samples or nothing in it + external order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
@@ -408,32 +423,32 @@ def test_store_external(orders_api, base_store, external_status_data):
         cases=external_status_data["families"],
     )
 
-    # THEN it should create and link samples and the family
-    family_obj = base_store.families().first()
+    # THEN it should create and link samples and the case
+    case_obj = base_store.families().first()
     assert len(new_families) == 1
-    new_family = new_families[0]
-    assert new_family == family_obj
-    assert new_family.name == "fam2"
-    assert new_family.data_analysis == str(Pipeline.MIP_DNA)
-    assert set(new_family.panels) == {"CTD", "CILM"}
-    assert new_family.priority_human == "priority"
+    new_case = new_families[0]
+    assert new_case == case_obj
+    assert new_case.name == "fam2"
+    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
+    assert new_case.data_delivery == str(DataDelivery.SCOUT)
+    assert set(new_case.panels) == {"CTD", "CILM"}
+    assert new_case.priority_human == "priority"
 
-    assert len(new_family.links) == 2
-    new_link = new_family.links[0]
+    assert len(new_case.links) == 2
+    new_link = new_case.links[0]
     assert new_link.status == "affected"
     assert new_link.sample.name == "sample1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.capture_kit == "Agilent Sureselect V5"
     assert new_link.sample.application_version.application.tag == "EXXCUSR000"
-    assert isinstance(new_family.links[0].sample.comment, str)
+    assert isinstance(new_case.links[0].sample.comment, str)
 
     assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_family.links:
+    for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
 
 def test_store_external_bad_apptag(orders_api, base_store, external_status_data):
-
     # GIVEN a basic store with no samples or nothing in it + external order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
@@ -455,7 +470,6 @@ def test_store_external_bad_apptag(orders_api, base_store, external_status_data)
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
-
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
@@ -474,7 +488,6 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
-
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
@@ -492,7 +505,6 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
 
 
 def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):
-
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
@@ -512,7 +524,6 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
 
 
 def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
-
     # GIVEN a basic store with no samples and a cancer order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
@@ -526,16 +537,17 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
         cases=balsamic_status_data["families"],
     )
 
-    # THEN it should create and link samples and the family
+    # THEN it should create and link samples and the case
     assert len(new_families) == 1
-    new_family = new_families[0]
-    assert new_family.name == "family1"
-    assert new_family.data_analysis == str(Pipeline.BALSAMIC)
-    assert set(new_family.panels) == set()
-    assert new_family.priority_human == "standard"
+    new_case = new_families[0]
+    assert new_case.name == "family1"
+    assert new_case.data_analysis == str(Pipeline.BALSAMIC)
+    assert new_case.data_delivery == str(DataDelivery.SCOUT)
+    assert set(new_case.panels) == set()
+    assert new_case.priority_human == "standard"
 
-    assert len(new_family.links) == 1
-    new_link = new_family.links[0]
+    assert len(new_case.links) == 1
+    new_link = new_case.links[0]
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
@@ -543,5 +555,5 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_link.sample.is_tumour
 
     assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_family.links:
+    for link in new_case.links:
         assert len(link.sample.deliveries) == 1
