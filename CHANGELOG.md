@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Fixed
+- Fix message in order ticket that says what type of project it is
+
 ## [18.11.1]
 
 ### Fixed
