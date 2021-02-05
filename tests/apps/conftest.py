@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 import requests
-
 from cg.utils.commands import Process
 
 # File fixtures for the apps

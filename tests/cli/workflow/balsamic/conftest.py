@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hermes.hermes_api import HermesApi
@@ -24,13 +23,6 @@ def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
-
-
-@pytest.fixture(name="balsamic_housekeeper_dir")
-def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
-    """Return the path to the balsamic housekeeper dir"""
-    balsamic_housekeeper_dir = tmpdir_factory.mktemp("bundles")
-    return balsamic_housekeeper_dir
 
 
 @pytest.fixture(name="balsamic_housekeeper_dir")

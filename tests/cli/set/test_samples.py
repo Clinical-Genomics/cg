@@ -2,7 +2,6 @@
 import logging
 
 import pytest
-
 from cg.cli.set.base import samples
 from cg.store import Store
 

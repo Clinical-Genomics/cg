@@ -4,9 +4,6 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from housekeeper.store import models as hk_models
-from ruamel import yaml
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
@@ -15,6 +12,8 @@ from cg.constants import Pipeline
 from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
+from housekeeper.store import models as hk_models
+from ruamel import yaml
 
 from .balsamic_config_builder import BalsamicConfigBuilder
 from .mip_config_builder import MipConfigBuilder

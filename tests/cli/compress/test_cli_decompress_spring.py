@@ -3,10 +3,10 @@
 import logging
 
 from cg.cli.compress.fastq import (
-    decompress_sample,
-    decompress_flowcell,
-    decompress_ticket,
     decompress_case,
+    decompress_flowcell,
+    decompress_sample,
+    decompress_ticket,
 )
 
 

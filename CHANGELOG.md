@@ -15,6 +15,18 @@ Try to use the following format:
 ### Fixed
 - Chromograph image tags back on track
 
+## [18.11.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+
+### Added
+- New Fluffy workflow for preparing, starting and storing of analyses
+
+
 ## [18.10.2]
 
 ### Fixed

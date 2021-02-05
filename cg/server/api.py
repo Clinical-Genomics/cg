@@ -5,15 +5,14 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 
+from cg.apps.lims import parse_json_order, parse_orderform
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.exc import DuplicateRecordError, OrderError, OrderFormError
+from cg.meta.orders import OrdersAPI, OrderType
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
-
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import DuplicateRecordError, OrderFormError, OrderError
-from cg.apps.lims import parse_orderform, parse_json_order
-from cg.meta.orders import OrdersAPI, OrderType
 
 from .ext import db, lims, osticket
 

@@ -26,8 +26,8 @@ class ScoutIndividual(BaseModel):
     capture_kit: Optional[str] = None
     alignment_path: Optional[str] = None
     analysis_type: Literal["wgs", "wes", "mixed", "unknown", "panel", "external"] = None
-    confirmed_sex: Optional[bool] = False
-    confirmed_parent: Optional[bool] = False
+    confirmed_sex: Optional[bool] = None
+    confirmed_parent: Optional[bool] = None
 
     tissue_type: Optional[str] = None
 
