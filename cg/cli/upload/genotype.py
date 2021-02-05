@@ -1,7 +1,7 @@
 """Code for uploading genotype data via CLI"""
-import click
 import logging
 
+import click
 from cg.meta.upload.gt import UploadGenotypesAPI
 
 from .utils import suggest_cases_to_upload

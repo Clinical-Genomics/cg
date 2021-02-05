@@ -4,7 +4,6 @@ import datetime as dt
 import logging
 
 import click
-
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 from cg.store.get.cases import ready_for_spring_compression

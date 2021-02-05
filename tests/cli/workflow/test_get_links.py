@@ -2,7 +2,6 @@
 
 import click
 import pytest
-
 from cg.cli.workflow.get_links import get_links
 
 

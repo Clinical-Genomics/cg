@@ -1,7 +1,7 @@
 """This script tests the cli methods to add cases to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.store import Store
 
 

@@ -1,7 +1,6 @@
 """Test the methods that generate a scout load config"""
 
 import pytest
-
 from cg.constants import Pipeline
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_load_config import (
@@ -39,15 +38,15 @@ def test_add_mandatory_info_to_mip_config(
 
 
 def test_generate_balsamic_load_config(
-    analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
+    balsamic_analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN a analysis object that have been run with balsamic
-    assert analysis_obj.pipeline == Pipeline.BALSAMIC
+    assert balsamic_analysis_obj.pipeline == Pipeline.BALSAMIC
 
     # GIVEN a upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=analysis_obj)
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=balsamic_analysis_obj)
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, BalsamicLoadConfig)

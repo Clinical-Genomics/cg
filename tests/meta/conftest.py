@@ -4,7 +4,6 @@ from datetime import datetime
 
 import pytest
 from _pytest import tmpdir
-
 from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI

@@ -1,10 +1,9 @@
 import click
-from colorclass import Color
-from tabulate import tabulate
-
 from cg.apps import tb
 from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
 from cg.store import Store
+from colorclass import Color
+from tabulate import tabulate
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
