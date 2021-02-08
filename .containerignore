@@ -1,0 +1,12 @@
+alembic
+tests
+dist
+scripts
+cg.egg-info
+.pytest_cache
+.github
+.gitignore
+.gitlint.yaml
+.pre-commit-config.yaml
+DEPLOYMENT.md
+CONTRIBUTING.md
