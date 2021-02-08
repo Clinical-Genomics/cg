@@ -14,6 +14,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+
+### Added
+- Add prep-category 'cov' on applications
+
 ## [18.10.2]
 
 ### Fixed
