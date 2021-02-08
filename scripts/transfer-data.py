@@ -22,7 +22,6 @@ import cg.meta.workflow.microsalt
 import click
 import pymongo
 import ruamel.yaml
-
 from cg.apps.lims import LimsAPI
 from cg.constants import PRIORITY_MAP
 from cg.store import Store, models

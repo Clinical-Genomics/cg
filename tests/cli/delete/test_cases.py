@@ -2,7 +2,6 @@
 import logging
 
 import pytest
-
 from cg.cli.delete.cases import cases
 from cg.store import Store
 

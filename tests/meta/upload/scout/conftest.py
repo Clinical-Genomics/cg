@@ -219,6 +219,8 @@ def fixture_mip_analysis_obj(
 
 @pytest.fixture(name="balsamic_analysis_obj")
 def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    for link_object in analysis_obj.family.links:
+        link_object.sample.application_version.application.prep_category = "wes"
     return analysis_obj
 
 

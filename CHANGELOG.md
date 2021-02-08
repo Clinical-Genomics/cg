@@ -7,7 +7,6 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
-
 ## [x.x.x]
 
 ### Added
@@ -15,7 +14,7 @@ Try to use the following format:
 ### Fixed
 
 
-## [18.11.0]
+## [18.12.0]
 
 ### Added
 - alembic functionality
@@ -23,6 +22,20 @@ Try to use the following format:
 - destination server PDC retrieval novaseq flowcells thalamus -> hasta
 ### Fixed
 - flowcell status after PDC retrieval ondisk -> retrieved
+
+## [18.11.2]
+
+### Fixed
+- Chromograph image tags back on track
+
+## [18.11.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+- New Fluffy workflow for preparing, starting and storing of analyses
 
 ## [18.10.2]
 
@@ -149,7 +162,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -164,7 +177,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows

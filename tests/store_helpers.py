@@ -3,11 +3,10 @@ import logging
 from datetime import datetime
 from typing import List
 
-from housekeeper.store import models as hk_models
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -21,11 +20,14 @@ class StoreHelpers:
     ) -> hk_models.Bundle:
         """Utility function to add a bundle of information to a housekeeper api"""
         bundle_exists = False
-        for bundle in store.bundles():
-            if bundle.name != bundle_data["name"]:
-                continue
-            bundle_exists = True
-            _bundle = bundle
+        if not store.bundles():
+            bundle_exists = False
+        else:
+            for bundle in store.bundles():
+                if bundle.name != bundle_data["name"]:
+                    continue
+                bundle_exists = True
+                _bundle = bundle
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
             store.add_commit(_bundle, _version)
@@ -497,12 +499,8 @@ class StoreHelpers:
 
     def add_samples(self, store: Store, nr_samples: int = 5) -> list:
         """Utility function to add a number of samples to use in tests"""
-        samples = []
-        if nr_samples < 2:
-            nr_samples = 2
-        for sample_id in range(1, nr_samples):
-            samples.append(self.add_sample(store, str(sample_id)))
-        return samples
+        nr_samples = max(nr_samples, 2)
+        return [self.add_sample(store, str(sample_id)) for sample_id in range(1, nr_samples)]
 
     @staticmethod
     def add_flowcell(

@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 import ruamel.yaml
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -22,6 +21,7 @@ from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
+from .mocks.limsmock import MockLimsAPI
 from .mocks.madeline import MockMadelineAPI
 from .mocks.process_mock import ProcessMock
 from .mocks.scout import MockScoutAPI
@@ -81,7 +81,7 @@ def fixture_ticket_nr() -> int:
 @pytest.fixture(scope="function", name="analysis_family_single_case")
 def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Build an example case."""
-    family = {
+    return {
         "name": family_name,
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
@@ -99,13 +99,12 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: in
             }
         ],
     }
-    return family
 
 
 @pytest.fixture(scope="function", name="analysis_family")
 def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Return a dictionary with information from a analysis case"""
-    family = {
+    return {
         "name": family_name,
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
@@ -144,8 +143,6 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> d
         ],
     }
 
-    return family
-
 
 # Config fixtures
 
@@ -153,7 +150,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> d
 @pytest.fixture
 def chanjo_config_dict():
     """Chanjo configs"""
-    _config = dict()
+    _config = {}
     _config.update(CHANJO_CONFIG)
     return _config
 
@@ -161,7 +158,7 @@ def chanjo_config_dict():
 @pytest.fixture
 def crunchy_config_dict():
     """Crunchy configs"""
-    _config = dict()
+    _config = {}
     _config.update(CRUNCHY_CONFIG)
     return _config
 
@@ -169,8 +166,12 @@ def crunchy_config_dict():
 @pytest.fixture(name="hk_config_dict")
 def fixture_hk_config_dict(root_path):
     """Crunchy configs"""
-    _config = {"housekeeper": {"database": "sqlite:///:memory:", "root": str(root_path)}}
-    return _config
+    return {
+        "housekeeper": {
+            "database": "sqlite:///:memory:",
+            "root": str(root_path),
+        }
+    }
 
 
 @pytest.fixture(name="genotype_config")
@@ -178,14 +179,13 @@ def fixture_genotype_config() -> dict:
     """
     genotype config fixture
     """
-    _config = {
+    return {
         "genotype": {
             "database": "database",
             "config_path": "config/path",
             "binary_path": "gtdb",
         }
     }
-    return _config
 
 
 # Api fixtures
@@ -254,50 +254,43 @@ def tmp_file(project_dir):
 @pytest.fixture(name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with orderforms"""
-    _path = fixtures_dir / "orderforms"
-    return _path
+    return fixtures_dir / "orderforms"
 
 
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
-    _path = apps_dir / "mip" / "dna" / "store"
-    return _path
+    return apps_dir / "mip" / "dna" / "store"
 
 
 @pytest.fixture(name="mip_analysis_dir")
 def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with mip analysis files"""
-    _path = analysis_dir / "mip"
-    return _path
+    return analysis_dir / "mip"
 
 
 @pytest.fixture(name="balsamic_analysis_dir")
 def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    _path = analysis_dir / "balsamic"
-    return _path
+    return analysis_dir / "balsamic"
 
 
 @pytest.fixture(name="balsamic_panel_analysis_dir")
 def fixture_balsamic_panel_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    _path = balsamic_analysis_dir / "tn_panel"
-    return _path
+    return balsamic_analysis_dir / "tn_panel"
 
 
 @pytest.fixture(name="mip_dna_analysis_dir")
 def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files"""
-    _path = mip_analysis_dir / "dna"
-    return _path
+    return mip_analysis_dir / "dna"
 
 
 @pytest.fixture(name="sample1_cram")
 def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for sample 1"""
-    _path = mip_dna_analysis_dir / "adm1.cram"
-    return _path
+    return mip_dna_analysis_dir / "adm1.cram"
 
 
 @pytest.fixture(name="mip_deliverables_file")
@@ -309,8 +302,7 @@ def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to to a vcf file"""
-    _path = mip_dna_store_files / "yellowhog_clinical_selected.vcf"
-    return _path
+    return mip_dna_store_files / "yellowhog_clinical_selected.vcf"
 
 
 # Orderform fixtures
@@ -319,15 +311,13 @@ def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    _file = orderforms / "1603.9.microbial.xlsx"
-    return str(_file)
+    return Path(orderforms / "1603.9.microbial.xlsx").as_posix()
 
 
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    _file = orderforms / "1604.10.rml.xlsx"
-    return str(_file)
+    return Path(orderforms / "1604.10.rml.xlsx").as_posix()
 
 
 @pytest.fixture(name="madeline_output")
@@ -552,39 +542,34 @@ def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
     """Get some bundle data for housekeeper"""
-    data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
     }
-    return data
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
 def fixture_sample_hk_bundle_no_files(sample: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
+    return {
         "name": sample,
         "created": timestamp,
         "expires": timestamp,
         "files": [],
     }
 
-    return hk_bundle_data
-
 
 @pytest.fixture(scope="function", name="case_hk_bundle_no_files")
 def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
-    hk_bundle_data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [],
     }
-
-    return hk_bundle_data
 
 
 @pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
@@ -643,8 +628,7 @@ def fixture_hk_version_obj(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
     """Get a housekeeper version object"""
-    _version = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
-    return _version
+    return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
 
 # Process Mock
@@ -680,8 +664,7 @@ def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
 @pytest.fixture(scope="function", name="scout_api")
 def fixture_scout_api() -> MockScoutAPI:
     """Setup Scout api."""
-    _api = MockScoutAPI()
-    return _api
+    return MockScoutAPI()
 
 
 # Crunchy fixtures
@@ -690,8 +673,7 @@ def fixture_scout_api() -> MockScoutAPI:
 @pytest.fixture(scope="function", name="crunchy_api")
 def fixture_crunchy_api():
     """Setup Crunchy api."""
-    _api = MockCrunchyAPI()
-    return _api
+    return MockCrunchyAPI()
 
 
 # Store fixtures
@@ -733,13 +715,12 @@ def fixture_customer_group() -> str:
 @pytest.fixture(scope="function", name="customer_production")
 def fixture_customer_production(customer_group) -> dict:
     """Return a dictionary with information about the prod customer"""
-    _cust = dict(
+    return dict(
         customer_id="cust000",
         name="Production",
         scout_access=True,
         customer_group=customer_group,
     )
-    return _cust
 
 
 @pytest.fixture(scope="function", name="external_wgs_application_tag")
@@ -751,14 +732,13 @@ def fixture_external_wgs_application_tag() -> str:
 @pytest.fixture(scope="function", name="external_wgs_info")
 def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
     """Return a dictionary with information external WGS application"""
-    _info = dict(
+    return dict(
         application_tag=external_wgs_application_tag,
         application_type="wgs",
         description="External WGS",
         is_external=True,
         target_reads=10,
     )
-    return _info
 
 
 @pytest.fixture(scope="function", name="external_wes_application_tag")
@@ -770,14 +750,13 @@ def fixture_external_wes_application_tag() -> str:
 @pytest.fixture(scope="function", name="external_wes_info")
 def fixture_external_wes_info(external_wes_application_tag) -> dict:
     """Return a dictionary with information external WES application"""
-    _info = dict(
+    return dict(
         application_tag=external_wes_application_tag,
         application_type="wes",
         description="External WES",
         is_external=True,
         target_reads=10,
     )
-    return _info
 
 
 @pytest.fixture(scope="function", name="wgs_application_tag")
@@ -789,7 +768,7 @@ def fixture_wgs_application_tag() -> str:
 @pytest.fixture(scope="function", name="wgs_application_info")
 def fixture_wgs_application_info(wgs_application_tag) -> dict:
     """Return a dictionary with information the WGS application"""
-    _info = dict(
+    return dict(
         application_tag=wgs_application_tag,
         application_type="wgs",
         description="WGS, double",
@@ -798,7 +777,6 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
         is_accredited=True,
         target_reads=10,
     )
-    return _info
 
 
 @pytest.fixture(scope="function", name="store")
@@ -1013,10 +991,10 @@ def disk_store(cli_runner, invoke_cli) -> Store:
     """Store on disk"""
     database = "./test_db.sqlite3"
     database_path = Path(database)
-    database_uri = f"sqlite:///{database}"
     with cli_runner.isolated_filesystem():
         assert database_path.exists() is False
 
+        database_uri = f"sqlite:///{database}"
         # WHEN calling "init"
         result = invoke_cli(["--database", database_uri, "init"])
 
@@ -1031,3 +1009,8 @@ def disk_store(cli_runner, invoke_cli) -> Store:
 @pytest.fixture(scope="function", name="trailblazer_api")
 def fixture_trailblazer_api() -> MockTB:
     return MockTB()
+
+
+@pytest.fixture(scope="function", name="lims_api")
+def fixture_lims_api() -> MockLimsAPI:
+    return MockLimsAPI()

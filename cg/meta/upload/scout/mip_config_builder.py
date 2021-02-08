@@ -3,8 +3,6 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from housekeeper.store import models as hk_models
-
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
@@ -17,6 +15,7 @@ from cg.meta.upload.scout.scout_load_config import (
 )
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -115,8 +114,10 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.mt_bam = self.fetch_sample_file(
             hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
         )
-        config_sample.chromograph_images.autozyg = self.fetch_sample_file(
-            hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
+        config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
+            file_path=self.fetch_sample_file(
+                hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
+            )
         )
         config_sample.chromograph_images.coverage = self.extract_generic_filepath(
             file_path=self.fetch_sample_file(
