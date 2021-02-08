@@ -38,7 +38,7 @@ class MockScoutAPI(ScoutAPI):
     # Overridden functions
 
     def upload(self, data: dict, threshold: int = 5, force: bool = False):
-        """Load analysis of a new family into Scout."""
+        """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
 
     def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):

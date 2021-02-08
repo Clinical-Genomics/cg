@@ -93,7 +93,7 @@ def test_store_completed_good_cases(
                 case_obj.action = "running"
                 status_db.commit()
             else:
-                helpers.add_family(store=status_db, internal_id=case_id, action="running")
+                helpers.add_case(store=status_db, internal_id=case_id, action="running")
 
         # WHEN we run store all completed cases
         result = cli_runner.invoke(completed, obj=mip_store_context)

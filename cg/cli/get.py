@@ -71,14 +71,14 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 def relations(context: click.Context, family_id: str):
     """Get information about a family relations."""
 
-    family_obj = context.obj["status_db"].family(family_id)
-    if family_obj is None:
+    case_obj = context.obj["status_db"].family(family_id)
+    if case_obj is None:
         LOG.error("%s: family doesn't exist", family_id)
         context.abort()
 
-    LOG.debug("%s: get info about family relations", family_obj.internal_id)
+    LOG.debug("%s: get info about family relations", case_obj.internal_id)
 
-    for link_obj in family_obj.links:
+    for link_obj in case_obj.links:
 
         row = [
             link_obj.sample.internal_id if link_obj.sample else "",
@@ -113,27 +113,27 @@ def family(
     else:
         families = []
         for family_id in family_ids:
-            family_obj = context.obj["status_db"].family(family_id)
-            if family_obj is None:
+            case_obj = context.obj["status_db"].family(family_id)
+            if case_obj is None:
                 LOG.error(f"{family_id}: family doesn't exist")
                 context.abort()
-            families.append(family_obj)
+            families.append(case_obj)
 
-    for family_obj in families:
-        LOG.debug(f"{family_obj.internal_id}: get info about family")
+    for case_obj in families:
+        LOG.debug(f"{case_obj.internal_id}: get info about family")
         row = [
-            family_obj.internal_id,
-            family_obj.name,
-            family_obj.customer.internal_id,
-            family_obj.priority_human,
-            ", ".join(family_obj.panels),
-            family_obj.action or "NA",
+            case_obj.internal_id,
+            case_obj.name,
+            case_obj.customer.internal_id,
+            case_obj.priority_human,
+            ", ".join(case_obj.panels),
+            case_obj.action or "NA",
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt="psql"))
         if relate:
-            context.invoke(relations, family_id=family_obj.internal_id)
+            context.invoke(relations, family_id=case_obj.internal_id)
         if samples:
-            sample_ids = [link_obj.sample.internal_id for link_obj in family_obj.links]
+            sample_ids = [link_obj.sample.internal_id for link_obj in case_obj.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
 
 

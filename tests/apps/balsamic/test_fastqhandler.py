@@ -8,7 +8,7 @@ from cg.apps.balsamic.fastq import FastqHandler
 def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_files_data):
     """Test method to test that the right number of files are created by linking"""
 
-    # given some fastq-files belonging to family and sample
+    # given some fastq-files belonging to case and sample
     link_files = simple_files_data
     assert len(tmpdir.listdir()) == len(link_files)
     link_dir = Path(f"{tmpdir}/{link_family}/fastq")
@@ -33,7 +33,7 @@ def test_link_file_content(
 ):
     """Test method to test that balsamic files are linked properly"""
 
-    # given some fastq-files belonging to family and sample
+    # given some fastq-files belonging to case and sample
     link_files = simple_files_data
     link_dir = Path(f"{tmpdir}/{link_family}/fastq")
 
@@ -62,7 +62,7 @@ def test_link_file_content_reversed(
 ):
     """Test method to test that balsamic files are linked properly"""
 
-    # given some fastq-files belonging to family and sample
+    # given some fastq-files belonging to case and sample
     link_files = simple_files_data_reversed
     link_dir = Path(f"{tmpdir}/{link_family}/fastq")
 
