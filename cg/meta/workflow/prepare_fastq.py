@@ -2,14 +2,15 @@
 
 import logging
 import os
-from typing import Dict
+from typing import Dict, List
 from pathlib import Path
 
 from cg.meta.compress.compress import CompressAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import files
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.store import Store
+from cg.models import CompressionData
+from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class PrepareFastqAPI:
 
     def get_compression_objects(self, case_id: str) -> List[CompressionData]:
         """Return a list of compression objects"""
-        case_obj = self.store.family(case_id)
+        case_obj: models.Family = self.store.family(case_id)
         compression_objects = []
         for link in case_obj.links:
             sample_id = link.sample.internal_id
@@ -74,14 +75,14 @@ class PrepareFastqAPI:
 
     def check_fastq_links(self, case_id: str) -> None:
         """Check if all fastq files are linked in housekeeper"""
-        case_obj = self.store.family(case_id)
+        case_obj: models.Family = self.store.family(case_id)
         for link in case_obj.links:
             sample_id = link.sample.internal_id
             version_obj: hk_models.Version = self.compress_api.get_latest_version(sample_id)
             fastq_files: Dict[Path, hk_models.File] = files.get_hk_files_dict(
                 tags=["fastq"], version_obj=version_obj
             )
-            compression_objs = files.get_spring_paths(version_obj)
+            compression_objs: List[CompressionData] = files.get_spring_paths(version_obj)
             for compression_obj in compression_objs:
                 if compression_obj.fastq_first not in fastq_files:
                     self.compress_api.add_decompressed_fastq(sample_id)

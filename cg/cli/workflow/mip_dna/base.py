@@ -16,7 +16,7 @@ from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.store import Store
+from cg.store import Store, models
 from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
@@ -287,11 +287,7 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
             )
         else:
             LOG.warning(
-                "The analysis for %s could not start",
-                case_obj.internal_id,
-            )
-            LOG.warning(
-                "The decompression for %s could not start",
+                "Decompression is needed but could not be started for %s",
                 case_obj.internal_id,
             )
         raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
