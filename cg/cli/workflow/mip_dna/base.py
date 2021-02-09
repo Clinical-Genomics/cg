@@ -270,7 +270,8 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis"""
     dna_api = context.obj["dna_api"]
     prepare_fastq_api = context.obj["prepare_fastq_api"]
-    case_obj = dna_api.db.family(case_id)
+    status_db: Store = dna_api.db
+    case_obj: models.Family = status_db.family(case_id)
     if not case_obj:
         LOG.error("Case %s does not exist in status-db", case_id)
         raise click.Abort
