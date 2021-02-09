@@ -22,7 +22,7 @@ class PrepareFastqAPI:
         self.compress_api: CompressAPI = compress_api
         self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
 
-    def get_compression_objects(self, case_id: str) -> list:
+    def get_compression_objects(self, case_id: str) -> List[CompressionData]:
         """Return a list of compression objects"""
         case_obj = self.store.family(case_id)
         compression_objects = []
