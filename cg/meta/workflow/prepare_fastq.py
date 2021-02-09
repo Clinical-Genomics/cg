@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 
 class PrepareFastqAPI:
     def __init__(self, store: Store, compress_api: CompressAPI):
-        self.store = store
+        self.store: Store = store
         self.hk_api: HousekeeperAPI = compress_api.hk_api
         self.compress_api: CompressAPI = compress_api
         self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
