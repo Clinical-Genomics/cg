@@ -54,7 +54,7 @@ class PrepareFastqAPI:
 
     def start_spring_decompression(self, case_id: str, dry_run: bool) -> bool:
         """Starts spring decompression"""
-        compression_objects = self.get_compression_objects(case_id=case_id)
+        compression_objects: List[CompressionData] = self.get_compression_objects(case_id=case_id)
         for compression_object in compression_objects:
             if not self.crunchy_api.is_spring_decompression_possible(compression_object):
                 return False
