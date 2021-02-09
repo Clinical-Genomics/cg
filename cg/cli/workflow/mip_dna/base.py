@@ -105,6 +105,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
         raise FlowcellsNeededError(
             "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
         )
+    LOG.info("All flowcells present on disk")
 
 
 @mip_dna.command()
