@@ -58,7 +58,8 @@ class PrepareFastqAPI:
         for compression_object in compression_objects:
             if not self.crunchy_api.is_spring_decompression_possible(compression_object):
                 return False
-        case_obj = self.store.family(case_id)
+        case_obj: models.Family = self.store.family(case_id)
+        link: models.FamilySample
         for link in case_obj.links:
             sample_id = link.sample.internal_id
             if dry_run:
