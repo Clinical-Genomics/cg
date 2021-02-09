@@ -337,7 +337,8 @@ def start(
     """Start full MIP-DNA analysis workflow for a case"""
 
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
-    case_obj = dna_api.db.family(case_id)
+    status_db: Store = dna_api.db
+    case_obj: models.Family = status_db.family(case_id)
     if not case_obj:
         LOG.error("Case %s does not exist in Status-DB", case_id)
         raise click.Abort
