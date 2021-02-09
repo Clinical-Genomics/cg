@@ -3,7 +3,6 @@
 import logging
 
 import click
-
 from cg.cli.get import family as print_case
 from cg.store import Store, models
 

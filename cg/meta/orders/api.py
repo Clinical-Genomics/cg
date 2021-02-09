@@ -14,7 +14,7 @@ from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.store import Store, models
 

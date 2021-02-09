@@ -1,5 +1,6 @@
 """Code for uploading to scout via CLI"""
 import logging
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -11,6 +12,7 @@ from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
+from ruamel.yaml import YAML
 
 from .utils import suggest_cases_to_upload
 
@@ -52,18 +54,26 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     LOG.info("Fetching family object")
     case_obj: Family = status_api.family(case_id)
     LOG.info("Create load config")
-    scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
+    if not case_obj.analyses:
+        LOG.warning("Could not find analyses for %s", case_id)
+        raise click.Abort
+    try:
+        scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
+    except SyntaxError as err:
+        LOG.warning("%s", err)
+        raise click.Abort
     LOG.info("Found load config %s", scout_load_config)
     analysis_context: str = "mip-rd-dna"
     if scout_load_config.track == "cancer":
-
         analysis_context = "balsamic"
     root_dir: Path = Path(context.obj[analysis_context]["root"])
     LOG.info("Set root dir to %s", root_dir)
     file_path: Path = root_dir / case_id / "scout_load.yaml"
 
     if print_console:
-        click.echo(scout_load_config.json(exclude_none=True, indent=4))
+        yaml = YAML()
+        yaml.indent(mapping=4, sequence=6, offset=3)
+        yaml.dump(scout_load_config.dict(exclude_none=True), sys.stdout)
         LOG.info("Would save file to %s", file_path)
         return
 

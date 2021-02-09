@@ -2,7 +2,6 @@
 import logging
 
 import click
-
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants import Pipeline
 from cg.exc import DuplicateRecordError, DuplicateSampleError

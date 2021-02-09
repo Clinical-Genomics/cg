@@ -2,7 +2,7 @@
 from datetime import datetime
 
 import click
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.store import Store
 
 CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC

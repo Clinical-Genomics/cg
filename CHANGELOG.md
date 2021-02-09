@@ -17,7 +17,24 @@ Try to use the following format:
 ## [NG.NG.NG]
 
 ### Added
-- Add prep-category 'cov' on applications
+- Add prep-category 'cov' for applications
+
+## [18.11.2]
+
+### Fixed
+- Chromograph image tags back on track
+
+## [18.11.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+
+### Added
+- New Fluffy workflow for preparing, starting and storing of analyses
+
 
 ## [18.10.2]
 
@@ -143,7 +160,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -158,7 +175,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows

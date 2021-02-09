@@ -3,8 +3,7 @@ import logging
 from typing import List
 
 import petname
-
-from cg.constants import PRIORITY_MAP, Pipeline, DataDelivery
+from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
 from cg.store import models, utils
 from cg.store.api.base import BaseHandler
 
