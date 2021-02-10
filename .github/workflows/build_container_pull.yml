@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Report container tags
-        run: echo "Container will be saved clinicalgenomics/cg-service-stage:${{ env.BRANCH_NAME }}"
+        run: echo "Container will be saved clinicalgenomics/cg-service-stage:${{ env.GITHUB_HEAD_REF_SLUG }}"
 
       - name: Build and publish to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@master
@@ -21,4 +21,4 @@ jobs:
           name: clinicalgenomics/cg-service-stage
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags:  "${{ env.BRANCH_NAME }}"
+          tags:  "${{ env.GITHUB_HEAD_REF_SLUG }}"
