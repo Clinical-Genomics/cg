@@ -43,6 +43,11 @@ Try to use the following format:
 ### Fixed
 - Chromograph image tags back on track
 
+## [18.12.1]
+
+### Fixed
+- Fix message in order ticket that says what type of project it is
+
 ## [18.11.1]
 
 ### Fixed
