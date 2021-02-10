@@ -33,7 +33,7 @@ Try to use the following format:
 ### Fixed
 - Chromograph image tags back on track
 
-## [NG.NG.NG]
+## [18.12.1]
 
 ### Fixed
 - Fix message in order ticket that says what type of project it is
