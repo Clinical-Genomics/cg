@@ -17,8 +17,11 @@ Try to use the following format:
 ## [19.0.0]
 
 ### Added
+- Adds command to start decompression for spring compressed files if needed
 ### Changed
-- reserved for mip decompress
+- Refactors MIP cli slightly to always expect a case id
+- workflow start now called start-available
+- Checking if flowcells are on disk moved to its own cli command
 
 ## [18.11.2]
 
