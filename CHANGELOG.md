@@ -13,7 +13,7 @@ Try to use the following format:
 ### Added
 ### Changed
 
-## [NG.NG.NG]
+## [18.12.0]
 
 ### Added
 - Add prep-category 'cov' for applications
