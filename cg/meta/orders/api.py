@@ -80,9 +80,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         return result
 
     def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
-        message = (
-            f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} samples: "
-        )
+        message = f"data:text/html;charset=utf-8,New incoming {project} samples: "
 
         for sample in order.get("samples"):
             message = self._add_sample_name_to_message(message, sample)
@@ -93,8 +91,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
             message = self._add_sample_comment_to_message(message, sample)
 
         message += NEW_LINE
-        message = self._add_project_to_message(message, project)
-        message = self._add_data_delivery_to_message(order, message)
         message = self._add_comment_to_message(order, message)
         message = self._add_user_name_to_message(message, ticket)
         message = self._add_customer_to_message(order, message)
@@ -139,18 +135,6 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def _add_sample_comment_to_message(message, sample):
         if sample.get("comment"):
             message += ", " + sample.get("comment")
-        return message
-
-    @staticmethod
-    def _add_project_to_message(message, project):
-        if project:
-            message += NEW_LINE + f"{project}."
-        return message
-
-    @staticmethod
-    def _add_data_delivery_to_message(order, message):
-        if order.get("delivery"):
-            message += NEW_LINE + f"{order.get('delivery')}."
         return message
 
     @staticmethod
