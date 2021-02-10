@@ -9,10 +9,9 @@ Please add a new candidate release at the top after changing the latest one. Fee
 Try to use the following format:
 
 ## [x.x.x]
-
+### Fixed
 ### Added
 ### Changed
-### Fixed
 
 ## [19.0.0]
 
@@ -22,6 +21,24 @@ Try to use the following format:
 - Refactors MIP cli slightly to always expect a case id
 - workflow start now called start-available
 - Checking if flowcells are on disk moved to its own cli command
+
+
+
+## [18.12.0]
+
+### Added
+- Add prep-category 'cov' for applications
+
+## [18.11.4]
+
+### Fixed
+- Install package in gihub-jobs via pip==21.0.1
+
+## [18.11.3]
+
+### Fixed
+- Upgraded insecure cryptography dependency 
+
 
 ## [18.11.2]
 
@@ -87,7 +104,8 @@ Try to use the following format:
 
 ## [18.7.0]
 
-### Added customer name in order tickets
+### Added
+- Added customer name in order tickets
 
 ## [18.6.1]
 
@@ -95,7 +113,9 @@ Try to use the following format:
 
 - Fix bug with name clash for created case when submitting RML-orders via Orderportal
 
-## 18.6.0
+
+## [18.6.0]
+
 
 ### Added
 
@@ -161,7 +181,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -176,7 +196,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows
