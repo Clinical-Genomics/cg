@@ -15,6 +15,7 @@ jobs:
       - name: Get branch name
         uses: nelonoel/branch-name@v1.0.1
 
+      - name: Output branch name
       - run: echo ${BRANCH_NAME}
 
       - name: Build and publish to Docker Hub
