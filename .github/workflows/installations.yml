@@ -27,11 +27,7 @@ jobs:
       # Make sure that we have correct python version and pip version
       # For details see .github/workflows/server_info.md
       run: |
-        if [ "$PYTHON_VERSION" = "$OLD_VERSION" ]; then
-          python -m pip install --upgrade pip==9.0.1
-        else
-          python -m pip install --upgrade pip==18.1
-        fi
+        python -m pip install --upgrade pip==21.0.1
         echo $PYTHON_VERSION
         pip --version
       env:
