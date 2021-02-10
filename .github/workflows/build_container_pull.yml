@@ -21,4 +21,4 @@ jobs:
           name: clinicalgenomics/cg-service-stage
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags:  "${{ BRANCH_NAME }}"
+          tags:  ${BRANCH_NAME}
