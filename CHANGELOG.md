@@ -7,14 +7,26 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
+
 ## [x.x.x]
 ### Fixed
 ### Added
 ### Changed
 
+## [NG.NG.NG]
+
+### Added
+- Add prep-category 'cov' for applications
+
 ## [18.11.4]
+
 ### Fixed
-- Install in gihub-jobs via pip==21.0.1
+- Install package in gihub-jobs via pip==21.0.1
+
+## [18.11.3]
+
+### Fixed
+- Upgraded insecure cryptography dependency 
 
 ## [18.11.2]
 
