@@ -4,7 +4,16 @@ name: Build container for stage testing
 on: [push]
 
 jobs:
-  docker-image-CI:
+  get-branch-name:
+    name: Get git branch name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: npm ci
+      - uses: nelonoel/branch-name@v1.0.1
+      - run: echo ${BRANCH_NAME}
+
+  docker-image-ci:
     name: Docker Image CI
     runs-on: ubuntu-latest
     steps:
@@ -12,13 +21,10 @@ jobs:
       - name: Check out git repository
         uses: actions/checkout@v2
 
-      - name: Extract branch name
-        uses: nelonoel/branch-name@v1.0.1
-
       - name: Build and publish to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: clinicalgenomics/cg-service-stage
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags:  ${BRANCH_NAME}
+          tags: ${BRANCH_NAME}
