@@ -2,7 +2,9 @@ alembic
 tests
 dist
 scripts
+documentation
 cg.egg-info
+.configs
 .pytest_cache
 .github
 .gitignore
@@ -10,3 +12,4 @@ cg.egg-info
 .pre-commit-config.yaml
 DEPLOYMENT.md
 CONTRIBUTING.md
+Dockerfile
