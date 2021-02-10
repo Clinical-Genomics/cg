@@ -8,10 +8,13 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 ## [x.x.x]
-
+### Fixed
 ### Added
 ### Changed
+
+## [NG.NG.NG]
 ### Fixed
+- Install in gihub-jobs via pip==21.0.1
 
 ## [18.11.2]
 
