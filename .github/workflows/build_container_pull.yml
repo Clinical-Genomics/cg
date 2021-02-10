@@ -1,7 +1,7 @@
 ---
 
 name: Build container for stage testing
-on: [push, pull_request]
+on: [push]
 
 jobs:
   docker-image-CI:
@@ -11,6 +11,9 @@ jobs:
 
       - name: Check out git repository
         uses: actions/checkout@v2
+
+      - name: Report container tags
+        run: echo "Container will be saved clinicalgenomics/cg-service-stage:${{ env.BRANCH_NAME }}"
 
       - name: Build and publish to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@master
