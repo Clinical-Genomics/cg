@@ -1,6 +1,8 @@
 """Commands to start MIP rare disease DNA workflow"""
 
 import logging
+from pathlib import Path
+from typing import List
 
 import click
 
@@ -89,13 +91,13 @@ def mip_dna(
 @click.pass_context
 def ensure_flowcells_ondisk(context: click.Context, case_id: str):
     """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
-    dna_api = context.obj["dna_api"]
-    case_obj = dna_api.db.family(case_id)
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
     if not case_obj:
         LOG.error("Case %s does not exist in Status-DB", case_id)
         raise click.Abort
 
-    all_flowcells_ondisk = dna_api.check(case_obj)
+    all_flowcells_ondisk: bool = dna_api.check_flowcells_ondisk(case_obj)
     if not all_flowcells_ondisk:
         LOG.warning(
             f"Case {case_obj.internal_id} not ready to run!",
@@ -113,9 +115,9 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
 @click.pass_context
 def link(context: click.Context, case_id: str):
     """Link FASTQ files for a sample_id"""
-    dna_api = context.obj["dna_api"]
-    case_obj = dna_api.db.family(case_id)
-    link_objs = case_obj.links
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
+    link_objs: List[models.FamilySample] = case_obj.links
     for link_obj in link_objs:
         LOG.info(
             "%s: %s link FASTQ files",
@@ -140,17 +142,16 @@ def link(context: click.Context, case_id: str):
 @click.pass_context
 def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
-    dna_api = context.obj["dna_api"]
-
-    case_obj = dna_api.db.family(case_id)
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
 
-    panel_bed = dna_api.resolve_panel_bed(panel_bed=panel_bed)
+    panel_bed: str = dna_api.resolve_panel_bed(panel_bed=panel_bed)
 
     try:
-        config_data = dna_api.pedigree_config(
+        config_data: dict = dna_api.pedigree_config(
             case_obj, panel_bed=panel_bed, pipeline=Pipeline.MIP_DNA
         )
     except CgError as error:
@@ -159,7 +160,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     if dry_run:
         print(config_data)
         return
-    out_path = dna_api.write_pedigree_config(
+    out_path: Path = dna_api.write_pedigree_config(
         data=config_data,
         out_dir=dna_api.get_case_output_path(case_id),
         pedigree_config_path=dna_api.get_pedigree_config_path(case_id),
@@ -174,9 +175,9 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 def panel(context: click.Context, case_id: str, dry_run: bool):
     """Write aggregated gene panel file"""
 
-    dna_api = context.obj["dna_api"]
-    case_obj = dna_api.db.family(case_id)
-    bed_lines = dna_api.panel(case_obj)
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
+    bed_lines: List[str] = dna_api.panel(case_obj)
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)
@@ -209,14 +210,14 @@ def run(
     start_with: str = None,
 ):
     """Run the analysis for a case"""
-    dna_api = context.obj["dna_api"]
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
 
-    case_obj = dna_api.db.family(case_id)
+    case_obj: models.Family = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort
 
-    email = email or environ_email()
+    email: str = email or environ_email()
     kwargs = dict(
         config=context.obj["mip-rd-dna"]["mip_config"],
         case=case_id,
@@ -268,8 +269,8 @@ def run(
 @click.pass_context
 def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis"""
-    dna_api = context.obj["dna_api"]
-    prepare_fastq_api = context.obj["prepare_fastq_api"]
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    prepare_fastq_api: PrepareFastqAPI = context.obj["prepare_fastq_api"]
     status_db: Store = dna_api.db
     case_obj: models.Family = status_db.family(case_id)
     if not case_obj:
@@ -382,7 +383,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
+            LOG.error(f"Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
