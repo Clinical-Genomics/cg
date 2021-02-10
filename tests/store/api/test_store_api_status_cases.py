@@ -1,7 +1,7 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline, DataDelivery
+from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, DataDelivery, Pipeline
 from cg.store import Store
 
 

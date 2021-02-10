@@ -1,10 +1,9 @@
 """Fixtures for testing the madeline cg app"""
 
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import pytest
-
 from cg.apps.madeline.api import MadelineAPI
 from tests.mocks.process_mock import ProcessMock
 

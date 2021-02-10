@@ -1,5 +1,5 @@
 from cg.apps.lims import limsjson
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 
 
 def test_parsing_balsamic_json(balsamic_order_to_submit):

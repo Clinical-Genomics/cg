@@ -9,8 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from typing_extensions import Literal
-
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hermes.hermes_api import HermesApi
@@ -21,6 +19,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 

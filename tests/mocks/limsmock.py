@@ -1,9 +1,8 @@
 from typing import List, Optional
 
+from cg.apps.lims import LimsAPI
 from pydantic import BaseModel
 from typing_extensions import Literal
-
-from cg.apps.lims import LimsAPI
 
 
 class LimsSample(BaseModel):

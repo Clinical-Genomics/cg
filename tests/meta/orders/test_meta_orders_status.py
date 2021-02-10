@@ -1,7 +1,7 @@
 import datetime as dt
 
 import pytest
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
 
@@ -97,7 +97,6 @@ def test_families_to_status(mip_order_to_submit):
 
 
 def test_store_rml(orders_api, base_store, rml_status_data):
-
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
     assert base_store.families(customer=None).count() == 0
@@ -132,9 +131,13 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_case.data_analysis == str(Pipeline.FLUFFY)
     assert new_case.data_delivery == str(DataDelivery.NIPT_VIEWER)
 
+    # and that the pool is set for invoicing but not the samples of the pool
+    assert not new_pool.no_invoice
+    for link in new_case.links:
+        assert link.sample.no_invoice
+
 
 def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
-
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools(customer=None).count() == 0
 
@@ -220,7 +223,6 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
 
 
 def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
-
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
@@ -248,7 +250,6 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
 
 
 def test_store_microbial_case_data_analysis_stored(orders_api, base_store, microbial_status_data):
-
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
@@ -275,7 +276,6 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
 
 
 def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
-
     # GIVEN a basic store missing the application on the samples
 
     for sample in microbial_status_data["samples"]:
@@ -297,7 +297,6 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
 
 
 def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
-
     # GIVEN a basic store with no samples
     assert base_store.samples().count() == 0
 
@@ -415,7 +414,6 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
 
 
 def test_store_external(orders_api, base_store, external_status_data):
-
     # GIVEN a basic store with no samples or nothing in it + external order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
@@ -455,7 +453,6 @@ def test_store_external(orders_api, base_store, external_status_data):
 
 
 def test_store_external_bad_apptag(orders_api, base_store, external_status_data):
-
     # GIVEN a basic store with no samples or nothing in it + external order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
@@ -477,7 +474,6 @@ def test_store_external_bad_apptag(orders_api, base_store, external_status_data)
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
-
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
@@ -496,7 +492,6 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
-
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
@@ -514,7 +509,6 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
 
 
 def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):
-
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
@@ -534,7 +528,6 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
 
 
 def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
-
     # GIVEN a basic store with no samples and a cancer order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None

@@ -4,7 +4,6 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI

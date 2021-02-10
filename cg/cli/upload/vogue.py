@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import click
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.vogue import VogueAPI

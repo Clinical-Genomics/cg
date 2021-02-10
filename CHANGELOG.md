@@ -9,10 +9,52 @@ Please add a new candidate release at the top after changing the latest one. Fee
 Try to use the following format:
 
 ## [x.x.x]
-
+### Fixed
 ### Added
 ### Changed
+
+## [18.12.0]
+
+### Added
+- Add prep-category 'cov' for applications
+
+## [18.11.4]
+
 ### Fixed
+- Install package in gihub-jobs via pip==21.0.1
+
+## [18.11.3]
+
+### Fixed
+- Upgraded insecure cryptography dependency 
+
+## [18.11.2]
+
+### Fixed
+- Chromograph image tags back on track
+
+## [18.11.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+
+### Added
+- New Fluffy workflow for preparing, starting and storing of analyses
+
+
+## [18.10.2]
+
+### Fixed
+- FLUFFY now have a validation schema and can be submitted in the Order Portal again
+- Samples of pools are now marked not to be invoiced, only the pool is invoiced
+
+## [18.10.1]
+
+### Added
+- Allow existing trio-samples to be re-run as single samples 
 
 ## [NG.NG.NG]
 
@@ -132,7 +174,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -147,7 +189,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows

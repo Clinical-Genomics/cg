@@ -40,14 +40,19 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
         if BalsamicAnalysisAPI.get_sample_type(db_sample) == "tumor":
             config_sample.phenotype = "affected"
+            config_sample.sample_id = "TUMOR"
         else:
             config_sample.phenotype = "unaffected"
+            config_sample.sample_id = "NORMAL"
 
         analysis_type: Literal["wgs", "wes", "tgs"] = BalsamicAnalysisAPI.get_application_type(
             db_sample
         )
         if analysis_type == "tgs":
             analysis_type = "panel"
+        if analysis_type == "wgs":
+            raise SyntaxError("Not allowed to upload WGS cancer cases")
+
         config_sample.analysis_type = analysis_type
         return config_sample
 
@@ -55,7 +60,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         LOG.info("Build load config for balsamic case")
         self.add_mandatory_info_to_load_config()
         self.load_config.human_genome_build = "37"
-        self.load_config.rank_score_threshold = 0
+        self.load_config.rank_score_threshold = -100
 
         self.include_case_files()
 

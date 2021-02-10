@@ -1,7 +1,8 @@
-from cg.constants import Pipeline
-from cg.store import Store
-from cg.meta.workflow.mip import MipAnalysisAPI
 import logging
+
+from cg.constants import Pipeline
+from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.store import Store
 
 
 def test_config(analysis_store: Store, analysis_api: MipAnalysisAPI):
