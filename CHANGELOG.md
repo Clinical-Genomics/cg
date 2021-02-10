@@ -13,14 +13,20 @@ Try to use the following format:
 ### Added
 ### Changed
 
-## [18.11.4]
-### Fixed
-- Install in gihub-jobs via pip==21.0.1
-
 ## [NG.NG.NG]
 
 ### Added
 - Add prep-category 'cov' for applications
+
+## [18.11.4]
+
+### Fixed
+- Install package in gihub-jobs via pip==21.0.1
+
+## [18.11.3]
+
+### Fixed
+- Upgraded insecure cryptography dependency 
 
 ## [18.11.2]
 
