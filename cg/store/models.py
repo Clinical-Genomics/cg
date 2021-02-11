@@ -463,32 +463,29 @@ class Sample(Model, PriorityMixin):
     @property
     def cohorts(self) -> List[str]:
         """Return a list of cohorts."""
-        panel_list = self._cohorts.split(",") if self._cohorts else []
-        return panel_list
+        return self._cohorts.split(",") if self._cohorts else []
 
     @cohorts.setter
-    def cohorts(self, panel_list: List[str]):
-        self._cohorts = ",".join(panel_list) if panel_list else None
+    def cohorts(self, cohort_list: List[str]):
+        self._cohorts = ",".join(cohort_list) if cohort_list else None
 
     @property
     def phenotype_terms(self) -> List[str]:
         """Return a list of phenotype_terms."""
-        panel_list = self._phenotype_terms.split(",") if self._phenotype_terms else []
-        return panel_list
+        return self._phenotype_terms.split(",") if self._phenotype_terms else []
 
     @phenotype_terms.setter
-    def phenotype_terms(self, panel_list: List[str]):
-        self._phenotype_terms = ",".join(panel_list) if panel_list else None
+    def phenotype_terms(self, phenotype_term_list: List[str]):
+        self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
     def synopsis(self) -> List[str]:
         """Return a list of synopsis."""
-        panel_list = self._synopsis.split(",") if self._synopsis else []
-        return panel_list
+        return self._synopsis.split(",") if self._synopsis else []
 
     @synopsis.setter
-    def synopsis(self, panel_list: List[str]):
-        self._synopsis = ",".join(panel_list) if panel_list else None
+    def synopsis(self, synopsis_list: List[str]):
+        self._synopsis = ",".join(synopsis_list) if synopsis_list else None
 
     @property
     def state(self) -> str:
