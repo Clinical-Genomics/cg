@@ -13,6 +13,10 @@ Try to use the following format:
 ### Added
 ### Changed
 
+## [NG.NG.NG]
+### Fixed
+- Allow price update files for application-version import to have prices optional
+
 ## [19.0.0]
 
 ### Added
