@@ -159,19 +159,20 @@ class StatusHandler:
                 "panels": list(panels),
                 "samples": [
                     {
+                        "age_at_sampling": sample.get("age_at_sampling"),
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
-                        "cohorts": list(sample.get("cohorts")),
+                        "cohorts": list(sample.get("cohorts", "")),
                         "comment": sample.get("comment"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
                         "internal_id": sample.get("internal_id"),
                         "mother": sample.get("mother"),
                         "name": sample["name"],
-                        "phenotype_terms": list(sample.get("phenotype_terms")),
+                        "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
-                        "synopsis": list(sample.get("synopsis")),
+                        "synopsis": list(sample.get("synopsis", "")),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
@@ -221,6 +222,7 @@ class StatusHandler:
                     family_samples[sample["name"]] = sample_obj
                 else:
                     new_sample = self.status.add_sample(
+                        age_at_sampling=sample["age_at_sampling"],
                         capture_kit=sample["capture_kit"],
                         cohorts=sample["cohorts"],
                         comment=sample["comment"],

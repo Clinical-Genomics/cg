@@ -97,7 +97,7 @@ MIP_SAMPLE = {
     # customer
     "data_analysis": str,
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
-    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(float)),
     "application": str,
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),

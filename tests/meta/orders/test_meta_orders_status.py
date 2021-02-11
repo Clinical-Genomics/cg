@@ -353,9 +353,13 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
 
-    assert set(new_link.sample.cohorts) == {"cohorts"}
-    assert set(new_link.sample.synopsis) == {"synopsis"}
-    assert set(new_link.sample.phenotype_terms) == {"phenotype_terms"}
+    assert set(new_link.sample.cohorts) == {"Other"}
+    assert set(new_link.sample.synopsis) == {
+        "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
+    }
+    assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
+
+    assert new_link.sample.age_at_sampling == 17.18192
 
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_case.links:
