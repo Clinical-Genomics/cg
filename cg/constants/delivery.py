@@ -8,6 +8,7 @@ BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnvkit", "regions"},
     {"vcf-snv-clinical"},
     {"vcf-snv-clinical-index"},
+    {"vardict", "deliver"},
     {"vcf", "sention", "haplotype-caller", "filtered"},
     {"vcf-index", "sention", "haplotype-caller", "filtered"},
     {"vcf-sv-clinical", "manta", "filtered"},
