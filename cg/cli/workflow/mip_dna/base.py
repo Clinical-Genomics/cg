@@ -1,9 +1,12 @@
 """Commands to start MIP rare disease DNA workflow"""
 
 import logging
+from pathlib import Path
+from typing import List
 
 import click
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -11,9 +14,11 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-from cg.exc import CgError
+from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
+from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.store import Store
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.store import Store, models
 from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +33,12 @@ START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="Start mip from this program.", type=str
 )
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry_run", is_flag=True, help="Print to console instead of executing"
+    "-d",
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    default=False,
+    help="Print to console instead of executing",
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -40,34 +50,28 @@ ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
 
 
 @click.group("mip-dna", invoke_without_command=True)
-@EMAIL_OPTION
-@PRIORITY_OPTION
-@OPTION_PANEL_BED
-@START_WITH_PROGRAM
-@OPTION_DRY
-@click.option(
-    "-c",
-    "--case",
-    "case_id",
-    help="case to prepare and start an analysis for",
-    type=str,
-)
 @click.pass_context
 def mip_dna(
     context: click.Context,
-    case_id: str,
-    email: str,
-    priority: str,
-    panel_bed: str,
-    start_with: str,
-    dry_run: bool,
 ):
     """Rare disease DNA workflow"""
+
+    if context.invoked_subcommand is None:
+        click.echo(context.get_help())
+        return
+
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
     context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
     context.obj["scout_api"] = ScoutAPI(context.obj)
     context.obj["lims_api"] = LimsAPI(context.obj)
     context.obj["status_db"] = Store(context.obj["database"])
+    context.obj["crunchy_api"] = CrunchyAPI(context.obj)
+    context.obj["compress_api"] = CompressAPI(
+        hk_api=context.obj["housekeeper_api"], crunchy_api=context.obj["crunchy_api"]
+    )
+    context.obj["prepare_fastq_api"] = PrepareFastqAPI(
+        context.obj["status_db"], context.obj["compress_api"]
+    )
 
     context.obj["dna_api"] = MipAnalysisAPI(
         db=context.obj["status_db"],
@@ -80,36 +84,30 @@ def mip_dna(
         conda_env=context.obj["mip-rd-dna"]["conda_env"],
         root=context.obj["mip-rd-dna"]["root"],
     )
-    dna_api = context.obj["dna_api"]
 
-    if context.invoked_subcommand is not None:
-        return
 
-    if case_id is None:
-        click.echo(context.get_help())
-        return
+@mip_dna.command()
+@ARGUMENT_CASE_ID
+@click.pass_context
+def ensure_flowcells_ondisk(context: click.Context, case_id: str):
+    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
+    if not case_obj:
+        LOG.error("Case %s does not exist in Status-DB", case_id)
+        raise click.Abort
 
-    case_obj = dna_api.db.family(case_id)
-    if not case_exists(case_obj, case_id):
-        LOG.error(f"Case {case_id} does not exist!")
-        raise click.Abort()
-
-    all_flowcells_ondisk = dna_api.check(case_obj)
+    all_flowcells_ondisk: bool = dna_api.check_flowcells_ondisk(case_obj)
     if not all_flowcells_ondisk:
         LOG.warning(
             f"Case {case_obj.internal_id} not ready to run!",
         )
         # Commit the updates to request flowcells
         dna_api.db.commit()
-        return
-
-    # Invoke full workflow
-    context.invoke(link, case_id=case_id)
-    context.invoke(panel, case_id=case_id, dry_run=dry_run)
-    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
-    context.invoke(
-        run, case_id=case_id, priority=priority, email=email, start_with=start_with, dry_run=dry_run
-    )
+        raise FlowcellsNeededError(
+            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
+        )
+    LOG.info("All flowcells present on disk")
 
 
 @mip_dna.command()
@@ -117,9 +115,9 @@ def mip_dna(
 @click.pass_context
 def link(context: click.Context, case_id: str):
     """Link FASTQ files for a sample_id"""
-    dna_api = context.obj["dna_api"]
-    case_obj = dna_api.db.family(case_id)
-    link_objs = case_obj.links
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
+    link_objs: List[models.FamilySample] = case_obj.links
     for link_obj in link_objs:
         LOG.info(
             "%s: %s link FASTQ files",
@@ -142,22 +140,18 @@ def link(context: click.Context, case_id: str):
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_context
-def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool = False):
+def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
-    dna_api = context.obj["dna_api"]
-    if case_id is None:
-        _suggest_cases_to_analyze(context)
-        return
-
-    case_obj = dna_api.db.family(case_id)
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
 
-    panel_bed = dna_api.resolve_panel_bed(panel_bed=panel_bed)
+    panel_bed: str = dna_api.resolve_panel_bed(panel_bed=panel_bed)
 
     try:
-        config_data = dna_api.pedigree_config(
+        config_data: dict = dna_api.pedigree_config(
             case_obj, panel_bed=panel_bed, pipeline=Pipeline.MIP_DNA
         )
     except CgError as error:
@@ -166,7 +160,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     if dry_run:
         print(config_data)
         return
-    out_path = dna_api.write_pedigree_config(
+    out_path: Path = dna_api.write_pedigree_config(
         data=config_data,
         out_dir=dna_api.get_case_output_path(case_id),
         pedigree_config_path=dna_api.get_pedigree_config_path(case_id),
@@ -178,12 +172,12 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_context
-def panel(context: click.Context, case_id: str, dry_run: bool = False):
+def panel(context: click.Context, case_id: str, dry_run: bool):
     """Write aggregated gene panel file"""
 
-    dna_api = context.obj["dna_api"]
-    case_obj = dna_api.db.family(case_id)
-    bed_lines = dna_api.panel(case_obj)
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    case_obj: models.Family = dna_api.db.family(case_id)
+    bed_lines: List[str] = dna_api.panel(case_obj)
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)
@@ -216,17 +210,14 @@ def run(
     start_with: str = None,
 ):
     """Run the analysis for a case"""
-    dna_api = context.obj["dna_api"]
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
 
-    if case_id is None:
-        _suggest_cases_to_analyze(context)
-        return
-    case_obj = dna_api.db.family(case_id)
+    case_obj: models.Family = dna_api.db.family(case_id)
     if not case_exists(case_obj, case_id):
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort
 
-    email = email or environ_email()
+    email: str = email or environ_email()
     kwargs = dict(
         config=context.obj["mip-rd-dna"]["mip_config"],
         case=case_id,
@@ -272,51 +263,130 @@ def run(
         raise click.Abort
 
 
-@mip_dna.command()
+@mip_dna.command("resolve-compression")
+@ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
-def start(context: click.Context, dry_run: bool = False):
-    """Start all cases that are ready for analysis"""
-    dna_api = context.obj["dna_api"]
-    exit_code = EXIT_SUCCESS
+def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
+    """Handles cases where decompression is needed before starting analysis"""
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    prepare_fastq_api: PrepareFastqAPI = context.obj["prepare_fastq_api"]
+    status_db: Store = dna_api.db
+    case_obj: models.Family = status_db.family(case_id)
+    if not case_obj:
+        LOG.error("Case %s does not exist in status-db", case_id)
+        raise click.Abort
+    decompression_needed = prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id)
+    if decompression_needed:
+        decompression_all_samples_started = prepare_fastq_api.start_spring_decompression(
+            case_obj.internal_id, dry_run
+        )
+        if decompression_all_samples_started:
+            LOG.info(
+                "The analysis for %s could not start, started decompression instead",
+                case_obj.internal_id,
+            )
+        else:
+            LOG.warning(
+                "Decompression is needed but could not be started for %s",
+                case_obj.internal_id,
+            )
+        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+
+    if prepare_fastq_api.is_spring_decompression_running(case_obj.internal_id):
+        raise DecompressionNeededError("Workflow interrupted: decompression is running")
+
+    LOG.info("Linking fastq files in housekeeper for case %s", case_id)
+    prepare_fastq_api.check_fastq_links(case_obj.internal_id)
+
+    if prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id):
+        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+
+    LOG.info("Decompression for case %s not needed, starting analysis", case_id)
+
+
+@mip_dna.command()
+@PRIORITY_OPTION
+@EMAIL_OPTION
+@START_WITH_PROGRAM
+@OPTION_PANEL_BED
+@ARGUMENT_CASE_ID
+@OPTION_DRY
+@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
+@click.option(
+    "--skip-evaluation",
+    "skip_evaluation",
+    is_flag=True,
+    help="Skip mip qccollect evaluation",
+)
+@click.pass_context
+def start(
+    context: click.Context,
+    case_id: str,
+    dry_run: bool,
+    email: str,
+    mip_dry_run: bool,
+    priority: str,
+    skip_evaluation: bool,
+    start_with: str,
+    panel_bed: str,
+):
+    """Start full MIP-DNA analysis workflow for a case"""
+
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    status_db: Store = dna_api.db
+    case_obj: models.Family = status_db.family(case_id)
+    if not case_obj:
+        LOG.error("Case %s does not exist in Status-DB", case_id)
+        raise click.Abort
+    LOG.info("Starting full MIP-DNA analysis workflow for case %s", case_id)
+
+    analysis_ongoing = dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id)
+    if analysis_ongoing:
+        status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+        LOG.warning(f"{case_obj.internal_id}: analysis status is {status} - skipping")
+        return
+    try:
+        context.invoke(ensure_flowcells_ondisk, case_id=case_id)
+        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
+        context.invoke(link, case_id=case_id)
+        context.invoke(panel, case_id=case_id, dry_run=dry_run)
+        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        context.invoke(
+            run,
+            case_id=case_id,
+            priority=priority,
+            email=email,
+            start_with=start_with,
+            dry_run=dry_run,
+            mip_dry_run=mip_dry_run,
+            skip_evaluation=skip_evaluation,
+        )
+    except (FlowcellsNeededError, DecompressionNeededError) as e:
+        LOG.error(e.message)
+
+
+@mip_dna.command("start-available")
+@OPTION_DRY
+@click.pass_context
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
+    dna_api: MipAnalysisAPI = context.obj["dna_api"]
+    exit_code: int = EXIT_SUCCESS
     for case_obj in dna_api.db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue
-        LOG.info(
-            f"{case_obj.internal_id}: start analysis",
-        )
-        has_started = dna_api.has_latest_analysis_started(case_id=case_obj.internal_id)
-        if has_started:
-            status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-            LOG.warning(f"{case_obj.internal_id}: analysis is {status} - skipping")
-            continue
-        if dry_run:
-            continue
         try:
-            context.invoke(
-                mip_dna,
-                priority=dna_api.get_priority(case_obj),
-                case_id=case_obj.internal_id,
-            )
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
+            LOG.error(f"Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
-
-
-def _suggest_cases_to_analyze(context: click.Context, show_as_error: bool = False):
-    """Suggest cases to analyze"""
-    if show_as_error:
-        LOG.error("provide a case, suggestions:")
-    else:
-        LOG.warning("provide a case, suggestions:")
-    for case_obj in context.obj["dna_api"].db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, limit=50):
-        LOG.info(case_obj)
 
 
 mip_dna.add_command(store_cmd)

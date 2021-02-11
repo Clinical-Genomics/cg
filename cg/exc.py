@@ -14,6 +14,14 @@ class CgError(Exception):
         self.message = message
 
 
+class DecompressionNeededError(CgError):
+    """Raised when decompression still needed to start analysis"""
+
+
+class FlowcellsNeededError(CgError):
+    """Raised when fetching flowcells still needed to start analysis"""
+
+
 class AnalysisNotFinishedError(CgError):
     """
     Exception raised when an adding a MIP analysis to Housekeeper, but the analysis is not
