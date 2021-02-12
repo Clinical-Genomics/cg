@@ -4,7 +4,7 @@
   "comment": "",
   "samples": [
     {
-      "age_at_sampling": 17.18192,
+      "age_at_sampling": "17.18192",
       "name": "sample1",
       "application": "WGTPCFC030",
       "comment": "comment",
@@ -32,7 +32,7 @@
       "cohorts":["Other"]
     },
     {
-      "age_at_sampling": 2.0,
+      "age_at_sampling": "2.0",
       "name": "sample2",
       "application": "WGTPCFC030",
       "data_analysis": "mip-dna",
@@ -64,7 +64,7 @@
       ]
     },
     {
-      "age_at_sampling": 3.0,
+      "age_at_sampling": "3.0",
       "name": "sample3",
       "application": "WGTPCFC030",
       "data_analysis": "mip-dna",
@@ -95,7 +95,7 @@
       ]
     },
     {
-      "age_at_sampling": 4.0,
+      "age_at_sampling": "4.0",
       "name": "sample4",
       "application": "WGTPCFC030",
       "data_analysis": "mip-dna",
