@@ -13,7 +13,7 @@ Try to use the following format:
 ### Added
 ### Changed
 
-## [NG.NG.NG]
+## [19.1.1]
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
 
