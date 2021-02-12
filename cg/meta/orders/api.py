@@ -17,7 +17,6 @@ from cg.apps.osticket import OsTicket
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError, TicketCreationError
 from cg.server.schemas.order import OrderIn
-from cg.server.schemas.ticket import TicketIn
 from cg.store import Store, models
 
 from .lims import LimsHandler
@@ -46,11 +45,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
             ORDER_SCHEMES[project].validate(order_in.dict())
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
+        self._validate_customer_on_imported_samples(project=project, order=order_in)
+
         order = order_in.dict()
-        self._validate_customer_on_imported_samples(project=project, order=order)
 
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6})", order.name)
+        ticket_match = re.fullmatch(r"#([0-9]{6})", order_in.name)
 
         if ticket_match:
             ticket_number = int(ticket_match.group(1))

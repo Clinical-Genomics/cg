@@ -43,6 +43,16 @@ LOG = logging.getLogger(__name__)
 # Case fixtures
 
 
+@pytest.fixture(name="user_name")
+def fixture_user_name() -> str:
+    return "Paul Anderson"
+
+
+@pytest.fixture(name="user_mail")
+def fixture_user_mail() -> str:
+    return "paul@magnolia.com"
+
+
 @pytest.fixture(name="email_adress")
 def fixture_email_adress() -> str:
     return "james.holden@scilifelab.se"
