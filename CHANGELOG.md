@@ -13,6 +13,10 @@ Try to use the following format:
 ### Added
 ### Changed
 
+## [19.1.1]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
+
 ## [19.1.0]
 ### Added
 - Cli command to deliver old balsamic analyses which were stored with old hk tags
