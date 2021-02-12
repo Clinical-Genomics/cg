@@ -15,7 +15,7 @@ Try to use the following format:
 
 ## [NG.NG.NG]
 ### Fixed
-- Allow price update files for application-version import to have prices optional
+- Allow price update files for application-version import to have empty prices 
 
 ## [19.1.0]
 ### Added
