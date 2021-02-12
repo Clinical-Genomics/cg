@@ -17,6 +17,10 @@ Try to use the following format:
 ### Fixed
 - Allow price update files for application-version import to have prices optional
 
+## [19.1.0]
+### Added
+- Cli command to deliver old balsamic analyses which were stored with old hk tags
+
 ## [19.0.0]
 
 ### Added
