@@ -10,7 +10,7 @@ import datetime as dt
 import logging
 import re
 import typing
-from typing import List
+from typing import List, Optional
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
@@ -22,6 +22,7 @@ from cg.store import Store, models
 from .lims import LimsHandler
 from .schema import ORDER_SCHEMES, OrderType
 from .status import StatusHandler
+from .ticket_handler import TicketHandler
 
 LOG = logging.getLogger(__name__)
 NEW_LINE = "<br />"
@@ -34,7 +35,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         super().__init__()
         self.lims = lims
         self.status = status
-        self.osticket = osticket
+        self.ticket_handler: TicketHandler = TicketHandler(osticket_api=osticket, status_db=status)
 
     def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
         """Submit a batch of samples.
@@ -47,117 +48,18 @@ class OrdersAPI(LimsHandler, StatusHandler):
             raise OrderError(error.args[0])
         self._validate_customer_on_imported_samples(project=project, order=order_in)
 
-        order = order_in.dict()
-
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6})", order_in.name)
+        ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
+        if not ticket_number and self.ticket_handler:
+            ticket_number = self.ticket_handler.create_ticket(
+                order=order_in, user_name=user_name, user_mail=user_mail, project=project
+            )
 
-        if ticket_match:
-            ticket_number = int(ticket_match.group(1))
-            LOG.info(f"{ticket_number}: detected ticket in order name")
-            order["ticket"] = ticket_number
-        else:
-            # open and assign ticket to order
-            try:
-                if self.osticket:
-                    message = self._create_new_ticket_message(
-                        order=order, user_name=user_name, project=project
-                    )
+        order = order_in.dict()
+        order["ticket"] = ticket_number
 
-                    order["ticket"] = self.osticket.open_ticket(
-                        name=user_name,
-                        email=user_mail,
-                        subject=order["name"],
-                        message=message,
-                    )
-
-                    LOG.info(f"{order['ticket']}: opened new ticket")
-                else:
-                    order["ticket"] = None
-            except TicketCreationError as error:
-                LOG.warning(error.message)
-                order["ticket"] = None
         order_func = self._get_submit_func(project.value)
-        result = order_func(order)
-        return result
-
-    def _create_new_ticket_message(self, order: dict, user_name: str, project: str) -> str:
-        message = f"data:text/html;charset=utf-8,New incoming {project} samples: "
-
-        for sample in order.get("samples"):
-            message = self._add_sample_name_to_message(message, sample)
-            message = self._add_sample_apptag_to_message(message, sample)
-            message = self._add_sample_case_name_to_message(message, sample)
-            message = self._add_existing_sample_info_to_message(message, order, sample)
-            message = self._add_sample_priority_to_message(message, sample)
-            message = self._add_sample_comment_to_message(message, sample)
-
-        message += NEW_LINE
-        message = self._add_comment_to_message(order, message)
-        message = self._add_user_name_to_message(message, user_name)
-        message = self._add_customer_to_message(order, message)
-
-        return message
-
-    @staticmethod
-    def _add_sample_name_to_message(message, sample):
-        message += NEW_LINE + sample.get("name")
-        return message
-
-    @staticmethod
-    def _add_sample_apptag_to_message(message, sample):
-        if sample.get("application"):
-            message += f", application: {sample['application']}"
-        return message
-
-    @staticmethod
-    def _add_sample_case_name_to_message(message, sample):
-        if sample.get("family_name"):
-            message += f", case: {sample.get('family_name')}"
-        return message
-
-    def _add_existing_sample_info_to_message(self, message, order, sample):
-        if sample.get("internal_id"):
-
-            existing_sample = self.status.sample(sample.get("internal_id"))
-            sample_customer = ""
-            if existing_sample.customer_id != order["customer"]:
-                sample_customer = " from " + existing_sample.customer.internal_id
-
-            message += f" (already existing sample{sample_customer})"
-        return message
-
-    @staticmethod
-    def _add_sample_priority_to_message(message, sample):
-        if sample.get("priority"):
-            message += ", priority: " + sample.get("priority")
-        return message
-
-    @staticmethod
-    def _add_sample_comment_to_message(message, sample):
-        if sample.get("comment"):
-            message += ", " + sample.get("comment")
-        return message
-
-    @staticmethod
-    def _add_comment_to_message(order, message):
-        if order.get("comment"):
-            message += NEW_LINE + f"{order.get('comment')}."
-        return message
-
-    @staticmethod
-    def _add_user_name_to_message(message, user_name):
-        if user_name:
-            message += NEW_LINE + f"{user_name}"
-        return message
-
-    def _add_customer_to_message(self, order, message):
-        if order.get("customer"):
-            customer_id = order.get("customer")
-            customer_name = self.status.customer(customer_id).name
-
-            message += f", {customer_name} ({customer_id})"
-        return message
+        return order_func(order)
 
     def _submit_fluffy(self, order: dict) -> dict:
         """Submit a batch of ready made libraries for FLUFFY analysis."""
