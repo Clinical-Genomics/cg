@@ -15,6 +15,7 @@ from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
 from .ext import db, lims, osticket
+from .schemas.order import OrderIn
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -57,11 +58,15 @@ def before_request():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
-    post_data = request.get_json()
+    post_data: OrderIn = OrderIn.parse_obj(request.get_json())
     LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
-        ticket = {"name": g.current_user.name, "email": g.current_user.email}
-        result = api.submit(OrderType(order_type), post_data, ticket=ticket)
+        result = api.submit(
+            project=OrderType(order_type),
+            order_in=post_data,
+            user_name=g.current_user.name,
+            user_mail=g.current_user.email,
+        )
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:

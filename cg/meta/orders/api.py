@@ -16,6 +16,8 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError, TicketCreationError
+from cg.server.schemas.order import OrderIn
+from cg.server.schemas.ticket import TicketIn
 from cg.store import Store, models
 
 from .lims import LimsHandler
@@ -35,20 +37,20 @@ class OrdersAPI(LimsHandler, StatusHandler):
         self.status = status
         self.osticket = osticket
 
-    def submit(self, project: OrderType, order: dict, ticket: dict) -> dict:
+    def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
         """Submit a batch of samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
         try:
-            ORDER_SCHEMES[project].validate(order)
+            ORDER_SCHEMES[project].validate(order_in.dict())
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
-
-        self._validate_customer_on_imported_samples(project, order)
+        order = order_in.dict()
+        self._validate_customer_on_imported_samples(project=project, order=order)
 
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6})", order["name"])
+        ticket_match = re.fullmatch(r"#([0-9]{6})", order.name)
 
         if ticket_match:
             ticket_number = int(ticket_match.group(1))
@@ -59,12 +61,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
             try:
                 if self.osticket:
                     message = self._create_new_ticket_message(
-                        order=order, ticket=ticket, project=project
+                        order=order, user_name=user_name, project=project
                     )
 
                     order["ticket"] = self.osticket.open_ticket(
-                        name=ticket["name"],
-                        email=ticket["email"],
+                        name=user_name,
+                        email=user_mail,
                         subject=order["name"],
                         message=message,
                     )
@@ -79,7 +81,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         result = order_func(order)
         return result
 
-    def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
+    def _create_new_ticket_message(self, order: dict, user_name: str, project: str) -> str:
         message = f"data:text/html;charset=utf-8,New incoming {project} samples: "
 
         for sample in order.get("samples"):
@@ -92,7 +94,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         message += NEW_LINE
         message = self._add_comment_to_message(order, message)
-        message = self._add_user_name_to_message(message, ticket)
+        message = self._add_user_name_to_message(message, user_name)
         message = self._add_customer_to_message(order, message)
 
         return message
@@ -144,9 +146,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
         return message
 
     @staticmethod
-    def _add_user_name_to_message(message, ticket):
-        if ticket.get("name"):
-            message += NEW_LINE + f"{ticket.get('name')}"
+    def _add_user_name_to_message(message, user_name):
+        if user_name:
+            message += NEW_LINE + f"{user_name}"
         return message
 
     def _add_customer_to_message(self, order, message):
@@ -343,8 +345,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
             )
             sample["verified_organism"] = is_verified
 
-    def _validate_customer_on_imported_samples(self, project: OrderType, order: dict):
-        for sample in order.get("samples"):
+    def _validate_customer_on_imported_samples(self, project: OrderType, order: OrderIn):
+        """Validate that the customer have access to all samples in order"""
+        for sample in order.samples:
 
             if sample.get("internal_id"):
 
@@ -361,7 +364,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     )
 
                 existing_sample = self.status.sample(sample.get("internal_id"))
-                data_customer = self.status.customer(order["customer"])
+                data_customer = self.status.customer(order.customer)
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")
