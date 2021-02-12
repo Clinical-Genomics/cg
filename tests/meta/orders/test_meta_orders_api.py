@@ -19,7 +19,15 @@ from cg.store import models
         OrderType.BALSAMIC,
     ],
 )
-def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeypatch, order_type):
+def test_submit(
+    base_store,
+    orders_api: OrdersAPI,
+    all_orders_to_submit,
+    monkeypatch,
+    order_type,
+    user_name: str,
+    user_mail: str,
+):
     ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
@@ -34,8 +42,7 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
     assert base_store.samples().first() is None
 
     # WHEN submitting the order
-    user_name = "Paul Anderson"
-    user_mail = "paul@magnolia.com"
+
     result = orders_api.submit(
         project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
@@ -54,7 +61,13 @@ def test_submit(base_store, orders_api: OrdersAPI, all_orders_to_submit, monkeyp
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.EXTERNAL, OrderType.BALSAMIC],
 )
 def test_submit_illegal_sample_customer(
-    sample_store, orders_api, all_orders_to_submit, monkeypatch, order_type
+    sample_store,
+    orders_api,
+    all_orders_to_submit,
+    monkeypatch,
+    order_type,
+    user_name: str,
+    user_mail: str,
 ):
     ticket_number = 123456
     monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
@@ -65,8 +78,7 @@ def test_submit_illegal_sample_customer(
         sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
     monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
-    user_name = "Paul Anderson"
-    user_mail = "paul@magnolia.com"
+
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
     customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
