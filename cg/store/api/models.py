@@ -14,7 +14,6 @@ class ApplicationVersionSchema(BaseModel):
     priority: Optional[int] = Field(alias="Priority")
     express: Optional[int] = Field(alias="Express")
     research: Optional[int] = Field(alias="Research")
-    percent_kth: Optional[int] = Field(alias="Percent kth")
 
 
 class ApplicationSchema(BaseModel):
