@@ -7,16 +7,56 @@ About changelog [here](https://keepachangelog.com/en/1.0.0/)
 Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
-## [x.x.x]
 
+## [x.x.x]
+### Fixed
 ### Added
 ### Changed
+
+## [19.1.1]
 ### Fixed
+- Allow price update files for application-version import to have empty prices 
+
+## [19.1.0]
+### Added
+- Cli command to deliver old balsamic analyses which were stored with old hk tags
+
+## [19.0.0]
+
+### Added
+- Adds command to start decompression for spring compressed files if needed
+### Changed
+- Refactors MIP cli slightly to always expect a case id
+- workflow start now called start-available
+- Checking if flowcells are on disk moved to its own cli command
+
+
+
+## [18.12.0]
+
+### Added
+- Add prep-category 'cov' for applications
+
+## [18.11.4]
+
+### Fixed
+- Install package in gihub-jobs via pip==21.0.1
+
+## [18.11.3]
+
+### Fixed
+- Upgraded insecure cryptography dependency 
+
 
 ## [18.11.2]
 
 ### Fixed
 - Chromograph image tags back on track
+
+## [18.12.1]
+
+### Fixed
+- Fix message in order ticket that says what type of project it is
 
 ## [18.11.1]
 
