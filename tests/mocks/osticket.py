@@ -1,25 +1,33 @@
+"""Mock the os ticket api"""
+
 import logging
 import os.path
 from typing import Optional
 
-import requests
+from cg.apps.osticket import OsTicket
 from cg.exc import TicketCreationError
 from flask import Flask
 
 LOG = logging.getLogger(__name__)
 
 
-class OsTicket(object):
+class MockOsTicket(OsTicket):
 
     """Interface to ticket system."""
 
     def __init__(self):
         self.headers = None
         self.url = None
+        self._ticket_nr: int = 123456
+        self._should_fail: bool = False
+        self._return_none: bool = False
+
+    def set_ticket_nr(self, number: int) -> None:
+        self._ticket_nr = number
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
-        self.setup(api_key=app.config["OSTICKET_API_KEY"], domain=app.config["OSTICKET_DOMAIN"])
+        return
 
     def setup(self, api_key: str = None, domain: str = None):
         """Initialize the API."""
@@ -28,14 +36,10 @@ class OsTicket(object):
 
     def open_ticket(self, name: str, email: str, subject: str, message: str) -> Optional[int]:
         """Open a new ticket through the REST API."""
-        data = dict(name=name, email=email, subject=subject, message=message)
-        res = requests.post(self.url, json=data, headers=self.headers)
-        if res.ok:
-            try:
-                return int(res.text)
-            except ValueError:
-                LOG.error("Could not convert res %s to int", res.text)
-                return None
-        else:
-            LOG.error("res.text: %s, reason: %s", res.text, res.reason)
-            raise TicketCreationError(res)
+        if self._should_fail:
+            LOG.error("res.text: %s, reason: %s", self._ticket_nr, "Unknown reason")
+            raise TicketCreationError("FAIL")
+        if self._return_none:
+            return None
+
+        return self._ticket_nr

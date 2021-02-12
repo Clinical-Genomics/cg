@@ -23,6 +23,7 @@ from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.limsmock import MockLimsAPI
 from .mocks.madeline import MockMadelineAPI
+from .mocks.osticket import MockOsTicket
 from .mocks.process_mock import ProcessMock
 from .mocks.scout import MockScoutAPI
 from .mocks.tb_mock import MockTB
@@ -218,6 +219,20 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     _api.set_outpath(madeline_output)
 
     return _api
+
+
+@pytest.fixture(name="ticket_number")
+def fixture_ticket_number() -> int:
+    """Return a ticket number for testing"""
+    return 123456
+
+
+@pytest.fixture(name="osticket")
+def fixture_os_ticket(ticket_number: int) -> MockOsTicket:
+    """Return a api that mock the os ticket api"""
+    api = MockOsTicket()
+    api.set_ticket_nr(ticket_number)
+    return api
 
 
 # Files fixtures

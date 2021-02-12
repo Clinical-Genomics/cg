@@ -27,10 +27,8 @@ def test_submit(
     order_type,
     user_name: str,
     user_mail: str,
+    ticket_number: int,
 ):
-    ticket_number = 123456
-    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
-
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
@@ -66,11 +64,10 @@ def test_submit_illegal_sample_customer(
     all_orders_to_submit,
     monkeypatch,
     order_type,
+    ticket_number: int,
     user_name: str,
     user_mail: str,
 ):
-    ticket_number = 123456
-    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
@@ -119,9 +116,8 @@ def test_submit_scout_legal_sample_customer(
     order_type,
     user_name: str,
     user_mail: str,
+    ticket_number: int,
 ):
-    ticket_number = 123456
-    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
@@ -181,9 +177,8 @@ def test_submit_non_scout_legal_sample_customer(
     order_type,
     user_name: str,
     user_mail: str,
+    ticket_number: int,
 ):
-    ticket_number = 123456
-    monkeypatch.setattr(orders_api.osticket, "open_ticket", lambda *args, **kwargs: ticket_number)
 
     order_data = all_orders_to_submit[order_type]
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
