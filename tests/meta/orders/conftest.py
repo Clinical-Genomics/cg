@@ -3,7 +3,9 @@ import json
 import pytest
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.meta.orders.status import StatusHandler
+from cg.meta.orders.ticket_handler import TicketHandler
 from cg.server.schemas.order import OrderIn
+from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
 
@@ -82,3 +84,8 @@ def balsamic_status_data(balsamic_order_to_submit):
 @pytest.fixture(scope="function")
 def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
     return OrdersAPI(lims=lims_api, status=base_store, osticket=osticket)
+
+
+@pytest.fixture(name="ticket_handler")
+def fixture_ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
+    return TicketHandler(status_db=store, osticket_api=osticket)

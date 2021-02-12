@@ -38,7 +38,7 @@ class TicketHandler:
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
         ticket_nr = None
         try:
-            ticket_nr: int = self.osticket.open_ticket(
+            ticket_nr: Optional[int] = self.osticket.open_ticket(
                 name=user_name,
                 email=user_mail,
                 subject=order.name,
@@ -55,44 +55,53 @@ class TicketHandler:
         message = f"data:text/html;charset=utf-8,New incoming {project} samples: "
 
         for sample in order.samples:
-            self.add_sample_name_to_message(message=message, sample_name=sample.get("name"))
-            self.add_sample_apptag_to_message(
+            message = self.add_sample_name_to_message(
+                message=message, sample_name=sample.get("name")
+            )
+            message = self.add_sample_apptag_to_message(
                 message=message, application=sample.get("application")
             )
-            self.add_sample_case_name_to_message(
+            message = self.add_sample_case_name_to_message(
                 message=message, case_name=sample.get("family_name")
             )
-            self.add_existing_sample_info_to_message(
+            message = self.add_existing_sample_info_to_message(
                 message=message, customer_id=order.customer, internal_id=sample.get("internal_id")
             )
-            self.add_sample_priority_to_message(message=message, priority=sample.get("priority"))
-            self.add_sample_comment_to_message(message=message, comment=sample.get("comment"))
+            message = self.add_sample_priority_to_message(
+                message=message, priority=sample.get("priority")
+            )
+            message = self.add_sample_comment_to_message(
+                message=message, comment=sample.get("comment")
+            )
 
-        message += self.NEW_LINE
-        self.add_order_comment_to_message(message=message, comment=order.comment)
-        self.add_user_name_to_message(message=message, name=user_name)
-        self.add_customer_to_message(message=message, customer_id=order.customer)
+        message = self.NEW_LINE
+        message = self.add_order_comment_to_message(message=message, comment=order.comment)
+        message = self.add_user_name_to_message(message=message, name=user_name)
+        message = self.add_customer_to_message(message=message, customer_id=order.customer)
 
         return message
 
-    def add_sample_name_to_message(self, message: str, sample_name: str) -> None:
+    def add_sample_name_to_message(self, message: str, sample_name: str) -> str:
         message += self.NEW_LINE + sample_name
+        return message
 
     @staticmethod
-    def add_sample_apptag_to_message(message: str, application: Optional[str]) -> None:
+    def add_sample_apptag_to_message(message: str, application: Optional[str]) -> str:
         if application:
             message += f", application: {application}"
+        return message
 
     @staticmethod
-    def add_sample_case_name_to_message(message: str, case_name: Optional[str]):
+    def add_sample_case_name_to_message(message: str, case_name: Optional[str]) -> str:
         if case_name:
             message += f", case: {case_name}"
+        return message
 
     def add_existing_sample_info_to_message(
         self, message: str, customer_id: str, internal_id: Optional[str]
-    ) -> None:
+    ) -> str:
         if not internal_id:
-            return
+            return message
         existing_sample: models.Sample = self.status_db.sample(internal_id)
         sample_customer = ""
         if existing_sample.customer_id != customer_id:
@@ -101,25 +110,28 @@ class TicketHandler:
         message += f" (already existing sample{sample_customer})"
 
     @staticmethod
-    def add_sample_priority_to_message(message: str, priority: Optional[str]) -> None:
+    def add_sample_priority_to_message(message: str, priority: Optional[str]) -> str:
         if priority:
             message += ", priority: " + priority
+        return message
 
     @staticmethod
-    def add_sample_comment_to_message(message: str, comment: Optional[str]) -> None:
+    def add_sample_comment_to_message(message: str, comment: Optional[str]) -> str:
         if comment:
             message += ", " + comment
+        return message
 
-    def add_order_comment_to_message(self, message: str, comment: Optional[str]) -> None:
-        if not comment:
-            return
-        message += self.NEW_LINE + f"{comment}."
+    def add_order_comment_to_message(self, message: str, comment: Optional[str]) -> str:
+        if comment:
+            message += self.NEW_LINE + f"{comment}."
+        return message
 
-    def add_user_name_to_message(self, message: str, name: Optional[str]):
-        if not name:
-            return
-        message += self.NEW_LINE + f"{name}"
+    def add_user_name_to_message(self, message: str, name: Optional[str]) -> str:
+        if name:
+            message += self.NEW_LINE + f"{name}"
+        return message
 
-    def add_customer_to_message(self, message: str, customer_id: str) -> None:
+    def add_customer_to_message(self, message: str, customer_id: str) -> str:
         customer: models.Customer = self.status_db.customer(customer_id)
         message += f", {customer.name} ({customer_id})"
+        return message
