@@ -63,3 +63,8 @@ class MockLimsAPI(LimsAPI):
 
     def get_delivery_method(self, lims_id: str) -> str:
         return "CG002 - Delivery"
+
+    def update_sample(
+        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
+    ):
+        pass

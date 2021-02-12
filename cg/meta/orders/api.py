@@ -30,7 +30,7 @@ NEW_LINE = "<br />"
 class OrdersAPI(LimsHandler, StatusHandler):
     """Orders API for accepting new samples into the system."""
 
-    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket = None):
+    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket):
         super().__init__()
         self.lims = lims
         self.status = status
