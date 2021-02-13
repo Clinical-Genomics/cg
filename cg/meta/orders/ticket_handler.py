@@ -82,7 +82,7 @@ class TicketHandler:
         return message
 
     def add_sample_name_to_message(self, message: str, sample_name: str) -> str:
-        message += self.NEW_LINE + sample_name
+        message += f"{self.NEW_LINE}{sample_name}"
         return message
 
     @staticmethod
@@ -108,27 +108,28 @@ class TicketHandler:
             sample_customer = " from " + existing_sample.customer.internal_id
 
         message += f" (already existing sample{sample_customer})"
+        return message
 
     @staticmethod
     def add_sample_priority_to_message(message: str, priority: Optional[str]) -> str:
         if priority:
-            message += ", priority: " + priority
+            message += f", priority: {priority}"
         return message
 
     @staticmethod
     def add_sample_comment_to_message(message: str, comment: Optional[str]) -> str:
         if comment:
-            message += ", " + comment
+            message += f", {comment}"
         return message
 
     def add_order_comment_to_message(self, message: str, comment: Optional[str]) -> str:
         if comment:
-            message += self.NEW_LINE + f"{comment}."
+            message += f"{self.NEW_LINE}{comment}."
         return message
 
     def add_user_name_to_message(self, message: str, name: Optional[str]) -> str:
         if name:
-            message += self.NEW_LINE + f"{name}"
+            message += f"{self.NEW_LINE}{name}"
         return message
 
     def add_customer_to_message(self, message: str, customer_id: str) -> str:
