@@ -13,9 +13,19 @@ Try to use the following format:
 ### Added
 ### Changed
 
-## [19.1.1]
+## [19.1.2]
+
 ### Changed
 - Refactor ticket handling from orders API
+
+## [19.1.1]
+
+### Changed
+- Refactor ticket handling from orders API
+
+### Fixed
+- Allow price update files for application-version import to have empty prices 
+
 
 ## [19.1.0]
 ### Added
