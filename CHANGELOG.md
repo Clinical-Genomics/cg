@@ -13,9 +13,15 @@ Try to use the following format:
 ### Added
 ### Changed
 
+## [19.1.2]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
+
+
 ## [19.1.1]
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
+
 
 ## [19.1.0]
 ### Added
