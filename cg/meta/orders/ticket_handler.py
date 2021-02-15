@@ -74,7 +74,7 @@ class TicketHandler:
                 message=message, comment=sample.get("comment")
             )
 
-        message = self.NEW_LINE
+        message += self.NEW_LINE
         message = self.add_order_comment_to_message(message=message, comment=order.comment)
         message = self.add_user_name_to_message(message=message, name=user_name)
         message = self.add_customer_to_message(message=message, customer_id=order.customer)
