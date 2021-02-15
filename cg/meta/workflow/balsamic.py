@@ -391,7 +391,12 @@ class BalsamicAnalysisAPI:
             panel_shortname = "Whole_Genome"
         else:
             panel_shortname = "Undefined"
-        application_tag = case_obj.links[0].sample.application.tag
+        application_tag = (
+            self.store.query(models.ApplicationVersion)
+            .filter(models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
+            .first()
+            .application.tag
+        )
         return f"{panel_shortname}:{case_obj.name}:{application_tag}"
 
     @staticmethod
