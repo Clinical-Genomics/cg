@@ -49,10 +49,12 @@ class BalsamicAPI:
             }
         )
         parameters = command + options
-        if not dry:
-            return self.process.run_command(parameters=parameters)
-        LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
-        return self.__EXIT_SUCCESS
+        if dry:
+            LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
+            retcode = self.__EXIT_SUCCESS
+        else:
+            retcode = self.process.run_command(parameters=parameters)
+        return retcode
 
     def run_analysis(self, arguments: dict, run_analysis: bool, dry: bool = False) -> int:
         """Execute BALSAMIC run analysis with given options"""
@@ -70,10 +72,12 @@ class BalsamicAPI:
             }
         )
         parameters = command + options + run_analysis
-        if not dry:
-            return self.process.run_command(parameters=parameters)
-        LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
-        return self.__EXIT_SUCCESS
+        if dry:
+            LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
+            retcode = self.__EXIT_SUCCESS
+        else:
+            retcode = self.process.run_command(parameters=parameters)
+        return retcode
 
     def report_deliver(self, arguments: dict, dry: bool = False) -> int:
         """Execute BALSAMIC report deliver with given options"""
@@ -83,12 +87,12 @@ class BalsamicAPI:
             {
                 "--sample-config": arguments.get("sample_config"),
                 "--analysis-type": arguments.get("analysis_type"),
-                "--sample-id-map": arguments.get("sample-id-map"),
-                "--case-id-map": arguments.get("case-id-map"),
             }
         )
         parameters = command + options
-        if not dry:
-            return self.process.run_command(parameters=parameters)
-        LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
-        return self.__EXIT_SUCCESS
+        if dry:
+            LOG.info(f'Dry run command balsamic {" ".join(parameters)}')
+            retcode = self.__EXIT_SUCCESS
+        else:
+            retcode = self.process.run_command(parameters=parameters)
+        return retcode
