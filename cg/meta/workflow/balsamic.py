@@ -385,7 +385,7 @@ class BalsamicAnalysisAPI:
         return tumor_string
 
     def build_case_id_map_string(self, case_id: str) -> str:
-        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag}"""
+        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
 
         case_obj: models.Family = self.store.family(case_id)
         capture_kit = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
@@ -394,7 +394,7 @@ class BalsamicAnalysisAPI:
         elif self.get_application_type(case_obj.links[0]) == "wgs":
             panel_shortname = "Whole_Genome"
         else:
-            panel_shortname = "Undefined"
+            return None
         application_tag = (
             self.store.query(models.ApplicationVersion)
             .filter(models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
