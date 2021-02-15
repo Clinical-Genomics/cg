@@ -8,7 +8,6 @@ be validated and if passing all checks be accepted as new samples.
 """
 import datetime as dt
 import logging
-import re
 import typing
 from typing import List, Optional
 
@@ -49,7 +48,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         # detect manual ticket assignment
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
-        if not ticket_number and self.ticket_handler:
+        if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project
             )
@@ -114,8 +113,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _submit_external(self, order: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
-        result = self._process_case_samples(order)
-        return result
+        return self._process_case_samples(order)
 
     def _submit_case_samples(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
@@ -203,7 +201,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 applications = [
                     sample_obj.application_version.application for sample_obj in order_samples
                 ]
-                prep_categories = set(application.prep_category for application in applications)
+                prep_categories = {application.prep_category for application in applications}
                 if len(prep_categories) == 1:
                     for sample_obj in order_samples:
                         if not sample_obj.application_version.application.reduced_price:
