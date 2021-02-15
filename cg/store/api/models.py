@@ -10,11 +10,14 @@ class ApplicationVersionSchema(BaseModel):
     app_tag: str = Field(alias="App tag")
     version: int = Field(alias="Version")
     valid_from: datetime = Field(alias="Valid from")
-    standard: int = Field(alias="Standard")
-    priority: int = Field(alias="Priority")
-    express: int = Field(alias="Express")
-    research: int = Field(alias="Research")
-    percent_kth: int = Field(alias="Percent kth")
+    standard: Optional[int] = Field(alias="Standard")
+    priority: Optional[int] = Field(alias="Priority")
+    express: Optional[int] = Field(alias="Express")
+    research: Optional[int] = Field(alias="Research")
+
+
+class ParsedApplicationVersion(ApplicationVersionSchema):
+    version: Optional[int] = Field(alias="Version")
 
 
 class ApplicationSchema(BaseModel):

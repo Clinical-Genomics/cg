@@ -12,7 +12,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from cg.exc import CgError
 from cg.store import Store, models
 
-from .models import ApplicationSchema, ApplicationVersionSchema
+from .models import ApplicationSchema, ApplicationVersionSchema, ParsedApplicationVersion
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def import_application_versions(
         :param dry_run:             Test run, no changes to the database
         :param skip_missing:        Continue despite missing applications
     """
-    application_versions: Iterable[ApplicationVersionSchema] = parse_application_versions(
+    application_versions: Iterable[ParsedApplicationVersion] = parse_application_versions(
         excel_path=excel_path
     )
 
@@ -301,7 +301,7 @@ def get_cells_from_excel(
 
 def parse_application_versions(
     excel_path: str, sheet_name: Optional[str] = None
-) -> Iterable[ApplicationVersionSchema]:
+) -> Iterable[ParsedApplicationVersion]:
     workbook: Workbook = openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
     data_sheet = workbook.worksheets[0]
     if sheet_name:
@@ -309,7 +309,7 @@ def parse_application_versions(
 
     application_info: dict
     for application_info in get_raw_dicts_from_xlsheet(data_sheet):
-        yield ApplicationVersionSchema(**application_info)
+        yield ParsedApplicationVersion(**application_info)
 
 
 def parse_applications(
