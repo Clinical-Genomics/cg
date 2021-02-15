@@ -171,14 +171,19 @@ def run(
 @click.pass_context
 def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    balsamic_analysis_api: BalsamicAnalysisAPI = context.obj["BalsamicAnalysisAPI"]
     try:
         LOG.info(f"Creating delivery report for {case_id}")
         balsamic_analysis_api.get_case_object(case_id)
         sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
         analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
         LOG.info(f"Found analysis finish file: {analysis_finish}")
-        arguments = {"sample_config": sample_config, "analysis_type": analysis_type}
+        arguments = {
+            "sample_config": sample_config,
+            "analysis_type": analysis_type,
+            "sample-id-map": balsamic_analysis_api.build_sample_id_map_string(case_id=case_id),
+            "case-id-map": balsamic_analysis_api.build_case_id_map_string(case_id=case_id),
+        }
         balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
     except BalsamicStartError as e:
         LOG.error(f"Could not create report file: {e.message}")
