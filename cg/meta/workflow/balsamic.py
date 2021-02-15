@@ -374,6 +374,8 @@ class BalsamicAnalysisAPI:
         }
 
     def build_sample_id_map_string(self, case_id: str) -> str:
+        """Creates sample info string for balsamic with format lims_id:tumor/normal:customer_sample_id"""
+
         tumor_sample_lims_id = self.get_tumor_sample_name(case_id=case_id)
         tumor_string = f"{tumor_sample_lims_id}:tumor:{self.store.sample(internal_id=tumor_sample_lims_id).name}"
         normal_sample_lims_id = self.get_normal_sample_name(case_id=case_id)
@@ -382,7 +384,9 @@ class BalsamicAnalysisAPI:
             return ",".join([tumor_string, normal_string])
         return tumor_string
 
-    def build_case_id_map_string(self, case_id: str) -> str:
+    def build_case_id_map_string(self, case_id: str) -> Optional[str]:
+        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
+
         case_obj: models.Family = self.store.family(case_id)
         capture_kit = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
         if capture_kit:
@@ -390,8 +394,13 @@ class BalsamicAnalysisAPI:
         elif self.get_application_type(case_obj.links[0]) == "wgs":
             panel_shortname = "Whole_Genome"
         else:
-            panel_shortname = "Undefined"
-        application_tag = case_obj.links[0].sample.application.tag
+            return
+        application_tag = (
+            self.store.query(models.ApplicationVersion)
+            .filter(models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
+            .first()
+            .application.tag
+        )
         return f"{panel_shortname}:{case_obj.name}:{application_tag}"
 
     @staticmethod

@@ -13,7 +13,12 @@ Try to use the following format:
 ### Added
 ### Changed
 
-## [19.1.2]
+## [19.3.0]
+### Added
+- New options for balsamic report deliver to propagate delivery report data to Balsamic
+
+
+## [19.2.0]
 ### Added
 - Cases that decompression is started for will have the action set to "analyze"
 
