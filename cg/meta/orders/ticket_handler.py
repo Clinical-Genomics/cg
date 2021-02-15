@@ -4,7 +4,7 @@ from typing import Optional
 
 from cg.apps.osticket import OsTicket
 from cg.exc import TicketCreationError
-from cg.server.schemas.order import OrderIn
+from cg.models.orders.order import OrderIn
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)

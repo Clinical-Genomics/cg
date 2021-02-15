@@ -15,8 +15,8 @@ from typing import List, Optional
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.constants import DataDelivery, Pipeline
-from cg.exc import OrderError, TicketCreationError
-from cg.server.schemas.order import OrderIn
+from cg.exc import OrderError
+from cg.models.orders.order import OrderIn
 from cg.store import Store, models
 
 from .lims import LimsHandler
@@ -25,7 +25,6 @@ from .status import StatusHandler
 from .ticket_handler import TicketHandler
 
 LOG = logging.getLogger(__name__)
-NEW_LINE = "<br />"
 
 
 class OrdersAPI(LimsHandler, StatusHandler):
