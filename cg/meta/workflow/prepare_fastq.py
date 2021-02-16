@@ -48,10 +48,10 @@ class PrepareFastqAPI:
     def is_spring_decompression_running(self, case_id: str) -> bool:
         """Check if case is being decompressed"""
         compression_objects = self.get_compression_objects(case_id=case_id)
-        for compression_object in compression_objects:
-            if self.crunchy_api.is_compression_pending(compression_object):
-                return True
-        return False
+        return any(
+            self.crunchy_api.is_compression_pending(compression_object)
+            for compression_object in compression_objects
+        )
 
     def start_spring_decompression(self, case_id: str, dry_run: bool) -> bool:
         """Starts spring decompression"""
