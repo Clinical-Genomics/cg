@@ -9,9 +9,10 @@ Please add a new candidate release at the top after changing the latest one. Fee
 Try to use the following format:
 
 ## [x.x.x]
-### Fixed
 ### Added
+- Dockerhub build app container for release and pull requests
 ### Changed
+- Changed CI actions that run on pull request on push to only run on pull request
 
 ## [19.3.1]
 ### Added
