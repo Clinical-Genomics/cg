@@ -104,3 +104,6 @@ DEVELOP/
 # Local stuff
 .flake8
 local/
+
+# Secrets
+alembic.ini

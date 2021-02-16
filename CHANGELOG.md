@@ -14,6 +14,16 @@ Try to use the following format:
 ### Changed
 - Changed CI actions that run on pull request on push to only run on pull request
 
+
+## [19.4.0]
+
+### Added
+- alembic functionality
+### Changed
+- destination server PDC retrieval novaseq flowcells thalamus -> hasta
+### Fixed
+- flowcell status after PDC retrieval ondisk -> retrieved
+
 ## [19.3.1]
 ### Added
 - Dockerfile declaration for running the cg app. Dockerfile should not be used for the cli toolkit
@@ -63,7 +73,6 @@ Try to use the following format:
 ### Fixed
 - Upgraded insecure cryptography dependency 
 
-
 ## [18.11.2]
 
 ### Fixed
@@ -81,10 +90,7 @@ Try to use the following format:
  - Fix so that upload breaks if balsamic case is WGS
 
 ## [18.11.0]
-
-### Added
 - New Fluffy workflow for preparing, starting and storing of analyses
-
 
 ## [18.10.2]
 
@@ -106,6 +112,7 @@ Try to use the following format:
 
 ### Added
 - Support for delivery type in the Order Portal
+
 
 ## [18.9.1]
 
