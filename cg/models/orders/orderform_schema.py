@@ -104,8 +104,8 @@ class OrderCase(BaseModel):
 class OrderPool(BaseModel):
     name: str
     data_analysis: str
-    data_delivery: str
-    application = str
+    data_delivery: Optional[str]
+    application: str
     samples: List[OrderSample]
 
 

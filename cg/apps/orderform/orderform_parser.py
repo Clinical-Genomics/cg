@@ -60,7 +60,7 @@ class OrderformParser:
                 continue
             # each pool must only have one application type
             pool = pools[pool_name]
-            if pool.application != application:
+            if str(pool.application) != application:
                 raise OrderError(
                     f"different application in pool: {pool_name} - {[pools[pool_name].application, application]}"
                 )
