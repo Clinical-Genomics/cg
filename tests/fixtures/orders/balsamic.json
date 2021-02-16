@@ -25,7 +25,16 @@
       "formalin_fixation_time": "1",
       "post_formalin_fixation_time": "2",
       "tissue_block_size": "small",
-      "comment": "other Elution buffer"
+      "comment": "other Elution buffer",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
     }
   ]
 }
