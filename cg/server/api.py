@@ -5,7 +5,6 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 
-from cg.apps.lims import parse_json_order, parse_orderform
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
@@ -14,6 +13,9 @@ from google.auth import jwt
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
+from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from ..apps.orderform.json_orderform_parser import JsonOrderformParser
+from ..models.orders.orderform_schema import OrderformSchema
 from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)
@@ -343,11 +345,14 @@ def orderform():
             temp_dir = Path(tempfile.gettempdir())
             saved_path = str(temp_dir / filename)
             input_file.save(saved_path)
-            parsed_order = parse_orderform(saved_path)
+            order_parser = ExcelOrderformParser()
+            order_parser.parse_orderform(excel_path=saved_path)
         else:
             json_data = json.load(input_file.stream)
-            parsed_order = parse_json_order(json_data)
+            order_parser = JsonOrderformParser()
+            order_parser.parse_orderform(order_data=json_data)
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
+    parsed_order: OrderformSchema = order_parser.generate_orderform()
 
-    return jsonify(**parsed_order)
+    return jsonify(**parsed_order.dict())
