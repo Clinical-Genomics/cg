@@ -54,7 +54,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.conda_env = conda_env
         self.root = root
 
-    def check(self, case_obj: models.Family) -> bool:
+    def check_flowcells_ondisk(self, case_obj: models.Family) -> bool:
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=case_obj)
         statuses = []
