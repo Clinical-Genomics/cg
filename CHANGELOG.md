@@ -13,6 +13,7 @@ Try to use the following format:
 ### Added
 ### Changed
 
+
 ## [19.4.0]
 
 ### Added
@@ -21,6 +22,10 @@ Try to use the following format:
 - destination server PDC retrieval novaseq flowcells thalamus -> hasta
 ### Fixed
 - flowcell status after PDC retrieval ondisk -> retrieved
+
+## [19.3.1]
+### Added
+- Dockerfile declaration for running the cg app. Dockerfile should not be used for the cli toolkit
 
 ## [19.3.0]
 ### Added
