@@ -18,6 +18,9 @@ jobs:
       - name: Output branch name
         run: echo ${BRANCH_NAME}
 
+      - name: Modify illegal docker names
+        run: BRANCH_NAME="$(tr "/" "-" <<<$BRANCH_NAME)"
+
       - name: Build and publish to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
