@@ -128,6 +128,9 @@ MIP_SAMPLE = {
     # "Not Required"
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 BALSAMIC_SAMPLE = {
@@ -162,6 +165,10 @@ BALSAMIC_SAMPLE = {
     # This information is optional
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 MIP_RNA_SAMPLE = {
@@ -190,6 +197,10 @@ MIP_RNA_SAMPLE = {
     # Orderform 1508:19
     "from_sample": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "time_point": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 EXTERNAL_SAMPLE = {

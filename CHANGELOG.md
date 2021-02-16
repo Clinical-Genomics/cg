@@ -97,6 +97,11 @@ Try to use the following format:
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
 
+## [NG.NG.NG]
+
+### Added
+- Support for storing cohorts, phenotype_terms and synopsis from order json
+
 ## [18.10.0]
 
 ### Added
