@@ -159,16 +159,20 @@ class StatusHandler:
                 "panels": list(panels),
                 "samples": [
                     {
+                        "age_at_sampling": sample.get("age_at_sampling"),
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
+                        "cohorts": list(sample.get("cohorts", "")),
                         "comment": sample.get("comment"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
                         "internal_id": sample.get("internal_id"),
                         "mother": sample.get("mother"),
                         "name": sample["name"],
+                        "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
+                        "synopsis": list(sample.get("synopsis", "")),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
@@ -218,15 +222,19 @@ class StatusHandler:
                     family_samples[sample["name"]] = sample_obj
                 else:
                     new_sample = self.status.add_sample(
+                        age_at_sampling=sample["age_at_sampling"],
                         capture_kit=sample["capture_kit"],
+                        cohorts=sample["cohorts"],
                         comment=sample["comment"],
                         from_sample=sample["from_sample"],
                         internal_id=sample["internal_id"],
                         name=sample["name"],
                         order=order,
                         ordered=ordered,
+                        phenotype_terms=sample["phenotype_terms"],
                         priority=case["priority"],
                         sex=sample["sex"],
+                        synopsis=sample["synopsis"],
                         ticket=ticket,
                         time_point=sample["time_point"],
                         tumour=sample["tumour"],

@@ -8,6 +8,31 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+## [x.x.x]
+
+### Added
+### Changed
+### Fixed
+
+## [19.5.1]
+
+### Fixed
+- changelog
+
+## [19.5.0]
+
+### Added
+- alembic functionality
+### Changed
+- destination server PDC retrieval novaseq flowcells thalamus -> hasta
+### Fixed
+- flowcell status after PDC retrieval ondisk -> retrieved
+
+## [19.4.0]
+
+### Added
+- Support for storing cohorts, phenotype_terms and synopsis from order json
+
 ## [19.3.2]
 ### Added
 - Dockerhub build app container for release and pull requests
@@ -46,8 +71,6 @@ Try to use the following format:
 - workflow start now called start-available
 - Checking if flowcells are on disk moved to its own cli command
 
-
-
 ## [18.12.0]
 
 ### Added
@@ -62,7 +85,6 @@ Try to use the following format:
 
 ### Fixed
 - Upgraded insecure cryptography dependency 
-
 
 ## [18.11.2]
 
@@ -81,10 +103,7 @@ Try to use the following format:
  - Fix so that upload breaks if balsamic case is WGS
 
 ## [18.11.0]
-
-### Added
 - New Fluffy workflow for preparing, starting and storing of analyses
-
 
 ## [18.10.2]
 
@@ -101,6 +120,7 @@ Try to use the following format:
 
 ### Added
 - Support for delivery type in the Order Portal
+
 
 ## [18.9.1]
 

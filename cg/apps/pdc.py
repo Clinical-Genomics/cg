@@ -15,9 +15,9 @@ class PdcApi:
     ) -> str:
         """Fetch a flowcell back from the backup solution."""
         server = {
-            "novaseq": "thalamus",
             "hiseqga": "thalamus",
             "hiseqx": "hasta",
+            "novaseq": "hasta",
         }.get(sequencer_type)
         path = root_dir[sequencer_type]
 
