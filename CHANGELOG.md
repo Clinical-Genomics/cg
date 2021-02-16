@@ -8,6 +8,15 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+## [x.x.x]
+### Added
+### Changed
+### Fixed
+
+## [19.5.3]
+### Fixed
+- Fix dry run flag when resolving decompression state
+
 ## [19.5.2]
 ### Fixed
 - fix container name when publishing branch builds on dockerhub
