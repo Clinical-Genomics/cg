@@ -8,6 +8,18 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+## [x.x.x]
+
+### Added
+### Fixed
+### Changed
+
+## [19.6.0]
+
+### Changed
+
+- Use pydantic models to validate orderforms
+
 ## [19.5.2]
 ### Fixed
 - fix container name when publishing branch builds on dockerhub
