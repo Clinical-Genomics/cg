@@ -101,6 +101,14 @@ class OrderCase(BaseModel):
     panels: List[str] = None
 
 
+class OrderPool(BaseModel):
+    name: str
+    data_analysis: str
+    data_delivery: str
+    application = str
+    samples: List[OrderSample]
+
+
 # This is for validating in data
 class OrderformSchema(BaseModel):
     comment: Optional[str]

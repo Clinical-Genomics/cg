@@ -2,13 +2,8 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cg.apps.orderform.schemas.orderform_schema import (
-    OrderCase,
-    OrderformSchema,
-    OrderPool,
-    OrderSample,
-)
 from cg.exc import OrderError, OrderFormError
+from cg.models.orders.orderform_schema import OrderCase, OrderformSchema, OrderPool, OrderSample
 
 LOG = logging.getLogger(__name__)
 
