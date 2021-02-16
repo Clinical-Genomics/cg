@@ -1,7 +1,7 @@
 ---
 
 name: Build container for stage testing
-on: [pull_request]
+on: [push]
 
 jobs:
   docker-image-ci:
