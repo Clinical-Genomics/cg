@@ -8,14 +8,18 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [19.3.2]
+## [x.x.x]
+
 ### Added
-- Dockerhub build app container for release and pull requests
 ### Changed
-- Changed CI actions that run on pull request on push to only run on pull request
+### Fixed
 
+## [19.5.1]
 
-## [19.4.0]
+### Fixed
+- changelog
+
+## [19.5.0]
 
 ### Added
 - alembic functionality
@@ -23,6 +27,17 @@ Try to use the following format:
 - destination server PDC retrieval novaseq flowcells thalamus -> hasta
 ### Fixed
 - flowcell status after PDC retrieval ondisk -> retrieved
+
+## [19.4.0]
+
+### Added
+- Support for storing cohorts, phenotype_terms and synopsis from order json
+
+## [19.3.2]
+### Added
+- Dockerhub build app container for release and pull requests
+### Changed
+- Changed CI actions that run on pull request on push to only run on pull request
 
 ## [19.3.1]
 ### Added
@@ -55,8 +70,6 @@ Try to use the following format:
 - Refactors MIP cli slightly to always expect a case id
 - workflow start now called start-available
 - Checking if flowcells are on disk moved to its own cli command
-
-
 
 ## [18.12.0]
 
@@ -102,11 +115,6 @@ Try to use the following format:
 
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
-
-## [19.4.0]
-
-### Added
-- Support for storing cohorts, phenotype_terms and synopsis from order json
 
 ## [18.10.0]
 
