@@ -10,7 +10,7 @@ jobs:
     steps:
 
       - name: Check out git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
 
       - name: Get branch name
         uses: nelonoel/branch-name@v1.0.1
