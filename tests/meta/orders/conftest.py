@@ -1,8 +1,7 @@
 import json
 
 import pytest
-
-from cg.apps.lims import LimsAPI, limsjson
+from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.meta.orders.status import StatusHandler

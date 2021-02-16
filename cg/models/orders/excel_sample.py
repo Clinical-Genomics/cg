@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from cg.apps.lims.orderform import REV_SEX_MAP, SOURCE_TYPES
+from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.orderform_schema import OrderSample
 from pydantic import Field, validator
 
