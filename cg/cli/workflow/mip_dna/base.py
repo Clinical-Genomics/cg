@@ -114,7 +114,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context: click.Context, case_id: str):
-    """Link FASTQ files for a sample_id"""
+    """Link FASTQ files for all samples in a case"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
     case_obj: models.Family = dna_api.db.family(case_id)
     link_objs: List[models.FamilySample] = case_obj.links
