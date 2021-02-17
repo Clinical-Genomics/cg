@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [19.5.4]
+
+### Changed
+- Refactor ticket handling from orders API
+
 ## [19.5.3]
 ### Fixed
 - Fix dry run flag when resolving decompression state
@@ -59,8 +64,8 @@ Try to use the following format:
 ### Added
 - Cases that decompression is started for will have the action set to "analyze"
 
-
 ## [19.1.1]
+
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
 
