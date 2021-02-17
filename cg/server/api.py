@@ -8,6 +8,7 @@ from pathlib import Path
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
+from cg.models.orders.order import OrderIn
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from requests.exceptions import HTTPError
@@ -59,11 +60,15 @@ def before_request():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
-    post_data = request.get_json()
+    post_data: OrderIn = OrderIn.parse_obj(request.get_json())
     LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
-        ticket = {"name": g.current_user.name, "email": g.current_user.email}
-        result = api.submit(OrderType(order_type), post_data, ticket=ticket)
+        result = api.submit(
+            project=OrderType(order_type),
+            order_in=post_data,
+            user_name=g.current_user.name,
+            user_mail=g.current_user.email,
+        )
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:

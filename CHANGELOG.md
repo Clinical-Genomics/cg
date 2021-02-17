@@ -9,16 +9,24 @@ Please add a new candidate release at the top after changing the latest one. Fee
 Try to use the following format:
 
 ## [x.x.x]
-
 ### Added
-### Fixed
 ### Changed
+### Fixed
 
 ## [19.6.0]
 
 ### Changed
 
 - Use pydantic models to validate orderforms
+
+## [19.5.4]
+
+### Changed
+- Refactor ticket handling from orders API
+
+## [19.5.3]
+### Fixed
+- Fix dry run flag when resolving decompression state
 
 ## [19.5.2]
 ### Fixed
