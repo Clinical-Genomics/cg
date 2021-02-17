@@ -282,6 +282,8 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
             case_obj.internal_id, dry_run
         )
         if decompression_all_samples_started:
+            if not dry_run:
+                dna_api.set_statusdb_action(case_id=case_id, action="analyze")
             LOG.info(
                 "The analysis for %s could not start, started decompression instead",
                 case_obj.internal_id,

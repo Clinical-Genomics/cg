@@ -143,15 +143,9 @@
       "require_qcok": false,
       "priority": "Standard",
       "comment": "F0018192-0 Data finns 2019-19202 duo med bror ",
-      "synopsis": [
-        ""
-      ],
-      "phenotype_terms": [
-        ""
-      ],
-      "cohorts": [
-        ""
-      ]
+      "synopsis":["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "phenotype_terms":["HP:0012747","HP:0025049"],
+      "cohorts":["Other"]
     },
     {
       "name": "2020-20212-22",
