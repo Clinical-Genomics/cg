@@ -38,11 +38,10 @@ class ExcelOrderformParser(OrderformParser):
     def get_sheet_name(self, sheet_names: List[str]) -> str:
         """Return the correct (existing) sheet names"""
 
-        for name in self.SHEET_NAMES:
-            if name not in sheet_names:
-                continue
-            LOG.info("Found sheet name %s", name)
-            return name
+        for name in sheet_names:
+            if name in self.SHEET_NAMES:
+                LOG.info("Found sheet name %s", name)
+                return name
         raise OrderFormError("'orderform' sheet not found in Excel file")
 
     @staticmethod
