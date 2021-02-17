@@ -6,9 +6,9 @@ import logging
 import click
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
-from cg.store.get.cases import ready_for_spring_compression
 
 from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
+from ...store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, d
     LOG.info("Running compress FASTQ")
     update_compress_api(context.obj["compress_api"], dry_run=dry_run, ntasks=ntasks, mem=mem)
 
-    store = context.obj["status_db"]
+    store: Store = context.obj["status_db"]
     if case_id:
         case_obj = store.family(case_id)
         if not case_obj:
@@ -43,7 +43,9 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, d
         cases = [case_obj]
     else:
         date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
-        cases = ready_for_spring_compression(store, date_threshold=date_threshold)
+        cases = context.obj["compress_api"].get_cases_to_compress(
+            store, date_threshold=date_threshold
+        )
 
     case_conversion_count = 0
     ind_conversion_count = 0
@@ -92,7 +94,7 @@ def clean_fastq(context, case_id, days_back, dry_run):
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 
-    store = context.obj["status_db"]
+    store: Store = context.obj["status_db"]
 
     if case_id:
         case_obj = store.family(case_id)
@@ -102,7 +104,9 @@ def clean_fastq(context, case_id, days_back, dry_run):
         cases = [case_obj]
     else:
         date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
-        cases = ready_for_spring_compression(store, date_threshold=date_threshold)
+        cases = context.obj["compress_api"].get_cases_to_compress(
+            store, date_threshold=date_threshold
+        )
 
     cleaned_inds = 0
     for case_obj in cases:
