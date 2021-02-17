@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from cg.exc import OrderError, OrderFormError
-from cg.models.orders.orderform_schema import OrderCase, OrderformSchema, OrderPool, OrderSample
+from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool, OrderSample
 
 LOG = logging.getLogger(__name__)
 
@@ -89,13 +89,13 @@ class OrderformParser:
             panels=list(gene_panels),
         )
 
-    def generate_orderform(self) -> OrderformSchema:
+    def generate_orderform(self) -> Orderform:
         """Generate an orderform"""
         cases_map: Dict[str, List[OrderSample]] = self.group_cases()
         case_objs: List[OrderCase] = []
         for case_id in cases_map:
             case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
-        return OrderformSchema(
+        return Orderform(
             comment=self.order_comment,
             samples=self.samples,
             cases=case_objs,

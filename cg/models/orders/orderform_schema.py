@@ -33,8 +33,6 @@ class StatusEnum(str, Enum):
     unknown = "unknown"
 
 
-STATUS_OPTIONS = ()
-
 NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 
@@ -110,7 +108,7 @@ class OrderPool(BaseModel):
 
 
 # This is for validating in data
-class OrderformSchema(BaseModel):
+class Orderform(BaseModel):
     comment: Optional[str]
     delivery_type: str
     project_type: str

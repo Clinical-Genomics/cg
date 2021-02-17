@@ -4,7 +4,7 @@ from typing import Optional
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants import Pipeline
 from cg.models.orders.excel_sample import ExcelSample
-from cg.models.orders.orderform_schema import OrderformSchema
+from cg.models.orders.orderform_schema import Orderform
 
 
 def get_sample_obj(
@@ -90,7 +90,7 @@ def test_generate_external_orderform_with_case(external_order_parser: ExcelOrder
     # GIVEN a external orderform parser
 
     # WHEN generating the orderform
-    orderform: OrderformSchema = external_order_parser.generate_orderform()
+    orderform: Orderform = external_order_parser.generate_orderform()
 
     # THEN assert that the customer id was correct
     assert external_order_parser.customer_id == "cust002"
@@ -109,7 +109,7 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
     # GIVEN a mip orderform parser
 
     # WHEN generating a orderform
-    orderform: OrderformSchema = mip_order_parser.generate_orderform()
+    orderform: Orderform = mip_order_parser.generate_orderform()
 
     # THEN assert that there where cases in the order
     assert len(orderform.cases) > 0
@@ -206,7 +206,7 @@ def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, c
     # GIVEN a order form parser that have parsed an excel file
 
     # WHEN generating the order
-    order: OrderformSchema = rml_order_parser.generate_orderform()
+    order: Orderform = rml_order_parser.generate_orderform()
 
     # THEN assert that some samples where parsed and found
     assert order.samples

@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
-from ..models.orders.orderform_schema import OrderformSchema
+from ..models.orders.orderform_schema import Orderform
 from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)
@@ -353,6 +353,6 @@ def orderform():
             order_parser.parse_orderform(order_data=json_data)
     except OrderFormError as error:
         return abort(make_response(jsonify(message=error.message), 400))
-    parsed_order: OrderformSchema = order_parser.generate_orderform()
+    parsed_order: Orderform = order_parser.generate_orderform()
 
     return jsonify(**parsed_order.dict())

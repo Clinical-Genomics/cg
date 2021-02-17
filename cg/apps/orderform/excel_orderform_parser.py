@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import openpyxl
 from cg.apps.orderform.orderform_parser import OrderformParser
@@ -99,7 +99,6 @@ class ExcelOrderformParser(OrderformParser):
 
                     sample_dict = dict(zip(header_row, values))
                     sample_dict.pop(None)
-                    print(sample_dict)
                     raw_samples.append(sample_dict)
                 else:
                     empty_row_found = True
@@ -112,28 +111,29 @@ class ExcelOrderformParser(OrderformParser):
                 current_row = "samples"
         return raw_samples
 
-    def get_project_type(self, document_title: str) -> str:
+    def get_project_type_from_samples(self) -> str:
+        analyses = {sample.data_analysis for sample in self.samples}
+
+        if len(analyses) != 1:
+            raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
+
+        analysis = analyses.pop().lower().replace(" ", "-")
+        return "fastq" if analysis == self.NO_ANALYSIS else analysis
+
+    def get_project_type(self, document_title: str) -> Optional[str]:
         """Determine the project type and set it to the class."""
-        project_type = None
+        document_number_to_project_type = {
+            "1541": "external",
+            "1604": "rml",
+            "1603": "microsalt",
+            "1605": "metagenome",
+        }
+        for document_number, value in document_number_to_project_type.items():
+            if document_number in document_title:
+                return value
 
-        if "1541" in document_title:
-            project_type = "external"
-        elif "1604" in document_title:
-            project_type = "rml"
-        elif "1603" in document_title:
-            project_type = "microsalt"
-        elif "1605" in document_title:
-            project_type = "metagenome"
-        elif "1508" in document_title:
-            analyses = {sample.data_analysis for sample in self.samples}
-
-            if len(analyses) != 1:
-                raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
-
-            analysis = analyses.pop().lower().replace(" ", "-")
-
-            project_type = "fastq" if analysis == self.NO_ANALYSIS else analysis
-        return project_type
+        if "1508" in document_title:
+            return self.get_project_type_from_samples()
 
     def parse_data_analysis(self) -> str:
         data_analyses = {sample.data_analysis for sample in self.samples if sample.data_analysis}
