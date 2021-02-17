@@ -67,4 +67,4 @@ class MockLimsAPI(LimsAPI):
     def update_sample(
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
     ):
-        pass
+        pass  # This is completely mocked out

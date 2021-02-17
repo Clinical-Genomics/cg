@@ -27,7 +27,6 @@ class MockOsTicket(OsTicket):
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
-        return
 
     def setup(self, api_key: str = None, domain: str = None):
         """Initialize the API."""
