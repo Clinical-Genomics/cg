@@ -19,8 +19,7 @@ def case_exists(case_obj, case_id: str):
 
 def get_links(case: models.Family) -> models.Sample:
     """Return all samples from a family object"""
-    for sample_obj in case.links:
-        yield sample_obj
+    yield from case.links
 
 
 def get_samples(analysis_obj: models.Analysis) -> models.Sample:

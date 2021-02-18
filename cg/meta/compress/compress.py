@@ -4,7 +4,7 @@
 
 import logging
 from pathlib import Path
-
+from cg.store.queries import get_cases_to_compress
 from housekeeper.store import models as housekeeper_models
 
 from cg.apps.crunchy import CrunchyAPI
@@ -23,6 +23,7 @@ class CompressAPI:
         self.hk_api = hk_api
         self.crunchy_api = crunchy_api
         self.dry_run = dry_run
+        self.get_cases_to_compress = get_cases_to_compress
 
     def set_dry_run(self, dry_run: bool):
         """Update dry run"""
