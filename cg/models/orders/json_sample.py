@@ -1,4 +1,4 @@
-from cg.models.orders.orderform_schema import OrderSample
+from cg.models.orders.sample_base import OrderSample
 from pydantic import Field
 
 

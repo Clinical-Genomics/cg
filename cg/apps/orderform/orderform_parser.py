@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from cg.exc import OrderError, OrderFormError
-from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool, OrderSample
+from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
+from cg.models.orders.sample_base import OrderSample
 
 LOG = logging.getLogger(__name__)
 
