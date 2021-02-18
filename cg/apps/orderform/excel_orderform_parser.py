@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import openpyxl
 from cg.apps.orderform.orderform_parser import OrderformParser
@@ -8,6 +8,7 @@ from cg.constants import DataDelivery
 from cg.exc import OrderFormError
 from cg.meta.orders import OrderType
 from cg.models.orders.excel_sample import ExcelSample
+from openpyxl.cell.cell import Cell
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import parse_obj_as
@@ -63,52 +64,76 @@ class ExcelOrderformParser(OrderformParser):
         return document_title
 
     @staticmethod
-    def relevant_rows(orderform_sheet: Worksheet) -> List[Dict[str, str]]:
-        """Get the relevant rows from an order form sheet."""
-        raw_samples = []
-        header_row = []
-        current_row = None
+    def get_sample_row_info(
+        row: Tuple[Cell], header_row: List[str], empty_row_found: bool
+    ) -> Optional[dict]:
+        """Convert an excel row with sample data into a dict with sample info"""
+        values = []
+        cell: Cell
+        for cell in row:
+            value = str(cell.value)
+            if value == "None":
+                value = ""
+            if value == "NA":
+                value = None
+            values.append(value)
+
+        if not values[0]:
+            return None
+        # skip empty rows
+        if empty_row_found:
+            raise OrderFormError(
+                f"Found data after empty lines. Please delete any "
+                f"non-sample data rows in between the samples"
+            )
+
+        sample_dict = dict(zip(header_row, values))
+        sample_dict.pop(None)
+        return sample_dict
+
+    @staticmethod
+    def get_header(rows: List[Tuple[Cell]]) -> List[str]:
+        header_row: List[str] = []
+        header = False
+        for row in rows:
+            if header:
+                return [cell.value for cell in row]
+            if row[0].value == "<TABLE HEADER>":
+                LOG.debug("Found header row")
+                header = True
+        return header_row
+
+    @staticmethod
+    def get_raw_samples(rows: List[Tuple[Cell]], header_row: List[str]) -> List[dict]:
+        raw_samples: List[dict] = []
+        sample_rows = False
         empty_row_found = False
-        row: tuple
-        for row in orderform_sheet.rows:
+        for row in rows:
             if row[0].value == "</SAMPLE ENTRIES>":
                 LOG.debug("End of samples info")
-                break
+                return raw_samples
 
-            if current_row == "header":
-                header_row = [cell.value for cell in row]
-                current_row = None
-            elif current_row == "samples":
-                values = []
-                for cell in row:
-                    value = str(cell.value)
-                    if value == "None":
-                        value = ""
-                    if value == "NA":
-                        value = None
-                    values.append(value)
-
-                # skip empty rows
-                if values[0]:
-                    if empty_row_found:
-                        raise OrderFormError(
-                            f"Found data after empty lines. Please delete any "
-                            f"non-sample data rows in between the samples"
-                        )
-
-                    sample_dict = dict(zip(header_row, values))
-                    sample_dict.pop(None)
+            if sample_rows:
+                sample_dict: Optional[dict] = ExcelOrderformParser.get_sample_row_info(
+                    row=row, header_row=header_row, empty_row_found=empty_row_found
+                )
+                if sample_dict:
                     raw_samples.append(sample_dict)
                 else:
                     empty_row_found = True
 
-            if row[0].value == "<TABLE HEADER>":
-                LOG.debug("Found header row")
-                current_row = "header"
             elif row[0].value == "<SAMPLE ENTRIES>":
                 LOG.debug("Found samples row")
-                current_row = "samples"
+                sample_rows = True
         return raw_samples
+
+    @staticmethod
+    def relevant_rows(orderform_sheet: Worksheet) -> List[Dict[str, str]]:
+        """Get the relevant rows from an order form sheet."""
+        # orderform_sheet.rows is a generator. Convert to list to be able to iterate multiple times
+        rows = list(orderform_sheet.rows)
+        header_row: List[str] = ExcelOrderformParser.get_header(rows)
+        return ExcelOrderformParser.get_raw_samples(rows=rows, header_row=header_row)
 
     def get_project_type_from_samples(self) -> str:
         analyses = {sample.data_analysis for sample in self.samples}
