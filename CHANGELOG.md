@@ -14,6 +14,10 @@ Try to use the following format:
 ### Fixed
 
 
+## [20.1.0]
+### Fixed
+- Fix automatic decompression to also work for mixed cases
+
 ## [20.0.1]
 ### Changed
 - Removed old unused scripts and scripts directory
@@ -81,6 +85,10 @@ Try to use the following format:
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
 
+
+## [19.1.1]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
 
 ## [19.1.0]
 ### Added
