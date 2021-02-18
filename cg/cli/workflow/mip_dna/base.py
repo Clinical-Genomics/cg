@@ -277,19 +277,35 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
         LOG.error("Case %s does not exist in status-db", case_id)
         raise click.Abort
     decompression_needed = prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id)
+
     if decompression_needed:
-        decompression_all_samples_started = prepare_fastq_api.start_spring_decompression(
-            case_obj.internal_id, dry_run
+        LOG.info(
+            "The analysis for %s could not start, decompression is needed",
+            case_obj.internal_id,
         )
-        if decompression_all_samples_started:
-            dna_api.set_statusdb_action(case_id=case_id, action="analyze")
-            LOG.info(
-                "The analysis for %s could not start, started decompression instead",
-                case_obj.internal_id,
+        decompression_possible = prepare_fastq_api.can_at_least_one_sample_be_decompressed(
+            case_obj.internal_id
+        )
+        if decompression_possible:
+            possible_to_start_decompression = (
+                prepare_fastq_api.can_at_least_one_decompression_job_start(
+                    case_obj.internal_id, dry_run
+                )
             )
+            if possible_to_start_decompression and not dry_run:
+                dna_api.set_statusdb_action(case_id=case_id, action="analyze")
+                LOG.info(
+                    "Decompression started for %s",
+                    case_obj.internal_id,
+                )
+            else:
+                LOG.warning(
+                    "Decompression failed to start for %s",
+                    case_obj.internal_id,
+                )
         else:
             LOG.warning(
-                "Decompression is needed but could not be started for %s",
+                "Decompression can not be started for %s",
                 case_obj.internal_id,
             )
         raise DecompressionNeededError("Workflow interrupted: decompression is not finished")

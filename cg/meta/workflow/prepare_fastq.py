@@ -53,25 +53,36 @@ class PrepareFastqAPI:
                 return True
         return False
 
-    def start_spring_decompression(self, case_id: str, dry_run: bool) -> bool:
-        """Starts spring decompression"""
+    def can_at_least_one_sample_be_decompressed(self, case_id: str) -> bool:
+        """Returns True if at least one sample can be decompressed, otherwise False"""
         compression_objects: List[CompressionData] = self.get_compression_objects(case_id=case_id)
-        for compression_object in compression_objects:
-            if not self.crunchy_api.is_spring_decompression_possible(compression_object):
-                return False
+        if any(
+            self.crunchy_api.is_spring_decompression_possible(compression_object)
+            for compression_object in compression_objects
+        ):
+            return True
+        else:
+            return False
+
+    def can_at_least_one_decompression_job_start(self, case_id: str, dry_run: bool) -> bool:
+        """Returns True if decompression started for at least one sample, otherwise False"""
         case_obj: models.Family = self.store.family(case_id)
         link: models.FamilySample
+        did_something_start = False
         for link in case_obj.links:
             sample_id = link.sample.internal_id
             if dry_run:
                 LOG.info(
                     f"This is a dry run, therefore decompression for {sample_id} won't be started"
                 )
-                return True
+                continue
             decompression_started = self.compress_api.decompress_spring(sample_id)
-            if not decompression_started:
-                return False
-        return True
+            if decompression_started:
+                did_something_start = True
+        if did_something_start:
+            return True
+        else:
+            return False
 
     def check_fastq_links(self, case_id: str) -> None:
         """Check if all fastq files are linked in housekeeper"""
