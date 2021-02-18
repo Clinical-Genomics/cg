@@ -1,14 +1,39 @@
+from enum import Enum
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from cg.models.orders.orderform_schema import (
-    NAME_PATTERN,
-    ContainerEnum,
-    PriorityEnum,
-    SexEnum,
-    StatusEnum,
-)
 from pydantic import BaseModel, constr
+
+
+class SexEnum(str, Enum):
+    male = "male"
+    female = "female"
+    other = "other"
+
+
+class PriorityEnum(str, Enum):
+    research = "research"
+    standard = "standard"
+    priority = "priority"
+    express = "express"
+    clinical_trials = "clinical trials"
+
+
+class ContainerEnum(str, Enum):
+    agilent_sureselect_cre = "Agilent Sureselect CRE"
+    agilent_sureselect_v5 = "Agilent Sureselect V5"
+    sureselect_focused_exome = "SureSelect Focused Exome"
+    twist_target_hg19_bed = "Twist_Target_hg19.bed"
+    other = "other"
+
+
+class StatusEnum(str, Enum):
+    affected = "affected"
+    unaffected = "unaffected"
+    unknown = "unknown"
+
+
+NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 
 class OrderSample(BaseModel):

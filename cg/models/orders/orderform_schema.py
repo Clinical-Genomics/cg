@@ -1,39 +1,7 @@
-from enum import Enum
 from typing import List, Optional
 
 from cg.models.orders.sample_base import OrderSample
 from pydantic import BaseModel
-
-
-class SexEnum(str, Enum):
-    male = "male"
-    female = "female"
-    other = "other"
-
-
-class PriorityEnum(str, Enum):
-    research = "research"
-    standard = "standard"
-    priority = "priority"
-    express = "express"
-    clinical_trials = "clinical trials"
-
-
-class ContainerEnum(str, Enum):
-    agilent_sureselect_cre = "Agilent Sureselect CRE"
-    agilent_sureselect_v5 = "Agilent Sureselect V5"
-    sureselect_focused_exome = "SureSelect Focused Exome"
-    twist_target_hg19_bed = "Twist_Target_hg19.bed"
-    other = "other"
-
-
-class StatusEnum(str, Enum):
-    affected = "affected"
-    unaffected = "unaffected"
-    unknown = "unknown"
-
-
-NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 
 # Class for holding information about cases in order
