@@ -13,11 +13,16 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [19.6.0]
+## [20.1.0]
 
 ### Changed
 
 - Use pydantic models to validate orderforms
+
+## [20.0.0]
+
+### Changed
+- cg workflow mip-rna link command to take case as positional arg
 
 ## [19.5.4]
 
