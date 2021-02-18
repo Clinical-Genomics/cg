@@ -366,7 +366,7 @@ class CrunchyAPI:
         ntasks = 12
         mem = 50
         time = 24
-        sbatch_header = SBATCH_HEADER_TEMPLATE.format(
+        return SBATCH_HEADER_TEMPLATE.format(
             job_name=job_name,
             account=self.slurm_account,
             log_dir=log_dir,
@@ -376,7 +376,6 @@ class CrunchyAPI:
             time=time,
             mem=mem,
         )
-        return sbatch_header
 
     @staticmethod
     def _get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
@@ -395,7 +394,7 @@ class CrunchyAPI:
         tmp_dir_path = CrunchyAPI._get_tmp_dir(
             prefix="spring_", suffix="_compress", base=compression_obj.analysis_dir
         )
-        sbatch_body = SBATCH_FASTQ_TO_SPRING.format(
+        return SBATCH_FASTQ_TO_SPRING.format(
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
             spring_path=compression_obj.spring_path,
@@ -403,8 +402,6 @@ class CrunchyAPI:
             pending_path=compression_obj.pending_path,
             tmp_dir=tmp_dir_path,
         )
-
-        return sbatch_body
 
     @staticmethod
     def _get_slurm_spring_to_fastq(
@@ -415,7 +412,7 @@ class CrunchyAPI:
         tmp_dir_path = CrunchyAPI._get_tmp_dir(
             prefix="spring_", suffix="_decompress", base=compression_obj.analysis_dir
         )
-        sbatch_body = SBATCH_SPRING_TO_FASTQ.format(
+        return SBATCH_SPRING_TO_FASTQ.format(
             spring_path=compression_obj.spring_path,
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
@@ -424,5 +421,3 @@ class CrunchyAPI:
             checksum_second=checksum_second,
             tmp_dir=tmp_dir_path,
         )
-
-        return sbatch_body

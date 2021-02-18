@@ -114,7 +114,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context: click.Context, case_id: str):
-    """Link FASTQ files for a sample_id"""
+    """Link FASTQ files for all samples in a case"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
     case_obj: models.Family = dna_api.db.family(case_id)
     link_objs: List[models.FamilySample] = case_obj.links
@@ -277,20 +277,36 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
         LOG.error("Case %s does not exist in status-db", case_id)
         raise click.Abort
     decompression_needed = prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id)
+
     if decompression_needed:
-        decompression_all_samples_started = prepare_fastq_api.start_spring_decompression(
-            case_obj.internal_id, dry_run
+        LOG.info(
+            "The analysis for %s could not start, decompression is needed",
+            case_obj.internal_id,
         )
-        if decompression_all_samples_started:
-            if not dry_run:
-                dna_api.set_statusdb_action(case_id=case_id, action="analyze")
-            LOG.info(
-                "The analysis for %s could not start, started decompression instead",
-                case_obj.internal_id,
+        decompression_possible = prepare_fastq_api.can_at_least_one_sample_be_decompressed(
+            case_obj.internal_id
+        )
+        if decompression_possible:
+            possible_to_start_decompression = (
+                prepare_fastq_api.can_at_least_one_decompression_job_start(
+                    case_obj.internal_id, dry_run
+                )
             )
+            if possible_to_start_decompression:
+                if not dry_run:
+                    dna_api.set_statusdb_action(case_id=case_id, action="analyze")
+                LOG.info(
+                    "Decompression started for %s",
+                    case_obj.internal_id,
+                )
+            else:
+                LOG.warning(
+                    "Decompression failed to start for %s",
+                    case_obj.internal_id,
+                )
         else:
             LOG.warning(
-                "Decompression is needed but could not be started for %s",
+                "Decompression can not be started for %s",
                 case_obj.internal_id,
             )
         raise DecompressionNeededError("Workflow interrupted: decompression is not finished")

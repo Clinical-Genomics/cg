@@ -1,1 +1,0 @@
-ALTER TABLE `family` CHANGE `_panels` `_panels` text NULL

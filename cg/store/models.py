@@ -283,8 +283,7 @@ class Family(Model, PriorityMixin):
     @property
     def panels(self) -> List[str]:
         """Return a list of panels."""
-        panel_list = self._panels.split(",") if self._panels else []
-        return panel_list
+        return self._panels.split(",") if self._panels else []
 
     @panels.setter
     def panels(self, panel_list: List[str]):
@@ -392,8 +391,7 @@ class Organism(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        data = super(Organism, self).to_dict()
-        return data
+        return super(Organism, self).to_dict()
 
 
 class Panel(Model):
@@ -537,8 +535,7 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        data = super(Invoice, self).to_dict()
-        return data
+        return super(Invoice, self).to_dict()
 
 
 class User(Model):

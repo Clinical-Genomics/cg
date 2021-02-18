@@ -17,8 +17,25 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
-## [19.5.4]
+## [20.1.1]
+### Changed
+- Updates issue template
 
+## [20.1.0]
+### Fixed
+- Fix automatic decompression to also work for mixed cases
+
+## [20.0.1]
+### Changed
+- Removed old unused scripts and scripts directory
+- Moved crunchy query from store into CompressAPI
+
+
+## [20.0.0]
+### Changed
+- cg workflow mip-rna link command to take case as positional arg
+
+## [19.5.4]
 ### Changed
 - Refactor ticket handling from orders API
 
@@ -69,17 +86,14 @@ Try to use the following format:
 - Cases that decompression is started for will have the action set to "analyze"
 
 ## [19.1.1]
-
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
-
 
 ## [19.1.0]
 ### Added
 - Cli command to deliver old balsamic analyses which were stored with old hk tags
 
 ## [19.0.0]
-
 ### Added
 - Adds command to start decompression for spring compressed files if needed
 ### Changed
@@ -88,32 +102,26 @@ Try to use the following format:
 - Checking if flowcells are on disk moved to its own cli command
 
 ## [18.12.0]
-
 ### Added
 - Add prep-category 'cov' for applications
 
 ## [18.11.4]
-
 ### Fixed
 - Install package in gihub-jobs via pip==21.0.1
 
 ## [18.11.3]
-
 ### Fixed
 - Upgraded insecure cryptography dependency 
 
 ## [18.11.2]
-
 ### Fixed
 - Chromograph image tags back on track
 
 ## [18.12.1]
-
 ### Fixed
 - Fix message in order ticket that says what type of project it is
 
 ## [18.11.1]
-
 ### Fixed
  - Fix so that variants gets uploaded to scout for balsamic samples
  - Fix so that upload breaks if balsamic case is WGS
@@ -122,75 +130,57 @@ Try to use the following format:
 - New Fluffy workflow for preparing, starting and storing of analyses
 
 ## [18.10.2]
-
 ### Fixed
 - FLUFFY now have a validation schema and can be submitted in the Order Portal again
 - Samples of pools are now marked not to be invoiced, only the pool is invoiced
 
 ## [18.10.1]
-
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
 
 ## [18.10.0]
-
 ### Added
 - Support for delivery type in the Order Portal
 
 
 ## [18.9.1]
-
 ### Added
 - cg upload vogue bioinfo-all uploads both BALSAMIC as well.
 
 ## [18.9.0]
-
 ### Added
 
 - Add functionality to upload balsamic analyses to scout
 
 ## [18.8.0]
-
 ### Added
 - cg workflow microsalt upload-analysis-vogue [case_id] to upload the latest analysis from specific case
 - cg workflow microsalt upload-latest-analyses-vogue to upload all latest analyses what haven't been uploaded
 
 ## [18.7.2]
-
 ### Changed
-
 - Skip deliver fastq files when delivering balsamic analysis
 
 ## [18.7.1]
-
 ### Fixed
-
 - clean_fastq command now also skips validation cases when cleaning fastq files
 
 ## [18.7.0]
-
 ### Added
 - Added customer name in order tickets
 
 ## [18.6.1]
-
 ### Fixed
-
 - Fix bug with name clash for created case when submitting RML-orders via Orderportal
 
 
 ## [18.6.0]
-
-
 ### Added
-
 - Add command 'delete case' to remove case from the database
 - Add command 'delete cases' to remove multiple cases from the database
 
 ## [18.5.1]
-
 ### Fixed
-
 - Fix bug with microsalt deliverables path where it only returns the path only if it exists. This caused errors in some cases when submitting to Trailblazer
 
 ## [18.5.0]
