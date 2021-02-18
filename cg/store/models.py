@@ -289,8 +289,7 @@ class Family(Model, PriorityMixin):
     @property
     def panels(self) -> List[str]:
         """Return a list of panels."""
-        panel_list = self._panels.split(",") if self._panels else []
-        return panel_list
+        return self._panels.split(",") if self._panels else []
 
     @panels.setter
     def panels(self, panel_list: List[str]):
@@ -372,8 +371,7 @@ class Organism(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        data = super(Organism, self).to_dict()
-        return data
+        return super(Organism, self).to_dict()
 
 
 class Panel(Model):
@@ -416,11 +414,13 @@ class Pool(Model):
 
 class Sample(Model, PriorityMixin):
 
+    age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
     capture_kit = Column(types.String(64))
+    _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -442,6 +442,7 @@ class Sample(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, nullable=False)
     organism_id = Column(ForeignKey("organism.id"))
     organism = orm.relationship("Organism", foreign_keys=[organism_id])
+    _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
     priority = Column(types.Integer, default=1, nullable=False)
     reads = Column(types.BigInteger, default=0)
@@ -449,12 +450,40 @@ class Sample(Model, PriorityMixin):
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
+    _synopsis = Column(types.Text)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     ticket_number = Column(types.Integer)
     time_point = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    @property
+    def cohorts(self) -> List[str]:
+        """Return a list of cohorts."""
+        return self._cohorts.split(",") if self._cohorts else []
+
+    @cohorts.setter
+    def cohorts(self, cohort_list: List[str]):
+        self._cohorts = ",".join(cohort_list) if cohort_list else None
+
+    @property
+    def phenotype_terms(self) -> List[str]:
+        """Return a list of phenotype_terms."""
+        return self._phenotype_terms.split(",") if self._phenotype_terms else []
+
+    @phenotype_terms.setter
+    def phenotype_terms(self, phenotype_term_list: List[str]):
+        self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
+
+    @property
+    def synopsis(self) -> List[str]:
+        """Return a list of synopsis."""
+        return self._synopsis.split(",") if self._synopsis else []
+
+    @synopsis.setter
+    def synopsis(self, synopsis_list: List[str]):
+        self._synopsis = ",".join(synopsis_list) if synopsis_list else None
 
     @property
     def state(self) -> str:
@@ -506,8 +535,7 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        data = super(Invoice, self).to_dict()
-        return data
+        return super(Invoice, self).to_dict()
 
 
 class User(Model):

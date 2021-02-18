@@ -1,0 +1,29 @@
+---
+
+name: Build container for stage testing
+on: [push]
+
+jobs:
+  docker-image-ci:
+    name: Docker Image CI
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check out git repository
+        uses: actions/checkout@v1
+
+      - name: Get branch name
+        uses: nelonoel/branch-name@v1.0.1
+
+      - name: Modify illegal docker names
+        id: get_branch_name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo "$(tr "/" "-" <<<$BRANCH_NAME)")"
+
+      - name: Build and publish to Docker Hub
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: clinicalgenomics/cg-service-stage
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: "${{ steps.get_branch_name.outputs.branch }}"

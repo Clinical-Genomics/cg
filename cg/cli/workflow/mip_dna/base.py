@@ -114,7 +114,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
 @ARGUMENT_CASE_ID
 @click.pass_context
 def link(context: click.Context, case_id: str):
-    """Link FASTQ files for a sample_id"""
+    """Link FASTQ files for all samples in a case"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
     case_obj: models.Family = dna_api.db.family(case_id)
     link_objs: List[models.FamilySample] = case_obj.links
@@ -292,8 +292,9 @@ def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
                     case_obj.internal_id, dry_run
                 )
             )
-            if possible_to_start_decompression and not dry_run:
-                dna_api.set_statusdb_action(case_id=case_id, action="analyze")
+            if possible_to_start_decompression:
+                if not dry_run:
+                    dna_api.set_statusdb_action(case_id=case_id, action="analyze")
                 LOG.info(
                     "Decompression started for %s",
                     case_obj.internal_id,
