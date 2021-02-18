@@ -47,7 +47,6 @@ def gather_files_and_bundle_in_housekeeper(
     }
 
     status.family(bundle_obj.name).action = None
-    status.commit()
     new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj)
     version_date = version_obj.created_at.date()
 
