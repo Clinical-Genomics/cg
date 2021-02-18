@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.0.0]
+
+### Changed
+- cg workflow mip-rna link command to take case as positional arg
+
 ## [19.5.4]
 
 ### Changed
