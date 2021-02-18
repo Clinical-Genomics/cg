@@ -16,7 +16,6 @@ from cg.exc import (
 )
 from cg.meta.store import mip as store_mip
 from cg.store import Store, models
-from cg.store.utils import reset_case_action
 
 ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,
@@ -47,7 +46,8 @@ def gather_files_and_bundle_in_housekeeper(
         Pipeline.MIP_DNA: status.family(bundle_obj.name),
     }
 
-    reset_case_action(case_obj[workflow])
+    status.family(bundle_obj.name).action = None
+    status.commit()
     new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj)
     version_date = version_obj.created_at.date()
 
