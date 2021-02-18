@@ -4,17 +4,13 @@
 
 import logging
 from pathlib import Path
-
-from alchy import Query
-
-from cg.store import Store, models
+from cg.store.queries import get_cases_to_compress
 from housekeeper.store import models as housekeeper_models
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
-import datetime as dt
 
 LOG = logging.getLogger(__name__)
 
@@ -27,6 +23,7 @@ class CompressAPI:
         self.hk_api = hk_api
         self.crunchy_api = crunchy_api
         self.dry_run = dry_run
+        self.get_cases_to_compress = get_cases_to_compress
 
     def set_dry_run(self, dry_run: bool):
         """Update dry run"""
@@ -278,13 +275,3 @@ class CompressAPI:
         fastq_second.unlink()
         LOG.debug("Second FASTQ in pair %s removed", fastq_second)
         LOG.info("FASTQ files removed")
-
-    @staticmethod
-    def get_cases_to_compress(store: Store, date_threshold: dt.datetime) -> Query:
-        """Fetch all cases that are ready to be compressed by SPRING"""
-        return (
-            store.query(models.Family)
-            .filter(models.Family.action not in ["running", "analyze"])
-            .filter(models.Family.created_at < date_threshold)
-            .order_by(models.Family.created_at.asc())
-        )
