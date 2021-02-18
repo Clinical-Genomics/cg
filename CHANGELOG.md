@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Move synopsis and cohorts from sample to case in the database since that is how they are used 
+
 ## [19.5.4]
 
 ### Changed
