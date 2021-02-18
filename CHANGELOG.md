@@ -13,11 +13,16 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.1.0]
+## [20.2.0]
 
 ### Changed
 
 - Use pydantic models to validate orderforms
+
+## [20.1.1]
+
+### Changed
+- Updates issue template
 
 ## [20.1.0]
 ### Fixed
