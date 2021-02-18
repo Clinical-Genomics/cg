@@ -48,21 +48,18 @@ class PrepareFastqAPI:
     def is_spring_decompression_running(self, case_id: str) -> bool:
         """Check if case is being decompressed"""
         compression_objects = self.get_compression_objects(case_id=case_id)
-        for compression_object in compression_objects:
-            if self.crunchy_api.is_compression_pending(compression_object):
-                return True
-        return False
+        return any(
+            self.crunchy_api.is_compression_pending(compression_object)
+            for compression_object in compression_objects
+        )
 
     def can_at_least_one_sample_be_decompressed(self, case_id: str) -> bool:
         """Returns True if at least one sample can be decompressed, otherwise False"""
         compression_objects: List[CompressionData] = self.get_compression_objects(case_id=case_id)
-        if any(
+        return any(
             self.crunchy_api.is_spring_decompression_possible(compression_object)
             for compression_object in compression_objects
-        ):
-            return True
-        else:
-            return False
+        )
 
     def can_at_least_one_decompression_job_start(self, case_id: str, dry_run: bool) -> bool:
         """Returns True if decompression started for at least one sample, otherwise False"""
@@ -79,10 +76,7 @@ class PrepareFastqAPI:
             decompression_started = self.compress_api.decompress_spring(sample_id)
             if decompression_started:
                 did_something_start = True
-        if did_something_start:
-            return True
-        else:
-            return False
+        return did_something_start
 
     def check_fastq_links(self, case_id: str) -> None:
         """Check if all fastq files are linked in housekeeper"""
