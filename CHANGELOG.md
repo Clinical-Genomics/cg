@@ -14,6 +14,10 @@ Try to use the following format:
 ### Fixed
 
 
+## [20.1.0]
+### Fixed
+- Fix automatic decompression to also work for mixed cases
+
 ## [20.0.1]
 ### Changed
 - Removed old unused scripts and scripts directory
