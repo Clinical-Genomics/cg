@@ -11,6 +11,7 @@ from cg.meta.orders import OrdersAPI, OrderType
 from cg.models.orders.order import OrderIn
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
+from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
 
@@ -356,7 +357,7 @@ def orderform():
             json_data = json.load(input_file.stream)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
-    except OrderFormError as error:
+    except (OrderFormError, ValidationError) as error:
         return abort(make_response(jsonify(message=error.message), 400))
     parsed_order: Orderform = order_parser.generate_orderform()
 
