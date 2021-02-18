@@ -149,6 +149,7 @@ class AddHandler(BaseHandler):
         name: str,
         panels: List[str],
         priority: str = "standard",
+        **kwargs,
     ) -> models.Family:
         """Build a new Family record."""
 
@@ -167,6 +168,7 @@ class AddHandler(BaseHandler):
             internal_id=internal_id,
             name=name,
             priority=priority_db,
+            **kwargs,
         )
         new_case.panels = panels
         return new_case

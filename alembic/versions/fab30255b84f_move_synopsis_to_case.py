@@ -16,14 +16,14 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 # revision identifiers, used by Alembic.
-revision = 'fab30255b84f'
-down_revision = '6d74453565f2'
+revision = "fab30255b84f"
+down_revision = "6d74453565f2"
 branch_labels = None
 depends_on = None
 
 
 class Family(Base):
-    __tablename__ = 'family'
+    __tablename__ = "family"
 
     id = sa.Column(sa.types.Integer, primary_key=True)
     internal_id = sa.Column(sa.types.String(32), unique=True, nullable=False)
@@ -52,7 +52,7 @@ class Family(Base):
 
 
 class FamilySample(Base):
-    __tablename__ = 'family_sample'
+    __tablename__ = "family_sample"
     __table_args__ = (sa.UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
 
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -69,7 +69,7 @@ class FamilySample(Base):
 
 
 class Sample(Base):
-    __tablename__ = 'sample'
+    __tablename__ = "sample"
 
     _cohorts = sa.Column(sa.types.Text)
     id = sa.Column(sa.types.Integer, primary_key=True)
@@ -99,8 +99,8 @@ class Sample(Base):
 def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.add_column('family', sa.Column('_synopsis', sa.TEXT))
-    op.add_column('family', sa.Column('_cohorts', sa.TEXT))
+    op.add_column("family", sa.Column("_synopsis", sa.TEXT))
+    op.add_column("family", sa.Column("_cohorts", sa.TEXT))
 
     # copy data from sample._synopsis to family._synopsis
     for sample in session.query(Sample).filter(Sample._synopsis.isnot(None)):
@@ -111,15 +111,15 @@ def upgrade():
             link.family._cohorts = sample._cohorts
     session.commit()
 
-    op.drop_column('sample', '_synopsis')
-    op.drop_column('sample', '_cohorts')
+    op.drop_column("sample", "_synopsis")
+    op.drop_column("sample", "_cohorts")
 
 
 def downgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    op.add_column('sample', sa.Column('_synopsis', sa.TEXT))
-    op.add_column('sample', sa.Column('_cohorts', sa.TEXT))
+    op.add_column("sample", sa.Column("_synopsis", sa.TEXT))
+    op.add_column("sample", sa.Column("_cohorts", sa.TEXT))
 
     # copy data from family._synopsis to sample._synopsis
     for family in session.query(Family).filter(Family._synopsis.isnot(None)):
@@ -130,5 +130,5 @@ def downgrade():
             link.sample._cohorts = family._cohorts
     session.commit()
 
-    op.drop_column('family', '_synopsis')
-    op.drop_column('family', '_cohorts')
+    op.drop_column("family", "_synopsis")
+    op.drop_column("family", "_cohorts")
