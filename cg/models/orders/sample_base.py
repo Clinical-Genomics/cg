@@ -1,15 +1,14 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from pydantic import BaseModel, constr
-
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.orderform_schema import (
-    ContainerEnum,
     NAME_PATTERN,
+    ContainerEnum,
     PriorityEnum,
     SexEnum,
     StatusEnum,
 )
+from pydantic import BaseModel, constr
 
 
 class OrderSample(BaseModel):
@@ -41,7 +40,7 @@ class OrderSample(BaseModel):
     name: constr(regex=NAME_PATTERN)
     organism: Optional[str]
     organism_other: Optional[str]
-    panels: List[str] = None
+    panels: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
     pool: str
     post_formalin_fixation_time: Optional[int]

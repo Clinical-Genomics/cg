@@ -15,10 +15,14 @@ def get_sample_obj(
             return sample_obj
 
 
+def is_excel(file_path: Path) -> bool:
+    return Path(file_path).suffix == ".xlsx"
+
+
 def test_parse_mip_rna_orderform(mip_rna_orderform: str):
     """Test to parse an mip rna orderform in excel format"""
     # GIVEN a orderform in excel format
-    assert Path(mip_rna_orderform).suffix == ".xlsx"
+    assert is_excel(Path(mip_rna_orderform))
     # GIVEN a orderform API
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
 
@@ -32,7 +36,7 @@ def test_parse_mip_rna_orderform(mip_rna_orderform: str):
 def test_parse_balsamic_orderform(balsamic_orderform: str):
     """Test to parse an balsamic orderform in excel format"""
     # GIVEN a orderform in excel format
-    assert Path(balsamic_orderform).suffix == ".xlsx"
+    assert is_excel(Path(balsamic_orderform))
     # GIVEN a orderform API
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
 
@@ -46,7 +50,7 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
 def test_parse_microbial_orderform(microbial_orderform: str):
     """Test to parse an microbial orderform in excel format"""
     # GIVEN a order form in excel format
-    assert Path(microbial_orderform).suffix == ".xlsx"
+    assert is_excel(Path(microbial_orderform))
     # GIVEN a orderform API
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
 
@@ -60,7 +64,7 @@ def test_parse_microbial_orderform(microbial_orderform: str):
 def test_parse_metagenome_orderform(metagenome_orderform: str):
     """Test to parse an metagenome orderform in excel format"""
     # GIVEN a order form in excel format
-    assert Path(metagenome_orderform).suffix == ".xlsx"
+    assert is_excel(Path(metagenome_orderform))
     # GIVEN a orderform API
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
 
@@ -74,7 +78,7 @@ def test_parse_metagenome_orderform(metagenome_orderform: str):
 def test_parse_external_orderform(external_orderform: str):
     """Test to parse a external orderform in xlsx format"""
     # GIVEN a orderform in excel format
-    assert Path(external_orderform).suffix == ".xlsx"
+    assert is_excel(Path(external_orderform))
     # GIVEN a orderform API
     order_form_parser = ExcelOrderformParser()
 
@@ -125,7 +129,7 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
 def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
     """Test to parse a mip orderform in xlsx format"""
     # GIVEN a orderform in excel format
-    assert Path(mip_orderform).suffix == ".xlsx"
+    assert is_excel(Path(mip_orderform))
     # GIVEN a orderform API
     order_form_parser = ExcelOrderformParser()
     # GIVEN the correct orderform name
@@ -144,7 +148,7 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
 def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
     """Test to parse an excel orderform in xlsx format"""
     # GIVEN a orderform in excel format
-    assert Path(rml_orderform).suffix == ".xlsx"
+    assert is_excel(Path(rml_orderform))
     # GIVEN a orderform API
     order_form_parser = ExcelOrderformParser()
     # GIVEN the correct orderform name
@@ -163,7 +167,7 @@ def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
 def test_parse_fastq_orderform(fastq_orderform: str, nr_samples_fastq_orderform: int):
     """Test to parse an fastq orderform in xlsx format"""
     # GIVEN a orderform in excel format
-    assert Path(fastq_orderform).suffix == ".xlsx"
+    assert is_excel(Path(fastq_orderform))
     # GIVEN a orderform API
     order_form_parser = ExcelOrderformParser()
     # GIVEN the correct orderform name
