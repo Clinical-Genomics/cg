@@ -170,35 +170,38 @@ class ExcelOrderformParser(OrderformParser):
     def is_from_orderform_without_data_delivery(self, data_delivery: str) -> bool:
         return data_delivery == self.NO_VALUE
 
+    def default_delivery_type(self, project_type: OrderType) -> str:
+        """Returns the default delivery type for a project type"""
+        if project_type == OrderType.FLUFFY:
+            return DataDelivery.NIPT_VIEWER
+
+        if project_type == OrderType.METAGENOME:
+            return DataDelivery.FASTQ
+
+        if project_type == OrderType.MICROSALT:
+            data_analysis: str = self.parse_data_analysis()
+
+            if data_analysis == "custom":
+                return DataDelivery.FASTQ_QC
+
+            elif data_analysis == "fastq":
+                return DataDelivery.FASTQ
+
+        if project_type == OrderType.RML:
+            return DataDelivery.FASTQ
+
+        if project_type == OrderType.EXTERNAL:
+            return DataDelivery.SCOUT
+
+        raise OrderFormError(f"Could not determine value for Data Delivery")
+
     def get_data_delivery(self, project_type: OrderType) -> str:
         """Determine the order_data delivery type."""
 
         data_delivery: str = self.parse_data_delivery()
 
         if self.is_from_orderform_without_data_delivery(data_delivery):
-
-            if project_type == OrderType.FLUFFY:
-                return DataDelivery.NIPT_VIEWER
-
-            if project_type == OrderType.METAGENOME:
-                return DataDelivery.FASTQ
-
-            if project_type == OrderType.MICROSALT:
-                data_analysis: str = self.parse_data_analysis()
-
-                if data_analysis == "custom":
-                    return DataDelivery.FASTQ_QC
-
-                elif data_analysis == "fastq":
-                    return DataDelivery.FASTQ
-
-            if project_type == OrderType.RML:
-                return DataDelivery.FASTQ
-
-            if project_type == OrderType.EXTERNAL:
-                return DataDelivery.SCOUT
-
-            raise OrderFormError(f"Could not determine value for Data Delivery")
+            return self.default_delivery_type(project_type)
 
         if data_delivery == "analysis-+-bam":
             return DataDelivery.ANALYSIS_BAM_FILES
