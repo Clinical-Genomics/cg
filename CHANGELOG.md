@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.0.1]
+
+### Changed
+- Updates issue template
+
 ## [20.0.0]
 
 ### Changed
