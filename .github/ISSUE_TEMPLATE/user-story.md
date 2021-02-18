@@ -1,30 +1,21 @@
 ---
-name: user story
+name: issue
 about: user story template
 
 ---
 
-As a busy person, I want to drink coffee so that I wake up.
+## Description
 
-Problem: 
-The coffee machine is leaking! Most likely the tube is not attached to the back very well.
+*Describe the problem/suggestion*
 
-Steps to reproduce
-  1. Go to the coffee machine on G4, small kitchen
-  2. Put a cup in the dispenser
-  3. Press to get any coffee
-  4. Water should now be dripping from the right side of the machine. Move the microwave for better view.
+## Suggested solution
 
-Expected outcome / suggested solution:
-A coffee in my cup.
+*Write here if there is a suggested way to solve the issue*
 
-Questions: 
-Q: Does the same problem occur for tea?
-A: Yes.
+## This can be closed when
 
-What needs to be done on the planning meeting:
-- Estimate storypoints
-- **Remember to add label *PBL Teamname***
+*Describe what needs to be done for this issue to be closed*
 
+## Blocked by
 
-See https://github.com/Clinical-Genomics/development/blob/master/git/issue-reports.md for more!
+*If there are any blocking issues/prs/things in this or other repos. Please link to them.*
