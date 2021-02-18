@@ -34,10 +34,10 @@ LOG = logging.getLogger(__name__)
 def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, dry_run):
     """ Find cases with FASTQ files and compress into SPRING """
     LOG.info("Running compress FASTQ")
-    update_compress_api(context.obj["compress_api"], dry_run=dry_run, ntasks=ntasks, mem=mem)
-
-    store: Store = context.obj["status_db"]
     compress_api: CompressAPI = context.obj["compress_api"]
+    store: Store = context.obj["status_db"]
+    update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
+
     if case_id:
         case_obj = store.family(case_id)
         if not case_obj:
@@ -46,9 +46,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, d
         cases = [case_obj]
     else:
         date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
-        cases = context.obj["compress_api"].get_cases_to_compress(
-            store, date_threshold=date_threshold
-        )
+        cases = compress_api.get_cases_to_compress(store, date_threshold=date_threshold)
 
     case_conversion_count = 0
     ind_conversion_count = 0
@@ -135,7 +133,7 @@ def fix_spring(context, bundle_name, dry_run):
     LOG.info("Running compress clean FASTQ")
     compress_api = context.obj["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
-    hk_api = compress_api.hk_api
+    hk_api: HousekeeperAPI = compress_api.hk_api
     correct_spring_paths(hk_api=hk_api, bundle_name=bundle_name, dry_run=dry_run)
 
 
