@@ -35,6 +35,7 @@ def fastq_cmd(context, case_id, number_of_conversions, ntasks, mem, days_back, d
     update_compress_api(context.obj["compress_api"], dry_run=dry_run, ntasks=ntasks, mem=mem)
 
     store: Store = context.obj["status_db"]
+    compress_api: CompressAPI = context.obj["compress_api"]
     if case_id:
         case_obj = store.family(case_id)
         if not case_obj:
