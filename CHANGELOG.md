@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [19.5.5]
+### Changed
+- Removed old unused scripts and scripts directory
+- Moved crunchy query from store into CompressAPI
+
 ## [19.5.4]
 
 ### Changed
