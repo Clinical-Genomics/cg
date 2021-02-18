@@ -19,6 +19,12 @@ Try to use the following format:
 
 - Use pydantic models to validate orderforms
 
+## [20.0.1]
+### Changed
+- Removed old unused scripts and scripts directory
+- Moved crunchy query from store into CompressAPI
+
+
 ## [20.0.0]
 
 ### Changed
