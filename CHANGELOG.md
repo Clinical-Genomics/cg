@@ -13,10 +13,17 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [19.5.5]
+
+## [20.0.1]
 ### Changed
 - Removed old unused scripts and scripts directory
 - Moved crunchy query from store into CompressAPI
+
+
+## [20.0.0]
+
+### Changed
+- cg workflow mip-rna link command to take case as positional arg
 
 ## [19.5.4]
 
