@@ -8,7 +8,7 @@ from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 
 from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
-from ...store import Store
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
