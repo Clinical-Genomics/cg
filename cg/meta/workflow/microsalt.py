@@ -16,20 +16,24 @@ from typing import Any, Dict, List, Optional
 
 import click
 
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
 
-class MicrosaltAnalysisAPI:
+class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
     def __init__(
@@ -39,8 +43,26 @@ class MicrosaltAnalysisAPI:
         lims_api: LimsAPI,
         hermes_api: HermesApi,
         trailblazer_api: TrailblazerAPI,
+        housekeeper_api: HousekeeperAPI,
+        prepare_fastq_api: PrepareFastqAPI,
+        status_db: Store,
+        process: Process,
+        pipeline: Pipeline,
+        scout_api: ScoutAPI,
         config: Optional[dict] = {},
     ):
+        super().__init__(
+            housekeeper_api,
+            trailblazer_api,
+            hermes_api,
+            lims_api,
+            prepare_fastq_api,
+            status_db,
+            process,
+            pipeline,
+            scout_api,
+            config,
+        )
         self.db = db
         self.hk = hk_api
         self.lims = lims_api
@@ -49,33 +71,6 @@ class MicrosaltAnalysisAPI:
         self.root_dir = config["root"]
         self.queries_path = config["queries_path"]
         self.process = Process(binary=config["binary_path"], environment=config["conda_env"])
-
-    def check_flowcells_on_disk(self, case_id: str, sample_id: Optional[str] = None) -> bool:
-        """Check if flowcells are on disk for sample before starting the analysis.
-        Flowcells not on disk will be requested
-        """
-
-        flowcells = self.get_flowcells(case_id=case_id, sample_id=sample_id)
-        statuses = []
-        for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
-            statuses.append(flowcell_obj.status)
-            if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
-        self.db.commit()
-        return all(status == "ondisk" for status in statuses)
-
-    def get_flowcells(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Flowcell]:
-        """Get all flowcells for all samples in a ticket"""
-        flowcells = set()
-        for sample in self.get_samples(case_id=case_id, sample_id=sample_id):
-            for flowcell in sample.flowcells:
-                flowcells.add(flowcell)
-
-        return list(flowcells)
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
@@ -118,60 +113,6 @@ class MicrosaltAnalysisAPI:
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
         return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
 
-    @staticmethod
-    def fastq_header(line: str) -> dict:
-        """handle illumina's two different header formats
-        @see https://en.wikipedia.org/wiki/FASTQ_format
-
-        @HWUSI-EAS100R:6:73:941:1973#0/1
-
-            HWUSI-EAS100R   the unique instrument name
-            6   flowcell lane
-            73  tile number within the flowcell lane
-            941     'x'-coordinate of the cluster within the tile
-            1973    'y'-coordinate of the cluster within the tile
-            #0  index number for a multiplexed sample (0 for no indexing)
-            /1  the member of a pair, /1 or /2 (paired-end or mate-pair reads only)
-
-        Versions of the Illumina pipeline since 1.4 appear to use #NNNNNN
-        instead of #0 for the multiplex ID, where NNNNNN is the sequence of the
-        multiplex tag.
-
-        With Casava 1.8 the format of the '@' line has changed:
-
-        @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-
-            EAS139  the unique instrument name
-            136     the run id
-            FC706VJ     the flowcell id
-            2   flowcell lane
-            2104    tile number within the flowcell lane
-            15343   'x'-coordinate of the cluster within the tile
-            197393  'y'-coordinate of the cluster within the tile
-            1   the member of a pair, 1 or 2 (paired-end or mate-pair reads only)
-            Y   Y if the read is filtered, N otherwise
-            18  0 when none of the control bits are on, otherwise it is an even number
-            ATCACG  index sequence
-        """
-
-        rs = {"lane": None, "flowcell": None, "readnumber": None}
-
-        parts = line.split(":")
-        if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
-            rs["lane"] = parts[1]
-            rs["flowcell"] = "XXXXXX"
-            rs["readnumber"] = parts[-1].split("/")[-1]
-        if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[6].split(" ")[-1]
-        if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[-1].split("/")[-1]
-
-        return rs
-
     def link_samples(self, case_id: str, sample_id: Optional[str] = None) -> None:
 
         case_dir: Path = self.get_case_fastq_path(case_id=case_id)
@@ -192,31 +133,17 @@ class MicrosaltAnalysisAPI:
         fastq_dir = Path(case_dir, sample_id)
         fastq_dir.mkdir(exist_ok=True, parents=True)
 
-        file_objs = self.hk.files(bundle=sample_id, tags=["fastq"])
+        file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
         files = []
 
         for file_obj in file_objs:
             # figure out flowcell name from header
-            with gzip.open(file_obj.full_path) as handle:
-                header_line = handle.readline().decode()
-                header_info = self.fastq_header(header_line)
-
-            data = {
-                "path": file_obj.full_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("_Undetermined_" in file_obj.path),
-            }
-            # look for tile identifier (HiSeq X runs)
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", file_obj.path)
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
+            data = FastqHandler.parse_file_data(file_obj.full_path)
             files.append(data)
 
         for fastq_data in files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = self.generate_fastq_name(
+            linked_fastq_name = FastqHandler.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample_id,
@@ -318,18 +245,6 @@ class MicrosaltAnalysisAPI:
 
         return self.db.cases_to_store(pipeline=Pipeline.MICROSALT)
 
-    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
-        """Sets action on case based on ticket number"""
-        if action in [None, *CASE_ACTIONS]:
-            case_object: models.Family = self.db.family(case_id)
-            case_object.action = action
-            self.db.commit()
-            LOG.info("Action %s set for case %s", action, case_id)
-            return
-        LOG.warning(
-            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
-        )
-
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any
     ) -> (str, Optional[str]):
@@ -382,81 +297,12 @@ class MicrosaltAnalysisAPI:
         case_id = case_obj.internal_id
         return case_id, None
 
-    def store_microbial_analysis_housekeeper(self, case_id: str) -> None:
-        """Gather information from microSALT analysis to store."""
-
-        deliverables_path = self.get_deliverables_file_path(case_id=case_id)
-        if not deliverables_path.exists():
-            LOG.warning(
-                "Deliverables file not found for %s, analysis may not be finished yet", case_id
-            )
-            raise click.Abort
-
-        analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
-
-        bundle_data = self.hermes_api.create_housekeeper_bundle(
-            deliverables=deliverables_path,
-            pipeline="microsalt",
-            created=analysis_date,
-            analysis_type=None,
-            bundle_name=case_id,
-        ).dict()
-        bundle_data["name"] = case_id
-
-        bundle_result = self.hk.add_bundle(bundle_data=bundle_data)
-        if not bundle_result:
-            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
-        bundle_object, bundle_version = bundle_result
-        self.hk.include(bundle_version)
-        self.hk.add_commit(bundle_object, bundle_version)
-        LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
-        )
-
-    def store_microbial_analysis_statusdb(self, case_id: str) -> None:
-        """Creates an analysis object in StatusDB"""
-        deliverables_path = self.get_deliverables_file_path(case_id=case_id)
-        analysis_date = self.get_date_from_deliverables_path(deliverables_path=deliverables_path)
-        case_obj: models.Family = self.db.family(case_id)
-
-        new_analysis: models.Analysis = self.db.add_analysis(
-            pipeline=Pipeline.MICROSALT,
-            version=self.get_microsalt_version(),
-            started_at=analysis_date,
-            completed_at=datetime.now(),
-            primary=(len(case_obj.analyses) == 0),
-        )
-        new_analysis.family = case_obj
-        self.db.add_commit(new_analysis)
-        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
-
     @staticmethod
     def get_date_from_deliverables_path(deliverables_path: Path) -> datetime.date:
         """ Get date from deliverables path using date created metadata """
         return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))
 
-    def get_priority(self, case_id: str) -> str:
-        """Returns priority for the case in clinical-db as text"""
-        case_object = self.db.family(case_id)
-        if case_object.high_priority:
-            return "high"
-        if case_object.low_priority:
-            return "low"
-        return "normal"
-
-    def submit_trailblazer_analysis(self, case_id: str) -> None:
-        self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
-        self.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            email=environ_email(),
-            type="other",
-            out_dir=self.get_deliverables_file_path(case_id).parent.as_posix(),
-            config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
-            priority=self.get_priority(case_id),
-            data_analysis=Pipeline.MICROSALT,
-        )
-
-    def get_microsalt_version(self) -> str:
+    def get_pipeline_version(self, case_id: str) -> str:
         try:
             self.process.run_command(["--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
