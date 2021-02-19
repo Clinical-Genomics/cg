@@ -145,13 +145,15 @@ class StatusHandler:
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
-            cohorts = set(cohort for sample in case_samples for cohort in sample.get("cohorts",
-                          set()))
+            cohorts = set(
+                cohort for sample in case_samples for cohort in sample.get("cohorts", set())
+            )
             if "" in cohorts:
                 cohorts.remove("")
 
-            synopses = set(synopsis for sample in case_samples for synopsis in sample.get("synopsis",
-                                                                                     set()))
+            synopses = set(
+                synopsis for sample in case_samples for synopsis in sample.get("synopsis", set())
+            )
             if "" in synopses:
                 synopses.remove("")
 

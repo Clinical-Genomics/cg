@@ -82,7 +82,7 @@ def test_families_to_status(mip_order_to_submit):
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == "standard"
     assert family["cohorts"] == {"Other"}
-    assert family["synopsis"] == {'Här kommer det att komma en väldigt lång text med för synopsis.'}
+    assert family["synopsis"] == {"Här kommer det att komma en väldigt lång text med för synopsis."}
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
 
@@ -90,7 +90,7 @@ def test_families_to_status(mip_order_to_submit):
     assert first_sample["age_at_sampling"] == "17.18192"
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGTPCFC030"
-    assert first_sample["phenotype_terms"] == ['HP:0012747', 'HP:0025049']
+    assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
     assert first_sample["mother"] == "sample2"
@@ -361,7 +361,6 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.application_version.application.tag == "WGTPCFC030"
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
-
 
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
 
