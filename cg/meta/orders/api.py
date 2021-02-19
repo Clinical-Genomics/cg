@@ -17,8 +17,8 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.store import Store, models
+from .lims import process_lims
 
-from .lims import LimsHandler
 from .schema import ORDER_SCHEMES, OrderType
 from .status import StatusHandler
 from .ticket_handler import TicketHandler
@@ -26,7 +26,7 @@ from .ticket_handler import TicketHandler
 LOG = logging.getLogger(__name__)
 
 
-class OrdersAPI(LimsHandler, StatusHandler):
+class OrdersAPI(StatusHandler):
     """Orders API for accepting new samples into the system."""
 
     def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket):
@@ -69,7 +69,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _submit_pools(self, order):
         status_data = self.pools_to_status(order)
-        project_data, lims_map = self.process_lims(order, order["samples"])
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, data=order, samples=order["samples"]
+        )
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
         self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
         new_records = self.store_rml(
@@ -84,7 +86,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def _submit_fastq(self, order: dict) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
         status_data = self.samples_to_status(order)
-        project_data, lims_map = self.process_lims(order, order["samples"])
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, data=order, samples=order["samples"]
+        )
         self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_fastq_samples(
             customer=status_data["customer"],
@@ -99,7 +103,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
     def _submit_metagenome(self, order: dict) -> dict:
         """Submit a batch of metagenome samples."""
         status_data = self.samples_to_status(order)
-        project_data, lims_map = self.process_lims(order, order["samples"])
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, data=order, samples=order["samples"]
+        )
         self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_samples(
             customer=status_data["customer"],
@@ -147,7 +153,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
         status_data = self.microbial_samples_to_status(order)
         self._fill_in_sample_verified_organism(order["samples"])
         # submit samples to LIMS
-        project_data, lims_map = self.process_lims(order, order["samples"])
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, data=order, samples=order["samples"]
+        )
         self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
         # submit samples to Status
         samples = self.store_microbial_samples(
@@ -169,7 +177,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
         status_data = self.cases_to_status(order)
         new_samples = [sample for sample in order["samples"] if sample.get("internal_id") is None]
         if new_samples:
-            project_data, lims_map = self.process_lims(order, new_samples)
+            project_data, lims_map = process_lims(
+                lims_api=self.lims, data=order, samples=new_samples
+            )
         else:
             project_data = lims_map = None
         samples = [sample for family in status_data["families"] for sample in family["samples"]]

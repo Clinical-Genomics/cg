@@ -34,7 +34,10 @@ def test_submit(
     lims_map = {
         sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
-    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
+    monkeypatch.setattr(
+        "cg.meta.orders.api.process_lims",
+        lambda **kwargs: (lims_project_data, lims_map),
+    )
 
     # GIVEN an order and an empty store
     assert base_store.samples().first() is None
@@ -74,7 +77,9 @@ def test_submit_illegal_sample_customer(
     lims_map = {
         sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
-    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
+    monkeypatch.setattr(
+        "cg.meta.orders.api.process_lims", lambda **kwargs: (lims_project_data, lims_map)
+    )
 
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
@@ -124,7 +129,9 @@ def test_submit_scout_legal_sample_customer(
     lims_map = {
         sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
-    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
+    monkeypatch.setattr(
+        "cg.meta.orders.api.process_lims", lambda **kwargs: (lims_project_data, lims_map)
+    )
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
     customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
@@ -185,7 +192,9 @@ def test_submit_non_scout_legal_sample_customer(
     lims_map = {
         sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
-    monkeypatch.setattr(orders_api, "process_lims", lambda *args: (lims_project_data, lims_map))
+    monkeypatch.setattr(
+        "cg.meta.orders.api.process_lims", lambda **kwargs: (lims_project_data, lims_map)
+    )
 
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from but on order types where this is dis-allowed
