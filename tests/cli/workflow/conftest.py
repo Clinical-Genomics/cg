@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pytest
 from cg.constants import Pipeline
-
 from cg.store import Store, models
 
 

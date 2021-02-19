@@ -9,8 +9,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from typing_extensions import Literal
-
 from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hermes.hermes_api import HermesApi
@@ -21,6 +19,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BalsamicStartError, BundleAlreadyAddedError
 from cg.store import Store, models
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -373,6 +372,36 @@ class BalsamicAnalysisAPI:
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
+
+    def build_sample_id_map_string(self, case_id: str) -> str:
+        """Creates sample info string for balsamic with format lims_id:tumor/normal:customer_sample_id"""
+
+        tumor_sample_lims_id = self.get_tumor_sample_name(case_id=case_id)
+        tumor_string = f"{tumor_sample_lims_id}:tumor:{self.store.sample(internal_id=tumor_sample_lims_id).name}"
+        normal_sample_lims_id = self.get_normal_sample_name(case_id=case_id)
+        if normal_sample_lims_id:
+            normal_string = f"{normal_sample_lims_id}:normal:{self.store.sample(internal_id=normal_sample_lims_id).name}"
+            return ",".join([tumor_string, normal_string])
+        return tumor_string
+
+    def build_case_id_map_string(self, case_id: str) -> Optional[str]:
+        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
+
+        case_obj: models.Family = self.store.family(case_id)
+        capture_kit = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
+        if capture_kit:
+            panel_shortname = self.store.bed_version(capture_kit).shortname
+        elif self.get_application_type(case_obj.links[0]) == "wgs":
+            panel_shortname = "Whole_Genome"
+        else:
+            return
+        application_tag = (
+            self.store.query(models.ApplicationVersion)
+            .filter(models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
+            .first()
+            .application.tag
+        )
+        return f"{panel_shortname}:{case_obj.name}:{application_tag}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:

@@ -3,14 +3,17 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-from ruamel.yaml import YAML
 
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
 from cg.constants import Pipeline
+from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
+from ruamel.yaml import YAML
 from tests.mocks.limsmock import MockLimsAPI
 
 
@@ -303,11 +306,34 @@ def fixture_rna_mip_context(
     return rna_mip_context
 
 
+@pytest.fixture(name="crunchy_config")
+def fixture_crunchy_config(crunchy_config_dict) -> dict:
+    """Returns a config for CrunchyAPI"""
+    return crunchy_config_dict
+
+
+@pytest.fixture(name="crunchy")
+def fixture_crunchy(crunchy_config_dict) -> CrunchyAPI:
+    """Returns CrunchyAPI"""
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    return crunchy_api
+
+
+@pytest.fixture(name="compress")
+def fixture_compress(housekeeper_api, crunchy) -> CompressAPI:
+    """Returns CompressAPI"""
+    compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy)
+    return compress_api
+
+
 @pytest.fixture(name="dna_mip_context")
 def fixture_dna_mip_context(
     analysis_store_single_case: Store,
     trailblazer_api: TrailblazerAPI,
     housekeeper_api: HousekeeperAPI,
+    crunchy: CrunchyAPI,
+    compress: CompressAPI,
+    crunchy_config: dict,
     mip_lims: MockLimsAPI,
     mock_root_folder: str,
     mock_mip_script: str,
@@ -326,6 +352,11 @@ def fixture_dna_mip_context(
             pipeline=mip_dna_pipeline,
             conda_env=mip_dna_conda_env_name,
             root=mock_root_folder,
+        ),
+        "crunchy_api": CrunchyAPI(crunchy_config),
+        "compress_api": CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy),
+        "prepare_fastq_api": PrepareFastqAPI(
+            store=analysis_store_single_case, compress_api=compress
         ),
         "mip-rd-dna": {
             "conda_env": mip_dna_conda_env_name,

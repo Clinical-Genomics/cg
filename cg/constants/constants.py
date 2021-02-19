@@ -32,7 +32,7 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 CASE_ACTIONS = ("analyze", "running", "hold")
 
-FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing")
+FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
 
 class Pipeline(StrEnum):
@@ -53,7 +53,7 @@ class DataDelivery(StrEnum):
     SCOUT: str = "scout"
 
 
-PREP_CATEGORIES = ("wgs", "wes", "tgs", "wts", "mic", "rml")
+PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
 SEX_OPTIONS = ("male", "female", "unknown")
 

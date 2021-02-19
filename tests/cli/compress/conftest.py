@@ -3,16 +3,16 @@
 import datetime as dt
 
 import pytest
-
 from cg.apps.crunchy import CrunchyAPI
 from cg.meta.compress import CompressAPI
 
 
-class MockCompressAPI:
+class MockCompressAPI(CompressAPI):
     """Mock out necessary functions for running the compress CLI functions"""
 
     def __init__(self):
         """initialize mock"""
+        super().__init__(hk_api=None, crunchy_api=None)
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True

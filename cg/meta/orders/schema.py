@@ -1,7 +1,5 @@
 from collections import Iterable
 
-from pyschemes import Scheme, validators
-
 from cg.constants import (
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
@@ -11,12 +9,13 @@ from cg.constants import (
     Pipeline,
 )
 from cg.utils.StrEnum import StrEnum
+from pyschemes import Scheme, validators
 
 
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
     EXTERNAL: str = "external"
-    FASTQ: str = "fastq"
+    FASTQ: str = str(Pipeline.FASTQ)
     FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"
     MICROSALT: str = str(Pipeline.MICROSALT)
@@ -106,7 +105,7 @@ MIP_SAMPLE = {
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     "require_qcok": bool,
-    "volume": str,
+    "volume": OptionalNone(TypeValidatorNone(str)),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
     "container_name": OptionalNone(TypeValidatorNone(str)),
@@ -129,6 +128,9 @@ MIP_SAMPLE = {
     # "Not Required"
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 BALSAMIC_SAMPLE = {
@@ -163,6 +165,10 @@ BALSAMIC_SAMPLE = {
     # This information is optional
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 MIP_RNA_SAMPLE = {
@@ -191,6 +197,10 @@ MIP_RNA_SAMPLE = {
     # Orderform 1508:19
     "from_sample": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "time_point": OptionalNone(TypeValidatorNone(str)),
+    "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
+    "cohorts": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 EXTERNAL_SAMPLE = {
@@ -337,6 +347,7 @@ ORDER_SCHEMES = {
     ),
     OrderType.FASTQ: Scheme({**BASE_PROJECT, "samples": ListValidator(FASTQ_SAMPLE, min_items=1)}),
     OrderType.RML: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
+    OrderType.FLUFFY: Scheme({**BASE_PROJECT, "samples": ListValidator(RML_SAMPLE, min_items=1)}),
     OrderType.MICROSALT: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(MICROSALT_SAMPLE, min_items=1)}
     ),

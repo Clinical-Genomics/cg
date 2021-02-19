@@ -1,5 +1,5 @@
 from cg.apps.lims import limsjson
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 
 
 def test_parsing_balsamic_json(balsamic_order_to_submit):
@@ -132,3 +132,17 @@ def test_parsing_mip_json(mip_json_order_to_submit: dict):
     assert sibling_sample["father"] == ""
     assert sibling_sample["quantity"] == ""
     assert sibling_sample["comment"] == "F0018192-0 Data finns 2019-19202 duo med bror "
+
+    # cohort
+    assert sibling_sample["cohorts"] == ["Other"]
+
+    # synopsis
+    assert sibling_sample["synopsis"] == [
+        "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
+    ]
+
+    # hpo-terms
+    assert sibling_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
+
+    # age at sampling
+    assert sibling_sample["age_at_sampling"] == "17.18192"

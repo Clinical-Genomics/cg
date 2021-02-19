@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 import click
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline

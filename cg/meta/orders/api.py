@@ -8,173 +8,66 @@ be validated and if passing all checks be accepted as new samples.
 """
 import datetime as dt
 import logging
-import re
 import typing
-from typing import List
+from typing import List, Optional
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.constants import Pipeline, DataDelivery
-from cg.exc import OrderError, TicketCreationError
+from cg.constants import DataDelivery, Pipeline
+from cg.exc import OrderError
+from cg.models.orders.order import OrderIn
 from cg.store import Store, models
 
 from .lims import LimsHandler
 from .schema import ORDER_SCHEMES, OrderType
 from .status import StatusHandler
+from .ticket_handler import TicketHandler
 
 LOG = logging.getLogger(__name__)
-NEW_LINE = "<br />"
 
 
 class OrdersAPI(LimsHandler, StatusHandler):
     """Orders API for accepting new samples into the system."""
 
-    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket = None):
+    def __init__(self, lims: LimsAPI, status: Store, osticket: OsTicket):
         super().__init__()
         self.lims = lims
         self.status = status
-        self.osticket = osticket
+        self.ticket_handler: TicketHandler = TicketHandler(osticket_api=osticket, status_db=status)
 
-    def submit(self, project: OrderType, order: dict, ticket: dict) -> dict:
+    def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
         """Submit a batch of samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
         try:
-            ORDER_SCHEMES[project].validate(order)
+            ORDER_SCHEMES[project].validate(order_in.dict())
         except (ValueError, TypeError) as error:
             raise OrderError(error.args[0])
-
-        self._validate_customer_on_imported_samples(project, order)
+        self._validate_customer_on_imported_samples(project=project, order=order_in)
 
         # detect manual ticket assignment
-        ticket_match = re.fullmatch(r"#([0-9]{6})", order["name"])
+        ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
+        if not ticket_number:
+            ticket_number = self.ticket_handler.create_ticket(
+                order=order_in, user_name=user_name, user_mail=user_mail, project=project
+            )
 
-        if ticket_match:
-            ticket_number = int(ticket_match.group(1))
-            LOG.info(f"{ticket_number}: detected ticket in order name")
-            order["ticket"] = ticket_number
-        else:
-            # open and assign ticket to order
-            try:
-                if self.osticket:
-                    message = self._create_new_ticket_message(
-                        order=order, ticket=ticket, project=project
-                    )
+        order = order_in.dict()
+        order["ticket"] = ticket_number
 
-                    order["ticket"] = self.osticket.open_ticket(
-                        name=ticket["name"],
-                        email=ticket["email"],
-                        subject=order["name"],
-                        message=message,
-                    )
-
-                    LOG.info(f"{order['ticket']}: opened new ticket")
-                else:
-                    order["ticket"] = None
-            except TicketCreationError as error:
-                LOG.warning(error.message)
-                order["ticket"] = None
         order_func = self._get_submit_func(project.value)
-        result = order_func(order)
-        return result
+        return order_func(order)
 
-    def _create_new_ticket_message(self, order: dict, ticket: dict, project: str) -> str:
-        message = (
-            f"data:text/html;charset=utf-8,New incoming {order.get('data_analysis')} samples: "
-        )
-
-        for sample in order.get("samples"):
-            message = self._add_sample_name_to_message(message, sample)
-            message = self._add_sample_apptag_to_message(message, sample)
-            message = self._add_sample_case_name_to_message(message, sample)
-            message = self._add_existing_sample_info_to_message(message, order, sample)
-            message = self._add_sample_priority_to_message(message, sample)
-            message = self._add_sample_comment_to_message(message, sample)
-
-        message += NEW_LINE
-        message = self._add_project_to_message(message, project)
-        message = self._add_data_delivery_to_message(order, message)
-        message = self._add_comment_to_message(order, message)
-        message = self._add_user_name_to_message(message, ticket)
-        message = self._add_customer_to_message(order, message)
-
-        return message
-
-    @staticmethod
-    def _add_sample_name_to_message(message, sample):
-        message += NEW_LINE + sample.get("name")
-        return message
-
-    @staticmethod
-    def _add_sample_apptag_to_message(message, sample):
-        if sample.get("application"):
-            message += f", application: {sample['application']}"
-        return message
-
-    @staticmethod
-    def _add_sample_case_name_to_message(message, sample):
-        if sample.get("family_name"):
-            message += f", case: {sample.get('family_name')}"
-        return message
-
-    def _add_existing_sample_info_to_message(self, message, order, sample):
-        if sample.get("internal_id"):
-
-            existing_sample = self.status.sample(sample.get("internal_id"))
-            sample_customer = ""
-            if existing_sample.customer_id != order["customer"]:
-                sample_customer = " from " + existing_sample.customer.internal_id
-
-            message += f" (already existing sample{sample_customer})"
-        return message
-
-    @staticmethod
-    def _add_sample_priority_to_message(message, sample):
-        if sample.get("priority"):
-            message += ", priority: " + sample.get("priority")
-        return message
-
-    @staticmethod
-    def _add_sample_comment_to_message(message, sample):
-        if sample.get("comment"):
-            message += ", " + sample.get("comment")
-        return message
-
-    @staticmethod
-    def _add_project_to_message(message, project):
-        if project:
-            message += NEW_LINE + f"{project}."
-        return message
-
-    @staticmethod
-    def _add_data_delivery_to_message(order, message):
-        if order.get("delivery"):
-            message += NEW_LINE + f"{order.get('delivery')}."
-        return message
-
-    @staticmethod
-    def _add_comment_to_message(order, message):
-        if order.get("comment"):
-            message += NEW_LINE + f"{order.get('comment')}."
-        return message
-
-    @staticmethod
-    def _add_user_name_to_message(message, ticket):
-        if ticket.get("name"):
-            message += NEW_LINE + f"{ticket.get('name')}"
-        return message
-
-    def _add_customer_to_message(self, order, message):
-        if order.get("customer"):
-            customer_id = order.get("customer")
-            customer_name = self.status.customer(customer_id).name
-
-            message += f", {customer_name} ({customer_id})"
-        return message
+    def _submit_fluffy(self, order: dict) -> dict:
+        """Submit a batch of ready made libraries for FLUFFY analysis."""
+        return self._submit_pools(order)
 
     def _submit_rml(self, order: dict) -> dict:
-        """Submit a batch of ready made libraries."""
+        """Submit a batch of ready made libraries for sequencing."""
+        return self._submit_pools(order)
+
+    def _submit_pools(self, order):
         status_data = self.pools_to_status(order)
         project_data, lims_map = self.process_lims(order, order["samples"])
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
@@ -220,8 +113,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _submit_external(self, order: dict) -> dict:
         """Submit a batch of externally sequenced samples for analysis."""
-        result = self._process_case_samples(order)
-        return result
+        return self._process_case_samples(order)
 
     def _submit_case_samples(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
@@ -309,7 +201,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                 applications = [
                     sample_obj.application_version.application for sample_obj in order_samples
                 ]
-                prep_categories = set(application.prep_category for application in applications)
+                prep_categories = {application.prep_category for application in applications}
                 if len(prep_categories) == 1:
                     for sample_obj in order_samples:
                         if not sample_obj.application_version.application.reduced_price:
@@ -352,8 +244,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
             )
             sample["verified_organism"] = is_verified
 
-    def _validate_customer_on_imported_samples(self, project: OrderType, order: dict):
-        for sample in order.get("samples"):
+    def _validate_customer_on_imported_samples(self, project: OrderType, order: OrderIn):
+        """Validate that the customer have access to all samples in order"""
+        for sample in order.samples:
 
             if sample.get("internal_id"):
 
@@ -370,7 +263,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
                     )
 
                 existing_sample = self.status.sample(sample.get("internal_id"))
-                data_customer = self.status.customer(order["customer"])
+                data_customer = self.status.customer(order.customer)
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")

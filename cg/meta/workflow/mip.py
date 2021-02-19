@@ -5,8 +5,6 @@ import re
 from pathlib import Path
 from typing import Any, List, Optional
 
-from ruamel.yaml import safe_load
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
@@ -25,6 +23,7 @@ from cg.constants import (
 )
 from cg.exc import CgDataError, CgError, LimsDataError
 from cg.store import Store, models
+from ruamel.yaml import safe_load
 
 LOG = logging.getLogger(__name__)
 
@@ -55,7 +54,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.conda_env = conda_env
         self.root = root
 
-    def check(self, case_obj: models.Family) -> bool:
+    def check_flowcells_ondisk(self, case_obj: models.Family) -> bool:
         """Check stuff before starting the analysis."""
         flowcells = self.db.flowcells(family=case_obj)
         statuses = []

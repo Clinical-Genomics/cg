@@ -9,10 +9,153 @@ Please add a new candidate release at the top after changing the latest one. Fee
 Try to use the following format:
 
 ## [x.x.x]
-
 ### Added
 ### Changed
 ### Fixed
+
+
+## [20.1.2]
+### Changed
+- Refactored and removed code from cg.store.utils in backwards compatible way
+
+## [20.1.1]
+
+### Changed
+- Updates issue template
+
+## [20.1.0]
+### Fixed
+- Fix automatic decompression to also work for mixed cases
+
+## [20.0.1]
+### Changed
+- Removed old unused scripts and scripts directory
+- Moved crunchy query from store into CompressAPI
+
+
+## [20.0.0]
+
+### Changed
+- cg workflow mip-rna link command to take case as positional arg
+
+## [19.5.4]
+
+### Changed
+- Refactor ticket handling from orders API
+
+## [19.5.3]
+### Fixed
+- Fix dry run flag when resolving decompression state
+
+## [19.5.2]
+### Fixed
+- fix container name when publishing branch builds on dockerhub
+
+## [19.5.1]
+
+### Fixed
+- changelog
+
+## [19.5.0]
+
+### Added
+- alembic functionality
+### Changed
+- destination server PDC retrieval novaseq flowcells thalamus -> hasta
+### Fixed
+- flowcell status after PDC retrieval ondisk -> retrieved
+
+## [19.4.0]
+
+### Added
+- Support for storing cohorts, phenotype_terms and synopsis from order json
+
+## [19.3.2]
+### Added
+- Dockerhub build app container for release and pull requests
+### Changed
+- Changed CI actions that run on pull request on push to only run on pull request
+
+## [19.3.1]
+### Added
+- Dockerfile declaration for running the cg app. Dockerfile should not be used for the cli toolkit
+
+## [19.3.0]
+### Added
+- New options for balsamic report deliver to propagate delivery report data to Balsamic
+
+
+## [19.2.0]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
+
+## [19.1.1]
+
+### Fixed
+- Allow price update files for application-version import to have empty prices 
+
+
+## [19.1.1]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
+
+## [19.1.0]
+### Added
+- Cli command to deliver old balsamic analyses which were stored with old hk tags
+
+## [19.0.0]
+
+### Added
+- Adds command to start decompression for spring compressed files if needed
+### Changed
+- Refactors MIP cli slightly to always expect a case id
+- workflow start now called start-available
+- Checking if flowcells are on disk moved to its own cli command
+
+## [18.12.0]
+
+### Added
+- Add prep-category 'cov' for applications
+
+## [18.11.4]
+
+### Fixed
+- Install package in gihub-jobs via pip==21.0.1
+
+## [18.11.3]
+
+### Fixed
+- Upgraded insecure cryptography dependency 
+
+## [18.11.2]
+
+### Fixed
+- Chromograph image tags back on track
+
+## [18.12.1]
+
+### Fixed
+- Fix message in order ticket that says what type of project it is
+
+## [18.11.1]
+
+### Fixed
+ - Fix so that variants gets uploaded to scout for balsamic samples
+ - Fix so that upload breaks if balsamic case is WGS
+
+## [18.11.0]
+- New Fluffy workflow for preparing, starting and storing of analyses
+
+## [18.10.2]
+
+### Fixed
+- FLUFFY now have a validation schema and can be submitted in the Order Portal again
+- Samples of pools are now marked not to be invoiced, only the pool is invoiced
+
+## [18.10.1]
+
+### Added
+- Allow existing trio-samples to be re-run as single samples 
 
 ## [NG.NG.NG]
 
@@ -22,7 +165,8 @@ Try to use the following format:
 ## [18.10.0]
 
 ### Added
- - Support for delivery type in the Order Portal
+- Support for delivery type in the Order Portal
+
 
 ## [18.9.1]
 
@@ -132,7 +276,7 @@ Try to use the following format:
 ### Fixed
 
 - cg workflow mip-rna config-case command
- 
+
 ## [18.1.1]
 
 ### Fixed
@@ -147,7 +291,7 @@ Try to use the following format:
 ## [18.0.0]
 
 ### Added
-- New commands for running cron jobs 
+- New commands for running cron jobs
 
 ### Changed
 - Changed cli commands for starting and storing microsalt workflows

@@ -3,9 +3,8 @@ import logging
 from typing import List
 
 import petname
-
-from cg.constants import PRIORITY_MAP, Pipeline, DataDelivery
-from cg.store import models, utils
+from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
+from cg.store import models
 from cg.store.api.base import BaseHandler
 
 LOG = logging.getLogger(__name__)
@@ -13,6 +12,12 @@ LOG = logging.getLogger(__name__)
 
 class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
+
+    def generate_unique_petname(self) -> str:
+        while True:
+            random_id = petname.Generate(3, separator="")
+            if not self.sample(random_id):
+                return random_id
 
     def add_customer(
         self,
@@ -27,7 +32,7 @@ class AddHandler(BaseHandler):
     ) -> models.Customer:
         """Build a new customer record."""
 
-        new_customer = self.Customer(
+        return self.Customer(
             internal_id=internal_id,
             name=name,
             scout_access=scout_access,
@@ -36,7 +41,6 @@ class AddHandler(BaseHandler):
             invoice_reference=invoice_reference,
             **kwargs,
         )
-        return new_customer
 
     def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
         """Build a new customer group record."""
@@ -124,10 +128,10 @@ class AddHandler(BaseHandler):
     ) -> models.Sample:
         """Build a new Sample record."""
 
-        internal_id = internal_id or utils.get_unique_id(self.sample)
+        internal_id = internal_id or self.generate_unique_petname()
         priority_human = priority or ("research" if downsampled_to else "standard")
         priority_db = PRIORITY_MAP[priority_human]
-        new_sample = self.Sample(
+        return self.Sample(
             name=name,
             internal_id=internal_id,
             received_at=received,
@@ -141,7 +145,6 @@ class AddHandler(BaseHandler):
             comment=comment,
             **kwargs,
         )
-        return new_sample
 
     def add_case(
         self,

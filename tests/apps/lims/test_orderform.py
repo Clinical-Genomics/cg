@@ -1,5 +1,5 @@
 from cg.apps.lims import orderform
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import DataDelivery, Pipeline
 
 
 def test_parsing_rml_orderform(rml_orderform: str):

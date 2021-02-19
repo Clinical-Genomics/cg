@@ -1,9 +1,10 @@
 """Tests for the compress fastq cli"""
 
-import logging
 import datetime as dt
-from cg.constants import Pipeline
+import logging
+
 from cg.cli.compress.fastq import fastq_cmd
+from cg.constants import Pipeline
 
 
 def test_compress_fastq_cli_no_family(compress_context, cli_runner, caplog):
