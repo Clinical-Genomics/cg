@@ -74,23 +74,13 @@ class FluffyAnalysisAPI:
         """
         return Path(self.get_output_path(case_id), "deliverables.yaml")
 
-    def get_slurm_job_ids_path(self, case_id: str) -> Path:
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
         """
         Location in working directory where SLURM job id file is to be stored.
         This file contains SLURM ID of jobs associated with current analysis ,
         is used as a config to be submitted to Trailblazer and track job progress in SLURM
         """
         return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
-
-    def get_priority(self, case_id: str) -> str:
-        """Returns priority for the case in clinical-db as text"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        if case_obj:
-            if case_obj.high_priority:
-                return "high"
-            if case_obj.low_priority:
-                return "low"
-        return "normal"
 
     def verify_case_id_in_database(self, case_id: str) -> None:
         """
@@ -217,58 +207,6 @@ class FluffyAnalysisAPI:
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def upload_bundle_housekeeper(self, case_id: str) -> None:
-        """
-        Save the completed analysis bundle in Housekeeper
-        """
-        deliverables_path = self.get_deliverables_path(case_id=case_id)
-        if not deliverables_path.exists():
-            LOG.error("Deliverables file not found for case %s, aborting!", case_id)
-            raise CgError
-        analysis_date = self.get_date_from_file_path(file_path=deliverables_path)
-        bundle_data = self.hermes_api.create_housekeeper_bundle(
-            deliverables=deliverables_path,
-            pipeline="fluffy",
-            created=analysis_date,
-            analysis_type=None,
-            bundle_name=case_id,
-        ).dict()
-        bundle_data["name"] = case_id
-        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-            bundle_data=bundle_data
-        )
-        if not bundle_result:
-            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
-        bundle_object, bundle_version = bundle_result
-        self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object, bundle_version)
-        LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
-        )
-
-    def upload_bundle_statusdb(self, case_id: str) -> None:
-        """
-        Create completed analysis object in StatusDB
-        """
-        case_obj: models.Family = self.status_db.family(case_id)
-        analysis_date = self.get_date_from_file_path(
-            file_path=self.get_deliverables_path(case_id=case_id)
-        )
-        new_analysis: models.Analysis = self.status_db.add_analysis(
-            pipeline=Pipeline.FLUFFY,
-            started_at=self.get_date_from_file_path(
-                file_path=self.get_samplesheet_path(case_id=case_id)
-            ),
-            version=self.get_pipeline_version(),
-            completed_at=self.get_date_from_file_path(
-                file_path=self.get_deliverables_path(case_id=case_id)
-            ),
-            primary=(len(case_obj.analyses) == 0),
-        )
-        new_analysis.family = case_obj
-        self.status_db.add_commit(new_analysis)
-        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_date}")
-
     @staticmethod
     def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
         """
@@ -296,17 +234,3 @@ class FluffyAnalysisAPI:
         except (Exception, CalledProcessError):
             LOG.warning("Could not retrieve fluffy version!")
             return "0.0.0"
-
-    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
-        """
-        Set one of the allowed actions on a case in StatusDB.
-        """
-        if action in [None, *CASE_ACTIONS]:
-            case_obj: models.Family = self.status_db.family(case_id)
-            case_obj.action = action
-            self.status_db.commit()
-            LOG.info("Action %s set for case %s", action, case_id)
-            return
-        LOG.warning(
-            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
-        )

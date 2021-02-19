@@ -296,10 +296,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_id = case_obj.internal_id
         return case_id, None
 
-    @staticmethod
-    def get_date_from_deliverables_path(deliverables_path: Path) -> datetime.date:
+    def get_bundle_created_date(self, case_id: str) -> datetime.date:
         """ Get date from deliverables path using date created metadata """
-        return datetime.fromtimestamp(int(os.path.getctime(deliverables_path)))
+        return datetime.fromtimestamp(
+            int(os.path.getctime(self.get_deliverables_file_path(case_id=case_id)))
+        )
 
     def get_pipeline_version(self, case_id: str) -> str:
         try:
