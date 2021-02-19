@@ -84,6 +84,6 @@ class OrderSample(BaseModel):
     tumour: bool = False
     tumour_purity: Optional[int]
     verified_organism: Optional[bool]
-    volume: Optional[int]
+    volume: Optional[str]
     well_position: Optional[str]
     well_position_rml: Optional[str]

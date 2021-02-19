@@ -35,7 +35,10 @@ class OrderformParser:
             if case_id not in cases:
                 cases[case_id] = []
             cases[case_id].append(sample)
-        LOG.info("Found cases %s", cases.keys())
+        if cases:
+            LOG.info("Found cases %s", ", ".join(cases.keys()))
+        else:
+            LOG.info("Could not find any cases")
         return cases
 
     def get_pools(self) -> List[OrderPool]:
