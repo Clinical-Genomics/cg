@@ -345,6 +345,12 @@ def rml_orderform(orderforms: Path) -> str:
     return Path(orderforms / "1604.10.rml.xlsx").as_posix()
 
 
+@pytest.fixture
+def mip_json_orderform() -> dict:
+    """Load an example json scout order."""
+    return json.load(open("tests/fixtures/orderforms/mip-json.json"))
+
+
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
@@ -356,12 +362,6 @@ def fixture_madeline_output(apps_dir: Path) -> str:
 def mip_order_to_submit() -> dict:
     """Load an example scout order."""
     return json.load(open("tests/fixtures/orders/mip.json"))
-
-
-@pytest.fixture
-def mip_json_order_to_submit() -> dict:
-    """Load an example json scout order."""
-    return json.load(open("tests/fixtures/orders/mip-json.json"))
 
 
 @pytest.fixture

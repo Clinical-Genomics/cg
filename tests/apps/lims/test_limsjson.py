@@ -90,11 +90,11 @@ def test_parsing_rml_json(rml_order_to_submit: dict) -> None:
     assert order_sample["concentration_sample"] == "6"
 
 
-def test_parsing_mip_json(mip_json_order_to_submit: dict):
+def test_parsing_mip_json(mip_json_orderform):
 
     # GIVEN an order form for a Scout order with samples, 1 trio, in a plate
     # WHEN parsing the order form
-    parsed_order = limsjson.parse_json_order(mip_json_order_to_submit)
+    parsed_order = limsjson.parse_json_order(mip_json_orderform)
 
     # THEN it should detect the type of project
     assert parsed_order["project_type"] == "mip-dna"
