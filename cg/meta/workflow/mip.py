@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, List, Optional
 
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
@@ -178,12 +179,12 @@ class MipAnalysisAPI(AnalysisAPI):
         fastq_dir.mkdir(parents=True, exist_ok=True)
         for fastq_data in files:
             fastq_path = Path(fastq_data["path"])
-            fastq_name = self.name_file(
+            fastq_name = FastqHandler.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample,
                 read=fastq_data["read"],
-                undetermined=fastq_data["undetermined"],
+                more=fastq_data["more"],
             )
             dest_path = fastq_dir / fastq_name
             if not dest_path.exists():
@@ -198,22 +199,7 @@ class MipAnalysisAPI(AnalysisAPI):
         files = []
 
         for file_obj in file_objs:
-            # figure out flowcell name from header
-            with gzip.open(file_obj.full_path) as handle:
-                header_line = handle.readline().decode()
-                header_info = self.fastq_header(header_line)
-
-            data = {
-                "path": file_obj.full_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("_Undetermined_" in file_obj.path),
-            }
-            # look for tile identifier (HiSeq X runs)
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", file_obj.path)
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
+            data = FastqHandler.parse_file_data(file_obj.full_path)
             files.append(data)
 
         self.link_file(
