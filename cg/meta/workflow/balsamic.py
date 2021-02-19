@@ -2,6 +2,7 @@
 
 import json
 import logging
+from abc import ABC
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -23,7 +24,7 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 
-class BalsamicAnalysisAPI(AnalysisAPI):
+class BalsamicAnalysisAPI(AnalysisAPI, ABC):
     """Handles communication between BALSAMIC processes
     and the rest of CG infrastructure"""
 
@@ -116,7 +117,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def link_samples(self, case_id: str) -> None:
+    def link_fastq_files(self, case_id: str) -> None:
         """Links and copies files to working directory"""
         for link_object in self.status_db.family(case_id).links:
             LOG.info(
@@ -438,7 +439,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
 
-    def __build_command_str(self, options: dict) -> List[str]:
+    @staticmethod
+    def __build_command_str(options: dict) -> List[str]:
         formatted_options = []
         for key, val in options.items():
             if val:

@@ -96,13 +96,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
         LOG.error("Case %s does not exist in Status-DB", case_id)
         raise click.Abort
 
-    all_flowcells_ondisk: bool = dna_api.check_flowcells_ondisk(case_obj)
-    if not all_flowcells_ondisk:
-        LOG.warning(
-            f"Case {case_obj.internal_id} not ready to run!",
-        )
-        # Commit the updates to request flowcells
-        dna_api.db.commit()
+    if not dna_api.all_flowcells_on_disk(case_id=case_id):
         raise FlowcellsNeededError(
             "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
         )
@@ -115,23 +109,7 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
 def link(context: click.Context, case_id: str):
     """Link FASTQ files for all samples in a case"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
-    case_obj: models.Family = dna_api.db.family(case_id)
-    link_objs: List[models.FamilySample] = case_obj.links
-    for link_obj in link_objs:
-        LOG.info(
-            "%s: %s link FASTQ files",
-            link_obj.sample.internal_id,
-            link_obj.family.data_analysis,
-        )
-        # This block is necessary to handle cases where data analysis is not set in ClinicalDB for old samples
-        if not link_obj.family.data_analysis:
-            LOG.warning(
-                f"No analysis set for {link_obj.sample.internal_id}, file will still be linked"
-            )
-            dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
-
-        if link_obj.family.data_analysis == str(Pipeline.MIP_DNA):
-            dna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
+    dna_api.link_fastq_files(case_id=case_id)
 
 
 @mip_dna.command("config-case")
@@ -220,19 +198,16 @@ def run(
     kwargs = dict(
         config=context.obj["mip-rd-dna"]["mip_config"],
         case=case_id,
-        priority=priority or dna_api.get_priority(case_obj),
+        priority=priority or dna_api.get_priority_for_case(case_id),
         email=email,
         dryrun=mip_dry_run,
         start_with=start_with,
-        skip_evaluation=skip_evaluation,
+        skip_evaluation=dna_api.get_skip_evaluation_flag(case_obj=case_obj),
     )
 
-    if dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
+    if dna_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
         LOG.warning(f"{case_obj.internal_id} : analysis is still ongoing - skipping")
         return
-
-    if dna_api.get_skip_evaluation_flag(case_obj=case_obj):
-        kwargs["skip_evaluation"] = True
 
     dna_api.run_command(dry_run=dry_run, **kwargs)
 
@@ -245,16 +220,7 @@ def run(
         return
 
     try:
-        dna_api.mark_analyses_deleted(case_id=case_id)
-        dna_api.add_pending_analysis(
-            case_id=case_id,
-            email=email,
-            type=dna_api.get_application_type(case_id),
-            out_dir=dna_api.get_case_output_path(case_id).as_posix(),
-            config_path=dna_api.get_slurm_job_ids_path(case_id).as_posix(),
-            priority=dna_api.get_priority(case_obj),
-            data_analysis=Pipeline.MIP_DNA,
-        )
+        dna_api.add_pending_trailblazer_analysis(case_id=case_id)
         dna_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("MIP rd-dna run started!")
     except CgError as e:
@@ -358,10 +324,8 @@ def start(
         raise click.Abort
     LOG.info("Starting full MIP-DNA analysis workflow for case %s", case_id)
 
-    analysis_ongoing = dna_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id)
-    if analysis_ongoing:
-        status = dna_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-        LOG.warning(f"{case_obj.internal_id}: analysis status is {status} - skipping")
+    if dna_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
+        LOG.warning(f"{case_obj.internal_id}: analysis status is ongoing - skipping")
         return
     try:
         context.invoke(ensure_flowcells_ondisk, case_id=case_id)

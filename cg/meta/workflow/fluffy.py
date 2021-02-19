@@ -10,7 +10,10 @@ import datetime as dt
 from alchy import Query
 
 from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.exc import BundleAlreadyAddedError, CgError
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.utils import Process
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -18,12 +21,11 @@ from cg.apps.lims import LimsAPI
 from cg.store import Store, models
 import os
 from cg.constants import Pipeline, CASE_ACTIONS
-from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
 
-class FluffyAnalysisAPI:
+class FluffyAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
         housekeeper_api: HousekeeperAPI,
@@ -32,7 +34,23 @@ class FluffyAnalysisAPI:
         lims_api: LimsAPI,
         status_db: Store,
         config: dict,
+        prepare_fastq_api: PrepareFastqAPI,
+        process: Process,
+        pipeline: Pipeline,
+        scout_api: ScoutAPI,
     ):
+        super().__init__(
+            housekeeper_api,
+            trailblazer_api,
+            hermes_api,
+            lims_api,
+            prepare_fastq_api,
+            status_db,
+            process,
+            pipeline,
+            scout_api,
+            config,
+        )
         self.housekeeper_api = housekeeper_api
         self.trailblazer_api = trailblazer_api
         self.status_db = status_db

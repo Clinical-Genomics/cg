@@ -193,6 +193,11 @@ class MipAnalysisAPI(AnalysisAPI):
             else:
                 LOG.debug(f"destination path already exists: {dest_path}")
 
+    def link_fastq_files(self, case_id: str) -> None:
+        case_obj = self.status_db.family(case_id)
+        for link in case_obj.links:
+            self.link_sample(sample=link.sample, case_id=case_id)
+
     def link_sample(self, sample: models.Sample, case_id: str):
         """Link FASTQ files for a sample."""
         file_objs = self.hk.files(bundle=sample.internal_id, tags=["fastq"])

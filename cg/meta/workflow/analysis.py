@@ -103,7 +103,7 @@ class AnalysisAPI:
         sample_obj: models.Sample = self.status_db.sample(lims_id)
         return sample_obj.name
 
-    def link_fastq_files(self, case_id: str, dest_path: Path, dry_run: bool) -> None:
+    def link_fastq_files(self, case_id: str) -> None:
         """
         Links fastq files from Housekeeper to case working directory
         """
