@@ -1,6 +1,6 @@
 """Ordering module"""
 import datetime as dt
-from typing import List
+from typing import List, Set
 
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
@@ -145,13 +145,13 @@ class StatusHandler:
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
-            cohorts = set(
+            cohorts: Set[Set[str]] = set(
                 cohort for sample in case_samples for cohort in sample.get("cohorts", set())
             )
             if "" in cohorts:
                 cohorts.remove("")
 
-            synopses = set(
+            synopses: Set[Set[str]] = set(
                 synopsis for sample in case_samples for synopsis in sample.get("synopsis", set())
             )
             if "" in synopses:
