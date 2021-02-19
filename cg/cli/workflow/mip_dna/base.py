@@ -235,57 +235,7 @@ def run(
 def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
-    prepare_fastq_api: PrepareFastqAPI = context.obj["prepare_fastq_api"]
-    status_db: Store = dna_api.db
-    case_obj: models.Family = status_db.family(case_id)
-    if not case_obj:
-        LOG.error("Case %s does not exist in status-db", case_id)
-        raise click.Abort
-    decompression_needed = prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id)
-
-    if decompression_needed:
-        LOG.info(
-            "The analysis for %s could not start, decompression is needed",
-            case_obj.internal_id,
-        )
-        decompression_possible = prepare_fastq_api.can_at_least_one_sample_be_decompressed(
-            case_obj.internal_id
-        )
-        if decompression_possible:
-            possible_to_start_decompression = (
-                prepare_fastq_api.can_at_least_one_decompression_job_start(
-                    case_obj.internal_id, dry_run
-                )
-            )
-            if possible_to_start_decompression:
-                if not dry_run:
-                    dna_api.set_statusdb_action(case_id=case_id, action="analyze")
-                LOG.info(
-                    "Decompression started for %s",
-                    case_obj.internal_id,
-                )
-            else:
-                LOG.warning(
-                    "Decompression failed to start for %s",
-                    case_obj.internal_id,
-                )
-        else:
-            LOG.warning(
-                "Decompression can not be started for %s",
-                case_obj.internal_id,
-            )
-        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
-
-    if prepare_fastq_api.is_spring_decompression_running(case_obj.internal_id):
-        raise DecompressionNeededError("Workflow interrupted: decompression is running")
-
-    LOG.info("Linking fastq files in housekeeper for case %s", case_id)
-    prepare_fastq_api.check_fastq_links(case_obj.internal_id)
-
-    if prepare_fastq_api.is_spring_decompression_needed(case_obj.internal_id):
-        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
-
-    LOG.info("Decompression for case %s not needed, starting analysis", case_id)
+    dna_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
 
 
 @mip_dna.command()
@@ -317,8 +267,7 @@ def start(
     """Start full MIP-DNA analysis workflow for a case"""
 
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
-    status_db: Store = dna_api.db
-    case_obj: models.Family = status_db.family(case_id)
+    case_obj: models.Family = dna_api.status_db.family(case_id)
     if not case_obj:
         LOG.error("Case %s does not exist in Status-DB", case_id)
         raise click.Abort

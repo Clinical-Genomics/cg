@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
@@ -27,6 +28,8 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 from ruamel.yaml import safe_load
+
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -87,9 +90,7 @@ class MipAnalysisAPI(AnalysisAPI):
                 raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
             return bed_version.filename
 
-    def pedigree_config(
-        self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
-    ) -> dict:
+    def pedigree_config(self, case_obj: models.Family, panel_bed: str = None) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
 
@@ -101,11 +102,10 @@ class MipAnalysisAPI(AnalysisAPI):
         Returns:
             dict: config_data (MIP format)
         """
-        data = self.build_config(case_obj, pipeline=pipeline, panel_bed=panel_bed)
+        data = self.build_config(case_obj, pipeline=self.pipeline, panel_bed=panel_bed)
 
         # Validate and reformat to MIP pedigree config format
-        config_data = ConfigHandler.make_pedigree_config(data=data, pipeline=pipeline)
-        return config_data
+        return ConfigHandler.make_pedigree_config(data=data, pipeline=self.pipeline)
 
     def build_config(
         self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None

@@ -46,8 +46,7 @@ class ConfigHandler:
     def make_pedigree_config(self, data: dict, pipeline: Pipeline = None) -> dict:
         """Make a MIP pedigree config"""
         self.validate_config(data=data, pipeline=pipeline)
-        config_data = self.parse_pedigree_config(data)
-        return config_data
+        return self.parse_pedigree_config(data)
 
     @staticmethod
     def validate_config(data: dict, pipeline: Pipeline = None) -> dict:

@@ -10,7 +10,13 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline, CASE_ACTIONS
-from cg.exc import BundleAlreadyAddedError, CgError, LimsDataError, CgDataError
+from cg.exc import (
+    BundleAlreadyAddedError,
+    CgError,
+    LimsDataError,
+    CgDataError,
+    DecompressionNeededError,
+)
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 from cg.utils import Process
@@ -222,3 +228,50 @@ class AnalysisAPI:
         if not bed_version_obj:
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
+
+    def resolve_decompression(self, case_id: str, dry_run: bool):
+        decompression_needed = self.prepare_fastq_api.is_spring_decompression_needed(case_id)
+
+        if decompression_needed:
+            LOG.info(
+                "The analysis for %s could not start, decompression is needed",
+                case_id,
+            )
+            decompression_possible = self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(
+                case_id
+            )
+            if decompression_possible:
+                possible_to_start_decompression = (
+                    self.prepare_fastq_api.can_at_least_one_decompression_job_start(
+                        case_id, dry_run
+                    )
+                )
+                if possible_to_start_decompression:
+                    if not dry_run:
+                        self.set_statusdb_action(case_id=case_id, action="analyze")
+                    LOG.info(
+                        "Decompression started for %s",
+                        case_id,
+                    )
+                else:
+                    LOG.warning(
+                        "Decompression failed to start for %s",
+                        case_id,
+                    )
+            else:
+                LOG.warning(
+                    "Decompression can not be started for %s",
+                    case_id,
+                )
+            raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+
+        if self.prepare_fastq_api.is_spring_decompression_running(case_id):
+            raise DecompressionNeededError("Workflow interrupted: decompression is running")
+
+        LOG.info("Linking fastq files in housekeeper for case %s", case_id)
+        self.prepare_fastq_api.check_fastq_links(case_id)
+
+        if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
+            raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+
+        LOG.info("Decompression for case %s not needed", case_id)
