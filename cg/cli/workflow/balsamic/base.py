@@ -5,17 +5,22 @@ import logging
 import click
 from pydantic import ValidationError
 
-from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.environ import environ_email
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
-from cg.exc import AnalysisUploadError, BalsamicStartError, BundleAlreadyAddedError, LimsDataError
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.exc import (
+    BalsamicStartError,
+    CgError,
+)
+from cg.meta.compress import CompressAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -59,14 +64,25 @@ def balsamic(context: click.Context):
         click.echo(context.get_help())
         return None
     config = context.obj
-    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(config),
-        store=Store(config["database"]),
-        housekeeper_api=HousekeeperAPI(config),
-        fastq_handler=FastqHandler(config),
-        lims_api=LimsAPI(config),
-        trailblazer_api=TrailblazerAPI(config),
-        hermes_api=HermesApi(config),
+    status_db = Store(config["database"])
+    housekeeper_api = HousekeeperAPI(config)
+    crunchy_api = CrunchyAPI(config)
+    compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)
+    lims_api = LimsAPI(config)
+    trailblazer_api = TrailblazerAPI(config)
+    hermes_api = HermesApi(config)
+    scout_api = ScoutAPI(config)
+    prepare_fastq_api = PrepareFastqAPI(store=status_db, compress_api=compress_api)
+    context.obj["AnalysisAPI"] = BalsamicAnalysisAPI(
+        status_db=status_db,
+        housekeeper_api=housekeeper_api,
+        lims_api=lims_api,
+        trailblazer_api=trailblazer_api,
+        hermes_api=hermes_api,
+        scout_api=scout_api,
+        prepare_fastq_api=prepare_fastq_api,
+        process=Process(config["balsamic"]["binary_path"]),
+        config=config,
     )
 
 
@@ -78,12 +94,12 @@ def link(context: click.Context, case_id: str):
     Locates FASTQ files for given CASE_ID.
     The files are renamed, concatenated, and saved in BALSAMIC working directory
     """
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
         LOG.info(f"Linking samples in case {case_id}")
-        balsamic_analysis_api.link_samples(case_id)
-    except BalsamicStartError as e:
-        LOG.error(f"Could not link samples: {e.message}")
+        analysis_api.link_samples(case_id)
+    except Exception as error:
+        LOG.error(f"Could not link samples: {error}")
         raise click.Abort()
 
 
@@ -94,17 +110,12 @@ def link(context: click.Context, case_id: str):
 @click.pass_context
 def config_case(context: click.Context, panel_bed: str, case_id: str, dry: bool):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
-
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
-        arguments = balsamic_analysis_api.get_verified_config_case_arguments(
-            case_id=case_id,
-            panel_bed=panel_bed,
-        )
-        balsamic_analysis_api.balsamic_api.config_case(arguments=arguments, dry=dry)
-    except (BalsamicStartError, LimsDataError) as e:
-        LOG.error(f"Could not create config: {e.message}")
+        analysis_api.config_case(case_id=case_id, panel_bed=panel_bed, dry=dry)
+    except Exception as error:
+        LOG.error(f"Could not create config: {error}")
         raise click.Abort()
 
 
@@ -124,42 +135,25 @@ def run(
     dry: bool,
 ):
     """Run balsamic analysis for given CASE ID"""
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
         LOG.info(f"Running analysis for {case_id}")
-        if balsamic_analysis_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
+        if analysis_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
             return
 
-        arguments = {
-            "priority": priority or balsamic_analysis_api.get_priority(case_id),
-            "analysis_type": analysis_type,
-            "run_analysis": run_analysis,
-            "sample_config": balsamic_analysis_api.get_config_path(
-                case_id=case_id, check_exists=True
-            ),
-            "disable_variant_caller": "mutect"
-            if balsamic_analysis_api.get_case_application_type(case_id=case_id) == "wes"
-            else None,  # Tell Balsamic to disable mutect for WES analyses.
-        }
-        balsamic_analysis_api.balsamic_api.run_analysis(
-            arguments=arguments, run_analysis=run_analysis, dry=dry
+        analysis_api.run_analysis(
+            case_id=case_id,
+            analysis_type=analysis_type,
+            run_analysis=run_analysis,
+            priority=priority,
+            dry=dry,
         )
         if dry:
             return
-
-        balsamic_analysis_api.trailblazer_api.mark_analyses_deleted(case_id=case_id)
-        balsamic_analysis_api.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            email=environ_email(),
-            type=balsamic_analysis_api.get_case_application_type(case_id=case_id),
-            out_dir=balsamic_analysis_api.get_case_path(case_id),
-            config_path=balsamic_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
-            priority=balsamic_analysis_api.get_priority(case_id),
-            data_analysis=Pipeline.BALSAMIC,
-        )
-        balsamic_analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except BalsamicStartError as e:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    except CgError as e:
         LOG.error(f"Could not run analysis: {e.message}")
         raise click.Abort()
 
@@ -171,20 +165,9 @@ def run(
 @click.pass_context
 def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
-    balsamic_analysis_api: BalsamicAnalysisAPI = context.obj["BalsamicAnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
-        LOG.info(f"Creating delivery report for {case_id}")
-        balsamic_analysis_api.get_case_object(case_id)
-        sample_config = balsamic_analysis_api.get_config_path(case_id=case_id, check_exists=True)
-        analysis_finish = balsamic_analysis_api.get_analysis_finish_path(case_id, check_exists=True)
-        LOG.info(f"Found analysis finish file: {analysis_finish}")
-        arguments = {
-            "sample_config": sample_config,
-            "analysis_type": analysis_type,
-            "sample-id-map": balsamic_analysis_api.build_sample_id_map_string(case_id=case_id),
-            "case-id-map": balsamic_analysis_api.build_case_id_map_string(case_id=case_id),
-        }
-        balsamic_analysis_api.balsamic_api.report_deliver(arguments=arguments, dry=dry)
+        analysis_api.report_deliver(case_id=case_id, analysis_type=analysis_type, dry=dry)
     except BalsamicStartError as e:
         LOG.error(f"Could not create report file: {e.message}")
         raise click.Abort()
@@ -192,27 +175,24 @@ def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@OPTION_DRY
 @click.pass_context
 def store_housekeeper(context: click.Context, case_id: str):
     """Store a finished analysis in Housekeeper and StatusDB."""
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
-        LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
-        balsamic_analysis_api.upload_bundle_housekeeper(case_id=case_id)
-        LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
-        balsamic_analysis_api.upload_analysis_statusdb(case_id=case_id)
-    except (BundleAlreadyAddedError, FileExistsError, AnalysisUploadError) as error:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
-        balsamic_analysis_api.housekeeper_api.rollback()
-        balsamic_analysis_api.store.rollback()
-        raise click.Abort()
-    except BalsamicStartError as error:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error.message}!")
-        raise click.Abort()
-    except ValidationError as err:
+        analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        analysis_api.upload_bundle_statusdb(case_id=case_id)
+        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+    except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
-        LOG.warning(err)
+        LOG.warning(error)
         raise click.Abort
+    except Exception as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
+        analysis_api.housekeeper_api.rollback()
+        analysis_api.status_db.rollback()
+        raise click.Abort()
 
 
 @balsamic.command("start")
@@ -261,15 +241,15 @@ def store(context: click.Context, case_id: str, analysis_type: str, dry: bool):
 @click.pass_context
 def start_available(context: click.Context, dry: bool):
     """Start full workflow for all available BALSAMIC cases"""
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     exit_code = EXIT_SUCCESS
-    for case_id in balsamic_analysis_api.get_cases_to_analyze():
+    for case_id in analysis_api.get_valid_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_id, dry=dry)
         except click.Abort:
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred - {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()
@@ -280,15 +260,15 @@ def start_available(context: click.Context, dry: bool):
 @click.pass_context
 def store_available(context: click.Context, dry: bool):
     """Store bundle data for all available Balsamic cases"""
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     exit_code = EXIT_SUCCESS
-    for case_id in balsamic_analysis_api.get_cases_to_store():
+    for case_id in analysis_api.get_cases_to_store():
         try:
             context.invoke(store, case_id=case_id, dry=dry)
         except click.Abort:
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error(f"Unspecified error occurred - {e.__class__.__name__}")
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred - {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()

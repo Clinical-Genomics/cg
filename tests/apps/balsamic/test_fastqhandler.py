@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.balsamic.fastq import link
 
 
 def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_files_data):
@@ -15,7 +15,7 @@ def test_link_file_count(tmpdir, cg_config, link_family, link_sample, simple_fil
     assert not os.path.exists(link_dir)
 
     # when calling the method to link
-    FastqHandler(cg_config).link(case=link_family, sample=link_sample, files=link_files)
+    link(case=link_family, sample=link_sample, files=link_files)
 
     # then the linking should have created on directory for the linked files
     assert os.path.exists(link_dir)
@@ -38,7 +38,7 @@ def test_link_file_content(
     link_dir = Path(f"{tmpdir}/{link_family}/fastq")
 
     # when calling the method to link
-    FastqHandler(cg_config).link(case=link_family, sample=link_sample, files=link_files)
+    link(case=link_family, sample=link_sample, files=link_files)
 
     # then the first concatenated file should contain 'ABCD' and the other 'DEFG'
     linked_files = [
@@ -67,7 +67,7 @@ def test_link_file_content_reversed(
     link_dir = Path(f"{tmpdir}/{link_family}/fastq")
 
     # when calling the method to link
-    FastqHandler(cg_config).link(case=link_family, sample=link_sample, files=link_files)
+    link(case=link_family, sample=link_sample, files=link_files)
 
     # then the first concatenated file should contain 'ABCD' and the other 'DEFG'
     linked_files = [

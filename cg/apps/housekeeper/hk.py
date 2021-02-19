@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
+from alchy import Query
+
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
@@ -92,7 +94,7 @@ class HousekeeperAPI:
 
     def files(
         self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
-    ) -> Iterable[models.File]:
+    ) -> Query:
         """ Fetch files """
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 

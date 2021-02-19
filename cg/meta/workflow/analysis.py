@@ -1,0 +1,224 @@
+import logging
+from pathlib import Path
+from typing import Optional, List, Literal
+import datetime as dt
+
+from cg.apps.environ import environ_email
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.constants import Pipeline, CASE_ACTIONS
+from cg.exc import BundleAlreadyAddedError, CgError, LimsDataError, CgDataError
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.store import Store, models
+from cg.utils import Process
+
+LOG = logging.getLogger(__name__)
+
+
+class AnalysisAPI:
+    def __init__(
+        self,
+        housekeeper_api: HousekeeperAPI,
+        trailblazer_api: TrailblazerAPI,
+        hermes_api: HermesApi,
+        lims_api: LimsAPI,
+        prepare_fastq_api: PrepareFastqAPI,
+        status_db: Store,
+        process: Process,
+        pipeline: Pipeline,
+        scout_api: ScoutAPI,
+        config: Optional[dict] = None,
+    ):
+        self.housekeeper_api = housekeeper_api
+        self.trailblazer_api = trailblazer_api
+        self.status_db = status_db
+        self.lims_api = lims_api
+        self.hermes_api = hermes_api
+        self.scout_api = scout_api
+        self.prepare_fastq_api = prepare_fastq_api
+        self.pipeline = pipeline
+        self.process = process
+        self.config = config or {}
+
+    def verify_case_id_in_statusdb(self, case_id: str) -> None:
+        """
+        Passes silently if case exists in StatusDB, raises error if case is missing
+        """
+        case_obj: models.Family = self.status_db.family(case_id)
+        if not case_obj:
+            LOG.error("Case %s could not be found in StatusDB!", case_id)
+            raise CgError
+
+    def get_flowcells(self, case_id: str) -> List[models.Flowcell]:
+        """Get all flowcells for all samples in a ticket"""
+        flowcells = set()
+        case_obj: models.Family = self.status_db.family(case_id)
+        for familysample in case_obj.links:
+            for flowcell in familysample.sample.flowcells:
+                flowcells.add(flowcell)
+        return list(flowcells)
+
+    def all_flowcells_on_disk(self, case_id: str) -> bool:
+        """Check if flowcells are on disk for sample before starting the analysis.
+        Flowcells not on disk will be requested
+        """
+        flowcells = self.get_flowcells(case_id=case_id)
+        statuses = []
+        for flowcell_obj in flowcells:
+            LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
+            statuses.append(flowcell_obj.status)
+            if flowcell_obj.status == "removed":
+                LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
+                flowcell_obj.status = "requested"
+            elif flowcell_obj.status != "ondisk":
+                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        self.status_db.commit()
+        return all(status == "ondisk" for status in statuses)
+
+    def get_priority_for_case(self, case_id: str) -> str:
+        """Fetch priority for case id"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        if not case_obj.priority or case_obj.priority == 0:
+            return "low"
+        if case_obj.priority > 1:
+            return "high"
+        return "normal"
+
+    def get_case_path(self, case_id: str) -> Path:
+        raise NotImplementedError
+
+    def get_case_config_path(self, case_id) -> Path:
+        raise NotImplementedError
+
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        raise NotImplementedError
+
+    def get_sample_name_from_lims_id(self, lims_id: str) -> str:
+        """
+        Retrieve sample name provided by customer for specific sample
+        """
+        sample_obj: models.Sample = self.status_db.sample(lims_id)
+        return sample_obj.name
+
+    def link_fastq_files(self, case_id: str, dest_path: Path, dry_run: bool) -> None:
+        """
+        Links fastq files from Housekeeper to case working directory
+        """
+        raise NotImplementedError
+
+    def get_bundle_deliverables_type(self, case_id: str) -> Optional[str]:
+        return None
+
+    def get_application_type(
+        self, sample_obj: models.Sample
+    ) -> Literal["wgs", "wes", "tgs", "other"]:
+        analysis_type = sample_obj.application_version.application.prep_category
+        if analysis_type and analysis_type.lower() in ["wgs", "wes", "tgs"]:
+            return analysis_type.lower
+        return "other"
+
+    def upload_bundle_housekeeper(self, case_id: str):
+        LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
+        bundle_result = self.housekeeper_api.add_bundle(
+            bundle_data=self.get_hermes_transformed_deliverables(case_id)
+        )
+        if not bundle_result:
+            raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
+        bundle_object, bundle_version = bundle_result
+        self.housekeeper_api.include(bundle_version)
+        self.housekeeper_api.add_commit(bundle_object, bundle_version)
+        LOG.info(
+            f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
+        )
+
+    def upload_bundle_statusdb(self, case_id: str) -> None:
+        LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
+        case_obj: models.Family = self.status_db.family(case_id)
+        analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
+        pipeline_version: str = self.get_pipeline_version(case_id=case_id)
+        new_analysis = self.status_db.add_analysis(
+            pipeline=self.pipeline,
+            version=pipeline_version,
+            started_at=analysis_start,
+            completed_at=dt.datetime.now(),
+            primary=(len(case_obj.analyses) == 0),
+        )
+        new_analysis.family = case_obj
+        self.status_db.add_commit(new_analysis)
+        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
+
+    def get_deliverables_file_path(self, case_id: str) -> Path:
+        raise NotImplementedError
+
+    def add_pending_trailblazer_analysis(self, case_id) -> None:
+        if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
+            LOG.error("Analysis still ongoing in Trailblazer!")
+            raise CgError
+        self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
+        self.trailblazer_api.add_pending_analysis(
+            case_id=case_id,
+            email=environ_email(),
+            type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
+            out_dir=self.get_case_path(case_id=case_id).as_posix(),
+            config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
+            priority=self.get_priority_for_case(case_id=case_id),
+            data_analysis=self.pipeline,
+        )
+
+    def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
+        return self.hermes_api.create_housekeeper_bundle(
+            bundle_name=case_id,
+            deliverables=self.get_deliverables_file_path(case_id=case_id),
+            pipeline=str(self.pipeline),
+            analysis_type=self.get_bundle_deliverables_type(case_id),
+            created=self.get_bundle_created_date(case_id),
+        ).dict()
+
+    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
+        raise NotImplementedError
+
+    def get_pipeline_version(self, case_id: str):
+        raise NotImplementedError
+
+    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
+        """
+        Set one of the allowed actions on a case in StatusDB.
+        """
+        if action in [None, *CASE_ACTIONS]:
+            case_obj: models.Family = self.status_db.family(case_id)
+            case_obj.action = action
+            self.status_db.commit()
+            LOG.info("Action %s set for case %s", action, case_id)
+            return
+        LOG.warning(
+            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
+        )
+
+    def get_analyses_to_clean(self, before: dt.datetime) -> List[models.Family]:
+        analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
+        return analyses_to_clean.all()
+
+    def get_cases_to_analyze(self, threshold: bool = False):
+        return self.status_db.cases_to_analyze(pipeline=self.pipeline, threshold=threshold)
+
+    def get_running_cases(self) -> List[models.Family]:
+        return (
+            self.status_db.query(models.Family)
+            .filter(models.Family.action == "running")
+            .filter(models.Family.data_analysis == self.pipeline)
+            .all()
+        )
+
+    def get_target_bed_from_lims(self, case_id: str) -> str:
+        """Get target bed filename from lims"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        target_bed_shortname = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
+        if not target_bed_shortname:
+            raise LimsDataError("Target bed %s not found in LIMS" % target_bed_shortname)
+        bed_version_obj = self.status_db.bed_version(target_bed_shortname)
+        if not bed_version_obj:
+            raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
+        return bed_version_obj.filename

@@ -246,7 +246,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         """Name a FASTQ file following MIP conventions."""
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
         date_str = date.strftime("%y%m%d") if date else "171015"
-        index = index if index else "XXXXXX"
+        index = index or "XXXXXX"
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
 
     def link_file(self, family: str, sample: str, analysis_type: str, files: List[dict]):
@@ -303,8 +303,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
     def panel(self, case_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
-        bed_lines = self.scout.export_panels(all_panels)
-        return bed_lines
+        return self.scout.export_panels(all_panels)
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to case dir"""
@@ -356,8 +355,7 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         """Open a bundle file and return it as an Python object."""
 
         full_file_path = Path(self.hk.get_root_dir()).joinpath(relative_file_path)
-        open_file = safe_load(open(full_file_path))
-        return open_file
+        return safe_load(open(full_file_path))
 
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
@@ -384,17 +382,17 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                     family_id,
                     error.args[0],
                 )
-                trending = dict()
+                trending = {}
         return trending
 
     @staticmethod
     def is_dna_only_case(case_obj: models.Family) -> bool:
         """Returns True if all samples of a case has dna application type"""
 
-        for _link in case_obj.links:
-            if _link.sample.application_version.application.analysis_type in "wts":
-                return False
-        return True
+        return all(
+            _link.sample.application_version.application.analysis_type not in "wts"
+            for _link in case_obj.links
+        )
 
     @staticmethod
     def get_skip_evaluation_flag(case_obj: models.Family) -> bool:
@@ -422,13 +420,12 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
 
     def get_application_type(self, case_id: str) -> str:
         pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id)))
-        analysis_types = set(
-            [
-                sample.get("analysis_type")
-                for sample in pedigree_config_dict["samples"]
-                if sample.get("analysis_type")
-            ]
-        )
+        analysis_types = {
+            sample.get("analysis_type")
+            for sample in pedigree_config_dict["samples"]
+            if sample.get("analysis_type")
+        }
+
         if len(analysis_types) == 1:
             return analysis_types.pop()
         return "wgs"
