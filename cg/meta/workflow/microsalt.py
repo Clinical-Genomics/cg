@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Optional
 import click
 
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI

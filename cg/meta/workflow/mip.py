@@ -22,20 +22,20 @@ from cg.constants import (
     Pipeline,
 )
 from cg.exc import CgDataError, CgError, LimsDataError
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 from ruamel.yaml import safe_load
 
 LOG = logging.getLogger(__name__)
 
 
-class MipAnalysisAPI(ConfigHandler, MipAPI):
+class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
     def __init__(
         self,
-        db: Store,
-        hk_api: HousekeeperAPI,
         scout_api: ScoutAPI,
         tb_api: TrailblazerAPI,
         lims_api: LimsAPI,
@@ -43,7 +43,24 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         pipeline: str,
         conda_env: str,
         root: str,
+        housekeeper_api: HousekeeperAPI,
+        trailblazer_api: TrailblazerAPI,
+        hermes_api: HermesApi,
+        prepare_fastq_api: PrepareFastqAPI,
+        status_db: Store,
+        process: Process,
     ):
+        super().__init__(
+            housekeeper_api,
+            trailblazer_api,
+            hermes_api,
+            lims_api,
+            prepare_fastq_api,
+            status_db,
+            process,
+            pipeline,
+            scout_api,
+        )
         self.db = db
         self.tb = tb_api
         self.hk = hk_api
@@ -53,33 +70,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         self.pipeline = pipeline
         self.conda_env = conda_env
         self.root = root
-
-    def check_flowcells_ondisk(self, case_obj: models.Family) -> bool:
-        """Check stuff before starting the analysis."""
-        flowcells = self.db.flowcells(family=case_obj)
-        statuses = []
-        for flowcell_obj in flowcells:
-            LOG.debug("%s: checking flowcell", flowcell_obj.name)
-            statuses.append(flowcell_obj.status)
-            if flowcell_obj.status == "removed":
-                LOG.info("%s: requesting removed flowcell", flowcell_obj.name)
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                LOG.warning("%s: %s", flowcell_obj.name, flowcell_obj.status)
-        return all(status == "ondisk" for status in statuses)
-
-    @staticmethod
-    def get_priority(case_obj: models.Family) -> str:
-        """Fetch priority for case id"""
-        if not case_obj.priority:
-            return "low"
-        if isinstance(case_obj.priority, int):
-            if case_obj.priority == 0:
-                return "low"
-            if case_obj.priority > 1:
-                return "high"
-            return "normal"
-        return case_obj.priority
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")
@@ -113,18 +103,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         data = self.build_config(case_obj, pipeline=pipeline, panel_bed=panel_bed)
 
         # Validate and reformat to MIP pedigree config format
-        config_data = self.make_pedigree_config(data=data, pipeline=pipeline)
+        config_data = ConfigHandler.make_pedigree_config(data=data, pipeline=pipeline)
         return config_data
-
-    def get_target_bed_from_lims(self, sample_id: str) -> str:
-        """Get target bed filename from lims"""
-        target_bed_shortname = self.lims.capture_kit(sample_id)
-        if not target_bed_shortname:
-            raise LimsDataError("Target bed %s not found in LIMS" % target_bed_shortname)
-        bed_version_obj = self.db.bed_version(target_bed_shortname)
-        if not bed_version_obj:
-            raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
-        return bed_version_obj.filename
 
     def build_config(
         self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
@@ -175,63 +155,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
         config_sample = dispatch[pipeline]
         data["samples"] = [config_sample(self, link_obj=link_obj) for link_obj in case_obj.links]
         return data
-
-    @staticmethod
-    def fastq_header(line: str) -> dict:
-        """handle Illumina's two different header formats
-        @see https://en.wikipedia.org/wiki/FASTQ_format
-
-        @HWUSI-EAS100R:6:73:941:1973#0/1
-
-            HWUSI-EAS100R   the unique instrument name
-            6   flowcell lane
-            73  tile number within the flowcell lane
-            941     'x'-coordinate of the cluster within the tile
-            1973    'y'-coordinate of the cluster within the tile
-            #0  index number for a multiplexed sample (0 for no indexing)
-            /1  the member of a pair, /1 or /2 (paired-end or mate-pair reads only)
-
-        Versions of the Illumina pipeline since 1.4 appear to use #NNNNNN
-        instead of #0 for the multiplex ID, where NNNNNN is the sequence of the
-        multiplex tag.
-
-        With Casava 1.8 the format of the '@' line has changed:
-
-        @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-
-            EAS139  the unique instrument name
-            136     the run id
-            FC706VJ     the flowcell id
-            2   flowcell lane
-            2104    tile number within the flowcell lane
-            15343   'x'-coordinate of the cluster within the tile
-            197393  'y'-coordinate of the cluster within the tile
-            1   the member of a pair, 1 or 2 (paired-end or mate-pair reads only)
-            Y   Y if the read is filtered, N otherwise
-            18  0 when none of the control bits are on, otherwise it is an even number
-            ATCACG  index sequence
-
-
-        TODO: add unit test
-        """
-
-        rs = {"lane": None, "flowcell": None, "readnumber": None}
-
-        parts = line.split(":")
-        if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
-            rs["lane"] = parts[1]
-            rs["flowcell"] = "XXXXXX"
-            rs["readnumber"] = parts[-1].split("/")[-1]
-        if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[6].split(" ")[-1]
-        if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[-1].split("/")[-1]
-
-        return rs
 
     @staticmethod
     def name_file(
@@ -408,16 +331,6 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
                 return True
         return False
 
-    def set_statusdb_action(self, case_id: str, action: str) -> None:
-        if action in [None, *CASE_ACTIONS]:
-            case_object = self.db.family(case_id)
-            case_object.action = action
-            self.db.commit()
-            return
-        LOG.warning(
-            f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
-        )
-
     def get_application_type(self, case_id: str) -> str:
         pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id)))
         analysis_types = {
@@ -430,73 +343,8 @@ class MipAnalysisAPI(ConfigHandler, MipAPI):
             return analysis_types.pop()
         return "wgs"
 
-    def get_case_output_path(self, case_id: str) -> Path:
+    def get_case_path(self, case_id: str) -> Path:
         return Path(self.root, case_id)
 
-    def get_case_object(self, case_id: str) -> models.Family:
-        return self.db.family(case_id)
-
-    def get_analyses_to_clean(self, before: dt.datetime) -> list:
-        analyses_to_clean = self.db.analyses_to_clean(pipeline=Pipeline.MIP_DNA, before=before)
-        return analyses_to_clean.all()
-
-    def get_slurm_job_ids_path(self, case_id: str) -> Path:
-        return Path(self.get_case_output_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
-
-    # TrailblazerAPI inherited methods
-    def is_latest_analysis_ongoing(self, case_id: str) -> bool:
-        return self.tb.is_latest_analysis_ongoing(case_id=case_id)
-
-    def has_latest_analysis_started(self, case_id: str) -> bool:
-        return self.tb.has_latest_analysis_started(case_id=case_id)
-
-    def mark_analyses_deleted(self, case_id: str) -> list:
-        return self.tb.mark_analyses_deleted(case_id=case_id)
-
-    def add_pending_analysis(
-        self,
-        case_id: str,
-        email: str,
-        type: str,
-        out_dir: str,
-        config_path: str,
-        priority: str,
-        data_analysis: Pipeline,
-    ) -> TrailblazerAnalysis:
-
-        return self.tb.add_pending_analysis(
-            case_id=case_id,
-            email=email,
-            type=type,
-            out_dir=out_dir,
-            config_path=config_path,
-            priority=priority,
-            data_analysis=data_analysis,
-        )
-
-    def get_latest_analysis_status(self, case_id: str) -> str:
-        return self.tb.get_latest_analysis_status(case_id=case_id)
-
-    def get_analyses_from_trailblazer(
-        self,
-        case_id: str = None,
-        query: str = None,
-        status: str = None,
-        deleted: bool = None,
-        temp: bool = False,
-        before: dt.datetime = None,
-        is_visible: bool = None,
-        family: str = None,
-        data_analysis: Pipeline = None,
-    ) -> list:
-        return self.tb.analyses(
-            case_id=case_id,
-            query=query,
-            status=status,
-            deleted=deleted,
-            temp=temp,
-            before=before,
-            is_visible=is_visible,
-            family=family,
-            data_analysis=data_analysis,
-        )
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
