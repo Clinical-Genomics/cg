@@ -17,6 +17,10 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
+## [20.1.2]
+### Changed
+- Refactored and removed code from cg.store.utils in backwards compatible way
+
 ## [20.1.1]
 ### Changed
 - Updates issue template
