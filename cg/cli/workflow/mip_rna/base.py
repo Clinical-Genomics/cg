@@ -14,7 +14,6 @@ from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store, models
-from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
 
@@ -87,7 +86,7 @@ def run(
     rna_api = context.obj["rna_api"]
     case_obj = rna_api.db.family(case_id)
 
-    if not case_exists(case_obj, case_id):
+    if not case_obj:
         raise click.Abort()
     if rna_api.get_analyses_from_trailblazer(case_id=case_obj.internal_id, temp=True):
         LOG.warning("%s: analysis already running", case_obj.internal_id)
@@ -135,7 +134,7 @@ def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     rna_api = context.obj["rna_api"]
 
     case_obj = rna_api.db.family(case_id)
-    if not case_exists(case_obj, case_id):
+    if not case_obj:
         LOG.error("Case %s does not exist!", case_id)
         context.abort()
     config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)

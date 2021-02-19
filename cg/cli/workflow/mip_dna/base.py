@@ -19,7 +19,6 @@ from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
-from cg.store.utils import case_exists
 
 LOG = logging.getLogger(__name__)
 EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
@@ -144,7 +143,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     """Generate a config for the case_id"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
     case_obj: models.Family = dna_api.db.family(case_id)
-    if not case_exists(case_obj, case_id):
+    if not case_obj:
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort()
 
@@ -213,7 +212,7 @@ def run(
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
 
     case_obj: models.Family = dna_api.db.family(case_id)
-    if not case_exists(case_obj, case_id):
+    if not case_obj:
         LOG.error(f"Case {case_id} does not exist!")
         raise click.Abort
 

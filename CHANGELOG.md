@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.1.2]
+### Changed
+- Refactored and removed code from cg.store.utils in backwards compatible way
+
 ## [20.1.1]
 
 ### Changed

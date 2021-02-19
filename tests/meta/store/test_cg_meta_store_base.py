@@ -37,13 +37,11 @@ def test_gather_files_and_bundle_in_hk_bundle_already_added(
 @mock.patch("cg.store.Store")
 @mock.patch("housekeeper.store.models")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
-@mock.patch("cg.meta.store.base.reset_case_action")
 @mock.patch("cg.meta.store.base.add_new_analysis")
 @mock.patch("cg.meta.store.mip.add_mip_analysis")
 def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_add_mip_analysis,
     mock_add_new_analysis,
-    mock_reset_case_action,
     mock_housekeeper_api,
     mock_housekeeper_store,
     mock_cg_store,
@@ -61,8 +59,6 @@ def test_gather_files_and_bundle_in_hk_bundle_new_analysis(
     mock_bundle = mock_housekeeper_store.Bundle.return_value
     mock_version = mock_housekeeper_store.Version.return_value
     mock_housekeeper_api.add_bundle.return_value = (mock_bundle, mock_version)
-    mock_case = mock_cg_store.Family.return_value
-    mock_reset_case_action(mock_case)
     mock_add_new_analysis.return_value = mock_cg_store.Analysis.return_value
 
     store_base.gather_files_and_bundle_in_housekeeper(
