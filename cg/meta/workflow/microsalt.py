@@ -5,7 +5,7 @@
     Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
     Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
     datetime.min"""
-import gzip
+
 import logging
 import os
 import re
@@ -22,8 +22,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import CASE_ACTIONS, Pipeline
-from cg.exc import BundleAlreadyAddedError, CgDataError
+from cg.constants import Pipeline
+from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
@@ -242,7 +242,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
 
-        return self.db.cases_to_store(pipeline=Pipeline.MICROSALT)
+        return self.status_db.cases_to_store(pipeline=self.pipeline)
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any

@@ -2,25 +2,21 @@ from pathlib import Path
 import logging
 import csv
 from subprocess import CalledProcessError
-from typing import Any, Optional, Tuple
 
 import shutil
 import datetime as dt
 
 from alchy import Query
 
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.exc import BundleAlreadyAddedError, CgError
+
+from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+
 from cg.utils import Process
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.lims import LimsAPI
-from cg.store import Store, models
+
+from cg.store import models
 import os
-from cg.constants import Pipeline, CASE_ACTIONS
+from cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -28,37 +24,18 @@ LOG = logging.getLogger(__name__)
 class FluffyAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
-        housekeeper_api: HousekeeperAPI,
-        trailblazer_api: TrailblazerAPI,
-        hermes_api: HermesApi,
-        lims_api: LimsAPI,
-        status_db: Store,
         config: dict,
-        prepare_fastq_api: PrepareFastqAPI,
-        process: Process,
-        pipeline: Pipeline,
-        scout_api: ScoutAPI,
+        pipeline: Pipeline = Pipeline.FLUFFY,
     ):
         super().__init__(
-            housekeeper_api,
-            trailblazer_api,
-            hermes_api,
-            lims_api,
-            prepare_fastq_api,
-            status_db,
-            process,
             pipeline,
-            scout_api,
             config,
         )
-        self.housekeeper_api = housekeeper_api
-        self.trailblazer_api = trailblazer_api
-        self.status_db = status_db
-        self.lims_api = lims_api
-        self.hermes_api = hermes_api
-        self.root_dir = Path(config["root_dir"])
-        self.process = Process(binary=config["binary_path"])
-        self.fluffy_config = Path(config["config_path"])
+        self.root_dir = Path(config["fluffy"]["root_dir"])
+        self.fluffy_config = Path(config["fluffy"]["config_path"])
+
+    def __configure_process_call(self, config: dict) -> Process:
+        return Process(binary=config["fluffy"]["binary_path"])
 
     def get_samplesheet_path(self, case_id: str) -> Path:
         """
@@ -99,15 +76,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         is used as a config to be submitted to Trailblazer and track job progress in SLURM
         """
         return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
-
-    def verify_case_id_in_database(self, case_id: str) -> None:
-        """
-        Passes silently if case exists in StatusDB, raises error if case is missing
-        """
-        case_obj = self.status_db.family(case_id)
-        if not case_obj:
-            LOG.error("Case %s could not be found in StatusDB!", case_id)
-            raise CgError
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
         """
@@ -224,6 +192,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "analyse",
         ]
         self.process.run_command(command_args, dry_run=dry_run)
+
+    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
+        return self.get_date_from_file_path(self.get_samplesheet_path(case_id=case_id))
 
     @staticmethod
     def get_date_from_file_path(file_path: Path) -> dt.datetime.date:

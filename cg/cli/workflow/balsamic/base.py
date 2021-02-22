@@ -5,22 +5,13 @@ import logging
 import click
 from pydantic import ValidationError
 
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import (
     BalsamicStartError,
     CgError,
 )
-from cg.meta.compress import CompressAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.store import Store
-from cg.utils import Process
+
 
 LOG = logging.getLogger(__name__)
 
@@ -64,24 +55,7 @@ def balsamic(context: click.Context):
         click.echo(context.get_help())
         return None
     config = context.obj
-    status_db = Store(config["database"])
-    housekeeper_api = HousekeeperAPI(config)
-    crunchy_api = CrunchyAPI(config)
-    compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)
-    lims_api = LimsAPI(config)
-    trailblazer_api = TrailblazerAPI(config)
-    hermes_api = HermesApi(config)
-    scout_api = ScoutAPI(config)
-    prepare_fastq_api = PrepareFastqAPI(store=status_db, compress_api=compress_api)
     context.obj["AnalysisAPI"] = BalsamicAnalysisAPI(
-        status_db=status_db,
-        housekeeper_api=housekeeper_api,
-        lims_api=lims_api,
-        trailblazer_api=trailblazer_api,
-        hermes_api=hermes_api,
-        scout_api=scout_api,
-        prepare_fastq_api=prepare_fastq_api,
-        process=Process(config["balsamic"]["binary_path"]),
         config=config,
     )
 
@@ -97,7 +71,7 @@ def link(context: click.Context, case_id: str):
     analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
         LOG.info(f"Linking samples in case {case_id}")
-        analysis_api.link_samples(case_id)
+        analysis_api.link_fastq_files(case_id)
     except Exception as error:
         LOG.error(f"Could not link samples: {error}")
         raise click.Abort()

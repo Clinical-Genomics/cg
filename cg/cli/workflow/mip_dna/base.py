@@ -59,30 +59,7 @@ def mip_dna(
         click.echo(context.get_help())
         return
 
-    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
-    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
-    context.obj["scout_api"] = ScoutAPI(context.obj)
-    context.obj["lims_api"] = LimsAPI(context.obj)
-    context.obj["status_db"] = Store(context.obj["database"])
-    context.obj["crunchy_api"] = CrunchyAPI(context.obj)
-    context.obj["compress_api"] = CompressAPI(
-        hk_api=context.obj["housekeeper_api"], crunchy_api=context.obj["crunchy_api"]
-    )
-    context.obj["prepare_fastq_api"] = PrepareFastqAPI(
-        context.obj["status_db"], context.obj["compress_api"]
-    )
-
-    context.obj["dna_api"] = MipAnalysisAPI(
-        db=context.obj["status_db"],
-        hk_api=context.obj["housekeeper_api"],
-        tb_api=context.obj["trailblazer_api"],
-        scout_api=context.obj["scout_api"],
-        lims_api=context.obj["lims_api"],
-        script=context.obj["mip-rd-dna"]["script"],
-        pipeline=context.obj["mip-rd-dna"]["pipeline"],
-        conda_env=context.obj["mip-rd-dna"]["conda_env"],
-        root=context.obj["mip-rd-dna"]["root"],
-    )
+    context.obj["dna_api"] = MipAnalysisAPI(pipeline=Pipeline.MIP_DNA, config=context.obj)
 
 
 @mip_dna.command()
@@ -128,9 +105,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     panel_bed: str = dna_api.resolve_panel_bed(panel_bed=panel_bed)
 
     try:
-        config_data: dict = dna_api.pedigree_config(
-            case_obj, panel_bed=panel_bed, pipeline=Pipeline.MIP_DNA
-        )
+        config_data: dict = dna_api.pedigree_config(case_obj, panel_bed=panel_bed)
     except CgError as error:
         LOG.error(error.message)
         raise click.Abort()

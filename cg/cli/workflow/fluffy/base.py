@@ -1,11 +1,6 @@
 import logging
 import click
 
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.store import Store
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.apps.environ import environ_email
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
@@ -29,12 +24,7 @@ def fluffy(context: click.Context):
         return None
     config = context.obj
     context.obj["fluffy_analysis_api"] = FluffyAnalysisAPI(
-        housekeeper_api=HousekeeperAPI(config),
-        trailblazer_api=TrailblazerAPI(config),
-        hermes_api=HermesApi(config),
-        lims_api=LimsAPI(config),
-        status_db=Store(config["database"]),
-        config=config["fluffy"],
+        config=config,
     )
 
 
@@ -47,7 +37,7 @@ def link(context: click.Context, case_id: str, dry_run: bool):
     Link fastq files from Housekeeper to analysis folder
     """
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_database(case_id=case_id)
+    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
@@ -60,7 +50,7 @@ def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
     Write modified samplesheet file to case folder
     """
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_database(case_id=case_id)
+    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     fluffy_analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
 
 
@@ -73,21 +63,13 @@ def run(context: click.Context, case_id: str, dry_run: bool):
     Run Fluffy analysis
     """
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_database(case_id=case_id)
+    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     fluffy_analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
     if dry_run:
         return
     # Submit analysis for tracking in Trailblazer
     try:
-        fluffy_analysis_api.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            email=environ_email(),
-            type="tgs",
-            out_dir=fluffy_analysis_api.get_output_path(case_id).as_posix(),
-            config_path=fluffy_analysis_api.get_slurm_job_ids_path(case_id).as_posix(),
-            priority=fluffy_analysis_api.get_priority(case_id),
-            data_analysis="FLUFFY",
-        )
+        fluffy_analysis_api.add_pending_trailblazer_analysis(case_id)
         LOG.info("Submitted case %s to Trailblazer!", case_id)
     except Exception as e:
         LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", e)
@@ -139,7 +121,7 @@ def store(context: click.Context, case_id: str, dry_run: bool):
     Store finished analysis files in Housekeeper
     """
     fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_database(case_id=case_id)
+    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if dry_run:
         LOG.info("Dry run: Would have stored deliverables for %s", case_id)
         return

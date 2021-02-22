@@ -2,61 +2,30 @@
 
 import json
 import logging
-from abc import ABC
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline, DataDelivery
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.store import Store, models
+from cg.store import models
 
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
 
-class BalsamicAnalysisAPI(AnalysisAPI, ABC):
+class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes
     and the rest of CG infrastructure"""
 
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
-    def __init__(
-        self,
-        housekeeper_api: HousekeeperAPI,
-        trailblazer_api: TrailblazerAPI,
-        hermes_api: HermesApi,
-        lims_api: LimsAPI,
-        prepare_fastq_api: PrepareFastqAPI,
-        status_db: Store,
-        process: Process,
-        scout_api: ScoutAPI,
-        pipeline: Pipeline = Pipeline.BALSAMIC,
-        config: Optional[dict] = None,
-    ):
-        super().__init__(
-            housekeeper_api,
-            trailblazer_api,
-            hermes_api,
-            lims_api,
-            prepare_fastq_api,
-            status_db,
-            process,
-            pipeline,
-            scout_api,
-            config,
-        )
-
+    def __init__(self, pipeline: Pipeline = Pipeline.BALSAMIC, config: Optional[dict] = None):
+        super().__init__(pipeline, config)
         self.root_dir = config["balsamic"]["root"]
         self.singularity = config["balsamic"]["singularity"]
         self.reference_config = config["balsamic"]["reference_config"]
@@ -64,6 +33,9 @@ class BalsamicAnalysisAPI(AnalysisAPI, ABC):
         self.email = config["balsamic"]["slurm"]["mail_user"]
         self.qos = config["balsamic"]["slurm"]["qos"]
         self.bed_path = config["bed_path"]
+
+    def __configure_process_call(self, config: dict) -> Process:
+        return Process(config["balsamic"]["binary_path"])
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
@@ -117,26 +89,31 @@ class BalsamicAnalysisAPI(AnalysisAPI, ABC):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def link_fastq_files(self, case_id: str) -> None:
+    def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """Links and copies files to working directory"""
-        for link_object in self.status_db.family(case_id).links:
+        case_obj: models.Family = self.status_db.family(case_id)
+        for link_object in case_obj.links:
             LOG.info(
                 f"{link_object.sample.internal_id}: {link_object.family.data_analysis} linking FASTQ files"
             )
+            if dry_run:
+                continue
             file_objs = self.housekeeper_api.files(
                 bundle=link_object.sample.internal_id, tags=["fastq"]
             )
             file_collection: List[dict] = [
                 FastqHandler.parse_file_data(file_obj.full_path) for file_obj in file_objs
             ]
+
             FastqHandler.link(
                 sample_id=link_object.sample.internal_id,
                 files=file_collection,
                 working_dir=self.get_case_path(case_id) / "fastq",
+                concatenate=True,
             )
         LOG.info("Linking completed")
 
-    def get_fastq_path(self, link_object: models.FamilySample) -> str:
+    def get_fastq_path(self, link_object: models.FamilySample) -> Path:
         """Returns path to the concatenated FASTQ file of a sample"""
         file_objs = self.housekeeper_api.files(
             bundle=link_object.sample.internal_id, tags=["fastq"]
@@ -152,13 +129,13 @@ class BalsamicAnalysisAPI(AnalysisAPI, ABC):
             read=fastq_data["read"],
             more={"undetermined": fastq_data["undetermined"]},
         )
-        concatenated_fastq_name = FastqHandler.get_concatenated_name(linked_fastq_name)
+        concatenated_fastq_name: str = FastqHandler.get_concatenated_name(linked_fastq_name)
         return Path(
             self.root_dir,
             link_object.family.internal_id,
             "fastq",
             concatenated_fastq_name,
-        ).as_posix()
+        )
 
     @staticmethod
     def get_sample_type(link_object: models.FamilySample) -> str:
@@ -362,7 +339,7 @@ class BalsamicAnalysisAPI(AnalysisAPI, ABC):
         sample_data = {
             link_object.sample.internal_id: {
                 "tissue_type": self.get_sample_type(link_object),
-                "concatenated_path": self.get_fastq_path(link_object),
+                "concatenated_path": self.get_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
@@ -497,7 +474,9 @@ class BalsamicAnalysisAPI(AnalysisAPI, ABC):
         parameters = command + options + run_analysis
         self.process.run_command(parameters=parameters, dry_run=dry)
 
-    def report_deliver(self, case_id: str, analysis_type=Optional[str], dry: bool = False) -> None:
+    def report_deliver(
+        self, case_id: str, analysis_type: Optional[str] = None, dry: bool = False
+    ) -> None:
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]

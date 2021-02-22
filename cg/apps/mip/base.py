@@ -58,13 +58,12 @@ class MipAPI:
                 _cg_to_mip_option_map(parameters, key)
                 _append_value_for_non_flags(parameters, value)
 
-        command = {
+        return {
             "binary": SPACE.join(binary_command),
             "config": config,
             "environment": self.conda_env,
             "parameters": parameters,
         }
-        return command
 
     @classmethod
     def execute(cls, command: dict, dry_run: bool = False) -> int:

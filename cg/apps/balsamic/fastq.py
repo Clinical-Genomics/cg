@@ -38,19 +38,19 @@ class FastqHandler:
             LOG.warning(error)
 
     @staticmethod
-    def size_before(files: List):
+    def size_before(files: List) -> int:
         """returns the total size of the linked fastq files before concatenation"""
 
         return sum(os.stat(f).st_size for f in files)
 
     @staticmethod
-    def size_after(concat_file: str):
+    def size_after(concat_file: str) -> int:
         """returns the size of the concatenated fastq files"""
 
         return os.stat(concat_file).st_size
 
     @staticmethod
-    def assert_file_sizes(size_before: int, size_after: int):
+    def assert_file_sizes(size_before: int, size_after: int) -> None:
         """asserts the file sizes before and after concatenation. If the file sizes differ by more
         than 1 percent, throw an exception"""
         msg = (
@@ -62,7 +62,7 @@ class FastqHandler:
         LOG.info("Concatenation file size check successful!")
 
     @staticmethod
-    def display_files(files: List, concat_file: str):
+    def display_files(files: List, concat_file: str) -> str:
         """display file names for logging purposes"""
         return (
             f"Concatenating: {', '.join(Path(file_).name for file_ in files)} -> "
@@ -70,13 +70,13 @@ class FastqHandler:
         )
 
     @staticmethod
-    def remove_files(files: list):
+    def remove_files(files: list) -> None:
         for file in files:
             if os.path.isfile(file):
                 os.remove(file)
 
     @staticmethod
-    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None):
+    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         date = more.get("date", None)
@@ -89,12 +89,12 @@ class FastqHandler:
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
 
     @staticmethod
-    def get_concatenated_name(linked_fastq_name):
+    def get_concatenated_name(linked_fastq_name) -> str:
         """"create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
-    def parse_header(line):
+    def parse_header(line: str) -> dict:
         """Generates a dict with parsed lanes, flowcells and read numbers
         Handle illumina's two different header formats
         @see https://en.wikipedia.org/wiki/FASTQ_format
@@ -149,7 +149,7 @@ class FastqHandler:
         return fastq_meta
 
     @staticmethod
-    def link(sample_id: str, files: List[dict], working_dir: Path):
+    def link(sample_id: str, files: List[dict], concatenate: bool, working_dir: Path) -> None:
         """Link FASTQ files for a balsamic sample.
         Shall be linked to /<balsamic root directory>/case-id/fastq/"""
 
@@ -183,13 +183,16 @@ class FastqHandler:
             else:
                 LOG.debug("destination path already exists: %s", linked_fastq_path)
 
+        if not concatenate:
+            return
+
         LOG.info("Concatenation in progress for sample %s.", sample_id)
         for read, value in linked_reads_paths.items():
             FastqHandler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             FastqHandler.remove_files(value)
 
     @staticmethod
-    def parse_file_data(fastq_path: Path):
+    def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
             header_info = FastqHandler.parse_header(header_line)

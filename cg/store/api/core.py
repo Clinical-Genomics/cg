@@ -25,6 +25,8 @@ class CoreHandler(
 
 
 class Store(alchy.Manager, CoreHandler):
-    def __init__(self, uri):
-        self.uri = uri
-        super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=models.Model)
+    def __init__(self, config_dict: dict):
+        self.uri = config_dict["database"]
+        super(Store, self).__init__(
+            config=dict(SQLALCHEMY_DATABASE_URI=self.uri), Model=models.Model
+        )

@@ -1,32 +1,22 @@
 import datetime as dt
-import gzip
 import logging
-import re
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.apps.mip import parse_trending
-from cg.apps.mip.base import MipAPI
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis
+
 from cg.constants import (
-    CASE_ACTIONS,
     COLLABORATORS,
     COMBOS,
     DEFAULT_CAPTURE_KIT,
     MASTER_LIST,
     Pipeline,
 )
-from cg.exc import CgDataError, CgError, LimsDataError
+from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.store import Store, models
+from cg.store import models
 from ruamel.yaml import safe_load
 
 from cg.utils import Process
@@ -38,42 +28,15 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(
-        self,
-        scout_api: ScoutAPI,
-        tb_api: TrailblazerAPI,
-        lims_api: LimsAPI,
-        script: str,
-        pipeline: str,
-        conda_env: str,
-        root: str,
-        housekeeper_api: HousekeeperAPI,
-        trailblazer_api: TrailblazerAPI,
-        hermes_api: HermesApi,
-        prepare_fastq_api: PrepareFastqAPI,
-        status_db: Store,
-        process: Process,
-    ):
-        super().__init__(
-            housekeeper_api,
-            trailblazer_api,
-            hermes_api,
-            lims_api,
-            prepare_fastq_api,
-            status_db,
-            process,
-            pipeline,
-            scout_api,
-        )
-        self.db = db
-        self.tb = tb_api
-        self.hk = hk_api
-        self.scout = scout_api
-        self.lims = lims_api
-        self.script = script
-        self.pipeline = pipeline
-        self.conda_env = conda_env
-        self.root = root
+    def __init__(self, config: dict, pipeline: Pipeline):
+        super().__init__(pipeline, config)
+        self.script = config["mip-rd-dna"]["script"]
+        self.pipeline = config["mip-rd-dna"]["pipeline"]
+        self.conda_env = config["mip-rd-dna"]["conda_env"]
+        self.root = config["mip-rd-dna"]["root"]
+
+    def __configure_process_call(self, config: dict) -> Type[Process]:
+        return Process
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")
@@ -85,7 +48,7 @@ class MipAnalysisAPI(AnalysisAPI):
         if panel_bed:
             if panel_bed.endswith(".bed"):
                 return panel_bed
-            bed_version = self.db.bed_version(panel_bed)
+            bed_version = self.status_db.bed_version(panel_bed)
             if not bed_version:
                 raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
             return bed_version.filename
@@ -102,14 +65,12 @@ class MipAnalysisAPI(AnalysisAPI):
         Returns:
             dict: config_data (MIP format)
         """
-        data = self.build_config(case_obj, pipeline=self.pipeline, panel_bed=panel_bed)
+        data = self.build_config(case_obj, panel_bed=panel_bed)
 
         # Validate and reformat to MIP pedigree config format
         return ConfigHandler.make_pedigree_config(data=data, pipeline=self.pipeline)
 
-    def build_config(
-        self, case_obj: models.Family, pipeline: Pipeline, panel_bed: str = None
-    ) -> dict:
+    def build_config(self, case_obj: models.Family, panel_bed: str = None) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
 
         def get_sample_data(link_obj):
@@ -153,7 +114,7 @@ class MipAnalysisAPI(AnalysisAPI):
             "case": case_obj.internal_id,
             "default_gene_panels": case_obj.panels,
         }
-        config_sample = dispatch[pipeline]
+        config_sample = dispatch[self.pipeline]
         data["samples"] = [config_sample(self, link_obj=link_obj) for link_obj in case_obj.links]
         return data
 
@@ -198,9 +159,9 @@ class MipAnalysisAPI(AnalysisAPI):
         for link in case_obj.links:
             self.link_sample(sample=link.sample, case_id=case_id)
 
-    def link_sample(self, sample: models.Sample, case_id: str):
+    def link_sample(self, sample: models.Sample, case_id: str) -> None:
         """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=sample.internal_id, tags=["fastq"])
+        file_objs = self.housekeeper_api.files(bundle=sample.internal_id, tags=["fastq"])
         files = []
 
         for file_obj in file_objs:
@@ -217,7 +178,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def panel(self, case_obj: models.Family) -> List[str]:
         """Create the aggregated panel file."""
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
-        return self.scout.export_panels(all_panels)
+        return self.scout_api.export_panels(all_panels)
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to case dir"""
@@ -251,9 +212,11 @@ class MipAnalysisAPI(AnalysisAPI):
     def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
         """Get a python object file for a tag and a family ."""
 
-        last_version = self.hk.last_version(bundle=family_id)
+        last_version = self.housekeeper_api.last_version(bundle=family_id)
 
-        analysis_files = self.hk.files(bundle=family_id, version=last_version.id, tags=[tag]).all()
+        analysis_files = self.housekeeper_api.files(
+            bundle=family_id, version=last_version.id, tags=[tag]
+        ).all()
 
         if analysis_files:
             analysis_file_raw = self._open_bundle_file(analysis_files[0].path)
@@ -268,7 +231,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def _open_bundle_file(self, relative_file_path: str) -> Any:
         """Open a bundle file and return it as an Python object."""
 
-        full_file_path = Path(self.hk.get_root_dir()).joinpath(relative_file_path)
+        full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
         return safe_load(open(full_file_path))
 
     def get_latest_metadata(self, family_id: str) -> dict:

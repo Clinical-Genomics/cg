@@ -3,6 +3,9 @@ from pathlib import Path
 from typing import Optional, List, Literal
 import datetime as dt
 
+from alchy import Query
+
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -17,6 +20,7 @@ from cg.exc import (
     CgDataError,
     DecompressionNeededError,
 )
+from cg.meta.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 from cg.utils import Process
@@ -27,27 +31,28 @@ LOG = logging.getLogger(__name__)
 class AnalysisAPI:
     def __init__(
         self,
-        housekeeper_api: HousekeeperAPI,
-        trailblazer_api: TrailblazerAPI,
-        hermes_api: HermesApi,
-        lims_api: LimsAPI,
-        prepare_fastq_api: PrepareFastqAPI,
-        status_db: Store,
-        process: Process,
         pipeline: Pipeline,
-        scout_api: ScoutAPI,
-        config: Optional[dict] = None,
+        config: Optional[dict],
     ):
-        self.housekeeper_api = housekeeper_api
-        self.trailblazer_api = trailblazer_api
-        self.status_db = status_db
-        self.lims_api = lims_api
-        self.hermes_api = hermes_api
-        self.scout_api = scout_api
-        self.prepare_fastq_api = prepare_fastq_api
         self.pipeline = pipeline
-        self.process = process
         self.config = config or {}
+
+        self.housekeeper_api = HousekeeperAPI(self.config)
+        self.trailblazer_api = TrailblazerAPI(self.config)
+        self.status_db = Store(self.config)
+        self.lims_api = LimsAPI(self.config)
+        self.hermes_api = HermesApi(self.config)
+        self.scout_api = ScoutAPI(self.config)
+        self.prepare_fastq_api = PrepareFastqAPI(
+            store=self.status_db,
+            compress_api=CompressAPI(
+                hk_api=self.housekeeper_api, crunchy_api=CrunchyAPI(self.config)
+            ),
+        )
+        self.process = self.__configure_process_call(self.config)
+
+    def __configure_process_call(self, config: dict) -> Process:
+        raise NotImplementedError
 
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """
@@ -109,7 +114,7 @@ class AnalysisAPI:
         sample_obj: models.Sample = self.status_db.sample(lims_id)
         return sample_obj.name
 
-    def link_fastq_files(self, case_id: str) -> None:
+    def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
         Links fastq files from Housekeeper to case working directory
         """
@@ -120,13 +125,21 @@ class AnalysisAPI:
 
     def get_application_type(
         self, sample_obj: models.Sample
-    ) -> Literal["wgs", "wes", "tgs", "other"]:
+    ) -> Literal["wgs", "wes", "tgs", "wts", "rml", "mic", "cov", "other"]:
         analysis_type = sample_obj.application_version.application.prep_category
-        if analysis_type and analysis_type.lower() in ["wgs", "wes", "tgs"]:
+        if analysis_type and analysis_type.lower() in [
+            "wgs",
+            "wes",
+            "tgs",
+            "wts",
+            "rml",
+            "mic",
+            "cov",
+        ]:
             return analysis_type.lower
         return "other"
 
-    def upload_bundle_housekeeper(self, case_id: str):
+    def upload_bundle_housekeeper(self, case_id: str) -> None:
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_result = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
@@ -159,6 +172,9 @@ class AnalysisAPI:
     def get_deliverables_file_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
+    def get_analysis_finish_path(self, case_id: str) -> Path:
+        raise NotImplementedError
+
     def add_pending_trailblazer_analysis(self, case_id) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.error("Analysis still ongoing in Trailblazer!")
@@ -186,7 +202,7 @@ class AnalysisAPI:
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         raise NotImplementedError
 
-    def get_pipeline_version(self, case_id: str):
+    def get_pipeline_version(self, case_id: str) -> str:
         raise NotImplementedError
 
     def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
@@ -207,7 +223,7 @@ class AnalysisAPI:
         analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
         return analyses_to_clean.all()
 
-    def get_cases_to_analyze(self, threshold: bool = False):
+    def get_cases_to_analyze(self, threshold: bool = False) -> List[models.Family]:
         return self.status_db.cases_to_analyze(pipeline=self.pipeline, threshold=threshold)
 
     def get_running_cases(self) -> List[models.Family]:
@@ -229,7 +245,7 @@ class AnalysisAPI:
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def resolve_decompression(self, case_id: str, dry_run: bool):
+    def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
         decompression_needed = self.prepare_fastq_api.is_spring_decompression_needed(case_id)
 
         if decompression_needed:
