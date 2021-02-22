@@ -76,7 +76,7 @@ def add_new_analysis(
     status: Store,
     version_obj: hk_models.Version,
 ) -> models.Analysis:
-    """Function to name_fastq_file and return a new analysis database record"""
+    """Function to create and return a new analysis database record"""
 
     try:
         pipeline = Pipeline(case_obj.data_analysis)

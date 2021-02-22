@@ -1,4 +1,4 @@
-"""Module to name_fastq_file MIP analysis delivery reports"""
+"""Module to create MIP analysis delivery reports"""
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -19,7 +19,7 @@ from cg.exc import DeliveryReportError
 
 
 class ReportAPI:
-    """API to name_fastq_file MIP analysis delivery reports"""
+    """API to create MIP analysis delivery reports"""
 
     def __init__(
         self,

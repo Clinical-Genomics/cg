@@ -1,4 +1,4 @@
-"""This script tests the cli methods to name_fastq_file prerequisites and start a mip-dna analysis"""
+"""This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 import logging
 
 from cg.cli.workflow.mip_dna.base import start, start_available

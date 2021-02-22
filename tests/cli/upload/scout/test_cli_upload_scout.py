@@ -68,7 +68,7 @@ def test_upload_with_load_config(
 def test_produce_load_config(
     base_context: dict, cli_runner, case_id: str, mip_analysis_hk_bundle_data: dict, helpers, caplog
 ):
-    """Test name_fastq_file a scout load config with the scout upload api"""
+    """Test create a scout load config with the scout upload api"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a singleton WGS case
     # GIVEN that the api generates a config

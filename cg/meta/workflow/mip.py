@@ -122,7 +122,7 @@ class MipAnalysisAPI(AnalysisAPI):
         fastq_dir.mkdir(parents=True, exist_ok=True)
         for fastq_data in files:
             fastq_path = Path(fastq_data["path"])
-            fastq_name = MipFastqHandler.name_fastq_file(
+            fastq_name = MipFastqHandler.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample,

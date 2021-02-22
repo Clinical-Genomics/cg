@@ -77,12 +77,12 @@ class FastqHandler:
                 os.remove(file)
 
     @staticmethod
-    def name_fastq_file(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
+    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
         raise NotImplementedError
 
     @staticmethod
     def get_concatenated_name(linked_fastq_name) -> str:
-        """"name_fastq_file a name for the concatenated file for some read files"""
+        """"create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
@@ -154,7 +154,7 @@ class FastqHandler:
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = FastqHandler.name_fastq_file(
+            linked_fastq_name = FastqHandler.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample_id,
@@ -204,7 +204,7 @@ class FastqHandler:
 
 class BalsamicFastqHandler(FastqHandler):
     @staticmethod
-    def name_fastq_file(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
+    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
         date = more.get("date", None)
@@ -219,7 +219,7 @@ class BalsamicFastqHandler(FastqHandler):
 
 class MipFastqHandler(FastqHandler):
     @staticmethod
-    def name_fastq_file(
+    def create(
         lane: int,
         flowcell: str,
         sample: str,

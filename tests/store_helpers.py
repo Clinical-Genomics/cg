@@ -36,7 +36,7 @@ class StoreHelpers:
         return _bundle
 
     def ensure_hk_version(self, store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
-        """Utility function to return existing or name_fastq_file an version for tests"""
+        """Utility function to return existing or create an version for tests"""
         _bundle = self.ensure_hk_bundle(store, bundle_data)
         return store.last_version(_bundle.name)
 
@@ -51,7 +51,7 @@ class StoreHelpers:
         sequencing_depth: int = None,
         is_accredited: bool = False,
     ) -> models.ApplicationVersion:
-        """Utility function to return existing or name_fastq_file application version for tests"""
+        """Utility function to return existing or create application version for tests"""
         if is_rna:
             application_tag = "rna_tag"
             application_type = "wts"
@@ -133,7 +133,7 @@ class StoreHelpers:
 
     @staticmethod
     def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> models.ApplicationVersion:
-        """Utility function to return existing or name_fastq_file bed version for tests"""
+        """Utility function to return existing or create bed version for tests"""
         bed = store.bed(name=bed_name)
         if not bed:
             bed = store.add_bed(name=bed_name)
@@ -153,7 +153,7 @@ class StoreHelpers:
         scout_access: bool = False,
         customer_group: str = "all_customers",
     ) -> models.Customer:
-        """Utility function to return existing or name_fastq_file customer for tests"""
+        """Utility function to return existing or create customer for tests"""
         customer_group_id = customer_group or customer_id + "_group"
         customer_group = store.customer_group(customer_group_id)
         if not customer_group:

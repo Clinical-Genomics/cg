@@ -125,7 +125,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             FastqHandler.parse_file_data(file_obj.full_path) for file_obj in file_objs
         ]
         fastq_data = file_collection[0]
-        linked_fastq_name = FastqHandler.name_fastq_file(
+        linked_fastq_name = FastqHandler.create(
             lane=fastq_data["lane"],
             flowcell=fastq_data["flowcell"],
             sample=link_object.sample.internal_id,

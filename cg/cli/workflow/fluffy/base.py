@@ -40,7 +40,7 @@ def link(context: click.Context, case_id: str, dry_run: bool):
     analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
-@fluffy.command("name_fastq_file-samplesheet")
+@fluffy.command("create-samplesheet")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context

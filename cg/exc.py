@@ -32,7 +32,7 @@ class AnalysisNotFinishedError(CgError):
 
 class AnalysisDuplicationError(CgError):
     """
-    Error related to trying to name_fastq_file analysis object that already exists in status-db.
+    Error related to trying to create analysis object that already exists in status-db.
     """
 
 

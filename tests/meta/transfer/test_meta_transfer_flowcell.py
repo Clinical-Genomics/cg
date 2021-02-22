@@ -29,7 +29,7 @@ def test_transfer_flowcell(
         warnings.simplefilter("ignore", category=sa_exc.SAWarning)
         flowcell_obj = transfer_flowcell_api.transfer(flowcell_id)
 
-    # THEN it should name_fastq_file a new flowcell record
+    # THEN it should create a new flowcell record
     assert flowcell_store.flowcells().count() == 1
     assert isinstance(flowcell_obj.id, int)
     assert flowcell_obj.name == flowcell_id

@@ -137,7 +137,7 @@ class HousekeeperAPI:
         root_dir: Path, version_obj: models.Version, file_obj: models.File
     ) -> Path:
         """Generate the path to a file that should be included.
-        If the version dir does not exist, name_fastq_file a new version dir in root dir
+        If the version dir does not exist, create a new version dir in root dir
         """
         # generate root directory
         version_root_dir = root_dir / version_obj.relative_root_dir

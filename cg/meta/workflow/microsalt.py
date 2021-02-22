@@ -115,7 +115,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for fastq_data in files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = FastqHandler.name_fastq_file(
+            linked_fastq_name = FastqHandler.create(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample_id,

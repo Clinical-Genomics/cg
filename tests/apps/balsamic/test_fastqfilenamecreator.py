@@ -8,7 +8,7 @@ from cg.apps.balsamic.fastq import FastqHandler
 def test_create(valid_fastq_filename_pattern) -> dict:
     """Test the method that creates balsamic file names for us"""
 
-    # given we have all the necessary inputs to name_fastq_file a filename
+    # given we have all the necessary inputs to create a filename
     lane = "l"
     flowcell = "fc"
     sample = "s"
@@ -18,8 +18,8 @@ def test_create(valid_fastq_filename_pattern) -> dict:
     optional_index = "abcdef"
     more = {"undetermined": undetermined, "date": optional_date, "index": optional_index}
 
-    # when calling the method to name_fastq_file a valid filename
-    result_filename = FastqHandler.FastqFileNameCreator.name_fastq_file(
+    # when calling the method to create a valid filename
+    result_filename = FastqHandler.FastqFileNameCreator.create(
         lane=lane, flowcell=flowcell, sample=sample, read=read, more=more
     )
 
