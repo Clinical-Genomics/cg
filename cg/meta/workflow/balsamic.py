@@ -11,7 +11,6 @@ from cg.constants import Pipeline, DataDelivery
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import models
-
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -449,7 +448,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        email: str,
         analysis_type: Optional[str],
         run_analysis: bool = True,
         priority: Optional[str] = None,
@@ -462,7 +460,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         options = self.__build_command_str(
             {
                 "--account": self.account,
-                "--mail-user": email or self.email,
+                "--mail-user": self.email,
                 "--qos": priority or self.get_priority_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),

@@ -8,14 +8,10 @@ from typing import Any
 import click
 import datetime as dt
 
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-from cg.store import Store, models
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
@@ -48,11 +44,6 @@ def microsalt(context: click.Context) -> None:
         click.echo(context.get_help())
         return None
     microsalt_analysis_api = MicrosaltAnalysisAPI(
-        db=Store(context.obj["database"]),
-        hk_api=HousekeeperAPI(context.obj),
-        lims_api=LimsAPI(context.obj),
-        trailblazer_api=TrailblazerAPI(context.obj),
-        hermes_api=HermesApi(context.obj),
         config=context.obj["microsalt"],
     )
     context.obj["microsalt_analysis_api"] = microsalt_analysis_api
@@ -72,7 +63,7 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: str) -> 
         sample=sample, ticket=ticket, unique_id=unique_id
     )
 
-    if not microsalt_analysis_api.check_flowcells_on_disk(case_id=case_id, sample_id=sample_id):
+    if not microsalt_analysis_api.all_flowcells_on_disk(case_id=case_id):
         raise click.Abort
     microsalt_analysis_api.link_samples(
         case_id=case_id,
@@ -173,7 +164,7 @@ def run(
 
     microsalt_analysis_api.set_statusdb_action(case_id=case_id, action="running")
     try:
-        microsalt_analysis_api.submit_trailblazer_analysis(case_id=case_id)
+        microsalt_analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
     except Exception as e:
         LOG.warning(
             "Trailblazer warning: Could not track analysis progress for case %s! %s",
@@ -189,17 +180,14 @@ def store(context: click.Context, unique_id: str) -> None:
     """Store microSALT results in Housekeeper for given case"""
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
 
-    case_obj = microsalt_analysis_api.db.family(unique_id)
-    if not case_obj:
-        LOG.error("Please provide a valid case id!")
-        raise click.Abort
+    microsalt_analysis_api.verify_case_id_in_statusdb(case_id=unique_id)
     try:
-        microsalt_analysis_api.store_microbial_analysis_housekeeper(case_id=unique_id)
-        microsalt_analysis_api.store_microbial_analysis_statusdb(case_id=unique_id)
+        microsalt_analysis_api.upload_bundle_housekeeper(case_id=unique_id)
+        microsalt_analysis_api.upload_bundle_statusdb(case_id=unique_id)
         microsalt_analysis_api.set_statusdb_action(case_id=unique_id, action=None)
     except Exception as error:
-        microsalt_analysis_api.db.rollback()
-        microsalt_analysis_api.hk.rollback()
+        microsalt_analysis_api.status_db.rollback()
+        microsalt_analysis_api.housekeeper_api.rollback()
         LOG.error(
             "Error storing deliverables for case %s - %s", unique_id, error.__class__.__name__
         )
@@ -250,7 +238,7 @@ def start_available(context: click.Context, dry_run: bool) -> None:
     """Start whole microSALT workflow for all newly sequenced cases"""
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
     exit_code: int = EXIT_SUCCESS
-    for case_obj in microsalt_analysis_api.db.cases_to_analyze(pipeline=Pipeline.MICROSALT):
+    for case_obj in microsalt_analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.MICROSALT):
         if dry_run:
             LOG.info("Would have started workflow for case %s", case_obj.internal_id)
             continue
@@ -277,13 +265,13 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
 
     vogue_api = VogueAPI(context.obj)
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
-    case_obj = microsalt_analysis_api.db.family(unique_id)
+    case_obj = microsalt_analysis_api.status_db.family(unique_id)
     if not case_obj or not case_obj.analyses:
         LOG.error("No analysis available for %s", unique_id)
         raise click.Abort
 
     samples_string = ",".join(str(link_obj.sample.internal_id) for link_obj in case_obj.links)
-    microsalt_version = microsalt_analysis_api.get_microsalt_version()
+    microsalt_version = microsalt_analysis_api.get_pipeline_version()
 
     if dry_run:
         LOG.info(
@@ -314,7 +302,7 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
     vogue_api.load_bioinfo_process(load_bioinfo_inputs=vogue_load_args, cleanup_flag=False)
     vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
     case_obj.analyses[0].uploaded_at = dt.datetime.now()
-    microsalt_analysis_api.db.commit()
+    microsalt_analysis_api.status_db.commit()
     LOG.info("Successfully uploaded latest analysis data for case %s to Vogue!", unique_id)
 
 
@@ -327,7 +315,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
     EXIT_CODE: int = EXIT_SUCCESS
     microsalt_analysis_api: MicrosaltAnalysisAPI = context.obj["microsalt_analysis_api"]
     latest_analyses = list(
-        microsalt_analysis_api.db.latest_analyses()
+        microsalt_analysis_api.status_db.latest_analyses()
         .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
         .filter(models.Analysis.uploaded_at.is_(None))
     )

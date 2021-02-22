@@ -63,6 +63,11 @@ class AnalysisAPI:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
 
+    def check_analysis_ongoing(self, case_id: str) -> None:
+        if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
+            LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
+            raise CgError("Analysis still ongoing")
+
     def get_flowcells(self, case_id: str) -> List[models.Flowcell]:
         """Get all flowcells for all samples in a ticket"""
         flowcells = set()

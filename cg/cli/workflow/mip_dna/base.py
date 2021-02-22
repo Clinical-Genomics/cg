@@ -6,19 +6,13 @@ from typing import List
 
 import click
 
-from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
+
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
-from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.store import Store, models
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
@@ -54,12 +48,10 @@ def mip_dna(
     context: click.Context,
 ):
     """Rare disease DNA workflow"""
-
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return
-
-    context.obj["dna_api"] = MipAnalysisAPI(pipeline=Pipeline.MIP_DNA, config=context.obj)
+    context.obj["dna_api"] = MipAnalysisAPI(config=context.obj)
 
 
 @mip_dna.command()
@@ -68,11 +60,7 @@ def mip_dna(
 def ensure_flowcells_ondisk(context: click.Context, case_id: str):
     """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
-    case_obj: models.Family = dna_api.db.family(case_id)
-    if not case_obj:
-        LOG.error("Case %s does not exist in Status-DB", case_id)
-        raise click.Abort
-
+    dna_api.verify_case_id_in_statusdb(case_id=case_id)
     if not dna_api.all_flowcells_on_disk(case_id=case_id):
         raise FlowcellsNeededError(
             "Analysis cannot be started: all flowcells need to be on disk to run the analysis"

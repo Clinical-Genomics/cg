@@ -111,11 +111,8 @@ def run(
     """Run balsamic analysis for given CASE ID"""
     analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
     try:
-        LOG.info(f"Running analysis for {case_id}")
-        if analysis_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
-            LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
-            return
-
+        analysis_api.verify_case_id_in_statusdb(case_id)
+        analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
             analysis_type=analysis_type,

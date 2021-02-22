@@ -70,53 +70,27 @@ class MipAnalysisAPI(AnalysisAPI):
         # Validate and reformat to MIP pedigree config format
         return ConfigHandler.make_pedigree_config(data=data, pipeline=self.pipeline)
 
+    @staticmethod
+    def get_sample_data(link_obj: models.FamilySample):
+        return {
+            "sample_id": link_obj.sample.internal_id,
+            "sample_display_name": link_obj.sample.name,
+            "analysis_type": link_obj.sample.application_version.application.analysis_type,
+            "sex": link_obj.sample.sex,
+            "phenotype": link_obj.status,
+            "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
+        }
+
     def build_config(self, case_obj: models.Family, panel_bed: str = None) -> dict:
         """Fetch data for creating a MIP pedigree config file"""
-
-        def get_sample_data(link_obj):
-            return {
-                "sample_id": link_obj.sample.internal_id,
-                "sample_display_name": link_obj.sample.name,
-                "analysis_type": link_obj.sample.application_version.application.analysis_type,
-                "sex": link_obj.sample.sex,
-                "phenotype": link_obj.status,
-                "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
-            }
-
-        def config_dna_sample(self, link_obj):
-            sample_data = get_sample_data(link_obj)
-            if sample_data["analysis_type"] == "wgs":
-                sample_data["capture_kit"] = panel_bed or DEFAULT_CAPTURE_KIT
-            else:
-                sample_data["capture_kit"] = panel_bed or self.get_target_bed_from_lims(
-                    link_obj.sample.internal_id
-                )
-            if link_obj.mother:
-                sample_data["mother"] = link_obj.mother.internal_id
-            if link_obj.father:
-                sample_data["father"] = link_obj.father.internal_id
-            return sample_data
-
-        def config_rna_sample(self, link_obj):
-            sample_data = get_sample_data(link_obj)
-            if link_obj.mother:
-                sample_data["mother"] = link_obj.mother.internal_id
-            if link_obj.father:
-                sample_data["father"] = link_obj.father.internal_id
-            return sample_data
-
-        dispatch = {
-            Pipeline.MIP_DNA: config_dna_sample,
-            Pipeline.MIP_RNA: config_rna_sample,
-        }
-
-        data = {
+        return {
             "case": case_obj.internal_id,
             "default_gene_panels": case_obj.panels,
+            "samples": [
+                self.config_sample(self, link_obj=link_obj, panel_bed=panel_bed)
+                for link_obj in case_obj.links
+            ],
         }
-        config_sample = dispatch[self.pipeline]
-        data["samples"] = [config_sample(self, link_obj=link_obj) for link_obj in case_obj.links]
-        return data
 
     @staticmethod
     def name_file(
@@ -175,8 +149,9 @@ class MipAnalysisAPI(AnalysisAPI):
             files=files,
         )
 
-    def panel(self, case_obj: models.Family) -> List[str]:
+    def panel(self, case_id: str) -> List[str]:
         """Create the aggregated panel file."""
+        case_obj: models.Family = self.status_db.family(case_id)
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
         return self.scout_api.export_panels(all_panels)
 
@@ -302,3 +277,6 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
+
+    def config_sample(self, link_obj: models.FamilySample, panel_bed: str):
+        raise NotImplementedError

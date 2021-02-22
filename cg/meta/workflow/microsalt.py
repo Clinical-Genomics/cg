@@ -17,16 +17,10 @@ from typing import Any, Dict, List, Optional
 import click
 
 from cg.apps.balsamic.fastq import FastqHandler
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.store import Store, models
+from cg.store import models
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -35,41 +29,14 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(
-        self,
-        db: Store,
-        hk_api: HousekeeperAPI,
-        lims_api: LimsAPI,
-        hermes_api: HermesApi,
-        trailblazer_api: TrailblazerAPI,
-        housekeeper_api: HousekeeperAPI,
-        prepare_fastq_api: PrepareFastqAPI,
-        status_db: Store,
-        process: Process,
-        pipeline: Pipeline,
-        scout_api: ScoutAPI,
-        config: Optional[dict] = {},
-    ):
-        super().__init__(
-            housekeeper_api,
-            trailblazer_api,
-            hermes_api,
-            lims_api,
-            prepare_fastq_api,
-            status_db,
-            process,
-            pipeline,
-            scout_api,
-            config,
+    def __init__(self, config: dict, pipeline: Pipeline = Pipeline.MICROSALT):
+
+        super().__init__(pipeline, config)
+        self.root_dir = config["microsalt"]["root"]
+        self.queries_path = config["microsalt"]["queries_path"]
+        self.process = Process(
+            binary=config["microsalt"]["binary_path"], environment=config["microsalt"]["conda_env"]
         )
-        self.db = db
-        self.hk = hk_api
-        self.lims = lims_api
-        self.hermes_api = hermes_api
-        self.trailblazer_api = trailblazer_api
-        self.root_dir = config["root"]
-        self.queries_path = config["queries_path"]
-        self.process = Process(binary=config["binary_path"], environment=config["conda_env"])
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
@@ -78,7 +45,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
-        case_obj: models.Family = self.db.family(case_id)
+        case_obj: models.Family = self.status_db.family(case_id)
         order_id = case_obj.name
         return Path(
             self.root_dir, "results", "reports", "trailblazer", f"{order_id}_slurm_ids.yaml"
@@ -87,7 +54,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
-        case_obj: models.Family = self.db.family(case_id)
+        case_obj: models.Family = self.status_db.family(case_id)
         order_id = case_obj.name
         deliverables_file_path = Path(
             self.root_dir,
@@ -163,15 +130,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         Otherwise, returns all samples in given case"""
         if sample_id:
             return [
-                self.db.query(models.Sample).filter(models.Sample.internal_id == sample_id).first()
+                self.status_db.query(models.Sample)
+                .filter(models.Sample.internal_id == sample_id)
+                .first()
             ]
 
-        case_obj: models.Family = self.db.family(case_id)
+        case_obj: models.Family = self.status_db.family(case_id)
         return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
         """ Returns the comment associated with a sample stored in lims"""
-        comment = self.lims.get_sample_comment(sample_id) or ""
+        comment = self.lims_api.get_sample_comment(sample_id) or ""
         if re.match(r"\w{4}\d{2,3}", comment):
             return comment
 
@@ -209,10 +178,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Fill a dict with case config information for one sample """
 
         sample_id = sample_obj.internal_id
-        method_library_prep = self.lims.get_prep_method(sample_id)
+        method_library_prep = self.lims_api.get_prep_method(sample_id)
         if method_library_prep:
             method_library_prep, _ = method_library_prep.split(" ", 1)
-        method_sequencing = self.lims.get_sequencing_method(sample_id)
+        method_sequencing = self.lims_api.get_sequencing_method(sample_id)
         if method_sequencing:
             method_sequencing, _ = method_sequencing.split(" ", 1)
         priority = "research" if sample_obj.priority == 0 else "standard"
@@ -236,7 +205,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_project(self, sample_id: str) -> str:
         """Get LIMS project for a sample"""
-        return self.lims.get_sample_project(sample_id)
+        return self.lims_api.get_sample_project(sample_id)
 
     def get_deliverables_to_store(self) -> list:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
@@ -266,7 +235,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
         """If ticked is provided as argument, finds the corresponding case_id and returns it.
         Since sample_id is not specified, nothing is returned as sample_id"""
-        case_obj: models.Family = self.db.find_family_by_name(unique_id)
+        case_obj: models.Family = self.status_db.find_family_by_name(unique_id)
         if not case_obj:
             LOG.error("No case found for ticket number:  %s", unique_id)
             raise click.Abort
@@ -278,7 +247,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
         """
         sample_obj: models.Sample = (
-            self.db.query(models.Sample).filter(models.Sample.internal_id == unique_id).first()
+            self.status_db.query(models.Sample)
+            .filter(models.Sample.internal_id == unique_id)
+            .first()
         )
         if not sample_obj:
             LOG.error("No sample found with id: %s", unique_id)
@@ -289,7 +260,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_id_from_case(self, unique_id: str) -> (str, None):
         """If case_id is specified, validates the presence of case_id in database and returns it"""
-        case_obj: models.Family = self.db.family(unique_id)
+        case_obj: models.Family = self.status_db.family(unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
             raise click.Abort
