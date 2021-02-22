@@ -40,7 +40,7 @@ class Udf(BaseModel):
     well_position_rml: Optional[str]
     verified_organism: Optional[str]
 
-    @validator("sex")
+    @validator("sex", pre=True)
     def validate_sex(cls, value: str):
         return SEX_MAP.get(value, "unknown")
 
