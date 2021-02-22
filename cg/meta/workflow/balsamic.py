@@ -33,6 +33,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.qos = config["balsamic"]["slurm"]["qos"]
         self.bed_path = config["bed_path"]
 
+    @property
+    def threshold_reads(self):
+        return True
+
     def __configure_process_call(self, config: dict) -> Process:
         return Process(config["balsamic"]["binary_path"])
 
@@ -121,7 +125,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             FastqHandler.parse_file_data(file_obj.full_path) for file_obj in file_objs
         ]
         fastq_data = file_collection[0]
-        linked_fastq_name = FastqHandler.create(
+        linked_fastq_name = FastqHandler.name_fastq_file(
             lane=fastq_data["lane"],
             flowcell=fastq_data["flowcell"],
             sample=link_object.sample.internal_id,
@@ -402,15 +406,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return [
             case_object.internal_id
-            for case_object in self.get_cases_to_analyze(threshold=True)
+            for case_object in self.get_cases_to_analyze()
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
         ]
 
-    def get_cases_to_store(self) -> list:
+    def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
         return [
-            case_object.internal_id
+            case_object
             for case_object in self.get_running_cases()
             if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]

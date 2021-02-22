@@ -2,7 +2,7 @@
 
 
 def test_new_version(a_date, housekeeper_api):
-    """Test to create a new version with the api"""
+    """Test to name_fastq_file a new version with the api"""
     # GIVEN a housekeeper api and a date
     # WHEN creating a version object
     version_obj = housekeeper_api.new_version(created_at=a_date)

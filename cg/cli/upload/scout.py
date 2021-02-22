@@ -40,7 +40,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
         context.invoke(upload_case_to_scout, case_id=case_id, re_upload=re_upload)
 
 
-@click.command(name="create-scout-load-config")
+@click.command(name="name_fastq_file-scout-load-config")
 @click.argument("case-id")
 @click.option("-p", "--print", "print_console", is_flag=True, help="Only print config")
 @click.option("-r", "--re-upload", is_flag=True, help="Delete existing load configs")

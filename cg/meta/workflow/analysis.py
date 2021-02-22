@@ -3,8 +3,6 @@ from pathlib import Path
 from typing import Optional, List, Literal
 import datetime as dt
 
-from alchy import Query
-
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
@@ -50,6 +48,10 @@ class AnalysisAPI:
             ),
         )
         self.process = self.__configure_process_call(self.config)
+
+    @property
+    def threshold_reads(self):
+        return False
 
     def __configure_process_call(self, config: dict) -> Process:
         raise NotImplementedError
@@ -228,8 +230,10 @@ class AnalysisAPI:
         analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
         return analyses_to_clean.all()
 
-    def get_cases_to_analyze(self, threshold: bool = False) -> List[models.Family]:
-        return self.status_db.cases_to_analyze(pipeline=self.pipeline, threshold=threshold)
+    def get_cases_to_analyze(self) -> List[models.Family]:
+        return self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.threshold_reads
+        )
 
     def get_running_cases(self) -> List[models.Family]:
         return (
@@ -238,6 +242,9 @@ class AnalysisAPI:
             .filter(models.Family.data_analysis == self.pipeline)
             .all()
         )
+
+    def get_cases_to_store(self) -> List[models.Family]:
+        raise NotImplementedError
 
     def get_target_bed_from_lims(self, case_id: str) -> str:
         """Get target bed filename from lims"""

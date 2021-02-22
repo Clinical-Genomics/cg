@@ -6,7 +6,7 @@ from cg.apps.madeline.api import MadelineAPI
 
 
 def get_ind_info(columns, line):
-    """Take some madeline columns and a raw madeline line and create a dictionary"""
+    """Take some madeline columns and a raw madeline line and name_fastq_file a dictionary"""
     ind_info = dict(zip(columns, line.rstrip().split("\t")))
     return ind_info
 

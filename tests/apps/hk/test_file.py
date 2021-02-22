@@ -5,7 +5,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):
-    """Test to create a new file with the housekeeper api"""
+    """Test to name_fastq_file a new file with the housekeeper api"""
     # GIVEN a housekeeper api without files and the path to an existing file
     assert small_helpers.length_of_iterable(housekeeper_api.files()) == 0
     assert Path(bed_file).exists() is True
@@ -22,7 +22,7 @@ def test_new_file(housekeeper_api, bed_file, small_helpers):
 
 
 def test_new_file_non_existing_path(housekeeper_api):
-    """Test to create a new file with the housekeeper api"""
+    """Test to name_fastq_file a new file with the housekeeper api"""
     # GIVEN a housekeeper api without files and the path to a not existing file
     file_name = "a_file.hello"
     assert Path(file_name).exists() is False
@@ -37,7 +37,7 @@ def test_new_file_non_existing_path(housekeeper_api):
 
 
 def test_add_new_file(populated_housekeeper_api, case_id, madeline_output, small_helpers):
-    """Test to create a new file with the housekeeper api"""
+    """Test to name_fastq_file a new file with the housekeeper api"""
     # GIVEN a populated housekeeper api and the existing version of a bundle
     version_obj = populated_housekeeper_api.last_version(bundle=case_id)
     # GIVEN an existing file that is not included in the database

@@ -5,6 +5,7 @@ from subprocess import CalledProcessError
 
 import shutil
 import datetime as dt
+from typing import List
 
 from alchy import Query
 
@@ -34,6 +35,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         self.root_dir = Path(config["fluffy"]["root_dir"])
         self.fluffy_config = Path(config["fluffy"]["config_path"])
 
+    @property
+    def threshold_reads(self):
+        return False
+
     def __configure_process_call(self, config: dict) -> Process:
         return Process(binary=config["fluffy"]["binary_path"])
 
@@ -62,7 +67,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         return Path(self.root_dir, case_id, "output")
 
-    def get_deliverables_path(self, case_id: str) -> Path:
+    def get_deliverables_file_path(self, case_id: str) -> Path:
         """
         Location in working directory where deliverables file will be stored upon completion of analysis.
         Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
@@ -77,13 +82,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
 
-    def get_sample_name_from_lims_id(self, lims_id: str) -> str:
-        """
-        Retrieve sample name provided by customer for specific sample
-        """
-        LOG.debug("Setting sample name for %s", lims_id)
-        sample_obj = self.status_db.sample(lims_id)
-        return sample_obj.name
+    def get_analysis_finish_path(self, case_id: str) -> Path:
+        return Path(self.get_output_path(case_id), "analysis_finished")
 
     def link_fastq_files(self, case_id: str, dry_run: bool) -> None:
         """
@@ -203,14 +203,13 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_cases_to_store(self) -> list:
-        """
-        Get a list of cases with action 'running' and existing deliverables file.
-        """
+    def get_cases_to_store(self) -> List[models.Family]:
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper"""
         return [
-            case_obj
-            for case_obj in self.status_db.cases_to_store(pipeline=Pipeline.FLUFFY)
-            if self.get_deliverables_path(case_id=case_obj.internal_id).exists()
+            case_object
+            for case_object in self.get_running_cases()
+            if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
 
     def get_pipeline_version(self) -> str:

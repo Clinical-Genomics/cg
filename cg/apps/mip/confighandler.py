@@ -43,13 +43,14 @@ class ConfigSchema(Schema):
 
 
 class ConfigHandler:
-    def make_pedigree_config(self, data: dict, pipeline: Pipeline = None) -> dict:
+    @staticmethod
+    def make_pedigree_config(data: dict) -> dict:
         """Make a MIP pedigree config"""
-        self.validate_config(data=data, pipeline=pipeline)
-        return self.parse_pedigree_config(data)
+        ConfigHandler.validate_config(data=data)
+        return ConfigHandler.parse_pedigree_config(data)
 
     @staticmethod
-    def validate_config(data: dict, pipeline: Pipeline = None) -> dict:
+    def validate_config(data: dict) -> dict:
         """Validate MIP pedigree config format"""
         errors = ConfigSchema().validate(data)
         fatal_error = False

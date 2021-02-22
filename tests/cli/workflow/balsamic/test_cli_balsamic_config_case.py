@@ -1,4 +1,4 @@
-"""Tests cli methods to create the case config for balsamic"""
+"""Tests cli methods to name_fastq_file the case config for balsamic"""
 
 import logging
 from pathlib import Path

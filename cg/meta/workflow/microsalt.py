@@ -34,7 +34,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         super().__init__(pipeline, config)
         self.root_dir = config["microsalt"]["root"]
         self.queries_path = config["microsalt"]["queries_path"]
-        self.process = Process(
+
+    @property
+    def threshold_reads(self):
+        return False
+
+    def __configure_process_call(self, config: dict) -> Process:
+        return Process(
             binary=config["microsalt"]["binary_path"], environment=config["microsalt"]["conda_env"]
         )
 
@@ -109,7 +115,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for fastq_data in files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = FastqHandler.create(
+            linked_fastq_name = FastqHandler.name_fastq_file(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample_id,

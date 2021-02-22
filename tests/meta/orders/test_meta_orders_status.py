@@ -170,7 +170,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
         samples=fastq_status_data["samples"],
     )
 
-    # THEN it should store the samples and create a case for each sample
+    # THEN it should store the samples and name_fastq_file a case for each sample
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
     assert base_store.families().count() == 2
@@ -333,7 +333,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
         cases=mip_status_data["families"],
     )
 
-    # THEN it should create and link samples and the case
+    # THEN it should name_fastq_file and link samples and the case
     assert len(new_families) == 2
     new_case = new_families[0]
     assert new_case.name == "family1"
@@ -382,7 +382,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
         cases=mip_rna_status_data["families"],
     )
 
-    # THEN it should create and link samples and the casing
+    # THEN it should name_fastq_file and link samples and the casing
     assert len(new_cases) == 1
     new_casing = new_cases[0]
 
@@ -431,7 +431,7 @@ def test_store_external(orders_api, base_store, external_status_data):
         cases=external_status_data["families"],
     )
 
-    # THEN it should create and link samples and the case
+    # THEN it should name_fastq_file and link samples and the case
     case_obj = base_store.families().first()
     assert len(new_families) == 1
     new_case = new_families[0]
@@ -545,7 +545,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
         cases=balsamic_status_data["families"],
     )
 
-    # THEN it should create and link samples and the case
+    # THEN it should name_fastq_file and link samples and the case
     assert len(new_families) == 1
     new_case = new_families[0]
     assert new_case.name == "family1"

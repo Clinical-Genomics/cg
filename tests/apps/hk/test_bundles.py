@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 def test_new_bundle(housekeeper_api, small_helpers):
-    """Test to create a bundle with the housekeeper api"""
+    """Test to name_fastq_file a bundle with the housekeeper api"""
     # GIVEN a housekeeper api without bundles
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
     # GIVEN some bundle information

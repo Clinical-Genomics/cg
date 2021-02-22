@@ -22,9 +22,8 @@ def fluffy(context: click.Context):
     if context.invoked_subcommand is None:
         LOG.info(context.get_help())
         return None
-    config = context.obj
-    context.obj["fluffy_analysis_api"] = FluffyAnalysisAPI(
-        config=config,
+    context.obj["analysis_api"] = FluffyAnalysisAPI(
+        config=context.obj,
     )
 
 
@@ -36,12 +35,12 @@ def link(context: click.Context, case_id: str, dry_run: bool):
     """
     Link fastq files from Housekeeper to analysis folder
     """
-    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    fluffy_analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
+    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
 
 
-@fluffy.command("create-samplesheet")
+@fluffy.command("name_fastq_file-samplesheet")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_context
@@ -49,9 +48,9 @@ def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
     """
     Write modified samplesheet file to case folder
     """
-    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    fluffy_analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
+    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
 
 
 @fluffy.command()
@@ -62,19 +61,19 @@ def run(context: click.Context, case_id: str, dry_run: bool):
     """
     Run Fluffy analysis
     """
-    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    fluffy_analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
+    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
     if dry_run:
         return
     # Submit analysis for tracking in Trailblazer
     try:
-        fluffy_analysis_api.add_pending_trailblazer_analysis(case_id)
+        analysis_api.add_pending_trailblazer_analysis(case_id)
         LOG.info("Submitted case %s to Trailblazer!", case_id)
     except Exception as e:
         LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", e)
 
-    fluffy_analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
 
 @fluffy.command()
@@ -101,8 +100,8 @@ def start_available(context: click.Context, dry_run: bool):
     Start full Fluffy workflow for all cases/batches ready to be analyzed
     """
     exit_code = EXIT_SUCCESS
-    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    for case_obj in fluffy_analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.FLUFFY):
+    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    for case_obj in analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.FLUFFY):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
@@ -120,18 +119,18 @@ def store(context: click.Context, case_id: str, dry_run: bool):
     """
     Store finished analysis files in Housekeeper
     """
-    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
-    fluffy_analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if dry_run:
         LOG.info("Dry run: Would have stored deliverables for %s", case_id)
         return
     try:
-        fluffy_analysis_api.upload_bundle_housekeeper(case_id=case_id)
-        fluffy_analysis_api.upload_bundle_statusdb(case_id=case_id)
-        fluffy_analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id)
+        analysis_api.upload_bundle_statusdb(case_id=case_id)
+        analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except Exception as error:
-        fluffy_analysis_api.housekeeper_api.rollback()
-        fluffy_analysis_api.status_db.rollback()
+        analysis_api.housekeeper_api.rollback()
+        analysis_api.status_db.rollback()
         LOG.error("Error storing deliverables for case %s - %s", case_id, error.__class__.__name__)
         raise
 
@@ -143,9 +142,9 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     """
     Store bundles for all finished analyses in Housekeeper
     """
-    fluffy_analysis_api: FluffyAnalysisAPI = context.obj["fluffy_analysis_api"]
+    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
     exit_code: int = EXIT_SUCCESS
-    for case_obj in fluffy_analysis_api.get_cases_to_store():
+    for case_obj in analysis_api.get_cases_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)

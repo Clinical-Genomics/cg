@@ -13,7 +13,7 @@ def test_create_samplesheet_dry(
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
     # GIVEN a case_id that does exist in database
 
-    # WHEN running command to create samplesheet with dry-run flag
+    # WHEN running command to name_fastq_file samplesheet with dry-run flag
     result = cli_runner.invoke(
         create_samplesheet, [fluffy_case_id_existing, "--dry-run"], obj=fluffy_context
     )
@@ -69,7 +69,7 @@ def test_create_samplesheet_success(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
-    # WHEN running command to create samplesheet
+    # WHEN running command to name_fastq_file samplesheet
     result = cli_runner.invoke(create_samplesheet, [fluffy_case_id_existing], obj=fluffy_context)
 
     # THEN log text is output

@@ -1,16 +1,36 @@
-from typing import Optional
+from typing import Optional, Type
 
 from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.utils import Process
 
 
 class MipRNAAnalysisAPI(MipAnalysisAPI):
     def __init__(self, config: dict, pipeline: Pipeline = Pipeline.MIP_RNA):
         super().__init__(config, pipeline)
-        self.script = config["mip-rd-rna"]["script"]
-        self.pipeline = config["mip-rd-rna"]["pipeline"]
-        self.conda_env = config["mip-rd-rna"]["conda_env"]
-        self.root = config["mip-rd-rna"]["root"]
+
+    @property
+    def root(self) -> str:
+        return self.config["mip-rd-rna"]["root"]
+
+    @property
+    def conda_env(self) -> str:
+        return self.config["mip-rd-rna"]["conda_env"]
+
+    @property
+    def pipeline(self) -> str:
+        return self.config["mip-rd-rna"]["pipeline"]
+
+    @property
+    def script(self) -> str:
+        return self.config["mip-rd-rna"]["script"]
+
+    @property
+    def threshold_reads(self):
+        return True
+
+    def __configure_process_call(self, config: dict) -> Type[Process]:
+        return Process
 
     def config_sample(self, link_obj, panel_bed: Optional[str] = None) -> dict:
         sample_data = self.get_sample_data(link_obj)

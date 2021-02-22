@@ -17,9 +17,7 @@ def add_mip_analysis(config_stream):
     sampleinfo_data = parse_sampleinfo(sampleinfo_raw)
 
     deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
-    new_bundle = store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
-
-    return new_bundle
+    return store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
 
 def parse_config(data: dict) -> dict:
@@ -52,14 +50,12 @@ def parse_sampleinfo(data: dict) -> dict:
         dict: parsed data
     """
 
-    sampleinfo_data = {
+    return {
         "date": data["analysis_date"],
         "is_finished": data["analysisrunstatus"] == "finished",
         "case": data["case"],
         "version": data["mip_version"],
     }
-
-    return sampleinfo_data
 
 
 def _get_sample_analysis_type(data: dict) -> list:

@@ -1,17 +1,37 @@
-from typing import Optional
+from typing import Optional, Type
 
 from cg.constants import Pipeline, DEFAULT_CAPTURE_KIT
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
+from cg.utils import Process
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
     def __init__(self, config: dict, pipeline: Pipeline = Pipeline.MIP_DNA):
         super().__init__(config, pipeline)
-        self.script = config["mip-rd-dna"]["script"]
-        self.pipeline = config["mip-rd-dna"]["pipeline"]
-        self.conda_env = config["mip-rd-dna"]["conda_env"]
-        self.root = config["mip-rd-dna"]["root"]
+
+    @property
+    def root(self) -> str:
+        return self.config["mip-rd-dna"]["root"]
+
+    @property
+    def conda_env(self) -> str:
+        return self.config["mip-rd-dna"]["conda_env"]
+
+    @property
+    def pipeline(self) -> str:
+        return self.config["mip-rd-dna"]["pipeline"]
+
+    @property
+    def script(self) -> str:
+        return self.config["mip-rd-dna"]["script"]
+
+    @property
+    def threshold_reads(self):
+        return True
+
+    def __configure_process_call(self, config: dict) -> Type[Process]:
+        return Process
 
     def config_sample(self, link_obj: models.FamilySample, panel_bed: Optional[str]) -> dict:
         sample_data = self.get_sample_data(link_obj)

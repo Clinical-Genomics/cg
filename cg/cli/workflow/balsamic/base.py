@@ -1,4 +1,4 @@
-"""CLI support to create config and/or start BALSAMIC """
+"""CLI support to name_fastq_file config and/or start BALSAMIC """
 
 import logging
 
@@ -89,7 +89,7 @@ def config_case(context: click.Context, panel_bed: str, case_id: str, dry: bool)
         LOG.info(f"Creating config file for {case_id}.")
         analysis_api.config_case(case_id=case_id, panel_bed=panel_bed, dry=dry)
     except Exception as error:
-        LOG.error(f"Could not create config: {error}")
+        LOG.error(f"Could not name_fastq_file config: {error}")
         raise click.Abort()
 
 
@@ -140,7 +140,7 @@ def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry
     try:
         analysis_api.report_deliver(case_id=case_id, analysis_type=analysis_type, dry=dry)
     except BalsamicStartError as e:
-        LOG.error(f"Could not create report file: {e.message}")
+        LOG.error(f"Could not name_fastq_file report file: {e.message}")
         raise click.Abort()
 
 

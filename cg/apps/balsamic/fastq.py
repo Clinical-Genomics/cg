@@ -12,6 +12,7 @@ import re
 import shutil
 from pathlib import Path
 from typing import List
+import datetime as dt
 
 LOG = logging.getLogger(__name__)
 
@@ -76,21 +77,12 @@ class FastqHandler:
                 os.remove(file)
 
     @staticmethod
-    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
-        """Name a FASTQ file following Balsamic conventions. Naming must be
-        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
-        date = more.get("date", None)
-        index = more.get("index", None)
-        undetermined = more.get("undetermined", None)
-
-        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        date_str = date.strftime("%y%m%d") if date else "171015"
-        index = index or "XXXXXX"
-        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
+    def name_fastq_file(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
+        raise NotImplementedError
 
     @staticmethod
     def get_concatenated_name(linked_fastq_name) -> str:
-        """"create a name for the concatenated file for some read files"""
+        """"name_fastq_file a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
@@ -162,7 +154,7 @@ class FastqHandler:
 
         for fastq_data in sorted_files:
             original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = FastqHandler.create(
+            linked_fastq_name = FastqHandler.name_fastq_file(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample_id,
@@ -208,3 +200,36 @@ class FastqHandler:
             if len(matches) > 0:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             return data
+
+
+class BalsamicFastqHandler(FastqHandler):
+    @staticmethod
+    def name_fastq_file(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
+        """Name a FASTQ file following Balsamic conventions. Naming must be
+        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+        date = more.get("date", None)
+        index = more.get("index", None)
+        undetermined = more.get("undetermined", None)
+
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        date_str = date.strftime("%y%m%d") if date else "171015"
+        index = index or "XXXXXX"
+        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
+
+
+class MipFastqHandler(FastqHandler):
+    @staticmethod
+    def name_fastq_file(
+        lane: int,
+        flowcell: str,
+        sample: str,
+        read: int,
+        undetermined: bool = False,
+        date: dt.datetime = None,
+        index: str = None,
+    ) -> str:
+        """Name a FASTQ file following MIP conventions."""
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        date_str = date.strftime("%y%m%d") if date else "171015"
+        index = index or "XXXXXX"
+        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"

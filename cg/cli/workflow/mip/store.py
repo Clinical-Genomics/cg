@@ -27,23 +27,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper."""
-    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
-    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
-    context.obj["scout_api"] = ScoutAPI(context.obj)
-    context.obj["lims_api"] = LimsAPI(context.obj)
-    context.obj["status_db"] = Store(context.obj["database"])
-
-    context.obj["mip_api"] = MipAnalysisAPI(
-        db=context.obj["status_db"],
-        hk_api=context.obj["housekeeper_api"],
-        tb_api=context.obj["trailblazer_api"],
-        scout_api=context.obj["scout_api"],
-        lims_api=context.obj["lims_api"],
-        script=context.obj["mip-rd-dna"]["script"],
-        pipeline=context.obj["mip-rd-dna"]["pipeline"],
-        conda_env=context.obj["mip-rd-dna"]["conda_env"],
-        root=context.obj["mip-rd-dna"]["root"],
-    )
+    context.obj["mip_api"] = MipAnalysisAPI(context.obj)
 
 
 @store.command()

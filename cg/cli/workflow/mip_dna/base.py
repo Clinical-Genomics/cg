@@ -266,7 +266,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
     dna_api: MipAnalysisAPI = context.obj["dna_api"]
     exit_code: int = EXIT_SUCCESS
-    for case_obj in dna_api.db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
+    for case_obj in dna_api.status_db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
         if not dna_api.is_dna_only_case(case_obj):
             LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
             continue

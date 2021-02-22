@@ -3,14 +3,13 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional, Type
 
-from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.balsamic.fastq import FastqHandler, MipFastqHandler
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 
 from cg.constants import (
     COLLABORATORS,
     COMBOS,
-    DEFAULT_CAPTURE_KIT,
     MASTER_LIST,
     Pipeline,
 )
@@ -30,13 +29,22 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def __init__(self, config: dict, pipeline: Pipeline):
         super().__init__(pipeline, config)
-        self.script = config["mip-rd-dna"]["script"]
-        self.pipeline = config["mip-rd-dna"]["pipeline"]
-        self.conda_env = config["mip-rd-dna"]["conda_env"]
-        self.root = config["mip-rd-dna"]["root"]
 
-    def __configure_process_call(self, config: dict) -> Type[Process]:
-        return Process
+    @property
+    def root(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def conda_env(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def pipeline(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def script(self) -> str:
+        raise NotImplementedError
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")
@@ -59,19 +67,19 @@ class MipAnalysisAPI(AnalysisAPI):
 
         Args:
             case_obj (models.Family):
-            pipeline (str): the name of the pipeline to validate the config against
             panel_bed(str): Overrides default capture kit or bypassed getting panel BED from LIMS
 
         Returns:
             dict: config_data (MIP format)
         """
-        data = self.build_config(case_obj, panel_bed=panel_bed)
 
         # Validate and reformat to MIP pedigree config format
-        return ConfigHandler.make_pedigree_config(data=data, pipeline=self.pipeline)
+        return ConfigHandler.make_pedigree_config(
+            data=self.build_config(case_obj, panel_bed=panel_bed)
+        )
 
     @staticmethod
-    def get_sample_data(link_obj: models.FamilySample):
+    def get_sample_data(link_obj: models.FamilySample) -> dict:
         return {
             "sample_id": link_obj.sample.internal_id,
             "sample_display_name": link_obj.sample.name,
@@ -87,7 +95,7 @@ class MipAnalysisAPI(AnalysisAPI):
             "case": case_obj.internal_id,
             "default_gene_panels": case_obj.panels,
             "samples": [
-                self.config_sample(self, link_obj=link_obj, panel_bed=panel_bed)
+                self.config_sample(link_obj=link_obj, panel_bed=panel_bed)
                 for link_obj in case_obj.links
             ],
         }
@@ -114,7 +122,7 @@ class MipAnalysisAPI(AnalysisAPI):
         fastq_dir.mkdir(parents=True, exist_ok=True)
         for fastq_data in files:
             fastq_path = Path(fastq_data["path"])
-            fastq_name = FastqHandler.create(
+            fastq_name = MipFastqHandler.name_fastq_file(
                 lane=fastq_data["lane"],
                 flowcell=fastq_data["flowcell"],
                 sample=sample,
@@ -278,5 +286,5 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
-    def config_sample(self, link_obj: models.FamilySample, panel_bed: str):
+    def config_sample(self, link_obj: models.FamilySample, panel_bed: str) -> dict:
         raise NotImplementedError

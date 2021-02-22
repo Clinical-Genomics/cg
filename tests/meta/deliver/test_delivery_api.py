@@ -15,7 +15,7 @@ from tests.store_helpers import StoreHelpers
 def test_get_delivery_path(
     base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path, case_id: str
 ):
-    """Test to create the delivery path"""
+    """Test to name_fastq_file the delivery path"""
     # GIVEN a deliver api
     deliver_api = DeliverAPI(
         store=base_store,
