@@ -11,7 +11,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import datetime as dt
 
 LOG = logging.getLogger(__name__)
@@ -201,35 +201,68 @@ class FastqHandler:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             return data
 
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flowcell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = "171015",
+        index: str = "XXXXXX",
+        undetermined: Optional[str] = None,
+    ):
+        raise NotImplementedError
+
 
 class BalsamicFastqHandler(FastqHandler):
     @staticmethod
-    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
+    def create_fastq_name(
+        lane: str,
+        flowcell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = "171015",
+        index: str = "XXXXXX",
+        undetermined: Optional[str] = None,
+    ) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
-        date = more.get("date", None)
-        index = more.get("index", None)
-        undetermined = more.get("undetermined", None)
-
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        date_str = date.strftime("%y%m%d") if date else "171015"
-        index = index or "XXXXXX"
+        date_str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_R_{read}.fastq.gz"
 
 
 class MipFastqHandler(FastqHandler):
     @staticmethod
-    def create(
-        lane: int,
+    def create_fastq_name(
+        lane: str,
         flowcell: str,
         sample: str,
-        read: int,
-        undetermined: bool = False,
-        date: dt.datetime = None,
-        index: str = None,
+        read: str,
+        date: dt.datetime = "171015",
+        index: str = "XXXXXX",
+        undetermined: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following MIP conventions."""
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        date_str = date.strftime("%y%m%d") if date else "171015"
-        index = index or "XXXXXX"
+        date_str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
+
+
+class MicrosaltFastqHandler(FastqHandler):
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flowcell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = "171015",
+        index: str = "XXXXXX",
+        undetermined: Optional[str] = None,
+    ) -> str:
+        """Name a FASTQ file following usalt conventions. Naming must be
+        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+        # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
+
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"

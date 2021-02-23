@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, List, Literal
 import datetime as dt
 
+from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
@@ -37,7 +38,7 @@ class AnalysisAPI:
 
         self.housekeeper_api = HousekeeperAPI(self.config)
         self.trailblazer_api = TrailblazerAPI(self.config)
-        self.status_db = Store(self.config)
+        self.status_db = Store(self.config["database"])
         self.lims_api = LimsAPI(self.config)
         self.hermes_api = HermesApi(self.config)
         self.scout_api = ScoutAPI(self.config)
@@ -52,6 +53,10 @@ class AnalysisAPI:
     @property
     def threshold_reads(self):
         return False
+
+    @property
+    def fastq_handler(self):
+        return FastqHandler
 
     def __configure_process_call(self, config: dict) -> Process:
         raise NotImplementedError
@@ -245,6 +250,56 @@ class AnalysisAPI:
 
     def get_cases_to_store(self) -> List[models.Family]:
         raise NotImplementedError
+
+    def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
+        raise NotImplementedError
+
+    def gather_file_metadata_for_sample(self, sample_obj: models.Sample) -> List[dict]:
+        return [
+            self.fastq_handler.parse_file_data(file_obj.full_path)
+            for file_obj in self.housekeeper_api.files(
+                bundle=sample_obj.internal_id, tags=["fastq"]
+            )
+        ]
+
+    def link_fastq_files_for_sample(
+        self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
+    ) -> None:
+        """Link FASTQ files for a sample."""
+        linked_reads_paths = {1: [], 2: []}
+        concatenated_paths = {1: "", 2: ""}
+        files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
+        sorted_files = sorted(files, key=lambda k: k["path"])
+        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir.mkdir(parents=True, exist_ok=True)
+
+        for fastq_data in sorted_files:
+            fastq_path = Path(fastq_data["path"])
+            fastq_name = self.fastq_handler.create_fastq_name(
+                lane=fastq_data["lane"],
+                flowcell=fastq_data["flowcell"],
+                sample=sample_obj.internal_id,
+                read=fastq_data["read"],
+            )
+            destination_path: Path = fastq_dir / fastq_name
+            linked_reads_paths[fastq_data["read"]].append(destination_path)
+            concatenated_paths[
+                fastq_data["read"]
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+
+            if not destination_path.exists():
+                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
+                destination_path.symlink_to(fastq_path)
+            else:
+                LOG.warning(f"Destination path already exists: {destination_path}")
+
+        if not concatenate:
+            return
+
+        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        for read, value in linked_reads_paths.items():
+            self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
+            self.fastq_handler.remove_files(value)
 
     def get_target_bed_from_lims(self, case_id: str) -> str:
         """Get target bed filename from lims"""

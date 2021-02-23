@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional, Type
 
-from cg.apps.balsamic.fastq import FastqHandler, MipFastqHandler
+from cg.apps.balsamic.fastq import MipFastqHandler
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 
@@ -45,6 +45,10 @@ class MipAnalysisAPI(AnalysisAPI):
     @property
     def script(self) -> str:
         raise NotImplementedError
+
+    @property
+    def fastq_handler(self):
+        return MipFastqHandler
 
     def get_pedigree_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree.yaml")
@@ -100,62 +104,24 @@ class MipAnalysisAPI(AnalysisAPI):
             ],
         }
 
-    @staticmethod
-    def name_file(
-        lane: int,
-        flowcell: str,
-        sample: str,
-        read: int,
-        undetermined: bool = False,
-        date: dt.datetime = None,
-        index: str = None,
-    ) -> str:
-        """Name a FASTQ file following MIP conventions."""
-        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        date_str = date.strftime("%y%m%d") if date else "171015"
-        index = index or "XXXXXX"
-        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
+    def get_sample_fastq_destination_dir(
+        self, case_obj: models.Family, sample_obj: models.Sample
+    ) -> Path:
+        return Path(
+            self.root,
+            case_obj.internal_id,
+            sample_obj.application_version.application.analysis_type,
+            sample_obj.internal_id,
+            "fastq",
+        )
 
-    def link_file(self, family: str, sample: str, analysis_type: str, files: List[dict]):
-        """Link FASTQ files for a sample."""
-        fastq_dir = Path(self.root) / family / analysis_type / sample / "fastq"
-        fastq_dir.mkdir(parents=True, exist_ok=True)
-        for fastq_data in files:
-            fastq_path = Path(fastq_data["path"])
-            fastq_name = MipFastqHandler.create(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample,
-                read=fastq_data["read"],
-                more=fastq_data["more"],
-            )
-            dest_path = fastq_dir / fastq_name
-            if not dest_path.exists():
-                LOG.info(f"linking: {fastq_path} -> {dest_path}")
-                dest_path.symlink_to(fastq_path)
-            else:
-                LOG.debug(f"destination path already exists: {dest_path}")
-
-    def link_fastq_files(self, case_id: str) -> None:
+    def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
-            self.link_sample(sample=link.sample, case_id=case_id)
-
-    def link_sample(self, sample: models.Sample, case_id: str) -> None:
-        """Link FASTQ files for a sample."""
-        file_objs = self.housekeeper_api.files(bundle=sample.internal_id, tags=["fastq"])
-        files = []
-
-        for file_obj in file_objs:
-            data = FastqHandler.parse_file_data(file_obj.full_path)
-            files.append(data)
-
-        self.link_file(
-            family=case_id,
-            sample=sample.internal_id,
-            analysis_type=sample.application_version.application.analysis_type,
-            files=files,
-        )
+            self.link_fastq_files_for_sample(
+                case_obj=case_obj,
+                sample_obj=link.sample,
+            )
 
     def panel(self, case_id: str) -> List[str]:
         """Create the aggregated panel file."""

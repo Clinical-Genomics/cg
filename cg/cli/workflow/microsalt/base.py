@@ -65,7 +65,7 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: str) -> 
 
     if not microsalt_analysis_api.all_flowcells_on_disk(case_id=case_id):
         raise click.Abort
-    microsalt_analysis_api.link_samples(
+    microsalt_analysis_api.link_fastq_files(
         case_id=case_id,
         sample_id=sample_id,
     )

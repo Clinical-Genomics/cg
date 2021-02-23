@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.constants import Pipeline, DataDelivery
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -36,6 +36,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @property
     def threshold_reads(self):
         return True
+
+    @property
+    def fastq_handler(self):
+        return BalsamicFastqHandler
 
     def __configure_process_call(self, config: dict) -> Process:
         return Process(config["balsamic"]["binary_path"])
@@ -92,47 +96,30 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
+    def get_sample_fastq_destination_dir(
+        self, case_obj: models.Family, sample_obj: models.Sample
+    ) -> Path:
+        return self.get_case_path(case_obj.internal_id) / "fastq"
+
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        """Links and copies files to working directory"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        for link_object in case_obj.links:
-            LOG.info(
-                f"{link_object.sample.internal_id}: {link_object.family.data_analysis} linking FASTQ files"
+        case_obj = self.status_db.family(case_id)
+        for link in case_obj.links:
+            self.link_fastq_files_for_sample(
+                case_obj=case_obj, sample_obj=link.sample, concatenate=True
             )
-            if dry_run:
-                continue
-            file_objs = self.housekeeper_api.files(
-                bundle=link_object.sample.internal_id, tags=["fastq"]
-            )
-            file_collection: List[dict] = [
-                FastqHandler.parse_file_data(file_obj.full_path) for file_obj in file_objs
-            ]
 
-            FastqHandler.link(
-                sample_id=link_object.sample.internal_id,
-                files=file_collection,
-                working_dir=self.get_case_path(case_id) / "fastq",
-                concatenate=True,
-            )
-        LOG.info("Linking completed")
-
-    def get_fastq_path(self, link_object: models.FamilySample) -> Path:
+    def get_concatenated_fastq_path(self, link_object: models.FamilySample) -> Path:
         """Returns path to the concatenated FASTQ file of a sample"""
-        file_objs = self.housekeeper_api.files(
-            bundle=link_object.sample.internal_id, tags=["fastq"]
-        )
-        file_collection: List[dict] = [
-            FastqHandler.parse_file_data(file_obj.full_path) for file_obj in file_objs
-        ]
+        file_collection: List[dict] = self.gather_file_metadata_for_sample(link_object.sample)
         fastq_data = file_collection[0]
-        linked_fastq_name = FastqHandler.create(
+        linked_fastq_name = self.fastq_handler.create_fastq_name(
             lane=fastq_data["lane"],
             flowcell=fastq_data["flowcell"],
             sample=link_object.sample.internal_id,
             read=fastq_data["read"],
-            more={"undetermined": fastq_data["undetermined"]},
+            undetermined=fastq_data["undetermined"],
         )
-        concatenated_fastq_name: str = FastqHandler.get_concatenated_name(linked_fastq_name)
+        concatenated_fastq_name: str = self.fastq_handler.get_concatenated_name(linked_fastq_name)
         return Path(
             self.root_dir,
             link_object.family.internal_id,

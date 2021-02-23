@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 import click
 
-from cg.apps.balsamic.fastq import FastqHandler
+from cg.apps.balsamic.fastq import FastqHandler, MicrosaltFastqHandler
 from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -38,6 +38,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     @property
     def threshold_reads(self):
         return False
+
+    @property
+    def fastq_handler(self):
+        return MicrosaltFastqHandler
 
     def __configure_process_call(self, config: dict) -> Process:
         return Process(
@@ -73,24 +77,23 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
-    @staticmethod
-    def generate_fastq_name(
-        lane: str, flowcell: str, sample: str, read: str, more: dict = None
-    ) -> str:
-        """Name a FASTQ file following usalt conventions. Naming must be
-        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+    def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
+        fastq_dir = Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_id)
 
-        undetermined = more.get("undetermined", None)
-        # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
-        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
-        return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
+    def link_fastq_files(
+        self, case_id: str, sample_id: Optional[str], dry_run: bool = False
+    ) -> None:
+        case_obj = self.status_db.family(case_id)
+        samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        for sample_obj in samples:
+            self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
 
     def link_samples(self, case_id: str, sample_id: Optional[str] = None) -> None:
 
         case_dir: Path = self.get_case_fastq_path(case_id=case_id)
         case_dir.mkdir(parents=True, exist_ok=True)
 
-        samples = self.get_samples(case_id=case_id, sample_id=sample_id)
+        samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
 
         for sample in samples:
             LOG.info("%s: link FASTQ files", sample.internal_id)
