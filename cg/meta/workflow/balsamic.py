@@ -128,9 +128,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def get_sample_type(link_object: models.FamilySample) -> str:
+    def get_sample_type(sample_obj: models.Sample) -> str:
         """Returns tissue type of a sample"""
-        if link_object.sample.is_tumour:
+        if sample_obj.is_tumour:
             return "tumor"
         return "normal"
 
@@ -328,8 +328,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         sample_data = {
             link_object.sample.internal_id: {
-                "tissue_type": self.get_sample_type(link_object),
-                "concatenated_path": self.get_fastq_path(link_object).as_posix(),
+                "tissue_type": self.get_sample_type(link_object.sample),
+                "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }

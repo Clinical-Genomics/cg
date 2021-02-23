@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 import click
 
-from cg.apps.balsamic.fastq import FastqHandler, MicrosaltFastqHandler
+from cg.apps.balsamic.fastq import MicrosaltFastqHandler
 from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -77,8 +77,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
-    def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
-        fastq_dir = Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_id)
+    def get_sample_fastq_destination_dir(
+        self, case_obj: models.Family, sample_obj: models.Sample
+    ) -> Path:
+        return Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_obj.internal_id)
 
     def link_fastq_files(
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False
@@ -87,51 +89,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
-
-    def link_samples(self, case_id: str, sample_id: Optional[str] = None) -> None:
-
-        case_dir: Path = self.get_case_fastq_path(case_id=case_id)
-        case_dir.mkdir(parents=True, exist_ok=True)
-
-        samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
-
-        for sample in samples:
-            LOG.info("%s: link FASTQ files", sample.internal_id)
-            self.link_fastq(
-                case_dir,
-                sample_id=sample.internal_id,
-            )
-
-    def link_fastq(self, case_dir: Path, sample_id: str) -> None:
-        """Link FASTQ files for a sample."""
-
-        fastq_dir = Path(case_dir, sample_id)
-        fastq_dir.mkdir(exist_ok=True, parents=True)
-
-        file_objs = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
-        files = []
-
-        for file_obj in file_objs:
-            # figure out flowcell name from header
-            data = FastqHandler.parse_file_data(file_obj.full_path)
-            files.append(data)
-
-        for fastq_data in files:
-            original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = FastqHandler.create(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample_id,
-                read=fastq_data["read"],
-                more={"undetermined": fastq_data["undetermined"]},
-            )
-            linked_fastq_path = Path(fastq_dir, linked_fastq_name)
-
-            if not linked_fastq_path.exists():
-                LOG.info("Linking: %s -> %s", original_fastq_path, linked_fastq_path)
-                linked_fastq_path.symlink_to(original_fastq_path)
-            else:
-                LOG.debug("Destination path already exists: %s, skipping", linked_fastq_path)
 
     def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
         """Returns a list of samples to configure

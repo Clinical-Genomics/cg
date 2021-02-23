@@ -85,7 +85,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         return Path(self.get_output_path(case_id), "analysis_finished")
 
-    def link_fastq_files(self, case_id: str, dry_run: bool) -> None:
+    def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
         Links fastq files from Housekeeper to case working directory
         """

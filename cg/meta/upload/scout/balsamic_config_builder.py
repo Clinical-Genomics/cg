@@ -38,7 +38,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutBalsamicIndividual()
 
         self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
-        if BalsamicAnalysisAPI.get_sample_type(db_sample) == "tumor":
+        if BalsamicAnalysisAPI.get_sample_type(db_sample.sample) == "tumor":
             config_sample.phenotype = "affected"
             config_sample.sample_id = "TUMOR"
         else:
@@ -46,7 +46,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             config_sample.sample_id = "NORMAL"
 
         analysis_type: Literal["wgs", "wes", "tgs"] = BalsamicAnalysisAPI.get_application_type(
-            db_sample
+            db_sample.sample
         )
         if analysis_type == "tgs":
             analysis_type = "panel"
