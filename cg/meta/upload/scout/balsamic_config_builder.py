@@ -29,6 +29,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.load_config.vcf_cancer = self.fetch_file_from_hk(self.case_tags.snv_vcf)
         self.load_config.vcf_cancer_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
         self.include_multiqc_report()
+        self.include_coverage_qc_report()
 
     def include_sample_files(self, config_sample: ScoutBalsamicIndividual):
         LOG.info("Including BALSAMIC specific sample level files")
