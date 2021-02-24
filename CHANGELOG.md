@@ -13,6 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.1.4]
+### Added
+- delivery_report handling from BALSAMIC case import to Scout config export
+### Changed
+### Fixed
+
 ## [20.1.3]
 ### Changed
 - Genes are optional when exporting scout variants
@@ -95,7 +102,7 @@ Try to use the following format:
 ## [19.1.1]
 
 ### Fixed
-- Allow price update files for application-version import to have empty prices 
+- Allow price update files for application-version import to have empty prices
 
 
 ## [19.1.1]
@@ -128,7 +135,7 @@ Try to use the following format:
 ## [18.11.3]
 
 ### Fixed
-- Upgraded insecure cryptography dependency 
+- Upgraded insecure cryptography dependency
 
 ## [18.11.2]
 
@@ -158,7 +165,7 @@ Try to use the following format:
 ## [18.10.1]
 
 ### Added
-- Allow existing trio-samples to be re-run as single samples 
+- Allow existing trio-samples to be re-run as single samples
 
 ## [18.10.0]
 
