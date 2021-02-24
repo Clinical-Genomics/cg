@@ -1,6 +1,5 @@
 import logging
 
-from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store
 
@@ -15,7 +14,7 @@ def test_config(analysis_store: Store, analysis_api: MipAnalysisAPI):
         analysis_store.commit()
 
     # WHEN generating the MIP config for the case
-    mip_config = analysis_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_DNA)
+    mip_config = analysis_api.pedigree_config(case_obj)
 
     # THEN it should fill in values accordingly
     assert len(mip_config["samples"]) == len(case_obj.links)

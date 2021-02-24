@@ -4,7 +4,6 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-from cg.apps.balsamic.api import BalsamicAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
@@ -109,15 +108,7 @@ def balsamic_analysis_api(
     hermes_api: HermesApi,
     trailblazer_api,
 ):
-    return BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(server_config),
-        store=balsamic_clean_store,
-        housekeeper_api=housekeeper_api,
-        fastq_handler="FastqHandler",
-        lims_api="LIMS",
-        trailblazer_api=trailblazer_api,
-        hermes_api=hermes_api,
-    )
+    return BalsamicAnalysisAPI(server_config)
 
 
 @pytest.fixture

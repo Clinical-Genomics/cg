@@ -8,8 +8,6 @@ from typing import List
 import click
 from dateutil.parser import parse as parse_date
 
-from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -19,7 +17,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -37,26 +35,8 @@ def clean(context):
     context.obj["lims_api"] = LimsAPI(context.obj)
     context.obj["hermes_api"] = HermesApi(context.obj)
 
-    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(context.obj),
-        store=context.obj["status_db"],
-        housekeeper_api=context.obj["housekeeper_api"],
-        fastq_handler=FastqHandler(context.obj),
-        lims_api=context.obj["lims_api"],
-        trailblazer_api=context.obj["trailblazer_api"],
-        hermes_api=context.obj["hermes_api"],
-    )
-    context.obj["MipAnalysisAPI"] = MipAnalysisAPI(
-        db=context.obj["status_db"],
-        hk_api=context.obj["housekeeper_api"],
-        tb_api=context.obj["trailblazer_api"],
-        scout_api=context.obj["scout_api"],
-        lims_api=context.obj["lims_api"],
-        script=context.obj["mip-rd-dna"]["script"],
-        pipeline=context.obj["mip-rd-dna"]["pipeline"],
-        conda_env=context.obj["mip-rd-dna"]["conda_env"],
-        root=context.obj["mip-rd-dna"]["root"],
-    )
+    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
+    context.obj["MipAnalysisAPI"] = MipDNAAnalysisAPI(context.obj)
 
 
 @clean.command("balsamic-run-dir")

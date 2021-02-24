@@ -7,8 +7,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
@@ -769,15 +767,7 @@ def balsamic_context(
 ) -> dict:
     """context to use in cli"""
     hermes_api.process = balsamic_hermes_process
-    balsamic_analysis_api = BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(server_config),
-        store=balsamic_store,
-        housekeeper_api=balsamic_housekeeper,
-        fastq_handler=FastqHandler(server_config),
-        lims_api=balsamic_lims,
-        trailblazer_api=trailblazer_api,
-        hermes_api=hermes_api,
-    )
+    balsamic_analysis_api = BalsamicAnalysisAPI(server_config)
     return {
         "BalsamicAnalysisAPI": balsamic_analysis_api,
     }

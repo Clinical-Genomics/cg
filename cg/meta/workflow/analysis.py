@@ -1,9 +1,8 @@
 import logging
 from pathlib import Path
-from typing import Optional, List, Literal
+from typing import Optional, List
 import datetime as dt
 
-from cg.apps.balsamic.fastq import FastqHandler
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
 from cg.apps.hermes.hermes_api import HermesApi
@@ -20,6 +19,7 @@ from cg.exc import (
     DecompressionNeededError,
 )
 from cg.meta.compress import CompressAPI
+from cg.meta.workflow.fastq import FastqHandler
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 from cg.utils import Process
@@ -135,9 +135,8 @@ class AnalysisAPI:
     def get_bundle_deliverables_type(self, case_id: str) -> Optional[str]:
         return None
 
-    def get_application_type(
-        self, sample_obj: models.Sample
-    ) -> Literal["wgs", "wes", "tgs", "wts", "rml", "mic", "cov", "other"]:
+    @staticmethod
+    def get_application_type(sample_obj: models.Sample) -> str:
         analysis_type = sample_obj.application_version.application.prep_category
         if analysis_type and analysis_type.lower() in [
             "wgs",

@@ -1,7 +1,6 @@
 """This script tests the cli method to clean old balsamic run dirs"""
 import datetime as dt
 import logging
-from datetime import datetime, timedelta
 from pathlib import Path
 
 from cg.cli.clean import balsamic_past_run_dirs, balsamic_run_dir

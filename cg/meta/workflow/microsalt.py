@@ -16,10 +16,10 @@ from typing import Any, Dict, List, Optional
 
 import click
 
-from cg.apps.balsamic.fastq import MicrosaltFastqHandler
 from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.store import models
 from cg.utils import Process
 

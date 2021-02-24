@@ -4,10 +4,11 @@ from datetime import datetime
 
 import pytest
 from _pytest import tmpdir
-from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -209,21 +210,36 @@ def fixture_mip_hk_store(
     return real_housekeeper_api
 
 
+@pytest.fixture()
+def server_config(
+    mip_dna_conda_env_name: str,
+    mip_dna_pipeline: str,
+    mock_root_folder: str,
+    mip_rna_conda_env_name,
+    mip_rna_pipeline,
+    mock_mip_script,
+):
+    return {
+        "mip-rd-dna": {
+            "conda_env": mip_dna_conda_env_name,
+            "mip_config": "config.yaml",
+            "pipeline": mip_dna_pipeline,
+            "root": mock_root_folder,
+            "script": "mip",
+        },
+        "mip-rd-rna": {
+            "conda_env": mip_rna_conda_env_name,
+            "mip_config": "config.yaml",
+            "pipeline": mip_rna_pipeline,
+            "root": mock_root_folder,
+            "script": mock_mip_script,
+        },
+    }
+
+
 @pytest.fixture(scope="function", name="analysis_api")
-def fixture_analysis_api(
-    analysis_store: Store, mip_hk_store: HousekeeperAPI, scout_api: ScoutAPI
-) -> MipAnalysisAPI:
+def fixture_analysis_api(server_config) -> MipAnalysisAPI:
     """Setup an analysis API."""
 
-    analysis_api = MipAnalysisAPI(
-        db=analysis_store,
-        hk_api=mip_hk_store,
-        scout_api=scout_api,
-        tb_api=MockTB(),
-        lims_api=MockLims(),
-        script="echo",
-        pipeline="analyse rd_dna",
-        conda_env="S_mip_rd-dna",
-        root="/var/empty",
-    )
+    analysis_api = MipDNAAnalysisAPI(server_config)
     yield analysis_api

@@ -6,10 +6,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.balsamic.fastq import BalsamicFastqHandler
 from cg.constants import Pipeline, DataDelivery
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.store import models
 from cg.utils import Process
 

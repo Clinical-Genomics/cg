@@ -10,8 +10,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
 from cg.constants import Pipeline
 from cg.meta.compress.compress import CompressAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.store import Store
 from ruamel.yaml import YAML
 from tests.mocks.limsmock import MockLimsAPI
@@ -19,8 +19,7 @@ from tests.mocks.limsmock import MockLimsAPI
 
 @pytest.fixture(name="mip_lims")
 def fixture_mip_lims() -> MockLimsAPI:
-    mip_lims = MockLimsAPI({})
-    return mip_lims
+    return MockLimsAPI({})
 
 
 @pytest.fixture(name="mock_mip_script")
@@ -37,7 +36,7 @@ def mock_root_folder(project_dir: Path) -> str:
 def fixture_mip_case_ids() -> dict:
     """Dictionary of case ids, connected samples, their name and if they should fail (textbook or not)"""
 
-    case_ids = {
+    return {
         "yellowhog": {
             "textbook": True,
             "name": "F0000001",
@@ -54,8 +53,6 @@ def fixture_mip_case_ids() -> dict:
             "internal_id": "ACC00000",
         },
     }
-
-    return case_ids
 
 
 @pytest.fixture(name="mip_case_dirs")
@@ -272,38 +269,10 @@ def fixture_analysis_store_rna_case(
 
 
 @pytest.fixture(name="rna_mip_context")
-def fixture_rna_mip_context(
-    analysis_store_rna_case: Store,
-    trailblazer_api: TrailblazerAPI,
-    housekeeper_api: HousekeeperAPI,
-    mip_lims: MockLimsAPI,
-    mock_root_folder: str,
-    mock_mip_script: str,
-    mip_rna_conda_env_name: str,
-    mip_dna_conda_env_name: str,
-    mip_rna_pipeline: str,
-):
-    rna_mip_context = {
-        "rna_api": MipAnalysisAPI(
-            db=analysis_store_rna_case,
-            hk_api=housekeeper_api,
-            tb_api=trailblazer_api,
-            scout_api="scout_api",
-            lims_api=mip_lims,
-            script=mock_mip_script,
-            pipeline=mip_rna_pipeline,
-            conda_env=mip_rna_conda_env_name,
-            root=mock_root_folder,
-        ),
-        "mip-rd-rna": {
-            "conda_env": mip_rna_conda_env_name,
-            "mip_config": "config.yaml",
-            "pipeline": mip_rna_pipeline,
-            "root": mock_root_folder,
-            "script": mock_mip_script,
-        },
+def fixture_rna_mip_context(server_config):
+    return {
+        "analysis_api": MipRNAAnalysisAPI(server_config),
     }
-    return rna_mip_context
 
 
 @pytest.fixture(name="crunchy_config")
@@ -315,77 +284,58 @@ def fixture_crunchy_config(crunchy_config_dict) -> dict:
 @pytest.fixture(name="crunchy")
 def fixture_crunchy(crunchy_config_dict) -> CrunchyAPI:
     """Returns CrunchyAPI"""
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-    return crunchy_api
+    return CrunchyAPI(crunchy_config_dict)
 
 
 @pytest.fixture(name="compress")
 def fixture_compress(housekeeper_api, crunchy) -> CompressAPI:
     """Returns CompressAPI"""
-    compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy)
-    return compress_api
+    return CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy)
 
 
-@pytest.fixture(name="dna_mip_context")
-def fixture_dna_mip_context(
-    analysis_store_single_case: Store,
-    trailblazer_api: TrailblazerAPI,
-    housekeeper_api: HousekeeperAPI,
-    crunchy: CrunchyAPI,
-    compress: CompressAPI,
-    crunchy_config: dict,
-    mip_lims: MockLimsAPI,
-    mock_root_folder: str,
-    mock_mip_script: str,
-    mip_rna_conda_env_name: str,
+@pytest.fixture()
+def server_config(
     mip_dna_conda_env_name: str,
     mip_dna_pipeline: str,
+    mock_root_folder: str,
+    mip_rna_conda_env_name,
+    mip_rna_pipeline,
+    mock_mip_script,
 ):
-    dna_mip_context = {
-        "dna_api": MipAnalysisAPI(
-            db=analysis_store_single_case,
-            hk_api=housekeeper_api,
-            tb_api=trailblazer_api,
-            scout_api="scout_api",
-            lims_api=mip_lims,
-            script=mock_mip_script,
-            pipeline=mip_dna_pipeline,
-            conda_env=mip_dna_conda_env_name,
-            root=mock_root_folder,
-        ),
-        "crunchy_api": CrunchyAPI(crunchy_config),
-        "compress_api": CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy),
-        "prepare_fastq_api": PrepareFastqAPI(
-            store=analysis_store_single_case, compress_api=compress
-        ),
+    return {
         "mip-rd-dna": {
             "conda_env": mip_dna_conda_env_name,
             "mip_config": "config.yaml",
             "pipeline": mip_dna_pipeline,
             "root": mock_root_folder,
+            "script": "mip",
+        },
+        "mip-rd-rna": {
+            "conda_env": mip_rna_conda_env_name,
+            "mip_config": "config.yaml",
+            "pipeline": mip_rna_pipeline,
+            "root": mock_root_folder,
             "script": mock_mip_script,
         },
     }
-    return dna_mip_context
+
+
+@pytest.fixture(name="dna_mip_context")
+def fixture_dna_mip_context(server_config: dict):
+    return {"analysis_api": MipDNAAnalysisAPI(server_config)}
 
 
 @pytest.fixture(name="mip_store_context")
 def mip_store_context(
-    trailblazer_api, _store: Store, empty_housekeeper_api: HousekeeperAPI, mock_root_folder: Path
+    server_config,
+    trailblazer_api,
+    _store: Store,
+    empty_housekeeper_api: HousekeeperAPI,
+    mock_root_folder: Path,
 ) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
     return {
-        "mip_api": MipAnalysisAPI(
-            db=_store,
-            tb_api=trailblazer_api,
-            hk_api=empty_housekeeper_api,
-            scout_api=None,
-            lims_api=None,
-            script="None",
-            pipeline="None",
-            conda_env="None",
-            root=mock_root_folder,
-        ),
+        "mip_api": MipDNAAnalysisAPI(server_config),
         "trailblazer_api": trailblazer_api,
         "housekeeper_api": empty_housekeeper_api,
         "status_db": _store,

@@ -8,7 +8,6 @@ from cg.meta.upload.scout.scout_load_config import BalsamicLoadConfig, ScoutBals
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import models
 from housekeeper.store import models as hk_models
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -45,9 +44,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             config_sample.phenotype = "unaffected"
             config_sample.sample_id = "NORMAL"
 
-        analysis_type: Literal["wgs", "wes", "tgs"] = BalsamicAnalysisAPI.get_application_type(
-            db_sample.sample
-        )
+        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=db_sample.sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":
