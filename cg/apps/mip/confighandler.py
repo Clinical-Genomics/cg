@@ -86,11 +86,3 @@ class ConfigHandler:
             if sample_data["analysis_type"] == "wgs" and sample_data.get("capture_kit") is None:
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
         return data_copy
-
-    @staticmethod
-    def write_pedigree_config(data: dict, out_dir: Path, pedigree_config_path: Path) -> Path:
-        """Write the pedigree config to the the case dir"""
-        out_dir.mkdir(parents=True, exist_ok=True)
-        dump = ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
-        pedigree_config_path.write_text(dump)
-        return pedigree_config_path

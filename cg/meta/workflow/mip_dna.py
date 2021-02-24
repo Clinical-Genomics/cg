@@ -19,7 +19,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self.config["mip-rd-dna"]["conda_env"]
 
     @property
-    def pipeline(self) -> str:
+    def mip_pipeline(self) -> str:
         return self.config["mip-rd-dna"]["pipeline"]
 
     @property

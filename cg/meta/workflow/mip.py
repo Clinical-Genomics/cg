@@ -16,7 +16,7 @@ from cg.constants import (
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import models
-from ruamel.yaml import safe_load
+from ruamel.yaml import safe_load, ruamel
 
 from cg.utils import Process
 
@@ -39,7 +39,7 @@ class MipAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     @property
-    def pipeline(self) -> str:
+    def mip_pipeline(self) -> str:
         raise NotImplementedError
 
     @property
@@ -65,22 +65,33 @@ class MipAnalysisAPI(AnalysisAPI):
                 raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
             return bed_version.filename
 
-    def pedigree_config(self, case_obj: models.Family, panel_bed: str = None) -> dict:
+    def pedigree_config(self, case_id: str, panel_bed: str = None) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
         and converted to MIP format via trailblazer.
-
-        Args:
-            case_obj (models.Family):
-            panel_bed(str): Overrides default capture kit or bypassed getting panel BED from LIMS
-
-        Returns:
-            dict: config_data (MIP format)
         """
 
         # Validate and reformat to MIP pedigree config format
+        case_obj: models.Family = self.status_db.family(case_id)
         return ConfigHandler.make_pedigree_config(
-            data=self.build_config(case_obj, panel_bed=panel_bed)
+            data={
+                "case": case_obj.internal_id,
+                "default_gene_panels": case_obj.panels,
+                "samples": [
+                    self.config_sample(link_obj=link_obj, panel_bed=panel_bed)
+                    for link_obj in case_obj.links
+                ],
+            }
         )
+
+    def write_pedigree_config(self, case_id: str, data: dict) -> Path:
+        """Write the pedigree config to the the case dir"""
+        out_dir = self.get_case_path(case_id=case_id)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        pedigree_config_path = self.get_pedigree_config_path(case_id=case_id)
+        pedigree_config_path.write_text(
+            ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
+        )
+        return pedigree_config_path
 
     @staticmethod
     def get_sample_data(link_obj: models.FamilySample) -> dict:
@@ -91,17 +102,6 @@ class MipAnalysisAPI(AnalysisAPI):
             "sex": link_obj.sample.sex,
             "phenotype": link_obj.status,
             "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
-        }
-
-    def build_config(self, case_obj: models.Family, panel_bed: str = None) -> dict:
-        """Fetch data for creating a MIP pedigree config file"""
-        return {
-            "case": case_obj.internal_id,
-            "default_gene_panels": case_obj.panels,
-            "samples": [
-                self.config_sample(link_obj=link_obj, panel_bed=panel_bed)
-                for link_obj in case_obj.links
-            ],
         }
 
     def get_sample_fastq_destination_dir(
@@ -220,9 +220,11 @@ class MipAnalysisAPI(AnalysisAPI):
             for _link in case_obj.links
         )
 
-    @staticmethod
-    def get_skip_evaluation_flag(case_obj: models.Family) -> bool:
+    def get_skip_evaluation_flag(self, case_id: str, skip_evaluation: bool) -> bool:
         """If any sample in this case is downsampled or external, returns true"""
+        if skip_evaluation:
+            return True
+        case_obj = self.status_db.family(case_id)
         for link_obj in case_obj.links:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
