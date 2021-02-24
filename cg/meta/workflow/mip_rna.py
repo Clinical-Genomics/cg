@@ -29,8 +29,12 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
     def threshold_reads(self):
         return True
 
-    def __configure_process_call(self, config: dict) -> Type[Process]:
-        return Process
+    def __configure_process_call(self, config: dict) -> Process:
+        return Process(
+            binary=f"{self.script} {self.mip_pipeline}",
+            config=self.config["mip-rd-rna"]["mip_config"],
+            environment=self.conda_env,
+        )
 
     def config_sample(self, link_obj, panel_bed: Optional[str] = None) -> dict:
         sample_data = self.get_sample_data(link_obj)

@@ -1,7 +1,6 @@
-import datetime as dt
 import logging
 from pathlib import Path
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional
 
 from cg.apps.balsamic.fastq import MipFastqHandler
 from cg.apps.mip import parse_trending
@@ -18,7 +17,17 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import models
 from ruamel.yaml import safe_load, ruamel
 
-from cg.utils import Process
+CLI_OPTIONS = {
+    "config": {"option": "--config_file"},
+    "priority": {"option": "--slurm_quality_of_service"},
+    "email": {"option": "--email"},
+    "base": {"option": "--cluster_constant_path"},
+    "dryrun": {"option": "--dry_run_all"},
+    "gene_list": {"option": "--vcfparser_slt_fl"},
+    "max_gaussian": {"option": "--gatk_varrecal_snv_max_gau"},
+    "skip_evaluation": {"option": "--qccollect_skip_evaluation"},
+    "start_with": {"option": "--start_with_recipe"},
+}
 
 LOG = logging.getLogger(__name__)
 
@@ -235,6 +244,33 @@ class MipAnalysisAPI(AnalysisAPI):
                 )
                 return True
         return False
+
+    @staticmethod
+    def _append_value_for_non_flags(parameters: list, value) -> None:
+        """Add the value of the non boolean options to the parameters"""
+        if value is not True:
+            parameters.append(value)
+
+    @staticmethod
+    def _cg_to_mip_option_map(parameters: list, mip_key) -> None:
+        """Map cg options to MIP option syntax"""
+        parameters.append(CLI_OPTIONS[mip_key]["option"])
+
+    def run_analysis(self, case_id: str, command_args: dict, dry_run: bool) -> None:
+        parameters = [
+            case_id,
+        ]
+        for key, value in command_args.items():
+            if value:
+                self._cg_to_mip_option_map(parameters, key)
+                self._append_value_for_non_flags(parameters, value)
+
+        exit_code = self.process.run_command(dry_run=dry_run, parameters=parameters)
+        for line in self.process.stdout_lines():
+            LOG.info(line)
+        for line in self.process.stderr_lines():
+            LOG.info(line)
+        return exit_code
 
     def get_application_type(self, case_id: str) -> str:
         pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id)))

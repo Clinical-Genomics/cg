@@ -146,8 +146,7 @@ def run(
     """Run the analysis for a case"""
     dna_api: MipDNAAnalysisAPI = context.obj["dna_api"]
     dna_api.verify_case_id_in_statusdb(case_id)
-    kwargs = dict(
-        config=context.obj["mip-rd-dna"]["mip_config"],
+    command_args = dict(
         case=case_id,
         priority=priority or dna_api.get_priority_for_case(case_id),
         email=email or environ_email(),
@@ -158,7 +157,7 @@ def run(
         ),
     )
     dna_api.check_analysis_ongoing(case_id=case_id)
-    dna_api.run_command(dry_run=dry_run, **kwargs)
+    dna_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
 
     if mip_dry_run:
         LOG.info("Executed MIP in dry-run mode")
@@ -215,15 +214,8 @@ def start(
     """Start full MIP-DNA analysis workflow for a case"""
 
     dna_api: MipDNAAnalysisAPI = context.obj["dna_api"]
-    case_obj: models.Family = dna_api.status_db.family(case_id)
-    if not case_obj:
-        LOG.error("Case %s does not exist in Status-DB", case_id)
-        raise click.Abort
+    dna_api.verify_case_id_in_statusdb(case_id=case_id)
     LOG.info("Starting full MIP-DNA analysis workflow for case %s", case_id)
-
-    if dna_api.trailblazer_api.is_latest_analysis_ongoing(case_id=case_obj.internal_id):
-        LOG.warning(f"{case_obj.internal_id}: analysis status is ongoing - skipping")
-        return
     try:
         context.invoke(ensure_flowcells_ondisk, case_id=case_id)
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
@@ -251,10 +243,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
     dna_api: MipDNAAnalysisAPI = context.obj["dna_api"]
     exit_code: int = EXIT_SUCCESS
-    for case_obj in dna_api.status_db.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=0.75):
-        if not dna_api.is_dna_only_case(case_obj):
-            LOG.warning("%s: contains non-dna samples - skipping", case_obj.internal_id)
-            continue
+    for case_obj in dna_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
