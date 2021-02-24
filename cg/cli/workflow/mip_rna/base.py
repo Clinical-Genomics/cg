@@ -1,41 +1,29 @@
 """ Add CLI support to start MIP rare disease RNA"""
 
 import logging
-from pathlib import Path
 import click
-from cg.apps.environ import environ_email
+from cg.cli.workflow.mip.base import (
+    ensure_flowcells_ondisk,
+    link,
+    config_case,
+    resolve_compression,
+    run,
+)
+from cg.cli.workflow.mip.options import (
+    OPTION_DRY,
+    OPTION_PANEL_BED,
+    EMAIL_OPTION,
+    PRIORITY_OPTION,
+    START_WITH_PROGRAM,
+    ARGUMENT_CASE_ID,
+)
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.exc import FlowcellsNeededError, CgError
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.exc import FlowcellsNeededError, CgError, DecompressionNeededError
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 
 
 LOG = logging.getLogger(__name__)
-
-EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
-PRIORITY_OPTION = click.option(
-    "-p",
-    "--priority",
-    default="normal",
-    type=click.Choice(["low", "normal", "high"]),
-)
-START_WITH_PROGRAM = click.option(
-    "-sw", "--start-with", help="Start mip from this program.", type=str
-)
-OPTION_DRY = click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    default=False,
-    help="Print to console instead of executing",
-)
-OPTION_PANEL_BED = click.option(
-    "--panel-bed",
-    type=str,
-    help="Set this option to override fetching of panel name from LIMS",
-)
-
-ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
 
 
 @click.group("mip-rna")
@@ -48,34 +36,19 @@ def mip_rna(context: click.Context):
     context.obj["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
 
 
-@mip_rna.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def ensure_flowcells_ondisk(context: click.Context, case_id: str):
-    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
-    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.all_flowcells_on_disk(case_id=case_id):
-        raise FlowcellsNeededError(
-            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
-        )
-    LOG.info("All flowcells present on disk")
-
-
-@mip_rna.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def link(context: click.Context, case_id: str):
-    """Link FASTQ files for all samples in a case"""
-    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-    analysis_api.link_fastq_files(case_id=case_id)
+mip_rna.add_command(ensure_flowcells_ondisk)
+mip_rna.add_command(link)
+mip_rna.add_command(config_case)
+mip_rna.add_command(resolve_compression)
+mip_rna.add_command(run)
+mip_rna.add_command(store_cmd)
 
 
 @mip_rna.command()
 @PRIORITY_OPTION
 @EMAIL_OPTION
 @START_WITH_PROGRAM
+@OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
@@ -86,77 +59,56 @@ def link(context: click.Context, case_id: str):
     help="Skip mip qccollect evaluation",
 )
 @click.pass_context
-def run(
+def start(
     context: click.Context,
     case_id: str,
-    dry_run: bool = False,
-    email: str = None,
-    mip_dry_run: bool = False,
-    priority: str = None,
-    skip_evaluation: bool = False,
-    start_with: str = None,
+    dry_run: bool,
+    email: str,
+    mip_dry_run: bool,
+    priority: str,
+    skip_evaluation: bool,
+    start_with: str,
+    panel_bed: str,
 ):
-    """Run the analysis for a case"""
-    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-    command_args = dict(
-        case=case_id,
-        priority=priority or analysis_api.get_priority_for_case(case_id),
-        email=email or environ_email(),
-        dryrun=mip_dry_run,
-        start_with=start_with,
-        skip_evaluation=analysis_api.get_skip_evaluation_flag(
-            case_id=case_id, skip_evaluation=skip_evaluation
-        ),
-    )
-    analysis_api.check_analysis_ongoing(case_id=case_id)
-    analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
-    if mip_dry_run:
-        LOG.info("Executed MIP in dry-run mode")
-        return
-    if dry_run:
-        LOG.info("Running in dry-run mode. Analysis not submitted to Trailblazer")
-        return
-    try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-        LOG.info("MIP rd-dna run started!")
-    except CgError as e:
-        LOG.error(e.message)
-        raise click.Abort
+    """Start full MIP-DNA analysis workflow for a case"""
 
-
-@mip_rna.command("config-case")
-@OPTION_DRY
-@OPTION_PANEL_BED
-@ARGUMENT_CASE_ID
-@click.pass_context
-def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool):
-    """Generate a config for the case_id"""
-    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-    panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
-    try:
-        config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
-    except CgError as error:
-        LOG.error(error.message)
-        raise click.Abort()
-    if dry_run:
-        print(config_data)
-        return
-    out_path: Path = analysis_api.write_pedigree_config(data=config_data, case_id=case_id)
-    LOG.info(f"Config file saved to {out_path}")
-
-
-@mip_rna.command("resolve-compression")
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@click.pass_context
-def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
-    """Handles cases where decompression is needed before starting analysis"""
     analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
+    LOG.info("Starting full MIP-RNA analysis workflow for case %s", case_id)
+    try:
+        context.invoke(ensure_flowcells_ondisk, case_id=case_id)
+        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
+        context.invoke(link, case_id=case_id)
+        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        context.invoke(
+            run,
+            case_id=case_id,
+            priority=priority,
+            email=email,
+            start_with=start_with,
+            dry_run=dry_run,
+            mip_dry_run=mip_dry_run,
+            skip_evaluation=skip_evaluation,
+        )
+    except (FlowcellsNeededError, DecompressionNeededError) as e:
+        LOG.error(e.message)
 
 
-mip_rna.add_command(store_cmd)
+@mip_rna.command("start-available")
+@OPTION_DRY
+@click.pass_context
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
+    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_analyze():
+        try:
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except CgError as error:
+            LOG.error(error.message)
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred: %s", e)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
