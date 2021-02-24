@@ -105,7 +105,7 @@ crunchy:
   cram_reference: "grch37_homo_sapiens_-d5-.fasta"
   slurm:
     account: "development"
-    mail_user: "mans.magnusson@scilifelab.se"
+    mail_user: "magnus.mansson@scilifelab.se"
     conda_env: "S_crunchy"
 
 backup:
