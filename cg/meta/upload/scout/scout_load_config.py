@@ -93,7 +93,6 @@ class ScoutLoadConfig(BaseModel):
 
 class BalsamicLoadConfig(ScoutLoadConfig):
     madeline: Optional[str]
-    coverage_qc_report: Optional[str] = None
     vcf_cancer: str = None
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
