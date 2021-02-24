@@ -8,9 +8,9 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [x.x.x]
+## [20.1.3]
 ### Added
-- coverage_qc_report handling from BALSAMIC case import to Scout config export
+- delivery_report handling from BALSAMIC case import to Scout config export
 ### Changed
 ### Fixed
 

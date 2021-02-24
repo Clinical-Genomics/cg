@@ -80,12 +80,6 @@ class ScoutConfigBuilder:
         LOG.info("Include MultiQC report to case")
         self.load_config.multiqc = self.fetch_file_from_hk(self.case_tags.multiqc_report)
 
-    def include_coverage_qc_report(self) -> None:
-        LOG.info("Include Coverage QC report in case")
-        self.load_config.coverage_qc_report = self.fetch_file_from_hk(
-            self.case_tags.coverage_qc_report
-        )
-
     def include_delivery_report(self) -> None:
         LOG.info("Include delivery report to case")
         self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
