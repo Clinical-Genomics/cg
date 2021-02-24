@@ -23,7 +23,7 @@ class ExcelOrderformParser(OrderformParser):
     VALID_ORDERFORMS: List[str] = [
         "1508:22",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
         "1541:6",  # Orderform Externally sequenced samples
-        "1603:9",  # Microbial WGS
+        "1603:10",  # Microbial WGS
         "1604:10",  # Orderform Ready made libraries (RML)
         "1605:8",  # Microbial meta genomes
     ]
