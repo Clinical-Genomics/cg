@@ -311,7 +311,7 @@ def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return Path(orderforms / "1603.9.microbial.xlsx").as_posix()
+    return Path(orderforms / "1603.10.microbial.xlsx").as_posix()
 
 
 @pytest.fixture

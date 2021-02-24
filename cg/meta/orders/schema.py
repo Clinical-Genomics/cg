@@ -89,7 +89,7 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 BASE_PROJECT = {"name": str, "customer": str, "comment": OptionalNone(TypeValidatorNone(str))}
 
 MIP_SAMPLE = {
-    # Orderform 1508:18
+    # Orderform 1508
     # Order portal specific
     "internal_id": OptionalNone(TypeValidatorNone(str)),
     # "required for new samples"
@@ -134,7 +134,7 @@ MIP_SAMPLE = {
 }
 
 BALSAMIC_SAMPLE = {
-    # 1508:18 Orderform
+    # 1508 Orderform
     # Order portal specific
     "internal_id": OptionalNone(TypeValidatorNone(str)),
     # "This information is required for new samples"
@@ -194,7 +194,6 @@ MIP_RNA_SAMPLE = {
     # # "Not Required"
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
-    # Orderform 1508:19
     "from_sample": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "time_point": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
@@ -204,7 +203,7 @@ MIP_RNA_SAMPLE = {
 }
 
 EXTERNAL_SAMPLE = {
-    # Orderform 1541:6
+    # Orderform 1541
     # Order portal specific
     "internal_id": OptionalNone(TypeValidatorNone(str)),
     "data_analysis": str,
@@ -233,7 +232,7 @@ EXTERNAL_SAMPLE = {
 }
 
 FASTQ_SAMPLE = {
-    # Orderform 1508:?
+    # Orderform 1508
     # "required"
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
@@ -264,7 +263,7 @@ FASTQ_SAMPLE = {
 }
 
 RML_SAMPLE = {
-    # 1604:10 Orderform Ready made libraries (RML)
+    # 1604 Orderform Ready made libraries (RML)
     # Order portal specific
     "priority": str,
     # "This information is required"
@@ -288,19 +287,20 @@ RML_SAMPLE = {
 }
 
 MICROSALT_SAMPLE = {
-    # 1603:6 Orderform Microbial WGS
+    # 1603 Orderform Microbial WGS
     # "These fields are required"
     "name": validators.RegexValidator(NAME_PATTERN),
     "organism": str,
     "reference_genome": str,
     "data_analysis": str,
-    "data_delivery": OptionalNone(TypeValidatorNone(str)),
+    "data_delivery": str,
     "application": str,
     "require_qcok": bool,
     "elution_buffer": str,
     "extraction_method": str,
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
-    "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
+    "volume": str,
+    "priority": validators.Any(PRIORITY_OPTIONS),
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
@@ -313,7 +313,7 @@ MICROSALT_SAMPLE = {
 }
 
 METAGENOME_SAMPLE = {
-    # 1605:4 Orderform Microbial Metagenomes- 16S
+    # 1605 Orderform Microbial Metagenomes- 16S
     # "This information is required"
     "name": validators.RegexValidator(NAME_PATTERN),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),

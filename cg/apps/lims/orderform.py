@@ -16,7 +16,7 @@ SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 VALID_ORDERFORMS = [
     "1508:22",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
     "1541:6",  # Orderform Externally sequenced samples
-    "1603:9",  # Microbial WGS
+    "1603:10",  # Microbial WGS
     "1604:10",  # Orderform Ready made libraries (RML)
     "1605:8",  # Microbial metagenomes
 ]
@@ -173,7 +173,7 @@ def get_data_delivery(samples: [dict], project_type: OrderType) -> DataDelivery:
 
             if data_analysis == "fastq":
                 return DataDelivery.FASTQ
-            if data_analysis == "custom":
+            if data_analysis == "microsalt":
                 return DataDelivery.FASTQ_QC
 
         if project_type == OrderType.RML:
@@ -182,7 +182,7 @@ def get_data_delivery(samples: [dict], project_type: OrderType) -> DataDelivery:
         if project_type == OrderType.EXTERNAL:
             return DataDelivery.SCOUT
 
-        raise OrderFormError(f"Could not determine value for Data Delivery")
+        raise OrderFormError(f"Could not determine value for Data Delivery for {project_type}")
 
     if data_delivery == "analysis-+-bam":
         return DataDelivery.ANALYSIS_BAM_FILES

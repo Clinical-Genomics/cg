@@ -212,10 +212,10 @@ def test_parsing_microbial_orderform(microbial_orderform):
     # ... and collect relevant sample data
     sample_data = data["items"][0]
 
-    assert sample_data["name"] == "s1"
+    assert sample_data["name"] == "sample1"
     assert sample_data.get("internal_id") is None
     assert sample_data["organism"] == "other"
-    assert sample_data["reference_genome"] == "NC_00001"
+    assert sample_data["reference_genome"] == "NC_000001"
     assert sample_data["data_analysis"].lower() == str(Pipeline.FASTQ)
     assert sample_data["application"] == "MWRNXTR003"
     # customer on order (data)
@@ -223,7 +223,8 @@ def test_parsing_microbial_orderform(microbial_orderform):
     assert sample_data["elution_buffer"] == 'Other (specify in "Comments")'
     assert sample_data["extraction_method"] == "other (specify in comment field)"
     assert sample_data["container"] == "96 well plate"
-    assert sample_data.get("priority") in "research"
+    assert sample_data["priority"] == "research"
+    assert sample_data["volume"] == "1"
 
     assert sample_data["container_name"] == "plate1"
     assert sample_data["well_position"] == "A:1"
