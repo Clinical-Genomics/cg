@@ -13,12 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Changed
+- Use pydantic models to validate orderforms
 
 ## [20.1.4]
 ### Added
 - delivery_report handling from BALSAMIC case import to Scout config export
-### Changed
-### Fixed
 
 ## [20.1.3]
 ### Changed
@@ -29,7 +30,6 @@ Try to use the following format:
 - Refactored and removed code from cg.store.utils in backwards compatible way
 
 ## [20.1.1]
-
 ### Changed
 - Updates issue template
 
@@ -102,7 +102,7 @@ Try to use the following format:
 ## [19.1.1]
 
 ### Fixed
-- Allow price update files for application-version import to have empty prices
+- Allow price update files for application-version import to have empty prices 
 
 
 ## [19.1.1]
@@ -135,7 +135,7 @@ Try to use the following format:
 ## [18.11.3]
 
 ### Fixed
-- Upgraded insecure cryptography dependency
+- Upgraded insecure cryptography dependency 
 
 ## [18.11.2]
 
@@ -165,7 +165,7 @@ Try to use the following format:
 ## [18.10.1]
 
 ### Added
-- Allow existing trio-samples to be re-run as single samples
+- Allow existing trio-samples to be re-run as single samples 
 
 ## [18.10.0]
 
