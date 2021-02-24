@@ -122,3 +122,48 @@ def fixture_microbial_store_dummy_tag(microbial_store: Store, helpers: StoreHelp
         store=microbial_store, tag="dummy_tag", application_type="mic", is_archived=False
     )
     return microbial_store
+
+
+@pytest.fixture(name="rml_store")
+def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
+    """Populate a store with microbial application tags"""
+    active_apptags = [
+        "RMLP10R300",
+        "RMLP10S130",
+        "RMLP15R100",
+        "RMLP15R200",
+        "RMLP15R400",
+        "RMLP15R500",
+        "RMLP15R750",
+        "RMLP15R825",
+        "RMLP15S100",
+        "RMLP15S125",
+        "RMLP15S150",
+        "RMLP15S175",
+        "RMLP15S200",
+        "RMLP15S225",
+    ]
+    inactive_apptags = [
+        "RMLP15S250",
+        "RMLP15S275",
+        "RMLP15S300",
+        "RMLP15S325",
+        "RMLP15S350",
+        "RMLP15S375",
+        "RMLP15S400",
+        "RMLS05R150",
+        "RMLS05R200",
+        "RMLP05R800",
+    ]
+
+    for app_tag in active_apptags:
+        helpers.ensure_application(
+            store=store, tag=app_tag, application_type="rml", is_archived=False
+        )
+
+    for app_tag in inactive_apptags:
+        helpers.ensure_application(
+            store=store, tag=app_tag, application_type="rml", is_archived=True
+        )
+
+    return store
