@@ -14,6 +14,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.1.3]
+### Changed
+- Genes are optional when exporting scout variants
 
 ## [20.1.2]
 ### Changed
