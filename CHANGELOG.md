@@ -19,6 +19,10 @@ Try to use the following format:
 
 - Use pydantic models to validate orderforms
 
+## [20.1.3]
+### Changed
+- Genes are optional when exporting scout variants
+
 ## [20.1.2]
 
 ### Changed
