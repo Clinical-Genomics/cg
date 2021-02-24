@@ -1,9 +1,10 @@
 """Schemas for scout serialisation"""
 
-from typing import List, Optional
-from typing_extensions import Literal
-from pydantic import BaseModel, Field, validator
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, Field, validator
+from typing_extensions import Literal
 
 
 class Individual(BaseModel):
@@ -92,5 +93,5 @@ class Variant(BaseModel):
     rank_score: int
     category: str
     sub_category: str
-    genes: List[Gene]
+    genes: Optional[List[Gene]]
     samples: List[Genotype]

@@ -16,7 +16,6 @@ from cg.exc import (
 )
 from cg.meta.store import mip as store_mip
 from cg.store import Store, models
-from cg.store.utils import reset_case_action
 
 ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,
@@ -47,7 +46,7 @@ def gather_files_and_bundle_in_housekeeper(
         Pipeline.MIP_DNA: status.family(bundle_obj.name),
     }
 
-    reset_case_action(case_obj[workflow])
+    status.family(bundle_obj.name).action = None
     new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj)
     version_date = version_obj.created_at.date()
 
@@ -63,13 +62,12 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
 
     analysis_type = config_data["samples"][0]["type"]
 
-    data = {
+    return {
         "name": config_data["case"],
         "created": analysisinfo_data["date"],
         "pipeline_version": analysisinfo_data["version"],
         "files": deliverables_files(deliverables, analysis_type),
     }
-    return data
 
 
 def add_new_analysis(
@@ -114,9 +112,7 @@ def _is_deliverables_tags_missing_in_analysis_tags(
     analysis_type_tags: dict, deliverables_tag_map: tuple
 ) -> bool:
     """Check if deliverable tags are represented in analysis tags """
-    if deliverables_tag_map in analysis_type_tags:
-        return False
-    return True
+    return deliverables_tag_map not in analysis_type_tags
 
 
 def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
@@ -162,9 +158,11 @@ def get_tags(
 ) -> List[str]:
     """Get all tags for a file"""
 
-    tags = {"id": str(file["id"])}
-    tags["pipeline"] = pipeline_tags[0]
-    tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
+    tags = {
+        "id": str(file["id"]),
+        "pipeline": pipeline_tags[0],
+        "application": pipeline_tags[1] if len(pipeline_tags) > 1 else None,
+    }
 
     return _convert_deliverables_tags_to_hk_tags(
         tags, analysis_type_tags, deliverables_tag_map, is_index

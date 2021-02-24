@@ -12,7 +12,7 @@ def test_cg_workflow_mip_rna_link(cli_runner, caplog, case_id, rna_mip_context):
     # GIVEN a store with a RNA case with wts application
 
     # WHEN we run a case in dry run mode
-    result = cli_runner.invoke(link, ["-c", case_id], obj=rna_mip_context)
+    result = cli_runner.invoke(link, [case_id], obj=rna_mip_context)
 
     # THEN the command should be printed
     assert result.exit_code == 0

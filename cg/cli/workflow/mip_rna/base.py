@@ -1,6 +1,7 @@
 """ Add CLI support to start MIP rare disease RNA"""
 
 import logging
+from typing import List
 
 import click
 
@@ -9,14 +10,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.workflow.get_links import get_links
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.store import Store
-from cg.store.utils import case_exists
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
+
+ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
 
 
 @click.group("mip-rna")
@@ -43,13 +44,13 @@ def mip_rna(context: click.Context):
 
 
 @mip_rna.command()
-@click.option("-c", "--case", "case_id", help="link all samples for a case")
-@click.argument("sample_id", required=False)
+@ARGUMENT_CASE_ID
 @click.pass_context
-def link(context: click.Context, case_id: str, sample_id: str):
-    """Link FASTQ files for a sample_id"""
-    rna_api = context.obj["rna_api"]
-    link_objs = get_links(rna_api.db, case_id, sample_id)
+def link(context: click.Context, case_id: str):
+    """Link FASTQ files for all samples in a case"""
+    rna_api: MipAnalysisAPI = context.obj["rna_api"]
+    case_obj: models.Family = rna_api.db.family(case_id)
+    link_objs: List[models.FamilySample] = case_obj.links
 
     for link_obj in link_objs:
         LOG.info(
@@ -70,7 +71,7 @@ def link(context: click.Context, case_id: str, sample_id: str):
 @click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
 @click.option("-sw", "--start-with", help="start mip from this program.")
-@click.argument("case_id")
+@ARGUMENT_CASE_ID
 @click.pass_context
 def run(
     context: click.Context,
@@ -85,7 +86,7 @@ def run(
     rna_api = context.obj["rna_api"]
     case_obj = rna_api.db.family(case_id)
 
-    if not case_exists(case_obj, case_id):
+    if not case_obj:
         raise click.Abort()
     if rna_api.get_analyses_from_trailblazer(case_id=case_obj.internal_id, temp=True):
         LOG.warning("%s: analysis already running", case_obj.internal_id)
@@ -126,14 +127,14 @@ def run(
 
 @mip_rna.command("config-case")
 @click.option("-d", "--dry-run", "dry_run", is_flag=True, help="Print pedigree config to console")
-@click.argument("case_id")
+@ARGUMENT_CASE_ID
 @click.pass_context
 def config_case(context: click.Context, case_id: str, dry_run: bool = False):
     """Generate a pedigree config for the case"""
     rna_api = context.obj["rna_api"]
 
     case_obj = rna_api.db.family(case_id)
-    if not case_exists(case_obj, case_id):
+    if not case_obj:
         LOG.error("Case %s does not exist!", case_id)
         context.abort()
     config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)

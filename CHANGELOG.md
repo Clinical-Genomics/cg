@@ -13,6 +13,39 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.1.3]
+### Changed
+- Genes are optional when exporting scout variants
+
+## [20.1.2]
+### Changed
+- Refactored and removed code from cg.store.utils in backwards compatible way
+
+## [20.1.1]
+
+### Changed
+- Updates issue template
+
+## [20.1.0]
+### Fixed
+- Fix automatic decompression to also work for mixed cases
+
+## [20.0.1]
+### Changed
+- Removed old unused scripts and scripts directory
+- Moved crunchy query from store into CompressAPI
+
+
+## [20.0.0]
+
+### Changed
+- cg workflow mip-rna link command to take case as positional arg
+
+## [19.5.4]
+
+### Changed
+- Refactor ticket handling from orders API
+
 ## [19.5.3]
 ### Fixed
 - Fix dry run flag when resolving decompression state
@@ -59,11 +92,15 @@ Try to use the following format:
 ### Added
 - Cases that decompression is started for will have the action set to "analyze"
 
-
 ## [19.1.1]
+
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
 
+
+## [19.1.1]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
 
 ## [19.1.0]
 ### Added
