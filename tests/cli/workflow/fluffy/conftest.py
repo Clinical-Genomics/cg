@@ -5,7 +5,6 @@ import pytest
 from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
-from tests.mocks.process_mock import ProcessMock
 import datetime as dt
 
 
@@ -128,7 +127,8 @@ def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
 
 
 @pytest.fixture(scope="function")
-def fluffy_populated_status_db(base_store, helpers, fluffy_case_id_existing, fluffy_sample_lims_id):
+def fluffy_populated_status_db(store, helpers, fluffy_case_id_existing, fluffy_sample_lims_id):
+    base_store = store
     example_fluffy_case = helpers.add_case(
         base_store,
         internal_id=fluffy_case_id_existing,

@@ -90,15 +90,16 @@ def fixture_ticket_nr() -> int:
     return 123456
 
 
-@pytest.fixture(name="root_dir")
+@pytest.fixture(name="config_root_dir")
 def root_dir(tmpdir_factory):
     return str(tmpdir_factory.mktemp("root"))
 
 
 @pytest.fixture(name="context_config")
-def context_config(root_dir) -> dict:
+def context_config(config_root_dir) -> dict:
+    root_dir = config_root_dir
     return {
-        "database": "sqlite:///:memory:",
+        "database": "sqlite:///status",
         "madeline_exe": "madeline2",
         "bed_path": root_dir,
         "delivery_path": root_dir,
