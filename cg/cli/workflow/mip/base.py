@@ -1,10 +1,11 @@
 import logging
+from pathlib import Path
 from typing import List
 
 import click
 
 from cg.apps.environ import environ_email
-from cg.exc import CgError, FlowcellsNeededError
+from cg.exc import CgError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.cli.workflow.mip.options import (
     OPTION_DRY,
@@ -16,40 +17,6 @@ from cg.cli.workflow.mip.options import (
 )
 
 LOG = logging.getLogger(__name__)
-
-
-@click.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def ensure_flowcells_ondisk(context: click.Context, case_id: str):
-    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.all_flowcells_on_disk(case_id=case_id):
-        raise FlowcellsNeededError(
-            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
-        )
-    LOG.info("All flowcells present on disk")
-
-
-@click.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def link(context: click.Context, case_id: str):
-    """Link FASTQ files for all samples in a case"""
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-    analysis_api.link_fastq_files(case_id=case_id)
-
-
-@click.command()
-@ARGUMENT_CASE_ID
-@click.pass_context
-def link(context: click.Context, case_id: str):
-    """Link FASTQ files for all samples in a case"""
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-    analysis_api.link_fastq_files(case_id=case_id)
 
 
 @click.command("config-case")
@@ -121,7 +88,6 @@ def run(
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
-        case=case_id,
         priority=priority or analysis_api.get_priority_for_case(case_id),
         email=email or environ_email(),
         dryrun=mip_dry_run,
@@ -142,18 +108,7 @@ def run(
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
-        LOG.info("MIP rd-dna run started!")
+        LOG.info("%s run started!", analysis_api.pipeline)
     except CgError as e:
         LOG.error(e.message)
         raise click.Abort
-
-
-@click.command("resolve-compression")
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@click.pass_context
-def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
-    """Handles cases where decompression is needed before starting analysis"""
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)

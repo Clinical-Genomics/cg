@@ -5,6 +5,7 @@ import logging
 import click
 from pydantic import ValidationError
 
+from cg.cli.workflow.commands import link, resolve_compression, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import (
     BalsamicStartError,
@@ -60,21 +61,9 @@ def balsamic(context: click.Context):
     )
 
 
-@balsamic.command("link")
-@ARGUMENT_CASE_ID
-@click.pass_context
-def link(context: click.Context, case_id: str):
-    """
-    Locates FASTQ files for given CASE_ID.
-    The files are renamed, concatenated, and saved in BALSAMIC working directory
-    """
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
-    try:
-        LOG.info(f"Linking samples in case {case_id}")
-        analysis_api.link_fastq_files(case_id)
-    except Exception as error:
-        LOG.error(f"Could not link samples: {error}")
-        raise click.Abort()
+balsamic.add_command(resolve_compression)
+balsamic.add_command(link)
+balsamic.add_command(store_available)
 
 
 @balsamic.command("config-case")
@@ -195,18 +184,6 @@ def start(
     )
 
 
-@balsamic.command("store")
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@OPTION_ANALYSIS_TYPE
-@click.pass_context
-def store(context: click.Context, case_id: str, analysis_type: str, dry: bool):
-    """Generate Housekeeper report for CASE ID and store in Housekeeper"""
-    LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
-    context.invoke(store_housekeeper, case_id=case_id)
-
-
 @balsamic.command("start-available")
 @OPTION_DRY
 @click.pass_context
@@ -226,20 +203,13 @@ def start_available(context: click.Context, dry: bool):
         raise click.Abort()
 
 
-@balsamic.command("store-available")
+@balsamic.command("store")
+@ARGUMENT_CASE_ID
 @OPTION_DRY
+@OPTION_ANALYSIS_TYPE
 @click.pass_context
-def store_available(context: click.Context, dry: bool):
-    """Store bundle data for all available Balsamic cases"""
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
-    exit_code = EXIT_SUCCESS
-    for case_id in analysis_api.get_cases_to_store():
-        try:
-            context.invoke(store, case_id=case_id, dry=dry)
-        except click.Abort:
-            exit_code = EXIT_FAIL
-        except Exception as error:
-            LOG.error(f"Unspecified error occurred - {error}")
-            exit_code = EXIT_FAIL
-    if exit_code:
-        raise click.Abort()
+def store(context: click.Context, case_id: str, analysis_type: str, dry: bool):
+    """Generate Housekeeper report for CASE ID and store in Housekeeper"""
+    LOG.info(f"Storing analysis for {case_id}")
+    context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
+    context.invoke(store_housekeeper, case_id=case_id)

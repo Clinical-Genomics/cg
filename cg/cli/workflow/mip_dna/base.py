@@ -4,12 +4,10 @@ import logging
 
 import click
 
+from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
 from cg.cli.workflow.mip.base import (
-    ensure_flowcells_ondisk,
-    link,
     panel,
     config_case,
-    resolve_compression,
     run,
 )
 from cg.cli.workflow.mip.options import (
@@ -118,6 +116,3 @@ def start_available(context: click.Context, dry_run: bool = False):
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
-
-
-mip_dna.add_command(store_cmd)

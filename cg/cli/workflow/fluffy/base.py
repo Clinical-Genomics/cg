@@ -1,6 +1,7 @@
 import logging
 import click
 
+from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 
@@ -26,17 +27,10 @@ def fluffy(context: click.Context):
     )
 
 
-@fluffy.command()
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@click.pass_context
-def link(context: click.Context, case_id: str, dry_run: bool):
-    """
-    Link fastq files from Housekeeper to analysis folder
-    """
-    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    analysis_api.link_fastq_files(case_id=case_id, dry_run=dry_run)
+fluffy.add_command(link)
+fluffy.add_command(resolve_compression)
+fluffy.add_command(store)
+fluffy.add_command(store_available)
 
 
 @fluffy.command("create-samplesheet")
@@ -104,50 +98,7 @@ def start_available(context: click.Context, dry_run: bool):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
-            LOG.error(f"Exception occurred - {exception_object.__class__.__name__}")
+            LOG.error(f"Exception occurred - {exception_object}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort()
-
-
-@fluffy.command()
-@ARGUMENT_CASE_ID
-@OPTION_DRY
-@click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
-    """
-    Store finished analysis files in Housekeeper
-    """
-    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if dry_run:
-        LOG.info("Dry run: Would have stored deliverables for %s", case_id)
-        return
-    try:
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
-        analysis_api.upload_bundle_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None)
-    except Exception as error:
-        analysis_api.housekeeper_api.rollback()
-        analysis_api.status_db.rollback()
-        LOG.error("Error storing deliverables for case %s - %s", case_id, error.__class__.__name__)
-        raise
-
-
-@fluffy.command("store-available")
-@OPTION_DRY
-@click.pass_context
-def store_available(context: click.Context, dry_run: bool) -> None:
-    """
-    Store bundles for all finished analyses in Housekeeper
-    """
-    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
-    exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_store():
-        LOG.info("Storing deliverables for %s", case_obj.internal_id)
-        try:
-            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
-        except Exception:
-            exit_code = EXIT_FAIL
-    if exit_code:
-        raise click.Abort

@@ -1,12 +1,12 @@
 """ Add CLI support to start MIP rare disease RNA"""
 
 import logging
+
 import click
+
+from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
 from cg.cli.workflow.mip.base import (
-    ensure_flowcells_ondisk,
-    link,
     config_case,
-    resolve_compression,
     run,
 )
 from cg.cli.workflow.mip.options import (
@@ -18,10 +18,9 @@ from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
 )
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.exc import FlowcellsNeededError, CgError, DecompressionNeededError
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
-
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ def start(
     start_with: str,
     panel_bed: str,
 ):
-    """Start full MIP-DNA analysis workflow for a case"""
+    """Start full MIP-RNA analysis workflow for a case"""
 
     analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -98,7 +97,8 @@ def start(
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
-    """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
+    """Start full analysis workflow for all cases ready for analysis"""
+
     analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
