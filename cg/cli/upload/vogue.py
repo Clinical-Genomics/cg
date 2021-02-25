@@ -7,7 +7,6 @@ import click
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.vogue import VogueAPI
-from cg.cli.workflow.get_links import get_links
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.vogue import UploadVogueAPI
