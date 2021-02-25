@@ -190,10 +190,10 @@ class AnalysisAPI:
             case_id=case_id,
             email=environ_email(),
             type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
-            out_dir=self.get_case_path(case_id=case_id).as_posix(),
+            out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             priority=self.get_priority_for_case(case_id=case_id),
-            data_analysis=str(self.pipeline),
+            data_analysis=self.pipeline,
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:

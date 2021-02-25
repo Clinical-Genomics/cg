@@ -31,8 +31,7 @@ class TrailblazerAPI:
         signer = RSASigner.from_service_account_file(self.service_account_auth_file)
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
-        auth_header = {"Authorization": f"Bearer {jwt_token}"}
-        return auth_header
+        return {"Authorization": f"Bearer {jwt_token}"}
 
     def query_trailblazer(self, command: str, request_body: dict) -> Any:
         url = self.host + "/" + command
