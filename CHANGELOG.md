@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Fixed json orderform special cases
+
 ## [20.2.0]
 ### Changed
 - Use pydantic models to validate orderforms
