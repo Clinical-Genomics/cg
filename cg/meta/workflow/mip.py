@@ -273,7 +273,7 @@ class MipAnalysisAPI(AnalysisAPI):
         return exit_code
 
     def get_application_type(self, case_id: str) -> str:
-        pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id)))
+        pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id), "r"))
         analysis_types = {
             sample.get("analysis_type")
             for sample in pedigree_config_dict["samples"]
