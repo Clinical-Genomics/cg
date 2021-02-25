@@ -30,7 +30,8 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
     def threshold_reads(self):
         return True
 
-    def __configure_process_call(self, config: dict) -> Process:
+    @property
+    def process(self) -> Process:
         return Process(
             binary=f"{self.script} {self.mip_pipeline}",
             config=self.config["mip-rd-dna"]["mip_config"],

@@ -41,8 +41,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def fastq_handler(self):
         return BalsamicFastqHandler
 
-    def __configure_process_call(self, config: dict) -> Process:
-        return Process(config["balsamic"]["binary_path"])
+    @property
+    def process(self):
+        return Process(self.config["balsamic"]["binary_path"])
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
