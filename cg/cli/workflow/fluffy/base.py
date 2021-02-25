@@ -61,7 +61,7 @@ def run(context: click.Context, case_id: str, dry_run: bool):
         return
     # Submit analysis for tracking in Trailblazer
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id)
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         LOG.info("Submitted case %s to Trailblazer!", case_id)
     except Exception as e:
         LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", e)

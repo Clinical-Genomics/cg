@@ -193,7 +193,7 @@ class AnalysisAPI:
             out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             priority=self.get_priority_for_case(case_id=case_id),
-            data_analysis=self.pipeline,
+            data_analysis=str(self.pipeline),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
