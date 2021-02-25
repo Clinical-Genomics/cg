@@ -19,7 +19,6 @@ class JsonSample(OrderSample):
 
     @validator("well_position", pre=True)
     def convert_well(cls, value: str):
-        print("value", value)
         if not value:
             return None
         if ":" in value:
