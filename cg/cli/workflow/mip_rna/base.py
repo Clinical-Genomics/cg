@@ -35,7 +35,6 @@ def mip_rna(context: click.Context):
     context.obj["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
 
 
-mip_rna.add_command(ensure_flowcells_ondisk)
 mip_rna.add_command(link)
 mip_rna.add_command(config_case)
 mip_rna.add_command(resolve_compression)
@@ -75,7 +74,6 @@ def start(
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     LOG.info("Starting full MIP-RNA analysis workflow for case %s", case_id)
     try:
-        context.invoke(ensure_flowcells_ondisk, case_id=case_id)
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
