@@ -146,7 +146,7 @@ class TrailblazerAPI:
             "priority": priority,
             "data_analysis": str(data_analysis).upper(),
         }
-        LOG.info("Submitting job to Trailblazer: %s", request_body)
+        LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.parse_obj(response)

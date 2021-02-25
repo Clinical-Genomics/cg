@@ -142,7 +142,7 @@ class AnalysisAPI:
             "wes",
             "tgs",
         ]:
-            return analysis_type.lower
+            return analysis_type.lower()
         return "other"
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
