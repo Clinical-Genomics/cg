@@ -13,13 +13,23 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.2.0]
+### Changed
+- Use pydantic models to validate orderforms
+
+## [20.1.4]
+### Added
+- delivery_report handling from BALSAMIC case import to Scout config export
+
+## [20.1.3]
+### Changed
+- Genes are optional when exporting scout variants
 
 ## [20.1.2]
 ### Changed
 - Refactored and removed code from cg.store.utils in backwards compatible way
 
 ## [20.1.1]
-
 ### Changed
 - Updates issue template
 
