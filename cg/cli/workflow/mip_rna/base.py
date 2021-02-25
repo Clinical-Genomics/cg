@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
+from cg.cli.workflow.commands import link, resolve_compression
 from cg.cli.workflow.mip.base import (
     config_case,
     run,
