@@ -272,18 +272,6 @@ class MipAnalysisAPI(AnalysisAPI):
             LOG.info(line)
         return exit_code
 
-    def get_application_type(self, case_id: str) -> str:
-        pedigree_config_dict = safe_load(open(self.get_pedigree_config_path(case_id=case_id), "r"))
-        analysis_types = {
-            sample.get("analysis_type")
-            for sample in pedigree_config_dict["samples"]
-            if sample.get("analysis_type")
-        }
-
-        if len(analysis_types) == 1:
-            return analysis_types.pop()
-        return "wgs"
-
     def get_case_path(self, case_id: str) -> Path:
         return Path(self.root, case_id)
 
