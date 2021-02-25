@@ -11,6 +11,7 @@ import datetime as dt
 from cg.apps.vogue import VogueAPI
 from cg.cli.workflow.commands import store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.exc import CgError
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import models
 
@@ -187,24 +188,20 @@ def start(
 @microsalt.command("start-available")
 @OPTION_DRY_RUN
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool) -> None:
-    """Start whole microSALT workflow for all newly sequenced cases"""
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full analysis workflow for all cases ready for analysis"""
+
     analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.MICROSALT):
-        if dry_run:
-            LOG.info("Would have started workflow for case %s", case_obj.internal_id)
-            continue
+    for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, unique_id=case_obj.internal_id)
-        except Exception as error:
-            LOG.error(
-                "Error when starting analysis for case %s - %s",
-                case_obj.internal_id,
-                error.__class__.__name__,
-            )
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except CgError as error:
+            LOG.error(error.message)
             exit_code = EXIT_FAIL
-
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred: %s", e)
+            exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
 

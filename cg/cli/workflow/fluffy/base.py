@@ -3,6 +3,7 @@ import click
 
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
+from cg.exc import CgError
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 
 OPTION_DRY = click.option(
@@ -88,17 +89,19 @@ def start(context: click.Context, case_id: str, dry_run: bool):
 @fluffy.command("start-available")
 @OPTION_DRY
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool):
-    """
-    Start full Fluffy workflow for all cases/batches ready to be analyzed
-    """
-    exit_code = EXIT_SUCCESS
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full analysis workflow for all cases ready for analysis"""
+
     analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
-    for case_obj in analysis_api.status_db.cases_to_analyze(pipeline=Pipeline.FLUFFY):
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
-        except Exception as exception_object:
-            LOG.error(f"Exception occurred - {exception_object}")
+        except CgError as error:
+            LOG.error(error.message)
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort

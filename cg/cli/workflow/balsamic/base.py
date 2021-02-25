@@ -187,20 +187,22 @@ def start(
 @balsamic.command("start-available")
 @OPTION_DRY
 @click.pass_context
-def start_available(context: click.Context, dry: bool):
-    """Start full workflow for all available BALSAMIC cases"""
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
-    exit_code = EXIT_SUCCESS
-    for case_id in analysis_api.get_valid_cases_to_analyze():
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full workflow for all cases ready for analysis"""
+
+    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case_id, dry=dry)
-        except click.Abort:
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except CgError as error:
+            LOG.error(error.message)
             exit_code = EXIT_FAIL
-        except Exception as error:
-            LOG.error(f"Unspecified error occurred - {error}")
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
     if exit_code:
-        raise click.Abort()
+        raise click.Abort
 
 
 @balsamic.command("store")
