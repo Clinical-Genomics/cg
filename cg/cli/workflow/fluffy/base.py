@@ -2,7 +2,6 @@ import logging
 import click
 
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
-from cg.apps.environ import environ_email
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 
 OPTION_DRY = click.option(

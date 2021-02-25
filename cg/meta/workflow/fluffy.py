@@ -1,3 +1,4 @@
+from abc import ABC
 from pathlib import Path
 import logging
 import csv
@@ -28,19 +29,20 @@ class FluffyAnalysisAPI(AnalysisAPI):
         config: dict,
         pipeline: Pipeline = Pipeline.FLUFFY,
     ):
+        self.root_dir = Path(config["fluffy"]["root_dir"])
+        self.fluffy_config = Path(config["fluffy"]["config_path"])
         super().__init__(
             pipeline,
             config,
         )
-        self.root_dir = Path(config["fluffy"]["root_dir"])
-        self.fluffy_config = Path(config["fluffy"]["config_path"])
 
     @property
     def threshold_reads(self):
         return False
 
-    def __configure_process_call(self, config: dict) -> Process:
-        return Process(binary=config["fluffy"]["binary_path"])
+    @property
+    def process(self):
+        return Process(binary=self.config["fluffy"]["binary_path"])
 
     def get_samplesheet_path(self, case_id: str) -> Path:
         """

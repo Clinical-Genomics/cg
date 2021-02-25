@@ -10,7 +10,8 @@ import shutil
 from pathlib import Path
 
 import pytest
-import ruamel.yaml
+import yaml
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -87,6 +88,101 @@ def fixture_customer_id() -> str:
 def fixture_ticket_nr() -> int:
     """Return a ticket nr"""
     return 123456
+
+
+@pytest.fixture(name="root_dir")
+def root_dir(tmpdir_factory):
+    return str(tmpdir_factory.mktemp("root"))
+
+
+@pytest.fixture(name="context_config")
+def context_config(root_dir) -> dict:
+    return {
+        "database": "sqlite:///:memory:",
+        "madeline_exe": "madeline2",
+        "bed_path": root_dir,
+        "delivery_path": root_dir,
+        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "fluffy": {
+            "deploy_config": "fluffy-deploy-stage.yaml",
+            "binary_path": "fluffy",
+            "config_path": "fluffy/Config.json",
+            "root_dir": root_dir,
+        },
+        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "shipping"},
+        "housekeeper": {"database": "sqlite:///housekeeper", "root": root_dir},
+        "trailblazer": {
+            "service_account": "SERVICE",
+            "service_account_auth_file": "trailblazer-auth.json",
+            "host": "https://trailblazer-api-stage.scilifelab.se/api/v1",
+        },
+        "lims": {
+            "host": "https://clinical-lims-stage.scilifelab.se",
+            "username": "user",
+            "password": "password",
+        },
+        "chanjo": {"binary_path": "chanjo", "config_path": "chanjo-stage.yaml"},
+        "genotype": {
+            "database": "sqlite:///genotype",
+            "binary_path": "genotype",
+            "config_path": "genotype-stage.yaml",
+        },
+        "vogue": {"binary_path": "vogue", "config_path": "vogue-stage.yaml"},
+        "cgstats": {"database": "sqlite:///cgstats", "root": root_dir},
+        "scout": {
+            "binary_path": "scout",
+            "config_path": "scout-stage.yaml",
+            "deploy_config": "scout-deploy-stage.yaml",
+        },
+        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
+        "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
+        "balsamic": {
+            "root": root_dir,
+            "singularity": "BALSAMIC_release_v6.0.1.sif",
+            "reference_config": "reference.json",
+            "binary_path": "balsamic",
+            "conda_env": "S_BALSAMIC",
+            "slurm": {
+                "mail_user": "test.email@scilifelab.se",
+                "account": "development",
+                "qos": "low",
+            },
+        },
+        "microsalt": {
+            "root": root_dir,
+            "queries_path": Path(root_dir, "queries").as_posix(),
+            "binary_path": "microSALT",
+            "conda_env": "S_microSALT",
+        },
+        "mip-rd-dna": {
+            "conda_env": "S_mip9.0",
+            "mip_config": "mip9.0-dna-stage.yaml",
+            "pipeline": "analyse rd_dna",
+            "root": root_dir,
+            "script": "mip",
+        },
+        "mip-rd-rna": {
+            "conda_env": "S_mip9.0",
+            "mip_config": "mip9.0-rna-stage.yaml",
+            "pipeline": "analyse rd_rna",
+            "root": root_dir,
+            "script": "mip",
+        },
+        "mutacc-auto": {
+            "config_path": "mutacc-auto-stage.yaml",
+            "binary_path": "mutacc-auto",
+            "padding": 300,
+        },
+        "crunchy": {
+            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "slurm": {
+                "account": "development",
+                "mail_user": "magnus.mansson@scilifelab.se",
+                "conda_env": "S_crunchy",
+            },
+        },
+        "backup": {"root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"}},
+    }
 
 
 @pytest.fixture(scope="function", name="analysis_family_single_case")
@@ -482,15 +578,15 @@ def fixture_bed_file(analysis_dir) -> str:
 def fixture_files_raw(files):
     """Get some raw files"""
     return {
-        "config": ruamel.yaml.safe_load(open(files["config"])),
-        "sampleinfo": ruamel.yaml.safe_load(open(files["sampleinfo"])),
-        "qcmetrics": ruamel.yaml.safe_load(open(files["qcmetrics"])),
-        "rna_config": ruamel.yaml.safe_load(open(files["rna_config"])),
-        "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
-        "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
-        "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
-        "dna_config_store": ruamel.yaml.safe_load(open(files["dna_config_store"])),
-        "dna_sampleinfo_store": ruamel.yaml.safe_load(open(files["dna_sampleinfo_store"])),
+        "config": yaml.safe_load(open(files["config"])),
+        "sampleinfo": yaml.safe_load(open(files["sampleinfo"])),
+        "qcmetrics": yaml.safe_load(open(files["qcmetrics"])),
+        "rna_config": yaml.safe_load(open(files["rna_config"])),
+        "rna_sampleinfo": yaml.safe_load(open(files["rna_sampleinfo"])),
+        "rna_config_store": yaml.safe_load(open(files["rna_config_store"])),
+        "rna_sampleinfo_store": yaml.safe_load(open(files["rna_sampleinfo_store"])),
+        "dna_config_store": yaml.safe_load(open(files["dna_config_store"])),
+        "dna_sampleinfo_store": yaml.safe_load(open(files["dna_sampleinfo_store"])),
     }
 
 

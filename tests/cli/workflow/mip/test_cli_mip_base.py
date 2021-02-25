@@ -7,9 +7,6 @@ from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.store.api.status import StatusHandler
 
-from tests.meta.conftest import fixture_analysis_api
-from tests.meta.conftest import fixture_mip_hk_store
-
 
 def test_spring_decompression_needed_and_started(
     mocker, cli_runner, caplog, dna_mip_context, case_id, analysis_api

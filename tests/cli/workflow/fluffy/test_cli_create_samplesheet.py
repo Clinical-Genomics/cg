@@ -10,7 +10,7 @@ def test_create_samplesheet_dry(
     caplog,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # WHEN running command to create samplesheet with dry-run flag
@@ -54,7 +54,7 @@ def test_create_samplesheet_success(
     cli_runner, fluffy_case_id_existing, fluffy_context, samplesheet_fixture_path, caplog, mocker
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # GIVEN an existing samplesheet in Housekeeper

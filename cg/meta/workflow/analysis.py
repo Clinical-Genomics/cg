@@ -22,7 +22,6 @@ from cg.meta.compress import CompressAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
-from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -48,18 +47,18 @@ class AnalysisAPI:
                 hk_api=self.housekeeper_api, crunchy_api=CrunchyAPI(self.config)
             ),
         )
-        self.process = self.__configure_process_call(self.config)
 
     @property
     def threshold_reads(self):
         return False
 
     @property
+    def process(self):
+        raise NotImplementedError
+
+    @property
     def fastq_handler(self):
         return FastqHandler
-
-    def __configure_process_call(self, config: dict) -> Process:
-        raise NotImplementedError
 
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """

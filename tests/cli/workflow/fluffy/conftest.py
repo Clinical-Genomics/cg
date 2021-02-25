@@ -162,24 +162,9 @@ def fluffy_populated_housekeeper_store(
 
 @pytest.fixture(scope="function")
 def fluffy_context(
-    fluffy_populated_housekeeper_store,
-    trailblazer_api,
-    hermes_api,
-    fluffy_populated_status_db,
-    fluffy_cases_dir,
-    lims_api,
+    context_config, fluffy_populated_status_db, fluffy_populated_housekeeper_store
 ) -> dict:
-    fluffy_analysis_api = FluffyAnalysisAPI(
-        housekeeper_api=fluffy_populated_housekeeper_store,
-        trailblazer_api=trailblazer_api,
-        hermes_api=hermes_api,
-        lims_api=lims_api,
-        status_db=fluffy_populated_status_db,
-        config={
-            "root_dir": fluffy_cases_dir,
-            "binary_path": "echo",
-            "config_path": "/dev/null/config.json",
-        },
-    )
-    fluffy_analysis_api.process = ProcessMock()
-    return {"fluffy_analysis_api": fluffy_analysis_api}
+    fluffy_analysis_api = FluffyAnalysisAPI(config=context_config)
+    fluffy_analysis_api.status_db = fluffy_populated_status_db
+    fluffy_analysis_api.housekeeper_api = fluffy_populated_housekeeper_store
+    return {"analysis_api": fluffy_analysis_api}
