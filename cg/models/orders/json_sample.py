@@ -10,6 +10,7 @@ class JsonSample(OrderSample):
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: Optional[str]
+    quantity: Optional[str]
     synopsis: Optional[List[str]]
     well_position: Optional[constr(regex="[A-H]:[0-9]+")]
 
