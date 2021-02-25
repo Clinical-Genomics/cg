@@ -80,7 +80,7 @@ def start(context: click.Context, case_id: str, dry_run: bool):
     LOG.info("Starting full Fluffy workflow for %s", case_id)
     if dry_run:
         LOG.info("Dry run: the executed commands will not produce output!")
-    context.invoke(link, case_id=case_id, dry_run=dry_run)
+    context.invoke(link, case_id=case_id)
     context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
     context.invoke(run, case_id=case_id, dry_run=dry_run)
 
