@@ -141,10 +141,6 @@ class AnalysisAPI:
             "wgs",
             "wes",
             "tgs",
-            "wts",
-            "rml",
-            "mic",
-            "cov",
         ]:
             return analysis_type.lower
         return "other"
