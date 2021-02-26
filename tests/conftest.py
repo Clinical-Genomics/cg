@@ -44,6 +44,11 @@ LOG = logging.getLogger(__name__)
 # Case fixtures
 
 
+@pytest.fixture(name="slurm_account")
+def fixture_slurm_account() -> str:
+    return "super_account"
+
+
 @pytest.fixture(name="user_name")
 def fixture_user_name() -> str:
     return "Paul Anderson"
