@@ -352,8 +352,9 @@ class StatusHandler:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                data_analysis = self.if_type_is_wgs_then_we_should_do_MIP_analysis_for_MAF(
-                    application_version)
+                data_analysis = self.if_type_is_wgs_then_we_should_do_mip_dna_analysis_for_maf(
+                    application_version
+                )
                 new_case = self.status.add_case(
                     data_analysis=data_analysis,
                     data_delivery=DataDelivery(sample["data_delivery"]),
@@ -373,9 +374,13 @@ class StatusHandler:
         self.status.add_commit(new_samples)
         return new_samples
 
-    def if_type_is_wgs_then_we_should_do_MIP_analysis_for_MAF(self, application_version):
-        return Pipeline.MIP_DNA if application_version.application.prep_category \
-                                   == "wgs" else Pipeline.FASTQ
+    @staticmethod
+    def if_type_is_wgs_then_we_should_do_mip_dna_analysis_for_maf(application_version):
+        return (
+            Pipeline.MIP_DNA
+            if application_version.application.prep_category == "wgs"
+            else Pipeline.FASTQ
+        )
 
     def store_microbial_samples(
         self,
