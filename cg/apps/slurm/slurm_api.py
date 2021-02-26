@@ -4,25 +4,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from cg.apps.slurm.sbatch import SBATCH_BODY_TEMPLATE, SBATCH_HEADER_TEMPLATE
+from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
-from pydantic import BaseModel
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
-
-
-class Sbatch(BaseModel):
-    job_name: str
-    account: str
-    number_tasks: int
-    memory: int
-    log_dir: str
-    email: str
-    hours: int
-    minutes: str = "00"
-    priority: Literal["high", "low"] = "low"
-    commands: str
-    error: Optional[str]
 
 
 class SlurmAPI:
