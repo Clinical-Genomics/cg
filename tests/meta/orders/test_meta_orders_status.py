@@ -180,7 +180,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
-    assert family_link.family.data_analysis == Pipeline.FASTQ
+    assert family_link.family.data_analysis
     assert family_link.family.data_delivery == DataDelivery.FASTQ
 
 
@@ -200,6 +200,47 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
 
     # THEN the sample sex should be stored
     assert new_samples[0].sex == "male"
+
+
+def test_store_fastq_samples_wgs_to_mip(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a fastq order as wgs
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
+    base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+
+    # WHEN storing the order
+    new_samples = orders_api.store_fastq_samples(
+        customer=fastq_status_data["customer"],
+        order=fastq_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=fastq_status_data["samples"],
+    )
+
+    # THEN the analysis for the case should be MAF
+    assert new_samples[0].links[0].family.data_analysis == Pipeline.MIP_DNA
+
+
+def test_store_fastq_samples_non_wgs_as_fastq(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a fastq order as non wgs
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
+    non_wgs_prep_category = "wes"
+    assert base_store.applications(category=non_wgs_prep_category)
+    for sample in fastq_status_data["samples"]:
+        sample["application"] = base_store.applications(category=non_wgs_prep_category)[0].tag
+
+    # WHEN storing the order
+    new_samples = orders_api.store_fastq_samples(
+        customer=fastq_status_data["customer"],
+        order=fastq_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=fastq_status_data["samples"],
+    )
+
+    # THEN the analysis for the case should be fastq (none)
+    assert new_samples[0].links[0].family.data_analysis == Pipeline.FASTQ
 
 
 def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
