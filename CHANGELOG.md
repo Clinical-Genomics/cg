@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Fix bug that that prevented wgs fastq samples from being genotyped
+
 ## [20.2.0]
 ### Changed
 - Use pydantic models to validate orderforms
