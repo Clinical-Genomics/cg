@@ -145,23 +145,31 @@ class StatusHandler:
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
-            cohorts: Set[Set[str]] = set(
-                cohort for sample in case_samples for cohort in sample.get("cohorts", set())
-            )
-            if "" in cohorts:
-                cohorts.remove("")
+            cohorts: Set[str] = {
+                cohort
+                for sample in case_samples
+                for cohort in sample.get("cohorts", [])
+                if cohort
+            }
 
-            synopses: Set[Set[str]] = set(
-                synopsis for sample in case_samples for synopsis in sample.get("synopsis", set())
-            )
-            if "" in synopses:
-                synopses.remove("")
+            synopses: Set[str] = {
+                synopsis
+                for sample in case_samples
+                for synopsis in sample.get("synopsis", [])
+                if synopsis
+            }
 
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
 
-            panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
+            panels: Set[str] = {
+                panel
+                for sample in case_samples
+                for panel in sample.get("panels", [])
+                if panel
+            }
+
             case = {
                 # Set from first sample until order portal sets this on case level
                 "cohorts": cohorts,
@@ -175,7 +183,6 @@ class StatusHandler:
                         "age_at_sampling": sample.get("age_at_sampling"),
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
-                        "cohorts": list(sample.get("cohorts", "")),
                         "comment": sample.get("comment"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
@@ -185,7 +192,6 @@ class StatusHandler:
                         "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
-                        "synopsis": list(sample.get("synopsis", "")),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
