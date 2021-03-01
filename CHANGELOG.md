@@ -17,6 +17,18 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
+## [20.2.1]
+### Fixed
+- Fixed json orderform special cases
+
+## [20.2.0]
+### Changed
+- Use pydantic models to validate orderforms
+
+## [20.1.4]
+### Added
+- delivery_report handling from BALSAMIC case import to Scout config export
+
 ## [20.1.3]
 ### Changed
 - Genes are optional when exporting scout variants
