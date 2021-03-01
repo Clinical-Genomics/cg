@@ -13,8 +13,7 @@ class BalsamicAPI:
 
     def __init__(self, config: dict):
         self.binary = config["balsamic"]["binary_path"]
-        self.singularity = config["balsamic"]["singularity"]
-        self.reference_config = config["balsamic"]["reference_config"]
+        self.baslamic_cache = config["balsamic"]["balsamic_cache"]
         self.root_dir = config["balsamic"]["root"]
         self.account = config["balsamic"]["slurm"]["account"]
         self.email = config["balsamic"]["slurm"]["mail_user"]
@@ -37,8 +36,7 @@ class BalsamicAPI:
         options = self.__build_command_str(
             {
                 "--analysis-dir": self.root_dir,
-                "--singularity": self.singularity,
-                "--reference-config": self.reference_config,
+                "--balsamic-cache": self.balsamic_cache,
                 "--case-id": arguments.get("case_id"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
@@ -62,6 +60,7 @@ class BalsamicAPI:
         options = self.__build_command_str(
             {
                 "--account": self.account,
+                "--benchmark": "HERE_BE_DRAGONS",
                 "--mail-user": arguments.get("email", self.email),
                 "--qos": arguments.get("priority", self.qos),
                 "--sample-config": arguments.get("sample_config"),
