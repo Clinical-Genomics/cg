@@ -10,7 +10,6 @@ def test_cli_link_no_case(
     fluffy_case_id_non_existing,
     fluffy_sample_lims_id,
     fluffy_context,
-    fluffy_populated_status_db,
     caplog,
 ):
 

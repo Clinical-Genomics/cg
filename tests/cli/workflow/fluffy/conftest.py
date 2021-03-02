@@ -1,124 +1,15 @@
-import shutil
 from pathlib import Path
 
 import pytest
 
 from cg.apps.housekeeper.models import InputBundle
-from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 import datetime as dt
 
 
-@pytest.fixture(name="config_root_dir")
-def config_root_dir():
-    return Path("tests/fixtures/data")
-
-
-@pytest.fixture(name="database_copy_path")
-def database_copy_path(tmpdir_factory):
-    return tmpdir_factory.mktemp("database/")
-
-
-@pytest.fixture(name="fixture_db_url")
-def fixture_db_url(database_copy_path):
-    new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
-    return f"sqlite:///{new_path}"
-
-
-@pytest.fixture(name="context_config")
-def context_config(config_root_dir, fixture_db_url) -> dict:
-    root_dir = config_root_dir.as_posix()
-    return {
-        "database": fixture_db_url,
-        "madeline_exe": "madeline2",
-        "bed_path": root_dir,
-        "delivery_path": root_dir,
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
-        "fluffy": {
-            "deploy_config": "fluffy-deploy-stage.yaml",
-            "binary_path": "fluffy",
-            "config_path": "fluffy/Config.json",
-            "root_dir": root_dir,
-        },
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "shipping"},
-        "housekeeper": {"database": "sqlite:///./housekeeper", "root": root_dir},
-        "trailblazer": {
-            "service_account": "SERVICE",
-            "service_account_auth_file": "trailblazer-auth.json",
-            "host": "https://trailblazer-api-stage.scilifelab.se/api/v1",
-        },
-        "lims": {
-            "host": "https://clinical-lims-stage.scilifelab.se",
-            "username": "user",
-            "password": "password",
-        },
-        "chanjo": {"binary_path": "chanjo", "config_path": "chanjo-stage.yaml"},
-        "genotype": {
-            "database": "sqlite:///./genotype",
-            "binary_path": "genotype",
-            "config_path": "genotype-stage.yaml",
-        },
-        "vogue": {"binary_path": "vogue", "config_path": "vogue-stage.yaml"},
-        "cgstats": {"database": "sqlite:///./cgstats", "root": root_dir},
-        "scout": {
-            "binary_path": "scout",
-            "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
-        },
-        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
-        "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
-        "balsamic": {
-            "root": root_dir,
-            "singularity": "BALSAMIC_release_v6.0.1.sif",
-            "reference_config": "reference.json",
-            "binary_path": "balsamic",
-            "conda_env": "S_BALSAMIC",
-            "slurm": {
-                "mail_user": "test.email@scilifelab.se",
-                "account": "development",
-                "qos": "low",
-            },
-        },
-        "microsalt": {
-            "root": root_dir,
-            "queries_path": Path(root_dir, "queries").as_posix(),
-            "binary_path": "microSALT",
-            "conda_env": "S_microSALT",
-        },
-        "mip-rd-dna": {
-            "conda_env": "S_mip9.0",
-            "mip_config": "mip9.0-dna-stage.yaml",
-            "pipeline": "analyse rd_dna",
-            "root": root_dir,
-            "script": "mip",
-        },
-        "mip-rd-rna": {
-            "conda_env": "S_mip9.0",
-            "mip_config": "mip9.0-rna-stage.yaml",
-            "pipeline": "analyse rd_rna",
-            "root": root_dir,
-            "script": "mip",
-        },
-        "mutacc-auto": {
-            "config_path": "mutacc-auto-stage.yaml",
-            "binary_path": "mutacc-auto",
-            "padding": 300,
-        },
-        "crunchy": {
-            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
-            "slurm": {
-                "account": "development",
-                "mail_user": "magnus.mansson@scilifelab.se",
-                "conda_env": "S_crunchy",
-            },
-        },
-        "backup": {"root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"}},
-    }
-
-
 @pytest.fixture(scope="function")
 def fluffy_case_id_existing():
-    return "lovedkitten"
+    return "norwegiangiraffe"
 
 
 @pytest.fixture(scope="function")
@@ -128,12 +19,7 @@ def fluffy_case_id_non_existing():
 
 @pytest.fixture(scope="function")
 def fluffy_sample_lims_id():
-    return "ACC9001A1"
-
-
-@pytest.fixture(scope="function")
-def fluffy_dir(tmpdir_factory):
-    return tmpdir_factory.mktemp("fluffy")
+    return "ACC1234A1"
 
 
 @pytest.fixture(scope="function")
@@ -166,16 +52,15 @@ def fluffy_success_output_aberrations(tmpdir_factory):
 
 
 @pytest.fixture(scope="function")
-def samplesheet_fixture_path(config_root_dir):
-    fixture_path = Path(config_root_dir)
-    return Path(fixture_path, "SampleSheet.csv").absolute()
+def samplesheet_fixture_path():
+    return Path("tests/fixtures/data/SampleSheet.csv").absolute()
 
 
 @pytest.fixture(scope="function")
 def fastq_file_fixture_path(config_root_dir):
-    fixture_path = Path(config_root_dir, "tests/fixtures/apps/fluffy/")
+    fixture_path = Path(config_root_dir)
     fixture_path.mkdir(parents=True, exist_ok=True)
-    fixture_fastq_path = Path(fixture_path, "fluffy_fastq.fastq.gz")
+    fixture_fastq_path = Path(fixture_path, "fastq.fastq.gz")
     fixture_fastq_path.touch(exist_ok=True)
     return fixture_fastq_path
 
@@ -241,30 +126,11 @@ def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
 
 @pytest.fixture(scope="function")
 def fluffy_context(
-    context_config,
-    helpers,
-    fluffy_case_id_existing,
-    fluffy_sample_lims_id,
+    context_config, helpers, fluffy_samplesheet_bundle_data, fluffy_fastq_hk_bundle_data
 ) -> dict:
     fluffy_analysis_api = FluffyAnalysisAPI(config=context_config)
-    example_fluffy_case = helpers.add_case(
-        fluffy_analysis_api.status_db,
-        internal_id=fluffy_case_id_existing,
-        case_id=fluffy_case_id_existing,
-        data_analysis=Pipeline.FLUFFY,
+    helpers.ensure_hk_version(
+        fluffy_analysis_api.housekeeper_api, bundle_data=fluffy_samplesheet_bundle_data
     )
-    example_fluffy_sample = helpers.add_sample(
-        fluffy_analysis_api.status_db,
-        internal_id=fluffy_sample_lims_id,
-        is_tumour=False,
-        application_type="tgs",
-        reads=100,
-        sequenced_at=dt.datetime.now(),
-    )
-    helpers.add_flowcell(
-        fluffy_analysis_api.status_db, flowcell_id="flowcell", samples=[example_fluffy_sample]
-    )
-    helpers.add_relationship(
-        fluffy_analysis_api.status_db, case=example_fluffy_case, sample=example_fluffy_sample
-    )
+    helpers.ensure_hk_version(fluffy_analysis_api.housekeeper_api, fluffy_fastq_hk_bundle_data)
     return {"analysis_api": fluffy_analysis_api}

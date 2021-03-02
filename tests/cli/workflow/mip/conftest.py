@@ -6,30 +6,12 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis as tb_Analysis
 from cg.constants import Pipeline
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.store import Store
 from ruamel.yaml import YAML
-from tests.mocks.limsmock import MockLimsAPI
-
-
-@pytest.fixture(name="mip_lims")
-def fixture_mip_lims() -> MockLimsAPI:
-    return MockLimsAPI({})
-
-
-@pytest.fixture(name="mock_mip_script")
-def fixture_mock_mip_script() -> str:
-    return "echo"
-
-
-@pytest.fixture
-def mock_root_folder(project_dir: Path) -> str:
-    return Path(project_dir, "cases").as_posix()
 
 
 @pytest.fixture(name="mip_case_ids")
@@ -86,8 +68,8 @@ def fixture_mip_deliverables(
     with open(mip_deliverables_file, "r") as mip_dna_deliverables:
         mip_deliverables = yaml.load(mip_dna_deliverables)
 
-    for case in mip_case_ids:
-        if mip_case_ids[case]["textbook"]:
+    for case, value in mip_case_ids.items():
+        if value["textbook"]:
             case_specific_deliverables = copy.deepcopy(mip_deliverables)
 
             for file in case_specific_deliverables["files"]:
@@ -102,13 +84,11 @@ def fixture_mip_deliverables(
             case_deliverables_path = mip_case_dirs[case] / f"{case}_deliverables.yaml"
             with open(case_deliverables_path, "w") as fh:
                 yaml.dump(case_specific_deliverables, fh)
-            deliverables_paths[case] = case_deliverables_path
-
-        elif not mip_case_ids[case]["textbook"]:
+        else:
             case_deliverables_path = mip_case_dirs[case] / f"{case}_deliverables.yaml"
             with open(case_deliverables_path, "w") as fh:
                 yaml.dump({"files": []}, fh)
-            deliverables_paths[case] = case_deliverables_path
+        deliverables_paths[case] = case_deliverables_path
 
     return deliverables_paths
 
@@ -208,53 +188,6 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
     return _store
 
 
-@pytest.fixture(name="empty_housekeeper_api")
-def fixture_empty_housekeeper_api(real_housekeeper_api: HousekeeperAPI) -> HousekeeperAPI:
-    """Empty housekeeper for testing store in mip workflow"""
-
-    _housekeeper_api = real_housekeeper_api
-
-    return _housekeeper_api
-
-
-@pytest.fixture(name="populated_mip_tb_api")
-def fixture_populated_mip_tb_api(
-    trailblazer_api: TrailblazerAPI, mip_case_ids: dict, mip_configs: dict
-) -> TrailblazerAPI:
-    """Trailblazer api filled with mip cases"""
-
-    _tb_api = trailblazer_api
-
-    for case in mip_case_ids:
-        _tb_api.add_commit(
-            tb_Analysis(
-                family=case, status="completed", deleted=False, config_path=str(mip_configs[case])
-            )
-        )
-
-    return _tb_api
-
-
-@pytest.fixture(name="mip_rna_conda_env_name")
-def fixture_mip_rna_conda_env_name() -> str:
-    return "S_mip_rd-rna"
-
-
-@pytest.fixture(name="mip_dna_conda_env_name")
-def fixture_mip_dna_conda_env_name() -> str:
-    return "S_mip_rd-dna"
-
-
-@pytest.fixture(name="mip_dna_pipeline")
-def fixture_mip_dna_pipeline() -> str:
-    return "analyse rd_dna"
-
-
-@pytest.fixture(name="mip_rna_pipeline")
-def fixture_mip_rna_pipeline() -> str:
-    return "analyse rd_rna"
-
-
 @pytest.fixture(scope="function", name="analysis_store_rna_case")
 def fixture_analysis_store_rna_case(
     base_store: Store, analysis_family_single_case: dict, apptag_rna: str, helpers
@@ -275,68 +208,22 @@ def fixture_rna_mip_context(server_config):
     }
 
 
-@pytest.fixture(name="crunchy_config")
-def fixture_crunchy_config(crunchy_config_dict) -> dict:
-    """Returns a config for CrunchyAPI"""
-    return crunchy_config_dict
-
-
-@pytest.fixture(name="crunchy")
-def fixture_crunchy(crunchy_config_dict) -> CrunchyAPI:
-    """Returns CrunchyAPI"""
-    return CrunchyAPI(crunchy_config_dict)
-
-
 @pytest.fixture(name="compress")
 def fixture_compress(housekeeper_api, crunchy) -> CompressAPI:
     """Returns CompressAPI"""
     return CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy)
 
 
-@pytest.fixture()
-def server_config(
-    mip_dna_conda_env_name: str,
-    mip_dna_pipeline: str,
-    mock_root_folder: str,
-    mip_rna_conda_env_name,
-    mip_rna_pipeline,
-    mock_mip_script,
-):
-    return {
-        "mip-rd-dna": {
-            "conda_env": mip_dna_conda_env_name,
-            "mip_config": "config.yaml",
-            "pipeline": mip_dna_pipeline,
-            "root": mock_root_folder,
-            "script": "mip",
-        },
-        "mip-rd-rna": {
-            "conda_env": mip_rna_conda_env_name,
-            "mip_config": "config.yaml",
-            "pipeline": mip_rna_pipeline,
-            "root": mock_root_folder,
-            "script": mock_mip_script,
-        },
-    }
-
-
 @pytest.fixture(name="dna_mip_context")
-def fixture_dna_mip_context(server_config: dict):
-    return {"analysis_api": MipDNAAnalysisAPI(server_config)}
+def fixture_dna_mip_context(context_config: dict):
+    return {"analysis_api": MipDNAAnalysisAPI(context_config)}
 
 
 @pytest.fixture(name="mip_store_context")
 def mip_store_context(
-    server_config,
-    trailblazer_api,
-    _store: Store,
-    empty_housekeeper_api: HousekeeperAPI,
-    mock_root_folder: Path,
+    context_config,
 ) -> dict:
     """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
     return {
-        "mip_api": MipDNAAnalysisAPI(server_config),
-        "trailblazer_api": trailblazer_api,
-        "housekeeper_api": empty_housekeeper_api,
-        "status_db": _store,
+        "analysis_api": MipDNAAnalysisAPI(context_config),
     }

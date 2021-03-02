@@ -1,6 +1,7 @@
 """This script tests the cli mip store functions"""
 import logging
 
+from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.cli.workflow.mip.store import analysis, completed
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -56,50 +57,70 @@ def test_store_analysis(
 
 
 def test_store_completed_good_cases(
-    cli_runner: CliRunner, mip_store_context: dict, mip_case_ids: dict, mip_configs, helpers, caplog
+    cli_runner: CliRunner,
+    mocker,
+    mip_store_context: dict,
+    context_config,
+    mip_case_ids: dict,
+    mip_configs,
+    helpers,
+    caplog,
 ):
     """Test if store completed stores function"""
 
-    with caplog.at_level("INFO"):
-        trailblazer_api = mip_store_context["trailblazer_api"]
-        analyses = [
-            {
-                "id": 1,
-                "family": "yellowhog",
-                "config_path": mip_configs["yellowhog"].as_posix(),
-                "status": "completed",
-            },
-            {
-                "id": 2,
-                "family": "bluezebra",
-                "config_path": mip_configs["bluezebra"].as_posix(),
-                "status": "completed",
-            },
-            {
-                "id": 3,
-                "family": "purplesnail",
-                "config_path": mip_configs["purplesnail"].as_posix(),
-                "status": "completed",
-            },
-        ]
-        for analysis in analyses:
-            trailblazer_api.ensure_get_latest_analysis_response(analysis_dict=analysis)
+    caplog.set_level("INFO")
 
-        status_db = mip_store_context["status_db"]
-        for case_id in ["yellowhog", "bluezebra", "purplesnail"]:
-            case_obj = status_db.family(case_id)
-            if case_obj:
-                case_obj.action = "running"
-                status_db.commit()
-            else:
-                helpers.add_case(store=status_db, internal_id=case_id, action="running")
+    mocker.patch.object(TrailblazerAPI, "get_latest_analysis")
+    TrailblazerAPI.get_latest_analysis(
+        case_id="yellowhog"
+    ).return_value = TrailblazerAnalysis.parse_obj(
+        {
+            "id": 1,
+            "family": "yellowhog",
+            "config_path": mip_configs["yellowhog"].as_posix(),
+            "status": "completed",
+        }
+    )
 
-        # WHEN we run store all completed cases
-        result = cli_runner.invoke(completed, obj=mip_store_context)
-        # THEN some cases should be added and some should fail
-        assert "new bundle added: yellowhog" in caplog.text
-        assert "Case storage failed: purplesnail" in caplog.text
-        assert "new bundle added: bluezebra" in caplog.text
-        assert "Included files in Housekeeper" in caplog.text
-        # THEN the command should have an EXIT_FAIL code
-        assert result.exit_code == EXIT_FAIL
+    mocker.patch.object(TrailblazerAPI, "get_latest_analysis")
+    TrailblazerAPI.get_latest_analysis(
+        case_id="bluezebra"
+    ).return_value = TrailblazerAnalysis.parse_obj(
+        {
+            "id": 2,
+            "family": "bluezebra",
+            "config_path": mip_configs["bluezebra"].as_posix(),
+            "status": "completed",
+        }
+    )
+
+    mocker.patch.object(TrailblazerAPI, "get_latest_analysis")
+    TrailblazerAPI.get_latest_analysis(
+        case_id="purplesnail"
+    ).return_value = TrailblazerAnalysis.parse_obj(
+        {
+            "id": 3,
+            "family": "purplesnail",
+            "config_path": mip_configs["purplesnail"].as_posix(),
+            "status": "completed",
+        }
+    )
+
+    status_db = mip_store_context["analysis_api"].status_db
+    for case_id in ["yellowhog", "bluezebra", "purplesnail"]:
+        case_obj = status_db.family(case_id)
+        if case_obj:
+            case_obj.action = "running"
+            status_db.commit()
+        else:
+            helpers.add_case(store=status_db, internal_id=case_id, action="running")
+
+    # WHEN we run store all completed cases
+    result = cli_runner.invoke(completed, obj=mip_store_context)
+    # THEN some cases should be added and some should fail
+    assert "new bundle added: yellowhog" in caplog.text
+    assert "Case storage failed: purplesnail" in caplog.text
+    assert "new bundle added: bluezebra" in caplog.text
+    assert "Included files in Housekeeper" in caplog.text
+    # THEN the command should have an EXIT_FAIL code
+    assert result.exit_code == EXIT_FAIL

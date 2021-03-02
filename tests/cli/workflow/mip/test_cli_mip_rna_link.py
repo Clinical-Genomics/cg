@@ -16,4 +16,4 @@ def test_cg_workflow_mip_rna_link(cli_runner, caplog, case_id, rna_mip_context):
 
     # THEN the command should be printed
     assert result.exit_code == 0
-    assert f"mip-rna link" in caplog.text
+    assert "Linking" in caplog.text

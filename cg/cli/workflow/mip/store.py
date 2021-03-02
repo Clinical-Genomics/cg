@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper."""
-    context.obj["mip_api"] = MipAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = MipAnalysisAPI(context.obj)
 
 
 @store.command()
@@ -35,7 +35,7 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    mip_api = context.obj["mip_api"]
+    mip_api: MipAnalysisAPI = context.obj["analysis_api"]
 
     exit_code = EXIT_SUCCESS
     if not config_stream:
@@ -45,11 +45,11 @@ def analysis(context, config_stream):
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
             config_stream,
-            mip_api.hk,
-            mip_api.db,
+            mip_api.housekeeper_api,
+            mip_api.status_db,
             workflow=Pipeline.MIP_DNA,
         )
-        mip_api.db.add_commit(new_analysis)
+        mip_api.status_db.add_commit(new_analysis)
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
@@ -72,12 +72,12 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    mip_api = context.obj["mip_api"]
+    mip_api: MipAnalysisAPI = context.obj["analysis_api"]
 
     exit_code = EXIT_SUCCESS
-    for case_obj in mip_api.db.cases_to_store(pipeline=Pipeline.MIP_DNA):
+    for case_obj in mip_api.status_db.cases_to_store(pipeline=Pipeline.MIP_DNA):
         try:
-            analysis_obj = mip_api.tb.get_latest_analysis(case_id=case_obj.internal_id)
+            analysis_obj = mip_api.trailblazer_api.get_latest_analysis(case_id=case_obj.internal_id)
             if analysis_obj.status != "completed":
                 continue
             LOG.info(f"Storing case: {analysis_obj.family}")

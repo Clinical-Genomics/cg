@@ -214,7 +214,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
 
-    def get_pipeline_version(self) -> str:
+    def get_pipeline_version(self, case_id: str) -> str:
         """
         Calls the pipeline to get the pipeline version number. If fails, returns a placeholder value instead.
         """
