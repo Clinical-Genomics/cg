@@ -19,10 +19,8 @@ def test_cli_link_no_case(
 
     # GIVEN a case_id that does not exist in database
 
-    print(fluffy_populated_status_db.family("lovedkitten"))
     # WHEN running command in dry-run
     result = cli_runner.invoke(link, [fluffy_case_id_non_existing], obj=fluffy_context)
-    print(result)
 
     # THEN command does not terminate successfully
     assert result.exit_code != EXIT_SUCCESS
