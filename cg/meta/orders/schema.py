@@ -323,6 +323,7 @@ METAGENOME_SAMPLE = {
     "require_qcok": bool,
     "elution_buffer": str,
     "source": str,
+    "volume": str,
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),

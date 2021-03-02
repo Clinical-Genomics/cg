@@ -106,6 +106,7 @@ class StatusHandler:
                     "sex": sample.get("sex"),
                     "status": sample.get("status"),
                     "tumour": sample.get("tumour") or False,
+                    "volume": sample.get("volume"),
                 }
                 for sample in data["samples"]
             ],
@@ -132,6 +133,7 @@ class StatusHandler:
                     "organism_id": sample_data["organism"],
                     "priority": sample_data["priority"],
                     "reference_genome": sample_data["reference_genome"],
+                    "volume": sample_data.get("volume"),
                 }
                 for sample_data in data["samples"]
             ],

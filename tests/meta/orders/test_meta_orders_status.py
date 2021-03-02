@@ -40,9 +40,24 @@ def test_samples_to_status(fastq_order_to_submit):
     assert first_sample["application"] == "WGSPCFC060"
     assert first_sample["priority"] == "priority"
     assert first_sample["tumour"] is False
+    assert first_sample["volume"] == "1"
 
     # ... and the other sample is a tumour
     assert data["samples"][1]["tumour"] is True
+
+
+def test_metagenome_to_status(metagenome_order_to_submit):
+
+    # GIVEN metagenome order with two samples
+    # WHEN parsing for status
+    data = StatusHandler.samples_to_status(metagenome_order_to_submit)
+    # THEN it should pick out samples and relevant information
+    assert len(data["samples"]) == 2
+    first_sample = data["samples"][0]
+    assert first_sample["name"] == "Bristol"
+    assert first_sample["application"] == "METLIFR020"
+    assert first_sample["priority"] == "standard"
+    assert first_sample["volume"] == "1"
 
 
 def test_microbial_samples_to_status(microbial_order_to_submit):
@@ -68,6 +83,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data["reference_genome"] == "NC_111"
     assert sample_data["application"] == "MWRNXTR003"
     assert sample_data["comment"] == "plate comment"
+    assert sample_data["volume"] == "1"
 
 
 def test_families_to_status(mip_order_to_submit):
@@ -493,23 +509,6 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
     # THEN it should store the samples
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
-
-
-def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
-    # GIVEN a basic store with no samples and a metagenome order
-    assert base_store.samples().count() == 0
-
-    # WHEN storing the order
-    new_samples = orders_api.store_samples(
-        customer=metagenome_status_data["customer"],
-        order=metagenome_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket=1234348,
-        samples=metagenome_status_data["samples"],
-    )
-
-    # THEN it should have stored the samples
-    assert base_store.samples().count() > 0
 
 
 def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_status_data):

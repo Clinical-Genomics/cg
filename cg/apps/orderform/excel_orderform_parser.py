@@ -25,7 +25,7 @@ class ExcelOrderformParser(OrderformParser):
         "1541:6",  # Orderform Externally sequenced samples
         "1603:10",  # Microbial WGS
         "1604:10",  # Orderform Ready made libraries (RML)
-        "1605:8",  # Microbial meta genomes
+        "1605:9",  # Microbial meta genomes
     ]
 
     def check_orderform_version(self, document_title: str) -> None:
