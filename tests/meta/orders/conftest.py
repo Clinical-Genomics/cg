@@ -12,24 +12,26 @@ from tests.mocks.osticket import MockOsTicket
 
 @pytest.fixture
 def all_orders_to_submit(
-    rml_order_to_submit,
+    balsamic_order_to_submit,
+    external_order_to_submit,
     fastq_order_to_submit,
+    metagenome_order_to_submit,
+    microbial_order_to_submit,
     mip_order_to_submit,
     mip_rna_order_to_submit,
-    external_order_to_submit,
-    microbial_order_to_submit,
-    metagenome_order_to_submit,
-    balsamic_order_to_submit,
+    rml_order_to_submit,
+    sarscov2_order_to_submit,
 ):
     return {
-        OrderType.RML: OrderIn.parse_obj(rml_order_to_submit),
+        OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit),
+        OrderType.EXTERNAL: OrderIn.parse_obj(external_order_to_submit),
         OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit),
+        OrderType.METAGENOME: OrderIn.parse_obj(metagenome_order_to_submit),
+        OrderType.MICROSALT: OrderIn.parse_obj(microbial_order_to_submit),
         OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit),
         OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit),
-        OrderType.EXTERNAL: OrderIn.parse_obj(external_order_to_submit),
-        OrderType.MICROSALT: OrderIn.parse_obj(microbial_order_to_submit),
-        OrderType.METAGENOME: OrderIn.parse_obj(metagenome_order_to_submit),
-        OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit),
+        OrderType.RML: OrderIn.parse_obj(rml_order_to_submit),
+        OrderType.SARSCOV2: OrderIn.parse_obj(sarscov2_order_to_submit),
     }
 
 

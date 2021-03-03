@@ -22,6 +22,7 @@ class OrderType(StrEnum):
     MIP_DNA: str = str(Pipeline.MIP_DNA)
     MIP_RNA: str = str(Pipeline.MIP_RNA)
     RML: str = "rml"
+    SARSCOV2: str = str(Pipeline.SARSCOV2)
 
 
 class ListValidator(validators.Validator):
@@ -295,12 +296,13 @@ MICROSALT_SAMPLE = {
     "data_analysis": str,
     "data_delivery": str,
     "application": str,
+    "priority": validators.Any(PRIORITY_OPTIONS),
     "require_qcok": bool,
     "elution_buffer": str,
     "extraction_method": str,
-    "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     "volume": str,
-    "priority": validators.Any(PRIORITY_OPTIONS),
+    "container": validators.Any(CONTAINER_OPTIONS),
+
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
@@ -335,6 +337,39 @@ METAGENOME_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
 
+SARSCOV2_SAMPLE = {
+    # 2184 Orderform SARS-COV-2
+    # "These fields are required"
+    "name": validators.RegexValidator(NAME_PATTERN),
+    "organism": str,
+    "reference_genome": str,
+    "data_analysis": str,
+    "data_delivery": str,
+    "application": str,
+    "priority": validators.Any(PRIORITY_OPTIONS),
+    "require_qcok": bool,
+    "elution_buffer": str,
+    "extraction_method": str,
+    "pre_processing_method": str,
+    "region_code": str,
+    "lab_code": str,
+    "selection_criteria": str,
+    "volume": str,
+    "container": validators.Any(CONTAINER_OPTIONS),
+
+    # "Required if Plate"
+    "container_name": OptionalNone(TypeValidatorNone(str)),
+    "well_position": OptionalNone(TypeValidatorNone(str)),
+
+    # "Required if "Other" is chosen in column "Species""
+    "organism_other": OptionalNone(TypeValidatorNone(str)),
+
+    # "These fields are not required"
+    "concentration_sample": OptionalNone(TypeValidatorNone(str)),
+    "quantity": OptionalNone(TypeValidatorNone(str)),
+    "comment": OptionalNone(TypeValidatorNone(str)),
+}
+
 ORDER_SCHEMES = {
     OrderType.EXTERNAL: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(EXTERNAL_SAMPLE, min_items=1)}
@@ -354,5 +389,8 @@ ORDER_SCHEMES = {
     ),
     OrderType.METAGENOME: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(METAGENOME_SAMPLE, min_items=1)}
+    ),
+    OrderType.SARSCOV2: Scheme(
+        {**BASE_PROJECT, "samples": ListValidator(SARSCOV2_SAMPLE, min_items=1)}
     ),
 }

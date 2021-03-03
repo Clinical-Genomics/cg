@@ -340,6 +340,12 @@ def microbial_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
+def sarscov2_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples"""
+    return Path(orderforms / "2184.1.sarscov2.xlsx").as_posix()
+
+
+@pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
     return Path(orderforms / "1604.10.rml.xlsx").as_posix()
@@ -398,6 +404,12 @@ def metagenome_order_to_submit() -> dict:
 def microbial_order_to_submit() -> dict:
     """Load an example microbial order."""
     return json.load(open("tests/fixtures/orders/microsalt.json"))
+
+
+@pytest.fixture
+def sarscov2_order_to_submit() -> dict:
+    """Load an example sarscov2 order."""
+    return json.load(open("tests/fixtures/orders/sarscov2.json"))
 
 
 @pytest.fixture
@@ -945,6 +957,15 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             percent_reads_guaranteed=75,
             sequencing_depth=25,
             accredited=True,
+            target_reads=10,
+        ),
+        store.add_application(
+            tag="VWGDPTR001",
+            category="cov",
+            description="Viral whole genome  ",
+            sequencing_depth=0,
+            percent_kth=80,
+            percent_reads_guaranteed=75,
             target_reads=10,
         ),
     ]

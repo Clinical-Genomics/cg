@@ -42,6 +42,7 @@ class Pipeline(StrEnum):
     MICROSALT: str = "microsalt"
     MIP_DNA: str = "mip-dna"
     MIP_RNA: str = "mip-rna"
+    SARSCOV2: str = "sarscov2"
 
 
 class DataDelivery(StrEnum):

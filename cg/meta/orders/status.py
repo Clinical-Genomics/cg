@@ -140,6 +140,37 @@ class StatusHandler:
         }
         return status_data
 
+    @staticmethod
+    def sarscov2_samples_to_status(data: dict) -> dict:
+        """Convert order input for sarscov2 samples."""
+
+        status_data = {
+            "customer": data["customer"],
+            "order": data["name"],
+            "comment": data.get("comment"),
+            "data_analysis": data["samples"][0]["data_analysis"],
+            "data_delivery": data["samples"][0]["data_delivery"],
+            "samples": [
+                {
+                    "application": sample_data["application"],
+                    "comment": sample_data.get("comment"),
+                    "data_delivery": sample_data.get("data_delivery"),
+                    "internal_id": sample_data.get("internal_id"),
+                    "name": sample_data["name"],
+                    "organism_id": sample_data["organism"],
+                    "priority": sample_data["priority"],
+                    "reference_genome": sample_data["reference_genome"],
+                    "volume": sample_data["volume"],
+                    "pre_processing_method": sample_data["pre_processing_method"],
+                    "region_code": sample_data["region_code"],
+                    "lab_code": sample_data["lab_code"],
+                    "selection_criteria": sample_data["selection_criteria"],
+                }
+                for sample_data in data["samples"]
+            ],
+        }
+        return status_data
+
     @classmethod
     def cases_to_status(cls, data: dict) -> dict:
         """Convert order input to status interface input."""

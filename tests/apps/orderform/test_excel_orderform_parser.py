@@ -48,7 +48,7 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
 
 
 def test_parse_microbial_orderform(microbial_orderform: str):
-    """Test to parse an microbial orderform in excel format"""
+    """Test to parse a microbial orderform in excel format"""
     # GIVEN a order form in excel format
     assert is_excel(Path(microbial_orderform))
     # GIVEN a orderform API
@@ -59,6 +59,21 @@ def test_parse_microbial_orderform(microbial_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == "microsalt"
+
+
+def test_parse_sarscov2_orderform(sarscov2_orderform: str):
+    """Test to parse a sarscov2 orderform in excel format"""
+
+    # GIVEN a order form in excel format
+    assert is_excel(Path(sarscov2_orderform))
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=sarscov2_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == "sarscov2"
 
 
 def test_parse_metagenome_orderform(metagenome_orderform: str):

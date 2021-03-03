@@ -26,6 +26,7 @@ class ExcelOrderformParser(OrderformParser):
         "1603:10",  # Microbial WGS
         "1604:10",  # Orderform Ready made libraries (RML)
         "1605:9",  # Microbial meta genomes
+        "2184:1",  # Orderform SARS-CoV-2
     ]
 
     def check_orderform_version(self, document_title: str) -> None:
@@ -144,13 +145,14 @@ class ExcelOrderformParser(OrderformParser):
         analysis = analyses.pop().lower().replace(" ", "-")
         return "fastq" if analysis == self.NO_ANALYSIS else analysis
 
-    def get_project_type(self, document_title: str) -> Optional[str]:
+    def get_project_type(self, document_title: str) -> str:
         """Determine the project type and set it to the class."""
         document_number_to_project_type = {
-            "1541": "external",
-            "1604": "rml",
-            "1603": "microsalt",
-            "1605": "metagenome",
+            "1541": str(OrderType.EXTERNAL),
+            "1604": str(OrderType.RML),
+            "1603": str(OrderType.MICROSALT),
+            "1605": str(OrderType.METAGENOME),
+            "2184": str(OrderType.SARSCOV2),
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:
@@ -158,6 +160,8 @@ class ExcelOrderformParser(OrderformParser):
 
         if "1508" in document_title:
             return self.get_project_type_from_samples()
+
+        raise OrderFormError(f"Undetermined project type in: {document_title}")
 
     def parse_data_analysis(self) -> str:
         data_analyses = {sample.data_analysis for sample in self.samples if sample.data_analysis}

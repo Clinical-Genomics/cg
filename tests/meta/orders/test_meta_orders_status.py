@@ -86,6 +86,36 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     assert sample_data["volume"] == "1"
 
 
+def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
+    # GIVEN sarscov2 order with three samples
+
+    # WHEN parsing for status
+    data = StatusHandler.sarscov2_samples_to_status(sarscov2_order_to_submit)
+
+    # THEN it should pick out samples and relevant information
+    assert len(data["samples"]) == 5
+    assert data["customer"] == "cust002"
+    assert data["order"] == "Sars-CoV-2 samples"
+    assert data["comment"] == "Order comment"
+    assert data["data_analysis"] == str(Pipeline.MICROSALT)
+    assert data["data_delivery"] == str(DataDelivery.FASTQ)
+
+    # THEN first sample should contain all the relevant data from the microbial order
+    sample_data = data["samples"][0]
+    assert sample_data.get("priority") in "research"
+    assert sample_data["name"] == "all-fields"
+    assert sample_data.get("internal_id") is None
+    assert sample_data["organism_id"] == "SARS CoV-2"
+    assert sample_data["reference_genome"] == "NC_111"
+    assert sample_data["application"] == "VWGDPTR001"
+    assert sample_data["comment"] == "plate comment"
+    assert sample_data["volume"] == "1"
+    assert sample_data["pre_processing_method"] == "COVIDSeq"
+    assert sample_data["region_code"] == "01 Region Stockholm"
+    assert sample_data["lab_code"] == "SE110 Växjö"
+    assert sample_data["selection_criteria"] == "1. Allmän övervakning"
+
+
 def test_families_to_status(mip_order_to_submit):
     # GIVEN a scout order with a trio case
     # WHEN parsing for status

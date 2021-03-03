@@ -163,6 +163,28 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
         return {"project": project_data, "records": samples}
 
+    def _submit_sarscov2(self, order: dict) -> dict:
+        """Submit a batch of sars-cov-2 samples."""
+        # prepare order for status database
+        status_data = self.sarscov2_samples_to_status(order)
+        self._fill_in_sample_verified_organism(order["samples"])
+        # submit samples to LIMS
+        project_data, lims_map = self.process_lims(order, order["samples"])
+        self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
+        # submit samples to Status
+        samples = self.store_microbial_samples(
+            customer=status_data["customer"],
+            order=status_data["order"],
+            ordered=project_data["date"] if project_data else dt.datetime.now(),
+            ticket=order["ticket"],
+            samples=status_data["samples"],
+            comment=status_data["comment"],
+            data_analysis=Pipeline(status_data["data_analysis"]),
+            data_delivery=DataDelivery(status_data["data_delivery"]),
+        )
+
+        return {"project": project_data, "records": samples}
+
     def _process_case_samples(self, order: dict) -> dict:
         """Process samples to be analyzed."""
         # filter out only new samples
