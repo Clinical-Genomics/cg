@@ -302,7 +302,6 @@ MICROSALT_SAMPLE = {
     "extraction_method": str,
     "volume": str,
     "container": validators.Any(CONTAINER_OPTIONS),
-
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
@@ -356,14 +355,11 @@ SARSCOV2_SAMPLE = {
     "selection_criteria": str,
     "volume": str,
     "container": validators.Any(CONTAINER_OPTIONS),
-
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
-
     # "Required if "Other" is chosen in column "Species""
     "organism_other": OptionalNone(TypeValidatorNone(str)),
-
     # "These fields are not required"
     "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),

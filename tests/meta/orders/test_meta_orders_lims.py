@@ -102,9 +102,7 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     assert first_sample["udfs"]["priority"] == "research"
     assert first_sample["udfs"]["organism"] == "SARS CoV-2"
     assert first_sample["udfs"]["reference_genome"] == "NC_111"
-    assert (
-            first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
-    )
+    assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
     assert first_sample["udfs"]["volume"] == "1"
     assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
     assert first_sample["udfs"]["region_code"] == "01 Region Stockholm"
