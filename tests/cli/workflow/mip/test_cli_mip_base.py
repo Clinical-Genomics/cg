@@ -2,21 +2,24 @@
 
 import logging
 
+from cg.apps.tb import TrailblazerAPI
+from cg.cli.workflow.commands import resolve_compression
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.store.api.status import StatusHandler
 
 
 def test_spring_decompression_needed_and_started(
-    mocker, cli_runner, caplog, dna_mip_context, case_id, analysis_api
+    mocker, cli_runner, caplog, dna_mip_context, case_id
 ):
     """Tests starting the MIP analysis when decompression is needed"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = analysis_api
-    case_object = mip_api.get_case_object(case_id)
+    mip_api = dna_mip_context["analysis_api"]
+    case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
     mocker.patch.object(StatusHandler, "cases_to_analyze")
@@ -26,11 +29,9 @@ def test_spring_decompression_needed_and_started(
     mocker.patch.object(MipAnalysisAPI, "is_dna_only_case")
     MipAnalysisAPI.is_dna_only_case.return_value = True
 
-    case_object.internal_id = "ADM1"
-
     # GIVEN the latest analysis has not started
-    mocker.patch.object(MipAnalysisAPI, "has_latest_analysis_started")
-    MipAnalysisAPI.has_latest_analysis_started.return_value = False
+    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
+    TrailblazerAPI.has_latest_analysis_started.return_value = False
 
     # GIVEN spring decompression is needed
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
@@ -55,14 +56,18 @@ def test_spring_decompression_needed_and_started(
 
 
 def test_spring_decompression_needed_and_start_failed(
-    mocker, cli_runner, caplog, dna_mip_context, case_id, analysis_api
+    mocker,
+    cli_runner,
+    caplog,
+    dna_mip_context,
+    case_id,
 ):
     """Tests starting the MIP analysis when decompression is needed but fail to start"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = analysis_api
-    case_object = mip_api.get_case_object(case_id)
+    mip_api = dna_mip_context["analysis_api"]
+    case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
     mocker.patch.object(StatusHandler, "cases_to_analyze")
@@ -72,11 +77,9 @@ def test_spring_decompression_needed_and_start_failed(
     mocker.patch.object(MipAnalysisAPI, "is_dna_only_case")
     MipAnalysisAPI.is_dna_only_case.return_value = True
 
-    case_object.internal_id = "ADM1"
-
     # GIVEN the latest analysis has not started
-    mocker.patch.object(MipAnalysisAPI, "has_latest_analysis_started")
-    MipAnalysisAPI.has_latest_analysis_started.return_value = False
+    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
+    TrailblazerAPI.has_latest_analysis_started.return_value = False
 
     # GIVEN spring decompression is needed
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
@@ -101,14 +104,14 @@ def test_spring_decompression_needed_and_start_failed(
 
 
 def test_spring_decompression_needed_and_cant_start(
-    mocker, cli_runner, caplog, dna_mip_context, case_id, analysis_api
+    mocker, cli_runner, caplog, dna_mip_context, case_id
 ):
     """Tests starting the MIP analysis when decompression is needed but can't start"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = analysis_api
-    case_object = mip_api.get_case_object(case_id)
+    mip_api = dna_mip_context["analysis_api"]
+    case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
     mocker.patch.object(StatusHandler, "cases_to_analyze")
@@ -118,11 +121,9 @@ def test_spring_decompression_needed_and_cant_start(
     mocker.patch.object(MipAnalysisAPI, "is_dna_only_case")
     MipAnalysisAPI.is_dna_only_case.return_value = True
 
-    case_object.internal_id = "ADM1"
-
     # GIVEN the latest analysis has not started
-    mocker.patch.object(MipAnalysisAPI, "has_latest_analysis_started")
-    MipAnalysisAPI.has_latest_analysis_started.return_value = False
+    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
+    TrailblazerAPI.has_latest_analysis_started.return_value = False
 
     # GIVEN spring decompression is needed
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
@@ -142,29 +143,25 @@ def test_spring_decompression_needed_and_cant_start(
     assert f"Decompression can not be started for" in caplog.text
 
 
-def test_case_needs_to_be_stored(
-    mocker, cli_runner, caplog, case_id, analysis_api, dna_mip_context
-):
+def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_context):
     """Test starting MIP when files are decompressed but not stored in housekeeper"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = analysis_api
-    case_object = mip_api.get_case_object(case_id)
+    mip_api = dna_mip_context["analysis_api"]
+    case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
     mocker.patch.object(StatusHandler, "cases_to_analyze")
     StatusHandler.cases_to_analyze.return_value = [case_object]
 
     # GIVEN all samples in the case has dna application type
-    mocker.patch.object(MipAnalysisAPI, "is_dna_only_case")
-    MipAnalysisAPI.is_dna_only_case.return_value = True
-
-    case_object.internal_id = "ADM1"
+    mocker.patch.object(MipDNAAnalysisAPI, "is_dna_only_case")
+    MipDNAAnalysisAPI.is_dna_only_case.return_value = True
 
     # GIVEN the latest analysis has not started
-    mocker.patch.object(MipAnalysisAPI, "has_latest_analysis_started")
-    MipAnalysisAPI.has_latest_analysis_started.return_value = False
+    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
+    TrailblazerAPI.has_latest_analysis_started.return_value = False
 
     # GIVEN spring decompression is not needed
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
@@ -179,13 +176,14 @@ def test_case_needs_to_be_stored(
     PrepareFastqAPI.is_spring_decompression_running.return_value = False
 
     # GIVEN a panel file is created
-    mocker.patch.object(MipAnalysisAPI, "panel")
-    MipAnalysisAPI.panel.return_value = "bla"
+    mocker.patch.object(MipDNAAnalysisAPI, "panel")
+    MipDNAAnalysisAPI.panel.return_value = "bla"
+
+    mocker.patch.object(MipDNAAnalysisAPI, "resolve_decompression")
+    MipDNAAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN MIP analysis is started
-    result = cli_runner.invoke(
-        start, ["ADM1", "--panel-bed", "panel.bed", "--dry-run"], obj=dna_mip_context
-    )
+    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=dna_mip_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0

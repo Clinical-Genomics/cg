@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.models import InputBundle
+from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 import datetime as dt
 
@@ -126,11 +127,36 @@ def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
 
 @pytest.fixture(scope="function")
 def fluffy_context(
-    context_config, helpers, fluffy_samplesheet_bundle_data, fluffy_fastq_hk_bundle_data
+    context_config,
+    helpers,
+    fluffy_samplesheet_bundle_data,
+    fluffy_fastq_hk_bundle_data,
+    fluffy_case_id_existing,
+    fluffy_sample_lims_id,
 ) -> dict:
     fluffy_analysis_api = FluffyAnalysisAPI(config=context_config)
     helpers.ensure_hk_version(
         fluffy_analysis_api.housekeeper_api, bundle_data=fluffy_samplesheet_bundle_data
     )
     helpers.ensure_hk_version(fluffy_analysis_api.housekeeper_api, fluffy_fastq_hk_bundle_data)
+    example_fluffy_case = helpers.add_case(
+        fluffy_analysis_api.status_db,
+        internal_id=fluffy_case_id_existing,
+        case_id=fluffy_case_id_existing,
+        data_analysis=Pipeline.FLUFFY,
+    )
+    example_fluffy_sample = helpers.add_sample(
+        fluffy_analysis_api.status_db,
+        internal_id=fluffy_sample_lims_id,
+        is_tumour=False,
+        application_type="tgs",
+        reads=100,
+        sequenced_at=dt.datetime.now(),
+    )
+    helpers.add_flowcell(
+        fluffy_analysis_api.status_db, flowcell_id="flowcell", samples=[example_fluffy_sample]
+    )
+    helpers.add_relationship(
+        fluffy_analysis_api.status_db, case=example_fluffy_case, sample=example_fluffy_sample
+    )
     return {"analysis_api": fluffy_analysis_api}

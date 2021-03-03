@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry", help="Print command to console without executing", is_flag=True
+    "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -56,7 +56,7 @@ def balsamic(context: click.Context):
         click.echo(context.get_help())
         return None
     config = context.obj
-    context.obj["AnalysisAPI"] = BalsamicAnalysisAPI(
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(
         config=config,
     )
 
@@ -71,12 +71,16 @@ balsamic.add_command(store_available)
 @OPTION_PANEL_BED
 @OPTION_DRY
 @click.pass_context
-def config_case(context: click.Context, panel_bed: str, case_id: str, dry: bool):
+def config_case(context: click.Context, panel_bed: str, case_id: str, dry_run: bool):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
-        analysis_api.config_case(case_id=case_id, panel_bed=panel_bed, dry=dry)
+        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.config_case(case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+    except CgError as e:
+        LOG.error(f"Could not create config: {e.message}")
+        raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create config: {error}")
         raise click.Abort()
@@ -95,26 +99,30 @@ def run(
     run_analysis: bool,
     priority: str,
     case_id: str,
-    dry: bool,
+    dry_run: bool,
 ):
     """Run balsamic analysis for given CASE ID"""
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
     try:
         analysis_api.verify_case_id_in_statusdb(case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
             analysis_type=analysis_type,
             run_analysis=run_analysis,
             priority=priority,
-            dry=dry,
+            dry_run=dry_run,
         )
-        if dry:
+        if dry_run:
             return
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except CgError as e:
         LOG.error(f"Could not run analysis: {e.message}")
+        raise click.Abort()
+    except Exception as e:
+        LOG.error(f"Could not run analysis: {e}")
         raise click.Abort()
 
 
@@ -123,31 +131,41 @@ def run(
 @OPTION_DRY
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
-def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry: bool):
+def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
     try:
-        analysis_api.report_deliver(case_id=case_id, analysis_type=analysis_type, dry=dry)
-    except BalsamicStartError as e:
+        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_analysis_finish_file_exists(case_id=case_id)
+        analysis_api.report_deliver(case_id=case_id, analysis_type=analysis_type, dry_run=dry_run)
+    except CgError as e:
         LOG.error(f"Could not create report file: {e.message}")
+        raise click.Abort()
+    except Exception as e:
+        LOG.error(f"Could not run analysis: {e}")
         raise click.Abort()
 
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
 @click.pass_context
 def store_housekeeper(context: click.Context, case_id: str):
     """Store a finished analysis in Housekeeper and StatusDB."""
-    analysis_api: BalsamicAnalysisAPI = context.obj["AnalysisAPI"]
+    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
     try:
+        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id)
         analysis_api.upload_bundle_statusdb(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
-        LOG.warning(error)
-        raise click.Abort
+        raise error
+    except CgError as e:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}")
+        raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         analysis_api.housekeeper_api.rollback()
@@ -168,19 +186,19 @@ def start(
     analysis_type: str,
     panel_bed: str,
     priority: str,
-    dry: bool,
+    dry_run: bool,
 ):
     """Start full workflow for CASE ID"""
     LOG.info(f"Starting analysis for {case_id}")
     context.invoke(link, case_id=case_id)
-    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry=dry)
+    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
     context.invoke(
         run,
         case_id=case_id,
         analysis_type=analysis_type,
         priority=priority,
         run_analysis="--run-analysis",
-        dry=dry,
+        dry_run=dry_run,
     )
 
 
@@ -210,8 +228,8 @@ def start_available(context: click.Context, dry_run: bool = False):
 @OPTION_DRY
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
-def store(context: click.Context, case_id: str, analysis_type: str, dry: bool):
+def store(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry=dry)
+    context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id)

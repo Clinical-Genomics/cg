@@ -4,13 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
+
 from cg.constants import Pipeline
-from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
-from cg.store import Store
+
 from ruamel.yaml import YAML
 
 
@@ -156,11 +154,27 @@ def fixture_mip_configs(
     return config_dict
 
 
-@pytest.fixture(name="_store")
-def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
-    """Create and populate temporary db with test cases for mip"""
+@pytest.fixture(name="rna_mip_context")
+def fixture_rna_mip_context(
+    context_config, analysis_family_single_case, helpers, apptag_rna, case_id, housekeeper_api
+):
+    analysis_api = MipRNAAnalysisAPI(context_config)
+    analysis_api.housekeeper_api = housekeeper_api
+    analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
+    if not analysis_api.status_db.family(case_id):
+        helpers.ensure_case_from_dict(
+            analysis_api.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
+        )
+    return {
+        "analysis_api": analysis_api,
+    }
 
-    _store = base_store
+
+@pytest.fixture(name="dna_mip_context")
+def fixture_dna_mip_context(context_config: dict, helpers, mip_case_ids, housekeeper_api):
+    analysis_api = MipDNAAnalysisAPI(context_config)
+    _store = analysis_api.status_db
+    analysis_api.housekeeper_api = housekeeper_api
 
     # Add apptag to db
 
@@ -169,61 +183,21 @@ def fixture_store(base_store: Store, mip_case_ids: dict, helpers) -> Store:
     # Add sample, cases and relationships to db
 
     for case_id in mip_case_ids:
-        case_obj = helpers.add_case(
-            store=_store,
-            internal_id=case_id,
-            case_id=mip_case_ids[case_id]["name"],
-        )
-        sample = helpers.add_sample(
-            store=_store,
-            sample=mip_case_ids[case_id]["internal_id"],
-            data_analysis=Pipeline.MIP_DNA,
-            customer_name="cust000",
-            application_tag="WGSA",
-            application_type="wgs",
-            gender="unknown",
-        )
-        helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
+        if not _store.family(case_id):
+            case_obj = helpers.add_case(
+                store=_store,
+                internal_id=case_id,
+                case_id=mip_case_ids[case_id]["name"],
+            )
+            sample = helpers.add_sample(
+                store=_store,
+                sample=mip_case_ids[case_id]["internal_id"],
+                data_analysis=Pipeline.MIP_DNA,
+                customer_name="cust000",
+                application_tag="WGSA",
+                application_type="wgs",
+                gender="unknown",
+            )
+            helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
 
-    return _store
-
-
-@pytest.fixture(scope="function", name="analysis_store_rna_case")
-def fixture_analysis_store_rna_case(
-    base_store: Store, analysis_family_single_case: dict, apptag_rna: str, helpers
-) -> Store:
-    """Setup a store instance with a single ind RNA case for testing analysis API"""
-    analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
-    helpers.ensure_case_from_dict(
-        base_store, case_info=analysis_family_single_case, app_tag=apptag_rna
-    )
-
-    yield base_store
-
-
-@pytest.fixture(name="rna_mip_context")
-def fixture_rna_mip_context(server_config):
-    return {
-        "analysis_api": MipRNAAnalysisAPI(server_config),
-    }
-
-
-@pytest.fixture(name="compress")
-def fixture_compress(housekeeper_api, crunchy) -> CompressAPI:
-    """Returns CompressAPI"""
-    return CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy)
-
-
-@pytest.fixture(name="dna_mip_context")
-def fixture_dna_mip_context(context_config: dict):
-    return {"analysis_api": MipDNAAnalysisAPI(context_config)}
-
-
-@pytest.fixture(name="mip_store_context")
-def mip_store_context(
-    context_config,
-) -> dict:
-    """Create a context to be used in testing mip store, this should be fused with mip_context above at later stages"""
-    return {
-        "analysis_api": MipDNAAnalysisAPI(context_config),
-    }
+    return {"analysis_api": analysis_api}

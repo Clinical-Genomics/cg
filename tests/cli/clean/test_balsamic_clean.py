@@ -32,12 +32,12 @@ def test_run_dir_without_options(cli_runner, clean_context: dict):
 def test_with_yes(cli_runner, clean_context: dict, timestamp_today: dt.datetime, helpers, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
-    store = clean_context["BalsamicAnalysisAPI"].store
+    store = clean_context["analysis_api"].store
     timestamp_now = timestamp_today
 
     case_id = "balsamic_case_clean"
     analysis_to_clean = store.family(case_id).analyses[0]
-    case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
+    case_path = clean_context["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir()
 
     # WHEN running with yes and remove stuff from before today
@@ -58,7 +58,7 @@ def test_dry_run(
 
     # GIVEN a case on disk that could be deleted
     caplog.set_level(logging.INFO)
-    base_store = clean_context["BalsamicAnalysisAPI"].store
+    base_store = clean_context["analysis_api"].store
     helpers.add_analysis(
         base_store,
         pipeline=Pipeline.BALSAMIC,
@@ -68,7 +68,7 @@ def test_dry_run(
     )
     case_id = "balsamic_case_clean"
     analysis_to_clean = base_store.family(case_id).analyses[0]
-    case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
+    case_path = clean_context["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir()
 
     # WHEN dry running with dry run specified
@@ -83,9 +83,9 @@ def test_dry_run(
 def test_cleaned_at_valid(cli_runner, clean_context: dict, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
-    base_store = clean_context["BalsamicAnalysisAPI"].store
+    base_store = clean_context["analysis_api"].store
     case_id = "balsamic_case_clean"
-    case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
+    case_path = clean_context["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir()
     # WHEN dry running with dry run specified
     result = cli_runner.invoke(balsamic_run_dir, [case_id, "-y"], obj=clean_context)
@@ -99,9 +99,9 @@ def test_cleaned_at_valid(cli_runner, clean_context: dict, caplog):
 def test_cleaned_at_invalid(cli_runner, clean_context: dict, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
-    base_store = clean_context["BalsamicAnalysisAPI"].store
+    base_store = clean_context["analysis_api"].store
     case_id = "balsamic_case_not_clean"
-    case_path = clean_context["BalsamicAnalysisAPI"].get_case_path(case_id)
+    case_path = clean_context["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir()
     assert not base_store.family("balsamic_case_not_clean").analyses[0].cleaned_at
     # WHEN dry running with dry run specified

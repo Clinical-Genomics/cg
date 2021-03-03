@@ -68,6 +68,9 @@ class AnalysisAPI:
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
+        elif not case_obj.links:
+            LOG.error("Case %s has no samples in StatusDB!", case_id)
+            raise CgError
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
@@ -300,7 +303,7 @@ class AnalysisAPI:
         case_obj: models.Family = self.status_db.family(case_id)
         target_bed_shortname = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
         if not target_bed_shortname:
-            raise LimsDataError("Target bed %s not found in LIMS" % target_bed_shortname)
+            return target_bed_shortname
         bed_version_obj = self.status_db.bed_version(target_bed_shortname)
         if not bed_version_obj:
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)

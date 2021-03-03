@@ -18,6 +18,7 @@ from cg.exc import (
 )
 from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper."""
-    context.obj["analysis_api"] = MipAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
 
 @store.command()
@@ -35,7 +36,7 @@ def store(context):
 @click.pass_context
 def analysis(context, config_stream):
     """Store a finished analysis in Housekeeper."""
-    mip_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
 
     exit_code = EXIT_SUCCESS
     if not config_stream:
@@ -45,11 +46,11 @@ def analysis(context, config_stream):
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
             config_stream,
-            mip_api.housekeeper_api,
-            mip_api.status_db,
+            analysis_api.housekeeper_api,
+            analysis_api.status_db,
             workflow=Pipeline.MIP_DNA,
         )
-        mip_api.status_db.add_commit(new_analysis)
+        analysis_api.status_db.add_commit(new_analysis)
     except (
         AnalysisNotFinishedError,
         AnalysisDuplicationError,
@@ -72,17 +73,19 @@ def analysis(context, config_stream):
 @click.pass_context
 def completed(context):
     """Store all completed analyses."""
-    mip_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
 
     exit_code = EXIT_SUCCESS
-    for case_obj in mip_api.status_db.cases_to_store(pipeline=Pipeline.MIP_DNA):
+    for case_obj in analysis_api.status_db.cases_to_store(pipeline=Pipeline.MIP_DNA):
         try:
-            analysis_obj = mip_api.trailblazer_api.get_latest_analysis(case_id=case_obj.internal_id)
+            analysis_obj = analysis_api.trailblazer_api.get_latest_analysis(
+                case_id=case_obj.internal_id
+            )
             if analysis_obj.status != "completed":
                 continue
             LOG.info(f"Storing case: {analysis_obj.family}")
             with Path(
-                mip_api.get_case_config_path(case_id=analysis_obj.family)
+                analysis_api.get_case_config_path(case_id=case_obj.internal_id)
             ).open() as config_stream:
 
                 context.invoke(analysis, config_stream=config_stream)

@@ -124,5 +124,5 @@ def clean_context(
     return {
         "housekeeper_api": housekeeper_api,
         "store_api": balsamic_clean_store,
-        "BalsamicAnalysisAPI": balsamic_analysis_api,
+        "analysis_api": balsamic_analysis_api,
     }

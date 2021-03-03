@@ -23,8 +23,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
-    def __init__(self, pipeline: Pipeline = Pipeline.BALSAMIC, config: Optional[dict] = None):
-        super().__init__(pipeline, config)
+    def __init__(
+        self,
+        config: dict = None,
+        pipeline: Pipeline = Pipeline.BALSAMIC,
+    ):
+        super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config["balsamic"]["root"]
         self.singularity = config["balsamic"]["singularity"]
         self.reference_config = config["balsamic"]["reference_config"]
@@ -62,6 +66,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             case_id + ".hk",
         )
 
+    def verify_deliverables_file_exists(self, case_id: str) -> None:
+        if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+            raise CgError(f"No deliverables file found for case {case_id}")
+
     def get_case_config_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located.
 
@@ -69,10 +77,18 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
         return Path(self.root_dir, case_id, case_id + ".json")
 
+    def verify_case_config_file_exists(self, case_id: str):
+        if not Path(self.get_case_config_path(case_id=case_id)).exists():
+            raise CgError(f"No config file found for case {case_id}")
+
     def get_analysis_finish_path(self, case_id: str) -> Path:
         """Returns path to analysis_finish file.
         (Optional) Checks if analysis_finish file exists"""
         return Path(self.root_dir, case_id, "analysis", "analysis_finish")
+
+    def verify_analysis_finish_file_exists(self, case_id: str):
+        if not Path(self.get_analysis_finish_path(case_id=case_id)).exists():
+            raise CgError(f"No analysis_finish file found for case {case_id}")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")
@@ -169,7 +185,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                     f"Application type {application_types.pop()} requires a bed file to be analyzed!"
                 )
             return Path(self.bed_path, target_bed).as_posix()
-        raise BalsamicStartError(f"Too many BED versions in LIMS: {len(target_beds)}")
 
     @staticmethod
     def get_verified_tumor_path(sample_data: dict) -> str:
@@ -215,7 +230,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
         sample_obj = (
-            self.status_db.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            self.status_db.query(models.Sample)
+            .join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
             .filter(models.Sample.is_tumour == True)
             .first()
@@ -226,7 +242,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_normal_sample_name(self, case_id: str) -> Optional[str]:
 
         sample_obj = (
-            self.status_db.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            self.status_db.query(models.Sample)
+            .join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
             .filter(models.Sample.is_tumour == False)
             .first()
@@ -289,7 +306,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         capture_kit = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
         if capture_kit:
             panel_shortname = self.status_db.bed_version(capture_kit).shortname
-        elif self.get_application_type(case_obj.links[0]) == "wgs":
+        elif self.get_application_type(case_obj.links[0].sample) == "wgs":
             panel_shortname = "Whole_Genome"
         else:
             return
@@ -342,7 +359,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_case_application_type(self, case_id: str) -> str:
         application_types = {
-            self.get_application_type(link_object)
+            self.get_application_type(link_object.sample)
             for link_object in self.status_db.family(case_id).links
         }
 
@@ -354,9 +371,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ) -> Optional[str]:
         if panel_bed:
             return panel_bed
-        if self.get_application_type(link_object) not in self.__BALSAMIC_BED_APPLICATIONS:
+        if self.get_application_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
             return None
-        return self.get_target_bed_from_lims(link_object)
+        return self.get_target_bed_from_lims(link_object.family.internal_id)
 
     def get_bundle_created_date(self, case_id: str) -> datetime:
         """Parse the analysis config and return the analysis date"""
@@ -377,7 +394,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
         This check is only applied to filter jobs which start automatically"""
         query = (
-            self.status_db.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            self.status_db.query(models.Sample)
+            .join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
             .filter(models.Family.data_analysis == self.pipeline)
         )
@@ -416,7 +434,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 formatted_options.append(str(val))
         return formatted_options
 
-    def config_case(self, case_id: str, panel_bed: str, dry: bool = False) -> None:
+    def config_case(self, case_id: str, panel_bed: str, dry_run: bool = False) -> None:
         """Create config file for BALSAMIC analysis """
         arguments = self.get_verified_config_case_arguments(case_id=case_id, panel_bed=panel_bed)
         command = ["config", "case"]
@@ -435,7 +453,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             }
         )
         parameters = command + options
-        self.process.run_command(parameters=parameters, dry_run=dry)
+        self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def run_analysis(
         self,
@@ -443,7 +461,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         analysis_type: Optional[str],
         run_analysis: bool = True,
         priority: Optional[str] = None,
-        dry: bool = False,
+        dry_run: bool = False,
     ) -> None:
         """Execute BALSAMIC run analysis with given options"""
 
@@ -462,10 +480,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             }
         )
         parameters = command + options + run_analysis
-        self.process.run_command(parameters=parameters, dry_run=dry)
+        self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(
-        self, case_id: str, analysis_type: Optional[str] = None, dry: bool = False
+        self, case_id: str, analysis_type: Optional[str] = None, dry_run: bool = False
     ) -> None:
         """Execute BALSAMIC report deliver with given options"""
 
@@ -479,7 +497,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             }
         )
         parameters = command + options
-        self.process.run_command(parameters=parameters, dry_run=dry)
+        self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_analysis_type(self, case_id: str) -> Optional[str]:
         case_obj = self.status_db.family(case_id)

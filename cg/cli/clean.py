@@ -35,7 +35,7 @@ def clean(context):
     context.obj["lims_api"] = LimsAPI(context.obj)
     context.obj["hermes_api"] = HermesApi(context.obj)
 
-    context.obj["BalsamicAnalysisAPI"] = BalsamicAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
     context.obj["MipAnalysisAPI"] = MipDNAAnalysisAPI(context.obj)
 
 
@@ -47,7 +47,7 @@ def clean(context):
 def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
     """Remove Balsamic run directory"""
 
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    balsamic_analysis_api = context.obj["analysis_api"]
     case_object = balsamic_analysis_api.get_case_object(case_id)
     if not case_object:
         LOG.warning(f"{case_id} not found!")
@@ -224,7 +224,7 @@ def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run:
 
     exit_code = EXIT_SUCCESS
     before = parse_date(before_str)
-    balsamic_analysis_api = context.obj["BalsamicAnalysisAPI"]
+    balsamic_analysis_api = context.obj["analysis_api"]
     possible_cleanups = balsamic_analysis_api.get_analyses_to_clean(before_date=before)
     LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
 

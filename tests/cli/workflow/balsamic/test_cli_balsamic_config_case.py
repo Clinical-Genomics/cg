@@ -23,13 +23,13 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    assert not balsamic_context["analysis_api"].status_db.family(case_id)
     # WHEN running
     result = cli_runner.invoke(config_case, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
-    assert case_id in caplog.text
+    assert "could not be found in StatusDB!" in caplog.text
 
 
 def test_without_samples(cli_runner, balsamic_context: dict, caplog):
@@ -43,7 +43,7 @@ def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert case_id in caplog.text
-    assert "analysis will not be started" in caplog.text
+    assert "has no samples" in caplog.text
 
 
 def test_dry(cli_runner, balsamic_context: dict, caplog):
@@ -161,12 +161,12 @@ def test_single_panel(balsamic_context: dict, cli_runner, caplog):
     assert "--normal" not in caplog.text
 
 
-def test_error_single_wgs_panel_arg(balsamic_context: dict, balsamic_dir: Path, cli_runner, caplog):
+def test_error_single_wgs_panel_arg(balsamic_context: dict, cg_dir: Path, cli_runner, caplog):
     """Test with case_id that requires SINGLE WGS analysis and --panel-bed argument"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing ONE tumor, WGS application and panel bed argument
     case_id = "balsamic_case_wgs_single"
-    panel_bed = Path(balsamic_dir, "balsamic_bed_1.bed")
+    panel_bed = Path(cg_dir, "balsamic_bed_1.bed")
     # WHEN dry running
     result = cli_runner.invoke(
         config_case,
@@ -229,18 +229,6 @@ def test_error_not_balsamic_application(balsamic_context: dict, cli_runner, capl
     assert "not compatible with BALSAMIC" in caplog.text
 
 
-def test_error_mixed_panel_bed(balsamic_context: dict, cli_runner, caplog):
-    """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS"""
-    caplog.set_level(logging.ERROR)
-    case_id = "balsamic_case_mixed_bed_paired_error"
-    # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command is NOT generated successfully
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN log warning should be printed
-    assert "Too many BED versions in LIMS" in caplog.text
-
-
 def test_error_mixed_panel_bed_resque(balsamic_context: dict, cli_runner, caplog):
     """Test with case_id marked for PAIRED TGS analysis but different BED files in LIMS
     AND supplying --panel-bed option should prevent error"""
@@ -259,18 +247,6 @@ def test_error_mixed_panel_bed_resque(balsamic_context: dict, cli_runner, caplog
     # THEN panel bed should override LIMS data and be present in command
     assert "--panel-bed" in caplog.text
     assert panel_bed in caplog.text
-
-
-def test_error_only_mip_tumor(balsamic_context: dict, cli_runner, caplog):
-    """Test with case_id containing ONE tumor sample marked for MIP analysis"""
-    caplog.set_level(logging.ERROR)
-    case_id = "mip_case_wgs_single"
-    # WHEN dry running
-    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
-    # THEN command is NOT generated successfully
-    assert result.exit_code != EXIT_SUCCESS
-    # THEN log warning should be printed
-    assert "no samples tagged for BALSAMIC analysis" in caplog.text
 
 
 def test_error_two_normal(balsamic_context: dict, cli_runner, caplog):

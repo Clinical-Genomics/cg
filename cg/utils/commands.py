@@ -64,6 +64,7 @@ class Process:
 
         LOG.info("Running command %s", " ".join(command))
         if dry_run:
+            LOG.info("Dry run: process call will not be executed!!")
             return RETURN_SUCCESS
 
         if self.environment:
@@ -116,13 +117,11 @@ class Process:
 
     def stdout_lines(self):
         """Iterate over the lines in self.stdout"""
-        for line in self.stdout.split("\n"):
-            yield line
+        yield from self.stdout.split("\n")
 
     def stderr_lines(self):
         """Iterate over the lines in self.stderr"""
-        for line in self.stderr.split("\n"):
-            yield line
+        yield from self.stderr.split("\n")
 
     def __repr__(self):
         return f"Process:base_call:{self.base_call}"

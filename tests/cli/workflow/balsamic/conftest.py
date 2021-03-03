@@ -15,9 +15,11 @@ from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.process_mock import ProcessMock
 
+from tests.mocks.tb_mock import MockTB
+
 
 @pytest.fixture(name="balsamic_dir")
-def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
+def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the balsamic apps dir"""
     balsamic_dir = tmpdir_factory.mktemp("balsamic")
     return Path(balsamic_dir).absolute().as_posix()
@@ -26,40 +28,39 @@ def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
 @pytest.fixture(name="balsamic_housekeeper_dir")
 def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     """Return the path to the balsamic housekeeper dir"""
-    balsamic_housekeeper_dir = tmpdir_factory.mktemp("bundles")
-    return balsamic_housekeeper_dir
+    return tmpdir_factory.mktemp("bundles")
 
 
 @pytest.fixture(name="balsamic_singularity_path")
-def balsamic_singularity_path(balsamic_dir: Path) -> Path:
+def balsamic_singularity_path(balsamic_dir: Path) -> str:
     balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
     balsamic_singularity_path.touch(exist_ok=True)
     return balsamic_singularity_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_reference_path")
-def balsamic_reference_path(balsamic_dir: Path) -> Path:
+def balsamic_reference_path(balsamic_dir: Path) -> str:
     balsamic_reference_path = Path(balsamic_dir, "reference.json")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_bed_1_path")
-def balsamic_bed_1_path(balsamic_dir: Path) -> Path:
+def balsamic_bed_1_path(balsamic_dir: Path) -> str:
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
     balsamic_bed_1_path.touch(exist_ok=True)
     return balsamic_bed_1_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_bed_2_path")
-def balsamic_bed_2_path(balsamic_dir: Path) -> Path:
+def balsamic_bed_2_path(balsamic_dir: Path) -> str:
     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
     balsamic_bed_2_path.touch(exist_ok=True)
     return balsamic_bed_2_path.as_posix()
 
 
 @pytest.fixture
-def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
     ).as_posix()
@@ -69,7 +70,7 @@ def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R1_001.fastq.gz"
     ).as_posix()
@@ -79,7 +80,7 @@ def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R1_001.fastq.gz"
     ).as_posix()
@@ -89,7 +90,7 @@ def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R1_001.fastq.gz"
     ).as_posix()
@@ -99,7 +100,7 @@ def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
     ).as_posix()
@@ -109,7 +110,7 @@ def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R2_001.fastq.gz"
     ).as_posix()
@@ -119,7 +120,7 @@ def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R2_001.fastq.gz"
     ).as_posix()
@@ -129,7 +130,7 @@ def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> Path:
 
 
 @pytest.fixture
-def fastq_file_l_4_r_2(balsamic_housekeeper_dir: Path) -> Path:
+def fastq_file_l_4_r_2(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R2_001.fastq.gz"
     ).as_posix()
@@ -202,47 +203,11 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
     return housekeeper_api
 
 
-@pytest.fixture
-def server_config(
-    balsamic_dir: Path,
-    balsamic_housekeeper_dir: Path,
-    balsamic_singularity_path: Path,
-    balsamic_reference_path: Path,
-) -> dict:
-    """Mimic a dict normally found in cg context"""
-
-    return {
-        "database": "database",
-        "bed_path": balsamic_dir,
-        "balsamic": {
-            "root": balsamic_dir,
-            "singularity": Path(balsamic_dir, "singularity.sif").as_posix(),
-            "reference_config": Path(balsamic_dir, "reference.json").as_posix(),
-            "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC/bin/balsamic",
-            "conda_env": "S_BALSAMIC",
-            "slurm": {
-                "mail_user": "test.mail@scilifelab.se",
-                "account": "development",
-                "qos": "low",
-            },
-        },
-        "housekeeper": {
-            "database": "database",
-            "root": balsamic_housekeeper_dir,
-        },
-        "lims": {
-            "host": "example.db",
-            "username": "testuser",
-            "password": "testpassword",
-        },
-    }
-
-
 @pytest.fixture(name="balsamic_lims")
-def balsamic_lims(server_config: dict) -> MockLimsAPI:
+def balsamic_lims(context_config: dict) -> MockLimsAPI:
     """Create populated mock LIMS api to mimic all functionality of LIMS used by BALSAMIC"""
 
-    balsamic_lims = MockLimsAPI(server_config)
+    balsamic_lims = MockLimsAPI(context_config)
     balsamic_lims.add_capture_kit(
         internal_id="sample_case_wgs_paired_tumor",
         capture_kit=None,
@@ -324,11 +289,22 @@ def balsamic_lims(server_config: dict) -> MockLimsAPI:
     return balsamic_lims
 
 
-@pytest.fixture(name="balsamic_store")
-def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
-    """real store to be used in tests"""
-    _store = base_store
-
+@pytest.fixture(scope="function", name="balsamic_context")
+def balsamic_context(
+    context_config: dict,
+    helpers,
+    balsamic_lims: MockLimsAPI,
+    balsamic_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir,
+) -> dict:
+    """context to use in cli"""
+    balsamic_analysis_api = BalsamicAnalysisAPI(context_config)
+    _store = balsamic_analysis_api.status_db
+    balsamic_analysis_api.housekeeper_api = balsamic_housekeeper
+    balsamic_analysis_api.lims_api = balsamic_lims
+    balsamic_analysis_api.trailblazer_api = trailblazer_api
     # Create tgs application version
     helpers.ensure_application_version(store=_store, application_tag="TGSA", application_type="tgs")
 
@@ -733,7 +709,7 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"
     bed1_filename = "balsamic_bed_1.bed"
-    Path(balsamic_dir, bed1_filename).touch(exist_ok=True)
+    Path(cg_dir, bed1_filename).touch(exist_ok=True)
     bed1 = _store.add_bed(name=bed1_name)
     _store.add_commit(bed1)
     version1 = _store.add_bed_version(
@@ -744,32 +720,15 @@ def balsamic_store(base_store: Store, balsamic_dir: Path, helpers) -> Store:
     # Create BED2 version 1
     bed2_name = "BalsamicBed2"
     bed2_filename = "balsamic_bed_2.bed"
-    Path(balsamic_dir, bed2_filename).touch(exist_ok=True)
+    Path(cg_dir, bed2_filename).touch(exist_ok=True)
     bed2 = _store.add_bed(name=bed2_name)
     _store.add_commit(bed2)
     version2 = _store.add_bed_version(
         bed=bed2, version=1, filename=bed2_filename, shortname=bed2_name
     )
     _store.add_commit(version2)
-
-    return _store
-
-
-@pytest.fixture(scope="function", name="balsamic_context")
-def balsamic_context(
-    server_config: dict,
-    balsamic_store: Store,
-    balsamic_lims: MockLimsAPI,
-    balsamic_housekeeper: HousekeeperAPI,
-    hermes_api: HermesApi,
-    balsamic_hermes_process: ProcessMock,
-    trailblazer_api,
-) -> dict:
-    """context to use in cli"""
-    hermes_api.process = balsamic_hermes_process
-    balsamic_analysis_api = BalsamicAnalysisAPI(server_config)
     return {
-        "BalsamicAnalysisAPI": balsamic_analysis_api,
+        "analysis_api": balsamic_analysis_api,
     }
 
 
@@ -811,7 +770,7 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
         "sample_case_wgs_single_tumor",
     ]
 
-    _deliverable_data = {
+    return {
         "files": [
             {
                 "path": f"{balsamic_dir}/{case_id}/multiqc_report.html",
@@ -820,6 +779,7 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
                 "tag": ["qc"],
                 "id": "T_WGS",
                 "format": "html",
+                "mandatory": True,
             },
             {
                 "path": f"{balsamic_dir}/{case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
@@ -828,18 +788,26 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
                 "tag": [f"concatenated_{samples[0]}_R", "qc"],
                 "id": f"concatenated_{samples[0]}_R",
                 "format": "fastq.gz",
+                "mandatory": True,
             },
             {
                 "path": f"{balsamic_dir}/{case_id}/CNV.somatic.{case_id}.cnvkit.pass.vcf.gz.tbi",
                 "path_index": "",
                 "step": "vep_somatic",
                 "format": "vcf.gz.tbi",
-                "tag": ["CNV", case_id, "cnvkit", "annotation", "somatic", "index"],
+                "tag": [
+                    "CNV",
+                    case_id,
+                    "cnvkit",
+                    "annotation",
+                    "somatic",
+                    "index",
+                ],
                 "id": case_id,
+                "mandatory": True,
             },
         ]
     }
-    return _deliverable_data
 
 
 @pytest.fixture
@@ -869,15 +837,16 @@ def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -
             tags.append("fastq")
         elif "vcf" in file_info["format"]:
             tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
-        hermes_output["files"].append({"path": file_info["path"], "tags": tags})
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
 
 
 @pytest.fixture(name="malformed_hermes_deliverables")
 def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-    hermes_deliverables.pop("pipeline")
+    malformed_deliverable = hermes_deliverables.copy()
+    malformed_deliverable.pop("pipeline")
 
-    return hermes_deliverables
+    return malformed_deliverable
 
 
 @pytest.fixture(name="balsamic_hermes_process")
