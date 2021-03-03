@@ -15,12 +15,11 @@ Try to use the following format:
 
 ## [NG.NG.NG]
 ### Added
-- Add support for Microbial Orderform 1603:10
-- Add support for Metagenome Orderform 1605:09
+- Support for SARS-CoV-2 Orderform 2184:1
 
 ## [20.2.1]
 ### Fixed
-- Fixed json orderform special cases
+- json orderform special cases
 
 ## [20.2.0]
 ### Changed
