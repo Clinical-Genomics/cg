@@ -163,6 +163,9 @@ def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_co
     mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
     TrailblazerAPI.has_latest_analysis_started.return_value = False
 
+    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+
     # GIVEN spring decompression is not needed
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = False
@@ -178,9 +181,6 @@ def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_co
     # GIVEN a panel file is created
     mocker.patch.object(MipDNAAnalysisAPI, "panel")
     MipDNAAnalysisAPI.panel.return_value = "bla"
-
-    mocker.patch.object(MipDNAAnalysisAPI, "resolve_decompression")
-    MipDNAAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN MIP analysis is started
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=dna_mip_context)
