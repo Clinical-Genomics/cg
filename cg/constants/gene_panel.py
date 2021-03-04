@@ -4,6 +4,7 @@ MASTER_LIST = (
     "BRAIN",
     "Cardiology",
     "CTD",
+    "DIAB"
     "ENDO",
     "EP",
     "IBMFS",
@@ -14,6 +15,7 @@ MASTER_LIST = (
     "MIT",
     "MOVE",
     "mtDNA",
+    "NBS-M",
     "NEURODEG",
     "NMD",
     "PEDHEP",
