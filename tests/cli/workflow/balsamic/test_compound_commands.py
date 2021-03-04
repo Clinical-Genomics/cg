@@ -5,6 +5,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 
 EXIT_SUCCESS = 0
 
@@ -29,6 +30,10 @@ def test_start(cli_runner, balsamic_context: dict, mock_config, caplog, mocker):
 
     # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
+
+    # GIVEN decompression is not needed
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
+    BalsamicAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
