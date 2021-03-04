@@ -60,7 +60,7 @@ cadd_column_names:
   - '-'
   - CADD
 cadd_vcf_header_file: /path/to/rare-disease/references/references_8.0/cadd_to_vcf_header_-1.0-.txt
-case_id: case_id
+case_id: yellowhogS
 chanjo_sexcheck: 2
 chanjo_sexcheck_log_level: DEBUG
 chromograph_ar: 2
@@ -272,7 +272,7 @@ print_recipe_mode: '2'
 project_id: development
 qccollect_ar: 2
 qccollect_regexp_file: /path/to/rare-disease/references/references_8.0/qc_regexp_-v1.24-.yaml
-qccollect_sampleinfo_file: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+qccollect_sampleinfo_file: tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml
 qccollect_skip_evaluation: '0'
 rank_model_file: /path/to/rare-disease/references/references_8.0/rank_model_cmms_-v1.28-.ini
 rankvariant: 2
@@ -455,7 +455,7 @@ sambamba_depth_noduplicates: '1'
 sambamba_depth_quality_control: '1'
 sample_ids:
   - sample_id
-sample_info_file: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+sample_info_file: tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml
 samtools_subsample_mt: 2
 samtools_subsample_mt_depth: '150'
 set_recipe_core_number: {}
@@ -475,7 +475,7 @@ smncopynumbercaller: 2
 split_fastq_file: '0'
 split_fastq_file_read_batch: '25000000'
 start_with_recipe: qccollect_ar
-store_file: /path/to/rare-disease/cases/case_id/analysis/case_id_deliverables.yaml
+store_file: tests/fixtures/apps/mip/dna/store/case_id_deliverables.yaml
 submission_profile: slurm
 supported_capture_kit:
   agilent_sureselect.v2: genome_reference_source_version_agilent_sureselect_targets_-v2-.bed

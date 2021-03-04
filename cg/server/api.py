@@ -73,7 +73,7 @@ def submit_order(order_type):
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
-        return abort(make_response(jsonify(message=error.args[0]), 401))
+        return abort(make_response(jsonify(message=error), 401))
 
     return jsonify(
         project=result["project"], records=[record.to_dict() for record in result["records"]]

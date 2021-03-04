@@ -96,15 +96,18 @@ def run(
             case_id=case_id, skip_evaluation=skip_evaluation
         ),
     )
+
     analysis_api.check_analysis_ongoing(case_id=case_id)
     analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
+
+    if dry_run:
+        LOG.info("Running in dry-run mode.")
+        return
 
     if mip_dry_run:
         LOG.info("Executed MIP in dry-run mode")
         return
-    if dry_run:
-        LOG.info("Running in dry-run mode. Analysis not submitted to Trailblazer")
-        return
+
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")

@@ -85,33 +85,13 @@ def test_store_completed_good_cases(
         }
     )
 
-    mocker.patch.object(TrailblazerAPI, "get_latest_analysis")
-    TrailblazerAPI.get_latest_analysis.return_value = TrailblazerAnalysis.parse_obj(
-        {
-            "id": 2,
-            "family": "bluezebra",
-            "status": "completed",
-        }
-    )
-
-    mocker.patch.object(TrailblazerAPI, "get_latest_analysis")
-    TrailblazerAPI.get_latest_analysis.return_value = TrailblazerAnalysis.parse_obj(
-        {
-            "id": 3,
-            "family": "purplesnail",
-            "status": "completed",
-        }
-    )
-
     status_db = dna_mip_context["analysis_api"].status_db
     for case_id in ["yellowhog", "bluezebra", "purplesnail"]:
         case_obj = status_db.family(case_id)
-        if case_obj:
-            case_obj.action = "running"
-            status_db.commit()
-        else:
-            helpers.add_case(store=status_db, internal_id=case_id, action="running")
-
+        if not case_obj:
+            case_obj = helpers.add_case(store=status_db, internal_id=case_id)
+        case_obj.action = "running"
+        status_db.commit()
     # WHEN we run store all completed cases
     result = cli_runner.invoke(completed, obj=dna_mip_context)
     # THEN some cases should be added and some should fail

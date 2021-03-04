@@ -1,17 +1,23 @@
 """ Test the CLI for run mip-dna """
 import logging
 
+from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.mip_dna.base import run
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
-def test_cg_dry_run(cli_runner, caplog, case_id, email_adress, dna_mip_context):
+def test_cg_dry_run(cli_runner, mocker, caplog, case_id, email_adress, dna_mip_context):
     """Test print the MIP run to console"""
 
     caplog.set_level(logging.INFO)
-    dna_mip_context["analysis_api"].get_pedigree_config_path(case_id=case_id).parent.mkdir(
-        parents=True, exist_ok=True
+
+    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
+    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = (
+        "tests/fixtures/apps/mip/rna/case_config.yaml"
     )
-    dna_mip_context["analysis_api"].get_pedigree_config_path(case_id=case_id).touch(exist_ok=True)
+    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
+    TrailblazerAPI.is_latest_analysis_ongoing.return_value = False
+
     # GIVEN a cli function
     # WHEN we run a case in dry run mode
     result = cli_runner.invoke(
@@ -19,9 +25,3 @@ def test_cg_dry_run(cli_runner, caplog, case_id, email_adress, dna_mip_context):
     )
     # THEN command is run successfully
     assert result.exit_code == 0
-
-    # THEN the command should be printed
-    assert (
-        f"analyse rd_dna {case_id} --config config.yaml --slurm_quality_of_service normal --email {email_adress}"
-        in caplog.text
-    )

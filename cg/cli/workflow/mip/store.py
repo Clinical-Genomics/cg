@@ -61,7 +61,7 @@ def analysis(context, config_stream):
         LOG.error(error.message)
         exit_code = EXIT_FAIL
     except FileNotFoundError as error:
-        LOG.error(f"Missing file: {error.args[0]}")
+        LOG.error(f"Missing file: {error}")
         exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -89,8 +89,8 @@ def completed(context):
             ).open() as config_stream:
 
                 context.invoke(analysis, config_stream=config_stream)
-        except (Exception, click.Abort):
-            LOG.error(f"Case storage failed: {case_obj.internal_id}", exc_info=True)
+        except (Exception, click.Abort) as error:
+            LOG.error(f"Case storage failed: {case_obj.internal_id}, {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

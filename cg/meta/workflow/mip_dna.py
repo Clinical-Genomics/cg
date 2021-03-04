@@ -44,7 +44,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             sample_data["capture_kit"] = panel_bed or DEFAULT_CAPTURE_KIT
         else:
             sample_data["capture_kit"] = panel_bed or self.get_target_bed_from_lims(
-                link_obj.sample.internal_id
+                link_obj.family.internal_id
             )
         if link_obj.mother:
             sample_data["mother"] = link_obj.mother.internal_id

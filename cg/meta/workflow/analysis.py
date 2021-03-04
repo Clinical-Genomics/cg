@@ -3,50 +3,25 @@ from pathlib import Path
 from typing import Optional, List
 import datetime as dt
 
-from cg.apps.crunchy import CrunchyAPI
 from cg.apps.environ import environ_email
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline, CASE_ACTIONS
 from cg.exc import (
     BundleAlreadyAddedError,
     CgError,
-    LimsDataError,
     CgDataError,
     DecompressionNeededError,
 )
-from cg.meta.compress import CompressAPI
+from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
-class AnalysisAPI:
-    def __init__(
-        self,
-        pipeline: Pipeline,
-        config: Optional[dict],
-    ):
+class AnalysisAPI(MetaAPI):
+    def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
+        super().__init__(config=config)
         self.pipeline = pipeline
-        self.config = config or {}
-
-        self.housekeeper_api = HousekeeperAPI(self.config)
-        self.trailblazer_api = TrailblazerAPI(self.config)
-        self.status_db = Store(self.config["database"])
-        self.lims_api = LimsAPI(self.config)
-        self.hermes_api = HermesApi(self.config)
-        self.scout_api = ScoutAPI(self.config)
-        self.prepare_fastq_api = PrepareFastqAPI(
-            store=self.status_db,
-            compress_api=CompressAPI(
-                hk_api=self.housekeeper_api, crunchy_api=CrunchyAPI(self.config)
-            ),
-        )
 
     @property
     def threshold_reads(self):
@@ -69,13 +44,18 @@ class AnalysisAPI:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
         elif not case_obj.links:
-            LOG.error("Case %s has no samples in StatusDB!", case_id)
+            LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
-            raise CgError("Analysis still ongoing")
+            raise CgError("Analysis still ongoing for case %s", case_id)
+
+    def verify_case_path_exists(self, case_id: str) -> None:
+        if not self.get_case_path(case_id=case_id).exists():
+            LOG.error("Working directory path for %s does not exist", case_id)
+            raise CgError()
 
     def get_flowcells(self, case_id: str) -> List[models.Flowcell]:
         """Get all flowcells for all samples in a ticket"""
@@ -228,7 +208,7 @@ class AnalysisAPI:
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> List[models.Family]:
+    def get_analyses_to_clean(self, before: dt.datetime) -> List[models.Analysis]:
         analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
         return analyses_to_clean.all()
 

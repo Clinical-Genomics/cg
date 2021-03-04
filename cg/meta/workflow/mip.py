@@ -210,12 +210,12 @@ class MipAnalysisAPI(AnalysisAPI):
                 LOG.warning(
                     "get_latest_metadata failed for '%s', missing key: %s",
                     family_id,
-                    error.args[0],
+                    error,
                 )
                 LOG.warning(
                     "get_latest_metadata failed for '%s', missing key: %s",
                     family_id,
-                    error.args[0],
+                    error,
                 )
                 trending = {}
         return trending

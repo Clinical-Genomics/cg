@@ -1,24 +1,16 @@
 """cg module for cleaning databases and files"""
 import logging
-import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import List
-
 import click
-from dateutil.parser import parse as parse_date
 
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.apps.scout.scout_export import ScoutExportCase
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.cli.workflow.commands import past_run_dirs
+from cg.meta.meta import MetaAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.store import Store
+
 
 LOG = logging.getLogger(__name__)
 
@@ -27,90 +19,10 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def clean(context):
     """Clean up processes"""
-    context.obj["status_db"] = Store(context.obj["database"])
-    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
-    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
-    context.obj["scout_api"] = ScoutAPI(context.obj)
-    context.obj["crunchy_api"] = CrunchyAPI(context.obj)
-    context.obj["lims_api"] = LimsAPI(context.obj)
-    context.obj["hermes_api"] = HermesApi(context.obj)
-
-    context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
-    context.obj["MipAnalysisAPI"] = MipDNAAnalysisAPI(context.obj)
+    return
 
 
-@clean.command("balsamic-run-dir")
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.argument("case_id")
-@click.pass_context
-def balsamic_run_dir(context, yes, case_id, dry_run: bool = False):
-    """Remove Balsamic run directory"""
-
-    balsamic_analysis_api = context.obj["analysis_api"]
-    case_object = balsamic_analysis_api.get_case_object(case_id)
-    if not case_object:
-        LOG.warning(f"{case_id} not found!")
-        raise click.Abort()
-
-    analysis_obj = case_object.analyses[0] if case_object.analyses else None
-    if not analysis_obj:
-        LOG.error(f"{case_id}: analysis not found")
-        raise click.Abort()
-
-    analysis_path = Path(balsamic_analysis_api.get_case_path(case_id))
-
-    if dry_run:
-        LOG.info(f"Would have deleted: {analysis_path}")
-        return EXIT_SUCCESS
-
-    if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
-        if not analysis_path.exists():
-            LOG.warning(f"Could not find path: {analysis_path}")
-            return EXIT_FAIL
-        if analysis_path.is_symlink():
-            LOG.warning(
-                f"Will not automatically delete symlink: {analysis_path}, delete it manually",
-            )
-            return EXIT_FAIL
-
-        shutil.rmtree(analysis_path, ignore_errors=True)
-        LOG.info(f"Cleaned {analysis_path}")
-        analysis_obj.cleaned_at = datetime.now()
-        balsamic_analysis_api.store.commit()
-
-
-@clean.command("mip-run-dir")
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.argument("case_id")
-@click.pass_context
-def mip_run_dir(context, yes, case_id, dry_run: bool = False):
-    """Remove MIP run directory"""
-
-    mip_analysis_api = context.obj["MipAnalysisAPI"]
-    case_obj = mip_analysis_api.get_case_object(case_id)
-
-    if case_obj is None:
-        LOG.error("%s: family not found", case_id)
-        raise click.Abort()
-
-    analysis_path = mip_analysis_api.get_case_output_path(case_id=case_id)
-    if not analysis_path.exists():
-        LOG.error(f"No analysis directory found for {case_id}")
-        raise click.Abort()
-
-    if dry_run:
-        LOG.info(f"Cleaning case {case_id} : Would have deleted contents of {analysis_path}")
-        return
-
-    if yes or click.confirm(f"Are you sure you want to remove {case_id}?"):
-        shutil.rmtree(analysis_path, ignore_errors=True)
-        LOG.info(f"Cleaning case {case_id} : Deleted contents of {analysis_path}")
-        mip_analysis_api.mark_analyses_deleted(case_id)
-        for analysis_obj in case_obj.analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
-        mip_analysis_api.db.commit()
+clean.add_command(past_run_dirs)
 
 
 @clean.command("hk-alignment-files")
@@ -120,12 +32,13 @@ def mip_run_dir(context, yes, case_id, dry_run: bool = False):
 @click.pass_context
 def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
+    meta_api = MetaAPI(context.obj)
     if bundle is None:
         LOG.info("Please select a bundle")
         raise click.Abort
     files = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
-        files.extend(context.obj["housekeeper_api"].get_files(bundle=bundle, tags=[tag]))
+        files.extend(meta_api.housekeeper_api.get_files(bundle=bundle, tags=[tag]))
     for file_obj in files:
         if file_obj.is_included:
             question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
@@ -134,13 +47,12 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
 
         if yes or click.confirm(question):
             file_name = file_obj.full_path
-            if file_obj.is_included and Path(file_name).exists():
-                if not dry_run:
-                    Path(file_name).unlink()
+            if file_obj.is_included and Path(file_name).exists() and not dry_run:
+                Path(file_name).unlink()
 
             if not dry_run:
                 file_obj.delete()
-                context.obj["housekeeper_api"].commit()
+                meta_api.housekeeper_api.commit()
                 click.echo(f"{file_name} deleted")
 
 
@@ -156,11 +68,10 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
 @click.pass_context
 def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Clean up of solved and archived scout cases"""
+    meta_api = MetaAPI(context.obj)
     bundles = []
     for status in ["archived", "solved"]:
-        cases: List[ScoutExportCase] = context.obj["scout_api"].get_cases(
-            status=status, reruns=False
-        )
+        cases: List[ScoutExportCase] = meta_api.scout_api.get_cases(status=status, reruns=False)
         cases_added = 0
         for case in cases:
             x_days_ago = datetime.now() - case.analysis_date
@@ -179,39 +90,39 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
-def hk_past_files(context, case_id, tags, yes, dry_run):
+def hk_past_files(context, case_id: str, tags: list, yes: bool, dry_run: bool):
     """ Remove files found in older housekeeper bundles """
+    meta_api = MetaAPI(context.obj)
     if case_id:
-        cases = [context.obj["status_db"].family(case_id)]
+        cases = [meta_api.status_db.family(case_id)]
     else:
-        cases = context.obj["status_db"].families()
+        cases = meta_api.status_db.families()
     for case in cases:
         case_id = case.internal_id
-        last_version = context.obj["housekeeper_api"].last_version(bundle=case_id)
+        last_version = meta_api.housekeeper_api.last_version(bundle=case_id)
         if not last_version:
             continue
         last_version_file_paths = [
             Path(hk_file.full_path)
-            for hk_file in context.obj["housekeeper_api"].get_files(
+            for hk_file in meta_api.housekeeper_api.get_files(
                 bundle=case_id, tags=None, version=last_version.id
             )
         ]
         LOG.info("Searching %s bundle for outdated files", case_id)
         hk_files = []
         for tag in tags:
-            hk_files.extend(context.obj["housekeeper_api"].get_files(bundle=case_id, tags=[tag]))
+            hk_files.extend(meta_api.housekeeper_api.get_files(bundle=case_id, tags=[tag]))
         for hk_file in hk_files:
             file_path = Path(hk_file.full_path)
             if file_path in last_version_file_paths:
                 continue
             LOG.info("Will remove %s", file_path)
-            if yes or click.confirm("Do you want to remove this file?"):
-                if not dry_run:
-                    hk_file.delete()
-                    context.obj["housekeeper_api"].commit()
-                    if file_path.exists():
-                        file_path.unlink()
-                    LOG.info("File removed")
+            if (yes or click.confirm("Do you want to remove this file?")) and not dry_run:
+                hk_file.delete()
+                meta_api.housekeeper_api.commit()
+                if file_path.exists():
+                    file_path.unlink()
+                LOG.info("File removed")
 
 
 @clean.command("balsamic-past-run-dirs")
@@ -219,28 +130,13 @@ def hk_past_files(context, case_id, tags, yes, dry_run):
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("before_str")
 @click.pass_context
-def balsamic_past_run_dirs(context, before_str: str, yes: bool = False, dry_run: bool = False):
+def balsamic_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
     """Clean up of "old" Balsamic case run dirs"""
 
-    exit_code = EXIT_SUCCESS
-    before = parse_date(before_str)
-    balsamic_analysis_api = context.obj["analysis_api"]
-    possible_cleanups = balsamic_analysis_api.get_analyses_to_clean(before_date=before)
-    LOG.info(f"Cleaning {len(possible_cleanups)} analyses created before {before}")
-
-    for analysis in possible_cleanups:
-        case_id = analysis.family.internal_id
-        LOG.info(f"{case_id} - {balsamic_analysis_api.store.family(case_id).action}")
-        try:
-            LOG.info(f"Cleaning Balsamic output for {case_id}")
-            context.invoke(balsamic_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
-        except Exception as e:
-            LOG.error(f"Failed to clean directories for case {case_id} - {e.__class__}")
-            exit_code = EXIT_FAIL
-    if exit_code:
-        raise click.Abort
-
-    LOG.info("Done cleaning Balsamic output")
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
 @clean.command("mip-past-run-dirs")
@@ -252,28 +148,5 @@ def mip_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs"""
-    exit_code = EXIT_SUCCESS
-    mip_analysis_api = context.obj["MipAnalysisAPI"]
-    before = parse_date(before_str)
-    old_analyses = mip_analysis_api.get_analyses_to_clean(before=before)
-    LOG.info(f"Cleaning {len(old_analyses)} analyses created before {before}")
-    for status_analysis in old_analyses:
-        case_id = status_analysis.family.internal_id
-        try:
-            LOG.info(f"Cleaning MIP output for {case_id}")
-            context.invoke(
-                mip_run_dir,
-                yes=yes,
-                case_id=case_id,
-                dry_run=dry_run,
-            )
-        except Exception as e:
-            LOG.error(
-                f"Failed to clean directories for case {status_analysis.family.internal_id} - {e.__class__}"
-            )
-            exit_code = EXIT_FAIL
-            continue
-    if exit_code:
-        raise click.Abort
-
-    LOG.info("Done cleaning MIP output")
+    context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
