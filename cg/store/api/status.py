@@ -23,8 +23,8 @@ class StatusHandler(BaseHandler):
                 models.ApplicationVersion.application,
             )
             .filter(
-                models.Sample.received_at == None,
-                models.Sample.downsampled_to == None,
+                models.Sample.received_at.is_(None),
+                models.Sample.downsampled_to.is_(None),
                 models.Application.is_external == external,
             )
             .order_by(models.Sample.ordered_at)
@@ -38,11 +38,11 @@ class StatusHandler(BaseHandler):
                 models.ApplicationVersion.application,
             )
             .filter(
-                models.Sample.received_at != None,
-                models.Sample.prepared_at == None,
-                models.Sample.downsampled_to == None,
+                models.Sample.received_at.isnot(None),
+                models.Sample.prepared_at.is_(None),
+                models.Sample.downsampled_to.is_(None),
                 models.Application.is_external == False,
-                models.Sample.sequenced_at == None,
+                models.Sample.sequenced_at.is_(None),
             )
             .order_by(models.Sample.priority.desc(), models.Sample.received_at)
         )
@@ -55,9 +55,9 @@ class StatusHandler(BaseHandler):
                 models.ApplicationVersion.application,
             )
             .filter(
-                models.Sample.prepared_at != None,
-                models.Sample.sequenced_at == None,
-                models.Sample.downsampled_to == None,
+                models.Sample.prepared_at.isnot(None),
+                models.Sample.sequenced_at.is_(None),
+                models.Sample.downsampled_to.is_(None),
                 models.Application.is_external == False,
             )
             .order_by(models.Sample.priority.desc(), models.Sample.received_at)
@@ -561,7 +561,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.filter(
-            models.Analysis.completed_at != None, models.Analysis.uploaded_at == None
+            models.Analysis.completed_at.isnot(None), models.Analysis.uploaded_at.is_(None)
         )
 
         if pipeline:
@@ -578,7 +578,7 @@ class StatusHandler(BaseHandler):
             models.Analysis.uploaded_at.isnot(None),
             models.Analysis.cleaned_at.is_(None),
             models.Analysis.started_at <= before,
-            models.Family.action == None,
+            models.Family.action.is_(None),
         )
         if pipeline:
             records = records.filter(
@@ -645,26 +645,26 @@ class StatusHandler(BaseHandler):
     def samples_to_deliver(self):
         """Fetch samples that have been sequenced but not delivered."""
         return self.Sample.query.filter(
-            models.Sample.sequenced_at != None,
-            models.Sample.delivered_at == None,
-            models.Sample.downsampled_to == None,
+            models.Sample.sequenced_at.isnot(None),
+            models.Sample.delivered_at.is_(None),
+            models.Sample.downsampled_to.is_(None),
         )
 
     def samples_not_delivered(self):
         """Fetch samples not delivered."""
         return self.Sample.query.filter(
-            models.Sample.delivered_at == None, models.Sample.downsampled_to == None
+            models.Sample.delivered_at.is_(None), models.Sample.downsampled_to.is_(None)
         )
 
     def samples_not_invoiced(self):
         """Fetch all samples that are not invoiced."""
         return self.Sample.query.filter(
-            models.Sample.downsampled_to == None, models.Sample.invoice_id == None
+            models.Sample.downsampled_to.is_(None), models.Sample.invoice_id.is_(None)
         )
 
     def samples_not_downsampled(self):
         """Fetch all samples that are not down sampled."""
-        return self.Sample.query.filter(models.Sample.downsampled_to == None)
+        return self.Sample.query.filter(models.Sample.downsampled_to.is_(None))
 
     def microbial_samples_to_invoice(self, customer: models.Customer = None):
         """Fetch microbial samples that should be invoiced.
@@ -674,7 +674,7 @@ class StatusHandler(BaseHandler):
         records = self.Sample.query.filter(
             str(Pipeline.MICROSALT) in self.Family.data_analysis,
             models.Sample.delivered_at is not None,
-            models.Sample.invoice_id == None,
+            models.Sample.invoice_id.is_(None),
         )
         customers_to_invoice = list({case_obj.customer for case_obj in records.all()})
         if customer:
@@ -688,10 +688,10 @@ class StatusHandler(BaseHandler):
         have been marked to skip invoicing.
         """
         records = self.Sample.query.filter(
-            models.Sample.delivered_at != None,
-            models.Sample.invoice_id == None,
+            models.Sample.delivered_at.isnot(None),
+            models.Sample.invoice_id.is_(None),
             models.Sample.no_invoice == False,
-            models.Sample.downsampled_to == None,
+            models.Sample.downsampled_to.is_(None),
         )
         customers_to_invoice = [
             case_obj.customer
@@ -708,9 +708,9 @@ class StatusHandler(BaseHandler):
         Fetch pools that should be invoiced.
         """
         records = self.Pool.query.filter(
-            models.Pool.invoice_id == None,
+            models.Pool.invoice_id.is_(None),
             models.Pool.no_invoice == False,
-            models.Pool.delivered_at != None,
+            models.Pool.delivered_at.isnot(None),
         )
 
         customers_to_invoice = [
@@ -725,12 +725,12 @@ class StatusHandler(BaseHandler):
 
     def pools_to_receive(self):
         """Fetch pools that have been not yet been received."""
-        return self.Pool.query.filter(models.Pool.received_at == None)
+        return self.Pool.query.filter(models.Pool.received_at.is_(None))
 
     def pools_to_deliver(self):
         """Fetch pools that have been not yet been delivered."""
         return self.Pool.query.filter(
-            models.Pool.received_at != None, models.Pool.delivered_at == None
+            models.Pool.received_at.isnot(None), models.Pool.delivered_at.is_(None)
         )
 
     def _calculate_estimated_turnaround_time(
