@@ -12,7 +12,7 @@ class JsonSample(OrderSample):
     index: Optional[str]
     quantity: Optional[str]
     synopsis: Optional[List[str]]
-    well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]
+    well_position: Optional[constr(regex="[A-H]:[0-9]+")]
 
     @validator("priority", pre=True)
     def make_lower(cls, value: str):
