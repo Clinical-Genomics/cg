@@ -67,8 +67,6 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: str) -> 
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    if not analysis_api.all_flowcells_on_disk(case_id=case_id):
-        raise click.Abort
     analysis_api.link_fastq_files(
         case_id=case_id,
         sample_id=sample_id,
