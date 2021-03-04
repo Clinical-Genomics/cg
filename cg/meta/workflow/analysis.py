@@ -57,20 +57,11 @@ class AnalysisAPI(MetaAPI):
             LOG.error("Working directory path for %s does not exist", case_id)
             raise CgError()
 
-    def get_flowcells(self, case_id: str) -> List[models.Flowcell]:
-        """Get all flowcells for all samples in a ticket"""
-        flowcells = set()
-        case_obj: models.Family = self.status_db.family(case_id)
-        for familysample in case_obj.links:
-            for flowcell in familysample.sample.flowcells:
-                flowcells.add(flowcell)
-        return list(flowcells)
-
     def all_flowcells_on_disk(self, case_id: str) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
         Flowcells not on disk will be requested
         """
-        flowcells = self.get_flowcells(case_id=case_id)
+        flowcells = self.status_db.flowcells(family=self.status_db.family(case_id))
         statuses = []
         for flowcell_obj in flowcells:
             LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")

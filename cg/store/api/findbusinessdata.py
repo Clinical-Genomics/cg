@@ -165,10 +165,10 @@ class FindBusinessDataHandler(BaseHandler):
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
-        if invoiced is True:
-            query = query.filter(models.Invoice.invoiced_at != None)
-        elif invoiced is False:
-            query = query.filter(models.Invoice.invoiced_at == None)
+        if invoiced:
+            query = query.filter(models.Invoice.invoiced_at.isnot(None))
+        else:
+            query = query.filter(models.Invoice.invoiced_at.is_(None))
         return query
 
     def invoice(self, invoice_id: int) -> models.Invoice:
