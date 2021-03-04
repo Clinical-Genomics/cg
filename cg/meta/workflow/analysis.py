@@ -64,7 +64,8 @@ class AnalysisAPI(MetaAPI):
         flowcells = self.status_db.flowcells(family=self.status_db.family(case_id))
         statuses = []
         for flowcell_obj in flowcells:
-            LOG.debug(f"{flowcell_obj.name}: checking if flowcell is on disk")
+            LOG.info(f"{flowcell_obj.name}: checking if flowcell is on disk")
+            LOG.info(f"{flowcell_obj.name}: status is {flowcell_obj.status}")
             statuses.append(flowcell_obj.status)
             if flowcell_obj.status == "removed":
                 LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
