@@ -6,10 +6,8 @@ from typing import List
 import click
 
 from cg.apps.scout.scout_export import ScoutExportCase
-from cg.cli.workflow.commands import past_run_dirs
+from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs
 from cg.meta.meta import MetaAPI
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 LOG = logging.getLogger(__name__)
@@ -22,7 +20,8 @@ def clean(context):
     return
 
 
-clean.add_command(past_run_dirs)
+clean.add_command(balsamic_past_run_dirs)
+clean.add_command(mip_past_run_dirs)
 
 
 @clean.command("hk-alignment-files")
@@ -123,30 +122,3 @@ def hk_past_files(context, case_id: str, tags: list, yes: bool, dry_run: bool):
                 if file_path.exists():
                     file_path.unlink()
                 LOG.info("File removed")
-
-
-@clean.command("balsamic-past-run-dirs")
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.argument("before_str")
-@click.pass_context
-def balsamic_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
-):
-    """Clean up of "old" Balsamic case run dirs"""
-
-    context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
-    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
-
-
-@clean.command("mip-past-run-dirs")
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.argument("before_str")
-@click.pass_context
-def mip_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
-):
-    """Clean up of "old" MIP case run dirs"""
-    context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)

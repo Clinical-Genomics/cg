@@ -9,6 +9,8 @@ from dateutil.parser import parse as parse_date
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import FlowcellsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
@@ -157,3 +159,30 @@ def past_run_dirs(context, before_str: str, yes: bool = False, dry_run: bool = F
     if exit_code:
         raise click.Abort
     LOG.info("Done cleaning %s output ", analysis_api.pipeline)
+
+
+@click.command("balsamic-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("before_str")
+@click.pass_context
+def balsamic_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic case run dirs"""
+
+    context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("mip-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("before_str")
+@click.pass_context
+def mip_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" MIP case run dirs"""
+    context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
