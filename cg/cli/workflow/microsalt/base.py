@@ -9,7 +9,7 @@ import click
 import datetime as dt
 
 from cg.apps.vogue import VogueAPI
-from cg.cli.workflow.commands import store, store_available
+from cg.cli.workflow.commands import store, store_available, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -52,6 +52,7 @@ def microsalt(context: click.Context) -> None:
 
 microsalt.add_command(store)
 microsalt.add_command(store_available)
+microsalt.add_command(resolve_compression)
 
 
 @microsalt.command()

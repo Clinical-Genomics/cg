@@ -10,6 +10,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import (
     BalsamicStartError,
     CgError,
+    DecompressionNeededError,
 )
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
@@ -190,16 +191,20 @@ def start(
 ):
     """Start full workflow for CASE ID"""
     LOG.info(f"Starting analysis for {case_id}")
-    context.invoke(link, case_id=case_id)
-    context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
-    context.invoke(
-        run,
-        case_id=case_id,
-        analysis_type=analysis_type,
-        priority=priority,
-        run_analysis="--run-analysis",
-        dry_run=dry_run,
-    )
+    try:
+        context.invoke(resolve_compression)
+        context.invoke(link, case_id=case_id)
+        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        context.invoke(
+            run,
+            case_id=case_id,
+            analysis_type=analysis_type,
+            priority=priority,
+            run_analysis="--run-analysis",
+            dry_run=dry_run,
+        )
+    except DecompressionNeededError as e:
+        LOG.error(e.message)
 
 
 @balsamic.command("start-available")

@@ -3,7 +3,7 @@ import click
 
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
-from cg.exc import CgError
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 
 OPTION_DRY = click.option(
@@ -81,9 +81,13 @@ def start(context: click.Context, case_id: str, dry_run: bool):
     LOG.info("Starting full Fluffy workflow for %s", case_id)
     if dry_run:
         LOG.info("Dry run: the executed commands will not produce output!")
-    context.invoke(link, case_id=case_id)
-    context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
-    context.invoke(run, case_id=case_id, dry_run=dry_run)
+    try:
+        context.invoke(resolve_compression)
+        context.invoke(link, case_id=case_id)
+        context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
+        context.invoke(run, case_id=case_id, dry_run=dry_run)
+    except DecompressionNeededError as e:
+        LOG.error(e.message)
 
 
 @fluffy.command("start-available")
