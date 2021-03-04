@@ -4,7 +4,7 @@ from pathlib import Path
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
-
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 EXIT_SUCCESS = 0
 
@@ -23,7 +23,7 @@ def test_balsamic_no_args(cli_runner, balsamic_context: dict):
     assert "help" in result.output
 
 
-def test_start(cli_runner, balsamic_context: dict, mock_config, caplog):
+def test_start(cli_runner, balsamic_context: dict, mock_config, caplog, mocker):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
 
@@ -79,7 +79,7 @@ def test_store(
     assert balsamic_context["analysis_api"].housekeeper_api.bundle(case_id)
 
 
-def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
+def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, caplog, mocker):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
@@ -98,6 +98,10 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     Path(balsamic_context["analysis_api"].get_case_config_path(case_id_success)).touch(
         exist_ok=True
     )
+
+    # GIVEN decompression is not needed
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
+    BalsamicAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)

@@ -82,7 +82,7 @@ def start(context: click.Context, case_id: str, dry_run: bool):
     if dry_run:
         LOG.info("Dry run: the executed commands will not produce output!")
     try:
-        context.invoke(resolve_compression)
+        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id)
         context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
         context.invoke(run, case_id=case_id, dry_run=dry_run)
