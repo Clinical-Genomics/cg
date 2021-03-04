@@ -66,7 +66,7 @@ class AnalysisAPI(MetaAPI):
         for flowcell_obj in flowcells:
             LOG.info(f"{flowcell_obj.name}: checking if flowcell is on disk")
             LOG.info(f"{flowcell_obj.name}: status is {flowcell_obj.status}")
-            statuses.append(flowcell_obj.status if flowcell_obj.status else "ondisk")
+            statuses.append(flowcell_obj.status or "ondisk")
             if flowcell_obj.status == "removed":
                 LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
                 flowcell_obj.status = "requested"
