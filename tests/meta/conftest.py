@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -126,3 +127,11 @@ def fixture_mip_hk_store(
     helpers.ensure_hk_bundle(real_housekeeper_api, empty_deliver_hk_bundle_data, include=True)
 
     return real_housekeeper_api
+
+
+@pytest.fixture()
+def mip_analysis_api(context_config, mip_hk_store, analysis_store):
+    analysis_api = MipDNAAnalysisAPI(context_config)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

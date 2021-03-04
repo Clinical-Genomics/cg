@@ -1,14 +1,8 @@
 """This script tests the cli mip store functions"""
 import logging
-from pathlib import Path
-
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis
-from cg.cli.workflow.mip.store import analysis, completed
+from cg.cli.workflow.mip.store import analysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from click.testing import CliRunner
-
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 def test_store_no_config(cli_runner: CliRunner, dna_mip_context: dict, caplog):
@@ -55,49 +49,3 @@ def test_store_analysis(
         assert "Included files in Housekeeper" in caplog.text
         # THEN the exit code should be EXIT_SUCCESS
         assert result.exit_code == EXIT_SUCCESS
-
-
-def test_store_completed_good_cases(
-    cli_runner: CliRunner,
-    mocker,
-    dna_mip_context: dict,
-    context_config,
-    mip_case_ids: dict,
-    mip_configs,
-    helpers,
-    caplog,
-):
-    """Test if store completed stores function"""
-
-    caplog.set_level("INFO")
-
-    mocker.patch.object(MipDNAAnalysisAPI, "get_case_config_path")
-    MipDNAAnalysisAPI.get_case_config_path.return_value = Path(
-        "tests/fixtures/apps/mip/dna/store/case_config.yaml"
-    )
-
-    mocker.patch.object(TrailblazerAPI, "get_latest_analysis")
-    TrailblazerAPI.get_latest_analysis.return_value = TrailblazerAnalysis.parse_obj(
-        {
-            "id": 1,
-            "family": "yellowhog",
-            "status": "completed",
-        }
-    )
-
-    status_db = dna_mip_context["analysis_api"].status_db
-    for case_id in ["yellowhog", "bluezebra", "purplesnail"]:
-        case_obj = status_db.family(case_id)
-        if not case_obj:
-            case_obj = helpers.add_case(store=status_db, internal_id=case_id)
-        case_obj.action = "running"
-        status_db.commit()
-    # WHEN we run store all completed cases
-    result = cli_runner.invoke(completed, obj=dna_mip_context)
-    # THEN some cases should be added and some should fail
-    assert "new bundle added: yellowhog" in caplog.text
-    assert "Case storage failed: purplesnail" in caplog.text
-    assert "new bundle added: bluezebra" in caplog.text
-    assert "Included files in Housekeeper" in caplog.text
-    # THEN the command should have an EXIT_FAIL code
-    assert result.exit_code == EXIT_FAIL
