@@ -14,6 +14,10 @@ LOG = logging.getLogger(__name__)
 
 
 class AnalysisAPI(MetaAPI):
+    """
+    Parent class containing all methods that are either shared or overridden by other workflow APIs.
+    """
+
     def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
         super().__init__(config=config)
         self.pipeline = pipeline
