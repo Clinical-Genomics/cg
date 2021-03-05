@@ -28,6 +28,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def store(context):
     """Store results from MIP in housekeeper"""
+
     context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
 
