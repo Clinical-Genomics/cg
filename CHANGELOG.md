@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.3.0]
+### Added
+- DIAB and NBS-M to master list 
+### Fixed
+- Alphabetical order of master list
+
 ## [20.2.1]
 ### Fixed
 - Fixed json orderform special cases
