@@ -48,9 +48,8 @@ class AnalysisAPI(MetaAPI):
             raise CgError(f"No analysis_finish file found for case {case_id}")
 
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
-        """
-        Passes silently if case exists in StatusDB, raises error if case is missing
-        """
+        """Passes silently if case exists in StatusDB, raises error if case is missing"""
+        
         case_obj: models.Family = self.status_db.family(case_id)
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
@@ -106,9 +105,7 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
-        """
-        Retrieve sample name provided by customer for specific sample
-        """
+        """Retrieve sample name provided by customer for specific sample"""
         sample_obj: models.Sample = self.status_db.sample(lims_id)
         return sample_obj.name
 
@@ -133,6 +130,8 @@ class AnalysisAPI(MetaAPI):
         return "other"
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
+        """Storing bundle data in Housekeeper for CASE_ID"""
+        
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_result = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
@@ -147,7 +146,9 @@ class AnalysisAPI(MetaAPI):
         )
 
     def upload_bundle_statusdb(self, case_id: str) -> None:
-        LOG.info(f"Storing Analysis in ClinicalDB for {case_id}")
+        """Storing analysis bundle in StatusDB for CASE_ID"""
+        
+        LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)

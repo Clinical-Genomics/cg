@@ -31,7 +31,9 @@ clean.add_command(mip_past_run_dirs)
 @click.pass_context
 def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
+
     meta_api = MetaAPI(context.obj)
+
     if bundle is None:
         LOG.info("Please select a bundle")
         raise click.Abort
@@ -67,7 +69,9 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
 @click.pass_context
 def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Clean up of solved and archived scout cases"""
+
     meta_api = MetaAPI(context.obj)
+
     bundles = []
     for status in ["archived", "solved"]:
         cases: List[ScoutExportCase] = meta_api.scout_api.get_cases(status=status, reruns=False)
@@ -91,7 +95,9 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
 @click.pass_context
 def hk_past_files(context, case_id: str, tags: list, yes: bool, dry_run: bool):
     """ Remove files found in older housekeeper bundles """
+
     meta_api = MetaAPI(context.obj)
+
     if case_id:
         cases = [meta_api.status_db.family(case_id)]
     else:

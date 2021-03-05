@@ -13,7 +13,6 @@ START_WITH_PROGRAM = click.option(
 OPTION_DRY = click.option(
     "-d",
     "--dry-run",
-    "dry_run",
     is_flag=True,
     default=False,
     help="Print to console instead of executing",

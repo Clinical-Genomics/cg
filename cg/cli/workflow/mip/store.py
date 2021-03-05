@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 @click.group()
 @click.pass_context
 def store(context):
-    """Store results from MIP in housekeeper."""
+    """Store results from MIP in housekeeper"""
     context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
 
@@ -35,7 +35,8 @@ def store(context):
 @click.argument("config-stream", type=click.File("r"), required=False)
 @click.pass_context
 def analysis(context, config_stream):
-    """Store a finished analysis in Housekeeper."""
+    """Store a finished analysis in Housekeeper"""
+
     analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
 
     exit_code = EXIT_SUCCESS
@@ -72,7 +73,8 @@ def analysis(context, config_stream):
 @store.command()
 @click.pass_context
 def completed(context):
-    """Store all completed analyses."""
+    """Store all completed analyses"""
+
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
 
     exit_code = EXIT_SUCCESS

@@ -6,8 +6,8 @@ import click
 
 from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
 from cg.cli.workflow.mip.base import (
-    panel,
     config_case,
+    panel,
     run,
 )
 from cg.cli.workflow.mip.options import (
@@ -35,15 +35,16 @@ def mip_dna(
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return
+
     context.obj["analysis_api"] = MipDNAAnalysisAPI(config=context.obj)
 
 
+mip_dna.add_command(config_case)
 mip_dna.add_command(ensure_flowcells_ondisk)
 mip_dna.add_command(link)
-mip_dna.add_command(config_case)
+mip_dna.add_command(panel)
 mip_dna.add_command(resolve_compression)
 mip_dna.add_command(run)
-mip_dna.add_command(panel)
 mip_dna.add_command(store_cmd)
 
 
@@ -76,6 +77,7 @@ def start(
     """Start full MIP-DNA analysis workflow for a case"""
 
     analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     LOG.info("Starting full MIP-DNA analysis workflow for case %s", case_id)
     try:
@@ -103,7 +105,9 @@ def start(
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full MIP-DNA analysis workflow for all cases ready for analysis"""
+
     analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:

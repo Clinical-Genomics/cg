@@ -29,14 +29,16 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
+
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return
+
     context.obj["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
 
 
-mip_rna.add_command(link)
 mip_rna.add_command(config_case)
+mip_rna.add_command(link)
 mip_rna.add_command(resolve_compression)
 mip_rna.add_command(run)
 mip_rna.add_command(store_cmd)
@@ -52,7 +54,6 @@ mip_rna.add_command(store_cmd)
 @click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option(
     "--skip-evaluation",
-    "skip_evaluation",
     is_flag=True,
     help="Skip mip qccollect evaluation",
 )
@@ -71,6 +72,7 @@ def start(
     """Start full MIP-RNA analysis workflow for a case"""
 
     analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
+
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     LOG.info("Starting full MIP-RNA analysis workflow for case %s", case_id)
     try:
@@ -98,6 +100,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
 
     analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
+
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:

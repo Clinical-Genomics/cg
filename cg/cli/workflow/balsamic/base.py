@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
+    "-d", "--dry-run", help="Print command to console without executing", is_flag=True
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
@@ -74,6 +74,7 @@ balsamic.add_command(store_available)
 @click.pass_context
 def config_case(context: click.Context, panel_bed: str, case_id: str, dry_run: bool):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
+
     analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
@@ -134,7 +135,9 @@ def run(
 @click.pass_context
 def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
+
     analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
@@ -153,7 +156,9 @@ def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry
 @click.pass_context
 def store_housekeeper(context: click.Context, case_id: str):
     """Store a finished analysis in Housekeeper and StatusDB."""
+
     analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
@@ -214,6 +219,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     """Start full workflow for all cases ready for analysis"""
 
     analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
@@ -222,7 +228,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred: %s", e)
+            LOG.error("Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

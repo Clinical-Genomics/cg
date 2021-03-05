@@ -26,6 +26,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
+
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
 
@@ -37,7 +38,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
         LOG.error(error.message)
         raise click.Abort()
     if dry_run:
-        print(config_data)
+        click.echo(config_data)
         return
     out_path: Path = analysis_api.write_pedigree_config(data=config_data, case_id=case_id)
     LOG.info(f"Config file saved to {out_path}")
@@ -52,6 +53,7 @@ def panel(context: click.Context, case_id: str, dry_run: bool):
 
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+
     bed_lines: List[str] = analysis_api.panel(case_id=case_id)
     if dry_run:
         for bed_line in bed_lines:
@@ -66,10 +68,9 @@ def panel(context: click.Context, case_id: str, dry_run: bool):
 @START_WITH_PROGRAM
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
+@click.option("--mip-dry-run", is_flag=True, help="Run MIP in dry-run mode")
 @click.option(
     "--skip-evaluation",
-    "skip_evaluation",
     is_flag=True,
     help="Skip mip qccollect evaluation",
 )
@@ -85,7 +86,9 @@ def run(
     start_with: str = None,
 ):
     """Run the analysis for a case"""
+
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
+
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
         priority=priority or analysis_api.get_priority_for_case(case_id),

@@ -40,7 +40,7 @@ class FastqHandler:
 
     @staticmethod
     def size_before(files: List) -> int:
-        """returns the total size of the linked fastq files before concatenation"""
+        """Returns the total size of the linked fastq files before concatenation"""
 
         return sum(os.stat(f).st_size for f in files)
 

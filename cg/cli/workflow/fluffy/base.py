@@ -97,6 +97,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
 
     analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
@@ -105,7 +106,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error.message)
             exit_code = EXIT_FAIL
         except Exception as e:
-            LOG.error(f"Unspecified error occurred: %s", e)
+            LOG.error("Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

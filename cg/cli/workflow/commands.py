@@ -13,7 +13,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 OPTION_DRY = click.option(
-    "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
+    "-d", "--dry-run", help="Print command to console without executing", is_flag=True
 )
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 
@@ -60,11 +60,11 @@ def link(context: click.Context, case_id: str):
 @OPTION_DRY
 @click.pass_context
 def store(context: click.Context, case_id: str, dry_run: bool):
-    """
-    Store finished analysis files in Housekeeper
-    """
+    """Store finished analysis files in Housekeeper"""
+
     analysis_api: AnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+
     if dry_run:
         LOG.info("Dry run: Would have stored deliverables for %s", case_id)
         return
@@ -83,10 +83,10 @@ def store(context: click.Context, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """
-    Store bundles for all finished analyses in Housekeeper
-    """
+    """Store bundles for all finished analyses in Housekeeper"""
+
     analysis_api: AnalysisAPI = context.obj["analysis_api"]
+
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info("Storing deliverables for %s", case_obj.internal_id)
@@ -105,7 +105,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_context
 def clean_run_dir(context, yes: bool, case_id: str, dry_run: bool = False):
-    """Remove Balsamic run directory"""
+    """Remove workflow run directory"""
 
     analysis_api = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
@@ -127,10 +127,9 @@ def clean_run_dir(context, yes: bool, case_id: str, dry_run: bool = False):
         shutil.rmtree(analysis_path, ignore_errors=True)
         LOG.info("Cleaned %s", analysis_path)
         analyses: list = analysis_api.status_db.family(case_id).analyses
-        if analyses:
-            for analysis_obj in analyses:
-                analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-                analysis_api.status_db.commit()
+        for analysis_obj in analyses:
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+            analysis_api.status_db.commit()
 
 
 @click.command("past-run-dirs")
@@ -172,6 +171,7 @@ def balsamic_past_run_dirs(
     """Clean up of "old" Balsamic case run dirs"""
 
     context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -184,5 +184,7 @@ def mip_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs"""
+
     context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
