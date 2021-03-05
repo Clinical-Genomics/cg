@@ -91,12 +91,15 @@ class AnalysisAPI(MetaAPI):
         return "normal"
 
     def get_case_path(self, case_id: str) -> Path:
+        """Path to case working directory"""
         raise NotImplementedError
 
     def get_case_config_path(self, case_id) -> Path:
+        """Path to case config file"""
         raise NotImplementedError
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Path to Trailblazer job id file"""
         raise NotImplementedError
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
@@ -115,6 +118,10 @@ class AnalysisAPI(MetaAPI):
 
     @staticmethod
     def get_application_type(sample_obj: models.Sample) -> str:
+        """
+        Gets application type for sample. Only application types supported by trailblazer (or other)
+        are valid outputs
+        """
         analysis_type = sample_obj.application_version.application.prep_category
         if analysis_type and analysis_type.lower() in [
             "wgs",
@@ -172,7 +179,7 @@ class AnalysisAPI(MetaAPI):
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
-            type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
+            analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
             out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             priority=self.get_priority_for_case(case_id=case_id),
@@ -237,7 +244,10 @@ class AnalysisAPI(MetaAPI):
     def link_fastq_files_for_sample(
         self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
     ) -> None:
-        """Link FASTQ files for a sample."""
+        """
+        Link FASTQ files for a sample to working directory.
+        If pipeline input requires concatenated fastq, files can also be concatenated
+        """
         linked_reads_paths = {1: [], 2: []}
         concatenated_paths = {1: "", 2: ""}
         files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
@@ -285,6 +295,10 @@ class AnalysisAPI(MetaAPI):
         return bed_version_obj.filename
 
     def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
+        """
+        Handles decompression automatically for case.
+        Raises error to interrupt the workflow execution if cannot be resolved immediately
+        """
         decompression_needed = self.prepare_fastq_api.is_spring_decompression_needed(case_id)
 
         if decompression_needed:

@@ -130,7 +130,7 @@ class TrailblazerAPI:
     def add_pending_analysis(
         self,
         case_id: str,
-        type: str,
+        analysis_type: str,
         config_path: str,
         out_dir: str,
         priority: str,
@@ -140,7 +140,7 @@ class TrailblazerAPI:
         request_body = {
             "case_id": case_id,
             "email": email,
-            "type": type,
+            "type": analysis_type,
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
