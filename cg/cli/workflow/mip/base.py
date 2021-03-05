@@ -31,7 +31,6 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     analysis_api.verify_case_id_in_statusdb(case_id)
 
     panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
-
     try:
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
@@ -40,8 +39,7 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
     if dry_run:
         click.echo(config_data)
         return
-    out_path: Path = analysis_api.write_pedigree_config(data=config_data, case_id=case_id)
-    LOG.info(f"Config file saved to {out_path}")
+    analysis_api.write_pedigree_config(data=config_data, case_id=case_id)
 
 
 @click.command()

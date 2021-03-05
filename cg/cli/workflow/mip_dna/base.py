@@ -10,6 +10,7 @@ from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
     OPTION_DRY,
+    OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
@@ -51,7 +52,7 @@ mip_dna.add_command(store_cmd)
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
+@OPTION_MIP_DRY_RUN
 @click.option(
     "--skip-evaluation",
     "skip_evaluation",

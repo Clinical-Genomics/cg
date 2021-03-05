@@ -11,6 +11,9 @@ from cg.store import Store
 
 
 class MetaAPI:
+
+    """MetaAPI class initializing all complex API used within CG in non-conflicting manner"""
+
     def __init__(self, config: dict):
         self.config = config or {}
         self.housekeeper_api = HousekeeperAPI(self.config)

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List
+from typing import List, Tuple, Optional
 
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
@@ -16,7 +16,7 @@ VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database"""
 
-    def samples_to_receive(self, external=False):
+    def samples_to_receive(self, external=False) -> Query:
         """Fetch incoming samples."""
         return (
             self.Sample.query.join(
@@ -31,7 +31,7 @@ class StatusHandler(BaseHandler):
             .order_by(models.Sample.ordered_at)
         )
 
-    def samples_to_prepare(self):
+    def samples_to_prepare(self) -> Query:
         """Fetch samples in lab prep queue."""
         return (
             self.Sample.query.join(
@@ -48,7 +48,7 @@ class StatusHandler(BaseHandler):
             .order_by(models.Sample.priority.desc(), models.Sample.received_at)
         )
 
-    def samples_to_sequence(self):
+    def samples_to_sequence(self) -> Query:
         """Fetch samples in sequencing."""
         return (
             self.Sample.query.join(
@@ -106,6 +106,14 @@ class StatusHandler(BaseHandler):
         )
         return list(families_query)[:limit]
 
+    def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[models.Family]:
+        return (
+            self.query(models.Family)
+            .filter(models.Family.action == "running")
+            .filter(models.Family.data_analysis == pipeline)
+            .all()
+        )
+
     def get_cases_from_ticket(self, ticket_id: int) -> Query:
         return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
             models.Sample.ticket_number == ticket_id
@@ -123,30 +131,30 @@ class StatusHandler(BaseHandler):
         self,
         internal_id: str = None,
         name: str = None,
-        days=0,
-        case_action=None,
-        priority=None,
+        days: int = 0,
+        case_action: Optional[str] = None,
+        priority: str = None,
         customer_id: str = None,
         exclude_customer_id: str = None,
         data_analysis: str = None,
         sample_id: str = None,
-        only_received=False,
-        only_prepared=False,
-        only_sequenced=False,
-        only_analysed=False,
-        only_uploaded=False,
-        only_delivered=False,
-        only_delivery_reported=False,
-        only_invoiced=False,
-        exclude_received=False,
-        exclude_prepared=False,
-        exclude_sequenced=False,
-        exclude_analysed=False,
-        exclude_uploaded=False,
-        exclude_delivered=False,
-        exclude_delivery_reported=False,
-        exclude_invoiced=False,
-    ):
+        only_received: bool = False,
+        only_prepared: bool = False,
+        only_sequenced: bool = False,
+        only_analysed: bool = False,
+        only_uploaded: bool = False,
+        only_delivered: bool = False,
+        only_delivery_reported: bool = False,
+        only_invoiced: bool = False,
+        exclude_received: bool = False,
+        exclude_prepared: bool = False,
+        exclude_sequenced: bool = False,
+        exclude_analysed: bool = False,
+        exclude_uploaded: bool = False,
+        exclude_delivered: bool = False,
+        exclude_delivery_reported: bool = False,
+        exclude_invoiced: bool = False,
+    ) -> list:
         """Fetch cases with and w/o analyses"""
         case_q = self._get_filtered_case_query(
             case_action,
@@ -196,7 +204,7 @@ class StatusHandler(BaseHandler):
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
     @staticmethod
-    def _get_case_output(case_data: SimpleNamespace):
+    def _get_case_output(case_data: SimpleNamespace) -> dict:
         return {
             "data_analysis": case_data.data_analysis,
             "internal_id": case_data.internal_id,
@@ -244,24 +252,24 @@ class StatusHandler(BaseHandler):
 
     @staticmethod
     def _should_be_skipped(
-        case_data,
-        exclude_analysed,
-        exclude_delivered,
-        exclude_delivery_reported,
-        exclude_invoiced,
-        exclude_prepared,
-        exclude_received,
-        exclude_sequenced,
-        exclude_uploaded,
-        only_analysed,
-        only_delivered,
-        only_delivery_reported,
-        only_invoiced,
-        only_prepared,
-        only_received,
-        only_sequenced,
-        only_uploaded,
-    ):
+        case_data: SimpleNamespace,
+        exclude_analysed: bool,
+        exclude_delivered: bool,
+        exclude_delivery_reported: bool,
+        exclude_invoiced: bool,
+        exclude_prepared: bool,
+        exclude_received: bool,
+        exclude_sequenced: bool,
+        exclude_uploaded: bool,
+        only_analysed: bool,
+        only_delivered: bool,
+        only_delivery_reported: bool,
+        only_invoiced: bool,
+        only_prepared: bool,
+        only_received: bool,
+        only_sequenced: bool,
+        only_uploaded: bool,
+    ) -> bool:
         skip_case = False
         if only_received and not case_data.samples_received_bool:
             skip_case = True
@@ -297,7 +305,7 @@ class StatusHandler(BaseHandler):
             skip_case = True
         return skip_case
 
-    def _calculate_case_data(self, case_obj: models.Family):
+    def _calculate_case_data(self, case_obj: models.Family) -> SimpleNamespace:
         case_data = self._get_empty_case_data()
 
         case_data.data_analysis = case_obj.data_analysis
@@ -463,16 +471,16 @@ class StatusHandler(BaseHandler):
 
     def _get_filtered_case_query(
         self,
-        case_action,
-        customer_id,
+        case_action: Optional[str],
+        customer_id: str,
         data_analysis: str,
-        days,
-        exclude_customer_id,
-        internal_id,
-        name,
-        priority,
-        sample_id,
-    ):
+        days: int,
+        exclude_customer_id: bool,
+        internal_id: str,
+        name: str,
+        priority: str,
+        sample_id: str,
+    ) -> Query:
         case_q = self.Family.query
         # family filters
         if days != 0:
@@ -511,7 +519,12 @@ class StatusHandler(BaseHandler):
         return case_q
 
     @staticmethod
-    def _is_rerun(case_obj, samples_received_at, samples_prepared_at, samples_sequenced_at):
+    def _is_rerun(
+        case_obj: models.Family,
+        samples_received_at: datetime,
+        samples_prepared_at: datetime,
+        samples_sequenced_at: datetime,
+    ) -> bool:
 
         return (
             (len(case_obj.analyses) > 0)
@@ -595,14 +608,14 @@ class StatusHandler(BaseHandler):
             models.Analysis, models.Family.links, models.FamilySample.sample
         ).filter(models.Sample.loqusdb_id.is_(None))
 
-    def observations_uploaded(self):
+    def observations_uploaded(self) -> Query:
         """Fetch observations that have been uploaded."""
 
         return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
             models.Sample.loqusdb_id.isnot(None)
         )
 
-    def analyses_to_deliver(self, pipeline: Pipeline = None):
+    def analyses_to_deliver(self, pipeline: Pipeline = None) -> Query:
         """Fetch analyses that have been uploaded but not delivered."""
         return (
             self.Analysis.query.join(models.Family, models.Family.links, models.FamilySample.sample)
@@ -643,7 +656,7 @@ class StatusHandler(BaseHandler):
         )
         return analyses_query
 
-    def samples_to_deliver(self):
+    def samples_to_deliver(self) -> Query:
         """Fetch samples that have been sequenced but not delivered."""
         return self.Sample.query.filter(
             models.Sample.sequenced_at.isnot(None),
@@ -651,23 +664,23 @@ class StatusHandler(BaseHandler):
             models.Sample.downsampled_to.is_(None),
         )
 
-    def samples_not_delivered(self):
+    def samples_not_delivered(self) -> Query:
         """Fetch samples not delivered."""
         return self.Sample.query.filter(
             models.Sample.delivered_at.is_(None), models.Sample.downsampled_to.is_(None)
         )
 
-    def samples_not_invoiced(self):
+    def samples_not_invoiced(self) -> Query:
         """Fetch all samples that are not invoiced."""
         return self.Sample.query.filter(
             models.Sample.downsampled_to.is_(None), models.Sample.invoice_id.is_(None)
         )
 
-    def samples_not_downsampled(self):
+    def samples_not_downsampled(self) -> Query:
         """Fetch all samples that are not down sampled."""
         return self.Sample.query.filter(models.Sample.downsampled_to.is_(None))
 
-    def microbial_samples_to_invoice(self, customer: models.Customer = None):
+    def microbial_samples_to_invoice(self, customer: models.Customer = None) -> Tuple[Query, list]:
         """Fetch microbial samples that should be invoiced.
 
         Returns microbial samples that have been delivered but not invoiced.
@@ -682,7 +695,7 @@ class StatusHandler(BaseHandler):
             records = records.join(models.Family).filter(models.Family.customer_id == customer.id)
         return records, customers_to_invoice
 
-    def samples_to_invoice(self, customer: models.Customer = None):
+    def samples_to_invoice(self, customer: models.Customer = None) -> Tuple[Query, list]:
         """Fetch samples that should be invoiced.
 
         Returns samples have been delivered but not invoiced, excluding those that
@@ -704,7 +717,7 @@ class StatusHandler(BaseHandler):
         records = records.filter(models.Sample.customer == customer) if customer else records
         return records, customers_to_invoice
 
-    def pools_to_invoice(self, customer: models.Customer = None):
+    def pools_to_invoice(self, customer: models.Customer = None) -> Tuple[Query, list]:
         """
         Fetch pools that should be invoiced.
         """
@@ -724,11 +737,11 @@ class StatusHandler(BaseHandler):
         records = records.filter(models.Pool.customer_id == customer.id) if customer else records
         return records, customers_to_invoice
 
-    def pools_to_receive(self):
+    def pools_to_receive(self) -> Query:
         """Fetch pools that have been not yet been received."""
         return self.Pool.query.filter(models.Pool.received_at.is_(None))
 
-    def pools_to_deliver(self):
+    def pools_to_deliver(self) -> Query:
         """Fetch pools that have been not yet been delivered."""
         return self.Pool.query.filter(
             models.Pool.received_at.isnot(None), models.Pool.delivered_at.is_(None)
@@ -745,7 +758,7 @@ class StatusHandler(BaseHandler):
         analysis_completed_at,
         analysis_uploaded_at,
         samples_delivered_at,
-    ):
+    ) -> timedelta:
         """Calculated estimated turnaround-time"""
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
@@ -773,7 +786,7 @@ class StatusHandler(BaseHandler):
         return r_p + p_s + s_a + a_u + u_d
 
     @staticmethod
-    def _calculate_date_delta(default, first_date, last_date):
+    def _calculate_date_delta(default, first_date, last_date) -> timedelta:
         # calculates date delta between two dates, assumes last_date is today if missing
         delta = default
         if not last_date:
@@ -783,7 +796,7 @@ class StatusHandler(BaseHandler):
         return delta
 
     @staticmethod
-    def _get_max_tat(links):
+    def _get_max_tat(links) -> int:
         max_tat = 0
         for link in links:
             if link.sample.application_version.application.turnaround_time:

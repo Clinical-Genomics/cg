@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from cg.cli.workflow.commands import link, resolve_compression, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import BalsamicStartError, CgError, DecompressionNeededError
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 LOG = logging.getLogger(__name__)
@@ -180,6 +180,7 @@ def store_housekeeper(context: click.Context, case_id: str):
 @OPTION_PRIORITY
 @OPTION_DRY
 @OPTION_PANEL_BED
+@OPTION_RUN_ANALYSIS
 @click.pass_context
 def start(
     context: click.Context,
@@ -187,6 +188,7 @@ def start(
     analysis_type: str,
     panel_bed: str,
     priority: str,
+    run_analysis: bool,
     dry_run: bool,
 ):
     """Start full workflow for CASE ID"""
@@ -200,7 +202,7 @@ def start(
             case_id=case_id,
             analysis_type=analysis_type,
             priority=priority,
-            run_analysis="--run-analysis",
+            run_analysis=run_analysis,
             dry_run=dry_run,
         )
     except DecompressionNeededError as e:

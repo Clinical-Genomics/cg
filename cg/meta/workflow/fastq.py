@@ -16,6 +16,13 @@ from typing import List, Optional
 
 LOG = logging.getLogger(__name__)
 
+DEFAULT_DATE_STR = (
+    "171015"  # Stand in value to use if sequencing date cannot be extracted from header
+)
+DEFAULT_INDEX = (
+    "XXXXXX"  # Stand in value to use if flowcell index is to be masked when renaming file
+)
+
 
 class FastqHandler:
     """Handles fastq file linking"""
@@ -207,8 +214,8 @@ class FastqHandler:
         flowcell: str,
         sample: str,
         read: str,
-        date: dt.datetime = "171015",
-        index: str = "XXXXXX",
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
     ):
         raise NotImplementedError
@@ -221,8 +228,8 @@ class BalsamicFastqHandler(FastqHandler):
         flowcell: str,
         sample: str,
         read: str,
-        date: dt.datetime = "171015",
-        index: str = "XXXXXX",
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
@@ -239,8 +246,8 @@ class MipFastqHandler(FastqHandler):
         flowcell: str,
         sample: str,
         read: str,
-        date: dt.datetime = "171015",
-        index: str = "XXXXXX",
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following MIP conventions."""
@@ -256,8 +263,8 @@ class MicrosaltFastqHandler(FastqHandler):
         flowcell: str,
         sample: str,
         read: str,
-        date: dt.datetime = "171015",
-        index: str = "XXXXXX",
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following usalt conventions. Naming must be

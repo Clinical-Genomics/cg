@@ -17,6 +17,9 @@ OPTION_DRY = click.option(
     default=False,
     help="Print to console instead of executing",
 )
+OPTION_MIP_DRY_RUN = click.option(
+    "--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode"
+)
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
     type=str,

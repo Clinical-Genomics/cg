@@ -95,7 +95,7 @@ class MipAnalysisAPI(AnalysisAPI):
         pedigree_config_path.write_text(
             ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
         )
-        return pedigree_config_path
+        LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
     def get_sample_data(link_obj: models.FamilySample) -> dict:

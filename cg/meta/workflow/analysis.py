@@ -218,12 +218,7 @@ class AnalysisAPI(MetaAPI):
         )
 
     def get_running_cases(self) -> List[models.Family]:
-        return (
-            self.status_db.query(models.Family)
-            .filter(models.Family.action == "running")
-            .filter(models.Family.data_analysis == self.pipeline)
-            .all()
-        )
+        return self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
 
     def get_cases_to_store(self) -> List[models.Family]:
         raise NotImplementedError
