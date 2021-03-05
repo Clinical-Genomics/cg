@@ -4,7 +4,7 @@ MASTER_LIST = (
     "BRAIN",
     "Cardiology",
     "CTD",
-    "DIAB"
+    "DIAB",
     "ENDO",
     "EP",
     "IBMFS",
