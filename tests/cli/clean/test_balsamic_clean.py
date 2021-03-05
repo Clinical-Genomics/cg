@@ -4,8 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.clean import past_run_dirs
-from cg.cli.workflow.commands import clean_run_dir
+from cg.cli.workflow.commands import clean_run_dir, past_run_dirs
 from cg.constants import Pipeline
 
 EXIT_SUCCESS = 0
