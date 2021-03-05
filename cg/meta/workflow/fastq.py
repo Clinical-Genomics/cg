@@ -5,6 +5,7 @@ Classes:
     FastqFileNameCreator: Creates valid balsamic filenames
     FastqHandler: Handles fastq file linking
 """
+import datetime as dt
 import gzip
 import logging
 import os
@@ -12,7 +13,6 @@ import re
 import shutil
 from pathlib import Path
 from typing import List, Optional
-import datetime as dt
 
 LOG = logging.getLogger(__name__)
 

@@ -5,9 +5,9 @@ from typing import List
 import click
 
 from cg.apps.mutacc_auto import MutaccAutoAPI
-from cg.meta.upload.mutacc import UploadToMutaccAPI
-from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 LOG = logging.getLogger(__name__)
 

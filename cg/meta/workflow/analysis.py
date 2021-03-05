@@ -1,16 +1,11 @@
+import datetime as dt
 import logging
 from pathlib import Path
-from typing import Optional, List
-import datetime as dt
+from typing import List, Optional
 
 from cg.apps.environ import environ_email
-from cg.constants import Pipeline, CASE_ACTIONS
-from cg.exc import (
-    BundleAlreadyAddedError,
-    CgError,
-    CgDataError,
-    DecompressionNeededError,
-)
+from cg.constants import CASE_ACTIONS, Pipeline
+from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.store import Store, models
@@ -49,7 +44,7 @@ class AnalysisAPI(MetaAPI):
 
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """Passes silently if case exists in StatusDB, raises error if case is missing"""
-        
+
         case_obj: models.Family = self.status_db.family(case_id)
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
@@ -131,7 +126,7 @@ class AnalysisAPI(MetaAPI):
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
-        
+
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_result = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
@@ -147,7 +142,7 @@ class AnalysisAPI(MetaAPI):
 
     def upload_bundle_statusdb(self, case_id: str) -> None:
         """Storing analysis bundle in StatusDB for CASE_ID"""
-        
+
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)

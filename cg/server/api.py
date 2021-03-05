@@ -5,15 +5,16 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import DuplicateRecordError, OrderError, OrderFormError
-from cg.meta.orders import OrdersAPI, OrderType
-from cg.models.orders.order import OrderIn
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
+
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.exc import DuplicateRecordError, OrderError, OrderFormError
+from cg.meta.orders import OrdersAPI, OrderType
+from cg.models.orders.order import OrderIn
 
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser

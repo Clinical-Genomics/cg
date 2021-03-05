@@ -1,12 +1,12 @@
+import datetime as dt
 import logging
 import shutil
 from pathlib import Path
-import datetime as dt
 
 import click
 from dateutil.parser import parse as parse_date
 
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

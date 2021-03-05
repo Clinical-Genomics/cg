@@ -5,18 +5,14 @@ import logging
 import click
 
 from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
-from cg.cli.workflow.mip.base import (
-    config_case,
-    panel,
-    run,
-)
+from cg.cli.workflow.mip.base import config_case, panel, run
 from cg.cli.workflow.mip.options import (
+    ARGUMENT_CASE_ID,
+    EMAIL_OPTION,
     OPTION_DRY,
     OPTION_PANEL_BED,
-    EMAIL_OPTION,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
-    ARGUMENT_CASE_ID,
 )
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS

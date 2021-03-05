@@ -12,7 +12,6 @@ from cg.cli.workflow.balsamic.base import store_housekeeper
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.utils import Process
 
-
 EXIT_SUCCESS = 0
 
 

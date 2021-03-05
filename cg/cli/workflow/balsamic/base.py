@@ -7,13 +7,8 @@ from pydantic import ValidationError
 
 from cg.cli.workflow.commands import link, resolve_compression, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import (
-    BalsamicStartError,
-    CgError,
-    DecompressionNeededError,
-)
+from cg.exc import BalsamicStartError, CgError, DecompressionNeededError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-
 
 LOG = logging.getLogger(__name__)
 

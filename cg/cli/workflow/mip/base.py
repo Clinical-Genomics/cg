@@ -5,16 +5,16 @@ from typing import List
 import click
 
 from cg.apps.environ import environ_email
-from cg.exc import CgError
-from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.cli.workflow.mip.options import (
+    ARGUMENT_CASE_ID,
+    EMAIL_OPTION,
     OPTION_DRY,
     OPTION_PANEL_BED,
-    EMAIL_OPTION,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
-    ARGUMENT_CASE_ID,
 )
+from cg.exc import CgError
+from cg.meta.workflow.mip import MipAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 

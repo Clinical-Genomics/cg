@@ -3,13 +3,11 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
+from ruamel.yaml import YAML
 
 from cg.constants import Pipeline
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
-
-from ruamel.yaml import YAML
 
 
 @pytest.fixture(name="mip_case_ids")

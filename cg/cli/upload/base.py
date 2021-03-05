@@ -5,6 +5,7 @@ import sys
 import traceback
 
 import click
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI

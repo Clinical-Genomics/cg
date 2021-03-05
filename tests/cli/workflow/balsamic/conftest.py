@@ -7,15 +7,15 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.process_mock import ProcessMock
+from tests.mocks.tb_mock import MockTB
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import Store
-from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.process_mock import ProcessMock
-
-from tests.mocks.tb_mock import MockTB
 
 
 @pytest.fixture(name="balsamic_dir")

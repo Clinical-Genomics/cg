@@ -3,6 +3,7 @@ import logging
 from typing import List
 
 import click
+
 from cg.store import models
 
 LOG = logging.getLogger(__name__)

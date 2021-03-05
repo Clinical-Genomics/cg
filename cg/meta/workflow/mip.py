@@ -2,20 +2,15 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional
 
+from ruamel.yaml import ruamel, safe_load
+
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
-
-from cg.constants import (
-    COLLABORATORS,
-    COMBOS,
-    MASTER_LIST,
-    Pipeline,
-)
+from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.store import models
-from ruamel.yaml import safe_load, ruamel
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},

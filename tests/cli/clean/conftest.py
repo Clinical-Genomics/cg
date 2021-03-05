@@ -1,7 +1,9 @@
 """Fixtures for cli clean tests"""
 
 from pathlib import Path
+
 import pytest
+
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 

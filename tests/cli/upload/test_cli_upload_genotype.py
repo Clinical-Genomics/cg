@@ -2,8 +2,9 @@
 
 import logging
 
-from cg.cli.upload.genotype import genotypes as upload_genotypes_cmd
 from click.testing import CliRunner
+
+from cg.cli.upload.genotype import genotypes as upload_genotypes_cmd
 
 
 def test_upload_genotype(

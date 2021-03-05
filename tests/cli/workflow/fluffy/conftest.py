@@ -1,3 +1,4 @@
+import datetime as dt
 from pathlib import Path
 
 import pytest
@@ -5,7 +6,6 @@ import pytest
 from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
-import datetime as dt
 
 
 @pytest.fixture(scope="function")

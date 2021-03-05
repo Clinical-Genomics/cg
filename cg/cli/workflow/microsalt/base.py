@@ -1,15 +1,15 @@
 """CLI support to start microsalt"""
 
+import datetime as dt
 import json
 import logging
 from pathlib import Path
 from typing import Any
 
 import click
-import datetime as dt
 
 from cg.apps.vogue import VogueAPI
-from cg.cli.workflow.commands import store, store_available, resolve_compression
+from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI

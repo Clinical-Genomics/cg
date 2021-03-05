@@ -3,6 +3,7 @@
 """
 
 import logging
+
 import pytest
 
 from cg.apps.gt import GenotypeAPI

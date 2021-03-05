@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from ruamel.yaml import YAML
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
@@ -12,7 +14,6 @@ from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
-from ruamel.yaml import YAML
 
 from .utils import suggest_cases_to_upload
 

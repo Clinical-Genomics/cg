@@ -1,6 +1,6 @@
 from typing import Optional, Type
 
-from cg.constants import Pipeline, DEFAULT_CAPTURE_KIT
+from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import models
 from cg.utils import Process

@@ -4,12 +4,14 @@ import getpass
 import logging
 
 import click
+
 from cg.apps.lims import LimsAPI
-from .families import families
-from .family import family
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.store import Store, models
+
+from .families import families
+from .family import family
 
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"

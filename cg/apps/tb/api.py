@@ -5,11 +5,11 @@ import logging
 from typing import Any, Optional
 
 import requests
-from cg.constants import Pipeline
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import Pipeline
 from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)

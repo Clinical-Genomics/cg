@@ -1,7 +1,8 @@
 """ Test cg.cli.upload.vogue module """
 
-from cg.cli.upload.vogue import reagent_labels, samples, flowcells
 import logging
+
+from cg.cli.upload.vogue import flowcells, reagent_labels, samples
 
 
 def test_cli_upload_vogue_reagent_labes(vogue_context, cli_runner, caplog):

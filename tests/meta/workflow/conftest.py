@@ -1,10 +1,10 @@
 """Fixtures for the prepare_fastq api tests"""
 
 import pytest
+from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 
 from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
-from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 
 
 @pytest.fixture(scope="function", name="populated_compress_spring_api")

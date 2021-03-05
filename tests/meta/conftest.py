@@ -3,10 +3,11 @@
 from datetime import datetime
 
 import pytest
+from tests.store_helpers import StoreHelpers
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
-from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="analysis_store")

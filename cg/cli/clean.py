@@ -3,12 +3,12 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List
+
 import click
 
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs
 from cg.meta.meta import MetaAPI
-
 
 LOG = logging.getLogger(__name__)
 

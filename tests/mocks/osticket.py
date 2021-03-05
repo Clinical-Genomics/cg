@@ -4,9 +4,10 @@ import logging
 import os.path
 from typing import Optional
 
+from flask import Flask
+
 from cg.apps.osticket import OsTicket
 from cg.exc import TicketCreationError
-from flask import Flask
 
 LOG = logging.getLogger(__name__)
 

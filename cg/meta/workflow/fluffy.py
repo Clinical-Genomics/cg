@@ -1,24 +1,20 @@
+import csv
+import datetime as dt
+import logging
+import os
+import shutil
 from abc import ABC
 from pathlib import Path
-import logging
-import csv
 from subprocess import CalledProcessError
-
-import shutil
-import datetime as dt
 from typing import List
 
 from alchy import Query
 
-
+from cg.constants import Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-
-from cg.utils import Process
-
 from cg.store import models
-import os
-from cg.constants import Pipeline
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
 import logging
+
 import click
 
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 

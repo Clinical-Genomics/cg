@@ -4,10 +4,10 @@ import logging
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import resolve_compression
+from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.cli.workflow.mip_dna.base import start, start_available
 from cg.store.api.status import StatusHandler
 
 

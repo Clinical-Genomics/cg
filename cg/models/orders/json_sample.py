@@ -1,8 +1,9 @@
 from typing import List, Optional
 
+from pydantic import Field, constr, validator
+
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
-from pydantic import Field, constr, validator
 
 
 class JsonSample(OrderSample):
