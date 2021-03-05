@@ -59,7 +59,6 @@ def balsamic(context: click.Context):
 
 balsamic.add_command(resolve_compression)
 balsamic.add_command(link)
-balsamic.add_command(store_available)
 
 
 @balsamic.command("config-case")
@@ -241,3 +240,23 @@ def store(context: click.Context, case_id: str, analysis_type: str, dry_run: boo
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id)
+
+
+@balsamic.command("store-available")
+@OPTION_DRY
+@click.pass_context
+def store_available(context: click.Context, dry_run: bool) -> None:
+    """Store bundles for all finished analyses in Housekeeper"""
+
+    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_store():
+        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        try:
+            context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
+        except Exception as exception_object:
+            LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
