@@ -4,6 +4,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.vogue import VogueAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
@@ -18,6 +19,7 @@ class MetaAPI:
         self.lims_api = LimsAPI(self.config)
         self.hermes_api = HermesApi(self.config)
         self.scout_api = ScoutAPI(self.config)
+        self.vogue_api = VogueAPI(self.config)
         self.prepare_fastq_api = PrepareFastqAPI(
             store=self.status_db,
             compress_api=CompressAPI(

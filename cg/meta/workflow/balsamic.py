@@ -66,10 +66,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             case_id + ".hk",
         )
 
-    def verify_deliverables_file_exists(self, case_id: str) -> None:
-        if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
-            raise CgError(f"No deliverables file found for case {case_id}")
-
     def get_case_config_path(self, case_id: str) -> Path:
         """Generates a path where the Balsamic config for the case_id should be located.
 
@@ -77,18 +73,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
         return Path(self.root_dir, case_id, case_id + ".json")
 
-    def verify_case_config_file_exists(self, case_id: str):
-        if not Path(self.get_case_config_path(case_id=case_id)).exists():
-            raise CgError(f"No config file found for case {case_id}")
-
     def get_analysis_finish_path(self, case_id: str) -> Path:
         """Returns path to analysis_finish file.
         (Optional) Checks if analysis_finish file exists"""
         return Path(self.root_dir, case_id, "analysis", "analysis_finish")
-
-    def verify_analysis_finish_file_exists(self, case_id: str):
-        if not Path(self.get_analysis_finish_path(case_id=case_id)).exists():
-            raise CgError(f"No analysis_finish file found for case {case_id}")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")

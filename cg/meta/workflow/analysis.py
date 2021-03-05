@@ -35,6 +35,18 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    def verify_deliverables_file_exists(self, case_id: str) -> None:
+        if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
+            raise CgError(f"No deliverables file found for case {case_id}")
+
+    def verify_case_config_file_exists(self, case_id: str):
+        if not Path(self.get_case_config_path(case_id=case_id)).exists():
+            raise CgError(f"No config file found for case {case_id}")
+
+    def verify_analysis_finish_file_exists(self, case_id: str):
+        if not Path(self.get_analysis_finish_path(case_id=case_id)).exists():
+            raise CgError(f"No analysis_finish file found for case {case_id}")
+
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """
         Passes silently if case exists in StatusDB, raises error if case is missing

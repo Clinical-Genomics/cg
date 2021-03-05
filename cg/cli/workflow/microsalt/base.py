@@ -212,7 +212,6 @@ def start_available(context: click.Context, dry_run: bool = False):
 def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool) -> None:
     """Upload the trending report for latest analysis of given case_id to Vogue"""
 
-    vogue_api = VogueAPI(context.obj)
     analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
     case_obj = analysis_api.status_db.family(unique_id)
     if not case_obj or not case_obj.analyses:
@@ -247,9 +246,11 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
         "analysis_workflow_version": microsalt_version,
         "case_analysis_type": "microsalt",
     }
-    vogue_api.load_bioinfo_raw(load_bioinfo_inputs=vogue_load_args)
-    vogue_api.load_bioinfo_process(load_bioinfo_inputs=vogue_load_args, cleanup_flag=False)
-    vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
+    analysis_api.vogue_api.load_bioinfo_raw(load_bioinfo_inputs=vogue_load_args)
+    analysis_api.vogue_api.load_bioinfo_process(
+        load_bioinfo_inputs=vogue_load_args, cleanup_flag=False
+    )
+    analysis_api.vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
     case_obj.analyses[0].uploaded_at = dt.datetime.now()
     analysis_api.status_db.commit()
     LOG.info("Successfully uploaded latest analysis data for case %s to Vogue!", unique_id)
