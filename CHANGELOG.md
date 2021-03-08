@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.3.0]
+### Changed
+- Refactored AnalysisAPI anf FastHandler classes into one class
+
+
 ## [20.2.1]
 ### Fixed
 - Fixed json orderform special cases
