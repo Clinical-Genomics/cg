@@ -1,7 +1,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
@@ -9,6 +9,7 @@ from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionN
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.store import Store, models
+from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ class AnalysisAPI(MetaAPI):
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs
         """
-        analysis_type = sample_obj.application_version.application.prep_category
+        analysis_type: str = sample_obj.application_version.application.prep_category
         if analysis_type and analysis_type.lower() in [
             "wgs",
             "wes",
@@ -139,7 +140,7 @@ class AnalysisAPI(MetaAPI):
         """Storing bundle data in Housekeeper for CASE_ID"""
 
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
-        bundle_result = self.housekeeper_api.add_bundle(
+        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
         )
         if not bundle_result:
@@ -158,7 +159,7 @@ class AnalysisAPI(MetaAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
-        new_analysis = self.status_db.add_analysis(
+        new_analysis: models.Family = self.status_db.add_analysis(
             pipeline=self.pipeline,
             version=pipeline_version,
             started_at=analysis_start,
@@ -175,10 +176,8 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(self, case_id) -> None:
-        if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
-            LOG.error("Analysis still ongoing in Trailblazer!")
-            raise CgError
+    def add_pending_trailblazer_analysis(self, case_id: str) -> None:
+        self.check_analysis_ongoing(case_id=case_id)
         self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
@@ -290,10 +289,12 @@ class AnalysisAPI(MetaAPI):
     def get_target_bed_from_lims(self, case_id: str) -> str:
         """Get target bed filename from lims"""
         case_obj: models.Family = self.status_db.family(case_id)
-        target_bed_shortname = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
+        target_bed_shortname: str = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
         if not target_bed_shortname:
             return target_bed_shortname
-        bed_version_obj = self.status_db.bed_version(target_bed_shortname)
+        bed_version_obj: Optional[models.BedVersion] = self.status_db.bed_version(
+            target_bed_shortname
+        )
         if not bed_version_obj:
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
@@ -303,18 +304,18 @@ class AnalysisAPI(MetaAPI):
         Handles decompression automatically for case.
         Raises error to interrupt the workflow execution if cannot be resolved immediately
         """
-        decompression_needed = self.prepare_fastq_api.is_spring_decompression_needed(case_id)
+        decompression_needed: bool = self.prepare_fastq_api.is_spring_decompression_needed(case_id)
 
         if decompression_needed:
             LOG.info(
                 "The analysis for %s could not start, decompression is needed",
                 case_id,
             )
-            decompression_possible = self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(
-                case_id
+            decompression_possible: bool = (
+                self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(case_id)
             )
             if decompression_possible:
-                possible_to_start_decompression = (
+                possible_to_start_decompression: bool = (
                     self.prepare_fastq_api.can_at_least_one_decompression_job_start(
                         case_id, dry_run
                     )

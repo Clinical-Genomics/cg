@@ -32,10 +32,10 @@ class FastqHandler:
         """Concatenates a list of fastq files"""
         LOG.info(FastqHandler.display_files(files, concat_file))
 
-        with open(concat_file, "wb") as wfd:
-            for fil in files:
-                with open(fil, "rb") as file_descriptor:
-                    shutil.copyfileobj(file_descriptor, wfd)
+        with open(concat_file, "wb") as write_file_obj:
+            for filename in files:
+                with open(filename, "rb") as file_descriptor:
+                    shutil.copyfileobj(file_descriptor, write_file_obj)
 
         size_before = FastqHandler.size_before(files)
         size_after = FastqHandler.size_after(concat_file)
@@ -79,9 +79,11 @@ class FastqHandler:
 
     @staticmethod
     def remove_files(files: list) -> None:
-        for file in files:
-            if os.path.isfile(file):
-                os.remove(file)
+        for file_name in files:
+            file_path: Path = Path(file_name)
+            if not file_path.is_file():
+                continue
+            file_path.unlink()
 
     @staticmethod
     def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:

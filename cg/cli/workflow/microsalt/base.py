@@ -4,16 +4,16 @@ import datetime as dt
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, List
 
 import click
 
-from cg.apps.vogue import VogueAPI
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import models
+from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
@@ -94,8 +94,8 @@ def config_case(
         LOG.error("No sample found for that ticket/sample_id")
         raise click.Abort
 
-    parameters = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
-    filename = sample_id or case_id
+    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
+    filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
         click.echo(json.dumps(parameters, indent=4, sort_keys=True))
@@ -220,7 +220,7 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
         raise click.Abort
 
     samples_string = ",".join(str(link_obj.sample.internal_id) for link_obj in case_obj.links)
-    microsalt_version = analysis_api.get_pipeline_version(case_id=case_obj.internal_id)
+    microsalt_version: str = analysis_api.get_pipeline_version(case_id=case_obj.internal_id)
 
     if dry_run:
         LOG.info(
@@ -231,7 +231,7 @@ def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool)
         )
         return
 
-    analysis_result_file = analysis_api.housekeeper_api.get_files(
+    analysis_result_file: Optional[File] = analysis_api.housekeeper_api.get_files(
         bundle=unique_id, tags=["vogue"]
     ).first()
     if not analysis_result_file:
@@ -271,7 +271,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
         .filter(models.Analysis.uploaded_at.is_(None))
     )
     for analysis in latest_analyses:
-        unique_id = analysis.family.internal_id
+        unique_id: str = analysis.family.internal_id
         try:
             context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
         except Exception as e:
@@ -280,7 +280,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
                 unique_id,
                 e.__class__.__name__,
             )
-            EXIT_CODE = EXIT_FAIL
+            EXIT_CODE: int = EXIT_FAIL
 
     if EXIT_CODE:
         raise click.Abort

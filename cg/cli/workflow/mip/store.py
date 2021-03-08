@@ -8,6 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import (
     AnalysisDuplicationError,
@@ -47,9 +48,9 @@ def analysis(context, config_stream):
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream,
-            analysis_api.housekeeper_api,
-            analysis_api.status_db,
+            config_stream=config_stream,
+            hk_api=analysis_api.housekeeper_api,
+            status=analysis_api.status_db,
             workflow=Pipeline.MIP_DNA,
         )
         analysis_api.status_db.add_commit(new_analysis)
@@ -81,7 +82,7 @@ def completed(context):
     exit_code = EXIT_SUCCESS
     for case_obj in analysis_api.status_db.cases_to_store(pipeline=Pipeline.MIP_DNA):
         try:
-            analysis_obj = analysis_api.trailblazer_api.get_latest_analysis(
+            analysis_obj: TrailblazerAnalysis = analysis_api.trailblazer_api.get_latest_analysis(
                 case_id=case_obj.internal_id
             )
             if analysis_obj.status != "completed":
