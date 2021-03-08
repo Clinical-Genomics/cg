@@ -12,7 +12,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 
@@ -183,7 +183,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any
-    ) -> (str, Optional[str]):
+    ) -> Tuple[str, Optional[str]]:
         """Resolve case_id and sample_id w based on input arguments. """
         if ticket and sample:
             LOG.error("Flags -t and -s are mutually exclusive!")
@@ -200,7 +200,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return case_id, sample_id
 
-    def get_case_id_from_ticket(self, unique_id: str) -> (str, None):
+    def get_case_id_from_ticket(self, unique_id: str) -> Tuple[str, None]:
         """If ticked is provided as argument, finds the corresponding case_id and returns it.
         Since sample_id is not specified, nothing is returned as sample_id"""
         case_obj: models.Family = self.status_db.find_family_by_name(unique_id)
@@ -210,7 +210,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_id = case_obj.internal_id
         return case_id, None
 
-    def get_case_id_from_sample(self, unique_id: str) -> (str, str):
+    def get_case_id_from_sample(self, unique_id: str) -> Tuple[str, str]:
         """If sample is specified, finds the corresponding case_id to which this sample belongs.
         The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
         """
@@ -226,7 +226,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         sample_id = sample_obj.internal_id
         return case_id, sample_id
 
-    def get_case_id_from_case(self, unique_id: str) -> (str, None):
+    def get_case_id_from_case(self, unique_id: str) -> Tuple[str, None]:
         """If case_id is specified, validates the presence of case_id in database and returns it"""
         case_obj: models.Family = self.status_db.family(unique_id)
         if not case_obj:
