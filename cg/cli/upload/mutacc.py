@@ -8,6 +8,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -24,17 +25,19 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    scout_api: ScoutAPI = context.obj["scout_api"]
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
     mutacc_auto_api = MutaccAutoAPI(context.obj)
 
-    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+    mutacc_upload = UploadToMutaccAPI(
+        scout_api=analysis_api.scout_api, mutacc_auto_api=mutacc_auto_api
+    )
 
     # Get cases to upload into mutacc from scout
     finished_cases: List[ScoutExportCase] = []
     if case_id is not None:
-        finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+        finished_cases = analysis_api.scout_api.get_cases(finished=True, case_id=case_id)
     elif days_ago is not None:
-        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
+        finished_cases = analysis_api.scout_api.get_solved_cases(days_ago=days_ago)
     else:
         LOG.info("Please enter option '--case-id' or '--days-ago'")
 

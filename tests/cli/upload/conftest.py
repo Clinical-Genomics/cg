@@ -5,6 +5,9 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+
+from cg.meta.report.api import ReportAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -31,13 +34,18 @@ def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestam
     """Get some bundle data for housekeeper"""
     tag_name = UploadScoutAPI.get_load_config_tag()
 
-    hk_bundle_data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [{"path": str(scout_load_config), "archive": False, "tags": [tag_name]}],
+        "files": [
+            {
+                "path": str(scout_load_config),
+                "archive": False,
+                "tags": [tag_name],
+            }
+        ],
     }
-    return hk_bundle_data
 
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
@@ -45,16 +53,19 @@ def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
 ) -> dict:
     """ Returns a dictionary in hk format with files used in upload gt process"""
-    data = {
+    return {
         "name": case_id,
         "created": datetime.now(),
         "expires": datetime.now(),
         "files": [
-            {"path": str(case_qc_metrics), "archive": False, "tags": ["qcmetrics"]},
+            {
+                "path": str(case_qc_metrics),
+                "archive": False,
+                "tags": ["qcmetrics"],
+            },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],
     }
-    return data
 
 
 @pytest.fixture(name="analysis_obj")
@@ -128,16 +139,6 @@ def fixture_vogue_cli_context(vogue_api) -> dict:
     """context to use in cli"""
 
     return {"vogue_api": vogue_api}
-
-
-@pytest.fixture(scope="function", name="upload_scout_api")
-def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
-    """Return a upload scout api"""
-    api = MockScoutUploadApi()
-    api.housekeeper = housekeeper_api
-    api.config = mip_load_config
-
-    return api
 
 
 @pytest.fixture(scope="function", name="vogue_api")
@@ -235,3 +236,26 @@ class MockLims:
             if sample["id"] == sample_id:
                 return sample
         return None
+
+
+@pytest.fixture(name="upload_context")
+def upload_context(context_config):
+    analysis_api = MipDNAAnalysisAPI(context_config)
+
+    return {
+        "analysis_api": analysis_api,
+        "report_api": ReportAPI(
+            store=analysis_api.status_db,
+            lims_api=analysis_api.lims_api,
+            chanjo_api=analysis_api.chanjo_api,
+            analysis_api=analysis_api,
+            scout_api=analysis_api.scout_api,
+        ),
+        "scout_upload_api": UploadScoutAPI(
+            hk_api=analysis_api.housekeeper_api,
+            scout_api=analysis_api.scout_api,
+            madeline_api=analysis_api.madeline_api,
+            analysis_api=analysis_api,
+            lims_api=analysis_api.lims_api,
+        ),
+    }

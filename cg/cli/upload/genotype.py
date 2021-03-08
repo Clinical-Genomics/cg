@@ -2,10 +2,12 @@
 import logging
 
 import click
+from cg.store import models
 
 from cg.meta.upload.gt import UploadGenotypesAPI
 
 from .utils import suggest_cases_to_upload
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -18,16 +20,14 @@ def genotypes(context, re_upload, family_id):
     """Upload genotypes from an analysis to Genotype."""
 
     click.echo(click.style("----------------- GENOTYPES -------------------"))
-
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
     if not family_id:
         suggest_cases_to_upload(context)
         context.abort()
-
-    gt_api = context.obj["genotype_api"]
-    hk_api = context.obj["housekeeper_api"]
-    status_api = context.obj["status_db"]
-    case_obj = status_api.family(family_id)
-    upload_genotypes_api = UploadGenotypesAPI(hk_api=hk_api, gt_api=gt_api)
+    case_obj: models.Family = analysis_api.status_db.family(family_id)
+    upload_genotypes_api = UploadGenotypesAPI(
+        hk_api=analysis_api.housekeeper_api, gt_api=analysis_api.genotype_api
+    )
     results = upload_genotypes_api.data(case_obj.analyses[0])
 
     if results:

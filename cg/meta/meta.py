@@ -1,7 +1,10 @@
+from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
@@ -23,9 +26,11 @@ class MetaAPI:
         self.hermes_api = HermesApi(self.config)
         self.scout_api = ScoutAPI(self.config)
         self.vogue_api = VogueAPI(self.config)
+        self.crunchy_api = CrunchyAPI(self.config)
+        self.madeline_api = MadelineAPI(self.config)
+        self.genotype_api = GenotypeAPI(self.config)
+        self.chanjo_api = ChanjoAPI(self.config)
         self.prepare_fastq_api = PrepareFastqAPI(
             store=self.status_db,
-            compress_api=CompressAPI(
-                hk_api=self.housekeeper_api, crunchy_api=CrunchyAPI(self.config)
-            ),
+            compress_api=CompressAPI(hk_api=self.housekeeper_api, crunchy_api=self.crunchy_api),
         )
