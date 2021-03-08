@@ -143,13 +143,11 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _submit_microsalt(self, order: dict) -> dict:
         """Submit a batch of microbial samples."""
+        return self._submit_microbial_samples(order)
+
+    def _submit_microbial_samples(self, order):
         # prepare order for status database
         status_data = self.microbial_samples_to_status(order)
-        project_data, samples = self._handle_microbial_samples(order, status_data)
-
-        return {"project": project_data, "records": samples}
-
-    def _handle_microbial_samples(self, order, status_data):
         self._fill_in_sample_verified_organism(order["samples"])
         # submit samples to LIMS
         project_data, lims_map = self.process_lims(order, order["samples"])
@@ -165,15 +163,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
             data_analysis=Pipeline(status_data["data_analysis"]),
             data_delivery=DataDelivery(status_data["data_delivery"]),
         )
-        return project_data, samples
+        return {"project": project_data, "records": samples}
 
     def _submit_sarscov2(self, order: dict) -> dict:
         """Submit a batch of sars-cov-2 samples."""
         # prepare order for status database
-        status_data = self.sarscov2_samples_to_status(order)
-        project_data, samples = self._handle_microbial_samples(order, status_data)
-
-        return {"project": project_data, "records": samples}
+        return self._submit_microbial_samples(order)
 
     def _process_case_samples(self, order: dict) -> dict:
         """Process samples to be analyzed."""
