@@ -5,6 +5,7 @@
 from subprocess import CalledProcessError
 
 import pytest
+
 from cg.apps.loqus import LoqusdbAPI
 from cg.utils import Process
 

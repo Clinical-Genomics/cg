@@ -4,13 +4,13 @@
 
 import logging
 from pathlib import Path
-from cg.store.queries import get_cases_to_compress
-from housekeeper.store import models as housekeeper_models
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
+from cg.store.queries import get_cases_to_compress
+from housekeeper.store import models as housekeeper_models
 
 LOG = logging.getLogger(__name__)
 

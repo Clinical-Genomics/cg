@@ -1,8 +1,9 @@
 from enum import Enum
 from typing import List, Optional
 
-from cg.constants import DataDelivery, Pipeline
 from pydantic import BaseModel, constr
+
+from cg.constants import DataDelivery, Pipeline
 
 
 class SexEnum(str, Enum):

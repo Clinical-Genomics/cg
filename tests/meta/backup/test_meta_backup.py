@@ -1,9 +1,10 @@
 """ tests for the meta BackupAPI """
 
 import logging
+import subprocess
+
 import mock
 import pytest
-import subprocess
 
 from cg.meta.backup import BackupApi
 

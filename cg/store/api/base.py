@@ -1,5 +1,6 @@
 """All models aggregated in a base class"""
 from attr import dataclass
+
 from cg.store import models
 
 

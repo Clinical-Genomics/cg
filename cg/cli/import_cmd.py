@@ -1,8 +1,9 @@
 """Cli commands for importing data into the status database"""
-import logging
 import getpass
+import logging
 
 import click
+
 from cg.store import Store
 from cg.store.api.import_func import (
     import_application_versions,

@@ -18,9 +18,7 @@ def test_no_arguments(cli_runner, base_context):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_dry_arguments(
-    cli_runner, base_context, microbial_ticket, queries_path, fastq_path, caplog
-):
+def test_dry_arguments(cli_runner, base_context, microbial_ticket, caplog):
     """Test command dry """
 
     # GIVEN

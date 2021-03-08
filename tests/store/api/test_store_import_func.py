@@ -2,6 +2,8 @@
 
 from typing import List
 
+from tests.store.api.conftest import StoreCheckers
+
 from cg.store import Store, models
 from cg.store.api.import_func import (
     add_application_version,
@@ -13,7 +15,6 @@ from cg.store.api.import_func import (
     versions_are_same,
 )
 from cg.store.api.models import ApplicationVersionSchema
-from tests.store.api.conftest import StoreCheckers
 
 
 def test_prices_are_same_int_and_int():

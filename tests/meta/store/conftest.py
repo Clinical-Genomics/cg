@@ -1,9 +1,9 @@
 """ fixtures for storing RNA analysis unit tests  """
 import datetime
 from pathlib import Path
-import ruamel
 
 import pytest
+import ruamel
 
 
 @pytest.fixture(scope="function")

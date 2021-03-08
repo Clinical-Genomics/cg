@@ -1,9 +1,11 @@
 """Tests for the scout api"""
 
 import logging
+
 import yaml
-from cg.apps.scout.scoutapi import ScoutAPI
+
 from cg.apps.scout.scout_export import Variant
+from cg.apps.scout.scoutapi import ScoutAPI
 
 
 def test_get_causative_variants_no_variants(scout_api: ScoutAPI, case_id: str):
