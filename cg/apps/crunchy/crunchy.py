@@ -13,16 +13,15 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
-from typing_extensions import Literal
-
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
+from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 from cg.utils.date import get_date_str
 from marshmallow import ValidationError
+from typing_extensions import Literal
 
-from ...models.slurm.sbatch import Sbatch
-from ..slurm.slurm_api import SlurmAPI
 from .models import CrunchyFileSchema
 from .sbatch import (
     FASTQ_TO_SPRING_COMMANDS,
@@ -146,7 +145,9 @@ class CrunchyAPI:
             return False
         LOG.info("SPRING metadata file found")
 
-        spring_metadata = self.get_spring_metadata(compression_obj.spring_metadata_path)
+        spring_metadata: Optional[List[dict]] = self.get_spring_metadata(
+            compression_obj.spring_metadata_path
+        )
         # Check if the SPRING archive has been unarchived
         updated_at = self.get_file_updated_at(spring_metadata)
 
@@ -174,7 +175,7 @@ class CrunchyAPI:
             - SPRING archive file should still exist
         """
 
-        spring_metadata_path = compression_obj.spring_metadata_path
+        spring_metadata_path: Path = compression_obj.spring_metadata_path
         LOG.info("Check if SPRING metadata file %s exists", spring_metadata_path)
 
         if not compression_obj.metadata_exists():
