@@ -87,7 +87,7 @@ class MipAnalysisAPI(AnalysisAPI):
             }
         )
 
-    def write_pedigree_config(self, case_id: str, data: dict) -> Path:
+    def write_pedigree_config(self, case_id: str, data: dict) -> None:
         """Write the pedigree config to the the case dir"""
         out_dir = self.get_case_path(case_id=case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
