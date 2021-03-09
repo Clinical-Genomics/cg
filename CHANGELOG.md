@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.3.1]
+### Fixed
+- HousekeeperAPI to reuse db connection from context instead of creating new one for each call
+
 ## [20.3.0]
 ### Changed
 - Refactored AnalysisAPI anf FastHandler classes into one class
