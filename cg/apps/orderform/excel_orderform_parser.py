@@ -205,7 +205,7 @@ class ExcelOrderformParser(OrderformParser):
 
         if data_delivery == "analysis-+-bam":
             return DataDelivery.ANALYSIS_BAM_FILES
-        if data_delivery in ("fastq-+-qc", "fastq-qc"):
+        if data_delivery == "fastq-qc":
             return DataDelivery.FASTQ_QC
 
         try:
