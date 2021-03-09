@@ -165,7 +165,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         )
         return {"project": project_data, "records": samples}
 
-    def _submit_sarscov2(self, order: dict) -> dict:
+    def _submit_sars_cov_2(self, order: dict) -> dict:
         """Submit a batch of sars-cov-2 samples."""
         # prepare order for status database
         return self._submit_microbial_samples(order)
@@ -282,5 +282,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             return getattr(self, "_submit_mip_dna")
         if project_type == OrderType.MIP_RNA:
             return getattr(self, "_submit_mip_rna")
+        if project_type == OrderType.SARS_COV_2:
+            return getattr(self, "_submit_sars_cov_2")
 
         return getattr(self, f"_submit_{str(project_type)}")

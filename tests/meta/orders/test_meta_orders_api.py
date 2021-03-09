@@ -17,7 +17,7 @@ from cg.store import models
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
         OrderType.RML,
-        OrderType.SARSCOV2,
+        OrderType.SARS_COV_2,
     ],
 )
 def test_submit(

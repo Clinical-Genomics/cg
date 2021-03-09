@@ -152,7 +152,7 @@ class ExcelOrderformParser(OrderformParser):
             "1604": str(OrderType.RML),
             "1603": str(OrderType.MICROSALT),
             "1605": str(OrderType.METAGENOME),
-            "2184": str(OrderType.SARSCOV2),
+            "2184": str(OrderType.SARS_COV_2),
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:

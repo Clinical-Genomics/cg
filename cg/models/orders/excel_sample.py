@@ -64,7 +64,7 @@ class ExcelSample(OrderSample):
             "MicroSALT",
             "MIP DNA",
             "MIP RNA",
-            "SARS CoV 2",
+            "SARS-CoV-2",
             "scout",
             "No analysis",
         ]
