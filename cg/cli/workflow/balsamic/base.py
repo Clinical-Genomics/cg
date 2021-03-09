@@ -217,7 +217,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_analyze():
+    for case_obj in analysis_api.get_valid_cases_to_analyze():
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
