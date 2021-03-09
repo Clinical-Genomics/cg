@@ -249,7 +249,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_pipeline_version(self, case_id: str) -> str:
         try:
             self.process.run_command(["--version"])
-            print(list(self.process.stdout_lines()))
             return list(self.process.stdout_lines())[0].split()[-1]
         except CalledProcessError:
             LOG.warning("Could not retrieve microsalt version!")
