@@ -394,12 +394,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             ]
         )
 
-    def get_valid_cases_to_analyze(self) -> list:
+    def get_valid_cases_to_analyze(self) -> List[models.Family]:
         """Retrieve a list of balsamic cases without analysis,
         where samples have enough reads to be analyzed"""
 
         return [
-            case_object.internal_id
+            case_object
             for case_object in self.get_cases_to_analyze()
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
         ]
