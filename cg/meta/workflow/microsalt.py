@@ -45,10 +45,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     @property
     def process(self) -> Process:
-        return Process(
-            binary=self.config["microsalt"]["binary_path"],
-            environment=self.config["microsalt"]["conda_env"],
-        )
+        if not self._process:
+            self._process = Process(
+                binary=self.config["microsalt"]["binary_path"],
+                environment=self.config["microsalt"]["conda_env"],
+            )
+        return self._process
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
