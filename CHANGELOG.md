@@ -14,6 +14,11 @@ Try to use the following format:
 ### Fixed
 
 
+## [20.3.2]
+### Fixed
+- Fixed cases_to_store for microbial workflow. 
+- Fixed process call for all workflows to not create a new process object
+
 ## [20.3.1]
 ### Fixed
 - HousekeeperAPI to reuse db connection from context instead of creating new one for each call
