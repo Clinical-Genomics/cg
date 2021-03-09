@@ -32,11 +32,13 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
 
     @property
     def process(self) -> Process:
-        return Process(
-            binary=f"{self.script} {self.mip_pipeline}",
-            config=self.config["mip-rd-dna"]["mip_config"],
-            environment=self.conda_env,
-        )
+        if not self._process:
+            self._process = Process(
+                binary=f"{self.script} {self.mip_pipeline}",
+                config=self.config["mip-rd-dna"]["mip_config"],
+                environment=self.conda_env,
+            )
+        return self._process
 
     def config_sample(self, link_obj: models.FamilySample, panel_bed: Optional[str]) -> dict:
         sample_data = self.get_sample_data(link_obj)

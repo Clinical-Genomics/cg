@@ -45,10 +45,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     @property
     def process(self) -> Process:
-        return Process(
-            binary=self.config["microsalt"]["binary_path"],
-            environment=self.config["microsalt"]["conda_env"],
-        )
+        if not self._process:
+            self._process = Process(
+                binary=self.config["microsalt"]["binary_path"],
+                environment=self.config["microsalt"]["conda_env"],
+            )
+        return self._process
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
@@ -175,11 +177,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Get LIMS project for a sample"""
         return self.lims_api.get_sample_project(sample_id)
 
-    def get_deliverables_to_store(self) -> list:
+    def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of microbial deliverables files for orders where analysis finished
         successfully, and are ready to be stored in Housekeeper"""
-
-        return self.status_db.cases_to_store(pipeline=self.pipeline)
+        return [
+            case_obj
+            for case_obj in self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
+            if self.get_deliverables_file_path(case_id=case_obj.internal_id).exists()
+        ]
 
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any

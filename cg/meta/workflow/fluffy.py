@@ -37,8 +37,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         return False
 
     @property
-    def process(self):
-        return Process(binary=self.config["fluffy"]["binary_path"])
+    def process(self) -> Process:
+        if not self._process:
+            self._process = Process(binary=self.config["fluffy"]["binary_path"])
+        return self._process
 
     def get_samplesheet_path(self, case_id: str) -> Path:
         """

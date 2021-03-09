@@ -22,6 +22,7 @@ class AnalysisAPI(MetaAPI):
     def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
         super().__init__(config=config)
         self.pipeline = pipeline
+        self._process = None
 
     @property
     def threshold_reads(self):

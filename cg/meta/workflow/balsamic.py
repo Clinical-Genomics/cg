@@ -47,7 +47,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     @property
     def process(self):
-        return Process(self.config["balsamic"]["binary_path"])
+        if not self._process:
+            self._process = Process(self.config["balsamic"]["binary_path"])
+        return self._process
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
