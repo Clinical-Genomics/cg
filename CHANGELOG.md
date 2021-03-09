@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:1
+
 ## [20.3.3]
 
 ### Changed

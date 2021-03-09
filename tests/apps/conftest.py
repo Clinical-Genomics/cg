@@ -34,7 +34,7 @@ def fastq_orderform(orderforms: Path):
 @pytest.fixture
 def metagenome_orderform(orderforms: Path) -> str:
     """Orderform fixture for metagenome samples"""
-    _file = orderforms / "1605.8.metagenome.xlsx"
+    _file = orderforms / "1605.9.metagenome.xlsx"
     return str(_file)
 
 
