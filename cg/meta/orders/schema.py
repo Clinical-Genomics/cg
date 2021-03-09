@@ -22,7 +22,7 @@ class OrderType(StrEnum):
     MIP_DNA: str = str(Pipeline.MIP_DNA)
     MIP_RNA: str = str(Pipeline.MIP_RNA)
     RML: str = "rml"
-    SARSCOV2: str = str(Pipeline.SARSCOV2)
+    SARS_COV_2: str = str(Pipeline.SARS_COV_2)
 
 
 class ListValidator(validators.Validator):
@@ -386,7 +386,7 @@ ORDER_SCHEMES = {
     OrderType.METAGENOME: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(METAGENOME_SAMPLE, min_items=1)}
     ),
-    OrderType.SARSCOV2: Scheme(
+    OrderType.SARS_COV_2: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(SARSCOV2_SAMPLE, min_items=1)}
     ),
 }

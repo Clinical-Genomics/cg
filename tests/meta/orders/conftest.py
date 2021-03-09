@@ -31,7 +31,7 @@ def all_orders_to_submit(
         OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit),
         OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit),
         OrderType.RML: OrderIn.parse_obj(rml_order_to_submit),
-        OrderType.SARSCOV2: OrderIn.parse_obj(sarscov2_order_to_submit),
+        OrderType.SARS_COV_2: OrderIn.parse_obj(sarscov2_order_to_submit),
     }
 
 

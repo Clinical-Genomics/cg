@@ -3,6 +3,7 @@ from typing import Optional
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants import Pipeline
+from cg.meta.orders import OrderType
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.orderform_schema import Orderform
 
@@ -30,7 +31,7 @@ def test_parse_mip_rna_orderform(mip_rna_orderform: str):
     orderform_parser.parse_orderform(excel_path=mip_rna_orderform)
 
     # THEN assert that the project type is correct
-    assert orderform_parser.project_type == "mip-rna"
+    assert orderform_parser.project_type == OrderType.MIP_RNA
 
 
 def test_parse_balsamic_orderform(balsamic_orderform: str):
@@ -44,7 +45,7 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
     orderform_parser.parse_orderform(excel_path=balsamic_orderform)
 
     # THEN assert that the project type is correct
-    assert orderform_parser.project_type == "balsamic"
+    assert orderform_parser.project_type == OrderType.BALSAMIC
 
 
 def test_parse_microbial_orderform(microbial_orderform: str):
@@ -58,7 +59,7 @@ def test_parse_microbial_orderform(microbial_orderform: str):
     orderform_parser.parse_orderform(excel_path=microbial_orderform)
 
     # THEN assert that the project type is correct
-    assert orderform_parser.project_type == "microsalt"
+    assert orderform_parser.project_type == OrderType.MICROSALT
 
 
 def test_parse_sarscov2_orderform(sarscov2_orderform: str):
@@ -73,7 +74,7 @@ def test_parse_sarscov2_orderform(sarscov2_orderform: str):
     orderform_parser.parse_orderform(excel_path=sarscov2_orderform)
 
     # THEN assert that the project type is correct
-    assert orderform_parser.project_type == "sarscov2"
+    assert orderform_parser.project_type == OrderType.SARS_COV_2
 
 
 def test_parse_metagenome_orderform(metagenome_orderform: str):
@@ -87,7 +88,7 @@ def test_parse_metagenome_orderform(metagenome_orderform: str):
     orderform_parser.parse_orderform(excel_path=metagenome_orderform)
 
     # THEN assert that the project type is correct
-    assert orderform_parser.project_type == "metagenome"
+    assert orderform_parser.project_type == OrderType.METAGENOME
 
 
 def test_parse_external_orderform(external_orderform: str):
@@ -101,7 +102,7 @@ def test_parse_external_orderform(external_orderform: str):
     order_form_parser.parse_orderform(excel_path=external_orderform)
 
     # THEN assert that the project type is correct
-    assert order_form_parser.project_type == "external"
+    assert order_form_parser.project_type == OrderType.EXTERNAL
 
 
 def test_generate_external_orderform_with_case(external_order_parser: ExcelOrderformParser):
