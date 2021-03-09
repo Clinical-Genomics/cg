@@ -4,10 +4,10 @@
 import click
 
 from .balsamic.base import balsamic as balsamic_cmd
+from .fluffy.base import fluffy
 from .microsalt.base import microsalt
 from .mip_dna.base import mip_dna
 from .mip_rna.base import mip_rna
-from .fluffy.base import fluffy
 
 
 @click.group()

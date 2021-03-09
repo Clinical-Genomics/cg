@@ -1,6 +1,7 @@
 import datetime as dt
 
 import pytest
+
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.store import models

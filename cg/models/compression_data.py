@@ -1,8 +1,8 @@
 """Class to hold file information about a compression entity"""
 import logging
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
 

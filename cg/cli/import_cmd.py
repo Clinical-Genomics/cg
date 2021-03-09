@@ -11,7 +11,6 @@ from cg.store.api.import_func import (
     import_applications,
     import_apptags,
 )
-from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 

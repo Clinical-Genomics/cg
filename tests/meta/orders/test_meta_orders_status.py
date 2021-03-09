@@ -1,6 +1,7 @@
 import datetime as dt
 
 import pytest
+
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler

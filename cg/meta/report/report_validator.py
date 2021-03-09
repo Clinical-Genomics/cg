@@ -3,7 +3,6 @@ from cg.exc import ValidationError
 from cg.meta.report.sample_helper import SampleHelper
 from cg.store import Store
 
-
 REQUIRED_REPORT_FIELDS = [
     "report_version",
     "case",

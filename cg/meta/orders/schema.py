@@ -1,5 +1,7 @@
 from collections import Iterable
 
+from pyschemes import Scheme, validators
+
 from cg.constants import (
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
@@ -9,7 +11,6 @@ from cg.constants import (
     Pipeline,
 )
 from cg.utils.StrEnum import StrEnum
-from pyschemes import Scheme, validators
 
 
 class OrderType(StrEnum):

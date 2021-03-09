@@ -3,9 +3,10 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytest
+from tests.mocks.limsmock import MockLimsAPI
+
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
-from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture

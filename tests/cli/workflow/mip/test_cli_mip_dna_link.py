@@ -16,4 +16,3 @@ def test_cg_workflow_mip_dna_link(cli_runner, caplog, case_id, dna_mip_context):
 
     # THEN the command should be printed
     assert result.exit_code == 0
-    assert f"mip-dna link" in caplog.text

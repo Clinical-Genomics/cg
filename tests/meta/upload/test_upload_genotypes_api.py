@@ -3,10 +3,11 @@
 from datetime import datetime
 from pathlib import Path
 
+import ruamel.yaml
+
+from cg.apps.mip import parse_qcmetrics
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import models
-import ruamel.yaml
-from cg.apps.mip import parse_qcmetrics
 
 
 def test_get_sample_sex():
