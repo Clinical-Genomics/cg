@@ -43,7 +43,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         try:
             ORDER_SCHEMES[project].validate(order_in.dict())
         except (ValueError, TypeError) as error:
-            raise OrderError(error.args[0])
+            raise OrderError(error)
         self._validate_customer_on_imported_samples(project=project, order=order_in)
 
         # detect manual ticket assignment
@@ -143,6 +143,9 @@ class OrdersAPI(LimsHandler, StatusHandler):
 
     def _submit_microsalt(self, order: dict) -> dict:
         """Submit a batch of microbial samples."""
+        return self._submit_microbial_samples(order)
+
+    def _submit_microbial_samples(self, order):
         # prepare order for status database
         status_data = self.microbial_samples_to_status(order)
         self._fill_in_sample_verified_organism(order["samples"])
@@ -160,8 +163,12 @@ class OrdersAPI(LimsHandler, StatusHandler):
             data_analysis=Pipeline(status_data["data_analysis"]),
             data_delivery=DataDelivery(status_data["data_delivery"]),
         )
-
         return {"project": project_data, "records": samples}
+
+    def _submit_sars_cov_2(self, order: dict) -> dict:
+        """Submit a batch of sars-cov-2 samples."""
+        # prepare order for status database
+        return self._submit_microbial_samples(order)
 
     def _process_case_samples(self, order: dict) -> dict:
         """Process samples to be analyzed."""
@@ -275,5 +282,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
             return getattr(self, "_submit_mip_dna")
         if project_type == OrderType.MIP_RNA:
             return getattr(self, "_submit_mip_rna")
+        if project_type == OrderType.SARS_COV_2:
+            return getattr(self, "_submit_sars_cov_2")
 
         return getattr(self, f"_submit_{str(project_type)}")

@@ -297,10 +297,8 @@ def test_sync_microbial_orderform_activate(microbial_store: Store, microbial_ord
     assert inactive_mic_apps_from_start > inactive_mic_apps_after_when
 
 
-def test_sync_microbial_orderform_inactivate(
-    rml_store: Store, rml_orderform: str, helpers: StoreHelpers
-):
-    # GIVEN an orderform and a store where all the apptags exists half some inactive and
+def test_sync_rml_orderform_inactivate(rml_store: Store, rml_orderform: str, helpers: StoreHelpers):
+    # GIVEN a rml orderform and a store where all the apptags exists half some inactive and
     # some active
     prep_category = "rml"
     sign = "PG"

@@ -134,6 +134,10 @@ class StatusHandler:
                     "priority": sample_data["priority"],
                     "reference_genome": sample_data["reference_genome"],
                     "volume": sample_data.get("volume"),
+                    "pre_processing_method": sample_data.get("pre_processing_method"),
+                    "region_code": sample_data.get("region_code"),
+                    "lab_code": sample_data.get("lab_code"),
+                    "selection_criteria": sample_data.get("selection_criteria"),
                 }
                 for sample_data in data["samples"]
             ],

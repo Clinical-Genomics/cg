@@ -18,6 +18,29 @@ Try to use the following format:
 - Add support for Microbial Orderform 1603:10
 - Add support for Metagenome Orderform 1605:09
 
+## [20.4.0]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:1
+
+## [20.3.3]
+
+### Changed
+- Set concentration and concentration sample to str in json orderform sample since this is expected in frontend
+
+## [20.3.2]
+### Fixed
+- Fixed cases_to_store for microbial workflow. 
+- Fixed process call for all workflows to not create a new process object
+
+## [20.3.1]
+### Fixed
+- HousekeeperAPI to reuse db connection from context instead of creating new one for each call
+
+## [20.3.0]
+### Changed
+- Refactored AnalysisAPI anf FastHandler classes into one class
+
+
 ## [20.2.1]
 ### Fixed
 - Fixed json orderform special cases

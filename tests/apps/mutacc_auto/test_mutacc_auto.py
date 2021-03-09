@@ -1,6 +1,7 @@
 """ Tests for cg.apps.mutacc_auto module"""
 
 import subprocess
+
 import pytest
 
 from cg.apps.mutacc_auto import MutaccAutoAPI, run_command

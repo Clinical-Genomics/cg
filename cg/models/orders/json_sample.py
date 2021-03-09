@@ -7,12 +7,14 @@ from pydantic import Field, constr, validator
 
 class JsonSample(OrderSample):
     case_id: str = Field(None, alias="family_name")
+    concentration: Optional[str]
+    concentration_sample: Optional[str]
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: Optional[str]
     quantity: Optional[str]
     synopsis: Optional[List[str]]
-    well_position: Optional[constr(regex="[A-H]:[0-9]+")]
+    well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]
 
     @validator("priority", pre=True)
     def make_lower(cls, value: str):

@@ -6,6 +6,7 @@ import json
 import subprocess
 
 import pytest
+
 from cg.apps.loqus import LoqusdbAPI
 from cg.exc import CaseNotFoundError
 

@@ -1,7 +1,7 @@
 from functools import partial
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from genologics.entities import Artifact, Project, Container, Containertype, Researcher
+from genologics.entities import Artifact, Container, Containertype, Project, Researcher
 from lxml import etree
 from lxml.objectify import ElementMaker, ObjectifiedElement
 

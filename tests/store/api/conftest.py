@@ -1,6 +1,7 @@
 from typing import Iterable, List
 
 import pytest
+from tests.store_helpers import StoreHelpers
 
 from cg.store import Store, models
 from cg.store.api.import_func import (
@@ -9,7 +10,6 @@ from cg.store.api.import_func import (
     versions_are_same,
 )
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
-from tests.store_helpers import StoreHelpers
 
 
 class StoreCheckers:

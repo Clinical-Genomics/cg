@@ -3,9 +3,9 @@
 """
 
 import pytest
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
-
 
 GTCONFIG = {
     "genotype": {

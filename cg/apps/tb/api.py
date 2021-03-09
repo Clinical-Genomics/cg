@@ -5,11 +5,11 @@ import logging
 from typing import Any, Optional
 
 import requests
-from cg.constants import Pipeline
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import Pipeline
 from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
@@ -31,8 +31,7 @@ class TrailblazerAPI:
         signer = RSASigner.from_service_account_file(self.service_account_auth_file)
         payload = {"email": self.service_account}
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
-        auth_header = {"Authorization": f"Bearer {jwt_token}"}
-        return auth_header
+        return {"Authorization": f"Bearer {jwt_token}"}
 
     def query_trailblazer(self, command: str, request_body: dict) -> Any:
         url = self.host + "/" + command
@@ -131,7 +130,7 @@ class TrailblazerAPI:
     def add_pending_analysis(
         self,
         case_id: str,
-        type: str,
+        analysis_type: str,
         config_path: str,
         out_dir: str,
         priority: str,
@@ -141,12 +140,13 @@ class TrailblazerAPI:
         request_body = {
             "case_id": case_id,
             "email": email,
-            "type": type,
+            "type": analysis_type,
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
             "data_analysis": str(data_analysis).upper(),
         }
+        LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         if response:
             return TrailblazerAnalysis.parse_obj(response)

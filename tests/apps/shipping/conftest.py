@@ -1,7 +1,8 @@
 """Fixtures for the shipping api tests"""
 
-from typing import Dict
 from pathlib import Path
+from typing import Dict
+
 import pytest
 
 from cg.apps.shipping import ShippingAPI

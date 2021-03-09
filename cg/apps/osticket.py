@@ -3,8 +3,9 @@ import os.path
 from typing import Optional
 
 import requests
-from cg.exc import TicketCreationError
 from flask import Flask
+
+from cg.exc import TicketCreationError
 
 LOG = logging.getLogger(__name__)
 
