@@ -71,7 +71,7 @@ def get_date(date, date_format=None):
     raise ValueError("Date %s is invalid" % date)
 
 
-def get_date_str(date_time_obj: datetime.datetime, date_format: str = None) -> str:
+def get_date_str(date_time_obj: datetime.datetime = None, date_format: str = None) -> str:
     """Convert a datetime object to a string. Defaults to simple date string: 2020-06-15"""
     if date_format is None:
         date_format = SIMPLE_DATE_FORMAT

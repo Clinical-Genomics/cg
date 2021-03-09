@@ -12,6 +12,7 @@ docutils = "*"
 
 [packages]
 alchy = "*"
+cgmodels = "*"
 click = "*"
 google-auth = "*"
 requests = {extras = ["security"],version = "*"}
