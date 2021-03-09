@@ -90,7 +90,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     # GIVEN sarscov2 order with three samples
 
     # WHEN parsing for status
-    data = StatusHandler.sarscov2_samples_to_status(sarscov2_order_to_submit)
+    data = StatusHandler.microbial_samples_to_status(sarscov2_order_to_submit)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
