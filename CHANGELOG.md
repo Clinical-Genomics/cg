@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.3.3]
+
+### Changed
+- Set concentration and concentration sample to str in json orderform sample since this is expected in frontend
 
 ## [20.3.2]
 ### Fixed
