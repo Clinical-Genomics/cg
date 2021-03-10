@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [x.x.x]
+### Changed
+- Use cgmodels for crunchy metadata files
+
 ## [20.4.0]
 ### Added
 - Support for SARS-CoV-2 Orderform 2184:1
