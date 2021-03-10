@@ -6,9 +6,8 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
-from cg.apps.crunchy.models import CrunchyFileSchema
 from cg.models import CompressionData
+from cgmodels.crunchy.metadata import CrunchyMetadata
 
 LOG = logging.getLogger(__name__)
 
@@ -32,17 +31,8 @@ class MockProcess:
         LOG.info("Running command %s", " ".join(command))
 
 
-# File fixtures
-
-
-@pytest.fixture(scope="function", name="file_schema")
-def fixture_file_schema():
-    """Return a instance of the file schema that describes content of SPRING metadata"""
-    return CrunchyFileSchema()
-
-
 @pytest.fixture(name="real_spring_metadata_path")
-def fixture_real_spring_metadata_path(fixtures_dir):
+def fixture_real_spring_metadata_path(fixtures_dir) -> Path:
     """Return the path to a SPRING metadata file"""
     return fixtures_dir / "apps" / "crunchy" / "spring_metadata.json"
 
@@ -53,7 +43,7 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
     first_read = compression_object.fastq_first
     second_read = compression_object.fastq_second
     spring_path = compression_object.spring_path
-    metadata = [
+    return [
         {
             "path": str(first_read),
             "file": "first_read",
@@ -68,7 +58,12 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
         },
         {"path": str(spring_path), "file": "spring"},
     ]
-    return metadata
+
+
+@pytest.fixture(name="spring_metadata_object")
+def fixture_spring_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
+    """Return the parsed metadata"""
+    return CrunchyMetadata(files=spring_metadata)
 
 
 @pytest.fixture(scope="function", name="spring_metadata_file")

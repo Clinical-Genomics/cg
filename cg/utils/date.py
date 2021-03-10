@@ -2,6 +2,7 @@
 import datetime
 import logging
 import re
+from typing import Optional
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 DATETIME_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
@@ -31,7 +32,7 @@ def match_date(date):
     return False
 
 
-def get_date(date, date_format=None):
+def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> datetime.datetime:
     """Return a datetime object if there is a valid date
 
     Raise exception if date is not valid
@@ -64,9 +65,9 @@ def get_date(date, date_format=None):
             LOG.info("Date is not in std format")
 
     for separator in [DASH, SPACE, DOT, FWD_SLASH]:
-        splited_date = date.split(separator)
-        if len(splited_date) == 3:
-            return datetime.datetime(*(int(number) for number in splited_date))
+        split_date = date.split(separator)
+        if len(split_date) == 3:
+            return datetime.datetime(*(int(number) for number in split_date))
 
     raise ValueError("Date %s is invalid" % date)
 

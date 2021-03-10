@@ -6,16 +6,14 @@
 """
 
 import datetime
-import json
 import logging
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
 from cg.utils import Process
-from cg.utils.date import get_date_str
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
 from .files import get_file_updated_at, get_spring_archive_files, get_spring_metadata
@@ -58,7 +56,8 @@ class CrunchyAPI:
         LOG.info("Compression/decompression is not running")
         return False
 
-    def is_fastq_compression_possible(self, compression_obj: CompressionData) -> bool:
+    @staticmethod
+    def is_fastq_compression_possible(compression_obj: CompressionData) -> bool:
         """Check if FASTQ compression is possible
 
         There are three possible answers to this question:
@@ -67,7 +66,7 @@ class CrunchyAPI:
          - SPRING archive exists           -> Compression NOT possible
          - Not compressed and not running  -> Compression IS possible
         """
-        if self.is_compression_pending(compression_obj):
+        if CrunchyAPI.is_compression_pending(compression_obj):
             return False
 
         if compression_obj.spring_exists():
@@ -105,7 +104,8 @@ class CrunchyAPI:
 
         return True
 
-    def is_fastq_compression_done(self, compression_obj: CompressionData) -> bool:
+    @staticmethod
+    def is_fastq_compression_done(compression_obj: CompressionData) -> bool:
         """Check if FASTQ compression is finished
 
         This is checked by controlling that the SPRING files that are produced after FASTQ
@@ -137,14 +137,14 @@ class CrunchyAPI:
 
         spring_metadata: CrunchyMetadata = get_spring_metadata(compression_obj.spring_metadata_path)
         # Check if the SPRING archive has been unarchived
-        updated_at = get_file_updated_at(spring_metadata)
+        updated_at: Optional[datetime.date] = get_file_updated_at(spring_metadata)
         if updated_at is None:
             LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
             return True
 
         LOG.info("Files where unpacked %s", updated_at)
 
-        if not self.check_if_update_spring(updated_at):
+        if not CrunchyAPI.check_if_update_spring(updated_at):
             return False
 
         LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
@@ -239,11 +239,11 @@ class CrunchyAPI:
         )
 
     @staticmethod
-    def check_if_update_spring(file_date: datetime.datetime) -> bool:
+    def check_if_update_spring(file_date: datetime.date) -> bool:
         """Check if date is older than FASTQ_DELTA (21 days)"""
         delta = file_date + datetime.timedelta(days=FASTQ_DELTA)
         now = datetime.datetime.now()
-        if delta > now:
+        if delta > now.date():
             LOG.info("FASTQ files are not old enough")
             return False
         return True

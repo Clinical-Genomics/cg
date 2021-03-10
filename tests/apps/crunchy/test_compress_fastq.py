@@ -1,43 +1,51 @@
 """Test methods for compressing FASTQ"""
 import json
 import logging
+from pathlib import Path
+from typing import Dict, List
 
+import pytest
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.crunchy.files import get_spring_archive_files, get_spring_metadata
+from cg.models import CompressionData
+from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
+from pydantic import ValidationError
 
 
-def test_get_spring_metadata(spring_metadata_file, crunchy_config_dict):
+def test_get_spring_metadata(spring_metadata_file: Path):
     """Test the method that fetches the SPRING metadata from a file"""
     # GIVEN a SPRING path and the path to a populated SPRING metadata file
     assert spring_metadata_file.is_file()
     assert spring_metadata_file.exists()
-    # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
 
     # WHEN fetching the content of the file
-    parsed_content = crunchy_api.get_spring_metadata(spring_metadata_file)
+    parsed_content: CrunchyMetadata = get_spring_metadata(spring_metadata_file)
 
     # THEN assert information about the three files is there
-    assert len(parsed_content) == 3
+    assert len(parsed_content.files) == 3
     # THEN assert a list with the files is returned
-    assert isinstance(parsed_content, list)
+    assert isinstance(parsed_content.files, list)
 
 
-def test_get_spring_archive_files(spring_metadata):
+def test_get_spring_archive_files(spring_metadata_object: CrunchyMetadata):
     """Test the method that sorts the SPRING metadata into a dictionary"""
     # GIVEN a SPRING metadata content in its raw format
-    assert isinstance(spring_metadata, list)
+    assert isinstance(spring_metadata_object.files, list)
 
-    # WHEN fetching the content of the file
-    parsed_content = CrunchyAPI.get_spring_archive_files(spring_metadata)
+    # WHEN sorting the files
+    sorted_content: Dict[str, CrunchyFile] = get_spring_archive_files(spring_metadata_object)
 
     # THEN assert information about the three files is there
-    assert len(parsed_content) == 3
+    assert len(sorted_content) == 3
     # THEN assert a dictionary with the files is returned
-    assert isinstance(parsed_content, dict)
+    assert isinstance(sorted_content, dict)
+    # THEN assert that the correct files are there
+    for file_name in ["fastq_first", "fastq_second", "spring"]:
+        assert file_name in sorted_content
 
 
 def test_get_spring_metadata_malformed_info(
-    spring_metadata_file, spring_metadata, crunchy_config_dict
+    spring_metadata_file: Path, spring_metadata: List[dict]
 ):
     """Test the method that fetches the SPRING metadata from a file when file is malformed"""
     # GIVEN a SPRING metadata file with missing information
@@ -45,18 +53,14 @@ def test_get_spring_metadata_malformed_info(
     with open(spring_metadata_file, "w") as outfile:
         outfile.write(json.dumps(spring_metadata))
 
-    # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
     # WHEN fetching the content of the file
-    parsed_content = crunchy_api.get_spring_metadata(spring_metadata_file)
-
-    # THEN assert that None is returned to indicate failure
-    assert parsed_content is None
+    with pytest.raises(ValidationError):
+        # THEN assert that a pydantic validation error is raised
+        get_spring_metadata(spring_metadata_file)
 
 
 def test_get_spring_metadata_wrong_number_files(
-    spring_metadata_file, spring_metadata, crunchy_config_dict
+    spring_metadata_file: Path, spring_metadata: List[dict]
 ):
     """Test the method that fetches the SPRING metadata from a file when a file is missing"""
     # GIVEN a SPRING metadata file with missing file
@@ -64,27 +68,25 @@ def test_get_spring_metadata_wrong_number_files(
     with open(spring_metadata_file, "w") as outfile:
         outfile.write(json.dumps(spring_metadata))
 
-    # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
-
     # WHEN fetching the content of the file
-    parsed_content = crunchy_api.get_spring_metadata(spring_metadata_file)
+    with pytest.raises(ValidationError):
+        # THEN assert that a validation error is raised
+        get_spring_metadata(spring_metadata_file)
 
-    # THEN assert that None is returned to indicate failure
-    assert parsed_content is None
 
-
-def test_fastq_to_spring_sbatch(crunchy_config_dict, compression_object, sbatch_process, caplog):
+def test_fastq_to_spring_sbatch(
+    crunchy_config_dict: dict, compression_object: CompressionData, sbatch_process, caplog
+):
     """Test fastq_to_spring method"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
 
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     crunchy_api.process = sbatch_process
-    spring_path = compression_object.spring_path
-    log_path = crunchy_api.get_log_dir(spring_path)
-    run_name = compression_object.run_name
-    sbatch_path = crunchy_api.get_sbatch_path(log_path, "fastq", run_name)
+    spring_path: Path = compression_object.spring_path
+    log_path: Path = crunchy_api.get_log_dir(spring_path)
+    run_name: str = compression_object.run_name
+    sbatch_path: Path = crunchy_api.get_sbatch_path(log_path, "fastq", run_name)
 
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
@@ -96,7 +98,12 @@ def test_fastq_to_spring_sbatch(crunchy_config_dict, compression_object, sbatch_
     assert sbatch_path.is_file()
 
 
-def test_spring_to_fastq(compression_object, spring_metadata_file, crunchy_config_dict, mocker):
+def test_spring_to_fastq(
+    compression_object: CompressionData,
+    spring_metadata_file: Path,
+    crunchy_config_dict: dict,
+    mocker,
+):
     """Test SPRING to FASTQ method
 
     Test to decompress SPRING to FASTQ. This test will make sure that the correct sbatch content

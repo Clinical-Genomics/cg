@@ -5,7 +5,7 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cg.utils.date import get_date_str
+from cg.utils.date import get_date
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 from pydantic import ValidationError
 
@@ -21,11 +21,7 @@ def get_spring_metadata(metadata_path: Path) -> CrunchyMetadata:
         except JSONDecodeError:
             LOG.warning("No content in SPRING metadata file")
             raise SyntaxError
-    try:
-        metadata = CrunchyMetadata(files=content)
-    except ValidationError:
-        LOG.warning("Invalid spring metadata file %s", metadata_path)
-        raise SyntaxError
+    metadata = CrunchyMetadata(files=content)
 
     if len(metadata.files) != 3:
         LOG.warning("Wrong number of files in SPRING metadata file: %s", metadata_path)
@@ -60,11 +56,12 @@ def get_spring_archive_files(crunchy_metadata: CrunchyMetadata) -> Dict[str, Cru
 def update_metadata_date(spring_metadata_path: Path) -> None:
     """Update date in the SPRING metadata file to today date"""
 
-    today_str = get_date_str()
+    now: datetime = get_date()
     spring_metadata: CrunchyMetadata = get_spring_metadata(spring_metadata_path)
     LOG.info("Adding today date to SPRING metadata file")
     for file_info in spring_metadata.files:
-        file_info.updated = today_str
+        file_info.updated = now.date()
 
+    content: dict = json.loads(spring_metadata.json())
     with open(spring_metadata_path, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata.json()))
+        outfile.write(json.dumps(content["files"]))
