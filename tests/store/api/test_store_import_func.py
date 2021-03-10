@@ -2,8 +2,6 @@
 
 from typing import List
 
-from tests.store.api.conftest import StoreCheckers
-
 from cg.store import Store, models
 from cg.store.api.import_func import (
     add_application_version,
@@ -15,6 +13,8 @@ from cg.store.api.import_func import (
     versions_are_same,
 )
 from cg.store.api.models import ApplicationVersionSchema
+from tests.store.api.conftest import StoreCheckers
+from tests.store_helpers import StoreHelpers
 
 
 def test_prices_are_same_int_and_int():
@@ -240,11 +240,12 @@ def test_sync_microbial_orderform_dry_run(microbial_store: Store, microbial_orde
         store=microbial_store,
         excel_path=microbial_orderform,
         prep_category=prep_category,
-        sign=sign,
+        signature=sign,
         activate=activate,
         inactivate=inactivate,
         sheet_name="Drop down list",
         tag_column=2,
+        tag_row=1,
     )
 
     # THEN same number of active and inactive mic applications in status database
@@ -277,11 +278,12 @@ def test_sync_microbial_orderform_activate(microbial_store: Store, microbial_ord
         store=microbial_store,
         excel_path=microbial_orderform,
         prep_category=prep_category,
-        sign=sign,
+        signature=sign,
         activate=activate,
         inactivate=inactivate,
         sheet_name="Drop down list",
         tag_column=2,
+        tag_row=1,
     )
 
     # THEN more active mic applications in status database and same inactive
@@ -295,40 +297,38 @@ def test_sync_microbial_orderform_activate(microbial_store: Store, microbial_ord
     assert inactive_mic_apps_from_start > inactive_mic_apps_after_when
 
 
-def test_sync_microbial_orderform_inactivate(
-    microbial_store_dummy_tag: Store, microbial_orderform: str
-):
-    # GIVEN a microbial orderform and a store where all the apptags exists half some inactive and
+def test_sync_rml_orderform_inactivate(rml_store: Store, rml_orderform: str, helpers: StoreHelpers):
+    # GIVEN a rml orderform and a store where all the apptags exists half some inactive and
     # some active
-    prep_category = "mic"
+    prep_category = "rml"
     sign = "PG"
     activate = False
     inactivate = True
-    active_mic_apps_from_start = microbial_store_dummy_tag.applications(
-        category=prep_category, archived=False
-    ).count()
-    inactive_mic_apps_from_start = microbial_store_dummy_tag.applications(
-        category=prep_category, archived=True
-    ).count()
+
+    helpers.add_application(
+        store=rml_store,
+        application_tag="apptag_to_inactivate",
+        is_archived=False,
+        application_type=prep_category,
+    )
+    active_apps_from_start = rml_store.applications(category=prep_category, archived=False).count()
+    inactive_apps_from_start = rml_store.applications(category=prep_category, archived=True).count()
 
     # WHEN syncing app-tags in that orderform
     import_apptags(
-        store=microbial_store_dummy_tag,
-        excel_path=microbial_orderform,
+        store=rml_store,
+        excel_path=rml_orderform,
         prep_category=prep_category,
-        sign=sign,
+        signature=sign,
         activate=activate,
         inactivate=inactivate,
         sheet_name="Drop down list",
-        tag_column=2,
+        tag_column=7,
+        tag_row=0,
     )
 
-    # THEN same number of active and more inactive mic applications in status database
-    active_mic_apps_after_when = microbial_store_dummy_tag.applications(
-        category=prep_category, archived=False
-    ).count()
-    inactive_mic_apps_after_when = microbial_store_dummy_tag.applications(
-        category=prep_category, archived=True
-    ).count()
-    assert active_mic_apps_from_start > active_mic_apps_after_when
-    assert inactive_mic_apps_from_start < inactive_mic_apps_after_when
+    # THEN the number of active should be less and the number of inactive more than before
+    active_apps_after_when = rml_store.applications(category=prep_category, archived=False).count()
+    inactive_apps_after_when = rml_store.applications(category=prep_category, archived=True).count()
+    assert active_apps_from_start > active_apps_after_when
+    assert inactive_apps_from_start < inactive_apps_after_when
