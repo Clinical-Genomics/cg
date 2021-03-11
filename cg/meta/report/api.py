@@ -95,13 +95,14 @@ class ReportAPI:
 
         version_obj = hk_api.version(case_id, analysis_date)
 
-        uploaded_delivery_report_files = hk_api.get_files(
-            bundle=case_id,
-            tags=[delivery_report_tag_name],
-            version=version_obj.id,
-        )
-        number_of_delivery_reports = len(uploaded_delivery_report_files.all())
-        is_bundle_missing_delivery_report = number_of_delivery_reports == 0
+        is_bundle_missing_delivery_report = False
+        try:
+            uploaded_delivery_report_file = self.get_delivery_report_from_hk(
+                hk_api=hk_api,
+                family_id=case_id
+            )
+        except FileNotFoundError:
+            is_bundle_missing_delivery_report = True
 
         if is_bundle_missing_delivery_report:
             file_obj = hk_api.add_file(
