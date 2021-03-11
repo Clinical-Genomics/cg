@@ -26,7 +26,9 @@ def test_analysis_started_at(upload_context, cli_runner, caplog, helpers):
 
     # GIVEN a correct case_id and a correct date
     analysis = helpers.add_analysis(
-        upload_context["analysis_api"].status_db, started_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+        upload_context["analysis_api"].status_db,
+        started_at=datetime.now(),
+        pipeline=Pipeline.MIP_DNA,
     )
     case_id = analysis.family.internal_id
     a_date = analysis.started_at
@@ -48,7 +50,9 @@ def test_analysis_without_started_at(upload_context, cli_runner, caplog, helpers
 
     # GIVEN a correct case_id and a correct date
     analysis = helpers.add_analysis(
-        upload_context["analysis_api"].status_db, started_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+        upload_context["analysis_api"].status_db,
+        started_at=datetime.now(),
+        pipeline=Pipeline.MIP_DNA,
     )
     case_id = analysis.family.internal_id
     a_date = analysis.started_at
