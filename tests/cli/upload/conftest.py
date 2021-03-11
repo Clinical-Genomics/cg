@@ -7,7 +7,11 @@ from tempfile import tempdir
 
 import pytest
 
+from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.madeline import MockMadelineAPI
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -16,9 +20,6 @@ from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store, models
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.mocks.madeline import MockMadelineAPI
-from cg.meta.report.api import ReportAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -140,6 +141,16 @@ def fixture_vogue_cli_context(vogue_api) -> dict:
     """context to use in cli"""
 
     return {"vogue_api": vogue_api}
+
+
+@pytest.fixture(scope="function", name="upload_scout_api")
+def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
+    """Return a upload scout api"""
+    api = MockScoutUploadApi()
+    api.housekeeper = housekeeper_api
+    api.config = mip_load_config
+
+    return api
 
 
 @pytest.fixture(scope="function", name="vogue_api")

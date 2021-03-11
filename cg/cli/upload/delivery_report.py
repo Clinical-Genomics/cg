@@ -9,6 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.exc import CgError, DeliveryReportError
+from cg.meta.report.api import ReportAPI
 
 from .utils import suggest_cases_delivery_report
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -158,17 +159,16 @@ def delivery_report(
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
     analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
-    report_api = context.obj["report_api"]
+    report_api: ReportAPI = context.obj["report_api"]
 
-    if not case_id:
+    if not case_id or not analysis_api.status_db.family(internal_id=case_id):
         suggest_cases_delivery_report(context, pipeline=Pipeline.MIP_DNA)
         context.abort()
 
-    status_api = context.obj["status_db"]
-
     if not analysis_started_at:
-        analysis_started_at = status_api.family(case_id).analyses[0].started_at
-        LOG.debug("using analysis date: %s", analysis_started_at)
+        analysis_started_at = analysis_api.status_db.family(case_id).analyses[0].started_at
+
+    LOG.info("Using analysis started at: %s", analysis_started_at)
 
     if print_console:
         delivery_report_html = report_api.create_delivery_report(
@@ -176,8 +176,6 @@ def delivery_report(
         )
         click.echo(delivery_report_html)
         return
-
-    status_api = context.obj["status_db"]
 
     delivery_report_file = report_api.create_delivery_report_file(
         case_id,
