@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from tempfile import tempdir
 
 import pytest
 
@@ -125,12 +126,13 @@ def fixture_base_cli_context(
 ) -> dict:
     """context to use in cli"""
     return {
+        "housekeeper_api": housekeeper_api,
+        "mip-rd-dna": {"root": tempdir},
+        "report_api": MockReportApi(),
         "scout_api": MockScoutApi(),
         "scout_upload_api": upload_scout_api,
-        "housekeeper_api": housekeeper_api,
-        "trailblazer_api": trailblazer_api,
         "status_db": analysis_store,
-        "mip-rd-dna": {"root": "hej"},
+        "trailblazer_api": trailblazer_api,
     }
 
 
@@ -139,6 +141,16 @@ def fixture_vogue_cli_context(vogue_api) -> dict:
     """context to use in cli"""
 
     return {"vogue_api": vogue_api}
+
+
+@pytest.fixture(scope="function", name="upload_scout_api")
+def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
+    """Return a upload scout api"""
+    api = MockScoutUploadApi()
+    api.housekeeper = housekeeper_api
+    api.config = mip_load_config
+
+    return api
 
 
 @pytest.fixture(scope="function", name="vogue_api")
@@ -156,6 +168,21 @@ class MockScoutApi(ScoutAPI):
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
+
+
+class MockReportApi(ReportAPI):
+    def __init__(self):
+        """docstring for __init__"""
+        pass
+
+    def create_delivery_report(self, *args, **kwargs):
+        """docstring for create_delivery_report"""
+
+        for arg in args:
+            LOG.info("create_delivery_report called with positional %s", arg)
+
+        for key, value in kwargs.items():
+            LOG.info("create_delivery_report called with key %s and value %s", key, value)
 
 
 class MockVogueApi:

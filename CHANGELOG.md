@@ -226,6 +226,11 @@ Try to use the following format:
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
 
+## [NG.NG.NG]
+
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
 ## [18.10.0]
 
 ### Added

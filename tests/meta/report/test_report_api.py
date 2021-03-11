@@ -1,8 +1,8 @@
-import datetime
 import os
 from pathlib import Path
 
 from cg.meta.report.api import ReportAPI
+from tests.meta.report.comparison import is_similar_dicts, dict_values_exists_in
 
 
 def test_collect_delivery_data(report_api, report_store, case_id):
@@ -13,7 +13,9 @@ def test_collect_delivery_data(report_api, report_store, case_id):
     assert case
     assert case.links
     assert case.analyses
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # THEN all data for the delivery report should have been collected
     assert delivery_data["report_version"]
@@ -66,59 +68,13 @@ def test_collect_delivery_data(report_api, report_store, case_id):
     assert delivery_data["genome_build"]
 
 
-def is_similar_dicts(dict1, dict2):
-    _is_similar = True
-
-    for key in dict1.keys():
-        _is_similar = _is_similar and is_similar_values(dict1.get(key), dict2.get(key))
-
-    return _is_similar
-
-
-def is_similar_lists(list1, list2):
-    _is_similar = True
-
-    if isinstance(list2, list):
-        for value1, value2 in zip(list1, list2):
-            _is_similar = _is_similar and is_similar_values(value1, value2)
-    else:
-        for value1 in list1:
-            _is_similar = _is_similar and value1 in list2
-
-    return _is_similar
-
-
-def is_similar_values(value1, value2):
-
-    if str(value1) == str(value2):
-        return True
-
-    if isinstance(value1, dict):
-        return is_similar_dicts(value1, value2)
-
-    if isinstance(value1, list):
-        return is_similar_lists(value1, value2)
-
-    if isinstance(value1, datetime.datetime):
-        return str(value1.date()) == value2
-
-    if is_float(value1):
-        return round(float(value1), 1) == round(float(value2), 1)
-
-    return False
-
-
-def is_float(value):
-    try:
-        float(value)
-        return True
-    except (ValueError, TypeError):
-        return False
-
-
-def test_presentable_delivery_report_contains_delivery_data(report_api, case_id):
+def test_presentable_delivery_report_contains_delivery_data(report_store, report_api):
     # GIVEN data from an analysed case and an initialised report_api
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    case_id = "yellowhog"
+    case = report_store.family(case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # WHEN creating delivery report
     presentable_data = report_api._make_data_presentable(delivery_data)
@@ -128,53 +84,18 @@ def test_presentable_delivery_report_contains_delivery_data(report_api, case_id)
     assert is_similar_dicts(delivery_data, presentable_data)
 
 
-def dict_values_exists_in(a_dict: dict, a_target: str):
-
-    all_exists = True
-
-    for value in a_dict.values():
-        all_exists = all_exists and value_exists_in(value, a_target)
-    return all_exists
-
-
-def value_exists_in(value, a_target: str):
-
-    if isinstance(value, str):
-        return value in a_target
-    if isinstance(value, float):
-        return str(round(value, 2)) in a_target or str(round(value, 1)) in a_target
-    if isinstance(value, dict):
-        return dict_values_exists_in(value, a_target)
-    if isinstance(value, list):
-        return list_values_exists_in(value, a_target)
-    if isinstance(value, datetime.datetime):
-        return str(value.date()) in a_target
-
-    if str(value) in a_target:
-        return True
-
-    if isinstance(value, bool):
-        return True
-
-    return False
-
-
-def list_values_exists_in(a_list: list, a_target: str):
-
-    all_exists = True
-
-    for value in a_list:
-        all_exists = all_exists and value_exists_in(value, a_target)
-    return all_exists
-
-
-def test_create_delivery_report_contains_delivery_data(report_api):
+def test_create_delivery_report_contains_delivery_data(report_store, report_api):
     # GIVEN data from an analysed case and an initialised report_api
     case_id = "yellowhog"
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    case = report_store.family(case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # WHEN creating delivery report
-    delivery_report = report_api.create_delivery_report(case_id)
+    delivery_report = report_api.create_delivery_report(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # THEN
     # the delivery_report contains the delivery_data
@@ -209,10 +130,13 @@ def test_incorporate_lims_methods(report_samples, report_api):
         assert sample["sequencing_method"]
 
 
-def test_render_delivery_report(report_api):
+def test_render_delivery_report(report_store, report_api):
     # GIVEN proper qc data from an analysis exist
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
-    report_data = report_api._make_data_presentable(delivery_data)
+    case_id = "yellowhog"
+    case = report_store.family(case_id)
+    report_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # WHEN rendering a report from that data
     rendered_report = ReportAPI._render_delivery_report(report_data)
@@ -221,22 +145,65 @@ def test_render_delivery_report(report_api):
     assert len(rendered_report) > 0
 
 
-def test_create_delivery_report(report_api):
+def test_create_delivery_report(report_store, report_api):
     # GIVEN initialized ReportAPI
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
 
     # WHEN rendering a report from that data
-    created_report = report_api.create_delivery_report(case_id="yellowhog")
+    created_report = report_api.create_delivery_report(
+        case_id="yellowhog", analysis_date=anlysis_started_at
+    )
 
     # THEN a html report with certain data should have been rendered
     assert len(created_report) > 0
 
 
-def test_create_delivery_report_file(report_api: ReportAPI):
+def test_get_date_specific_delivery_data(report_store, report_api):
+    # GIVEN proper qc data from one analyses exist
+    case_id = "yellowhog"
+    case = report_store.family(case_id)
+    assert case.analyses[0].started_at
+
+    # WHEN fetching data from latest analysis
+    report_data_latest = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
+
+    # THEN the data fetched should be identical
+    assert is_similar_dicts(report_data_latest, report_data_latest)
+
+
+def test_get_date_specific_delivery_data(report_store, report_api):
+    # GIVEN proper qc data from two analyses exist
+    case_id = "yellowhog"
+    case = report_store.family(case_id)
+
+    assert case.analyses[0].started_at
+    assert case.analyses[1].started_at
+    assert case.analyses[0].started_at != case.analyses[1].started_at
+
+    report_data_latest = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
+
+    # WHEN fetching data from a previous analysis
+    report_data_specific = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[1].started_at
+    )
+
+    # THEN the data fetched should not be identical
+    assert not is_similar_dicts(report_data_latest, report_data_specific)
+
+
+def test_create_delivery_report_file(report_store, report_api: ReportAPI, tmp_path):
     # GIVEN initialized ReportAPI
+    case_id = "yellowhog"
+    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
 
     # WHEN rendering a report from that data
     created_report_file = report_api.create_delivery_report_file(
-        case_id="yellowhog", file_path=Path(".")
+        case_id="yellowhog", analysis_date=anlysis_started_at, file_path=tmp_path
     )
 
     # THEN a html report with certain data should have been created on disk
@@ -326,7 +293,9 @@ def test_get_application_data_from_status_db_none_accredited(report_samples, rep
 def test_render_accredited_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist with accredited application
     report_api.store._application_accreditation = True
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    analysis_date = report_api.store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=analysis_date)
     report_data = report_api._make_data_presentable(delivery_data)
     assert report_data["accredited"] is True
 
@@ -340,7 +309,9 @@ def test_render_accredited_delivery_report(report_api):
 def test_render_non_accredited_delivery_report(report_api):
     # GIVEN proper qc data from an analysis exist with non accredited application
     report_api.store._application_accreditation = False
-    delivery_data = report_api._get_delivery_data(case_id="yellowhog")
+    case_id = "yellowhog"
+    analysis_date = report_api.store.family(case_id).analyses[0].started_at
+    delivery_data = report_api._get_delivery_data(case_id=case_id, analysis_date=analysis_date)
     report_data = report_api._make_data_presentable(delivery_data)
     assert report_data["accredited"] is False
 
@@ -361,7 +332,9 @@ def test_get_delivery_data_not_accredited(report_api, report_store, case_id):
     for link in case.links:
         link.sample.application_version.application.is_accredited = False
 
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # THEN the accreditation status int the delivery_data is false
     assert delivery_data["accredited"] is False
@@ -375,7 +348,9 @@ def test_get_delivery_data_accredited(report_api, report_store, case_id):
     case = report_store.family(case_id)
     for link in case.links:
         link.sample.application_version.application.is_accredited = True
-    delivery_data = report_api._get_delivery_data(case_id=case_id)
+    delivery_data = report_api._get_delivery_data(
+        case_id=case_id, analysis_date=case.analyses[0].started_at
+    )
 
     # THEN the accreditation status int the delivery_data is true
     assert delivery_data["accredited"] is True
