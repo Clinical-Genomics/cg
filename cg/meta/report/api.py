@@ -78,8 +78,8 @@ class ReportAPI:
 
         return delivery_report_file
 
-    @staticmethod
     def add_delivery_report_to_hk(
+        self,
         delivery_report_file: Path,
         hk_api: HousekeeperAPI,
         case_id: str,
@@ -97,10 +97,7 @@ class ReportAPI:
 
         is_bundle_missing_delivery_report = False
         try:
-            uploaded_delivery_report_file = self.get_delivery_report_from_hk(
-                hk_api=hk_api,
-                family_id=case_id
-            )
+            self.get_delivery_report_from_hk(hk_api=hk_api, case_id=case_id)
         except FileNotFoundError:
             is_bundle_missing_delivery_report = True
 
@@ -114,17 +111,17 @@ class ReportAPI:
 
         return None
 
-    def get_delivery_report_from_hk(hk_api: HousekeeperAPI, family_id):
+    def get_delivery_report_from_hk(hk_api: HousekeeperAPI, case_id):
         delivery_report_tag_name = "delivery-report"
-        version_obj = hk_api.last_version(family_id)
+        version_obj = hk_api.last_version(case_id)
         uploaded_delivery_report_files = hk_api.get_files(
-            bundle=family_id,
+            bundle=case_id,
             tags=[delivery_report_tag_name],
             version=version_obj.id,
         )
 
         if uploaded_delivery_report_files.count() == 0:
-            raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
+            raise FileNotFoundError(f"No delivery report was found in housekeeper for {case_id}")
 
         return uploaded_delivery_report_files[0].full_path
 

@@ -196,7 +196,9 @@ def delivery_report(
         click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
 
     context.invoke(delivery_report_to_scout, case_id=case_id)
-    report_api.update_delivery_report_date(analysis_api.status_db, case_id, analysis_date=analysis_started_at)
+    report_api.update_delivery_report_date(
+        analysis_api.status_db, case_id, analysis_date=analysis_started_at
+    )
 
 
 @click.command("delivery-report-to-scout")
