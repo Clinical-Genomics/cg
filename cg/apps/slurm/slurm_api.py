@@ -57,7 +57,12 @@ class SlurmAPI:
         if self.process.stderr:
             LOG.info(self.process.stderr)
         LOG.info(self.process.stdout)
-        return int(self.process.stdout.strip())
+        try:
+            job_number: int = int(self.process.stdout.strip())
+        except ValueError:
+            LOG.warning("Could not get slurm job number")
+            job_number = 0
+        return job_number
 
 
 if __name__ == "__main__":

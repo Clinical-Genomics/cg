@@ -1,5 +1,6 @@
 import json
 import logging
+import tempfile
 from datetime import datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
@@ -9,6 +10,30 @@ from cg.utils.date import get_date
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
 LOG = logging.getLogger(__name__)
+
+
+# Methods to get file information
+def get_log_dir(file_path: Path) -> Path:
+    """Return the path to where logs should be stored"""
+    return file_path.parent
+
+
+def get_sbatch_path(log_dir: Path, compression: str, run_name: str = None) -> Path:
+    """Return the path to where sbatch should be printed"""
+    if compression == "fastq":
+        return log_dir / "_".join([run_name, "compress_fastq.sh"])
+    # Only other option is "SPRING"
+    return log_dir / "_".join([run_name, "decompress_spring.sh"])
+
+
+def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
+    """Create a temporary directory and return the path to it"""
+
+    with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix, dir=base) as dir_name:
+        tmp_dir_path = dir_name
+
+    LOG.info("Created temporary dir %s", tmp_dir_path)
+    return tmp_dir_path
 
 
 def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
