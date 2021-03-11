@@ -87,7 +87,6 @@ def test_dry_sample(
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
-    snapshot.assert_match(result.output)
 
 
 def test_dry_order(cli_runner, base_context, microbial_ticket, snapshot: Snapshot):
@@ -104,16 +103,13 @@ def test_dry_order(cli_runner, base_context, microbial_ticket, snapshot: Snapsho
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
-    snapshot.assert_match(result.output)
 
 
-def test_sample(
-    base_context, cli_runner, lims_api, microbial_sample_id, queries_path, snapshot: Snapshot
-):
+def test_sample(base_context, cli_runner, lims_api, microbial_sample_id, snapshot: Snapshot):
     """Test working command for sample"""
 
     # GIVEN an existing queries path
-    Path(queries_path).mkdir(exist_ok=True)
+    Path(base_context["analysis_api"].queries_path).mkdir(exist_ok=True)
     lims_api.sample(microbial_sample_id).sample_data["project"] = {"id": "microbial_order_test"}
 
     # WHEN dry running a sample name
@@ -121,16 +117,12 @@ def test_sample(
 
     # THEN command should give us a json dump
     assert result.exit_code == EXIT_SUCCESS
-    outfilename = queries_path / microbial_sample_id
-    outfilename = outfilename.with_suffix(".json")
-    with open(outfilename, "r") as outputfile:
-        snapshot.assert_match(outputfile.readlines())
 
 
-def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_gonorrhoeae(cli_runner, base_context, microbial_sample_id):
     """ Test if the substitution of the organism happens """
     # GIVEN a sample with organism set to gonorrhea
-    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj = base_context["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "gonorrhoeae"
 
     # WHEN getting the case config
@@ -140,10 +132,10 @@ def test_gonorrhoeae(cli_runner, microsalt_store, base_context, microbial_sample
     assert "Neisseria spp." in result.output
 
 
-def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_cutibacterium_acnes(cli_runner, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to Cutibacterium acnes
-    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj = base_context["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "Cutibacterium acnes"
 
     # WHEN getting the case config
@@ -153,10 +145,10 @@ def test_cutibacterium_acnes(cli_runner, microsalt_store, base_context, microbia
     assert "Propionibacterium acnes" in result.output
 
 
-def test_vre_nc_017960(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_vre_nc_017960(cli_runner, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
-    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj = base_context["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
     sample_obj.organism.reference_genome = "NC_017960.1"
 
@@ -167,10 +159,10 @@ def test_vre_nc_017960(cli_runner, microsalt_store, base_context, microbial_samp
     assert "Enterococcus faecium" in result.output
 
 
-def test_vre_nc_004668(cli_runner, microsalt_store, base_context, microbial_sample_id):
+def test_vre_nc_004668(cli_runner, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE
-    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj = base_context["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
     sample_obj.organism.reference_genome = "NC_004668.1"
 
@@ -181,10 +173,10 @@ def test_vre_nc_004668(cli_runner, microsalt_store, base_context, microbial_samp
     assert "Enterococcus faecalis" in result.output
 
 
-def test_vre_comment(cli_runner, microsalt_store, lims_api, base_context, microbial_sample_id):
+def test_vre_comment(cli_runner, lims_api, base_context, microbial_sample_id):
     """ Test if this bacteria gets its name changed """
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
-    sample_obj = microsalt_store.sample(microbial_sample_id)
+    sample_obj = base_context["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
     lims_sample = lims_api.sample(microbial_sample_id)
     lims_sample.sample_data["comment"] = "ABCD123"

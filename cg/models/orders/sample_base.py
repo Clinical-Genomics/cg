@@ -8,7 +8,7 @@ from pydantic import BaseModel, constr
 class SexEnum(str, Enum):
     male = "male"
     female = "female"
-    other = "other"
+    other = "unknown"
 
 
 class PriorityEnum(str, Enum):
@@ -20,6 +20,11 @@ class PriorityEnum(str, Enum):
 
 
 class ContainerEnum(str, Enum):
+    tube = "Tube"
+    plate = "96 well plate"
+
+
+class CaptureKitEnum(str, Enum):
     agilent_sureselect_cre = "Agilent Sureselect CRE"
     agilent_sureselect_v5 = "Agilent Sureselect V5"
     sureselect_focused_exome = "SureSelect Focused Exome"
@@ -39,13 +44,13 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 class OrderSample(BaseModel):
     age_at_sampling: Optional[str]
     application: str
-    capture_kit: Optional[str]
+    capture_kit: Optional[CaptureKitEnum]
     case_id: str
     cohorts: Optional[List[str]]
     comment: Optional[str]
-    concentration: int
-    concentration_sample: int
-    container: ContainerEnum = ContainerEnum.other
+    concentration: Optional[float]
+    concentration_sample: Optional[float]
+    container: Optional[ContainerEnum]
     container_name: Optional[str]
     customer: Optional[str]
     custom_index: Optional[str]
@@ -58,7 +63,7 @@ class OrderSample(BaseModel):
     formalin_fixation_time: Optional[int]
     from_sample: Optional[str]
     index: str
-    index_number: Optional[int]
+    index_number: Optional[str]
     index_sequence: Optional[str]
     internal_id: Optional[str]
     mother: Optional[str]
@@ -67,7 +72,7 @@ class OrderSample(BaseModel):
     organism_other: Optional[str]
     panels: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
-    pool: str
+    pool: Optional[str]
     post_formalin_fixation_time: Optional[int]
     priority: PriorityEnum = PriorityEnum.standard
     quantity: Optional[int]

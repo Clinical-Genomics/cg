@@ -1,7 +1,10 @@
 import logging
 from pathlib import Path
 
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 EXIT_SUCCESS = 0
 
@@ -20,12 +23,16 @@ def test_balsamic_no_args(cli_runner, balsamic_context: dict):
     assert "help" in result.output
 
 
-def test_start(cli_runner, balsamic_context: dict, mock_config, caplog):
+def test_start(cli_runner, balsamic_context: dict, mock_config, caplog, mocker):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id for which we created a config file
     case_id = "balsamic_case_wgs_single"
+
+    # GIVEN decompression is not needed
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
+    BalsamicAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=balsamic_context)
@@ -43,6 +50,8 @@ def test_store(
     mock_deliverable,
     mock_analysis_finish,
     caplog,
+    hermes_deliverables,
+    mocker,
 ):
     """Test to ensure all parts of store command are run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
@@ -51,13 +60,17 @@ def test_store(
     case_id = "balsamic_case_wgs_single"
 
     # Set Housekeeper to an empty real Housekeeper store
-    balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
+    balsamic_context["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # Make sure the bundle was not present in the store
-    assert not balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
+    assert not balsamic_context["analysis_api"].housekeeper_api.bundle(case_id)
 
     # Make sure  analysis not already stored in ClinicalDB
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
+    assert not balsamic_context["analysis_api"].status_db.family(case_id).analyses
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store, [case_id, "--dry-run"], obj=balsamic_context)
@@ -65,12 +78,12 @@ def test_store(
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
-    assert "Analysis successfully stored in ClinicalDB" in caplog.text
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
-    assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
+    assert "Analysis successfully stored in StatusDB" in caplog.text
+    assert balsamic_context["analysis_api"].status_db.family(case_id).analyses
+    assert balsamic_context["analysis_api"].housekeeper_api.bundle(case_id)
 
 
-def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, caplog):
+def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, caplog, mocker):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
@@ -83,12 +96,16 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
 
     # Ensure the config is mocked to run compound command
     Path.mkdir(
-        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_success)).parent,
+        Path(balsamic_context["analysis_api"].get_case_config_path(case_id_success)).parent,
         exist_ok=True,
     )
-    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_success)).touch(
+    Path(balsamic_context["analysis_api"].get_case_config_path(case_id_success)).touch(
         exist_ok=True
     )
+
+    # GIVEN decompression is not needed
+    mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
+    BalsamicAnalysisAPI.resolve_decompression.return_value = None
 
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
@@ -103,7 +120,7 @@ def test_start_available(tmpdir_factory, cli_runner, balsamic_context: dict, cap
     assert case_id_fail not in caplog.text
 
     # THEN action of the case should NOT be set to running
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_fail).action is None
+    assert balsamic_context["analysis_api"].status_db.family(case_id_fail).action is None
 
 
 def test_store_available(
@@ -115,6 +132,8 @@ def test_store_available(
     mock_deliverable,
     mock_analysis_finish,
     caplog,
+    mocker,
+    hermes_deliverables,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
@@ -128,25 +147,29 @@ def test_store_available(
 
     # Ensure the config is mocked for fail case to run compound command
     Path.mkdir(
-        Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_fail)).parent,
+        Path(balsamic_context["analysis_api"].get_case_config_path(case_id_fail)).parent,
         exist_ok=True,
     )
-    Path(balsamic_context["BalsamicAnalysisAPI"].get_config_path(case_id_fail)).touch(exist_ok=True)
+    Path(balsamic_context["analysis_api"].get_case_config_path(case_id_fail)).touch(exist_ok=True)
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
-    balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action = "running"
-    balsamic_context["BalsamicAnalysisAPI"].store.commit()
+    balsamic_context["analysis_api"].status_db.family(case_id_success).action = "running"
+    balsamic_context["analysis_api"].status_db.commit()
 
     # THEN command exits with 1 because one of the cases threw errors
     assert result.exit_code == 1
     assert case_id_success in caplog.text
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action == "running"
+    assert balsamic_context["analysis_api"].status_db.family(case_id_success).action == "running"
 
-    balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
+    balsamic_context["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # WHEN running command
-    result = cli_runner.invoke(store_available, ["--dry-run"], obj=balsamic_context)
+    result = cli_runner.invoke(store_available, obj=balsamic_context)
 
     # THEN command exits successfully
     assert result.exit_code == 0
@@ -154,11 +177,11 @@ def test_store_available(
     # THEN case id with analysis_finish gets picked up
     assert case_id_success in caplog.text
 
-    # THEN bundle added successfully and action set to None
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).action is None
-
     # THEN case has analyses
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id_success).analyses
+    assert balsamic_context["analysis_api"].status_db.family(case_id_success).analyses
 
     # THEN bundle can be found in Housekeeper
-    assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id_success)
+    assert balsamic_context["analysis_api"].housekeeper_api.bundle(case_id_success)
+
+    # THEN bundle added successfully and action set to None
+    assert balsamic_context["analysis_api"].status_db.family(case_id_success).action is None

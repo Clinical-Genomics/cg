@@ -1,5 +1,6 @@
 """Tests the Validator class"""
 import pytest
+
 from cg.constants import Pipeline
 from cg.meta.report.report_validator import ReportValidator
 

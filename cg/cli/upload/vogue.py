@@ -2,16 +2,17 @@
 
 import logging
 from pathlib import Path
+from typing import Tuple, Any, Optional, List
 
 import click
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.vogue import VogueAPI
-from cg.cli.workflow.get_links import get_links
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.vogue import UploadVogueAPI
-from cg.store import Store
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -234,12 +235,12 @@ def _get_samples(store: Store, case_name: str) -> str:
         sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs = get_links(store, case_name)
+    link_objs: List[models.FamilySample] = store.family(case_name).links
     sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 
 
-def _get_analysis_workflow_details(status_api: Store, case_name: str) -> str:
+def _get_analysis_workflow_details(status_api: Store, case_name: str) -> Tuple[Any, Optional[Any]]:
     """Get lowercase workflow name for a case_name
     Args:
         case_name(str): onemite

@@ -1,6 +1,8 @@
-from cg.store import Store, models
 import datetime as dt
+
 from alchy import Query
+
+from cg.store import Store, models
 
 
 def get_cases_to_compress(store: Store, date_threshold: dt.datetime) -> Query:

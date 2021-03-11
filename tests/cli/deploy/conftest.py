@@ -2,13 +2,12 @@
 
 from pathlib import Path
 
+import pytest
 from tests.apps.shipping.conftest import (
-    fixture_shipping_configs,
     fixture_binary_path,
     fixture_host_config,
+    fixture_shipping_configs,
 )
-
-import pytest
 
 
 @pytest.fixture(name="scout_config")

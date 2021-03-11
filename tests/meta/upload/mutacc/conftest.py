@@ -1,4 +1,5 @@
 import pytest
+
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 

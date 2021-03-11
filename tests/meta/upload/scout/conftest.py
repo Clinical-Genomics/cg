@@ -7,13 +7,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.constants import Pipeline
-from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
-from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scout_load_config import MipLoadConfig
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
-from cg.store import Store, models
-from housekeeper.store import models as hk_models
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -21,6 +14,14 @@ from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
+
+from cg.constants import Pipeline
+from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.scout_load_config import MipLoadConfig
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
