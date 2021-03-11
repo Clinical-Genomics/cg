@@ -43,28 +43,3 @@ jobs:
       run: |
         pip install -r requirements-dev.txt
         pip check
-
-  install-with-pipenv:
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - uses: actions/checkout@v2
-
-    # Set up python
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.7
-
-    - name: Install pipenv
-      uses: dschep/install-pipenv-action@v1
-
-    - name: Check pipenv lockfile
-      run: |
-        # Make sure the packages are properly locked in Pipfile.lock, and abort if the lock file is out-of-date
-        pipenv check
-        pipenv graph
-      env:
-        PIPENV_PYUP_API_KEY: ""
