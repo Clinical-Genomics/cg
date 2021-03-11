@@ -13,6 +13,18 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
+## [20.6.0]
+### Changed
+- Use cgmodels for crunchy metadata files
+
 ## [20.5.4]
 ### Added
 - Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
@@ -55,7 +67,6 @@ Try to use the following format:
 ## [20.3.0]
 ### Changed
 - Refactored AnalysisAPI anf FastHandler classes into one class
-
 
 ## [20.2.1]
 ### Fixed
