@@ -13,12 +13,38 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.5.0]
+
+## [20.7.0]
 ### Added
 - DIAB and NBS-M to master list 
 
 ### Fixed
 - Alphabetical order of master list
+
+## [20.6.0]
+### Changed
+- Use cgmodels for crunchy metadata files
+
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
+## [20.5.3]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
+
+## [20.5.2]
+### Changed
+- Remove pipfile and pipfile.lock since they are not used
+
+## [20.5.1]
+### Changed
+- Removes linting gh actions job
+
+## [20.5.0]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
 
 ## [20.4.0]
 ### Added
