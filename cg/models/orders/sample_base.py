@@ -8,7 +8,7 @@ from pydantic import BaseModel, constr
 class SexEnum(str, Enum):
     male = "male"
     female = "female"
-    other = "other"
+    other = "unknown"
 
 
 class PriorityEnum(str, Enum):
@@ -63,7 +63,7 @@ class OrderSample(BaseModel):
     formalin_fixation_time: Optional[int]
     from_sample: Optional[str]
     index: str
-    index_number: Optional[int]
+    index_number: Optional[str]
     index_sequence: Optional[str]
     internal_id: Optional[str]
     mother: Optional[str]

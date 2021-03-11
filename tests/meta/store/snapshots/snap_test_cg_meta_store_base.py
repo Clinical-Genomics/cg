@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import GenericRepr, Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots["test_build_dna_bundle 1"] = {
@@ -679,7 +678,7 @@ snapshots["test_parse_files_dna 1"] = [
     {
         "archive": False,
         "deliverables_tag_map": ("mip_analyse", "sample_info"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml",
+        "path": "tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml",
         "tags": ["case_id", "mip-dna", "sampleinfo"],
     },
     {
@@ -784,7 +783,7 @@ snapshots["test_parse_files_rna 1"] = [
     {
         "archive": False,
         "deliverables_tag_map": ("mip_analyse", "sample_info"),
-        "path": "/path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml",
+        "path": "tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml",
         "tags": ["case_id", "mip-analyse", "mip-rna", "sample-info"],
     },
     {

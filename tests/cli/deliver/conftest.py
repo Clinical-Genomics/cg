@@ -3,11 +3,11 @@
 from pathlib import Path
 
 import pytest
-from housekeeper.store import models as hk_models
+from tests.store_helpers import StoreHelpers
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import Store
-from tests.store_helpers import StoreHelpers
+from housekeeper.store import models as hk_models
 
 # Paths
 

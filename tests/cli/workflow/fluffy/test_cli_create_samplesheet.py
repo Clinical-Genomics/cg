@@ -10,7 +10,7 @@ def test_create_samplesheet_dry(
     caplog,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # WHEN running command to create samplesheet with dry-run flag
@@ -41,7 +41,6 @@ def test_create_samplesheet_dry_no_case(
     result = cli_runner.invoke(
         create_samplesheet, [fluffy_case_id_non_existing, "--dry-run"], obj=fluffy_context
     )
-
     # THEN command does NOT terminate successfully
     assert result.exit_code != EXIT_SUCCESS
 
@@ -54,7 +53,7 @@ def test_create_samplesheet_success(
     cli_runner, fluffy_case_id_existing, fluffy_context, samplesheet_fixture_path, caplog, mocker
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # GIVEN an existing samplesheet in Housekeeper
@@ -71,7 +70,6 @@ def test_create_samplesheet_success(
 
     # WHEN running command to create samplesheet
     result = cli_runner.invoke(create_samplesheet, [fluffy_case_id_existing], obj=fluffy_context)
-
     # THEN log text is output
     assert "Writing modified csv" in caplog.text
 

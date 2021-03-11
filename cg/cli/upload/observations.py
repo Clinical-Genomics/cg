@@ -2,12 +2,14 @@
 import logging
 
 import click
+
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants import Pipeline
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.observations import UploadObservationsAPI
 
 from .utils import LinkHelper
+from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -22,25 +24,23 @@ def observations(context, case_id, case_limit, dry_run):
 
     click.echo(click.style("----------------- OBSERVATIONS ----------------"))
 
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
     loqus_apis = {
         "wgs": LoqusdbAPI(context.obj),
         "wes": LoqusdbAPI(context.obj, analysis_type="wes"),
     }
-    status_api = context.obj["status_db"]
-    hk_api = context.obj["housekeeper_api"]
 
     if case_id:
-        families_to_upload = [status_api.family(case_id)]
+        families_to_upload = [analysis_api.status_db.family(case_id)]
     else:
-        families_to_upload = status_api.observations_to_upload()
+        families_to_upload = analysis_api.status_db.observations_to_upload()
 
     nr_uploaded = 0
     for case_obj in families_to_upload:
 
-        if case_limit is not None:
-            if nr_uploaded >= case_limit:
-                LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
-                return
+        if case_limit is not None and nr_uploaded >= case_limit:
+            LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
+            return
 
         if not case_obj.customer.loqus_upload:
             LOG.info(
@@ -59,7 +59,10 @@ def observations(context, case_id, case_limit, dry_run):
             continue
 
         analysis_list = LinkHelper.get_analysis_type_for_each_link(case_obj.links)
-        if not (len(set(analysis_list)) == 1 and analysis_list[0] in ("wes", "wgs")):
+        if len(set(analysis_list)) != 1 or analysis_list[0] not in (
+            "wes",
+            "wgs",
+        ):
             LOG.info(
                 "%s: Undetermined analysis type (wes or wgs) or mixed analyses. Skipping!",
                 case_obj.internal_id,
@@ -72,7 +75,9 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: Would upload observations", case_obj.internal_id)
             continue
 
-        api = UploadObservationsAPI(status_api, hk_api, loqus_apis[analysis_type])
+        api = UploadObservationsAPI(
+            analysis_api.status_db, analysis_api.housekeeper_api, loqus_apis[analysis_type]
+        )
 
         try:
             api.process(case_obj.analyses[0])

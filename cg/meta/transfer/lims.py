@@ -1,8 +1,8 @@
-from enum import Enum
 import logging
+from enum import Enum
 
-from cg.store import Store
 from cg.apps.lims import LimsAPI
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 

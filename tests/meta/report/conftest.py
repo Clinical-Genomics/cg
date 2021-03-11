@@ -3,9 +3,10 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytest
+from tests.mocks.limsmock import MockLimsAPI
+
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
-from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
@@ -78,7 +79,7 @@ class MockAnalysis:
         # Define output dict
         out_data = {
             "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "case": "yellowhog",
+            "family": "yellowhog",
             "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
             "genome_build": "hg19",
             "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
@@ -163,14 +164,6 @@ class MockScout:
 
 
 @pytest.fixture(scope="function")
-def report_store(analysis_store, helpers):
-    case = analysis_store.families()[0]
-    helpers.add_analysis(analysis_store, case)
-    helpers.add_analysis(analysis_store, case)
-    return analysis_store
-
-
-@pytest.fixture(scope="function")
 def report_api(report_store, lims_samples):
     db = MockDB(report_store)
     lims = MockLimsAPI(samples=lims_samples)
@@ -191,3 +184,12 @@ def report_api(report_store, lims_samples):
         path_tool=path_tool,
     )
     return _report_api
+
+
+@pytest.fixture(scope="function")
+def report_store(analysis_store, helpers):
+    family = analysis_store.families()[0]
+    yesterday = datetime.now() - timedelta(days=1)
+    helpers.add_analysis(analysis_store, family, started_at=yesterday)
+    helpers.add_analysis(analysis_store, family, started_at=datetime.now())
+    return analysis_store

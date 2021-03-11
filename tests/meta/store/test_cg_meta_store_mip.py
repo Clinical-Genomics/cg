@@ -1,14 +1,10 @@
 """Test MIP get files and build bundle"""
 import mock
 import pytest
-
 from snapshottest import Snapshot
 
 import cg.meta.store.mip as store_mip
-from cg.exc import (
-    AnalysisNotFinishedError,
-    BundleAlreadyAddedError,
-)
+from cg.exc import AnalysisNotFinishedError, BundleAlreadyAddedError
 
 
 @mock.patch("cg.meta.store.base.build_bundle")

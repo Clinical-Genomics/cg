@@ -1,6 +1,7 @@
 """Tests for the get cases functionality in ScoutAPI"""
 
 from datetime import datetime
+
 from cg.apps.scout.scoutapi import ScoutAPI
 
 

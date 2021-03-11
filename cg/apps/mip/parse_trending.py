@@ -1,4 +1,4 @@
-from cg.apps.mip import parse_sampleinfo, parse_qcmetrics
+from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 
 
 def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:

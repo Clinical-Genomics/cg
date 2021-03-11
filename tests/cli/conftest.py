@@ -11,8 +11,7 @@ from cg.store import Store
 @pytest.fixture(name="cli_runner")
 def fixture_cli_runner():
     """Create a CliRunner"""
-    runner = CliRunner()
-    return runner
+    return CliRunner()
 
 
 @pytest.fixture

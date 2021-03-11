@@ -207,9 +207,10 @@ def import_apptags(
     store: Store,
     excel_path: str,
     prep_category: str,
-    sign: str,
+    signature: str,
     sheet_name: str,
     tag_column: int,
+    tag_row: int,
     activate: bool,
     inactivate: bool,
 ):
@@ -218,34 +219,37 @@ def import_apptags(
     orderform_application_tags = []
 
     for tag in get_cells_from_excel(
-        excel_path=excel_path, sheet_name=sheet_name, tag_column=tag_column
+        excel_path=excel_path, sheet_name=sheet_name, tag_column=tag_column, tag_row=tag_row
     ):
         LOG.info("Found: %s in orderform", tag)
         orderform_application_tags.append(tag)
 
     if not orderform_application_tags:
         message = f"No applications found in column {tag_column} (zero-based), exiting"
-        raise CgError(message)
+        LOG.error(message)
+        return
 
     for orderform_application_tag in orderform_application_tags:
         application_obj = store.application(tag=orderform_application_tag)
 
         if not application_obj:
             message = f"Application {orderform_application_tag} was not found"
-            raise CgError(message)
+            LOG.error(message)
+            return
 
         if application_obj.prep_category != prep_category:
             message = (
                 f"{orderform_application_tag} prep_category, expected: {prep_category} was:"
                 f" {application_obj.prep_category}"
             )
-            raise CgError(message)
+            LOG.error(message)
+            return
 
         if application_obj.is_archived:
             if activate:
                 application_obj.comment = (
                     f"{application_obj.comment}\n{str(datetime.now())[:-10]}"
-                    f"Application un-archived by {sign}"
+                    f"Application un-archived by {signature}"
                 )
                 application_obj.is_archived = False
                 LOG.info("Un-archiving %s", application_obj)
@@ -274,7 +278,7 @@ def import_apptags(
         active_application.comment = (
             f"{active_application.comment}"
             f"\n{str(datetime.now())[:-10]} "
-            f"Application archived by {sign}"
+            f"Application archived by {signature}"
         )
         LOG.info("Archiving %s", active_application)
 
@@ -287,12 +291,14 @@ def import_apptags(
 
 
 def get_cells_from_excel(
-    excel_path: str, sheet_name: str = "Drop down list", tag_column: int = 2
+    excel_path: str, sheet_name: str = "Drop down list", tag_column: int = 2, tag_row: int = 0
 ) -> Iterable[str]:
     workbook: Workbook = openpyxl.load_workbook(filename=excel_path, read_only=True, data_only=True)
     data_sheet: Worksheet = workbook[sheet_name]
 
-    for row in data_sheet.rows:
+    for row_idx, row in enumerate(data_sheet.rows):
+        if row_idx < tag_row:
+            continue
         value = row[tag_column].value
         if value is None:
             continue

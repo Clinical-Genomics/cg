@@ -17,6 +17,64 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
+## [20.6.0]
+### Changed
+- Use cgmodels for crunchy metadata files
+
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
+## [20.5.3]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
+
+## [20.5.2]
+### Changed
+- Remove pipfile and pipfile.lock since they are not used
+
+## [20.5.1]
+### Changed
+- Removes linting gh actions job
+
+## [20.5.0]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
+
+## [20.4.0]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:1
+
+## [20.3.3]
+
+### Changed
+- Set concentration and concentration sample to str in json orderform sample since this is expected in frontend
+
+## [20.3.2]
+### Fixed
+- Fixed cases_to_store for microbial workflow. 
+- Fixed process call for all workflows to not create a new process object
+
+## [20.3.1]
+### Fixed
+- HousekeeperAPI to reuse db connection from context instead of creating new one for each call
+
+## [20.3.0]
+### Changed
+- Refactored AnalysisAPI anf FastHandler classes into one class
+
 ## [20.2.1]
 ### Fixed
 - Fixed json orderform special cases
@@ -49,7 +107,6 @@ Try to use the following format:
 ### Changed
 - Removed old unused scripts and scripts directory
 - Moved crunchy query from store into CompressAPI
-
 
 ## [20.0.0]
 ### Changed
