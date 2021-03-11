@@ -73,9 +73,8 @@ class ReportAPI:
         )
         file_path.mkdir(parents=True, exist_ok=True)
         report_file_path = Path(file_path / "delivery-report.html")
-        delivery_report_file = open(report_file_path, "w")
-        delivery_report_file.write(delivery_report)
-        delivery_report_file.close()
+        with open(report_file_path, "w") as delivery_report_file:
+            delivery_report_file.write(delivery_report)
 
         return delivery_report_file
 
