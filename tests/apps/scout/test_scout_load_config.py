@@ -1,7 +1,8 @@
 """Tests for the models in scout load config"""
 import pytest
-from cg.meta.upload.scout import scout_load_config
 from pydantic import ValidationError
+
+from cg.meta.upload.scout import scout_load_config
 
 
 def test_validate_individual_display_name(sample_dict):

@@ -1,6 +1,7 @@
 import logging
 
 import click
+
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
 from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice

@@ -1,8 +1,10 @@
 """Cli commands for importing data into the status database"""
 import logging
 import getpass
+from pathlib import Path
 
 import click
+from cg.constants import PREP_CATEGORIES
 from cg.store import Store
 from cg.store.api.import_func import (
     import_application_versions,
@@ -59,20 +61,28 @@ def application_version(context, excel_path, signature, dry_run, skip_missing):
 
 
 @import_cmd.command("apptag")
-@click.argument("excel_path")
-@click.argument("prep-category")
-@click.argument("signature", required=False)
+@click.argument("excel_path", type=click.types.Path(exists=True, file_okay=True, dir_okay=False))
+@click.argument("prep-category", type=click.types.Choice(PREP_CATEGORIES))
+@click.argument("signature", required=False, type=click.types.STRING)
 @click.option(
     "-s",
     "--sheet-name",
     default="Drop down list",
-    help="(optional) name of sheet where " "to find the applications",
+    help="(optional) name of sheet where to find the applications",
 )
 @click.option(
-    "-n",
+    "-c",
     "--tag-column",
     default=2,
-    help="(optional) zero-based column where to find " "the applications",
+    help="(optional) zero-based column where to find the applications",
+    type=click.types.INT,
+)
+@click.option(
+    "-r",
+    "--tag-row",
+    default=0,
+    help="(optional) zero-based row where to start looking for the applications",
+    type=click.types.INT,
 )
 @click.option(
     "-a", "--activate", is_flag=True, help="Activate archived tags found in the " "orderform"
@@ -80,7 +90,15 @@ def application_version(context, excel_path, signature, dry_run, skip_missing):
 @click.option("-i", "--inactivate", is_flag=True, help="Inactivate tags not found in the orderform")
 @click.pass_context
 def apptag(
-    context, excel_path, prep_category, signature, sheet_name, tag_column, activate, inactivate
+    context: click.Context,
+    excel_path: Path,
+    prep_category: str,
+    signature: str,
+    sheet_name: str,
+    tag_column: int,
+    tag_row: int,
+    activate: bool,
+    inactivate: bool,
 ):
     """
     Syncs all applications from the specified excel file
@@ -90,22 +108,24 @@ def apptag(
         :param sheet_name:          (optional) name of sheet where the applications can be found
         :param tag_column:          (optional) zero-based column where the application tags can be
         found
+        :param tag_row:             (optional) zero-based row where the application tags can be
+        found
         :param prep_category:       prep_category to sync
-        :param store:               status database store
         :param excel_path:          Path to orderform excel file
-        :param sign:                Signature of user running the script
+        :param signature:           Signature of user running the script
     """
 
     if not signature:
         signature = getpass.getuser()
 
     import_apptags(
-        context.obj["status_db"],
-        excel_path,
-        prep_category,
-        signature,
-        sheet_name,
-        tag_column,
-        activate,
-        inactivate,
+        store=context.obj["status_db"],
+        excel_path=excel_path,
+        prep_category=prep_category,
+        signature=signature,
+        sheet_name=sheet_name,
+        tag_column=tag_column,
+        tag_row=tag_row,
+        activate=activate,
+        inactivate=inactivate,
     )

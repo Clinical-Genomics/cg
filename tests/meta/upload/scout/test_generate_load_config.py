@@ -1,6 +1,7 @@
 """Test the methods that generate a scout load config"""
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_load_config import (

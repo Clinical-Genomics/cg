@@ -10,7 +10,8 @@ import shutil
 from pathlib import Path
 
 import pytest
-import ruamel.yaml
+import yaml
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -336,7 +337,13 @@ def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return Path(orderforms / "1603.9.microbial.xlsx").as_posix()
+    return Path(orderforms / "1603.10.microbial.xlsx").as_posix()
+
+
+@pytest.fixture
+def sarscov2_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples"""
+    return Path(orderforms / "2184.1.sarscov2.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -398,6 +405,12 @@ def metagenome_order_to_submit() -> dict:
 def microbial_order_to_submit() -> dict:
     """Load an example microbial order."""
     return json.load(open("tests/fixtures/orders/microsalt.json"))
+
+
+@pytest.fixture
+def sarscov2_order_to_submit() -> dict:
+    """Load an example sarscov2 order."""
+    return json.load(open("tests/fixtures/orders/sarscov2.json"))
 
 
 @pytest.fixture
@@ -482,15 +495,15 @@ def fixture_bed_file(analysis_dir) -> str:
 def fixture_files_raw(files):
     """Get some raw files"""
     return {
-        "config": ruamel.yaml.safe_load(open(files["config"])),
-        "sampleinfo": ruamel.yaml.safe_load(open(files["sampleinfo"])),
-        "qcmetrics": ruamel.yaml.safe_load(open(files["qcmetrics"])),
-        "rna_config": ruamel.yaml.safe_load(open(files["rna_config"])),
-        "rna_sampleinfo": ruamel.yaml.safe_load(open(files["rna_sampleinfo"])),
-        "rna_config_store": ruamel.yaml.safe_load(open(files["rna_config_store"])),
-        "rna_sampleinfo_store": ruamel.yaml.safe_load(open(files["rna_sampleinfo_store"])),
-        "dna_config_store": ruamel.yaml.safe_load(open(files["dna_config_store"])),
-        "dna_sampleinfo_store": ruamel.yaml.safe_load(open(files["dna_sampleinfo_store"])),
+        "config": yaml.safe_load(open(files["config"])),
+        "sampleinfo": yaml.safe_load(open(files["sampleinfo"])),
+        "qcmetrics": yaml.safe_load(open(files["qcmetrics"])),
+        "rna_config": yaml.safe_load(open(files["rna_config"])),
+        "rna_sampleinfo": yaml.safe_load(open(files["rna_sampleinfo"])),
+        "rna_config_store": yaml.safe_load(open(files["rna_config_store"])),
+        "rna_sampleinfo_store": yaml.safe_load(open(files["rna_sampleinfo_store"])),
+        "dna_config_store": yaml.safe_load(open(files["dna_config_store"])),
+        "dna_sampleinfo_store": yaml.safe_load(open(files["dna_sampleinfo_store"])),
     }
 
 
@@ -947,6 +960,15 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             accredited=True,
             target_reads=10,
         ),
+        store.add_application(
+            tag="VWGDPTR001",
+            category="cov",
+            description="Viral whole genome  ",
+            sequencing_depth=0,
+            percent_kth=80,
+            percent_reads_guaranteed=75,
+            target_reads=10,
+        ),
     ]
 
     store.add_commit(applications)
@@ -1039,3 +1061,154 @@ def fixture_trailblazer_api() -> MockTB:
 @pytest.fixture(scope="function", name="lims_api")
 def fixture_lims_api() -> MockLimsAPI:
     return MockLimsAPI()
+
+
+@pytest.fixture(name="config_root_dir")
+def config_root_dir(tmpdir_factory):
+    return Path("tests/fixtures/data")
+
+
+@pytest.fixture()
+def housekeeper_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("housekeeper")
+
+
+@pytest.fixture()
+def mip_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("mip")
+
+
+@pytest.fixture(scope="function")
+def fluffy_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("fluffy")
+
+
+@pytest.fixture(scope="function")
+def balsamic_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("balsamic")
+
+
+@pytest.fixture(scope="function")
+def cg_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("cg")
+
+
+@pytest.fixture(name="database_copy_path")
+def database_copy_path(tmpdir_factory):
+    return tmpdir_factory.mktemp("database/")
+
+
+@pytest.fixture(scope="function")
+def microsalt_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp("microsalt")
+
+
+@pytest.fixture(name="fixture_cg_url")
+def fixture_cg_url(database_copy_path):
+    new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
+    return f"sqlite:///{new_path}"
+
+
+@pytest.fixture(name="fixture_hk_url")
+def fixture_hk_url(database_copy_path):
+    new_path = shutil.copy("tests/fixtures/data/hkstore.db", database_copy_path)
+    return f"sqlite:///{new_path}"
+
+
+@pytest.fixture(name="context_config")
+def context_config(
+    fixture_cg_url,
+    fixture_hk_url,
+    fluffy_dir,
+    housekeeper_dir,
+    mip_dir,
+    cg_dir,
+    balsamic_dir,
+    microsalt_dir,
+) -> dict:
+    return {
+        "database": fixture_cg_url,
+        "madeline_exe": "echo",
+        "bed_path": cg_dir,
+        "delivery_path": cg_dir,
+        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "fluffy": {
+            "deploy_config": "fluffy-deploy-stage.yaml",
+            "binary_path": "echo",
+            "config_path": "fluffy/Config.json",
+            "root_dir": fluffy_dir,
+        },
+        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
+        "housekeeper": {"database": fixture_hk_url, "root": housekeeper_dir},
+        "trailblazer": {
+            "service_account": "SERVICE",
+            "service_account_auth_file": "trailblazer-auth.json",
+            "host": "https://trailblazer.scilifelab.se/",
+        },
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "username": "user",
+            "password": "password",
+        },
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "genotype": {
+            "database": "sqlite:///./genotype",
+            "binary_path": "echo",
+            "config_path": "genotype-stage.yaml",
+        },
+        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
+        "cgstats": {"database": "sqlite:///./cgstats", "root": cg_dir},
+        "scout": {
+            "binary_path": "echo",
+            "config_path": "scout-stage.yaml",
+            "deploy_config": "scout-deploy-stage.yaml",
+        },
+        "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
+        "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
+        "balsamic": {
+            "root": balsamic_dir,
+            "singularity": "BALSAMIC_release_v6.0.1.sif",
+            "reference_config": "reference.json",
+            "binary_path": "echo",
+            "conda_env": "S_BALSAMIC",
+            "slurm": {
+                "mail_user": "test.email@scilifelab.se",
+                "account": "development",
+                "qos": "low",
+            },
+        },
+        "microsalt": {
+            "root": microsalt_dir,
+            "queries_path": Path(microsalt_dir, "queries").as_posix(),
+            "binary_path": "echo",
+            "conda_env": "S_microSALT",
+        },
+        "mip-rd-dna": {
+            "conda_env": "S_mip9.0",
+            "mip_config": "mip9.0-dna-stage.yaml",
+            "pipeline": "analyse rd_dna",
+            "root": mip_dir,
+            "script": "mip",
+        },
+        "mip-rd-rna": {
+            "conda_env": "S_mip9.0",
+            "mip_config": "mip9.0-rna-stage.yaml",
+            "pipeline": "analyse rd_rna",
+            "root": mip_dir,
+            "script": "mip",
+        },
+        "mutacc-auto": {
+            "config_path": "mutacc-auto-stage.yaml",
+            "binary_path": "echo",
+            "padding": 300,
+        },
+        "crunchy": {
+            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "slurm": {
+                "account": "development",
+                "mail_user": "magnus.mansson@scilifelab.se",
+                "conda_env": "S_crunchy",
+            },
+        },
+        "backup": {"root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"}},
+    }

@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+
 from cg.apps.coverage.api import ChanjoAPI
 from cg.constants import Pipeline
 from cg.meta.upload.coverage import UploadCoverageApi

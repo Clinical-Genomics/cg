@@ -3,9 +3,10 @@
 import logging
 from pathlib import Path
 from typing import Dict
-from cg.cli.deploy.base import deploy
 
 from click.testing import CliRunner
+
+from cg.cli.deploy.base import deploy
 
 
 def test_running_deploy_shipping(shipping_configs: Dict[str, str], caplog):

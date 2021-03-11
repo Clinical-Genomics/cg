@@ -1,12 +1,13 @@
 import coloredlogs
-from flask import Flask, redirect, url_for, session
-from flask_admin.base import AdminIndexView
-from flask_dance.contrib.google import make_google_blueprint, google
-from flask_dance.consumer import oauth_authorized
 import requests
+from flask import Flask, redirect, session, url_for
+from flask_admin.base import AdminIndexView
+from flask_dance.consumer import oauth_authorized
+from flask_dance.contrib.google import google, make_google_blueprint
 
 from cg.store import models
-from . import api, ext, admin, invoices
+
+from . import admin, api, ext, invoices
 
 
 def create_app():

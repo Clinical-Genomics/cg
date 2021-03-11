@@ -4,13 +4,14 @@ import datetime as dt
 import logging
 
 import click
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
-
-from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 from cg.meta.compress import CompressAPI
 from cg.store import Store
-from cg.apps.housekeeper.hk import HousekeeperAPI
+
+from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
 

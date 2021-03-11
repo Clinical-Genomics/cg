@@ -2,6 +2,7 @@
 import logging
 
 import pytest
+
 from cg.cli.set.families import families
 from cg.store import Store
 

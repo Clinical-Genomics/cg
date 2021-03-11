@@ -1,8 +1,9 @@
 from typing import List, Optional
 
+from pydantic import Field, validator
+
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
 from cg.models.orders.sample_base import OrderSample
-from pydantic import Field, validator
 
 
 class ExcelSample(OrderSample):
@@ -25,6 +26,7 @@ class ExcelSample(OrderSample):
     from_sample: str = Field(None, alias="UDF/is_for_sample")
     index: str = Field(None, alias="UDF/Index type")
     index_number: str = Field(None, alias="UDF/Index number")
+    lab_code: str = Field(None, alias="UDF/Lab Code")
     mother: str = Field(None, alias="UDF/motherID")
     name: str = Field(..., alias="Sample/Name")
     organism: str = Field(None, alias="UDF/Strain")
@@ -32,12 +34,15 @@ class ExcelSample(OrderSample):
     panels: List[str] = Field(None, alias="UDF/Gene List")
     pool: str = Field(None, alias="UDF/pool name")
     post_formalin_fixation_time: str = Field(None, alias="UDF/Post Formalin Fixation Time")
+    pre_processing_method: str = Field(None, alias="UDF/Pre Processing Method")
     priority: str = Field(None, alias="UDF/priority")
     quantity: str = Field(None, alias="UDF/Quantity")
     reagent_label: str = Field(None, alias="Sample/Reagent Label")
     reference_genome: str = Field(None, alias="UDF/Reference Genome Microbial")
+    region_code: str = Field(None, alias="UDF/Region Code")
     require_qcok: bool = Field(None, alias="UDF/Process only if QC OK")
     rml_plate_name: str = Field(None, alias="UDF/RML plate name")
+    selection_criteria: str = Field(None, alias="UDF/Selection Criteria")
     sex: str = Field(None, alias="UDF/Gender")
     source: str = Field(None, alias="UDF/Source")
     status: str = Field(None, alias="UDF/Status")
@@ -53,12 +58,14 @@ class ExcelSample(OrderSample):
     def validate_data_analysis(cls, value):
 
         data_analysis_alternatives = [
-            "MIP DNA",
-            "MIP RNA",
-            "FLUFFY",
+            "custom",
             "Balsamic",
             "fastq",
-            "custom",
+            "FLUFFY",
+            "MicroSALT",
+            "MIP DNA",
+            "MIP RNA",
+            "SARS-CoV-2",
             "scout",
             "No analysis",
         ]
