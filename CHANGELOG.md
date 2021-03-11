@@ -226,7 +226,7 @@ Try to use the following format:
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
 
-## [NG.NG.NG]
+## [20.8.0]
 
 ### Added
 - Support for creating delivery reports for analyses that are not the latest ones
