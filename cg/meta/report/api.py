@@ -52,7 +52,7 @@ class ReportAPI:
     ) -> str:
         """Generate the html contents of a delivery report."""
 
-        delivery_data = self._get_delivery_data(case_id, analysis_date)
+        delivery_data = self._get_delivery_data(case_id=case_id, analysis_date=analysis_date)
         self._handle_missing_report_data(accept_missing_data, delivery_data, case_id)
         report_data = self._make_data_presentable(delivery_data)
         self._handle_missing_report_data(accept_missing_data, report_data, case_id)
