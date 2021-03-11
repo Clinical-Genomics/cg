@@ -148,7 +148,7 @@ BALSAMIC_SAMPLE = {
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "require_qcok": bool,
-    "volume": str,
+    "volume": OptionalNone(TypeValidatorNone(str)),
     "tumour": bool,
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
@@ -185,7 +185,7 @@ MIP_RNA_SAMPLE = {
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
-    "volume": str,
+    "volume": OptionalNone(TypeValidatorNone(str)),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
     "container_name": OptionalNone(TypeValidatorNone(str)),

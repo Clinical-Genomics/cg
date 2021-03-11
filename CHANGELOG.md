@@ -13,9 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.4.x]
+## [20.5.1]
 ### Changed
 - Removes linting gh actions job
+
+## [20.5.0]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
 
 ## [20.4.0]
 ### Added

@@ -8,7 +8,7 @@ from pydantic import BaseModel, constr
 class SexEnum(str, Enum):
     male = "male"
     female = "female"
-    other = "other"
+    other = "unknown"
 
 
 class PriorityEnum(str, Enum):
