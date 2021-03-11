@@ -359,7 +359,11 @@ def orderform():
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
     except (OrderFormError, ValidationError) as error:
-        return abort(make_response(jsonify(message=error.message), 400))
+        if hasattr(error, "message"):
+            message = error.message
+        else:
+            message = str(error)
+        return abort(make_response(jsonify(message=message), 400))
     parsed_order: Orderform = order_parser.generate_orderform()
 
     return jsonify(**parsed_order.dict())
