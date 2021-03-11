@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.5.2]
+### Changed
+- Remove pipfile and pipfile.lock since they are not used
+
 ## [20.5.1]
 ### Changed
 - Removes linting gh actions job
