@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [20.5.0]
 ### Added
 - Add support for Microbial Orderform 1603:10
 - Add support for Metagenome Orderform 1605:09
