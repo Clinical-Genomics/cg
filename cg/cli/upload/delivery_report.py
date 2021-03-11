@@ -5,12 +5,14 @@ import sys
 from pathlib import Path
 
 import click
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.exc import CgError, DeliveryReportError
 
 from .utils import suggest_cases_delivery_report
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
@@ -31,9 +33,9 @@ def delivery_reports(context, print_console, force_report):
     """Generate delivery reports for all cases that need one"""
 
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
-
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
     exit_code = SUCCESS
-    for analysis_obj in context.obj["status_db"].analyses_to_delivery_report(
+    for analysis_obj in analysis_api.status_db.analyses_to_delivery_report(
         pipeline=Pipeline.MIP_DNA
     ):
         case_id = analysis_obj.family.internal_id
@@ -147,6 +149,8 @@ def delivery_report(context, family_id, print_console, force_report):
 
     click.echo(click.style("----------------- DELIVERY_REPORT -------------"))
 
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+
     def _add_delivery_report_to_hk(
         delivery_report_file: Path, hk_api: HousekeeperAPI, family_id: str
     ):
@@ -187,16 +191,14 @@ def delivery_report(context, family_id, print_console, force_report):
         click.echo(delivery_report_html)
         return
 
-    status_api = context.obj["status_db"]
-    mip_dna_root_dir = context.obj["mip-rd-dna"]["root"]
-    hk_api = context.obj["housekeeper_api"]
-
     delivery_report_file = report_api.create_delivery_report_file(
         family_id,
-        file_path=Path(mip_dna_root_dir, family_id),
+        file_path=Path(analysis_api.root, family_id),
         accept_missing_data=force_report,
     )
-    added_file = _add_delivery_report_to_hk(delivery_report_file, hk_api, family_id)
+    added_file = _add_delivery_report_to_hk(
+        delivery_report_file, analysis_api.housekeeper_api, family_id
+    )
 
     if added_file:
         click.echo(click.style("uploaded to housekeeper", fg="green"))
@@ -204,7 +206,7 @@ def delivery_report(context, family_id, print_console, force_report):
         click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
 
     context.invoke(delivery_report_to_scout, case_id=family_id)
-    _update_delivery_report_date(status_api, family_id)
+    _update_delivery_report_date(analysis_api.status_db, family_id)
 
 
 @click.command("delivery-report-to-scout")
@@ -219,33 +221,25 @@ def delivery_report(context, family_id, print_console, force_report):
 @click.pass_context
 def delivery_report_to_scout(context, case_id: str, dry_run: bool):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
-
-    def _add_delivery_report_to_scout(context, path: Path, case_id: str):
-        scout_api = ScoutAPI(context.obj)
-        scout_api.upload_delivery_report(path, case_id, update=True)
-
-    def _get_delivery_report_from_hk(hk_api: HousekeeperAPI, family_id):
-        delivery_report_tag_name = "delivery-report"
-        version_obj = hk_api.last_version(family_id)
-        uploaded_delivery_report_files = hk_api.get_files(
-            bundle=family_id,
-            tags=[delivery_report_tag_name],
-            version=version_obj.id,
-        )
-
-        if uploaded_delivery_report_files.count() == 0:
-            raise FileNotFoundError(f"No delivery report was found in housekeeper for {family_id}")
-
-        return uploaded_delivery_report_files[0].full_path
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
 
     if not case_id:
         suggest_cases_delivery_report(context)
         context.abort()
 
-    hk_api = context.obj["housekeeper_api"]
-    report = _get_delivery_report_from_hk(hk_api, case_id)
+    uploaded_delivery_report_files = analysis_api.housekeeper_api.get_files(
+        bundle=case_id,
+        tags=["delivery-report"],
+        version=analysis_api.housekeeper_api.last_version(case_id).id,
+    )
+    if uploaded_delivery_report_files.count() == 0:
+        raise FileNotFoundError(f"No delivery report was found in housekeeper for {case_id}")
 
-    LOG.info("uploading delivery report %s to scout for case: %s", report, case_id)
+    report_path = uploaded_delivery_report_files[0].full_path
+
+    LOG.info("uploading delivery report %s to scout for case: %s", report_path, case_id)
     if not dry_run:
-        _add_delivery_report_to_scout(context, report, case_id)
+        analysis_api.scout_api.upload_delivery_report(
+            report_path=report_path, case_id=case_id, update=True
+        )
     click.echo(click.style("uploaded to scout", fg="green"))

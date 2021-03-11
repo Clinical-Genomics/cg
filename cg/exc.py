@@ -9,7 +9,7 @@ class CgError(Exception):
     Base exception for the package
     """
 
-    def __init__(self, message):
+    def __init__(self, message: str = ""):
         super(CgError, self).__init__()
         self.message = message
 

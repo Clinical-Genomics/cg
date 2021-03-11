@@ -2,14 +2,14 @@
     Module to upload cases to mutacc
 """
 
-import os
-from typing import Dict
 import logging
+import os
 from collections import namedtuple
+from typing import Dict
 
-from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout import scout_export
+from cg.apps.scout.scoutapi import ScoutAPI
 
 LOG = logging.getLogger(__name__)
 

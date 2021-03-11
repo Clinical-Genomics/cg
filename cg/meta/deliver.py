@@ -6,11 +6,10 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Iterable, List, Set
 
-from housekeeper.store import models as hk_models
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 

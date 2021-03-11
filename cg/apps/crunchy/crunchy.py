@@ -6,23 +6,19 @@
 """
 
 import datetime
-import json
 import logging
 import tempfile
-from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
-from cg.utils.date import get_date_str
-from marshmallow import ValidationError
-from typing_extensions import Literal
+from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
-from .models import CrunchyFileSchema
+from .files import get_crunchy_metadata, get_file_updated_at, get_spring_archive_files
 from .sbatch import (
     FASTQ_TO_SPRING_COMMANDS,
     FASTQ_TO_SPRING_ERROR,
@@ -68,7 +64,8 @@ class CrunchyAPI:
         LOG.info("Compression/decompression is not running")
         return False
 
-    def is_fastq_compression_possible(self, compression_obj: CompressionData) -> bool:
+    @staticmethod
+    def is_fastq_compression_possible(compression_obj: CompressionData) -> bool:
         """Check if FASTQ compression is possible
 
         There are three possible answers to this question:
@@ -77,7 +74,7 @@ class CrunchyAPI:
          - SPRING archive exists           -> Compression NOT possible
          - Not compressed and not running  -> Compression IS possible
         """
-        if self.is_compression_pending(compression_obj):
+        if CrunchyAPI.is_compression_pending(compression_obj):
             return False
 
         if compression_obj.spring_exists():
@@ -115,7 +112,8 @@ class CrunchyAPI:
 
         return True
 
-    def is_fastq_compression_done(self, compression_obj: CompressionData) -> bool:
+    @staticmethod
+    def is_fastq_compression_done(compression_obj: CompressionData) -> bool:
         """Check if FASTQ compression is finished
 
         This is checked by controlling that the SPRING files that are produced after FASTQ
@@ -145,26 +143,26 @@ class CrunchyAPI:
             return False
         LOG.info("SPRING metadata file found")
 
-        spring_metadata: Optional[List[dict]] = self.get_spring_metadata(
+        crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(
             compression_obj.spring_metadata_path
         )
         # Check if the SPRING archive has been unarchived
-        updated_at = self.get_file_updated_at(spring_metadata)
-
+        updated_at: Optional[datetime.date] = get_file_updated_at(crunchy_metadata)
         if updated_at is None:
             LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
             return True
 
         LOG.info("Files where unpacked %s", updated_at)
 
-        if not self.check_if_update_spring(updated_at):
+        if not CrunchyAPI.check_if_update_spring(updated_at):
             return False
 
         LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
 
         return True
 
-    def is_spring_decompression_done(self, compression_obj: CompressionData) -> bool:
+    @staticmethod
+    def is_spring_decompression_done(compression_obj: CompressionData) -> bool:
         """Check if SPRING decompression if finished.
 
         This means that all three files specified in SPRING metadata should exist.
@@ -182,16 +180,17 @@ class CrunchyAPI:
             LOG.info("No SPRING metadata file found")
             return False
 
-        spring_metadata = self.get_spring_metadata(spring_metadata_path)
-        if not spring_metadata:
+        try:
+            crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
+        except SyntaxError:
             LOG.info("Malformed metadata content")
             return False
 
-        for file_info in spring_metadata:
-            if not Path(file_info["path"]).exists():
-                LOG.info("File %s does not exist", file_info["path"])
+        for file_info in crunchy_metadata.files:
+            if not Path(file_info.path).exists():
+                LOG.info("File %s does not exist", file_info.path)
                 return False
-            if "updated" not in file_info:
+            if not file_info.updated:
                 LOG.info("Files have not been unarchived")
                 return False
 
@@ -242,10 +241,10 @@ class CrunchyAPI:
 
         """
         # Fetch the metadata information from a spring metadata file
-        spring_metadata: Optional[List[dict]] = self.get_spring_metadata(
+        crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(
             compression_obj.spring_metadata_path
         )
-        files_info = self.get_spring_archive_files(spring_metadata)
+        files_info = get_spring_archive_files(crunchy_metadata)
         log_dir = self.get_log_dir(compression_obj.spring_path)
 
         error_function = SPRING_TO_FASTQ_ERROR.format(
@@ -298,87 +297,12 @@ class CrunchyAPI:
         job_name: str = "_".join([sample_id, compression_obj.run_name, run_type])
         log_dir: Path = self.get_log_dir(compression_obj.spring_path)
 
-    # Spring metadata methods
-    def get_spring_metadata(self, metadata_path: Path) -> Optional[List[dict]]:
-        """Validate content of metadata file and return mapped content"""
-        LOG.info("Fetch SPRING metadata from %s", metadata_path)
-        with open(metadata_path, "r") as infile:
-            try:
-                content = json.load(infile)
-            except JSONDecodeError:
-                LOG.warning("No content in SPRING metadata file")
-                return None
-            assert isinstance(content, list)
-            metadata = self.mapped_spring_metadata(content)
-
-        if not metadata:
-            LOG.warning("Could not find any content in file %s", metadata_path)
-            return None
-
-        if len(metadata) != 3:
-            LOG.warning("Wrong number of files in SPRING metada file: %s", metadata_path)
-            LOG.info("Found %s files, should always be 3 files", len(metadata))
-            return None
-
-        return metadata
-
-    def update_metadata_date(self, spring_metadata_path: Path) -> None:
-        """Update date in the SPRING metadata file to todays date"""
-
-        today_str = get_date_str(None)
-        spring_metadata = self.get_spring_metadata(spring_metadata_path)
-        if not spring_metadata:
-            raise SyntaxError
-        LOG.info("Adding todays date to SPRING metadata file")
-        for file_info in spring_metadata:
-            file_info["updated"] = today_str
-
-        with open(spring_metadata_path, "w") as outfile:
-            outfile.write(json.dumps(spring_metadata))
-
     @staticmethod
-    def mapped_spring_metadata(metadata=List[dict]) -> Optional[List[dict]]:
-        """Validate the content of a SPRING metadata file and map them on the schema"""
-        file_schema = CrunchyFileSchema(many=True)
-        LOG.info("Validating SPRING metadata content")
-        try:
-            dumped_data = file_schema.load(metadata)
-        except ValidationError as err:
-            LOG.warning(err.messages)
-            return None
-        LOG.debug("Spring metadata content looks fine")
-        return dumped_data
-
-    @staticmethod
-    def get_spring_archive_files(spring_metadata: List[dict]) -> dict:
-        """Map the files in SPRING metadata to a dictionary
-
-        Returns: {
-                    "fastq_first" : {file_info},
-                    "fastq_second" : {file_info},
-                    "spring" : {file_info},
-                  }
-        """
-        names_map = {"first_read": "fastq_first", "second_read": "fastq_second", "spring": "spring"}
-        archive_files = {}
-        for file_info in spring_metadata:
-            file_name = names_map[file_info["file"]]
-            archive_files[file_name] = file_info
-        return archive_files
-
-    @staticmethod
-    def get_file_updated_at(spring_metadata: List[dict]) -> datetime.datetime:
-        """Check if a SPRING metadata file has been updated and return the date when updated"""
-        if "updated" not in spring_metadata[0]:
-            return None
-        return spring_metadata[0]["updated"]
-
-    @staticmethod
-    def check_if_update_spring(file_date: datetime.datetime) -> bool:
+    def check_if_update_spring(file_date: datetime.date) -> bool:
         """Check if date is older than FASTQ_DELTA (21 days)"""
         delta = file_date + datetime.timedelta(days=FASTQ_DELTA)
         now = datetime.datetime.now()
-        if delta > now:
+        if delta > now.date():
             LOG.info("FASTQ files are not old enough")
             return False
         return True

@@ -3,13 +3,11 @@
 from datetime import datetime
 
 import pytest
-from _pytest import tmpdir
-from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.store import Store
 from tests.store_helpers import StoreHelpers
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.store import Store
 
 
 @pytest.fixture(scope="function", name="analysis_store")
@@ -52,83 +50,6 @@ def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
         base_store.add(link)
     base_store.commit()
     yield base_store
-
-
-class MockLims:
-    """Mock lims fixture"""
-
-    lims = None
-
-    def __init__(self):
-        self.lims = self
-
-
-class MockPath:
-    def __init__(self, path):
-        self.yaml = None
-
-    def __call__(self, *args, **kwargs):
-        return self
-
-    def open(self):
-        return dict()
-
-    def joinpath(self, path):
-        return path
-
-
-class MockLogger:
-    warnings = []
-
-    def warning(self, text, *interpolations):
-
-        self.warnings.append(text % interpolations)
-
-    def get_warnings(self) -> list:
-        return self.warnings
-
-
-class MockTB:
-    _get_trending_raises_keyerror = False
-
-    def __init__(self):
-        """Needed to initialise mock variables"""
-        self._make_config_was_called = False
-
-    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
-        if self._get_trending_raises_keyerror:
-            raise KeyError("mockmessage")
-
-        # Returns: dict: parsed data
-        ### Define output dict
-        outdata = {
-            "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "case": "yellowhog",
-            "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
-            "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
-            "mip_version": "v4.0.20",
-            "sample_ids": ["2018-20203", "2018-20204"],
-            "genome_build": "37",
-            "rank_model_version": "1.18",
-        }
-
-        return outdata
-
-    def get_sampleinfo(self, analysis_obj):
-        return ""
-
-    def make_config(self, data, pipeline):
-        """Mock the make_config"""
-        self._make_config_was_called = True
-        del pipeline
-        return data
-
-
-class MockBalsamicFastq(BalsamicFastqHandler):
-    """Mock FastqHandler for analysis_api"""
-
-    def __init__(self):
-        super().__init__(config={"balsamic": {"root": tmpdir}})
 
 
 @pytest.fixture(scope="function", name="mip_hk_store")
@@ -209,21 +130,9 @@ def fixture_mip_hk_store(
     return real_housekeeper_api
 
 
-@pytest.fixture(scope="function", name="analysis_api")
-def fixture_analysis_api(
-    analysis_store: Store, mip_hk_store: HousekeeperAPI, scout_api: ScoutAPI
-) -> MipAnalysisAPI:
-    """Setup an analysis API."""
-
-    analysis_api = MipAnalysisAPI(
-        db=analysis_store,
-        hk_api=mip_hk_store,
-        scout_api=scout_api,
-        tb_api=MockTB(),
-        lims_api=MockLims(),
-        script="echo",
-        pipeline="analyse rd_dna",
-        conda_env="S_mip_rd-dna",
-        root="/var/empty",
-    )
-    yield analysis_api
+@pytest.fixture()
+def mip_analysis_api(context_config, mip_hk_store, analysis_store):
+    analysis_api = MipDNAAnalysisAPI(context_config)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

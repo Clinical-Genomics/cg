@@ -2,8 +2,9 @@
     conftest for genotype API
 """
 
-import pytest
 import json
+
+import pytest
 
 
 @pytest.fixture(name="genotype_export_sample_output")

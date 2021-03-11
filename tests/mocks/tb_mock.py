@@ -1,5 +1,6 @@
-from cg.apps.tb.models import TrailblazerAnalysis
 from typing import Optional
+
+from cg.apps.tb.models import TrailblazerAnalysis
 
 
 class MockTB:
