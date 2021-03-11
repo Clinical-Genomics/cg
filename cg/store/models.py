@@ -143,6 +143,7 @@ class Analysis(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
