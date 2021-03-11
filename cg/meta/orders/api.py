@@ -43,7 +43,7 @@ class OrdersAPI(LimsHandler, StatusHandler):
         try:
             ORDER_SCHEMES[project].validate(order_in.dict())
         except (ValueError, TypeError) as error:
-            raise OrderError(error)
+            raise OrderError(str(error))
         self._validate_customer_on_imported_samples(project=project, order=order_in)
 
         # detect manual ticket assignment

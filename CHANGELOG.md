@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
+
 ## [20.4.0]
 ### Added
 - Support for SARS-CoV-2 Orderform 2184:1
