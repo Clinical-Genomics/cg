@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.7.1]
+### Changed
+- Deletes unused files .gitlint, housekeeper, status, status_db
 
 ## [20.7.0]
 ### Added
