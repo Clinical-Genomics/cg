@@ -152,10 +152,7 @@ class StatusHandler:
 
         for case_name, case_samples in cases.items():
             cohorts: Set[str] = {
-                cohort
-                for sample in case_samples
-                for cohort in sample.get("cohorts", [])
-                if cohort
+                cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
             }
 
             synopses: Set[str] = {
@@ -170,10 +167,7 @@ class StatusHandler:
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
 
             panels: Set[str] = {
-                panel
-                for sample in case_samples
-                for panel in sample.get("panels", [])
-                if panel
+                panel for sample in case_samples for panel in sample.get("panels", []) if panel
             }
 
             case = {
