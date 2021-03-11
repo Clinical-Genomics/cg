@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
+
 ## [20.5.2]
 ### Changed
 - Remove pipfile and pipfile.lock since they are not used
