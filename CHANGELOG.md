@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.4.x]
+### Changed
+- Removes linting gh actions job
+
 ## [20.4.0]
 ### Added
 - Support for SARS-CoV-2 Orderform 2184:1
