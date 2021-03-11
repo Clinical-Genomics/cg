@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.5.1]
+### Changed
+- Removes linting gh actions job
+
 ## [20.5.0]
 ### Added
 - Add support for Microbial Orderform 1603:10
