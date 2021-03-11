@@ -27,7 +27,7 @@ class ExcelOrderformParser(OrderformParser):
         "1603:10",  # Microbial WGS
         "1604:10",  # Orderform Ready made libraries (RML)
         "1605:9",  # Microbial meta genomes
-        "2184:1",  # Orderform SARS-CoV-2
+        "2184:2",  # Orderform SARS-CoV-2
     ]
 
     def check_orderform_version(self, document_title: str) -> None:
@@ -189,7 +189,7 @@ class ExcelOrderformParser(OrderformParser):
             if data_analysis == "custom":
                 return DataDelivery.FASTQ_QC
 
-            elif data_analysis == "fastq":
+            if data_analysis == "fastq":
                 return DataDelivery.FASTQ
 
         if project_type == OrderType.RML:
@@ -210,6 +210,8 @@ class ExcelOrderformParser(OrderformParser):
 
         if data_delivery == "analysis-+-bam":
             return DataDelivery.ANALYSIS_BAM_FILES
+        if data_delivery == "fastq-qc":
+            return DataDelivery.FASTQ_QC
 
         try:
             return DataDelivery(data_delivery)

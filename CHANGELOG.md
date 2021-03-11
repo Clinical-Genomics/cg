@@ -13,9 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [x.x.x]
+## [20.5.1]
 ### Changed
 - Use cgmodels for crunchy metadata files
+
+## [20.5.0]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
 
 ## [20.4.0]
 ### Added
