@@ -191,7 +191,7 @@ def delivery_report(
     if added_file:
         click.echo(click.style("Uploaded to housekeeper", fg="green"))
     else:
-        click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
+        click.echo(click.style("Already uploaded to housekeeper, skipping", fg="yellow"))
 
     context.invoke(delivery_report_to_scout, case_id=case_id)
     report_api.update_delivery_report_date(
