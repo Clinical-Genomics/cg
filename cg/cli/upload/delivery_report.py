@@ -10,9 +10,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.exc import CgError, DeliveryReportError
 from cg.meta.report.api import ReportAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 from .utils import suggest_cases_delivery_report
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 SUCCESS = 0
