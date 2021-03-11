@@ -14,7 +14,7 @@ Try to use the following format:
 ### Fixed
 
 
-## [20.5.5]
+## [20.6.0]
 ### Changed
 - Use cgmodels for crunchy metadata files
 
