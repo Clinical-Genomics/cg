@@ -677,6 +677,11 @@ def fixture_hk_version_obj(
 # Process Mock
 
 
+@pytest.fixture(name="sbatch_job_number")
+def fixture_sbatch_job_number() -> int:
+    return 123456
+
+
 @pytest.fixture(name="process")
 def fixture_process() -> ProcessMock:
     """Returns a mocked process"""

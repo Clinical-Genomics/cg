@@ -20,17 +20,17 @@ class SlurmAPI:
         self.dry_run = dry_run
 
     @staticmethod
-    def generate_sbatch(parameters: Sbatch) -> str:
+    def generate_sbatch(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information"""
-        sbatch_header: str = SlurmAPI.generate_sbatch_header(parameters=parameters)
+        sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters=sbatch_parameters)
         sbatch_body: str = SlurmAPI.generate_sbatch_body(
-            commands=parameters.commands, error_function=parameters.error
+            commands=sbatch_parameters.commands, error_function=sbatch_parameters.error
         )
         return "\n".join([sbatch_header, sbatch_body])
 
     @staticmethod
-    def generate_sbatch_header(parameters: Sbatch) -> str:
-        return SBATCH_HEADER_TEMPLATE.format(**parameters.dict())
+    def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
+        return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
 
     @staticmethod
     def generate_sbatch_body(commands: str, error_function: Optional[str] = None) -> str:
@@ -57,44 +57,10 @@ class SlurmAPI:
         if self.process.stderr:
             LOG.info(self.process.stderr)
         LOG.info(self.process.stdout)
+
         try:
-            job_number: int = int(self.process.stdout.strip())
+            job_number: int = int(self.process.stdout.strip().split()[-1])
         except ValueError:
             LOG.warning("Could not get slurm job number")
             job_number = 0
         return job_number
-
-
-if __name__ == "__main__":
-    config = {
-        "job_name": "test",
-        "account": "myaccount",
-        "number_tasks": 3,
-        "memory": 10,
-        "log_dir": "path/to/dir",
-        "email": "mans@me.com",
-        "hours": 2,
-        "commands": "genmod",
-    }
-    parameters = Sbatch.parse_obj(config)
-    sbatch_file = SlurmAPI.generate_sbatch(parameters)
-
-    print(sbatch_file)
-
-    error = """
-     if [[ -e {spring_path} ]]
-     then
-        rm {spring_path}
-     fi
-     
-     if [[ -e {pending_path} ]]
-     then
-         rm {pending_path}
-     fi
-    """
-    logic = """mkdir -p path/to/tmp"""
-    parameters.error = error
-
-    sbatch_file = SlurmAPI.generate_sbatch(parameters)
-
-    print(sbatch_file)
