@@ -14,6 +14,13 @@ Try to use the following format:
 ### Fixed
 
 
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
 ## [20.6.0]
 ### Changed
 - Use cgmodels for crunchy metadata files
@@ -60,7 +67,6 @@ Try to use the following format:
 ## [20.3.0]
 ### Changed
 - Refactored AnalysisAPI anf FastHandler classes into one class
-
 
 ## [20.2.1]
 ### Fixed
