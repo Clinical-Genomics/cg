@@ -16,7 +16,7 @@ from cg.models import CompressionData
 from cg.utils import Process
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
-from .files import get_file_updated_at, get_spring_archive_files, get_spring_metadata
+from .files import get_crunchy_metadata, get_file_updated_at, get_spring_archive_files
 from .sbatch import SBATCH_FASTQ_TO_SPRING, SBATCH_HEADER_TEMPLATE, SBATCH_SPRING_TO_FASTQ
 
 LOG = logging.getLogger(__name__)
@@ -135,9 +135,11 @@ class CrunchyAPI:
             return False
         LOG.info("SPRING metadata file found")
 
-        spring_metadata: CrunchyMetadata = get_spring_metadata(compression_obj.spring_metadata_path)
+        crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(
+            compression_obj.spring_metadata_path
+        )
         # Check if the SPRING archive has been unarchived
-        updated_at: Optional[datetime.date] = get_file_updated_at(spring_metadata)
+        updated_at: Optional[datetime.date] = get_file_updated_at(crunchy_metadata)
         if updated_at is None:
             LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
             return True
@@ -171,12 +173,12 @@ class CrunchyAPI:
             return False
 
         try:
-            spring_metadata: CrunchyMetadata = get_spring_metadata(spring_metadata_path)
+            crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
         except SyntaxError:
             LOG.info("Malformed metadata content")
             return False
 
-        for file_info in spring_metadata.files:
+        for file_info in crunchy_metadata.files:
             if not Path(file_info.path).exists():
                 LOG.info("File %s does not exist", file_info.path)
                 return False
@@ -213,7 +215,7 @@ class CrunchyAPI:
         Decompress SPRING into FASTQ by submitting sbatch script to SLURM
 
         """
-        crunchy_metadata: CrunchyMetadata = get_spring_metadata(
+        crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(
             compression_obj.spring_metadata_path
         )
 

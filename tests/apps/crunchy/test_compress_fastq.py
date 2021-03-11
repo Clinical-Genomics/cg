@@ -6,7 +6,7 @@ from typing import Dict, List
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy.files import get_spring_archive_files, get_spring_metadata
+from cg.apps.crunchy.files import get_crunchy_metadata, get_spring_archive_files
 from cg.models import CompressionData
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 from pydantic import ValidationError
@@ -19,7 +19,7 @@ def test_get_spring_metadata(spring_metadata_file: Path):
     assert spring_metadata_file.exists()
 
     # WHEN fetching the content of the file
-    parsed_content: CrunchyMetadata = get_spring_metadata(spring_metadata_file)
+    parsed_content: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)
 
     # THEN assert information about the three files is there
     assert len(parsed_content.files) == 3
@@ -27,13 +27,13 @@ def test_get_spring_metadata(spring_metadata_file: Path):
     assert isinstance(parsed_content.files, list)
 
 
-def test_get_spring_archive_files(spring_metadata_object: CrunchyMetadata):
+def test_get_spring_archive_files(crunchy_metadata_object: CrunchyMetadata):
     """Test the method that sorts the SPRING metadata into a dictionary"""
     # GIVEN a SPRING metadata content in its raw format
-    assert isinstance(spring_metadata_object.files, list)
+    assert isinstance(crunchy_metadata_object.files, list)
 
     # WHEN sorting the files
-    sorted_content: Dict[str, CrunchyFile] = get_spring_archive_files(spring_metadata_object)
+    sorted_content: Dict[str, CrunchyFile] = get_spring_archive_files(crunchy_metadata_object)
 
     # THEN assert information about the three files is there
     assert len(sorted_content) == 3
@@ -56,7 +56,7 @@ def test_get_spring_metadata_malformed_info(
     # WHEN fetching the content of the file
     with pytest.raises(ValidationError):
         # THEN assert that a pydantic validation error is raised
-        get_spring_metadata(spring_metadata_file)
+        get_crunchy_metadata(spring_metadata_file)
 
 
 def test_get_spring_metadata_wrong_number_files(
@@ -71,7 +71,7 @@ def test_get_spring_metadata_wrong_number_files(
     # WHEN fetching the content of the file
     with pytest.raises(ValidationError):
         # THEN assert that a validation error is raised
-        get_spring_metadata(spring_metadata_file)
+        get_crunchy_metadata(spring_metadata_file)
 
 
 def test_fastq_to_spring_sbatch(

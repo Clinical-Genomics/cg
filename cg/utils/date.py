@@ -65,9 +65,9 @@ def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> d
             LOG.info("Date is not in std format")
 
     for separator in [DASH, SPACE, DOT, FWD_SLASH]:
-        split_date = date.split(separator)
-        if len(split_date) == 3:
-            return datetime.datetime(*(int(number) for number in split_date))
+        date_parts = date.split(separator)
+        if len(date_parts) == 3:
+            return datetime.datetime(*(int(number) for number in date_parts))
 
     raise ValueError("Date %s is invalid" % date)
 

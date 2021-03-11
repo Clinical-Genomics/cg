@@ -43,8 +43,8 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
     ]
 
 
-@pytest.fixture(name="spring_metadata_object")
-def fixture_spring_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
+@pytest.fixture(name="crunchy_metadata_object")
+def fixture_crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
     """Return the parsed metadata"""
     return CrunchyMetadata(files=spring_metadata)
 

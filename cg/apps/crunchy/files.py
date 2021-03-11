@@ -7,12 +7,11 @@ from typing import Dict, List, Optional
 
 from cg.utils.date import get_date
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
-from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
 
 
-def get_spring_metadata(metadata_path: Path) -> CrunchyMetadata:
+def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
     """Validate content of metadata file and return mapped content"""
     LOG.info("Fetch SPRING metadata from %s", metadata_path)
     with open(metadata_path, "r") as infile:
@@ -57,7 +56,7 @@ def update_metadata_date(spring_metadata_path: Path) -> None:
     """Update date in the SPRING metadata file to today date"""
 
     now: datetime = get_date()
-    spring_metadata: CrunchyMetadata = get_spring_metadata(spring_metadata_path)
+    spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
     LOG.info("Adding today date to SPRING metadata file")
     for file_info in spring_metadata.files:
         file_info.updated = now.date()
