@@ -14,9 +14,17 @@ Try to use the following format:
 ### Fixed
 
 
-## [20.5.3]
+## [20.5.5]
 ### Changed
 - Use cgmodels for crunchy metadata files
+
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
+## [20.5.3]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
 
 ## [20.5.2]
 ### Changed
