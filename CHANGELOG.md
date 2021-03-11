@@ -14,6 +14,13 @@ Try to use the following format:
 ### Fixed
 
 
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
 ## [20.6.0]
 ### Changed
 - Use cgmodels for crunchy metadata files
@@ -60,7 +67,6 @@ Try to use the following format:
 ## [20.3.0]
 ### Changed
 - Refactored AnalysisAPI anf FastHandler classes into one class
-
 
 ## [20.2.1]
 ### Fixed
@@ -219,6 +225,11 @@ Try to use the following format:
 
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
+
+## [20.8.0]
+
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
 
 ## [18.10.0]
 
