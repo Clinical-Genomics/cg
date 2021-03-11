@@ -38,6 +38,7 @@ CRUNCHY_CONFIG = {
         "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
     }
 }
+FAKE_NOW = dt.datetime(2021, 3, 1)
 
 
 LOG = logging.getLogger(__name__)
@@ -1212,3 +1213,13 @@ def context_config(
         },
         "backup": {"root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"}},
     }
+
+
+@pytest.fixture
+def patch_datetime_now(monkeypatch):
+    class mydatetime:
+        @classmethod
+        def now(cls):
+            return FAKE_NOW
+
+    monkeypatch.setattr(dt, "datetime", mydatetime)
