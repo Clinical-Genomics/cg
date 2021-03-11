@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.8.0]
+### Added
+- SlurmAPI to handle all communication with slurm from cg
 
 ## [20.7.0]
 ### Added
