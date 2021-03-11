@@ -244,7 +244,7 @@ class CrunchyAPI:
         crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(
             compression_obj.spring_metadata_path
         )
-        files_info = get_spring_archive_files(crunchy_metadata)
+        files_info: Dict[str, CrunchyFile] = get_spring_archive_files(crunchy_metadata)
         log_dir = self.get_log_dir(compression_obj.spring_path)
 
         error_function = SPRING_TO_FASTQ_ERROR.format(
