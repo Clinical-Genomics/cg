@@ -7,28 +7,11 @@ from typing import List
 
 import pytest
 from cg.models import CompressionData
+from cg.utils import Process
 from cgmodels.crunchy.metadata import CrunchyMetadata
+from tests.mocks.process_mock import ProcessMock
 
 LOG = logging.getLogger(__name__)
-
-
-class MockProcess:
-    """Mock a process"""
-
-    def __init__(self, process_name: str):
-        """Inititalise mock"""
-        self.stderr = ""
-        self.stdout = ""
-        self.base_call = [process_name]
-        self.process_name = process_name
-
-    def run_command(self, parameters: List):
-        """Mock the run process method"""
-        command = copy.deepcopy(self.base_call)
-        if parameters:
-            command.extend(parameters)
-
-        LOG.info("Running command %s", " ".join(command))
 
 
 @pytest.fixture(name="real_spring_metadata_path")
@@ -80,9 +63,9 @@ def fixture_spring_metadata_file(
 
 
 @pytest.fixture(scope="function", name="sbatch_process")
-def fixture_sbatch_process():
+def fixture_sbatch_process() -> Process:
     """Return a mocked process object"""
-    return MockProcess("sbatch")
+    return ProcessMock(binary="sbatch")
 
 
 @pytest.fixture(scope="function", name="fastq_first_file")

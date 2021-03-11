@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 
-from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import get_spring_metadata, update_metadata_date
 from cgmodels.crunchy.metadata import CrunchyMetadata
 
