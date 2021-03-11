@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
 ## [20.5.3]
 ### Added
 - Support for SARS-CoV-2 Orderform 2184:3
