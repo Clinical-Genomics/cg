@@ -13,9 +13,18 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.5.1]
+
+## [20.5.3]
 ### Changed
 - Use cgmodels for crunchy metadata files
+
+## [20.5.2]
+### Changed
+- Remove pipfile and pipfile.lock since they are not used
+
+## [20.5.1]
+### Changed
+- Removes linting gh actions job
 
 ## [20.5.0]
 ### Added
