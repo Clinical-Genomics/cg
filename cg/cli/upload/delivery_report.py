@@ -189,7 +189,7 @@ def delivery_report(
     )
 
     if added_file:
-        click.echo(click.style("uploaded to housekeeper", fg="green"))
+        click.echo(click.style("Uploaded to housekeeper", fg="green"))
     else:
         click.echo(click.style("already uploaded to housekeeper, skipping", fg="yellow"))
 
