@@ -253,6 +253,9 @@ class CrunchyAPI:
         Decompress SPRING into FASTQ by submitting sbatch script to SLURM
 
         """
+        CrunchyAPI.create_pending_file(
+            pending_path=compression_obj.pending_path, dry_run=self.dry_run
+        )
         # Fetch the metadata information from a spring metadata file
         crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(
             compression_obj.spring_metadata_path
