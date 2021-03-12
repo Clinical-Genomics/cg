@@ -63,9 +63,11 @@ def fixture_spring_metadata_file(
 
 
 @pytest.fixture(scope="function", name="sbatch_process")
-def fixture_sbatch_process() -> Process:
+def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object"""
-    return ProcessMock(binary="sbatch")
+    slurm_process = ProcessMock(binary="sbatch")
+    slurm_process.set_stdout(text=str(sbatch_job_number))
+    return slurm_process
 
 
 @pytest.fixture(scope="function", name="fastq_first_file")

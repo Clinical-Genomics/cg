@@ -45,6 +45,11 @@ LOG = logging.getLogger(__name__)
 # Case fixtures
 
 
+@pytest.fixture(name="slurm_account")
+def fixture_slurm_account() -> str:
+    return "super_account"
+
+
 @pytest.fixture(name="user_name")
 def fixture_user_name() -> str:
     return "Paul Anderson"
@@ -670,6 +675,11 @@ def fixture_hk_version_obj(
 
 
 # Process Mock
+
+
+@pytest.fixture(name="sbatch_job_number")
+def fixture_sbatch_job_number() -> int:
+    return 123456
 
 
 @pytest.fixture(name="process")
