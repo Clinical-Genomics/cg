@@ -390,3 +390,20 @@ class LimsAPI(Lims, OrderHandler):
     def get_sample_project(self, sample_id: str) -> str:
         """Get the lims-id for the project of the sample"""
         return self.sample(sample_id).get("project").get("id")
+
+    # FoHM data
+    def get_sample_lab_code(self, sample_id: str) -> str:
+        """Get the lab code of the sample"""
+        return self.get_sample_attribute(lims_id=sample_id, key="lab_code")
+
+    def get_sample_region_code(self, sample_id: str) -> str:
+        """Get the region code of the sample"""
+        return self.get_sample_attribute(lims_id=sample_id, key="region_code")
+
+    def get_sample_pre_processing_method(self, sample_id: str) -> str:
+        """Get the pre processing method of the sample"""
+        return self.get_sample_attribute(lims_id=sample_id, key="pre_processing_method")
+
+    def get_sample_selection_criteria(self, sample_id: str) -> str:
+        """Get the selection criteria of the sample"""
+        return self.get_sample_attribute(lims_id=sample_id, key="selection_criteria")

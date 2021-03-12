@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from ruamel.yaml import YAML
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
@@ -12,9 +14,9 @@ from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
-from ruamel.yaml import YAML
 
 from .utils import suggest_cases_to_upload
+from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -49,10 +51,10 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
     """Create a load config for a case in scout and add it to housekeeper"""
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
-    status_api: Store = context.obj["status_db"]
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
     LOG.info("Fetching family object")
-    case_obj: Family = status_api.family(case_id)
+    case_obj: Family = analysis_api.status_db.family(case_id)
     LOG.info("Create load config")
     if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)
@@ -110,27 +112,25 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
 
     LOG.info("----------------- UPLOAD -----------------------")
 
-    def _get_load_config_from_hk(hk_api: HousekeeperAPI, case_id: str) -> Path:
-        tag_name = UploadScoutAPI.get_load_config_tag()
-        version_obj = hk_api.last_version(case_id)
-        scout_config_file: Optional[hk_models.File] = hk_api.fetch_file_from_version(
-            version_obj=version_obj, tags={tag_name}
-        )
+    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
 
-        if scout_config_file is None:
-            raise FileNotFoundError(f"No scout load config was found in housekeeper for {case_id}")
+    tag_name = UploadScoutAPI.get_load_config_tag()
+    version_obj = analysis_api.housekeeper_api.last_version(case_id)
+    scout_config_file: Optional[
+        hk_models.File
+    ] = analysis_api.housekeeper_api.fetch_file_from_version(
+        version_obj=version_obj, tags={tag_name}
+    )
 
-        return Path(scout_config_file.full_path)
-
-    scout_api: ScoutAPI = context.obj["scout_api"]
-    hk_api: HousekeeperAPI = context.obj["housekeeper_api"]
-
-    load_config: Path = _get_load_config_from_hk(hk_api, case_id)
+    if scout_config_file is None:
+        raise FileNotFoundError(f"No scout load config was found in housekeeper for {case_id}")
 
     LOG.info("uploading case %s to scout", case_id)
 
     if not dry_run:
-        scout_api.upload(scout_load_config=load_config, force=re_upload)
+        analysis_api.scout_api.upload(
+            scout_load_config=scout_config_file.full_path, force=re_upload
+        )
 
-    LOG.info("uploaded to scout using load config %s", load_config)
+    LOG.info("uploaded to scout using load config %s", scout_config_file.full_path)
     LOG.info("Case loaded succesfully to Scout")

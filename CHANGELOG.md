@@ -13,6 +13,88 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 20.9.1
+### Fixed
+- Bug preventing MicroSALT to start automatically
+
+## [20.9.0]
+### Added
+- SlurmAPI to handle all communication with slurm from cg
+
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
+## [20.8.1]
+### Changed
+- Deletes unused files .gitlint, housekeeper, status, status_db
+
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
+## [20.6.0]
+### Changed
+- Use cgmodels for crunchy metadata files
+
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
+## [20.5.3]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
+
+## [20.5.2]
+### Changed
+- Remove pipfile and pipfile.lock since they are not used
+
+## [20.5.1]
+### Changed
+- Removes linting gh actions job
+
+## [20.5.0]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
+
+## [20.4.0]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:1
+
+## [20.3.3]
+
+### Changed
+- Set concentration and concentration sample to str in json orderform sample since this is expected in frontend
+
+## [20.3.2]
+### Fixed
+- Fixed cases_to_store for microbial workflow. 
+- Fixed process call for all workflows to not create a new process object
+
+## [20.3.1]
+### Fixed
+- HousekeeperAPI to reuse db connection from context instead of creating new one for each call
+
+## [20.3.0]
+### Changed
+- Refactored AnalysisAPI anf FastHandler classes into one class
+
+## [20.2.1]
+### Fixed
+- Fixed json orderform special cases
+
+## [20.2.0]
+### Changed
+- Use pydantic models to validate orderforms
+
+## [20.1.4]
+### Added
+- delivery_report handling from BALSAMIC case import to Scout config export
+
 ## [20.1.3]
 ### Changed
 - Genes are optional when exporting scout variants
@@ -22,7 +104,6 @@ Try to use the following format:
 - Refactored and removed code from cg.store.utils in backwards compatible way
 
 ## [20.1.1]
-
 ### Changed
 - Updates issue template
 

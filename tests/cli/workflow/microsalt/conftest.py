@@ -9,71 +9,6 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.store import Store
 
 
-@pytest.fixture(scope="function")
-def queries_path(tmpdir):
-    """ The path where to store the case-configs """
-    return Path(tmpdir) / "queries"
-
-
-@pytest.fixture(scope="function")
-def fastq_path(tmpdir):
-    """ The path where to store the case-configs """
-    return Path(tmpdir) / "fastq"
-
-
-@pytest.fixture(scope="function")
-def base_context(
-    microsalt_store, lims_api, tmpdir, queries_path, housekeeper_api, hermes_api, trailblazer_api
-):
-    """ The click context for the microsalt cli """
-    return {
-        "db": microsalt_store,
-        "microsalt_analysis_api": MicrosaltAnalysisAPI(
-            db=microsalt_store,
-            hk_api=housekeeper_api,
-            lims_api=lims_api,
-            hermes_api=hermes_api,
-            trailblazer_api=trailblazer_api,
-            config={
-                "root": tmpdir,
-                "queries_path": queries_path,
-                "binary_path": "/bin/true",
-                "conda_env": "root",
-            },
-        ),
-    }
-
-
-@pytest.fixture(scope="function")
-def microsalt_store(base_store: Store, microbial_sample_id, microbial_ticket, helpers) -> Store:
-    """ Filled in store to be used in the tests """
-    _store = base_store
-
-    helpers.add_microbial_sample(_store)
-
-    _store.commit()
-
-    return _store
-
-
-@pytest.fixture(name="microbial_sample_id")
-def fixture_microbial_sample_id():
-    """ Define a name for a microbial sample """
-    return "microbial_sample_id"
-
-
-@pytest.fixture(name="microbial_sample_name")
-def fixture_microbial_sample_name():
-    """ Define a name for a microbial sample """
-    return "microbial_sample_name"
-
-
-@pytest.fixture(name="microbial_ticket")
-def fixture_microbial_ticket():
-    """ Define a ticket for a microbial order """
-    return "123456"
-
-
 class MockLims:
     """ provides a mock class overriding relevant methods for microbial cli """
 
@@ -136,9 +71,37 @@ class LimsFactory:
 @pytest.fixture(scope="function")
 def lims_api():
     """return a mocked lims"""
+    return LimsFactory.produce()
 
-    _lims_api = LimsFactory.produce()
-    return _lims_api
+
+@pytest.fixture(scope="function")
+def base_context(context_config, helpers, lims_api):
+    """ The click context for the microsalt cli """
+    analysis_api = MicrosaltAnalysisAPI(context_config)
+    helpers.add_microbial_sample(analysis_api.status_db)
+    analysis_api.lims_api = lims_api
+
+    return {
+        "analysis_api": analysis_api,
+    }
+
+
+@pytest.fixture(name="microbial_sample_id")
+def fixture_microbial_sample_id():
+    """ Define a name for a microbial sample """
+    return "microbial_sample_id"
+
+
+@pytest.fixture(name="microbial_sample_name")
+def fixture_microbial_sample_name():
+    """ Define a name for a microbial sample """
+    return "microbial_sample_name"
+
+
+@pytest.fixture(name="microbial_ticket")
+def fixture_microbial_ticket():
+    """ Define a ticket for a microbial order """
+    return "123456"
 
 
 @pytest.fixture(scope="function")

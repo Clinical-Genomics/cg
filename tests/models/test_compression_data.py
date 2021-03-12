@@ -1,7 +1,7 @@
 """Tests for the compress data class"""
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from cg.models import CompressionData
 

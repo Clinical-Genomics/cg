@@ -3,15 +3,15 @@ import tempfile
 from datetime import date
 
 from flask import (
-    flash,
     Blueprint,
+    current_app,
+    flash,
+    redirect,
     render_template,
     request,
-    redirect,
-    url_for,
     send_from_directory,
     session,
-    current_app,
+    url_for,
 )
 from flask_dance.contrib.google import google
 

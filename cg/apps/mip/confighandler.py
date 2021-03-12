@@ -1,12 +1,12 @@
-from copy import deepcopy
 import logging
+from copy import deepcopy
 from pathlib import Path
 
-from marshmallow import Schema, fields, validate
 import ruamel.yaml
+from marshmallow import Schema, fields, validate
 
-from cg.exc import PedigreeConfigError
 from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT, Pipeline
+from cg.exc import PedigreeConfigError
 
 LOG = logging.getLogger(__name__)
 
@@ -43,14 +43,14 @@ class ConfigSchema(Schema):
 
 
 class ConfigHandler:
-    def make_pedigree_config(self, data: dict, pipeline: Pipeline = None) -> dict:
+    @staticmethod
+    def make_pedigree_config(data: dict) -> dict:
         """Make a MIP pedigree config"""
-        self.validate_config(data=data, pipeline=pipeline)
-        config_data = self.parse_pedigree_config(data)
-        return config_data
+        ConfigHandler.validate_config(data=data)
+        return ConfigHandler.parse_pedigree_config(data)
 
     @staticmethod
-    def validate_config(data: dict, pipeline: Pipeline = None) -> dict:
+    def validate_config(data: dict) -> dict:
         """Validate MIP pedigree config format"""
         errors = ConfigSchema().validate(data)
         fatal_error = False
@@ -86,11 +86,3 @@ class ConfigHandler:
             if sample_data["analysis_type"] == "wgs" and sample_data.get("capture_kit") is None:
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
         return data_copy
-
-    @staticmethod
-    def write_pedigree_config(data: dict, out_dir: Path, pedigree_config_path: Path) -> Path:
-        """Write the pedigree config to the the case dir"""
-        out_dir.mkdir(parents=True, exist_ok=True)
-        dump = ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
-        pedigree_config_path.write_text(dump)
-        return pedigree_config_path

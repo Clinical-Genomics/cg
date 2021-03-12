@@ -3,9 +3,9 @@
 import datetime
 
 import pytest
-from housekeeper.store import models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from housekeeper.store import models
 
 
 @pytest.fixture(name="hk_config")

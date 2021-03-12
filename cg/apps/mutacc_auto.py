@@ -2,10 +2,10 @@
     Module for mutacc-auto API
 """
 
-import logging
-import subprocess
 import copy
 import json
+import logging
+import subprocess
 
 LOG = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 """Mock a Process"""
 
-from typing import List
 import copy
 import logging
 from subprocess import CalledProcessError
+from typing import List
 
-from cg.utils.commands import Process
 from cg.constants import RETURN_SUCCESS
+from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
 

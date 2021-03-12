@@ -5,6 +5,7 @@ from typing import List
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
+from cg.constants import Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
 
@@ -65,8 +66,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
-        query = self.Delivery.query
-        return query
+        return self.Delivery.query
 
     def families(
         self, *, customer: models.Customer = None, enquiry: str = None, action: str = None
@@ -165,10 +165,10 @@ class FindBusinessDataHandler(BaseHandler):
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
-        if invoiced is True:
-            query = query.filter(models.Invoice.invoiced_at != None)
-        elif invoiced is False:
-            query = query.filter(models.Invoice.invoiced_at == None)
+        if invoiced:
+            query = query.filter(models.Invoice.invoiced_at.isnot(None))
+        else:
+            query = query.filter(models.Invoice.invoiced_at.is_(None))
         return query
 
     def invoice(self, invoice_id: int) -> models.Invoice:
@@ -209,11 +209,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch invoices."""
         query = self.Invoice.query.all()
         ids = [inv.id for inv in query]
-        if ids:
-            new_id = max(ids) + 1
-        else:
-            new_id = 0
-        return new_id
+        return max(ids) + 1 if ids else 0
 
     def pools(self, *, customer: models.Customer, enquiry: str = None) -> Query:
         """Fetch all the pools for a customer."""
