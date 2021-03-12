@@ -13,12 +13,19 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Bug preventing MicroSALT to start automatically
 
-## [20.8.0]
+## [20.9.0]
 ### Added
 - SlurmAPI to handle all communication with slurm from cg
 
-## [20.7.1]
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
+## [20.8.1]
 ### Changed
 - Deletes unused files .gitlint, housekeeper, status, status_db
 
@@ -233,11 +240,6 @@ Try to use the following format:
 
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
-
-## [20.8.0]
-
-### Added
-- Support for creating delivery reports for analyses that are not the latest ones
 
 ## [18.10.0]
 
