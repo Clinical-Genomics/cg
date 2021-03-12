@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Automation of delivery report upload
+
 ## 20.9.1
 ### Fixed
 - Bug preventing MicroSALT to start automatically
