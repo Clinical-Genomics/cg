@@ -18,11 +18,13 @@ def get_log_dir(file_path: Path) -> Path:
     return file_path.parent
 
 
-def get_sbatch_path(log_dir: Path, compression: str, run_name: str = None) -> Path:
-    """Return the path to where sbatch should be printed"""
-    if compression == "fastq":
-        return log_dir / "_".join([run_name, "compress_fastq.sh"])
-    # Only other option is "SPRING"
+def get_fastq_to_spring_sbatch_path(log_dir: Path, run_name: str = None) -> Path:
+    """Return the path to where compression sbatch should be printed"""
+    return log_dir / "_".join([run_name, "compress_fastq.sh"])
+
+
+def get_spring_to_fastq_sbatch_path(log_dir: Path, run_name: str = None) -> Path:
+    """Return the path to where decompression sbatch should be printed"""
     return log_dir / "_".join([run_name, "decompress_spring.sh"])
 
 

@@ -8,8 +8,8 @@ import pytest
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import (
     get_crunchy_metadata,
+    get_fastq_to_spring_sbatch_path,
     get_log_dir,
-    get_sbatch_path,
     get_spring_archive_files,
 )
 from cg.apps.slurm.slurm_api import SlurmAPI
@@ -97,7 +97,7 @@ def test_fastq_to_spring_sbatch(
     spring_path: Path = compression_object.spring_path
     log_path: Path = get_log_dir(spring_path)
     run_name: str = compression_object.run_name
-    sbatch_path: Path = get_sbatch_path(log_path, "fastq", run_name)
+    sbatch_path: Path = get_fastq_to_spring_sbatch_path(log_dir=log_path, run_name=run_name)
 
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
