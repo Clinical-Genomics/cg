@@ -98,9 +98,10 @@ def test_fastq_to_spring_sbatch(
     log_path: Path = get_log_dir(spring_path)
     run_name: str = compression_object.run_name
     sbatch_path: Path = get_fastq_to_spring_sbatch_path(log_dir=log_path, run_name=run_name)
-
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
+    # GIVEN that the pending path does not exist
+    assert compression_object.pending_exists() is False
 
     # WHEN calling fastq_to_spring on FASTQ files
     job_number: int = crunchy_api.fastq_to_spring(compression_obj=compression_object)
@@ -109,6 +110,8 @@ def test_fastq_to_spring_sbatch(
     assert sbatch_path.is_file()
     # THEN assert that correct job number was returned
     assert job_number == sbatch_job_number
+    # THEN assert that the pending path was created
+    assert compression_object.pending_exists() is True
 
 
 def test_spring_to_fastq(
@@ -126,9 +129,13 @@ def test_spring_to_fastq(
     assert spring_metadata_file.exists()
     mocker_submit_sbatch = mocker.patch.object(SlurmAPI, "submit_sbatch")
     crunchy_api = CrunchyAPI(crunchy_config_dict)
+    # GIVEN that the pending path does not exist
+    assert compression_object.pending_exists() is False
 
     # WHEN calling bam_to_cram method on bam-path
     crunchy_api.spring_to_fastq(compression_obj=compression_object)
 
     # THEN _submit_sbatch method is called
     mocker_submit_sbatch.assert_called()
+    # THEN assert that the pending path was created
+    assert compression_object.pending_exists() is True
