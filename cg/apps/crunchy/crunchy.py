@@ -195,12 +195,22 @@ class CrunchyAPI:
 
         return True
 
+    @staticmethod
+    def create_pending_file(pending_path: Path, dry_run: bool) -> None:
+        LOG.info("Creating pending flag %s", pending_path)
+        if dry_run:
+            return
+        pending_path.touch(exist_ok=False)
+
     # These are the compression/decompression methods
     def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = "") -> int:
         """
         Compress FASTQ files into SPRING by sending to sbatch SLURM
 
         """
+        CrunchyAPI.create_pending_file(
+            pending_path=compression_obj.pending_path, dry_run=self.dry_run
+        )
         log_dir: Path = files.get_log_dir(compression_obj.spring_path)
         # Generate the error function
         error_function = FASTQ_TO_SPRING_ERROR.format(
