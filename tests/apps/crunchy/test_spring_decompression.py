@@ -2,6 +2,7 @@
 import json
 import logging
 
+import pytest
 from cg.apps.crunchy import CrunchyAPI
 
 
@@ -139,12 +140,11 @@ def test_is_spring_decompression_done_empty_metadata_file(
     compression_object.spring_metadata_path.touch()
 
     # WHEN checking if SPRING decompression is done
-    result = crunchy_api.is_spring_decompression_done(compression_object)
-
-    # THEN result should be False since the metadata file has no content
-    assert result is False
-    # THEN assert that it was communicated that the content is malformed
-    assert "Malformed metadata content" in caplog.text
+    with pytest.raises(SyntaxError):
+        # THEN assert that an exception should be raised since the file is malformed
+        result = crunchy_api.is_spring_decompression_done(compression_object)
+        # THEN assert that it was communicated that the content is malformed
+        assert "Malformed metadata content" in caplog.text
 
 
 def test_is_spring_decompression_possible(

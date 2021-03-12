@@ -45,8 +45,9 @@ def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
         try:
             content: List[Dict[str, str]] = json.load(infile)
         except JSONDecodeError:
-            LOG.warning("No content in SPRING metadata file")
-            raise SyntaxError
+            message = "No content in SPRING metadata file"
+            LOG.warning(message)
+            raise SyntaxError(message)
     metadata = CrunchyMetadata(files=content)
 
     if len(metadata.files) != 3:
