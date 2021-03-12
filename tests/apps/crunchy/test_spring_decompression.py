@@ -142,7 +142,7 @@ def test_is_spring_decompression_done_empty_metadata_file(
     # WHEN checking if SPRING decompression is done
     with pytest.raises(SyntaxError):
         # THEN assert that an exception should be raised since the file is malformed
-        result = crunchy_api.is_spring_decompression_done(compression_object)
+        crunchy_api.is_spring_decompression_done(compression_object)
         # THEN assert that it was communicated that the content is malformed
         assert "Malformed metadata content" in caplog.text
 
