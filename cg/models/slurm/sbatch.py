@@ -13,6 +13,6 @@ class Sbatch(BaseModel):
     email: str
     hours: int
     minutes: str = "00"
-    priority: Literal["high", "low"] = "low"
+    priority: Literal["high", "normal", "low"] = "low"
     commands: str
     error: Optional[str]
