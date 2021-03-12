@@ -141,13 +141,11 @@ class CrunchyAPI:
             return False
         LOG.info("SPRING metadata file found")
 
-        try:
-            crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(
-                compression_obj.spring_metadata_path
-            )
-        except ValidationError:
-            LOG.warning("Crunchy metadata file is malformed")
-            return False
+        # We want this to raise exception if file is malformed
+        crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(
+            compression_obj.spring_metadata_path
+        )
+
         # Check if the SPRING archive has been unarchived
         updated_at: Optional[datetime.date] = files.get_file_updated_at(crunchy_metadata)
         if updated_at is None:
@@ -182,11 +180,8 @@ class CrunchyAPI:
             LOG.info("No SPRING metadata file found")
             return False
 
-        try:
-            crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(spring_metadata_path)
-        except (SyntaxError, ValidationError):
-            LOG.info("Malformed metadata content")
-            return False
+        # We want this to exit hard if the metadata is malformed
+        crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(spring_metadata_path)
 
         for file_info in crunchy_metadata.files:
             if not Path(file_info.path).exists():
