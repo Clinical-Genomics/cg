@@ -233,7 +233,7 @@ class CrunchyAPI:
             "commands": commands,
             "error": error_function,
         }
-        sbatch_content: str = self.slurm_api.generate_sbatch(Sbatch.parse_obj(sbatch_info))
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path = files.get_sbatch_path(log_dir, "fastq", compression_obj.run_name)
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
@@ -283,7 +283,7 @@ class CrunchyAPI:
             "commands": commands,
             "error": error_function,
         }
-        sbatch_content: str = self.slurm_api.generate_sbatch(Sbatch.parse_obj(sbatch_info))
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path = files.get_sbatch_path(
             log_dir=log_dir, compression="spring", run_name=compression_obj.run_name
         )

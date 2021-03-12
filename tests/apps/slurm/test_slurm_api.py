@@ -44,7 +44,7 @@ def test_generate_sbatch_script(sbatch_parameters: Sbatch):
     # GIVEN a Sbatch object with some parameters
 
     # WHEN creating a sbatch script
-    sbatch_content: str = api.generate_sbatch(sbatch_parameters=sbatch_parameters)
+    sbatch_content: str = api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
 
     # THEN assert that the command is in the body
     assert sbatch_parameters.commands in sbatch_content

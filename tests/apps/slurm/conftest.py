@@ -26,7 +26,7 @@ def fixture_sbatch_parameters(email_adress: str, slurm_account: str) -> Sbatch:
 @pytest.fixture(name="sbatch_content")
 def fixture_sbatch_content(sbatch_parameters: Sbatch) -> str:
     api = SlurmAPI()
-    return api.generate_sbatch(sbatch_parameters=sbatch_parameters)
+    return api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
 
 
 @pytest.fixture(name="slurm_api")

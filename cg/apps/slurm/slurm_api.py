@@ -20,7 +20,7 @@ class SlurmAPI:
         self.dry_run = dry_run
 
     @staticmethod
-    def generate_sbatch(sbatch_parameters: Sbatch) -> str:
+    def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information"""
         sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters=sbatch_parameters)
         sbatch_body: str = SlurmAPI.generate_sbatch_body(
