@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 20.9.4
+### Fixed
+- Fix bug that pending path was not created 
+
 ## 20.9.3
 ### Fixed
 - Bug in automation of delivery report upload
