@@ -111,7 +111,8 @@ class ReportAPI:
 
         return None
 
-    def get_delivery_report_from_hk(hk_api: HousekeeperAPI, case_id):
+    @staticmethod
+    def get_delivery_report_from_hk(hk_api: HousekeeperAPI, case_id: str) -> :
         delivery_report_tag_name = "delivery-report"
         version_obj = hk_api.last_version(case_id)
         uploaded_delivery_report_files = hk_api.get_files(
