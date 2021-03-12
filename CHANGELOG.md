@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 20.9.3
+### Fixed
+- Bug in automation of delivery report upload
+
 ## 20.9.2
 ### Fixed
 - Bug when updating crunchy metadata files
