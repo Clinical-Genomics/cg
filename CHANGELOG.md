@@ -17,6 +17,10 @@ Try to use the following format:
 ### Fixed
 - Automation of delivery report upload
 
+## 20.9.2
+### Fixed
+- Bug when updating crunchy metadata files
+
 ## 20.9.1
 ### Fixed
 - Bug preventing MicroSALT to start automatically
