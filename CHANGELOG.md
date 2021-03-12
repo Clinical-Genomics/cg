@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Bug in automation of delivery report upload
+
 ## 20.9.2
 ### Fixed
 - Bug when updating crunchy metadata files
