@@ -39,19 +39,12 @@ class SlurmAPI:
 
         return SBATCH_BODY_TEMPLATE.format(**{"error_body": error_function, "commands": commands})
 
-    def submit_sbatch(self, sbatch_content: str, sbatch_path: Path) -> int:
-        """Submit sbatch file to slurm job.
-
-        Return the slurm job id
-        """
-        LOG.info("Submit sbatch")
-        if self.dry_run:
-            LOG.info("Would submit sbatch %s to slurm", sbatch_path)
-            return 123456
-
+    @staticmethod
+    def write_sbatch_file(sbatch_content: str, sbatch_path: Path) -> None:
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 
+    def submit_sbatch_job(self, sbatch_path: Path) -> int:
         sbatch_parameters: List[str] = [str(sbatch_path.resolve())]
         self.process.run_command(parameters=sbatch_parameters)
         if self.process.stderr:
@@ -64,3 +57,15 @@ class SlurmAPI:
             LOG.warning("Could not get slurm job number")
             job_number = 0
         return job_number
+
+    def submit_sbatch(self, sbatch_content: str, sbatch_path: Path) -> int:
+        """Submit sbatch file to slurm job.
+
+        Return the slurm job id
+        """
+        LOG.info("Submit sbatch")
+        if self.dry_run:
+            LOG.info("Would submit sbatch %s to slurm", sbatch_path)
+            return 123456
+        SlurmAPI.write_sbatch_file(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+        return self.submit_sbatch_job(sbatch_path=sbatch_path)
