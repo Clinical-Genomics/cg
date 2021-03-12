@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## 20.9.2
+### Fixed
+- Bug when updating crunchy metadata files
+
 ## 20.9.1
 ### Fixed
 - Bug preventing MicroSALT to start automatically
