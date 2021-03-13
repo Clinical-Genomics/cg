@@ -89,6 +89,6 @@ def update_metadata_date(spring_metadata_path: Path) -> None:
     for file_info in spring_metadata.files:
         file_info.updated = now.date()
 
-    content: dict = json.loads(spring_metadata.json())
+    content: dict = json.loads(spring_metadata.json(exclude_none=True))
     with open(spring_metadata_path, "w") as outfile:
         outfile.write(json.dumps(content["files"]))
