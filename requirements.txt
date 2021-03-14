@@ -4,6 +4,7 @@ SQLAlchemy
 
 # cli
 Click<7.0
+click-pathlib # Convert to path directly in cli
 
 # server
 Flask-Admin
