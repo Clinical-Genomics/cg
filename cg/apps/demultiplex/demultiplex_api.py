@@ -24,7 +24,8 @@ convert it to a format that bcl2fastq accepts.
 
 When that file exists we start demultiplexing by sending a batch job with instructions to slurm.
 
-Before starting demux we will need to create a basemask.
+Before starting demux we will need understand what basemask to use. Basemask is a value derived from the runparameters 
+file. It has to do with the read length and the index length.
 
 for RUN_DIR in ${IN_DIR}/*; do
     if [[ ! -d ${RUN_DIR} ]]; then # -d means directory exists
