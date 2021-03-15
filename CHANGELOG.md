@@ -13,19 +13,23 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## 20.9.4
+## [20.9.5]
+### Fixed
+- Balsamic crontab start-available auto-disables balsamic dry run
+
+## [20.9.4]
 ### Fixed
 - Fix bug that pending path was not created 
 
-## 20.9.3
+## [20.9.3]
 ### Fixed
 - Bug in automation of delivery report upload
 
-## 20.9.2
+## [20.9.2]
 ### Fixed
 - Bug when updating crunchy metadata files
 
-## 20.9.1
+## [20.9.1]
 ### Fixed
 - Bug preventing MicroSALT to start automatically
 
