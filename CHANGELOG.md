@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.9.6]
+### Fixed
+- Use `coverage_qc_report` instead of `delivery_report` when uploading balsamic cases to scout
+
 ## [20.9.5]
 ### Fixed
 - Balsamic crontab start-available auto-disables balsamic dry run
