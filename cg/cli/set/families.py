@@ -55,7 +55,7 @@ def families(
     customer_id,
     identifiers: click.Tuple([str, str]),
 ):
-    """Set values on many samples at the same time"""
+    """Set values on many families at the same time"""
     store = context.obj["status_db"]
     cases = _get_cases(identifiers, store)
 
