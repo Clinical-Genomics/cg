@@ -17,8 +17,8 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 # revision identifiers, used by Alembic.
-revision = '432379a1adfa'
-down_revision = '6d74453565f2'
+revision = "432379a1adfa"
+down_revision = "6d74453565f2"
 branch_labels = None
 depends_on = None
 
@@ -33,8 +33,10 @@ class Family(Base):
     data_delivery = Column(types.Enum(*list(DataDelivery)))
 
     def __str__(self) -> str:
-        return f"{self.internal_id} ({self.name}) {self.data_analysis or 'None'}" \
-               f" {self.data_delivery}"
+        return (
+            f"{self.internal_id} ({self.name}) {self.data_analysis or 'None'}"
+            f" {self.data_delivery}"
+        )
 
 
 old_options = ("balsamic", "fastq", "fluffy", "microsalt", "mip-dna", "mip-rna")
@@ -49,8 +51,11 @@ def upgrade():
     session = orm.Session(bind=bind)
     op.alter_column("family", "data_analysis", type_=new_enum)
 
-    for family in session.query(Family).filter(Family.data_delivery == str(
-            DataDelivery.FASTQ)).filter(Family.data_analysis == ""):
+    for family in (
+        session.query(Family)
+        .filter(Family.data_delivery == str(DataDelivery.FASTQ))
+        .filter(Family.data_analysis == "")
+    ):
 
         print(f"Altering family: {str(family)}")
         family.data_analysis = str(Pipeline.SARS_COV_2)
