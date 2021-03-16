@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Added missing pipeline option in database for SARS-CoV-2 on case in database
+
 ## [20.9.6]
 ### Fixed
 - Use `coverage_qc_report` instead of `delivery_report` when uploading balsamic cases to scout
