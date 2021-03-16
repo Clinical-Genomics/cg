@@ -457,17 +457,17 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if run_analysis else []
+        benchmark = ["--benchmark"]
         options = self.__build_command_str(
             {
                 "--account": self.account,
-                "--benchmark": "HERE_BE_DRAGONS",
                 "--mail-user": self.email,
                 "--qos": priority or self.get_priority_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }
         )
-        parameters = command + options + run_analysis
+        parameters = command + options + run_analysis + benchmark
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(
