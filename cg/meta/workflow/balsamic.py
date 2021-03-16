@@ -30,7 +30,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config["balsamic"]["root"]
-        self.reference_config = config["balsamic"]["reference_config"]
         self.account = config["balsamic"]["slurm"]["account"]
         self.email = config["balsamic"]["slurm"]["mail_user"]
         self.qos = config["balsamic"]["slurm"]["qos"]
