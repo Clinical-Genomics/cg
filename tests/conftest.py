@@ -1177,7 +1177,6 @@ def context_config(
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
         "balsamic": {
             "root": balsamic_dir,
-            "reference_config": "reference.json",
             "binary_path": "echo",
             "conda_env": "S_BALSAMIC",
             "balsamic_cache": "hello",
