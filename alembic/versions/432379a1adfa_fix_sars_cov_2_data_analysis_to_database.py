@@ -50,6 +50,7 @@ def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
     op.alter_column("family", "data_analysis", type_=new_enum)
+    op.alter_column("analysis", "pipeline", type_=new_enum)
 
     for family in (
         session.query(Family)
@@ -66,3 +67,4 @@ def upgrade():
 
 def downgrade():
     op.alter_column("family", "data_analysis", type_=old_enum)
+    op.alter_column("analysis", "pipeline", type_=old_enum)
