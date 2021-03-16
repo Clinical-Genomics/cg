@@ -17,6 +17,10 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
+## [20.8.1]
+### Changed
+- Deletes unused files .gitlint, housekeeper, status, status_db
+
 ## [20.8.0]
 ### Added
 - Support for creating delivery reports for analyses that are not the latest ones
