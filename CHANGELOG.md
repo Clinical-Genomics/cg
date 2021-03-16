@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [20.9.7]
 ### Fixed
 - Added missing pipeline option in database for SARS-CoV-2 on case in database
 
