@@ -35,7 +35,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_delivery_report(self) -> None:
         LOG.info("Include coverage qc report to case")
-        print(self.case_tags.delivery_report)
         self.load_config.coverage_qc_report = self.fetch_file_from_hk(
             self.case_tags.delivery_report
         )
