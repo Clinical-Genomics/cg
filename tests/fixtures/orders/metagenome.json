@@ -18,6 +18,7 @@
             "concentration_sample": "2",
             "quantity": "10",
             "extraction_method": "best",
+            "volume": "1",
             "comment": "5 on the chart"
         },
         {
@@ -35,6 +36,7 @@
             "concentration_sample": "1",
             "quantity": "2",
             "extraction_method": "unknown",
+            "volume": "2",
             "comment": "test"
         }
     ]

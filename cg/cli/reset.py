@@ -1,6 +1,7 @@
 import logging
 
 import click
+
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)

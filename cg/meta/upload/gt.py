@@ -59,12 +59,12 @@ class UploadGenotypesAPI(object):
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
         qcmetrics_data = self.get_parsed_qc_metrics_data(qc_metrics_file)
-        data = {}
-        for sample_id in qcmetrics_data:
-            data[sample_id] = self.get_sample_predicted_sex(
+        return {
+            sample_id: self.get_sample_predicted_sex(
                 sample_id=sample_id, parsed_qcmetrics_data=qcmetrics_data
             )
-        return data
+            for sample_id in qcmetrics_data
+        }
 
     def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
         """Fetch a bcf file and return the file object"""

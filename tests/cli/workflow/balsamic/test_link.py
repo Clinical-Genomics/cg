@@ -21,13 +21,13 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    assert not balsamic_context["analysis_api"].status_db.family(case_id)
     # WHEN running
     result = cli_runner.invoke(link, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
-    assert case_id in caplog.text
+    assert "could not be found in StatusDB!" in caplog.text
 
 
 def test_without_samples(cli_runner, balsamic_context: dict, caplog):
@@ -41,7 +41,7 @@ def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no samples are found
     assert case_id in caplog.text
-    assert "0" in caplog.text
+    assert "no samples" in caplog.text
 
 
 def test_single_panel(balsamic_context: dict, cli_runner, caplog):

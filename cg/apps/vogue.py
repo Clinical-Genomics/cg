@@ -4,6 +4,7 @@
 
 import json
 import logging
+
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)

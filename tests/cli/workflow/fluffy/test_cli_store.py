@@ -39,7 +39,7 @@ def test_cli_store(
 ):
 
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -47,8 +47,8 @@ def test_cli_store(
     fluffy_analysis_api.set_statusdb_action(case_id=fluffy_case_id_existing, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_path")
-    FluffyAnalysisAPI.get_deliverables_path.return_value = deliverables_yaml_fixture_path
+    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
+    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_fixture_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
@@ -86,8 +86,8 @@ def test_cli_store_bundle_already_added(
     # GIVEN a case_id that does exist in database
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_path")
-    FluffyAnalysisAPI.get_deliverables_path.return_value = deliverables_yaml_fixture_path
+    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
+    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_fixture_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
@@ -121,7 +121,7 @@ def test_cli_store_available_case_is_running(
     mocker,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -129,8 +129,8 @@ def test_cli_store_available_case_is_running(
     fluffy_analysis_api.set_statusdb_action(case_id=fluffy_case_id_existing, action="running")
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_path")
-    FluffyAnalysisAPI.get_deliverables_path.return_value = deliverables_yaml_fixture_path
+    mocker.patch.object(FluffyAnalysisAPI, "get_analysis_finish_path")
+    FluffyAnalysisAPI.get_analysis_finish_path.return_value = deliverables_yaml_fixture_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")
@@ -169,7 +169,7 @@ def test_cli_store_available_case_not_running(
 ):
 
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["fluffy_analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -178,8 +178,8 @@ def test_cli_store_available_case_not_running(
     fluffy_analysis_api.status_db.commit()
 
     # GIVEN deliverables were generated and could be found
-    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_path")
-    FluffyAnalysisAPI.get_deliverables_path.return_value = deliverables_yaml_fixture_path
+    mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")
+    FluffyAnalysisAPI.get_deliverables_file_path.return_value = deliverables_yaml_fixture_path
 
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(FluffyAnalysisAPI, "get_date_from_file_path")

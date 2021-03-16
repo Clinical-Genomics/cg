@@ -2,9 +2,10 @@
 
 import openpyxl
 import pytest
-from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
+
+from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 
 
 def get_nr_samples_excel(orderform_path: str) -> int:

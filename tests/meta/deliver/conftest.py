@@ -3,11 +3,11 @@
 from pathlib import Path
 
 import pytest
+from tests.store_helpers import StoreHelpers
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="deliver_api")
