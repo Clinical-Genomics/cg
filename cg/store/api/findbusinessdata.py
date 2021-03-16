@@ -1,6 +1,6 @@
 """Handler to find business data objects"""
 import datetime as dt
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
@@ -38,6 +38,18 @@ class FindBusinessDataHandler(BaseHandler):
                 ),
             ).filter(models.Analysis.started_at < before)
         return records
+
+    def analyses_uploaded_to_vogue(self, after: Optional[dt.datetime] = None) -> Query:
+        """Fetch all analyses that have been uploaded to Vogue after a given date"""
+        records = self.Analysis.query
+        if after:
+            return records.filter(models.Analysis.uploaded_to_vogue_at > after)
+        return records.filter(models.Analysis.uploaded_to_vogue_at.isnot(None))
+
+    def analyses_not_uploaded_to_vogue(self) -> Query:
+        """Fetch all (recent) analyses that have been uploaded to Vogue"""
+        records = self.Analysis.query
+        return records.filter(models.Analysis.uploaded_to_vogue_at.is_(None))
 
     def latest_analyses(self) -> Query:
         """Fetch latest analysis for all cases."""
