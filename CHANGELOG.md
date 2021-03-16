@@ -13,6 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.9.7]
+### Fixed
+- Added missing pipeline option in database for SARS-CoV-2 on case in database
+
+## [20.9.6]
+### Fixed
+- Use `coverage_qc_report` instead of `delivery_report` when uploading balsamic cases to scout
+
 ## [20.9.5]
 ### Fixed
 - Balsamic crontab start-available auto-disables balsamic dry run

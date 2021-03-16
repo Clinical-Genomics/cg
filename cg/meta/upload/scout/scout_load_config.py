@@ -77,6 +77,7 @@ class ScoutLoadConfig(BaseModel):
     samples: List[ScoutIndividual] = []
 
     delivery_report: Optional[str] = None
+    coverage_qc_report: Optional[str] = None
     cnv_report: Optional[str] = None
     multiqc: Optional[str] = None
     track: Literal["rare", "cancer"] = "rare"

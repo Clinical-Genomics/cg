@@ -7,14 +7,6 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
-# Mocks
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.scout import MockScoutAPI
-from tests.store_helpers import StoreHelpers
-
 from cg.constants import Pipeline
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -22,6 +14,13 @@ from cg.meta.upload.scout.scout_load_config import MipLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
+
+# Mocks
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.scout import MockScoutAPI
+from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
 
@@ -141,7 +140,7 @@ def fixture_balsamic_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, balsamic_panel_analysis_dir: Path, sample_id: str
 ) -> dict:
     """Get some bundle data for housekeeper"""
-    data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
@@ -161,9 +160,13 @@ def fixture_balsamic_analysis_hk_bundle_data(
                 "archive": False,
                 "tags": ["cram", sample_id],
             },
+            {
+                "path": str(balsamic_panel_analysis_dir / "coverage_qc_report.pdf"),
+                "archive": False,
+                "tags": ["delivery-report"],
+            },
         ],
     }
-    return data
 
 
 @pytest.fixture(name="balsamic_analysis_hk_version")
