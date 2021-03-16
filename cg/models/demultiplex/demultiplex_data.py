@@ -40,7 +40,11 @@ class RunParameters:
         return self.get_node_integer_value(node_name)
 
     def base_mask(self) -> str:
-        """ create the bcl2fastq basemask for novaseq flowcells"""
+        """create the bcl2fastq basemask for novaseq flowcells
+
+        Basemask is used in this comma format as an argument to bcl2fastq.
+        When creating the unaligned path the commas are stripped
+        """
         return (
             f"Y{self.read_one_nr_cycles()},"
             f"I{self.index_read_one()},"

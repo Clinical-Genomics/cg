@@ -5,6 +5,7 @@ from typing import Iterable
 
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.models.demultiplex.demultiplex_data import DemultiplexData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch
 
@@ -26,6 +27,9 @@ When that file exists we start demultiplexing by sending a batch job with instru
 
 Before starting demux we will need understand what basemask to use. Basemask is a value derived from the runparameters 
 file. It has to do with the read length and the index length.
+
+Implement functionality for Novaseq and hiseq 2500, check for ApplicationName for hiseq or Application for novaseq 
+in runParameters.
 
 for RUN_DIR in ${IN_DIR}/*; do
     if [[ ! -d ${RUN_DIR} ]]; then # -d means directory exists
@@ -188,10 +192,9 @@ class DemultiplexingAPI:
         """Get the path to where sbatch file should be kept"""
         return directory / "demux-novaseq.sh"
 
-    def start_demultiplexing(
-        self, flowcell: Path, out_dir: Path, basemask: Path, sample_sheet: Path
-    ):
+    def start_demultiplexing(self, flowcell: Path, out_dir: Path):
         """Start demultiplexing for a flowcell"""
+        demultiplex_data: DemultiplexData = DemultiplexData(run=flowcell)
         log_path: Path = fetch_logfile_path(flowcell=flowcell, out_dir=out_dir, basemask=basemask)
         error_function: str = self.get_sbatch_error(
             flowcell=flowcell, log_path=log_path, email=self.DEMUX_MAIL
