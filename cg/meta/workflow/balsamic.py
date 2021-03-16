@@ -431,7 +431,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
-                "--reference-config": self.reference_config,
                 "--case-id": arguments.get("case_id"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
