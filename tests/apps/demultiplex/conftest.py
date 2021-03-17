@@ -21,6 +21,18 @@ def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "hiseq_run"
 
 
+@pytest.fixture(name="unknown_run_parameters")
+def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a file with hiseq run parameters"""
+    return demultiplex_fixtures / "unknown_run_parameters.xml"
+
+
+@pytest.fixture(name="run_parameters_missing_flowcell_type")
+def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a file with hiseq run parameters"""
+    return demultiplex_fixtures / "runParameters_missing_flowcell_run_field.xml"
+
+
 @pytest.fixture(name="hiseq_run_parameters")
 def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
     """Return the path to a file with hiseq run parameters"""

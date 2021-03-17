@@ -25,11 +25,15 @@ class RunParameters:
             node_name = ".Application"
             xml_node = self.tree.find(node_name)
         if xml_node is None:
-            raise SyntaxError("Could not determine flowcell type")
+            message = "Could not determine flowcell type"
+            LOG.warning(message)
+            raise SyntaxError(message)
         for flow_cell_name in ["novaseq", "hiseq"]:
             if flow_cell_name in xml_node.text.lower():
                 return flow_cell_name
-        raise SyntaxError("Unknown flowcell type %s".format(xml_node.text))
+        message = f"Unknown flowcell type {xml_node.text}"
+        LOG.warning(message)
+        raise SyntaxError(message)
 
         print(xml_node)
         try:
