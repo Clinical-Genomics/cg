@@ -109,7 +109,8 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.process.run_command(
             [
                 "analyse",
-                "sarscov2" "--config_case",
+                "sarscov2",
+                "--config_case",
                 self.get_case_config_path(case_id=case_id).as_posix(),
                 "--outdir",
                 self.get_case_output_path(case_id=case_id).as_posix(),
