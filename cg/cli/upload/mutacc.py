@@ -25,8 +25,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     # Get cases to upload into mutacc from scout
@@ -61,8 +60,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 def processed_solved(context):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- PROCESSED-SOLVED ----------------")

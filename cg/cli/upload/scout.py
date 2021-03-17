@@ -27,8 +27,7 @@ LOG = logging.getLogger(__name__)
 def scout(context, re_upload: bool, print_console: bool, case_id: str):
     """Upload variants from analysis to Scout."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
 
     LOG.info("----------------- SCOUT -----------------------")
 
@@ -51,9 +50,9 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 def create_scout_load_config(context, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
+
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
@@ -117,8 +116,7 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
 
     LOG.info("----------------- UPLOAD -----------------------")
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     tag_name = UploadScoutAPI.get_load_config_tag()

@@ -14,8 +14,7 @@ from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 def validate(context, family_id):
     """Validate a family of samples."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- VALIDATE --------------------"))

@@ -213,8 +213,7 @@ def delivery_report(
 @click.pass_context
 def delivery_report_to_scout(context, case_id: str, dry_run: bool):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     if not case_id:

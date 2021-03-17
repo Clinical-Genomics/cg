@@ -22,8 +22,7 @@ VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
 def vogue(context):
     """Load trending data into trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
 
     click.echo(click.style("----------------- TRENDING -----------------------"))
 
@@ -36,8 +35,7 @@ def vogue(context):
 def genotype(context, days: int):
     """Loading samples from the genotype database to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- GENOTYPE -----------------------"))
@@ -50,8 +48,7 @@ def genotype(context, days: int):
 def apptags(context):
     """Loading apptags from status db to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- APPLICATION TAGS -----------------------"))
@@ -67,8 +64,7 @@ def apptags(context):
 def flowcells(context, days: int):
     """Loading runs from lims to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- FLOWCELLS -----------------------")
@@ -84,8 +80,7 @@ def flowcells(context, days: int):
 def samples(context, days: int):
     """Loading samples from lims to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- SAMPLES -----------------------")
@@ -101,8 +96,7 @@ def samples(context, days: int):
 def reagent_labels(context, days: int):
     """Loading reagent_labels from lims to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- REAGENT LABELS -----------------------")
@@ -139,8 +133,7 @@ def reagent_labels(context, days: int):
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
@@ -199,8 +192,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
 def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
     analysis_api = context.obj["analysis_api"]
 
     cases = analysis_api.status_db.families()
