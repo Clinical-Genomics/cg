@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [x.x.x]
+### Changed
+- Only upload BALSAMIC results to Vogue
+
 ## [20.9.7]
 ### Fixed
 - Added missing pipeline option in database for SARS-CoV-2 on case in database
