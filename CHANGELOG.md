@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Fixed bug in upload delivery report automation
 
 ## [20.9.8]
 ### Fixed
