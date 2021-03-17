@@ -16,7 +16,7 @@ from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
+VOGUE_VALID_BIOINFO = [str(Pipeline.BALSAMIC)]
 
 
 @click.group()
