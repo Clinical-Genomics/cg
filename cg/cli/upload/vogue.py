@@ -6,13 +6,10 @@ from typing import Tuple, Any, Optional, List
 
 import click
 
-from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.vogue import VogueAPI
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
-from cg.meta.meta import MetaAPI
-from cg.meta.upload.vogue import UploadVogueAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -25,8 +22,8 @@ VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
 def vogue(context):
     """Load trending data into trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
     click.echo(click.style("----------------- TRENDING -----------------------"))
 
@@ -39,13 +36,13 @@ def vogue(context):
 def genotype(context, days: int):
     """Loading samples from the genotype database to the trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- GENOTYPE -----------------------"))
 
-    meta_api.upload_vogue_api.load_genotype(days=days)
+    analysis_api.upload_vogue_api.load_genotype(days=days)
 
 
 @vogue.command("apptags", short_help="Getting application tags to the trending database.")
@@ -53,13 +50,13 @@ def genotype(context, days: int):
 def apptags(context):
     """Loading apptags from status db to the trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- APPLICATION TAGS -----------------------"))
 
-    meta_api.upload_vogue_api.load_apptags()
+    analysis_api.upload_vogue_api.load_apptags()
 
 
 @vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
@@ -70,13 +67,13 @@ def apptags(context):
 def flowcells(context, days: int):
     """Loading runs from lims to the trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- FLOWCELLS -----------------------")
 
-    meta_api.vogue_api.load_flowcells(days=days)
+    analysis_api.vogue_api.load_flowcells(days=days)
 
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
@@ -87,13 +84,13 @@ def flowcells(context, days: int):
 def samples(context, days: int):
     """Loading samples from lims to the trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- SAMPLES -----------------------")
 
-    meta_api.vogue_api.load_samples(days=days)
+    analysis_api.vogue_api.load_samples(days=days)
 
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
@@ -104,13 +101,13 @@ def samples(context, days: int):
 def reagent_labels(context, days: int):
     """Loading reagent_labels from lims to the trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     LOG.info("----------------- REAGENT LABELS -----------------------")
 
-    meta_api.vogue_api.load_reagent_labels(days=days)
+    analysis_api.vogue_api.load_reagent_labels(days=days)
 
 
 @vogue.command("bioinfo", short_help="Load bioinfo results into vogue")
@@ -142,20 +139,20 @@ def reagent_labels(context, days: int):
 def bioinfo(context, case_name, cleanup, target_load, dry):
     """Load bioinfo case results to the trending database"""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
     load_bioinfo_raw_inputs = dict()
 
     # Probably get samples for a case_name through statusdb api
-    load_bioinfo_raw_inputs["samples"] = _get_samples(meta_api.status_db, case_name)
+    load_bioinfo_raw_inputs["samples"] = _get_samples(analysis_api.status_db, case_name)
 
     # Probably get analysis result file through housekeeper ai
     load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(
-        meta_api.housekeeper_api, case_name
+        analysis_api.housekeeper_api, case_name
     )
 
     # Probably get analysis_type [multiqc or microsalt or all] from cli
@@ -171,7 +168,9 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
     # Get workflow_name and workflow_version
-    workflow_name, workflow_version = _get_analysis_workflow_details(meta_api.status_db, case_name)
+    workflow_name, workflow_version = _get_analysis_workflow_details(
+        analysis_api.status_db, case_name
+    )
     if workflow_name not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
@@ -183,15 +182,15 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     if target_load in ("raw", "all"):
         click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
         if not dry:
-            meta_api.upload_vogue_api.load_bioinfo_raw(load_bioinfo_raw_inputs)
+            analysis_api.upload_vogue_api.load_bioinfo_raw(load_bioinfo_raw_inputs)
 
     if target_load in ("process", "all"):
         click.echo(click.style("----------------- PROCESS CASE -----------------------"))
         if not dry:
-            meta_api.upload_vogue_api.load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
+            analysis_api.upload_vogue_api.load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
         click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
         if not dry:
-            meta_api.upload_vogue_api.load_bioinfo_sample(load_bioinfo_raw_inputs)
+            analysis_api.upload_vogue_api.load_bioinfo_sample(load_bioinfo_raw_inputs)
 
 
 @vogue.command("bioinfo-all", short_help="Load all bioinfo results into vogue")
@@ -200,19 +199,19 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
 def bioinfo_all(context, dry):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
-    if not context.obj.get("meta_api"):
-        context.obj["meta_api"] = MetaAPI(context.obj)
-    meta_api = context.obj["meta_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
-    cases = meta_api.status_db.families()
+    cases = analysis_api.status_db.families()
     for case in cases:
         case_name = case.internal_id
-        version_obj = meta_api.housekeeper_api.last_version(case_name)
+        version_obj = analysis_api.housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
 
         # confirm multiqc.json exists
-        multiqc_file_obj = meta_api.housekeeper_api.get_files(
+        multiqc_file_obj = analysis_api.housekeeper_api.get_files(
             bundle=case_name, tags=["multiqc-json"], version=version_obj.id
         )
         if len(list(multiqc_file_obj)) == 0:
