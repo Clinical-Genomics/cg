@@ -73,9 +73,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             method_libprep=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="pre_processing_method"
             ),
-            method_sequencing=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="pre_processing_method"
-            ),
+            method_sequencing="novaseq",
             date_arrival=str(sample_obj.received_at),
             date_libprep=str(sample_obj.prepared_at),
             date_sequencing=str(sample_obj.sequenced_at),
