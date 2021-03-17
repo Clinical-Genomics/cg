@@ -8,7 +8,7 @@ class MutantSampleConfig(BaseModel):
     region_code: str = "01"
     lab_code: str = "SE100"
     priority: str = "normal"
-    customer_project_id: str = "AAA0000B1"  # Is this customers case name or ticket id?
+    customer_project_id: int  # Is this customers case name or ticket id?
     customer_sample_id: str = "MG-001"
     customer_id: str = "cust000"
     application_tag: str = "MWGNXTR003"
