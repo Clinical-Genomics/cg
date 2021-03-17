@@ -20,7 +20,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.SARS_COV_2,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config["mutant"]["root_dir"]
+        self.root_dir = config["mutant"]["root"]
 
     @property
     def process(self) -> Process:
