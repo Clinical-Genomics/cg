@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 from xml.etree import ElementTree
 
 LOG = logging.getLogger(__name__)
@@ -9,11 +9,34 @@ LOG = logging.getLogger(__name__)
 class RunParameters:
     """Class to handle the run parameters from a sequencing run"""
 
-    def __init__(self, run_parameters: Path, application_type: str = "nova_seek"):
+    def __init__(self, run_parameters: Path):
         self.run_parameters: Path = run_parameters
-        self.application_type: str = application_type
         with open(run_parameters, "rt") as in_file:
             self.tree: ElementTree = ElementTree.parse(in_file)
+        self.flowcell_type: str = self.get_flowcell_type()
+
+    def get_flowcell_type(self) -> Literal["novaseq", "hiseq"]:
+        """Fetch the flowcell type from the run parameters"""
+        # First try with the node name for hiseq
+        node_name = "./Setup/ApplicationName"
+        xml_node = self.tree.find(node_name)
+        if xml_node is None:
+            # Then try with node name for novaseq
+            node_name = ".Application"
+            xml_node = self.tree.find(node_name)
+        if xml_node is None:
+            raise SyntaxError("Could not determine flowcell type")
+        for flow_cell_name in ["novaseq", "hiseq"]:
+            if flow_cell_name in xml_node.text.lower():
+                return flow_cell_name
+        raise SyntaxError("Unknown flowcell type %s".format(xml_node.text))
+
+        print(xml_node)
+        try:
+            print(xml_node.text)
+        except AttributeError:
+            pass
+        return "novaseq"
 
     def get_node_integer_value(self, node_name: str) -> int:
         xml_node = self.tree.find(node_name)
