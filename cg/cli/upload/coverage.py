@@ -18,7 +18,8 @@ def coverage(context, re_upload, family_id):
 
     click.echo(click.style("----------------- COVERAGE --------------------"))
 
-    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
 
     if not family_id:

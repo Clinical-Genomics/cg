@@ -24,7 +24,8 @@ def observations(context, case_id, case_limit, dry_run):
 
     click.echo(click.style("----------------- OBSERVATIONS ----------------"))
 
-    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
 
     loqus_apis = {

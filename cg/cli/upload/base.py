@@ -40,7 +40,8 @@ LOG = logging.getLogger(__name__)
 def upload(context, family_id, force_restart):
     """Upload results from analyses."""
 
-    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
@@ -122,7 +123,8 @@ def upload(context, family_id, force_restart):
 def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
 
-    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- AUTO ------------------------"))

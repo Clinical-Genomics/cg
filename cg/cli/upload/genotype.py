@@ -19,7 +19,8 @@ LOG = logging.getLogger(__name__)
 def genotypes(context, re_upload, family_id):
     """Upload genotypes from an analysis to Genotype."""
 
-    context.obj["analysis_api"] = context.obj.get("analysis_api", MipDNAAnalysisAPI(context.obj))
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- GENOTYPES -------------------"))
