@@ -73,7 +73,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             method_libprep=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="pre_processing_method"
             ),
-            method_sequencing=self.status_db.flowcells(sample_obj.links[0].family)
+            method_sequencing=self.status_db.flowcells(family=sample_obj.links[0].family)
             .all()[0]
             .sequencer_type,
             date_arrival=str(sample_obj.received_at),
