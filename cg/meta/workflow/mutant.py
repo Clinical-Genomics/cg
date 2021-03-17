@@ -113,7 +113,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 self.get_case_config_path(case_id=case_id).as_posix(),
                 "--outdir",
                 self.get_case_output_path(case_id=case_id).as_posix(),
-                self.get_case_fastq_dir(case_id=case_id),
+                self.get_case_fastq_dir(case_id=case_id).as_posix(),
             ],
             dry_run=dry_run,
         )
