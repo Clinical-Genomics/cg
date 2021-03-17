@@ -2,22 +2,21 @@
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy.files import update_metadata_date
+from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date
 from cg.models import CompressionData
 
 
-def test_get_tmp_path_correct_place(crunchy_config_dict: dict, project_dir: Path):
+def test_get_tmp_path_correct_place(project_dir: Path):
     """Test to get the path to a temporary directory"""
     # GIVEN a crunchy API
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
     prefix = "spring_"
     suffix = "fastq_"
 
     # WHEN creating a tmpdir path
-    tmp_dir = crunchy_api._get_tmp_dir(prefix=prefix, suffix=suffix, base=str(project_dir))
+    tmp_dir = get_tmp_dir(prefix=prefix, suffix=suffix, base=str(project_dir))
 
     # THEN assert that the path is correct
     assert isinstance(tmp_dir, str)

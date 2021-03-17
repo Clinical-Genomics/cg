@@ -16,20 +16,10 @@ FWD_SLASH = "/"
 LOG = logging.getLogger(__name__)
 
 
-def match_date(date):
-    """Check if a string is a valid date
-
-    Args:
-        date(str)
-
-    Returns:
-        bool
-    """
+def match_date(date: str) -> bool:
+    """Check if a string is a valid date"""
     date_pattern = re.compile(r"^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])")
-    if re.match(date_pattern, date):
-        return True
-
-    return False
+    return bool(re.match(date_pattern, date))
 
 
 def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> datetime.datetime:
@@ -78,4 +68,4 @@ def get_date_str(date_time_obj: datetime.datetime = None, date_format: str = Non
         date_format = SIMPLE_DATE_FORMAT
     if date_time_obj is None:
         date_time_obj = datetime.datetime.now()
-    return date_time_obj.strftime(SIMPLE_DATE_FORMAT)
+    return date_time_obj.strftime(date_format)

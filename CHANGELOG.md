@@ -17,6 +17,38 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
+## [20.9.7]
+### Fixed
+- Added missing pipeline option in database for SARS-CoV-2 on case in database
+
+## [20.9.6]
+### Fixed
+- Use `coverage_qc_report` instead of `delivery_report` when uploading balsamic cases to scout
+
+## [20.9.5]
+### Fixed
+- Balsamic crontab start-available auto-disables balsamic dry run
+
+## [20.9.4]
+### Fixed
+- Fix bug that pending path was not created 
+
+## [20.9.3]
+### Fixed
+- Bug in automation of delivery report upload
+
+## [20.9.2]
+### Fixed
+- Bug when updating crunchy metadata files
+
+## [20.9.1]
+### Fixed
+- Bug preventing MicroSALT to start automatically
+
+## [20.9.0]
+### Added
+- SlurmAPI to handle all communication with slurm from cg
+
 ## [20.8.1]
 ### Changed
 - Deletes unused files .gitlint, housekeeper, status, status_db
@@ -195,17 +227,14 @@ Try to use the following format:
 - Upgraded insecure cryptography dependency 
 
 ## [18.11.2]
-
 ### Fixed
 - Chromograph image tags back on track
 
 ## [18.12.1]
-
 ### Fixed
 - Fix message in order ticket that says what type of project it is
 
 ## [18.11.1]
-
 ### Fixed
  - Fix so that variants gets uploaded to scout for balsamic samples
  - Fix so that upload breaks if balsamic case is WGS
@@ -214,13 +243,11 @@ Try to use the following format:
 - New Fluffy workflow for preparing, starting and storing of analyses
 
 ## [18.10.2]
-
 ### Fixed
 - FLUFFY now have a validation schema and can be submitted in the Order Portal again
 - Samples of pools are now marked not to be invoiced, only the pool is invoiced
 
 ## [18.10.1]
-
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
 
