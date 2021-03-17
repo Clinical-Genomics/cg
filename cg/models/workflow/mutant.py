@@ -18,5 +18,5 @@ class MutantSampleConfig(BaseModel):
     method_libprep: str = "1764:2"
     method_sequencing: str = "1036:15"
     cg_qc_pass: bool = True
-    selection_criteria: str = ""
+    selection_criteria: str = "zombie"
     # please add more fields which wrapper of the  custs might want

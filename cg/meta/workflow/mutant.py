@@ -70,12 +70,27 @@ class MutantAnalysisAPI(AnalysisAPI):
             cg_project_id=sample_obj.links[0].family.internal_id,
             customer_project_id=sample_obj.links[0].family.name,
             application_tag=sample_obj.application_version,
-            method_libprep="",
-            method_sequencing="",
-            date_arrival="",
-            date_libprep="",
-            date_sequencing="",
-            selection_criteria="",
+            method_libprep=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="pre_processing_method"
+            ),
+            method_sequencing=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="pre_processing_method"
+            ),
+            date_arrival=str(sample_obj.received_at),
+            date_libprep=str(sample_obj.prepared_at),
+            date_sequencing=str(sample_obj.sequenced_at),
+            selection_criteria=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="selection_criteria"
+            ),
+            priority=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="priority"
+            ),
+            region_code=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="region_code"
+            ),
+            lab_code=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="lab_code"
+            ),
         )
 
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
@@ -94,6 +109,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def run_analysis(self, case_id: str, dry_run: bool) -> None:
         self.process.run_command(
             [
+                "analyse",
                 "--config_case",
                 self.get_case_config_path(case_id=case_id).as_posix(),
                 "--outdir",
