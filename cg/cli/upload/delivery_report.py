@@ -5,8 +5,6 @@ from pathlib import Path
 
 import click
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.exc import CgError, DeliveryReportError
 from cg.meta.report.api import ReportAPI
@@ -32,8 +30,12 @@ FAIL = 1
 def delivery_reports(context, print_console, force_report):
     """Generate delivery reports for all cases that need one"""
 
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     click.echo(click.style("----------------- DELIVERY REPORTS ------------------------"))
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+
     exit_code = SUCCESS
     for analysis_obj in analysis_api.status_db.analyses_to_delivery_report(
         pipeline=Pipeline.MIP_DNA
@@ -211,7 +213,9 @@ def delivery_report(
 @click.pass_context
 def delivery_report_to_scout(context, case_id: str, dry_run: bool):
     """Fetches an delivery-report from housekeeper and uploads it to scout"""
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     if not case_id:
         suggest_cases_delivery_report(context, pipeline=Pipeline.MIP_DNA)

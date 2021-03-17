@@ -24,7 +24,6 @@ from .import_cmd import import_cmd
 from .reset import reset_cmd
 from .status import status
 from .transfer import transfer
-from .upload import vogue as vogue_command
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
 
@@ -93,5 +92,3 @@ base.add_command(workflow_cmd)
 base.add_command(store_cmd)
 base.add_command(deploy_cmd)
 base.add_command(deliver_cmd)
-
-upload.add_command(vogue_command)

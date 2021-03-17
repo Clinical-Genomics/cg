@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.9.8]
+### Fixed
+- Fixed context in upload vogue
+
 ## [20.9.7]
 ### Fixed
 - Added missing pipeline option in database for SARS-CoV-2 on case in database
