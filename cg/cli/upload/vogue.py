@@ -155,7 +155,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     workflow_name, workflow_version = _get_analysis_workflow_details(store, case_name)
     if workflow_name is None:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: non-existing workflow name.")
-    elif workflow_name.lower() not in VOGUE_VALID_BIOINFO:
+    if workflow_name.lower() not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name.lower()
     load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
