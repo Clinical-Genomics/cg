@@ -102,7 +102,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         if dry_run:
             LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
             LOG.info(case_config_list)
-        json.dump(case_config_list, open(config_path, "w"))
+        json.dump(case_config_list, open(config_path, "w"), indent=4)
         LOG.info("Saved config to %s", config_path)
 
     def run_analysis(self, case_id: str, dry_run: bool) -> None:
