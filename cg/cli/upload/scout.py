@@ -7,11 +7,9 @@ from typing import Optional
 import click
 from ruamel.yaml import YAML
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.scout.scoutapi import ScoutAPI
+
 from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
-from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
 
@@ -28,6 +26,9 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def scout(context, re_upload: bool, print_console: bool, case_id: str):
     """Upload variants from analysis to Scout."""
+
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
     LOG.info("----------------- SCOUT -----------------------")
 
@@ -50,9 +51,13 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 def create_scout_load_config(context, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
 
-    LOG.info("----------------- CREATE CONFIG -----------------------")
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
     scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
+
+    LOG.info("----------------- CREATE CONFIG -----------------------")
+
     LOG.info("Fetching family object")
     case_obj: Family = analysis_api.status_db.family(case_id)
     LOG.info("Create load config")
@@ -112,7 +117,9 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
 
     LOG.info("----------------- UPLOAD -----------------------")
 
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     tag_name = UploadScoutAPI.get_load_config_tag()
     version_obj = analysis_api.housekeeper_api.last_version(case_id)
