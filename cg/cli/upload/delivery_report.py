@@ -197,7 +197,7 @@ def delivery_report(
 
     context.invoke(delivery_report_to_scout, case_id=case_id)
     report_api.update_delivery_report_date(
-        analysis_api.status_db, case_id, analysis_date=analysis_started_at
+        status_api=analysis_api.status_db, case_id=case_id, analysis_date=analysis_started_at
     )
 
 
