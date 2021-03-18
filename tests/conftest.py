@@ -1116,7 +1116,11 @@ def microsalt_dir(tmpdir_factory):
 @pytest.fixture(name="fixture_cg_url")
 def fixture_cg_url(database_copy_path):
     new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
-    return f"sqlite:///{new_path}"
+    url = f"sqlite:///{new_path}"
+    store = Store(url)
+    store.drop_all()
+    store.create_all()
+    return url
 
 
 @pytest.fixture(name="fixture_hk_url")
