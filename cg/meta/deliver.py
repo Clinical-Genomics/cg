@@ -87,11 +87,11 @@ class DeliverAPI:
 
         link_obj: FamilySample
         for link_obj in link_objs:
+            sample_id: str = link_obj.sample.internal_id
+            sample_name: str = link_obj.sample.name
             if self.fastq_delivery:
                 LOG.debug("Fetch last version for sample bundle %s", sample_id)
                 last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
-            sample_id: str = link_obj.sample.internal_id
-            sample_name: str = link_obj.sample.name
             self.deliver_sample_files(
                 case_id=case_id,
                 case_name=case_name,
