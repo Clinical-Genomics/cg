@@ -17,6 +17,14 @@ Try to use the following format:
 ### Fixed
 - Move synopsis and cohorts from sample to case in the database since that is how they are used 
 
+## [20.9.9]
+### Fixed
+- Fixed bug in upload delivery report automation
+
+## [20.9.8]
+### Fixed
+- Fixed context in upload vogue
+
 ## [20.9.7]
 ### Fixed
 - Added missing pipeline option in database for SARS-CoV-2 on case in database
@@ -144,11 +152,14 @@ Try to use the following format:
 - Removed old unused scripts and scripts directory
 - Moved crunchy query from store into CompressAPI
 
+
 ## [20.0.0]
+
 ### Changed
 - cg workflow mip-rna link command to take case as positional arg
 
 ## [19.5.4]
+
 ### Changed
 - Refactor ticket handling from orders API
 
@@ -199,14 +210,21 @@ Try to use the following format:
 - Cases that decompression is started for will have the action set to "analyze"
 
 ## [19.1.1]
+
 ### Fixed
 - Allow price update files for application-version import to have empty prices 
+
+
+## [19.1.1]
+### Added
+- Cases that decompression is started for will have the action set to "analyze"
 
 ## [19.1.0]
 ### Added
 - Cli command to deliver old balsamic analyses which were stored with old hk tags
 
 ## [19.0.0]
+
 ### Added
 - Adds command to start decompression for spring compressed files if needed
 ### Changed
@@ -215,26 +233,32 @@ Try to use the following format:
 - Checking if flowcells are on disk moved to its own cli command
 
 ## [18.12.0]
+
 ### Added
 - Add prep-category 'cov' for applications
 
 ## [18.11.4]
+
 ### Fixed
 - Install package in gihub-jobs via pip==21.0.1
 
 ## [18.11.3]
+
 ### Fixed
 - Upgraded insecure cryptography dependency 
 
 ## [18.11.2]
+
 ### Fixed
 - Chromograph image tags back on track
 
 ## [18.12.1]
+
 ### Fixed
 - Fix message in order ticket that says what type of project it is
 
 ## [18.11.1]
+
 ### Fixed
  - Fix so that variants gets uploaded to scout for balsamic samples
  - Fix so that upload breaks if balsamic case is WGS
@@ -243,11 +267,13 @@ Try to use the following format:
 - New Fluffy workflow for preparing, starting and storing of analyses
 
 ## [18.10.2]
+
 ### Fixed
 - FLUFFY now have a validation schema and can be submitted in the Order Portal again
 - Samples of pools are now marked not to be invoiced, only the pool is invoiced
 
 ## [18.10.1]
+
 ### Added
 - Allow existing trio-samples to be re-run as single samples 
 
