@@ -128,12 +128,16 @@ def test_families_to_status(mip_order_to_submit):
     assert family["data_analysis"] == str(Pipeline.MIP_DNA)
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == "standard"
+    assert family["cohorts"] == {"Other"}
+    assert family["synopsis"] == {"Här kommer det att komma en väldigt lång text med för synopsis."}
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
 
     first_sample = family["samples"][0]
+    assert first_sample["age_at_sampling"] == "17.18192"
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGTPCFC030"
+    assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
     assert first_sample["mother"] == "sample2"
@@ -391,6 +395,11 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     new_link = new_case.links[0]
     assert new_case.data_analysis == str(Pipeline.MIP_DNA)
     assert new_case.data_delivery == str(DataDelivery.SCOUT)
+    assert set(new_case.cohorts) == {"Other"}
+    assert set(new_case.synopsis) == {
+        "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
+    }
+
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
@@ -400,10 +409,6 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
 
-    assert set(new_link.sample.cohorts) == {"Other"}
-    assert set(new_link.sample.synopsis) == {
-        "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
-    }
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
 
     assert new_link.sample.age_at_sampling == 17.18192

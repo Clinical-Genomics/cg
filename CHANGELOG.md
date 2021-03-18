@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Move synopsis and cohorts from sample to case in the database since that is how they are used 
+
 ## [20.9.9]
 ### Fixed
 - Fixed bug in upload delivery report automation
@@ -53,13 +57,13 @@ Try to use the following format:
 ### Added
 - SlurmAPI to handle all communication with slurm from cg
 
-## [20.8.0]
-### Added
-- Support for creating delivery reports for analyses that are not the latest ones
-
 ## [20.8.1]
 ### Changed
 - Deletes unused files .gitlint, housekeeper, status, status_db
+
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
 
 ## [20.7.0]
 ### Added
