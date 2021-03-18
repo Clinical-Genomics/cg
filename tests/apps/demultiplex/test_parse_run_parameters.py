@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import pytest
-from cg.models.demultiplex.demultiplex_data import RunParameters
+from cg.models.demultiplex.run_parameters import RunParameters
 
 
 def test_get_flowcell_type_hiseq_run_parameters(hiseq_run_parameters: Path):

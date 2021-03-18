@@ -6,15 +6,14 @@ from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 from pydantic import BaseModel
 
-SAMPLE_REF = "hg19"
-
 
 class LimsFlowcellSample(BaseModel):
     flowcell_id: str
     lane: int
     sample_id: str
-    sample_ref: str
+    sample_ref: str = "hg19"
     index: str
+    index2: str = ""
     description: str = ""
     sample_name: str
     control: str = "N"
@@ -89,7 +88,6 @@ def sample_sheet(lims: Lims, flowcell: str) -> Iterable[LimsFlowcellSample]:
                 flowcell_id=flowcell,
                 lane=lane,
                 sample_id=sample.id,
-                sample_ref=SAMPLE_REF,
                 index=index,
                 sample_name=sample.project.name,
                 project=sample.project.name,
