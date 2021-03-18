@@ -87,6 +87,9 @@ class DeliverAPI:
 
         link_obj: FamilySample
         for link_obj in link_objs:
+            if self.fastq_delivery:
+                LOG.debug("Fetch last version for sample bundle %s", sample_id)
+                last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
             sample_id: str = link_obj.sample.internal_id
             sample_name: str = link_obj.sample.name
             self.deliver_sample_files(
@@ -136,6 +139,8 @@ class DeliverAPI:
     ) -> None:
         """Deliver files on sample level"""
         # Make sure that the directory exists
+        if not self.case_tags:
+            case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
             case_name=case_name, sample_name=sample_name
         )
@@ -245,14 +250,14 @@ class DeliverAPI:
         """Set the ticket_id for this upload"""
         self._set_ticket_id(sample_obj.ticket_number)
 
-    def create_delivery_dir_path(self, case_name: str, sample_name: str = None) -> Path:
+    def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
         """Create a path for delivering files
 
         Note that case name and sample name needs to be the identifiers sent from customer
         """
-        delivery_path = (
-            self.project_base_path / self.customer_id / "inbox" / self.ticket_id / case_name
-        )
+        delivery_path = self.project_base_path / self.customer_id / "inbox" / self.ticket_id
+        if case_name:
+            delivery_path = delivery_path / case_name
         if sample_name:
             delivery_path = delivery_path / sample_name
 
