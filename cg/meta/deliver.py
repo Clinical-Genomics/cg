@@ -24,6 +24,7 @@ class DeliverAPI:
         case_tags: List[Set[str]],
         sample_tags: List[Set[str]],
         project_base_path: Path,
+        fastq_delivery: bool = False,
     ):
         """Initialize a delivery api
 
@@ -43,6 +44,7 @@ class DeliverAPI:
         self.customer_id: str = ""
         self.ticket_id: str = ""
         self.dry_run = False
+        self.fastq_delivery: bool = fastq_delivery
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run"""
@@ -211,6 +213,8 @@ class DeliverAPI:
 
         At least one tag should match between file and tags.
         Only include files with sample tag.
+
+        For fastq delivery we know that we want to deliver all files of bundle
         """
         tag: hk_models.Tag
         file_tags = set([tag.name for tag in file_obj.tags])
@@ -218,7 +222,8 @@ class DeliverAPI:
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
-            working_copy.add(sample_id)
+            if self.fastq_delivery is False:
+                working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True
 
