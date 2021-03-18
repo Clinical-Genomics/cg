@@ -153,9 +153,10 @@ class DeliverAPI:
             self.get_sample_files_from_version(version_obj=version_obj, sample_id=sample_id), 1
         ):
             # Out path should include customer names
-            out_path: Path = delivery_base / file_path.name.replace(case_id, case_name).replace(
-                sample_id, sample_name
-            )
+            file_name: str = file_path.name.replace(sample_id, sample_name)
+            if case_name:
+                file_name: str = file_name.replace(case_id, case_name)
+            out_path: Path = delivery_base / file_name
             if self.dry_run:
                 LOG.info("Would hard link file %s to %s", file_path, out_path)
                 continue
