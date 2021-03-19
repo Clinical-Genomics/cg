@@ -13,6 +13,18 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.9.10]
+### Fixed
+- Move synopsis and cohorts from sample to case in the database since that is how they are used 
+
+## [20.9.9]
+### Fixed
+- Fixed bug in upload delivery report automation
+
+## [20.9.8]
+### Fixed
+- Fixed context in upload vogue
+
 ## [20.9.7]
 ### Fixed
 - Added missing pipeline option in database for SARS-CoV-2 on case in database
@@ -45,13 +57,13 @@ Try to use the following format:
 ### Added
 - SlurmAPI to handle all communication with slurm from cg
 
-## [20.8.0]
-### Added
-- Support for creating delivery reports for analyses that are not the latest ones
-
 ## [20.8.1]
 ### Changed
 - Deletes unused files .gitlint, housekeeper, status, status_db
+
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
 
 ## [20.7.0]
 ### Added

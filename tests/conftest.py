@@ -357,6 +357,12 @@ def rml_orderform(orderforms: Path) -> str:
     return Path(orderforms / "1604.10.rml.xlsx").as_posix()
 
 
+@pytest.fixture
+def mip_json_orderform() -> dict:
+    """Load an example json scout order."""
+    return json.load(open("tests/fixtures/orderforms/mip-json.json"))
+
+
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
     """File with madeline output"""
@@ -368,12 +374,6 @@ def fixture_madeline_output(apps_dir: Path) -> str:
 def mip_order_to_submit() -> dict:
     """Load an example scout order."""
     return json.load(open("tests/fixtures/orders/mip.json"))
-
-
-@pytest.fixture
-def mip_json_order_to_submit() -> dict:
-    """Load an example json scout order."""
-    return json.load(open("tests/fixtures/orders/mip-json.json"))
 
 
 @pytest.fixture
@@ -1116,7 +1116,11 @@ def microsalt_dir(tmpdir_factory):
 @pytest.fixture(name="fixture_cg_url")
 def fixture_cg_url(database_copy_path):
     new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
-    return f"sqlite:///{new_path}"
+    url = f"sqlite:///{new_path}"
+    store = Store(url)
+    store.drop_all()
+    store.create_all()
+    return url
 
 
 @pytest.fixture(name="fixture_hk_url")
