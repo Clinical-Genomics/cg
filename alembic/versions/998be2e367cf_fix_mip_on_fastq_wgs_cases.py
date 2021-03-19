@@ -19,7 +19,7 @@ Base = declarative_base()
 
 # revision identifiers, used by Alembic.
 revision = "998be2e367cf"
-down_revision = "6d74453565f2"
+down_revision = "fab30255b84f"
 branch_labels = None
 depends_on = None
 
