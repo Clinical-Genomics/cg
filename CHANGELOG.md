@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [20.9.11]
 ### Fixed
 - Fix bug that that prevented wgs fastq samples from being genotyped
 
