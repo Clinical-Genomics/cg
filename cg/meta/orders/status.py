@@ -372,7 +372,7 @@ class StatusHandler:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                data_analysis = self.if_type_is_wgs_then_we_should_do_mip_dna_analysis_for_maf(
+                data_analysis: Pipeline = self.if_type_wgs_do_mip_dna_analysis_for_maf(
                     application_version
                 )
                 new_case = self.status.add_case(
@@ -395,7 +395,9 @@ class StatusHandler:
         return new_samples
 
     @staticmethod
-    def if_type_is_wgs_then_we_should_do_mip_dna_analysis_for_maf(application_version):
+    def if_type_wgs_do_mip_dna_analysis_for_maf(
+        application_version: models.ApplicationVersion,
+    ) -> Pipeline:
         return (
             Pipeline.MIP_DNA
             if application_version.application.prep_category == "wgs"
