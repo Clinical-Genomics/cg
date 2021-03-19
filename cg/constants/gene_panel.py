@@ -1,5 +1,8 @@
 """Gene panel specific constants"""
 
+GENOME_BUILD_37 = "37"
+GENOME_BUILD_38 = "38"
+
 MASTER_LIST = (
     "BRAIN",
     "Cardiology",

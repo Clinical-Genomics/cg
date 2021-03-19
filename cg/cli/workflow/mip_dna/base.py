@@ -17,6 +17,7 @@ from cg.cli.workflow.mip.options import (
 )
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
@@ -81,7 +82,7 @@ def start(
         context.invoke(ensure_flowcells_ondisk, case_id=case_id)
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id)
-        context.invoke(panel, case_id=case_id, dry_run=dry_run)
+        context.invoke(panel, case_id=case_id, dry_run=dry_run, genome_build=GENOME_BUILD_37)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
         context.invoke(
             run,

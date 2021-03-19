@@ -127,11 +127,11 @@ class MipAnalysisAPI(AnalysisAPI):
                 sample_obj=link.sample,
             )
 
-    def panel(self, case_id: str) -> List[str]:
-        """Create the aggregated panel file."""
+    def panel(self, case_id: str, genome_build: str = None) -> List[str]:
+        """Create the aggregated gene panel file"""
         case_obj: models.Family = self.status_db.family(case_id)
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
-        return self.scout_api.export_panels(all_panels)
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
 
     def write_panel(self, case_id: str, content: List[str]):
         """Write the gene panel to case dir"""

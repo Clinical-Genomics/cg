@@ -1,11 +1,11 @@
-""" Add CLI support to start MIP rare disease RNA"""
+"""Commands to start MIP rare disease RNA workflow"""
 
 import logging
 
 import click
 
 from cg.cli.workflow.commands import link, resolve_compression
-from cg.cli.workflow.mip.base import config_case, run
+from cg.cli.workflow.mip.base import config_case, panel, run
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
@@ -17,6 +17,7 @@ from cg.cli.workflow.mip.options import (
 )
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.gene_panel import GENOME_BUILD_38
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 
@@ -37,6 +38,7 @@ def mip_rna(context: click.Context):
 
 mip_rna.add_command(config_case)
 mip_rna.add_command(link)
+mip_rna.add_command(panel)
 mip_rna.add_command(resolve_compression)
 mip_rna.add_command(run)
 mip_rna.add_command(store_cmd)
@@ -76,6 +78,7 @@ def start(
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id)
+        context.invoke(panel, case_id=case_id, dry_run=dry_run, genome_build=GENOME_BUILD_38)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
         context.invoke(
             run,

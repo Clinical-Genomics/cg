@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path
+
 from typing import List
 
 import click
@@ -46,13 +46,13 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_context
-def panel(context: click.Context, case_id: str, dry_run: bool):
-    """Write aggregated gene panel file"""
+def panel(context: click.Context, case_id: str, dry_run: bool, genome_build: str = None):
+    """Write aggregated gene panel file exported from Scout"""
 
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
-    bed_lines: List[str] = analysis_api.panel(case_id=case_id)
+    bed_lines: List[str] = analysis_api.panel(case_id=case_id, genome_build=genome_build)
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)
