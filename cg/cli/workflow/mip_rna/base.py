@@ -12,6 +12,8 @@ from cg.cli.workflow.mip.options import (
     OPTION_DRY,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
+    OPTION_PANEL_GENOME_BUILD,
+    OPTION_SKIP_EVALUATION,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
 )
@@ -45,18 +47,15 @@ mip_rna.add_command(store_cmd)
 
 
 @mip_rna.command()
-@PRIORITY_OPTION
-@EMAIL_OPTION
-@START_WITH_PROGRAM
-@OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
+@EMAIL_OPTION
 @OPTION_DRY
 @OPTION_MIP_DRY_RUN
-@click.option(
-    "--skip-evaluation",
-    is_flag=True,
-    help="Skip mip qccollect evaluation",
-)
+@OPTION_PANEL_BED
+@OPTION_PANEL_GENOME_BUILD
+@OPTION_SKIP_EVALUATION
+@PRIORITY_OPTION
+@START_WITH_PROGRAM
 @click.pass_context
 def start(
     context: click.Context,
@@ -64,10 +63,11 @@ def start(
     dry_run: bool,
     email: str,
     mip_dry_run: bool,
+    panel_bed: str,
     priority: str,
     skip_evaluation: bool,
     start_with: str,
-    panel_bed: str,
+    panel_genome_build: str = GENOME_BUILD_38,
 ):
     """Start full MIP-RNA analysis workflow for a case"""
 
@@ -78,7 +78,9 @@ def start(
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id)
-        context.invoke(panel, case_id=case_id, dry_run=dry_run, genome_build=GENOME_BUILD_38)
+        context.invoke(
+            panel, case_id=case_id, dry_run=dry_run, panel_genome_build=panel_genome_build
+        )
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
         context.invoke(
             run,

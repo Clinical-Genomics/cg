@@ -9,7 +9,10 @@ from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
     OPTION_DRY,
+    OPTION_PANEL_GENOME_BUILD,
+    OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
+    OPTION_SKIP_EVALUATION,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
 )
@@ -44,15 +47,16 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 
 @click.command()
 @OPTION_DRY
+@OPTION_PANEL_GENOME_BUILD
 @ARGUMENT_CASE_ID
 @click.pass_context
-def panel(context: click.Context, case_id: str, dry_run: bool, genome_build: str = None):
+def panel(context: click.Context, case_id: str, dry_run: bool, panel_genome_build: str = None):
     """Write aggregated gene panel file exported from Scout"""
 
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
-    bed_lines: List[str] = analysis_api.panel(case_id=case_id, genome_build=genome_build)
+    bed_lines: List[str] = analysis_api.panel(case_id=case_id, genome_build=panel_genome_build)
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)
@@ -66,12 +70,8 @@ def panel(context: click.Context, case_id: str, dry_run: bool, genome_build: str
 @START_WITH_PROGRAM
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.option("--mip-dry-run", is_flag=True, help="Run MIP in dry-run mode")
-@click.option(
-    "--skip-evaluation",
-    is_flag=True,
-    help="Skip mip qccollect evaluation",
-)
+@OPTION_MIP_DRY_RUN
+@OPTION_SKIP_EVALUATION
 @click.pass_context
 def run(
     context: click.Context,

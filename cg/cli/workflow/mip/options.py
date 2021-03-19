@@ -23,5 +23,16 @@ OPTION_PANEL_BED = click.option(
     type=str,
     help="Set this option to override fetching of panel name from LIMS",
 )
+OPTION_PANEL_GENOME_BUILD = click.option(
+    "--panel-genome-build",
+    type=str,
+    help="Set genome build for gene panel export from Scout",
+)
+OPTION_SKIP_EVALUATION = click.option(
+    "--skip-evaluation",
+    "skip_evaluation",
+    is_flag=True,
+    help="Skip mip qccollect evaluation",
+)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
