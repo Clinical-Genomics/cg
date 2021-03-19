@@ -25,6 +25,7 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample["udfs"]["require_qcok"] is True
     assert first_sample["udfs"]["customer"] == "cust003"
     assert isinstance(samples[1]["udfs"]["comment"], str)
+    assert first_sample["udfs"]["volume"] == "1"
 
 
 def test_to_lims_external(external_order_to_submit):
@@ -48,6 +49,7 @@ def test_to_lims_fastq(fastq_order_to_submit):
     # ... and pick out relevant UDF values
     assert samples[0]["udfs"]["tumour"] is False
     assert samples[1]["udfs"]["tumour"] is True
+    assert samples[0]["udfs"]["volume"] == "1"
 
 
 def test_to_lims_rml(rml_order_to_submit):
@@ -56,7 +58,7 @@ def test_to_lims_rml(rml_order_to_submit):
     # WHEN parsing for LIMS
     samples = LimsHandler.to_lims(customer="dummyCust", samples=rml_order_to_submit["samples"])
 
-    # THEN it should "work"
+    # THEN it should have found the same number of samples
     assert len(samples) == 4
     # ... and pick out relevant UDFs
     first_sample = samples[0]
@@ -69,9 +71,11 @@ def test_to_lims_rml(rml_order_to_submit):
 
 def test_to_lims_microbial(microbial_order_to_submit):
     # GIVEN a microbial order for three samples
+
     # WHEN parsing for LIMS
     samples = LimsHandler.to_lims(customer="cust000", samples=microbial_order_to_submit["samples"])
-    # THEN it should "work"
+
+    # THEN it should have found the same number of samples
     assert len(samples) == 5
     # ... and pick out relevant UDFs
     first_sample = samples[0]
@@ -82,6 +86,28 @@ def test_to_lims_microbial(microbial_order_to_submit):
         first_sample["udfs"]["extraction_method"] == "MagNaPure 96 (contact Clinical Genomics "
         "before submission)"
     )
+    assert first_sample["udfs"]["volume"] == "1"
+
+
+def test_to_lims_sarscov2(sarscov2_order_to_submit):
+    # GIVEN a sarscov2 order for samples
+
+    # WHEN parsing for LIMS
+    samples = LimsHandler.to_lims(customer="cust000", samples=sarscov2_order_to_submit["samples"])
+
+    # THEN it should have found the same number of samples
+    assert len(samples) == 5
+    # ... and pick out relevant UDFs
+    first_sample = samples[0]
+    assert first_sample["udfs"]["priority"] == "research"
+    assert first_sample["udfs"]["organism"] == "SARS CoV-2"
+    assert first_sample["udfs"]["reference_genome"] == "NC_111"
+    assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
+    assert first_sample["udfs"]["volume"] == "1"
+    assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
+    assert first_sample["udfs"]["region_code"] == "01 Region Stockholm"
+    assert first_sample["udfs"]["lab_code"] == "SE110 Växjö"
+    assert first_sample["udfs"]["selection_criteria"] == "1. Allmän övervakning"
 
 
 def test_to_lims_balsamic(balsamic_order_to_submit):
@@ -109,6 +135,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["udfs"]["customer"] == "cust000"
     assert first_sample["udfs"]["require_qcok"] is False
     assert first_sample["udfs"]["source"] == "blood"
+    assert first_sample["udfs"]["volume"] == "1"
     assert first_sample["udfs"]["priority"] == "standard"
 
     assert container_names == set(["p1"])

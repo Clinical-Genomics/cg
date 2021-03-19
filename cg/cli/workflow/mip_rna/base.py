@@ -1,152 +1,113 @@
 """ Add CLI support to start MIP rare disease RNA"""
 
 import logging
-from typing import List
 
 import click
 
-from cg.apps.environ import environ_email
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.tb import TrailblazerAPI
+from cg.cli.workflow.commands import link, resolve_compression
+from cg.cli.workflow.mip.base import config_case, run
+from cg.cli.workflow.mip.options import (
+    ARGUMENT_CASE_ID,
+    EMAIL_OPTION,
+    OPTION_DRY,
+    OPTION_MIP_DRY_RUN,
+    OPTION_PANEL_BED,
+    PRIORITY_OPTION,
+    START_WITH_PROGRAM,
+)
 from cg.cli.workflow.mip.store import store as store_cmd
-from cg.constants import Pipeline
-from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.store import Store, models
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
-
-ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
 
 
 @click.group("mip-rna")
 @click.pass_context
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
-    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
-    context.obj["trailblazer_api"] = TrailblazerAPI(context.obj)
-    context.obj["scout_api"] = ScoutAPI(context.obj)
-    context.obj["lims_api"] = LimsAPI(context.obj)
-    context.obj["status_db"] = Store(context.obj["database"])
 
-    context.obj["rna_api"] = MipAnalysisAPI(
-        db=context.obj["status_db"],
-        hk_api=context.obj["housekeeper_api"],
-        tb_api=context.obj["trailblazer_api"],
-        scout_api=context.obj["scout_api"],
-        lims_api=context.obj["lims_api"],
-        script=context.obj["mip-rd-rna"]["script"],
-        pipeline=context.obj["mip-rd-rna"]["pipeline"],
-        conda_env=context.obj["mip-rd-rna"]["conda_env"],
-        root=context.obj["mip-rd-rna"]["root"],
-    )
+    if context.invoked_subcommand is None:
+        click.echo(context.get_help())
+        return
+
+    context.obj["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
+
+
+mip_rna.add_command(config_case)
+mip_rna.add_command(link)
+mip_rna.add_command(resolve_compression)
+mip_rna.add_command(run)
+mip_rna.add_command(store_cmd)
 
 
 @mip_rna.command()
+@PRIORITY_OPTION
+@EMAIL_OPTION
+@START_WITH_PROGRAM
+@OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
+@OPTION_DRY
+@OPTION_MIP_DRY_RUN
+@click.option(
+    "--skip-evaluation",
+    is_flag=True,
+    help="Skip mip qccollect evaluation",
+)
 @click.pass_context
-def link(context: click.Context, case_id: str):
-    """Link FASTQ files for all samples in a case"""
-    rna_api: MipAnalysisAPI = context.obj["rna_api"]
-    case_obj: models.Family = rna_api.db.family(case_id)
-    link_objs: List[models.FamilySample] = case_obj.links
-
-    for link_obj in link_objs:
-        LOG.info(
-            "%s: %s link FASTQ files", link_obj.sample.internal_id, link_obj.family.data_analysis
-        )
-        if not link_obj.family.data_analysis:
-            LOG.warning(
-                f"No analysis set for {link_obj.sample.internal_id}, file will still be linked"
-            )
-            rna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
-        if link_obj.family.data_analysis == str(Pipeline.MIP_RNA):
-            rna_api.link_sample(sample=link_obj.sample, case_id=link_obj.family.internal_id)
-
-
-@mip_rna.command()
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="print command to console")
-@click.option("-e", "--email", help="email to send errors to")
-@click.option("--mip-dry-run", "mip_dry_run", is_flag=True, help="Run MIP in dry-run mode")
-@click.option("-p", "--priority", type=click.Choice(["low", "normal", "high"]))
-@click.option("-sw", "--start-with", help="start mip from this program.")
-@ARGUMENT_CASE_ID
-@click.pass_context
-def run(
+def start(
     context: click.Context,
     case_id: str,
-    dry_run: bool = False,
-    mip_dry_run: bool = False,
-    priority: str = None,
-    email: str = None,
-    start_with: str = None,
+    dry_run: bool,
+    email: str,
+    mip_dry_run: bool,
+    priority: str,
+    skip_evaluation: bool,
+    start_with: str,
+    panel_bed: str,
 ):
-    """Run the analysis for a case"""
-    rna_api = context.obj["rna_api"]
-    case_obj = rna_api.db.family(case_id)
+    """Start full MIP-RNA analysis workflow for a case"""
 
-    if not case_obj:
-        raise click.Abort()
-    if rna_api.get_analyses_from_trailblazer(case_id=case_obj.internal_id, temp=True):
-        LOG.warning("%s: analysis already running", case_obj.internal_id)
-        return
+    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
 
-    email = email or environ_email()
-    kwargs = dict(
-        config=context.obj["mip-rd-rna"]["mip_config"],
-        case=case_id,
-        priority=priority,
-        email=email,
-        dryrun=mip_dry_run,
-        start_with=start_with,
-    )
-    if dry_run:
-        rna_api.run_command(dry_run=dry_run, **kwargs)
-        return
-
-    rna_api.run_command(**kwargs)
-
-    if mip_dry_run:
-        LOG.info("Executed MIP in dry-run mode - skipping Trailblazer step")
-        return
-
-    rna_api.mark_analyses_deleted(case_id=case_id)
-    rna_api.add_pending_analysis(
-        case_id=case_id,
-        email=email,
-        type=rna_api.get_application_type(case_id),
-        out_dir=rna_api.get_case_output_path(case_id).as_posix(),
-        config_path=rna_api.get_slurm_job_ids_path(case_id).as_posix(),
-        priority="normal",
-        data_analysis=Pipeline.MIP_RNA,
-    )
-    rna_api.set_statusdb_action(case_id=case_id, action="running")
-    LOG.info("MIP rd-rna run started!")
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    LOG.info("Starting full MIP-RNA analysis workflow for case %s", case_id)
+    try:
+        context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
+        context.invoke(link, case_id=case_id)
+        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        context.invoke(
+            run,
+            case_id=case_id,
+            priority=priority,
+            email=email,
+            start_with=start_with,
+            dry_run=dry_run,
+            mip_dry_run=mip_dry_run,
+            skip_evaluation=skip_evaluation,
+        )
+    except (FlowcellsNeededError, DecompressionNeededError) as e:
+        LOG.error(e.message)
 
 
-@mip_rna.command("config-case")
-@click.option("-d", "--dry-run", "dry_run", is_flag=True, help="Print pedigree config to console")
-@ARGUMENT_CASE_ID
+@mip_rna.command("start-available")
+@OPTION_DRY
 @click.pass_context
-def config_case(context: click.Context, case_id: str, dry_run: bool = False):
-    """Generate a pedigree config for the case"""
-    rna_api = context.obj["rna_api"]
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full analysis workflow for all cases ready for analysis"""
 
-    case_obj = rna_api.db.family(case_id)
-    if not case_obj:
-        LOG.error("Case %s does not exist!", case_id)
-        context.abort()
-    config_data = rna_api.pedigree_config(case_obj, pipeline=Pipeline.MIP_RNA)
-    if dry_run:
-        click.echo(config_data)
-        return
-    out_path = rna_api.write_pedigree_config(
-        data=config_data,
-        out_dir=rna_api.get_case_output_path(case_id),
-        pedigree_config_path=rna_api.get_pedigree_config_path(case_id),
-    )
-    LOG.info(f"Config saved to: {out_path}")
+    analysis_api: MipRNAAnalysisAPI = context.obj["analysis_api"]
 
-
-mip_rna.add_command(store_cmd)
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_analyze():
+        try:
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+        except CgError as error:
+            LOG.error(error.message)
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred: %s", e)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort

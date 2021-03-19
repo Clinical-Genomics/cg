@@ -4,7 +4,6 @@ import logging
 from typing import List
 
 from _io import TextIOWrapper
-from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
@@ -16,6 +15,7 @@ from cg.exc import (
 )
 from cg.meta.store import mip as store_mip
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 ANALYSIS_TYPE_TAGS = {
     "wgs": MIP_DNA_TAGS,

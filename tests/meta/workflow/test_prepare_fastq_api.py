@@ -1,11 +1,11 @@
 """Tests for the prepare_fastq_api"""
 
-from cg.meta.compress.compress import CompressAPI
 from cg.apps.crunchy import CrunchyAPI
+from cg.meta.compress import files
+from cg.meta.compress.compress import CompressAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
 from cg.store.models import Family
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
-from cg.meta.compress import files
 
 
 def test_is_spring_decompression_needed_when_true(

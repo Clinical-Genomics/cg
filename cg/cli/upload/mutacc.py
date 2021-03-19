@@ -5,9 +5,10 @@ from typing import List
 import click
 
 from cg.apps.mutacc_auto import MutaccAutoAPI
-from cg.meta.upload.mutacc import UploadToMutaccAPI
-from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.meta.upload.mutacc import UploadToMutaccAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -24,17 +25,16 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    scout_api: ScoutAPI = context.obj["scout_api"]
-    mutacc_auto_api = MutaccAutoAPI(context.obj)
-
-    mutacc_upload = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     # Get cases to upload into mutacc from scout
     finished_cases: List[ScoutExportCase] = []
     if case_id is not None:
-        finished_cases = scout_api.get_cases(finished=True, case_id=case_id)
+        finished_cases = analysis_api.scout_api.get_cases(finished=True, case_id=case_id)
     elif days_ago is not None:
-        finished_cases = scout_api.get_solved_cases(days_ago=days_ago)
+        finished_cases = analysis_api.scout_api.get_solved_cases(days_ago=days_ago)
     else:
         LOG.info("Please enter option '--case-id' or '--days-ago'")
 
@@ -50,7 +50,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
             continue
 
         LOG.info("Start processing case %s with mutacc", case.id)
-        mutacc_upload.extract_reads(case)
+        analysis_api.mutacc_upload_api.extract_reads(case)
 
     if number_processed == 0:
         LOG.info("No cases were solved within the last %s days", days_ago)
@@ -61,9 +61,12 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 def processed_solved(context):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     LOG.info("----------------- PROCESSED-SOLVED ----------------")
 
     LOG.info("Uploading processed cases by mutacc to the mutacc database")
 
-    mutacc_auto_api = MutaccAutoAPI(context.obj)
-    mutacc_auto_api.import_reads()
+    analysis_api.mutacc_auto_api.import_reads()

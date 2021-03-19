@@ -1,20 +1,18 @@
 """Code to handle files regarding compression and decompression"""
 
-import logging
 import datetime
+import logging
 from pathlib import Path
 from typing import Dict, List
 
-from housekeeper.store import models as hk_models
-
+from cg.constants import HK_FASTQ_TAGS
 from cg.constants.compression import (
+    FASTQ_DATETIME_DELTA,
     FASTQ_FIRST_READ_SUFFIX,
     FASTQ_SECOND_READ_SUFFIX,
-    FASTQ_DATETIME_DELTA,
 )
-from cg.constants import HK_FASTQ_TAGS
-
 from cg.models import CompressionData
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 

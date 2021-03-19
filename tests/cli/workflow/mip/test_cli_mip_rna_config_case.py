@@ -30,4 +30,4 @@ def test_cg_workflow_mip_rna_config_case(cli_runner, caplog, case_id, rna_mip_co
 
     # THEN the command should be printed
     assert result.exit_code == 0
-    assert f"Config saved to:" in caplog.text
+    assert f"Config file saved to" in caplog.text

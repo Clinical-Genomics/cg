@@ -174,3 +174,63 @@ def test_get_processing_time_for_no_delivered_time(lims_api, mocker):
 
     # THEN return value is none
     assert processing_time is None
+
+
+def test_get_sample_lab_code(lims_api, mocker):
+    """Test to get the sequenced date"""
+    # GIVEN a lims api and a mocked sample that returns a lab code
+    mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
+    mock_instance = mocked_sample.return_value
+    value = "SE110 Växjö"
+    mock_instance.udf = {"Lab Code": value}
+
+    # WHEN fetching the value
+    res = lims_api.get_sample_lab_code(sample_id="mocked")
+
+    # THEN assert the correct value is fetched
+    assert res == value
+
+
+def test_get_sample_region_code(lims_api, mocker):
+    """Test to get the sequenced date"""
+    # GIVEN a lims api and a mocked sample that returns a region code
+    mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
+    mock_instance = mocked_sample.return_value
+    value = "01 Region Stockholm"
+    mock_instance.udf = {"Region Code": value}
+
+    # WHEN fetching the value
+    res = lims_api.get_sample_region_code(sample_id="mocked")
+
+    # THEN assert the correct value is fetched
+    assert res == value
+
+
+def test_get_sample_selection_criteria(lims_api, mocker):
+    """Test to get the sequenced date"""
+    # GIVEN a lims api and a mocked sample that returns a selection criteria
+    mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
+    mock_instance = mocked_sample.return_value
+    value = "1. Allmän övervakning"
+    mock_instance.udf = {"Selection Criteria": value}
+
+    # WHEN fetching the value
+    res = lims_api.get_sample_selection_criteria(sample_id="mocked")
+
+    # THEN assert the correct value is fetched
+    assert res == value
+
+
+def test_get_sample_pre_processing_method(lims_api, mocker):
+    """Test to get the sequenced date"""
+    # GIVEN a lims api and a mocked sample that returns a pre processing method
+    mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
+    mock_instance = mocked_sample.return_value
+    value = 'Other (specify in "Comments")'
+    mock_instance.udf = {"Pre Processing Method": value}
+
+    # WHEN fetching the value
+    res = lims_api.get_sample_pre_processing_method(sample_id="mocked")
+
+    # THEN assert the correct value is fetched
+    assert res == value

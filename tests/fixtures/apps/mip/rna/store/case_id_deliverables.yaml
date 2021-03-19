@@ -86,7 +86,7 @@ files:
     tag: html
   - format: meta
     id: case_id
-    path: /path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml
+    path: tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml
     path_index: ~
     step: mip_analyse
     tag: sample_info

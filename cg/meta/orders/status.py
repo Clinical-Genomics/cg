@@ -1,6 +1,6 @@
 """Ordering module"""
 import datetime as dt
-from typing import List
+from typing import List, Set
 
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
@@ -106,6 +106,7 @@ class StatusHandler:
                     "sex": sample.get("sex"),
                     "status": sample.get("status"),
                     "tumour": sample.get("tumour") or False,
+                    "volume": sample.get("volume"),
                 }
                 for sample in data["samples"]
             ],
@@ -132,6 +133,11 @@ class StatusHandler:
                     "organism_id": sample_data["organism"],
                     "priority": sample_data["priority"],
                     "reference_genome": sample_data["reference_genome"],
+                    "volume": sample_data.get("volume"),
+                    "pre_processing_method": sample_data.get("pre_processing_method"),
+                    "region_code": sample_data.get("region_code"),
+                    "lab_code": sample_data.get("lab_code"),
+                    "selection_criteria": sample_data.get("selection_criteria"),
                 }
                 for sample_data in data["samples"]
             ],
@@ -145,13 +151,28 @@ class StatusHandler:
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
-            priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
+            cohorts: Set[str] = {
+                cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
+            }
+
+            synopses: Set[str] = {
+                synopsis
+                for sample in case_samples
+                for synopsis in sample.get("synopsis", [])
+                if synopsis
+            }
+
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
+            priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
 
-            panels = set(panel for sample in case_samples for panel in sample.get("panels", set()))
+            panels: Set[str] = {
+                panel for sample in case_samples for panel in sample.get("panels", []) if panel
+            }
+
             case = {
                 # Set from first sample until order portal sets this on case level
+                "cohorts": cohorts,
                 "data_analysis": data_analysis,
                 "data_delivery": data_delivery,
                 "name": case_name,
@@ -162,7 +183,6 @@ class StatusHandler:
                         "age_at_sampling": sample.get("age_at_sampling"),
                         "application": sample["application"],
                         "capture_kit": sample.get("capture_kit"),
-                        "cohorts": list(sample.get("cohorts", "")),
                         "comment": sample.get("comment"),
                         "father": sample.get("father"),
                         "from_sample": sample.get("from_sample"),
@@ -172,12 +192,12 @@ class StatusHandler:
                         "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
-                        "synopsis": list(sample.get("synopsis", "")),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
                     for sample in case_samples
                 ],
+                "synopsis": synopses,
             }
 
             status_data["families"].append(case)
@@ -206,11 +226,13 @@ class StatusHandler:
                 case_obj.panels = case["panels"]
             else:
                 case_obj = self.status.add_case(
+                    cohorts=case["cohorts"],
                     data_analysis=Pipeline(case["data_analysis"]),
                     data_delivery=DataDelivery(case["data_delivery"]),
                     name=case["name"],
                     panels=case["panels"],
                     priority=case["priority"],
+                    synopsis=case["synopsis"],
                 )
                 case_obj.customer = customer_obj
                 new_families.append(case_obj)
@@ -224,7 +246,6 @@ class StatusHandler:
                     new_sample = self.status.add_sample(
                         age_at_sampling=sample["age_at_sampling"],
                         capture_kit=sample["capture_kit"],
-                        cohorts=sample["cohorts"],
                         comment=sample["comment"],
                         from_sample=sample["from_sample"],
                         internal_id=sample["internal_id"],
@@ -234,7 +255,6 @@ class StatusHandler:
                         phenotype_terms=sample["phenotype_terms"],
                         priority=case["priority"],
                         sex=sample["sex"],
-                        synopsis=sample["synopsis"],
                         ticket=ticket,
                         time_point=sample["time_point"],
                         tumour=sample["tumour"],

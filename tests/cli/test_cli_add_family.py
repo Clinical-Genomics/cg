@@ -2,6 +2,7 @@
 from datetime import datetime
 
 import click
+
 from cg.constants import DataDelivery, Pipeline
 from cg.store import Store
 

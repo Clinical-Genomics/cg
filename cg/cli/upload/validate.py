@@ -1,9 +1,11 @@
 """Code for validating an upload via CLI"""
 
 import click
+
 from cg.apps.coverage import ChanjoAPI
 
 from .utils import suggest_cases_to_upload
+from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 @click.command()
@@ -12,14 +14,18 @@ from .utils import suggest_cases_to_upload
 def validate(context, family_id):
     """Validate a family of samples."""
 
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     click.echo(click.style("----------------- VALIDATE --------------------"))
 
     if not family_id:
         suggest_cases_to_upload(context)
         context.abort()
 
-    case_obj = context.obj["status_db"].family(family_id)
-    chanjo_api = ChanjoAPI(context.obj)
+    case_obj = analysis_api.status_db.family(family_id)
+    chanjo_api = analysis_api.chanjo_api
     chanjo_samples = []
     for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id

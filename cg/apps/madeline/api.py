@@ -2,10 +2,9 @@
 import logging
 import pathlib
 import tempfile
-from typing import List, Iterable
+from typing import Iterable, List
 
 from cg.utils import Process
-
 
 LOG = logging.getLogger(__name__)
 

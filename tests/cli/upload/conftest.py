@@ -3,8 +3,15 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from tempfile import tempdir
 
 import pytest
+
+from cg.meta.report.api import ReportAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.madeline import MockMadelineAPI
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -12,9 +19,6 @@ from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.store import Store, models
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.mocks.madeline import MockMadelineAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -30,13 +34,18 @@ def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestam
     """Get some bundle data for housekeeper"""
     tag_name = UploadScoutAPI.get_load_config_tag()
 
-    hk_bundle_data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [{"path": str(scout_load_config), "archive": False, "tags": [tag_name]}],
+        "files": [
+            {
+                "path": str(scout_load_config),
+                "archive": False,
+                "tags": [tag_name],
+            }
+        ],
     }
-    return hk_bundle_data
 
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
@@ -44,16 +53,19 @@ def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
 ) -> dict:
     """ Returns a dictionary in hk format with files used in upload gt process"""
-    data = {
+    return {
         "name": case_id,
         "created": datetime.now(),
         "expires": datetime.now(),
         "files": [
-            {"path": str(case_qc_metrics), "archive": False, "tags": ["qcmetrics"]},
+            {
+                "path": str(case_qc_metrics),
+                "archive": False,
+                "tags": ["qcmetrics"],
+            },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],
     }
-    return data
 
 
 @pytest.fixture(name="analysis_obj")
@@ -113,20 +125,14 @@ def fixture_base_cli_context(
 ) -> dict:
     """context to use in cli"""
     return {
+        "housekeeper_api": housekeeper_api,
+        "mip-rd-dna": {"root": tempdir},
+        "report_api": MockReportApi(),
         "scout_api": MockScoutApi(),
         "scout_upload_api": upload_scout_api,
-        "housekeeper_api": housekeeper_api,
-        "trailblazer_api": trailblazer_api,
         "status_db": analysis_store,
-        "mip-rd-dna": {"root": "hej"},
+        "trailblazer_api": trailblazer_api,
     }
-
-
-@pytest.fixture(scope="function", name="vogue_context")
-def fixture_vogue_cli_context(vogue_api) -> dict:
-    """context to use in cli"""
-
-    return {"vogue_api": vogue_api}
 
 
 @pytest.fixture(scope="function", name="upload_scout_api")
@@ -139,13 +145,6 @@ def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_confi
     return api
 
 
-@pytest.fixture(scope="function", name="vogue_api")
-def fixture_vogue_api():
-    """Return a MockVogueApi"""
-
-    return MockVogueApi()
-
-
 class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
@@ -156,19 +155,19 @@ class MockScoutApi(ScoutAPI):
         LOG.info("Case loaded successfully to Scout")
 
 
-class MockVogueApi:
+class MockReportApi(ReportAPI):
     def __init__(self):
         """docstring for __init__"""
         pass
 
-    def load_reagent_labels(self, days: int):
-        """docstring for upload"""
+    def create_delivery_report(self, *args, **kwargs):
+        """docstring for create_delivery_report"""
 
-    def load_samples(self, days: int):
-        """docstring for upload"""
+        for arg in args:
+            LOG.info("create_delivery_report called with positional %s", arg)
 
-    def load_flowcells(self, days: int):
-        """docstring for upload"""
+        for key, value in kwargs.items():
+            LOG.info("create_delivery_report called with key %s and value %s", key, value)
 
 
 class MockAnalysisApi(MipAnalysisAPI):
@@ -234,3 +233,26 @@ class MockLims:
             if sample["id"] == sample_id:
                 return sample
         return None
+
+
+@pytest.fixture(name="upload_context")
+def upload_context(context_config):
+    analysis_api = MipDNAAnalysisAPI(context_config)
+
+    return {
+        "analysis_api": analysis_api,
+        "report_api": ReportAPI(
+            store=analysis_api.status_db,
+            lims_api=analysis_api.lims_api,
+            chanjo_api=analysis_api.chanjo_api,
+            analysis_api=analysis_api,
+            scout_api=analysis_api.scout_api,
+        ),
+        "scout_upload_api": UploadScoutAPI(
+            hk_api=analysis_api.housekeeper_api,
+            scout_api=analysis_api.scout_api,
+            madeline_api=analysis_api.madeline_api,
+            analysis_api=analysis_api,
+            lims_api=analysis_api.lims_api,
+        ),
+    }

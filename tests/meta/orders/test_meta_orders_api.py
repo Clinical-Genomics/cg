@@ -1,6 +1,7 @@
 import datetime as dt
 
 import pytest
+
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.store import models
@@ -9,14 +10,15 @@ from cg.store import models
 @pytest.mark.parametrize(
     "order_type",
     [
-        OrderType.RML,
+        OrderType.BALSAMIC,
+        OrderType.EXTERNAL,
         OrderType.FASTQ,
+        OrderType.METAGENOME,
+        OrderType.MICROSALT,
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
-        OrderType.EXTERNAL,
-        OrderType.MICROSALT,
-        OrderType.METAGENOME,
-        OrderType.BALSAMIC,
+        OrderType.RML,
+        OrderType.SARS_COV_2,
     ],
 )
 def test_submit(
