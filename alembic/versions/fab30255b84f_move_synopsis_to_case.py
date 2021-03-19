@@ -1,7 +1,7 @@
 """move_synopsis_to_case
 
 Revision ID: fab30255b84f
-Revises: 6d74453565f2
+Revises: 432379a1adfa
 Create Date: 2021-02-17 17:43:47.102289
 
 """

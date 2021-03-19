@@ -1,7 +1,7 @@
 """fix-mip-on-fastq-wgs-cases
 
 Revision ID: 998be2e367cf
-Revises: 6d74453565f2
+Revises: fab30255b84f
 Create Date: 2021-02-26 10:03:23.560737
 
 """
