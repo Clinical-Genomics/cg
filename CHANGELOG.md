@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.10.0]
+### Added
+- functionality to upload synopsis, cohort and phenotype information to scout
+
 ## [20.9.12]
 ### Changed
 - Use pydantic models for handling lims samples
