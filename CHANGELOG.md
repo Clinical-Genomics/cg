@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.10.1]
+### Fixed
+- Mip start-available command
+
 ## [20.10.0]
 ### Added
 - Panel command to mip-rna analysis workflow
