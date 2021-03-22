@@ -4,7 +4,7 @@ from typing import Optional
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scout_load_config import (
+from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     MipLoadConfig,
     ScoutLoadConfig,

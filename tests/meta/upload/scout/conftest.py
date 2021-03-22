@@ -10,8 +10,8 @@ import pytest
 from cg.constants import Pipeline
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scout_load_config import MipLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 

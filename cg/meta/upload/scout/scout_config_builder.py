@@ -3,11 +3,10 @@ import logging
 from typing import Optional, Set
 
 import requests
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.meta.upload.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.store import models
 from housekeeper.store import models as hk_models
 
