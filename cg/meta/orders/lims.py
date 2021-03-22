@@ -7,7 +7,7 @@ from cg.models.lims.sample import LimsSample, Udf
 LOG = logging.getLogger(__name__)
 
 
-def to_lims(customer: str, samples: List[dict]) -> List[LimsSample]:
+def build_lims_sample(customer: str, samples: List[dict]) -> List[LimsSample]:
     """Convert order input to lims interface input."""
     samples_lims = []
     for sample in samples:
@@ -22,8 +22,8 @@ def to_lims(customer: str, samples: List[dict]) -> List[LimsSample]:
 
 def process_lims(lims_api: LimsAPI, data: dict, samples: List[dict]):
     """Process samples to add them to LIMS."""
-    samples_lims: List[LimsSample] = to_lims(data["customer"], samples)
-    project_name = data["ticket"] or data["name"]
+    samples_lims: List[LimsSample] = build_lims_sample(data["customer"], samples)
+    project_name = data.get("ticket", data["name"])
     # Create new lims project
     project_data = lims_api.submit_project(
         project_name, [lims_sample.dict() for lims_sample in samples_lims]

@@ -1,14 +1,16 @@
 from typing import List
 
 from cg.constants import Pipeline
-from cg.meta.orders.lims import to_lims
+from cg.meta.orders.lims import build_lims_sample
 from cg.models.lims.sample import LimsSample
 
 
 def test_to_lims_mip(mip_order_to_submit):
     # GIVEN a scout order for a trio
     # WHEN parsing the order to format for LIMS import
-    samples: List[LimsSample] = to_lims(customer="cust003", samples=mip_order_to_submit["samples"])
+    samples: List[LimsSample] = build_lims_sample(
+        customer="cust003", samples=mip_order_to_submit["samples"]
+    )
 
     # THEN it should list all samples
     assert len(samples) == 4
@@ -39,7 +41,7 @@ def test_to_lims_mip(mip_order_to_submit):
 def test_to_lims_external(external_order_to_submit):
     # GIVEN an external order for two samples
     # WHEN parsing the order to format for LIMS
-    samples: List[LimsSample] = to_lims(
+    samples: List[LimsSample] = build_lims_sample(
         customer="dummyCust", samples=external_order_to_submit["samples"]
     )
     # THEN should "work"
@@ -52,7 +54,7 @@ def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
 
     # WHEN parsing the order to format for LIMS
-    samples: List[LimsSample] = to_lims(
+    samples: List[LimsSample] = build_lims_sample(
         customer="dummyCust", samples=fastq_order_to_submit["samples"]
     )
 
@@ -70,7 +72,7 @@ def test_to_lims_rml(rml_order_to_submit):
     # GIVEN a rml order for four samples
 
     # WHEN parsing for LIMS
-    samples: List[LimsSample] = to_lims(
+    samples: List[LimsSample] = build_lims_sample(
         customer="dummyCust", samples=rml_order_to_submit["samples"]
     )
 
@@ -89,7 +91,7 @@ def test_to_lims_microbial(microbial_order_to_submit):
     # GIVEN a microbial order for three samples
 
     # WHEN parsing for LIMS
-    samples: List[LimsSample] = to_lims(
+    samples: List[LimsSample] = build_lims_sample(
         customer="cust000", samples=microbial_order_to_submit["samples"]
     )
     # THEN it should "work"
@@ -111,7 +113,7 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     # GIVEN a sarscov2 order for samples
 
     # WHEN parsing for LIMS
-    samples: List[LimsSample] = to_lims(
+    samples: List[LimsSample] = build_lims_sample(
         customer="cust000", samples=sarscov2_order_to_submit["samples"]
     )
 
@@ -134,7 +136,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
 
     # GIVEN a cancer order for a sample
     # WHEN parsing the order to format for LIMS import
-    samples: List[LimsSample] = to_lims(
+    samples: List[LimsSample] = build_lims_sample(
         customer="cust000", samples=balsamic_order_to_submit["samples"]
     )
     # THEN it should list all samples
