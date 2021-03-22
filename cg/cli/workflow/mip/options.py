@@ -24,4 +24,11 @@ OPTION_PANEL_BED = click.option(
     help="Set this option to override fetching of panel name from LIMS",
 )
 
+OPTION_SKIP_EVALUATION = click.option(
+    "--skip-evaluation",
+    "skip_evaluation",
+    is_flag=True,
+    help="Skip mip qccollect evaluation",
+)
+
 ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
