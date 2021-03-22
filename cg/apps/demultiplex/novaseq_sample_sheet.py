@@ -1,17 +1,15 @@
 """ Create a samplesheet for Novaseq flowcells """
 
 import csv
-from pathlib import Path
 from typing import Dict, List, Set
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.models.demultiplex import valid_indexes
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index
 from cg.resources import valid_indexes_path
 
 
-class NovaseqSampleSheet:
+class SampleSheet:
     """ Create a raw sample sheet for Novaseq flowcells """
 
     NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
@@ -46,17 +44,15 @@ class NovaseqSampleSheet:
     def __init__(
         self,
         flowcell: str,
-        index_length: int,
-        pad: bool,
         lims_samples: List[LimsFlowcellSample],
-        dummy_indexes_file: Path,
         run_parameters: RunParameters,
+        index_length: int = 8,
+        pad: bool = False,
     ):
         self.flowcell: str = flowcell
         self.index_length: int = index_length
         self.pad: bool = pad
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
-        self.dummy_indexes_file: Path = dummy_indexes_file
         self.run_parameters: RunParameters = run_parameters
         self.valid_indexes: List[Index] = self.get_valid_indexes()
 
@@ -81,7 +77,7 @@ class NovaseqSampleSheet:
         return LimsFlowcellSample(
             flowcell_id=flowcell,
             lane=lane,
-            sample_id=NovaseqSampleSheet.dummy_sample_name(sample_name=name),
+            sample_id=SampleSheet.dummy_sample_name(sample_name=name),
             index=dummy_index,
             sample_name="indexcheck",
             project="indexcheck",
@@ -134,10 +130,6 @@ class NovaseqSampleSheet:
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non existing indexes to samples"""
-        with open(f"{self.dummy_indexes_file}") as csv_file:
-            dummy_samples_csv = csv.reader(csv_file, delimiter=COMMA)
-            dummy_samples = [row for row in dummy_samples_csv]
-
         indexes_by_lane: Dict[int, Set[str]] = self.get_indexes_by_lane()
         for lane, indexes in indexes_by_lane.items():
             for index_obj in self.valid_indexes:
