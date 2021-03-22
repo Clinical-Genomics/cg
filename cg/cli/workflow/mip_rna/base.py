@@ -12,7 +12,6 @@ from cg.cli.workflow.mip.options import (
     OPTION_DRY,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
-    OPTION_RNA_PANEL_GENOME_BUILD,
     OPTION_SKIP_EVALUATION,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
@@ -51,7 +50,6 @@ mip_rna.add_command(store_cmd)
 @OPTION_DRY
 @OPTION_MIP_DRY_RUN
 @OPTION_PANEL_BED
-@OPTION_RNA_PANEL_GENOME_BUILD
 @OPTION_SKIP_EVALUATION
 @PRIORITY_OPTION
 @START_WITH_PROGRAM
@@ -66,7 +64,6 @@ def start(
     priority: str,
     skip_evaluation: bool,
     start_with: str,
-    panel_genome_build: str,
 ):
     """Start full MIP-RNA analysis workflow for a case"""
 
@@ -77,9 +74,7 @@ def start(
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id)
-        context.invoke(
-            panel, case_id=case_id, dry_run=dry_run, panel_genome_build=panel_genome_build
-        )
+        context.invoke(panel, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
         context.invoke(
             run,

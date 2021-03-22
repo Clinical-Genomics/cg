@@ -9,7 +9,6 @@ from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
     OPTION_DRY,
-    OPTION_DNA_PANEL_GENOME_BUILD,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
     OPTION_SKIP_EVALUATION,
@@ -47,7 +46,6 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 
 @click.command()
 @OPTION_DRY
-@OPTION_DNA_PANEL_GENOME_BUILD
 @ARGUMENT_CASE_ID
 @click.pass_context
 def panel(context: click.Context, case_id: str, dry_run: bool, panel_genome_build: str = None):
@@ -56,7 +54,7 @@ def panel(context: click.Context, case_id: str, dry_run: bool, panel_genome_buil
     analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
-    bed_lines: List[str] = analysis_api.panel(case_id=case_id, genome_build=panel_genome_build)
+    bed_lines: List[str] = analysis_api.panel(case_id=case_id)
     if dry_run:
         for bed_line in bed_lines:
             click.echo(bed_line)
