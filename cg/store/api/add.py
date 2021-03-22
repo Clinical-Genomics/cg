@@ -3,6 +3,7 @@ import logging
 from typing import List
 
 import petname
+
 from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
@@ -152,7 +153,9 @@ class AddHandler(BaseHandler):
         data_delivery: DataDelivery,
         name: str,
         panels: List[str],
+        cohorts: List[str] = None,
         priority: str = "standard",
+        synopsis: List[str] = None,
     ) -> models.Family:
         """Build a new Family record."""
 
@@ -166,13 +169,15 @@ class AddHandler(BaseHandler):
 
         priority_db = PRIORITY_MAP[priority]
         new_case = self.Family(
+            cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),
             internal_id=internal_id,
             name=name,
+            panels=panels,
             priority=priority_db,
+            synopsis=synopsis,
         )
-        new_case.panels = panels
         return new_case
 
     def relate_sample(

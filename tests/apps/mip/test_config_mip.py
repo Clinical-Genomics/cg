@@ -1,6 +1,7 @@
 import pytest
-from cg.exc import PedigreeConfigError
+
 from cg.apps.mip.confighandler import ConfigHandler
+from cg.exc import PedigreeConfigError
 
 
 def test_validate_config(valid_config):

@@ -140,7 +140,7 @@ def fixture_balsamic_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, balsamic_panel_analysis_dir: Path, sample_id: str
 ) -> dict:
     """Get some bundle data for housekeeper"""
-    data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
@@ -160,9 +160,13 @@ def fixture_balsamic_analysis_hk_bundle_data(
                 "archive": False,
                 "tags": ["cram", sample_id],
             },
+            {
+                "path": str(balsamic_panel_analysis_dir / "coverage_qc_report.pdf"),
+                "archive": False,
+                "tags": ["delivery-report"],
+            },
         ],
     }
-    return data
 
 
 @pytest.fixture(name="balsamic_analysis_hk_version")

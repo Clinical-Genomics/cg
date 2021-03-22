@@ -1,20 +1,17 @@
 """Fixtures for cli clean tests"""
 
-import datetime as dt
 from pathlib import Path
 
 import pytest
-from cg.apps.balsamic.api import BalsamicAPI
-from cg.apps.hermes.hermes_api import HermesApi
-from cg.apps.housekeeper.hk import HousekeeperAPI
+
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.store import Store
 
 
-@pytest.fixture
-def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, helpers) -> Store:
-    store = base_store
+@pytest.fixture()
+def clean_context(context_config, helpers, timestamp_yesterday, timestamp_today):
+    analysis_api = BalsamicAnalysisAPI(context_config)
+    store = analysis_api.status_db
 
     # Create textbook case for cleaning
     case_to_clean = helpers.add_case(
@@ -37,6 +34,7 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
+    Path(analysis_api.get_case_path("balsamic_case_clean")).mkdir(exist_ok=True, parents=True)
 
     # Create textbook case not for cleaning
     case_to_not_clean = helpers.add_case(
@@ -62,76 +60,6 @@ def balsamic_clean_store(base_store: Store, timestamp_yesterday: dt.datetime, he
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    return store
-
-
-@pytest.fixture(name="balsamic_dir")
-def balsamic_dir(tmpdir_factory, apps_dir: Path) -> Path:
-    """Return the path to the balsamic apps dir"""
-    balsamic_dir = tmpdir_factory.mktemp("balsamic")
-    return Path(balsamic_dir).absolute().as_posix()
-
-
-@pytest.fixture
-def server_config(balsamic_dir: Path) -> dict:
-    return {
-        "database": "database",
-        "bed_path": balsamic_dir,
-        "balsamic": {
-            "root": balsamic_dir,
-            "singularity": Path(balsamic_dir, "singularity.sif").as_posix(),
-            "reference_config": Path(balsamic_dir, "reference.json").as_posix(),
-            "binary_path": "/home/proj/bin/conda/envs/S_BALSAMIC/bin/balsamic",
-            "conda_env": "S_BALSAMIC",
-            "slurm": {
-                "mail_user": "test.mail@scilifelab.se",
-                "account": "development",
-                "qos": "low",
-            },
-        },
-        "housekeeper": {
-            "database": "database",
-            "root": balsamic_dir,
-        },
-        "lims": {
-            "host": "example.db",
-            "username": "testuser",
-            "password": "testpassword",
-        },
-    }
-
-
-@pytest.fixture
-def balsamic_analysis_api(
-    server_config: dict,
-    balsamic_clean_store: Store,
-    housekeeper_api: HousekeeperAPI,
-    hermes_api: HermesApi,
-    trailblazer_api,
-):
-    return BalsamicAnalysisAPI(
-        balsamic_api=BalsamicAPI(server_config),
-        store=balsamic_clean_store,
-        housekeeper_api=housekeeper_api,
-        fastq_handler="FastqHandler",
-        lims_api="LIMS",
-        trailblazer_api=trailblazer_api,
-        hermes_api=hermes_api,
-    )
-
-
-@pytest.fixture
-def clean_context(
-    base_store: Store,
-    housekeeper_api: HousekeeperAPI,
-    balsamic_analysis_api: BalsamicAnalysisAPI,
-    helpers,
-    tmpdir,
-) -> dict:
-    """context to use in cli"""
-
-    return {
-        "housekeeper_api": housekeeper_api,
-        "store_api": balsamic_clean_store,
-        "BalsamicAnalysisAPI": balsamic_analysis_api,
-    }
+    Path(analysis_api.get_case_path("balsamic_case_not_clean")).mkdir(exist_ok=True, parents=True)
+    context_config["analysis_api"] = analysis_api
+    return context_config

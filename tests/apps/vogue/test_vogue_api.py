@@ -1,10 +1,10 @@
 """
     Tests for VogueAPI
 """
-import subprocess
 import logging
-
+import subprocess
 from unittest import mock
+
 from cg.apps.vogue import VogueAPI
 
 

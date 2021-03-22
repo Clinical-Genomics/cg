@@ -3,8 +3,9 @@ import re
 from typing import List
 
 import click
-from cg.store import Store
 from tabulate import tabulate
+
+from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]

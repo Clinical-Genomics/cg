@@ -1,10 +1,12 @@
 """Code for uploading coverage reports via CLI"""
 
 import click
-from cg.apps.coverage import ChanjoAPI
+from cg.store import models
+
 from cg.meta.upload.coverage import UploadCoverageApi
 
 from .utils import suggest_cases_to_upload
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 @click.command()
@@ -16,12 +18,19 @@ def coverage(context, re_upload, family_id):
 
     click.echo(click.style("----------------- COVERAGE --------------------"))
 
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     if not family_id:
         suggest_cases_to_upload(context)
         context.abort()
 
-    chanjo_api = ChanjoAPI(context.obj)
-    case_obj = context.obj["status_db"].family(family_id)
-    api = UploadCoverageApi(context.obj["status_db"], context.obj["housekeeper_api"], chanjo_api)
+    case_obj: models.Family = analysis_api.status_db.family(family_id)
+    api = UploadCoverageApi(
+        status_api=analysis_api.status_db,
+        hk_api=analysis_api.housekeeper_api,
+        chanjo_api=analysis_api.chanjo_api,
+    )
     coverage_data = api.data(case_obj.analyses[0])
     api.upload(coverage_data, replace=re_upload)

@@ -1,10 +1,11 @@
 """Tests for the deliver base command"""
 
 from click.testing import CliRunner
+
 from cg.cli.base import base as base_command
 from cg.cli.deliver.base import deliver as deliver_cmd
-from cg.store import Store
 from cg.constants import EXIT_SUCCESS
+from cg.store import Store
 
 
 def test_run_base_help():

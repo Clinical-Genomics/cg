@@ -3,7 +3,6 @@ import string
 from typing import List
 
 import pytest
-from cg.apps.mip import MipAPI
 
 
 @pytest.fixture
@@ -76,14 +75,13 @@ def create_file(tmpdir, flowcell, lane, read, file_content):
 
 def create_file_data(file_path, flowcell, lane, read):
     """meta data about a file on disk"""
-    data = {
+    return {
         "path": file_path,
         "lane": lane,
         "flowcell": flowcell,
         "read": read,
         "undetermined": False,
     }
-    return data
 
 
 @pytest.fixture
@@ -129,18 +127,6 @@ def tb_api():
     return MockTB()
 
 
-@pytest.fixture(scope="session")
-def mip_api():
-    """MipAPI fixture"""
-    _mip_api = MipAPI(
-        script="test/fake_mip.pl",
-        pipeline="analyse rd_dna",
-        conda_env="S_mip_rd-rna",
-        root="/var/empty",
-    )
-    return _mip_api
-
-
 @pytest.fixture
 def mip_config_path():
     """path to a mip config"""
@@ -165,12 +151,11 @@ def valid_config():
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )
-    config = dict(
+    return dict(
         case="a_case",
         default_gene_panels=["a_panel"],
         samples=[sample],
     )
-    return config
 
 
 @pytest.fixture
@@ -186,12 +171,11 @@ def invalid_config_analysis_type():
         capture_kit="agilent_sureselect_cre.v1",
     )
 
-    config = dict(
+    return dict(
         case="a_case",
         default_gene_panels=["a_panel"],
         samples=[sample],
     )
-    return config
 
 
 @pytest.fixture
@@ -209,12 +193,11 @@ def invalid_config_unknown_field():
         unknown_field="UNKNOWN",
     )
 
-    config = dict(
+    return dict(
         case="a_case",
         default_gene_panels=["a_panel"],
         samples=[sample],
     )
-    return config
 
 
 @pytest.fixture
@@ -230,12 +213,11 @@ def invalid_config_unknown_field_sample_id():
         capture_kit="agilent_sureselect_cre.v1",
     )
 
-    config = dict(
+    return dict(
         case="a_case",
         default_gene_panels=["a_panel"],
         samples=[sample],
     )
-    return config
 
 
 @pytest.fixture
@@ -251,5 +233,4 @@ def invalid_config_unknown_field_analysis_type():
         expected_coverage=15,
         capture_kit="agilent_sureselect_cre.v1",
     )
-    config = dict(case="a_case", default_gene_panels=["a_panel"], samples=[sample])
-    return config
+    return dict(case="a_case", default_gene_panels=["a_panel"], samples=[sample])

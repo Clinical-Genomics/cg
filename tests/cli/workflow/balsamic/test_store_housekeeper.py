@@ -5,9 +5,12 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.base import store_housekeeper
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.utils import Process
 
 EXIT_SUCCESS = 0
 
@@ -32,7 +35,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
 
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id)
+    assert not balsamic_context["analysis_api"].status_db.family(case_id)
 
     # WHEN running
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
@@ -42,23 +45,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
 
     # THEN ERROR log should be printed containing invalid case_id
     assert case_id in caplog.text
-    assert "not found" in caplog.text
-
-
-def test_without_samples(cli_runner, balsamic_context: dict, caplog):
-    """Test command with case_id and no samples"""
-    caplog.set_level(logging.ERROR)
-    # GIVEN case-id
-    case_id = "no_sample_case"
-
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
-
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-
-    # THEN warning should be printed that no config file is found
-    assert "0" in caplog.text
+    assert "could not be found" in caplog.text
 
 
 def test_without_config(cli_runner, balsamic_context: dict, caplog):
@@ -97,6 +84,7 @@ def test_case_without_deliverables_file(
 
 def test_case_with_malformed_deliverables_file(
     cli_runner,
+    mocker,
     balsamic_context: dict,
     mock_config: dict,
     mock_deliverable,
@@ -106,8 +94,11 @@ def test_case_with_malformed_deliverables_file(
     """Test command with case_id and config file and analysis_finish but malformed deliverables output"""
     caplog.set_level(logging.WARNING)
     # GIVEN a malformed output from hermes
-    analysis_api: BalsamicAnalysisAPI = balsamic_context["BalsamicAnalysisAPI"]
-    analysis_api.hermes_api.process.set_stdout(text=json.dumps(malformed_hermes_deliverables))
+    analysis_api: BalsamicAnalysisAPI = balsamic_context["analysis_api"]
+
+    # GIVEN that HermesAPI returns a malformed deliverables output
+    mocker.patch.object(Process, "run_command")
+    Process.run_command.return_value = json.dumps(malformed_hermes_deliverables)
 
     # GIVEN that the output is malformed
     with pytest.raises(ValidationError):
@@ -115,22 +106,24 @@ def test_case_with_malformed_deliverables_file(
             deliverables_file=Path("a_file"), pipeline="balsamic"
         )
 
-    # GIVEN case-id
-    case_id = "balsamic_case_wgs_single"
+        # GIVEN case-id
+        case_id = "balsamic_case_wgs_single"
 
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
+        # WHEN dry running with dry specified
+        result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
+        # THEN command should NOT execute successfully
+        assert result.exit_code != EXIT_SUCCESS
 
-    # THEN information that the file is malformed should be communicated
-    assert "Deliverables file is malformed" in caplog.text
-    assert "field required" in caplog.text
+        # THEN information that the file is malformed should be communicated
+        assert "Deliverables file is malformed" in caplog.text
+        assert "field required" in caplog.text
 
 
 def test_valid_case(
     cli_runner,
+    mocker,
+    hermes_deliverables,
     balsamic_context: dict,
     real_housekeeper_api: HousekeeperAPI,
     mock_config,
@@ -142,24 +135,29 @@ def test_valid_case(
     case_id = "balsamic_case_wgs_single"
 
     # Make sure nothing is currently stored in Housekeeper
-    balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
 
     # Make sure  analysis not alredy stored in ClinicalDB
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
+    assert not balsamic_context["analysis_api"].status_db.family(case_id).analyses
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
-
+    print(result)
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
-    assert "Analysis successfully stored in ClinicalDB" in caplog.text
-    assert balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
-    assert balsamic_context["BalsamicAnalysisAPI"].housekeeper_api.bundle(case_id)
+    assert "Analysis successfully stored in StatusDB" in caplog.text
+    assert balsamic_context["analysis_api"].status_db.family(case_id).analyses
+    assert balsamic_context["analysis_api"].housekeeper_api.bundle(case_id)
 
 
 def test_valid_case_already_added(
     cli_runner,
+    mocker,
+    hermes_deliverables,
     balsamic_context: dict,
     real_housekeeper_api: HousekeeperAPI,
     mock_config,
@@ -172,16 +170,21 @@ def test_valid_case_already_added(
     case_id = "balsamic_case_wgs_single"
 
     # Make sure nothing is currently stored in Housekeeper
-    balsamic_context["BalsamicAnalysisAPI"].housekeeper_api = real_housekeeper_api
+    balsamic_context["analysis_api"].housekeeper_api = real_housekeeper_api
 
-    # Make sure  analysis not alredy stored in ClinicalDB
-    assert not balsamic_context["BalsamicAnalysisAPI"].store.family(case_id).analyses
+    # Make sure  analysis not already stored in ClinicalDB
+    assert not balsamic_context["analysis_api"].status_db.family(case_id).analyses
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # Ensure bundles exist by creating them first
     cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
+    print(result)
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS

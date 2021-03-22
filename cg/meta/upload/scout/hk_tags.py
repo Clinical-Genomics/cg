@@ -20,7 +20,7 @@ class CaseTags(BaseModel):
     peddy_sex: Set[str] = Field(None, description="Peddy sex check, only for rare disease")
     peddy_check: Set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
     multiqc_report: Set[str]
-    delivery_report: Set[str]
+    delivery_report: Set[str] = Field(None, description="Delivery report for cancer")
 
 
 class SampleTags(BaseModel):

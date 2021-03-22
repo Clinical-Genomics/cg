@@ -8,7 +8,6 @@ from cg.meta.upload.scout.scout_load_config import BalsamicLoadConfig, ScoutBals
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.store import models
 from housekeeper.store import models as hk_models
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -29,25 +28,30 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.load_config.vcf_cancer = self.fetch_file_from_hk(self.case_tags.snv_vcf)
         self.load_config.vcf_cancer_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
         self.include_multiqc_report()
+        self.include_delivery_report()
 
     def include_sample_files(self, config_sample: ScoutBalsamicIndividual):
         LOG.info("Including BALSAMIC specific sample level files")
+
+    def include_delivery_report(self) -> None:
+        LOG.info("Include coverage qc report to case")
+        self.load_config.coverage_qc_report = self.fetch_file_from_hk(
+            self.case_tags.delivery_report
+        )
 
     def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
         """Build a sample with balsamic specific information"""
         config_sample = ScoutBalsamicIndividual()
 
         self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
-        if BalsamicAnalysisAPI.get_sample_type(db_sample) == "tumor":
+        if BalsamicAnalysisAPI.get_sample_type(db_sample.sample) == "tumor":
             config_sample.phenotype = "affected"
             config_sample.sample_id = "TUMOR"
         else:
             config_sample.phenotype = "unaffected"
             config_sample.sample_id = "NORMAL"
 
-        analysis_type: Literal["wgs", "wes", "tgs"] = BalsamicAnalysisAPI.get_application_type(
-            db_sample
-        )
+        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=db_sample.sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":

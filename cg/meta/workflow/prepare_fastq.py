@@ -2,13 +2,13 @@
 
 import logging
 import os
-from typing import Dict, List
 from pathlib import Path
+from typing import Dict, List
 
-from cg.meta.compress.compress import CompressAPI
 from cg.apps.crunchy import CrunchyAPI
-from cg.meta.compress import files
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.compress import files
+from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
 from cg.store import Store, models
 from housekeeper.store import models as hk_models

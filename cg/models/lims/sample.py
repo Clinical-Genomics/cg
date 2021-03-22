@@ -22,15 +22,19 @@ class Udf(BaseModel):
     formalin_fixation_time: Optional[str]
     index: Optional[str]
     index_number: Optional[str]
+    lab_code: Optional[str]
     organism: Optional[str]
     organism_other: Optional[str]
     pool: Optional[str]
     post_formalin_fixation_time: Optional[str]
+    pre_processing_method: Optional[str]
     priority: str = "standard"
     quantity: Optional[str]
     reference_genome: Optional[str]
+    region_code: Optional[str]
     require_qcok: bool = False
     rml_plate_name: Optional[str]
+    selection_criteria: Optional[str]
     sex: Literal["M", "F", "unknown"] = "unknown"
     source: str = "NA"
     tissue_block_size: Optional[str]
