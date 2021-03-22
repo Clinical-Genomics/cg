@@ -165,7 +165,7 @@ def start(
         LOG.error(e.message)
 
 
-@click.command()
+@click.command("start-available")
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
