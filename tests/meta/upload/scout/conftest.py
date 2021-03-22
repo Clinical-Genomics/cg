@@ -210,6 +210,7 @@ def fixture_mip_file_handler(mip_analysis_hk_version: hk_models.Version) -> MipC
 def fixture_mip_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> models.Analysis:
+    helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
     case_obj: models.Family = analysis_store_trio.family(case_id)
     analysis_obj: models.Analysis = helpers.add_analysis(
         store=analysis_store_trio,

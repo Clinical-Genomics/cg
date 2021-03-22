@@ -14,6 +14,7 @@ from cg.store import models
 from housekeeper.store import models as hk_models
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.store_helpers import StoreHelpers
 
 from .conftest import MockAnalysis
 
@@ -65,6 +66,19 @@ def test_include_delivery_report_mip(mip_config_builder: MipConfigBuilder):
 
     # THEN assert that the delivery report was added
     assert mip_config_builder.load_config.delivery_report is not None
+
+
+def test_include_synopsis(mip_config_builder: MipConfigBuilder):
+    # GIVEN a config builder with some data
+
+    # GIVEN a config without a delivery report
+    assert mip_config_builder.load_config.synopsis is None
+
+    # WHEN including the delivery report
+    mip_config_builder.include_synopsis()
+
+    # THEN assert that the delivery report was added
+    assert mip_config_builder.load_config.synopsis is not None
 
 
 def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):
