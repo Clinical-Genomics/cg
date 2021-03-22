@@ -12,14 +12,13 @@ from cg.cli.workflow.mip.options import (
     OPTION_DRY,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
-    OPTION_PANEL_GENOME_BUILD,
+    OPTION_RNA_PANEL_GENOME_BUILD,
     OPTION_SKIP_EVALUATION,
     PRIORITY_OPTION,
     START_WITH_PROGRAM,
 )
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.gene_panel import GENOME_BUILD_38
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 
@@ -52,7 +51,7 @@ mip_rna.add_command(store_cmd)
 @OPTION_DRY
 @OPTION_MIP_DRY_RUN
 @OPTION_PANEL_BED
-@OPTION_PANEL_GENOME_BUILD
+@OPTION_RNA_PANEL_GENOME_BUILD
 @OPTION_SKIP_EVALUATION
 @PRIORITY_OPTION
 @START_WITH_PROGRAM
@@ -67,7 +66,7 @@ def start(
     priority: str,
     skip_evaluation: bool,
     start_with: str,
-    panel_genome_build: str = GENOME_BUILD_38,
+    panel_genome_build: str,
 ):
     """Start full MIP-RNA analysis workflow for a case"""
 

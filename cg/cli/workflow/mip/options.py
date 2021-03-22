@@ -1,5 +1,7 @@
 import click
 
+from cg.constants.gene_panel import GENOME_BUILD_37, GENOME_BUILD_38
+
 EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
 PRIORITY_OPTION = click.option(
     "-p",
@@ -9,6 +11,12 @@ PRIORITY_OPTION = click.option(
 )
 START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="Start mip from this program.", type=str
+)
+OPTION_DNA_PANEL_GENOME_BUILD = click.option(
+    "--panel-genome-build",
+    default=GENOME_BUILD_37,
+    type=str,
+    help="Set genome build for gene panel export from Scout",
 )
 OPTION_DRY = click.option(
     "-d",
@@ -23,8 +31,9 @@ OPTION_PANEL_BED = click.option(
     type=str,
     help="Set this option to override fetching of panel name from LIMS",
 )
-OPTION_PANEL_GENOME_BUILD = click.option(
+OPTION_RNA_PANEL_GENOME_BUILD = click.option(
     "--panel-genome-build",
+    default=GENOME_BUILD_38,
     type=str,
     help="Set genome build for gene panel export from Scout",
 )
