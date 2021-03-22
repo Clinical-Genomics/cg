@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.9.12]
+### Changed
+- Use pydantic models for handling lims samples
+
+
 ## [20.9.11]
 ### Fixed
 - Fix bug that that prevented wgs fastq samples from being genotyped
