@@ -63,13 +63,13 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_sample_parameters(self, sample_obj: models.Sample) -> MutantSampleConfig:
         return MutantSampleConfig(
-            cg_sample_id=sample_obj.internal_id,
-            case_id=sample_obj.links[0].family.internal_id,
-            customer_sample_id=sample_obj.name,
+            CG_ID_sample=sample_obj.internal_id,
+            case_ID=sample_obj.links[0].family.internal_id,
+            Customer_ID_sample=sample_obj.name,
             customer_id=sample_obj.customer.internal_id,
-            cg_qc_pass=sample_obj.reads > 0,
-            cg_project_id=sample_obj.links[0].family.name,
-            customer_project_id=sample_obj.ticket_number,
+            sequencing_qc_pass=sample_obj.reads > 0,
+            CG_ID_project=sample_obj.links[0].family.name,
+            Customer_ID_project=sample_obj.ticket_number,
             application_tag=sample_obj.application_version.application.tag,
             method_libprep=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="pre_processing_method"
