@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.9.13]
+## [20.10.0]
 ### Added
 - Add support for fastq delivery
 
