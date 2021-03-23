@@ -64,7 +64,7 @@ def start(context: click.Context, dry_run: bool, case_id: str) -> None:
     """Start full analysis workflow for a case"""
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-        context.invoke(link, case_id=case_id, dry_run=dry_run)
+        context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, dry_run=dry_run)
         context.invoke(run, case_id=case_id, dry_run=dry_run)
     except DecompressionNeededError:
