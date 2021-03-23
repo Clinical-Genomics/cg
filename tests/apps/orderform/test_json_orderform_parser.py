@@ -13,13 +13,13 @@ def test_parse_rml_orderform(rml_order_to_submit: dict):
     assert order_form_parser.order_name == rml_order_to_submit.get("name")
 
 
-def test_parse_json_orderform(mip_json_order_to_submit: dict):
+def test_parse_json_orderform(mip_json_orderform: dict):
     """Test to parse the RML orderform"""
     # GIVEN a orderform API
     order_form_parser = JsonOrderformParser()
 
     # WHEN parsing the RML orderform
-    order_form_parser.parse_orderform(order_data=mip_json_order_to_submit)
+    order_form_parser.parse_orderform(order_data=mip_json_orderform)
 
     # THEN assert that the orderform was parsed in the correct way
-    assert order_form_parser.order_name == mip_json_order_to_submit.get("name")
+    assert order_form_parser.order_name == mip_json_orderform.get("name")

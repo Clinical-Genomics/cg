@@ -13,7 +13,7 @@ from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import models
 from cg.utils.click.EnumChoice import EnumChoice
-
+from . import vogue
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
@@ -40,9 +40,11 @@ LOG = logging.getLogger(__name__)
 def upload(context, family_id, force_restart):
     """Upload results from analyses."""
 
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     click.echo(click.style("----------------- UPLOAD ----------------------"))
-    analysis_api = MipDNAAnalysisAPI(context.obj)
-    context.obj["analysis_api"] = analysis_api
 
     if family_id:
         try:
@@ -121,7 +123,10 @@ def upload(context, family_id, force_restart):
 def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
 
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
@@ -158,3 +163,4 @@ upload.add_command(coverage)
 upload.add_command(delivery_report)
 upload.add_command(delivery_reports)
 upload.add_command(delivery_report_to_scout)
+upload.add_command(vogue)
