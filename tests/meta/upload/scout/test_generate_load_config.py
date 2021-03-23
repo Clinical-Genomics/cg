@@ -3,13 +3,13 @@
 import pytest
 from cg.constants import Pipeline
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scout_load_config import (
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     MipLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.store import Store, models
 
 RESULT_KEYS = [

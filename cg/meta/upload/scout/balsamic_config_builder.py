@@ -4,8 +4,8 @@ from cg.apps.lims import LimsAPI
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.meta.upload.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
 from cg.store import models
 from housekeeper.store import models as hk_models
 

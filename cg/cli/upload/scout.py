@@ -5,16 +5,14 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from ruamel.yaml import YAML
-
-
-from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
+from ruamel.yaml import YAML
 
-from .utils import suggest_cases_to_upload
 from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
+from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)
 
