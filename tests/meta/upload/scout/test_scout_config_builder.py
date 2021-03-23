@@ -1,9 +1,6 @@
 """Tests for the file handlers"""
 from typing import Optional
 
-from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.madeline import MockMadelineAPI
-
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -15,6 +12,8 @@ from cg.meta.upload.scout.scout_load_config import (
 )
 from cg.store import models
 from housekeeper.store import models as hk_models
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.madeline import MockMadelineAPI
 
 from .conftest import MockAnalysis
 
@@ -55,7 +54,7 @@ def test_balsamic_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_include_delivery_report(mip_config_builder: MipConfigBuilder):
+def test_include_delivery_report_mip(mip_config_builder: MipConfigBuilder):
     # GIVEN a config builder with some data
 
     # GIVEN a config without a delivery report
@@ -123,6 +122,20 @@ def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuil
 
     # THEN assert that the mandatory snv vcf was added
     assert balsamic_config_builder.load_config.vcf_cancer
+
+
+def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfigBuilder):
+    # GIVEN a housekeeper version bundle with some balsamic analysis files
+    # GIVEN a case load object
+
+    # WHEN including the case level files
+    balsamic_config_builder.build_load_config()
+
+    # THEN assert that the coverage_qc_report exists
+    assert balsamic_config_builder.load_config.coverage_qc_report
+
+    # THEN assert that the delivery_report is None
+    assert balsamic_config_builder.load_config.delivery_report is None
 
 
 def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):

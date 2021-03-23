@@ -45,6 +45,11 @@ LOG = logging.getLogger(__name__)
 # Case fixtures
 
 
+@pytest.fixture(name="slurm_account")
+def fixture_slurm_account() -> str:
+    return "super_account"
+
+
 @pytest.fixture(name="user_name")
 def fixture_user_name() -> str:
     return "Paul Anderson"
@@ -343,13 +348,19 @@ def microbial_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def sarscov2_orderform(orderforms: Path) -> str:
     """Orderform fixture for sarscov2 samples"""
-    return Path(orderforms / "2184.2.sarscov2.xlsx").as_posix()
+    return Path(orderforms / "2184.3.sarscov2.xlsx").as_posix()
 
 
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
     return Path(orderforms / "1604.10.rml.xlsx").as_posix()
+
+
+@pytest.fixture
+def mip_json_orderform() -> dict:
+    """Load an example json scout order."""
+    return json.load(open("tests/fixtures/orderforms/mip-json.json"))
 
 
 @pytest.fixture(name="madeline_output")
@@ -363,12 +374,6 @@ def fixture_madeline_output(apps_dir: Path) -> str:
 def mip_order_to_submit() -> dict:
     """Load an example scout order."""
     return json.load(open("tests/fixtures/orders/mip.json"))
-
-
-@pytest.fixture
-def mip_json_order_to_submit() -> dict:
-    """Load an example json scout order."""
-    return json.load(open("tests/fixtures/orders/mip-json.json"))
 
 
 @pytest.fixture
@@ -670,6 +675,11 @@ def fixture_hk_version_obj(
 
 
 # Process Mock
+
+
+@pytest.fixture(name="sbatch_job_number")
+def fixture_sbatch_job_number() -> int:
+    return 123456
 
 
 @pytest.fixture(name="process")
@@ -1106,7 +1116,11 @@ def microsalt_dir(tmpdir_factory):
 @pytest.fixture(name="fixture_cg_url")
 def fixture_cg_url(database_copy_path):
     new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
-    return f"sqlite:///{new_path}"
+    url = f"sqlite:///{new_path}"
+    store = Store(url)
+    store.drop_all()
+    store.create_all()
+    return url
 
 
 @pytest.fixture(name="fixture_hk_url")

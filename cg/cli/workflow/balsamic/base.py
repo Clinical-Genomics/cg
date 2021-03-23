@@ -110,7 +110,7 @@ def run(
             priority=priority,
             dry_run=dry_run,
         )
-        if dry_run:
+        if dry_run or not run_analysis:
             return
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -219,7 +219,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run, run_analysis=True)
         except CgError as error:
             LOG.error(error.message)
             exit_code = EXIT_FAIL

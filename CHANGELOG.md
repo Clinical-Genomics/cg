@@ -13,9 +13,90 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.5.3]
+## [20.9.13]
 ### Added
 - Add support for fastq delivery
+
+
+## [20.9.12]
+### Changed
+- Use pydantic models for handling lims samples
+
+
+## [20.9.11]
+### Fixed
+- Fix bug that that prevented wgs fastq samples from being genotyped
+
+## [20.9.10]
+### Fixed
+- Move synopsis and cohorts from sample to case in the database since that is how they are used 
+
+## [20.9.9]
+### Fixed
+- Fixed bug in upload delivery report automation
+
+## [20.9.8]
+### Fixed
+- Fixed context in upload vogue
+
+## [20.9.7]
+### Fixed
+- Added missing pipeline option in database for SARS-CoV-2 on case in database
+
+## [20.9.6]
+### Fixed
+- Use `coverage_qc_report` instead of `delivery_report` when uploading balsamic cases to scout
+
+## [20.9.5]
+### Fixed
+- Balsamic crontab start-available auto-disables balsamic dry run
+
+## [20.9.4]
+### Fixed
+- Fix bug that pending path was not created 
+
+## [20.9.3]
+### Fixed
+- Bug in automation of delivery report upload
+
+## [20.9.2]
+### Fixed
+- Bug when updating crunchy metadata files
+
+## [20.9.1]
+### Fixed
+- Bug preventing MicroSALT to start automatically
+
+## [20.9.0]
+### Added
+- SlurmAPI to handle all communication with slurm from cg
+
+## [20.8.1]
+### Changed
+- Deletes unused files .gitlint, housekeeper, status, status_db
+
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
+## [20.6.0]
+### Changed
+- Use cgmodels for crunchy metadata files
+
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
+## [20.5.3]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
 
 ## [20.5.2]
 ### Changed
