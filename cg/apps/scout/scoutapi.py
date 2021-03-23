@@ -7,10 +7,9 @@ from subprocess import CalledProcessError
 from typing import List, Optional
 
 import yaml
-
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.gene_panel import GENOME_BUILD_37
-from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
+from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)

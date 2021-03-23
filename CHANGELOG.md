@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.11.0]
+### Added
+- functionality to upload synopsis, cohort and phenotype information to scout
+
 ## [20.10.1]
 ### Fixed
 - Mip start-available command

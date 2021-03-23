@@ -8,12 +8,8 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.meta.upload.scout.scout_load_config import (
-    MipLoadConfig,
-    ScoutLoadConfig,
-    ScoutMipIndividual,
-)
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.store import models
 from housekeeper.store import models as hk_models
 
