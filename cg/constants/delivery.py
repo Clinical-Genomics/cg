@@ -90,6 +90,12 @@ MICROSALT_ANALYSIS_CASE_TAGS = [
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS = []
 
+FASTQ_ANALYSIS_CASE_TAGS = []
+
+FASTQ_ANALYSIS_SAMPLE_TAGS = [
+    {"fastq"},
+]
+
 PIPELINE_ANALYSIS_TAG_MAP = {
     "balsamic": {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
@@ -113,6 +119,10 @@ PIPELINE_ANALYSIS_TAG_MAP = {
     #     "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
     #     "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     # },
+    "fastq": {
+        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
+        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
+    },
 }
 
 PIPELINE_ANALYSIS_OPTIONS = PIPELINE_ANALYSIS_TAG_MAP.keys()
