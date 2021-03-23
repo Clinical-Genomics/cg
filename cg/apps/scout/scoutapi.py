@@ -8,6 +8,7 @@ from typing import List, Optional
 
 import yaml
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
+from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 
@@ -59,7 +60,7 @@ class ScoutAPI:
         ]
         self.process.run_command(parameters=parameters)
 
-    def export_panels(self, panels: List[str], build: str = None) -> List[str]:
+    def export_panels(self, panels: List[str], build: str = GENOME_BUILD_37) -> List[str]:
         """Pass through to export of a list of gene panels.
 
         Return list of lines in bed format

@@ -13,9 +13,23 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.10.0]
+## [20.11.0]
 ### Added
 - functionality to upload synopsis, cohort and phenotype information to scout
+
+## [20.10.1]
+### Fixed
+- Mip start-available command
+
+## [20.10.0]
+### Added
+- Panel command to mip-rna analysis workflow
+- Add genome build 38 as default for mip-rna when exporting gene panels from Scout
+- Add genome build 37 as default for mip-dna when exporting gene panels from Scout
+- Add genome build 37 as default when exporting gene panels from Scout
+
+### Changed
+- Refactor start and start-available for mip
 
 ## [20.9.12]
 ### Changed
