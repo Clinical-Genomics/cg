@@ -6,20 +6,17 @@ from pathlib import Path
 from tempfile import tempdir
 
 import pytest
-
-from cg.meta.report.api import ReportAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.mocks.madeline import MockMadelineAPI
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.meta.upload.scout.scout_load_config import ScoutLoadConfig
+from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store, models
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.madeline import MockMadelineAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -136,13 +133,6 @@ def fixture_base_cli_context(
     }
 
 
-@pytest.fixture(scope="function", name="vogue_context")
-def fixture_vogue_cli_context(vogue_api) -> dict:
-    """context to use in cli"""
-
-    return {"vogue_api": vogue_api}
-
-
 @pytest.fixture(scope="function", name="upload_scout_api")
 def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
     """Return a upload scout api"""
@@ -151,13 +141,6 @@ def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_confi
     api.config = mip_load_config
 
     return api
-
-
-@pytest.fixture(scope="function", name="vogue_api")
-def fixture_vogue_api():
-    """Return a MockVogueApi"""
-
-    return MockVogueApi()
 
 
 class MockScoutApi(ScoutAPI):
@@ -183,21 +166,6 @@ class MockReportApi(ReportAPI):
 
         for key, value in kwargs.items():
             LOG.info("create_delivery_report called with key %s and value %s", key, value)
-
-
-class MockVogueApi:
-    def __init__(self):
-        """docstring for __init__"""
-        pass
-
-    def load_reagent_labels(self, days: int):
-        """docstring for upload"""
-
-    def load_samples(self, days: int):
-        """docstring for upload"""
-
-    def load_flowcells(self, days: int):
-        """docstring for upload"""
 
 
 class MockAnalysisApi(MipAnalysisAPI):

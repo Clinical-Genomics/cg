@@ -1,13 +1,12 @@
 """Functions that handle files in the context of scout uploading"""
 import logging
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 import requests
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
-from cg.meta.upload.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
+from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.store import models
 from housekeeper.store import models as hk_models
 
@@ -36,6 +35,9 @@ class ScoutConfigBuilder:
         self.load_config.family = self.analysis_obj.family.internal_id
         self.load_config.family_name = self.analysis_obj.family.name
         self.load_config.owner = self.analysis_obj.family.customer.internal_id
+        self.include_synopsis()
+        self.include_cohorts()
+        self.include_phenotype_terms()
 
     def add_mandatory_sample_info(
         self,
@@ -76,6 +78,36 @@ class ScoutConfigBuilder:
     def include_case_files(self) -> None:
         """Include all files that are used on case level in scout"""
         raise NotImplementedError
+
+    def include_phenotype_terms(self) -> None:
+        LOG.info("Adding phenotype terms to scout load config")
+        phenotype_terms: Set[str] = set()
+        link_obj: models.FamilySample
+        for link_obj in self.analysis_obj.family.links:
+            sample_obj: models.Sample = link_obj.sample
+            for phenotype_term in sample_obj.phenotype_terms:
+                LOG.debug(
+                    "Adding term %s from sample %s to phenotype terms",
+                    phenotype_term,
+                    sample_obj.internal_id,
+                )
+                phenotype_terms.add(phenotype_term)
+        if phenotype_terms:
+            self.load_config.phenotype_terms = list(phenotype_terms)
+
+    def include_synopsis(self) -> None:
+        LOG.info("Adding synopsis string to scout load config")
+        synopsis_string: str = " ".join(self.analysis_obj.family.synopsis)
+        if synopsis_string:
+            LOG.debug("Adding synopsis string %s", synopsis_string)
+            self.load_config.synopsis = synopsis_string
+
+    def include_cohorts(self) -> None:
+        LOG.info("Including cohorts to scout load config")
+        cohorts: List[str] = self.analysis_obj.family.cohorts
+        if cohorts:
+            LOG.debug("Adding cohorts %s", ", ".join(cohorts))
+            self.load_config.cohorts = cohorts
 
     def include_multiqc_report(self) -> None:
         LOG.info("Include MultiQC report to case")

@@ -4,8 +4,8 @@ from cg.apps.lims import LimsAPI
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.meta.upload.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
 from cg.store import models
 from housekeeper.store import models as hk_models
 
@@ -32,6 +32,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutBalsamicIndividual):
         LOG.info("Including BALSAMIC specific sample level files")
+
+    def include_delivery_report(self) -> None:
+        LOG.info("Include coverage qc report to case")
+        self.load_config.coverage_qc_report = self.fetch_file_from_hk(
+            self.case_tags.delivery_report
+        )
 
     def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
         """Build a sample with balsamic specific information"""

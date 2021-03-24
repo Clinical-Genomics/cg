@@ -17,7 +17,11 @@ def coverage(context, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
 
     click.echo(click.style("----------------- COVERAGE --------------------"))
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
+
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     if not family_id:
         suggest_cases_to_upload(context)
         context.abort()

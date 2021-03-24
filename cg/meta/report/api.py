@@ -132,7 +132,8 @@ class ReportAPI:
     ) -> None:
         """Update date on analysis when delivery report was created"""
 
-        analysis_obj = status_api.analysis(case_id, analysis_date)
+        case_obj = status_api.family(case_id)
+        analysis_obj = status_api.analysis(case_obj, analysis_date)
         analysis_obj.delivery_report_created_at = datetime.now()
         status_api.commit()
 

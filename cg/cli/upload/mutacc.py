@@ -25,12 +25,9 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    analysis_api: MipDNAAnalysisAPI = context.obj["analysis_api"]
-    mutacc_auto_api = MutaccAutoAPI(context.obj)
-
-    mutacc_upload = UploadToMutaccAPI(
-        scout_api=analysis_api.scout_api, mutacc_auto_api=mutacc_auto_api
-    )
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
 
     # Get cases to upload into mutacc from scout
     finished_cases: List[ScoutExportCase] = []
@@ -53,7 +50,7 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
             continue
 
         LOG.info("Start processing case %s with mutacc", case.id)
-        mutacc_upload.extract_reads(case)
+        analysis_api.mutacc_upload_api.extract_reads(case)
 
     if number_processed == 0:
         LOG.info("No cases were solved within the last %s days", days_ago)
@@ -64,9 +61,12 @@ def process_solved(context, case_id, days_ago, customers, dry_run):
 def processed_solved(context):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
+    if not context.obj.get("analysis_api"):
+        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api = context.obj["analysis_api"]
+
     LOG.info("----------------- PROCESSED-SOLVED ----------------")
 
     LOG.info("Uploading processed cases by mutacc to the mutacc database")
 
-    mutacc_auto_api = MutaccAutoAPI(context.obj)
-    mutacc_auto_api.import_reads()
+    analysis_api.mutacc_auto_api.import_reads()
