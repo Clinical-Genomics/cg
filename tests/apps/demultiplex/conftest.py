@@ -3,7 +3,20 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from cg.apps.demultiplex.novaseq_sample_sheet import SampleSheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.models.demultiplex.run_parameters import RunParameters
+from cg.models.demultiplex.valid_indexes import Index
+
+
+@pytest.fixture(name="flowcell_name")
+def fixture_flowcell_name() -> str:
+    return "AAAAAAA"
+
+
+@pytest.fixture(name="index_obj")
+def fixture_index_obj() -> Index:
+    return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
 @pytest.fixture(name="demultiplex_fixtures")
@@ -85,3 +98,21 @@ def fixture_lims_novaseq_samples(lims_novaseq_samples_file: Path) -> List[LimsFl
     with open(lims_novaseq_samples_file, "r") as in_file:
         raw_samples: List[dict] = json.load(in_file)
         return [LimsFlowcellSample(**sample) for sample in raw_samples]
+
+
+@pytest.fixture(name="novaseq_run_parameters_object")
+def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunParameters:
+    return RunParameters(novaseq_run_parameters)
+
+
+@pytest.fixture(name="novaseq_sample_sheet_object")
+def fixture_novaseq_sample_sheet_object(
+    flowcell_name: str,
+    lims_novaseq_samples: List[LimsFlowcellSample],
+    novaseq_run_parameters_object: RunParameters,
+) -> SampleSheet:
+    return SampleSheet(
+        flowcell=flowcell_name,
+        lims_samples=lims_novaseq_samples,
+        run_parameters=novaseq_run_parameters_object,
+    )

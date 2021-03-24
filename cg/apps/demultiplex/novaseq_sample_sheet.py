@@ -1,19 +1,20 @@
 """ Create a samplesheet for Novaseq flowcells """
 
-import csv
+import logging
 from typing import Dict, List, Set
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index
-from cg.resources import valid_indexes_path
+from cg.apps.demultiplex import index
+
+
+LOG = logging.getLogger(__name__)
 
 
 class SampleSheet:
     """ Create a raw sample sheet for Novaseq flowcells """
 
-    NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
-    NEW_REAGENT_KIT_VERSION = 1.5
     HEADER_TO_LIMS_KEY = {
         "FCID": "flowcell_id",
         "Lane": "lane",
@@ -54,14 +55,7 @@ class SampleSheet:
         self.pad: bool = pad
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
-        self.valid_indexes: List[Index] = self.get_valid_indexes()
-
-    @staticmethod
-    def get_valid_indexes() -> List[Index]:
-        with open(valid_indexes_path, "r") as csv_file:
-            indexes_csv = csv.reader(csv_file)
-            indexes: List[Index] = [Index(name=row[0], sequence=row[1]) for row in indexes_csv]
-        return indexes
+        self.valid_indexes: List[Index] = index.get_valid_indexes()
 
     @staticmethod
     def dummy_sample_name(sample_name: str) -> str:
@@ -89,17 +83,6 @@ class SampleSheet:
         return project.split()[0]
 
     @staticmethod
-    def get_reverse_complement_dna_seq(dna: str) -> str:
-        """ Generates the reverse complement of a DNA sequence"""
-        complement = {"A": "T", "C": "G", "G": "C", "T": "A"}
-        return "".join(complement[base] for base in reversed(dna))
-
-    @staticmethod
-    def is_dual_index(index: str) -> bool:
-        """ Determines if an index in the raw sample sheet is dual index or not """
-        return "-" in index
-
-    @staticmethod
     def index_exists(index: str, indexes: Set[str]) -> bool:
         """ Determines if a index is already present in the existing indexes """
         return any(existing_index.startswith(index) for existing_index in indexes)
@@ -107,16 +90,6 @@ class SampleSheet:
     def get_sample_indexes_in_lane(self, lane: int) -> Set[str]:
         """ Returns all sample indexes in a given lane """
         return {sample.index for sample in self.lims_samples if sample.lane == lane}
-
-    def is_reverse_complement(self) -> bool:
-        """If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
-        and the new reagent kit version (NEW_REAGENT_KIT_VERSION) the second index should be the
-        reverse complement"""
-        return (
-            self.run_parameters.control_software_version == self.NEW_CONTROL_SOFTWARE_VERSION
-            and self.get_reagent_kit_version(self.run_parameters.reagent_kit_version)
-            == self.NEW_REAGENT_KIT_VERSION
-        )
 
     def get_indexes_by_lane(self) -> Dict[int, Set[str]]:
         """Group the indexes by lane"""
@@ -147,68 +120,41 @@ class SampleSheet:
 
     def remove_unwanted_samples(self) -> None:
         """ Filter out samples with indexes of unwanted length and single indexes """
-        self.lims_samples = [
-            sample for sample in self.lims_samples if self.is_dual_index(sample.index)
-        ]
-
-    def adapt_indexes(self) -> None:
-        """Adapts the indexes: pads all indexes so that all indexes have a length equal to the
-        number  of index reads, and takes the reverse complement of index 2 in case of the new
-        novaseq software control version (1.7) in combination with the new reagent kit
-        (version 1.5)"""
-
-        is_reverse_complement: bool = self.is_reverse_complement()
-
+        LOG.info("Removing all samples with dual indexes")
+        samples_to_keep = []
+        sample: LimsFlowcellSample
         for sample in self.lims_samples:
-            index1, index2 = sample.index.split("-")
-            if self.pad and len(index1) == 8:
-                self.pad_and_rc_indexes(sample=sample, is_reverse_complement=is_reverse_complement)
-            elif len(index2) == 10:
-                if not is_reverse_complement:
-                    sample.index2 = index2
-                    continue
-                sample.index2 = self.get_reverse_complement_dna_seq(index2)
-            else:
+            if index.is_dual_index(sample.index):
+                LOG.warning("Removing sample %s", sample.sample_id)
                 continue
-
-    def pad_and_rc_indexes(self, sample: LimsFlowcellSample, is_reverse_complement: bool) -> None:
-        """ Pads and reverse complements indexes """
-        index1, index2 = sample.index.split("-")
-        if self.run_parameters.index_reads == 8:
-            if not is_reverse_complement:
-                sample.index2 = index2
-                return
-            sample.index2 = self.get_reverse_complement_dna_seq(index2)
-
-        if self.run_parameters.index_reads == 10:
-            sample.index = index1 + "AT"
-            if not is_reverse_complement:
-                sample.index2 = index2 + "AC"
-                return
-            sample.index2 = self.get_reverse_complement_dna_seq("AC" + index2)
+            samples_to_keep.append(sample)
+        self.lims_samples = samples_to_keep
 
     @staticmethod
-    def get_reagent_kit_version(reagent_kit_version: str) -> float:
-        """ Derives the reagent kit version from the run parameters """
-
-        parameter_to_version = {"1": 1.0, "3": 1.5}
-        if reagent_kit_version not in parameter_to_version:
-            raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
-
-        return parameter_to_version[reagent_kit_version]
-
-    def convert_sample_to_header_dict(self, sample: LimsFlowcellSample) -> List[str]:
+    def convert_sample_to_header_dict(
+        sample: LimsFlowcellSample, sample_sheet_headers: List[str], header_to_lims: Dict[str, str]
+    ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet headers"""
-        sample_dict = sample.json()
-        return [
-            sample_dict[self.HEADER_TO_LIMS_KEY[header]] for header in self.SAMPLE_SHEET_HEADERS
-        ]
+        LOG.info("Use sample sheet header %s", sample_sheet_headers)
+        print(sample_sheet_headers)
+        print(header_to_lims)
+        print(sample)
+        sample_dict = sample.dict()
+        return [str(sample_dict[header_to_lims[header]]) for header in sample_sheet_headers]
 
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
         sample_sheet = [",".join(self.SAMPLE_SHEET_HEADERS)]
         for sample in self.lims_samples:
-            sample_sheet.append(",".join(self.convert_sample_to_header_dict(sample=sample)))
+            sample_sheet.append(
+                ",".join(
+                    self.convert_sample_to_header_dict(
+                        sample=sample,
+                        sample_sheet_headers=self.SAMPLE_SHEET_HEADERS,
+                        header_to_lims=self.HEADER_TO_LIMS_KEY,
+                    )
+                )
+            )
         return "\n".join(sample_sheet)
 
     def construct_sample_sheet(self) -> str:

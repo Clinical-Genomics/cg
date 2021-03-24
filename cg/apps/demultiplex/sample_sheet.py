@@ -1,10 +1,9 @@
 """Create sample sheet for demultiplexing"""
 import logging
-from typing import Iterable, List
+from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.samplesheet import LimsFlowcellSample, sample_sheet
-from cgmodels.demultiplex.sample_sheet import SampleSheet
 
 LOG = logging.getLogger(__name__)
 
