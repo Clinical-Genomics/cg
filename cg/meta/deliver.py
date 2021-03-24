@@ -72,7 +72,7 @@ class DeliverAPI:
         if not self.customer_id:
             self.set_customer_id(case_obj=case_obj)
 
-        sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+        sample_ids: Set[str] = {sample.internal_id for sample in samples}
 
         if self.case_tags:
             self.deliver_case_files(
@@ -194,7 +194,7 @@ class DeliverAPI:
         Do not include files with sample tags.
         """
         tag: hk_models.Tag
-        file_tags = set([tag.name for tag in file_obj.tags])
+        file_tags = {tag.name for tag in file_obj.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")
             return False
@@ -225,7 +225,7 @@ class DeliverAPI:
         For fastq delivery we know that we want to deliver all files of bundle
         """
         tag: hk_models.Tag
-        file_tags = set([tag.name for tag in file_obj.tags])
+        file_tags = {tag.name for tag in file_obj.tags}
         tags: Set[str]
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
