@@ -17,6 +17,10 @@ Try to use the following format:
 ### Changed
 - Update orderform 2184 to latest version 4
 
+## [20.12.1]
+### Fixed
+- Fix skip MIP-DNA (for MAF) for tumours with wgs applications for fastq delivery
+
 ## [20.12.0]
 ### Added
 - Add support for fastq delivery
