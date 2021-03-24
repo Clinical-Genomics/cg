@@ -54,6 +54,7 @@ def deliver_analysis(context, case_id: str, ticket_id: int, delivery_type: str, 
         case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
         sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
         project_base_path=Path(inbox),
+        fastq_delivery=delivery_type == "fastq",
     )
     deliver_api.set_dry_run(dry_run)
     if case_id:

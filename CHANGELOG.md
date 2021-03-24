@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.12.0]
+### Added
+- Add support for fastq delivery
+
 ## [20.11.0]
 ### Added
 - functionality to upload synopsis, cohort and phenotype information to scout
