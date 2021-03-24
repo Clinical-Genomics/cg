@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [20.12.1]
 ### Fixed
 - Fix skip MIP-DNA (for MAF) for tumours with wgs applications for fastq delivery
 
