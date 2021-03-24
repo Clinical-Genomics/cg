@@ -1,6 +1,7 @@
-from typing import Optional, Type
+from typing import Optional, List
 
 from cg.constants import Pipeline
+from cg.constants.gene_panel import GENOME_BUILD_38
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.utils import Process
 
@@ -46,3 +47,9 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         if link_obj.father:
             sample_data["father"] = link_obj.father.internal_id
         return sample_data
+
+    def panel(self, case_id: str, genome_build: str = GENOME_BUILD_38) -> List[str]:
+        """Create the aggregated gene panel file"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
+        return self.scout_api.export_panels(build=genome_build, panels=all_panels)

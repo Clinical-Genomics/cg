@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store"""
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
@@ -541,3 +541,16 @@ class StoreHelpers:
         )
         store.add_commit(link)
         return link
+
+    @staticmethod
+    def add_synopsis_to_case(
+        store: Store, case_id: str, synopsis: str = "a synopsis"
+    ) -> Optional[models.Family]:
+        """Function for adding a synopsis to a case in the database"""
+        case_obj: models.Family = store.family(internal_id=case_id)
+        if not case_obj:
+            LOG.warning("Could not find case")
+            return None
+        case_obj._synopsis = synopsis
+        store.add_commit(case_obj)
+        return case_obj
