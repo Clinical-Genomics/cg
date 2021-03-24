@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 from pathlib import Path
 from typing import List, Optional, Tuple
+import os
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
@@ -350,3 +351,10 @@ class AnalysisAPI(MetaAPI):
             raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
 
         LOG.info("Decompression for case %s not needed", case_id)
+
+    @staticmethod
+    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
+        """
+        Get date from deliverables path using date created metadata.
+        """
+        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))

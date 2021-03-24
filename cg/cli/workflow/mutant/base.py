@@ -67,6 +67,7 @@ def start(context: click.Context, dry_run: bool, case_id: str) -> None:
         context.invoke(link, case_id=case_id)
         context.invoke(config_case, case_id=case_id, dry_run=dry_run)
         context.invoke(run, case_id=case_id, dry_run=dry_run)
+        context.invoke(store, case_id=case_id, dry_run=dry_run)
     except DecompressionNeededError:
         LOG.info("Workflow not ready to run, will continue when decompression is finalized")
 

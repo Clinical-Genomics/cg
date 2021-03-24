@@ -1,3 +1,4 @@
+import datetime as dt
 import json
 import logging
 from pathlib import Path
@@ -118,3 +119,6 @@ class MutantAnalysisAPI(AnalysisAPI):
             ],
             dry_run=dry_run,
         )
+
+    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
+        return self.get_date_from_file_path(self.get_case_config_path(case_id=case_id))

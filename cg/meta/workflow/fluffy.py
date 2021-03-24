@@ -196,13 +196,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         return self.get_date_from_file_path(self.get_samplesheet_path(case_id=case_id))
 
-    @staticmethod
-    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
-        """
-        Get date from deliverables path using date created metadata.
-        """
-        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
-
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
