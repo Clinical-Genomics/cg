@@ -51,7 +51,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case_id=case_id), "case_config.json")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
-        return Path(self.get_case_path(case_id=case_id), "deliverables.yaml")
+        return Path(self.get_case_output_path(case_id=case_id), f"{case_id}_deliverables.yaml")
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case_obj = self.status_db.family(case_id)
