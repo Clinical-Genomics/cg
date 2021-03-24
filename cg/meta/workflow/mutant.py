@@ -1,6 +1,7 @@
 import datetime as dt
 import json
 import logging
+import shutil
 from pathlib import Path
 from typing import List
 
@@ -107,6 +108,9 @@ class MutantAnalysisAPI(AnalysisAPI):
         LOG.info("Saved config to %s", config_path)
 
     def run_analysis(self, case_id: str, dry_run: bool) -> None:
+        if self.get_case_output_path(case_id=case_id).exists():
+            LOG.info("Found old output files, directory will be cleaned!")
+            shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
         self.process.run_command(
             [
                 "analyse",
