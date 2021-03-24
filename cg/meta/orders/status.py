@@ -372,8 +372,8 @@ class StatusHandler:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                data_analysis: Pipeline = self.if_type_wgs_do_mip_dna_analysis_for_maf(
-                    application_version
+                data_analysis: Pipeline = self.get_fastq_pipeline(
+                    application_version, new_sample.is_tumour
                 )
                 new_case = self.status.add_case(
                     data_analysis=data_analysis,
@@ -395,14 +395,15 @@ class StatusHandler:
         return new_samples
 
     @staticmethod
-    def if_type_wgs_do_mip_dna_analysis_for_maf(
-        application_version: models.ApplicationVersion,
+    def get_fastq_pipeline(
+        application_version: models.ApplicationVersion, is_tumour: bool
     ) -> Pipeline:
-        return (
-            Pipeline.MIP_DNA
-            if application_version.application.prep_category == "wgs"
-            else Pipeline.FASTQ
-        )
+        if is_tumour:
+            return Pipeline.FASTQ
+        if application_version.application.prep_category == "wgs":
+            return Pipeline.MIP_DNA
+
+        return Pipeline.FASTQ
 
     def store_microbial_samples(
         self,
