@@ -253,11 +253,12 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
     assert new_samples[0].sex == "male"
 
 
-def test_store_fastq_samples_wgs_to_mip(orders_api, base_store, fastq_status_data):
-    # GIVEN a basic store with no samples and a fastq order as wgs
+def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a non-tumour fastq order as wgs
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
     base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+    fastq_status_data["samples"][0]["tumour"] = False
 
     # WHEN storing the order
     new_samples = orders_api.store_fastq_samples(
@@ -270,6 +271,26 @@ def test_store_fastq_samples_wgs_to_mip(orders_api, base_store, fastq_status_dat
 
     # THEN the analysis for the case should be MAF
     assert new_samples[0].links[0].family.data_analysis == Pipeline.MIP_DNA
+
+
+def test_store_fastq_samples_tumour_wgs_to_fastq(orders_api, base_store, fastq_status_data):
+    # GIVEN a basic store with no samples and a tumour fastq order as wgs
+    assert base_store.samples().count() == 0
+    assert base_store.families().count() == 0
+    base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+    fastq_status_data["samples"][0]["tumour"] = True
+
+    # WHEN storing the order
+    new_samples = orders_api.store_fastq_samples(
+        customer=fastq_status_data["customer"],
+        order=fastq_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=1234348,
+        samples=fastq_status_data["samples"],
+    )
+
+    # THEN the analysis for the case should be FASTQ
+    assert new_samples[0].links[0].family.data_analysis == Pipeline.FASTQ
 
 
 def test_store_fastq_samples_non_wgs_as_fastq(orders_api, base_store, fastq_status_data):
