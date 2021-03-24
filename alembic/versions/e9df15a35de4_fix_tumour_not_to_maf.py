@@ -16,8 +16,8 @@ from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
 
 # revision identifiers, used by Alembic.
-revision = 'e9df15a35de4'
-down_revision = '998be2e367cf'
+revision = "e9df15a35de4"
+down_revision = "998be2e367cf"
 branch_labels = None
 depends_on = None
 
