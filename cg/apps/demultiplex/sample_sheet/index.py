@@ -1,7 +1,7 @@
 """Functions that deals with modifications of the indexes"""
 import csv
 import logging
-from typing import List
+from typing import List, Tuple, Set, Dict
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.valid_indexes import Index
@@ -10,6 +10,23 @@ from cg.resources import valid_indexes_path
 LOG = logging.getLogger(__name__)
 NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
 NEW_REAGENT_KIT_VERSION = 1.5
+DNA_COMPLEMENTS = {"A": "T", "C": "G", "G": "C", "T": "A"}
+
+
+def index_exists(index: str, indexes: Set[str]) -> bool:
+    """ Determines if a index is already present in the existing indexes """
+    return any(existing_index.startswith(index) for existing_index in indexes)
+
+
+def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]]:
+    """Group the indexes from samples by lane"""
+    indexes_by_lane = {}
+    for sample in samples:
+        lane: int = sample.lane
+        if lane not in indexes_by_lane:
+            indexes_by_lane[lane] = set()
+        indexes_by_lane[lane].add(sample.index)
+    return indexes_by_lane
 
 
 def get_valid_indexes() -> List[Index]:
@@ -52,31 +69,21 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
     """ Generates the reverse complement of a DNA sequence"""
-    complement = {"A": "T", "C": "G", "G": "C", "T": "A"}
-    return "".join(complement[base] for base in reversed(dna))
+    LOG.debug("Reverse complement string %s", dna)
+
+    return "".join(DNA_COMPLEMENTS[base] for base in reversed(dna))
 
 
-def pad_and_rc_indexes(
-    sample: LimsFlowcellSample, reverse_complement: bool, index_reads: int
-) -> None:
-    """ Pads and reverse complements indexes """
-    index1, index2 = sample.index.split("-")
-    if index_reads not in [8, 10]:
-        message = f"Invalid index length {index_reads}"
-        LOG.warning(message)
-        raise SyntaxError(message)
-    if index_reads == 8:
-        if reverse_complement:
-            sample.index2 = get_reverse_complement_dna_seq(index2)
-            return
-        sample.index2 = index2
+def pad_index_one(index_string: str) -> str:
+    """Adds bases 'AT' to index one"""
+    return index_string + "AT"
 
-    if index_reads == 10:
-        sample.index = index1 + "AT"
-        if reverse_complement:
-            sample.index2 = get_reverse_complement_dna_seq("AC" + index2)
-            return
-        sample.index2 = index2 + "AC"
+
+def pad_index_two(index_string: str, reverse_complement: bool) -> str:
+    """Adds bases to index two depending on if it should be reverse complement or not"""
+    if reverse_complement:
+        return "AC" + index_string
+    return index_string + "AC"
 
 
 def adapt_indexes(
@@ -98,15 +105,15 @@ def adapt_indexes(
 
     for sample in samples:
         index1, index2 = sample.index.split("-")
-        if pad and len(index1) == 8:
-            self.pad_and_rc_indexes(sample=sample, is_reverse_complement=is_reverse_complement)
-        elif len(index2) == 10:
-            if not is_reverse_complement:
-                sample.index2 = index2
-                continue
-            sample.index2 = get_reverse_complement_dna_seq(index2)
-        else:
-            continue
+        index_length = len(index1)
+        if pad and index_length == 8:
+            LOG.info("Padding indexes")
+            index1 = pad_index_one(index_string=index1)
+            index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
+        if reverse_complement:
+            index2 = get_reverse_complement_dna_seq(index2)
+        sample.index = index1
+        sample.index2 = index2
 
 
 def is_dual_index(index: str) -> bool:

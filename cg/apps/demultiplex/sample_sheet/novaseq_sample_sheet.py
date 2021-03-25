@@ -3,11 +3,11 @@
 import logging
 from typing import Dict, List, Set
 
+from cg.apps.demultiplex import index
+from cg.apps.demultiplex.dummy_sample import dummy_sample
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index
-from cg.apps.demultiplex import index
-
 
 LOG = logging.getLogger(__name__)
 
@@ -58,74 +58,41 @@ class SampleSheet:
         self.valid_indexes: List[Index] = index.get_valid_indexes()
 
     @staticmethod
-    def dummy_sample_name(sample_name: str) -> str:
-        """Convert a string to a dummy sample name
-
-        Replace space and parentheses with dashes
-        """
-        return sample_name.replace(" ", "-").replace("(", "-").replace(")", "-")
-
-    @staticmethod
-    def dummy_sample(flowcell: str, dummy_index: str, lane: int, name: str) -> LimsFlowcellSample:
-        """ Constructs and returns a dummy sample in novaseq sample sheet format"""
-        return LimsFlowcellSample(
-            flowcell_id=flowcell,
-            lane=lane,
-            sample_id=SampleSheet.dummy_sample_name(sample_name=name),
-            index=dummy_index,
-            sample_name="indexcheck",
-            project="indexcheck",
-        )
-
-    @staticmethod
     def get_project_name(project: str) -> str:
         """ Only keeps the first part of the project name """
         return project.split()[0]
 
-    @staticmethod
-    def index_exists(index: str, indexes: Set[str]) -> bool:
-        """ Determines if a index is already present in the existing indexes """
-        return any(existing_index.startswith(index) for existing_index in indexes)
-
-    def get_sample_indexes_in_lane(self, lane: int) -> Set[str]:
-        """ Returns all sample indexes in a given lane """
-        return {sample.index for sample in self.lims_samples if sample.lane == lane}
-
-    def get_indexes_by_lane(self) -> Dict[int, Set[str]]:
-        """Group the indexes by lane"""
-        samples_by_lane = {}
-        for sample in self.lims_samples:
-            lane: int = sample.lane
-            if lane not in samples_by_lane:
-                samples_by_lane[lane] = set()
-            samples_by_lane[lane].add(sample.index)
-        return samples_by_lane
-
     def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non existing indexes to samples"""
-        indexes_by_lane: Dict[int, Set[str]] = self.get_indexes_by_lane()
-        for lane, indexes in indexes_by_lane.items():
-            for index_obj in self.valid_indexes:
-                if not self.index_exists(index=index_obj.sequence, indexes=indexes):
-                    continue
+        """Add all dummy samples with non existing indexes to samples
 
-                self.lims_samples.append(
-                    self.dummy_sample(
-                        flowcell=self.flowcell,
-                        dummy_index=index_obj.sequence,
-                        lane=lane,
-                        name=index_obj.name,
-                    )
+        dummy samples are added if there are indexes that are not used by the actual samples.
+        This means that we will add each dummy sample (that is needed) to each lane
+        """
+        LOG.info("Adding dummy samples for unused indexes")
+        indexes_by_lane: Dict[int, Set[str]] = index.get_indexes_by_lane(samples=self.lims_samples)
+        for lane, lane_indexes in indexes_by_lane.items():
+            LOG.debug("Add dummy samples for lane %s", lane)
+            for index_obj in self.valid_indexes:
+                if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
+                    LOG.debug("Index %s already in use", index_obj.sequence)
+                    continue
+                dummy_sample_obj: LimsFlowcellSample = dummy_sample(
+                    flowcell=self.flowcell,
+                    dummy_index=index_obj.sequence,
+                    lane=lane,
+                    name=index_obj.name,
                 )
+                LOG.debug("Adding dummy sample %s to lane %s", dummy_sample_obj, lane)
+                self.lims_samples.append(dummy_sample_obj)
 
     def remove_unwanted_samples(self) -> None:
         """ Filter out samples with indexes of unwanted length and single indexes """
-        LOG.info("Removing all samples with dual indexes")
+        LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: LimsFlowcellSample
         for sample in self.lims_samples:
-            if index.is_dual_index(sample.index):
-                LOG.warning("Removing sample %s", sample.sample_id)
+            if not index.is_dual_index(sample.index):
+                LOG.warning("Removing sample %s since it does not have dual index", sample)
                 continue
             samples_to_keep.append(sample)
         self.lims_samples = samples_to_keep
@@ -136,9 +103,6 @@ class SampleSheet:
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet headers"""
         LOG.info("Use sample sheet header %s", sample_sheet_headers)
-        print(sample_sheet_headers)
-        print(header_to_lims)
-        print(sample)
         sample_dict = sample.dict()
         return [str(sample_dict[header_to_lims[header]]) for header in sample_sheet_headers]
 
@@ -162,6 +126,11 @@ class SampleSheet:
         # Create dummy samples for the indexes that is missing
         self.add_dummy_samples()
         self.remove_unwanted_samples()
-        self.adapt_indexes()
+        index.adapt_indexes(
+            samples=self.lims_samples,
+            control_software_version=self.run_parameters.control_software_version,
+            reagent_kit_version=self.run_parameters.reagent_kit_version,
+            pad=self.pad,
+        )
 
         return self.convert_to_sample_sheet()
