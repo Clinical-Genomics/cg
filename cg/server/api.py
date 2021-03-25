@@ -264,6 +264,7 @@ def options():
     customer_objs = (
         db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
     )
+
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
 
@@ -304,6 +305,9 @@ def options():
 @BLUEPRINT.route("/me")
 def me():
     """Fetch information about current user."""
+    if not g.current_user.is_admin and not g.current_user.customers:
+        return abort(401)
+
     return jsonify(user=g.current_user.to_dict())
 
 
