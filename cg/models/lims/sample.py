@@ -42,7 +42,7 @@ class Udf(BaseModel):
     tumour_purity: Optional[str]
     volume: Optional[str]
     well_position_rml: Optional[str]
-    verified_organism: Optional[str]
+    verified_organism: Optional[bool]
 
     @validator("sex", pre=True)
     def validate_sex(cls, value: str):
