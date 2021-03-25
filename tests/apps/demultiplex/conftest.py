@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.apps.demultiplex.novaseq_sample_sheet import SampleSheet
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index

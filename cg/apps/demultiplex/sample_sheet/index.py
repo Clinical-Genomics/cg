@@ -1,7 +1,7 @@
 """Functions that deals with modifications of the indexes"""
 import csv
 import logging
-from typing import List, Tuple, Set, Dict
+from typing import Dict, List, Set, Tuple
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.valid_indexes import Index
@@ -29,11 +29,17 @@ def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]
     return indexes_by_lane
 
 
-def get_valid_indexes() -> List[Index]:
+def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
     LOG.info("Fetch indexes from %s", valid_indexes_path)
+    indexes: List[Index] = []
     with open(valid_indexes_path, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
-        indexes: List[Index] = [Index(name=row[0], sequence=row[1]) for row in indexes_csv]
+        for row in indexes_csv:
+            index_name = row[0]
+            index_sequence = row[1]
+            if dual_indexes_only and not is_dual_index(index_sequence):
+                continue
+            indexes.append(Index(name=index_name, sequence=index_sequence))
     return indexes
 
 
