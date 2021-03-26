@@ -12,8 +12,8 @@ from sqlalchemy.dialects import mysql
 # revision identifiers, used by Alembic.
 from sqlalchemy.ext.declarative import declarative_base
 
-revision = '089edc289291'
-down_revision = 'e9df15a35de4'
+revision = "089edc289291"
+down_revision = "e9df15a35de4"
 branch_labels = None
 depends_on = None
 
@@ -51,12 +51,19 @@ def upgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
 
-    op.create_table('customer_user',
-                    sa.Column('customer_id', sa.Integer(), nullable=False),
-                    sa.Column('user_id', sa.Integer(), nullable=False),
-                    sa.ForeignKeyConstraint(['customer_id'], ['customer.id'], ),
-                    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
-                    sa.UniqueConstraint('customer_id', 'user_id', name='_customer_user_uc')
+    op.create_table(
+        "customer_user",
+        sa.Column("customer_id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["customer_id"],
+            ["customer.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["user.id"],
+        ),
+        sa.UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
     )
 
     # customer_user.__table__.create(bind)
@@ -68,12 +75,17 @@ def upgrade():
 
     session.commit()
 
-    op.drop_constraint('user_ibfk_1', 'user', type_='foreignkey')
-    op.drop_column('user', 'customer_id')
+    op.drop_constraint("user_ibfk_1", "user", type_="foreignkey")
+    op.drop_column("user", "customer_id")
 
 
 def downgrade():
-    op.add_column('user', sa.Column('customer_id', mysql.INTEGER(display_width=11), autoincrement=False, nullable=False))
+    op.add_column(
+        "user",
+        sa.Column(
+            "customer_id", mysql.INTEGER(display_width=11), autoincrement=False, nullable=False
+        ),
+    )
 
     # Change user<-user_customer->customer into direct connection user->customer
     bind = op.get_bind()
@@ -88,6 +100,8 @@ def downgrade():
 
     session.commit()
 
-    op.create_foreign_key('user_ibfk_1', 'user', 'customer', ['customer_id'], ['id'], ondelete='CASCADE')
+    op.create_foreign_key(
+        "user_ibfk_1", "user", "customer", ["customer_id"], ["id"], ondelete="CASCADE"
+    )
 
-    op.drop_table('customer_user')
+    op.drop_table("customer_user")

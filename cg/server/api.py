@@ -143,7 +143,8 @@ def family_in_customer_group(family_id):
     if case_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-        case_obj.customer.customer_group not in set(customer.customer_group for customer in g.current_user.customers)
+        case_obj.customer.customer_group
+        not in set(customer.customer_group for customer in g.current_user.customers)
     ):
         return abort(401)
 
@@ -201,7 +202,8 @@ def sample_in_customer_group(sample_id):
     if sample_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-         sample_obj.customer.customer_group not in set(customer.customer_group for customer in g.current_user.customers)
+        sample_obj.customer.customer_group
+        not in set(customer.customer_group for customer in g.current_user.customers)
     ):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
@@ -261,9 +263,7 @@ def analyses():
 @BLUEPRINT.route("/options")
 def options():
     """Fetch various options."""
-    customer_objs = (
-        db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
-    )
+    customer_objs = db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
 
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
