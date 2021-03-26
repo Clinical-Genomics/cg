@@ -18,7 +18,7 @@ class DemultiplexData:
             raise FileNotFoundError(
                 "Could not find run parameters file %s".format(self.run_parameters_path)
             )
-        return RunParameters(run_parameters=self.run_parameters_path)
+        return RunParameters(run_parameters_path=self.run_parameters_path)
 
     @property
     def run_parameters_path(self) -> Path:

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheet
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index
@@ -110,8 +110,8 @@ def fixture_novaseq_sample_sheet_object(
     flowcell_name: str,
     lims_novaseq_samples: List[LimsFlowcellSample],
     novaseq_run_parameters_object: RunParameters,
-) -> SampleSheet:
-    return SampleSheet(
+) -> SampleSheetCreator:
+    return SampleSheetCreator(
         flowcell=flowcell_name,
         lims_samples=lims_novaseq_samples,
         run_parameters=novaseq_run_parameters_object,

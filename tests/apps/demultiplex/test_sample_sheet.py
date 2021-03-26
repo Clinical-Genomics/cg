@@ -3,7 +3,7 @@ from typing import List
 from cg.apps.demultiplex.novaseq_sample_sheet import SampleSheet
 from cg.apps.demultiplex.sample_sheet import create_sample_sheet
 from cg.apps.lims import LimsAPI
-from cg.apps.lims.samplesheet import LimsFlowcellSample, sample_sheet
+from cg.apps.lims.samplesheet import LimsFlowcellSample, flowcell_samples
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index
 

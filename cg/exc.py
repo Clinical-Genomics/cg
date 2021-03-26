@@ -14,6 +14,10 @@ class CgError(Exception):
         self.message = message
 
 
+class FlowcellError(CgError):
+    """Raised when decompression still needed to start analysis"""
+
+
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis"""
 

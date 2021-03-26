@@ -96,7 +96,7 @@ def adapt_indexes(
     samples: List[LimsFlowcellSample],
     control_software_version: str,
     reagent_kit_version: str,
-    pad: bool,
+    expected_index_length: int,
 ) -> None:
     """Adapts the indexes: pads all indexes so that all indexes have a length equal to the
     number  of index reads, and takes the reverse complement of index 2 in case of the new
@@ -108,11 +108,10 @@ def adapt_indexes(
         control_software_version=control_software_version,
         reagent_kit_version_string=reagent_kit_version,
     )
-
     for sample in samples:
         index1, index2 = sample.index.split("-")
         index_length = len(index1)
-        if pad and index_length == 8:
+        if expected_index_length == 10 and index_length == 8:
             LOG.info("Padding indexes")
             index1 = pad_index_one(index_string=index1)
             index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)

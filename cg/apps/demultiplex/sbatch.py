@@ -7,7 +7,7 @@ singularity exec --bind \
 /home/proj/production/flowcells/novaseq/'$SLURM_JOB_ID':/run/user/$(id -u) \
 /home/proj/production/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
 bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
---runfolder-dir {run_dir} --output-dir {out_dir} --use-bases-mask {basemask} \
+--runfolder-dir {run_dir} --output-dir {out_dir} \
 --sample-sheet {sample_sheet} \
 --barcode-mismatches 1
 """
@@ -22,7 +22,6 @@ if __name__ == "__main__":
     demux_params = {
         "run_dir": "path/to/a_flowcell/",
         "out_dir": "path/to/output_dir/",
-        "basemask": "path/to/basemask.txt",
         "sample_sheet": "path/to/SampleSheet.csv",
     }
     print(DEMULTIPLEX_COMMAND.format(**demux_params))

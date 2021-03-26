@@ -1,7 +1,7 @@
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheet
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 
 
-def test_convert_to_sheet(novaseq_sample_sheet_object: SampleSheet):
+def test_convert_to_sheet(novaseq_sample_sheet_object: SampleSheetCreator):
     # GIVEN a sample sheet object populated with samples
     assert novaseq_sample_sheet_object.lims_samples
 

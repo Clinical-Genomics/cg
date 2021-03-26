@@ -12,7 +12,7 @@ from cg.models.demultiplex.valid_indexes import Index
 LOG = logging.getLogger(__name__)
 
 
-class SampleSheet:
+class SampleSheetCreator:
     """ Create a raw sample sheet for Novaseq flowcells """
 
     HEADER_TO_LIMS_KEY = {
@@ -47,15 +47,14 @@ class SampleSheet:
         flowcell: str,
         lims_samples: List[LimsFlowcellSample],
         run_parameters: RunParameters,
-        index_length: int = 8,
-        pad: bool = False,
     ):
         self.flowcell: str = flowcell
-        self.index_length: int = index_length
-        self.pad: bool = pad
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
-        self.valid_indexes: List[Index] = index.get_valid_indexes()
+
+    @property
+    def valid_indexes(self) -> List[Index]:
+        return index.get_valid_indexes(dual_indexes_only=True)
 
     @staticmethod
     def get_project_name(project: str) -> str:
@@ -124,13 +123,13 @@ class SampleSheet:
     def construct_sample_sheet(self) -> str:
         """ Construct the sample sheet """
         # Create dummy samples for the indexes that is missing
-        self.add_dummy_samples()
+        if self.run_parameters.run_type == "wgs":
+            self.add_dummy_samples()
         self.remove_unwanted_samples()
         index.adapt_indexes(
             samples=self.lims_samples,
             control_software_version=self.run_parameters.control_software_version,
             reagent_kit_version=self.run_parameters.reagent_kit_version,
-            pad=self.pad,
         )
 
         return self.convert_to_sample_sheet()

@@ -70,8 +70,8 @@ def get_index(lims: Lims, label: str) -> str:
     return sequence
 
 
-def sample_sheet(lims: Lims, flowcell: str) -> Iterable[LimsFlowcellSample]:
-    containers: List[Container] = lims.get_containers(name=flowcell)
+def flowcell_samples(lims: Lims, flowcell_id: str) -> Iterable[LimsFlowcellSample]:
+    containers: List[Container] = lims.get_containers(name=flowcell_id)
     if not containers:
         return []
     container: Container = containers[-1]  # only take the last one. See ÖA#217.
@@ -85,7 +85,7 @@ def sample_sheet(lims: Lims, flowcell: str) -> Iterable[LimsFlowcellSample]:
             label: Optional[str] = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
             yield LimsFlowcellSample(
-                flowcell_id=flowcell,
+                flowcell_id=flowcell_id,
                 lane=lane,
                 sample_id=sample.id,
                 index=index,
