@@ -348,7 +348,7 @@ def microbial_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def sarscov2_orderform(orderforms: Path) -> str:
     """Orderform fixture for sarscov2 samples"""
-    return Path(orderforms / "2184.3.sarscov2.xlsx").as_posix()
+    return Path(orderforms / "2184.4.sarscov2.xlsx").as_posix()
 
 
 @pytest.fixture
