@@ -69,7 +69,9 @@ class MutantAnalysisAPI(AnalysisAPI):
             case_ID=sample_obj.links[0].family.internal_id,
             Customer_ID_sample=sample_obj.name,
             customer_id=sample_obj.customer.internal_id,
-            sequencing_qc_pass=sample_obj.reads > 0,
+            sequencing_qc_pass=self.lims_api.get_sample_attribute(
+                lims_id=sample_obj.internal_id, key="sequencing_qc_pass"
+            ),
             CG_ID_project=sample_obj.links[0].family.name,
             Customer_ID_project=sample_obj.ticket_number,
             application_tag=sample_obj.application_version.application.tag,
