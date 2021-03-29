@@ -8,6 +8,7 @@ from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.models.demultiplex.valid_indexes import Index
+from cgmodels.demultiplex.sample_sheet import get_sample_sheet
 
 LOG = logging.getLogger(__name__)
 
@@ -44,11 +45,11 @@ class SampleSheetCreator:
 
     def __init__(
         self,
-        flowcell: str,
+        flowcell_id: str,
         lims_samples: List[LimsFlowcellSample],
         run_parameters: RunParameters,
     ):
-        self.flowcell: str = flowcell
+        self.flowcell_id: str = flowcell_id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
 
@@ -76,7 +77,7 @@ class SampleSheetCreator:
                     LOG.debug("Index %s already in use", index_obj.sequence)
                     continue
                 dummy_sample_obj: LimsFlowcellSample = dummy_sample(
-                    flowcell=self.flowcell,
+                    flowcell=self.flowcell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
@@ -101,12 +102,13 @@ class SampleSheetCreator:
         sample: LimsFlowcellSample, sample_sheet_headers: List[str], header_to_lims: Dict[str, str]
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet headers"""
-        LOG.info("Use sample sheet header %s", sample_sheet_headers)
+        LOG.debug("Use sample sheet header %s", sample_sheet_headers)
         sample_dict = sample.dict()
         return [str(sample_dict[header_to_lims[header]]) for header in sample_sheet_headers]
 
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
+        LOG.info("Convert samples to string")
         sample_sheet = ["[Data]", ",".join(self.SAMPLE_SHEET_HEADERS)]
         for sample in self.lims_samples:
             sample_sheet.append(
@@ -122,6 +124,7 @@ class SampleSheetCreator:
 
     def construct_sample_sheet(self) -> str:
         """ Construct the sample sheet """
+        LOG.info("Constructing sample sheet for %s", self.flowcell_id)
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.run_type == "wgs":
             self.add_dummy_samples()
@@ -132,5 +135,8 @@ class SampleSheetCreator:
             reagent_kit_version=self.run_parameters.reagent_kit_version,
             expected_index_length=self.run_parameters.index_length,
         )
-
-        return self.convert_to_sample_sheet()
+        sample_sheet: str = self.convert_to_sample_sheet()
+        LOG.info("Validating sample sheet")
+        get_sample_sheet(sample_sheet=sample_sheet, sheet_type="S2")
+        LOG.info("Sample sheet looks fine")
+        return sample_sheet

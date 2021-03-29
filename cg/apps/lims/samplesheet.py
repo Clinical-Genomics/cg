@@ -1,10 +1,13 @@
 """Functions to get sample sheet information from Lims"""
+import logging
 import re
 from typing import Iterable, List, Optional
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 from pydantic import BaseModel
+
+LOG = logging.getLogger(__name__)
 
 
 class LimsFlowcellSample(BaseModel):
@@ -71,6 +74,7 @@ def get_index(lims: Lims, label: str) -> str:
 
 
 def flowcell_samples(lims: Lims, flowcell_id: str) -> Iterable[LimsFlowcellSample]:
+    LOG.info("Fetching samples from lims for flowcell %s", flowcell_id)
     containers: List[Container] = lims.get_containers(name=flowcell_id)
     if not containers:
         return []

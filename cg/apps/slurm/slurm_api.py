@@ -41,9 +41,11 @@ class SlurmAPI:
 
     @staticmethod
     def write_sbatch_file(sbatch_content: str, sbatch_path: Path, dry_run: bool) -> None:
-        LOG.debug("Write sbatch content %s to %s", sbatch_content, sbatch_path)
+
         if dry_run:
+            LOG.info("Write sbatch content to path %s: \n%s", sbatch_path, sbatch_content)
             return
+        LOG.debug("Write sbatch content %s to %s", sbatch_content, sbatch_path)
         with open(sbatch_path, mode="w+t") as sbatch_file:
             sbatch_file.write(sbatch_content)
 

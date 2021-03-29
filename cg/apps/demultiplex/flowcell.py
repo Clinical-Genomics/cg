@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet
+from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
 from pydantic import ValidationError
 
@@ -33,7 +33,7 @@ class Flowcell:
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format"""
         try:
-            get_sample_sheet(infile=self.sample_sheet_path, sheet_type="S4")
+            get_sample_sheet_from_file(infile=self.sample_sheet_path, sheet_type="S4")
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
@@ -51,10 +51,6 @@ class Flowcell:
                 "Could not find run parameters file %s".format(self.run_parameters_path)
             )
         return RunParameters(run_parameters_path=self.run_parameters_path)
-
-    def fetch_logfile_path(self, out_dir: Path) -> Path:
-        """Create the path to the logfile"""
-        return out_dir / "Unaligned" / f"project.{self.flowcell_id}.log"
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done
@@ -91,6 +87,24 @@ class Flowcell:
             return False
 
         LOG.info("Flowcell %s is ready for demultiplexing", self.flowcell_id)
+        return True
+
+    def is_demultiplexing_possible(self) -> bool:
+        """Check if it is possible to start demultiplexing
+
+        This means that
+            - flowcell should be ready for demultiplexing (all files in place)
+            - sample sheet needs to exist
+            - demultiplexing should not be running
+        """
+        if not self.is_flowcell_ready():
+            return False
+        if not self.sample_sheet_exists():
+            LOG.warning("Could not find sample sheet for %s", self.flowcell_id)
+            return False
+        if self.is_demultiplexing_ongoing():
+            LOG.warning("Demultiplexing is ongoing for %s", self.flowcell_id)
+            return False
         return True
 
     def __str__(self):

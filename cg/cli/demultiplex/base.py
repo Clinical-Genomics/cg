@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 import click
 import click_pathlib
@@ -10,7 +10,11 @@ from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCre
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.samplesheet import LimsFlowcellSample, flowcell_samples
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet
+from cgmodels.demultiplex.sample_sheet import (
+    SampleSheet,
+    get_sample_sheet,
+    get_sample_sheet_from_file,
+)
 from click import Context
 from pydantic import ValidationError
 
@@ -41,7 +45,7 @@ def validate_sample_sheet(sheet: Path):
         LOG.warning("Suffix %s is not '.csv'", sheet.suffix)
         raise click.Abort
     try:
-        get_sample_sheet(sheet, sheet_type="S4")
+        get_sample_sheet_from_file(infile=sheet, sheet_type="S4")
     except ValidationError as err:
         LOG.warning(err)
         raise click.Abort
@@ -76,7 +80,7 @@ def create_sample_sheet(context: Context, flowcell: Path, dry_run: bool):
         lims=context.obj["lims_api"], flowcell_id=flowcell_object.flowcell_id
     )
     sample_sheet_creator = SampleSheetCreator(
-        flowcell=flowcell_object.flowcell_id,
+        flowcell_id=flowcell_object.flowcell_id,
         lims_samples=list(lims_samples),
         run_parameters=flowcell_object.run_parameters_object,
     )
@@ -90,30 +94,37 @@ def create_sample_sheet(context: Context, flowcell: Path, dry_run: bool):
 
 
 @click.command(name="flowcell")
-@click.option("--sample-sheet", type=click_pathlib.Path(exists=True), required=True)
-@click.option("--flowcell-directory", type=click_pathlib.Path(exists=True), required=True)
-@click.option("--out-directory", type=click_pathlib.Path(exists=True), required=True)
+@click.argument("flowcell-directory", type=click_pathlib.Path(exists=True))
+@click.option("--out-directory", type=click_pathlib.Path(exists=True))
+@click.option("--dry-run", is_flag=True)
 @click.pass_context
 def demultiplex_flowcell(
     context,
     flowcell_directory: Path,
-    out_directory: Path,
+    out_directory: Optional[Path],
+    dry_run: bool,
 ):
     """Demultiplex a flowcell on slurm using CG"""
     LOG.info("Sending demultiplex job for flowcell %s", flowcell_directory.name)
     demultiplex_api: DemultiplexingAPI = context.obj["demultiplex_api"]
+    if out_directory:
+        LOG.info("Set out_dir to %s", out_directory)
+        demultiplex_api.out_dir = out_directory
+    demultiplex_api.set_dry_run(dry_run=dry_run)
     flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
+
+    if not flowcell_obj.is_demultiplexing_possible():
+        if not dry_run:
+            raise click.Abort
 
     if not flowcell_obj.validate_sample_sheet():
         LOG.warning(
             "Malformed sample sheet. Run cg samplesheet validate %s", flowcell_obj.sample_sheet_path
         )
-        raise click.Abort
+        if not dry_run:
+            raise click.Abort
 
-    demultiplex_api.start_demultiplexing(
-        flowcell=flowcell_obj,
-        out_dir=out_directory,
-    )
+    demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
 
 
 demultiplex.add_command(demultiplex_flowcell)

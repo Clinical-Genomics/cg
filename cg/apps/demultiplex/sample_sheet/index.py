@@ -30,7 +30,7 @@ def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]
 
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
-    LOG.info("Fetch indexes from %s", valid_indexes_path)
+    LOG.info("Fetch valid indexes from %s", valid_indexes_path)
     indexes: List[Index] = []
     with open(valid_indexes_path, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
@@ -112,7 +112,7 @@ def adapt_indexes(
         index1, index2 = sample.index.split("-")
         index_length = len(index1)
         if expected_index_length == 10 and index_length == 8:
-            LOG.info("Padding indexes")
+            LOG.debug("Padding indexes")
             index1 = pad_index_one(index_string=index1)
             index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
         if reverse_complement:

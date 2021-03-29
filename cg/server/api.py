@@ -5,16 +5,15 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.exc import DuplicateRecordError, OrderError, OrderFormError
+from cg.meta.orders import OrdersAPI, OrderType
+from cg.models.orders.order import OrderIn
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from werkzeug.utils import secure_filename
-
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import DuplicateRecordError, OrderError, OrderFormError
-from cg.meta.orders import OrdersAPI, OrderType
-from cg.models.orders.order import OrderIn
 
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
@@ -254,7 +253,7 @@ def flowcells():
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def flowcell(flowcell_id):
     """Fetch a single flowcell."""
-    record = db.flowcell(flowcell_id)
+    record = db.flowcell_id(flowcell_id)
     if record is None:
         return abort(404)
     return jsonify(**record.to_dict(samples=True))

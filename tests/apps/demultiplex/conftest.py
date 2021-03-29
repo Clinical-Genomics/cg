@@ -112,7 +112,7 @@ def fixture_novaseq_sample_sheet_object(
     novaseq_run_parameters_object: RunParameters,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flowcell=flowcell_name,
+        flowcell_id=flowcell_name,
         lims_samples=lims_novaseq_samples,
         run_parameters=novaseq_run_parameters_object,
     )

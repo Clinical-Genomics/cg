@@ -30,12 +30,12 @@ class DemultiplexingAPI:
     This includes starting demultiplexing, creating sample sheets, creating base masks
     """
 
-    def __init__(self, config: dict, out_dir: Optional[Path]):
+    def __init__(self, config: dict, out_dir: Optional[Path] = None):
         self.slurm_api = SlurmAPI()
-        self.slurm_account = config["demultiplex"]["slurm"]["account"]
-        self.mail = config["demultiplex"]["slurm"]["mail_user"]
-        self.out_dir = out_dir or config["demultiplex"]["out_dir"]
-        self.dry_run = False
+        self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
+        self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
+        self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
         LOG.info("Set dry run to %s", dry_run)
@@ -57,7 +57,7 @@ class DemultiplexingAPI:
             out_dir=out_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
         )
-        return DEMULTIPLEX_COMMAND(**command_parameters.dict())
+        return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
 
     @staticmethod
     def get_demultiplex_sbatch_path(directory: Path) -> Path:
@@ -67,12 +67,16 @@ class DemultiplexingAPI:
     @staticmethod
     def get_logfile(out_dir: Path, flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
-        return out_dir / "Unaligned" / f"project.{flowcell.flowcell_id}.log"
+        # How to handle if a flowcell is redemuxed ?
+        return out_dir / f"project.{flowcell.flowcell_id}.log"
 
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
         flowcell_out_dir: Path = self.out_dir / flowcell.path.name
         LOG.info("Demultiplexing to %s", flowcell_out_dir)
+        if not self.dry_run:
+            LOG.info("Creating out dir %s", flowcell_out_dir)
+            flowcell_out_dir.mkdir(exist_ok=False, parents=True)
         log_path: Path = self.get_logfile(out_dir=flowcell_out_dir, flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
             flowcell_id=flowcell.flowcell_id, log_path=log_path, email=self.mail

@@ -1,7 +1,6 @@
 import datetime as dt
 
 import pytest
-
 from cg.apps.lims import LimsAPI
 from cg.apps.stats import StatsAPI
 from cg.meta.transfer import TransferLims
@@ -59,7 +58,7 @@ def base_store_stats(store_stats, data):
             datasource = store_stats.Datasource(document_path="NA", document_type="html")
             datasource.supportparams = supportparams
             demux = store_stats.Demux()
-            demux.flowcell = flowcell
+            demux.flowcell_id = flowcell
             demux.datasource = datasource
             demuxes[sample_data["flowcell"]] = demux
 
