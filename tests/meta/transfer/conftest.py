@@ -58,7 +58,7 @@ def base_store_stats(store_stats, data):
             datasource = store_stats.Datasource(document_path="NA", document_type="html")
             datasource.supportparams = supportparams
             demux = store_stats.Demux()
-            demux.flowcell_id = flowcell
+            demux.flowcell = flowcell
             demux.datasource = datasource
             demuxes[sample_data["flowcell"]] = demux
 

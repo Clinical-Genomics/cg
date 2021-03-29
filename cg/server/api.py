@@ -253,7 +253,7 @@ def flowcells():
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def flowcell(flowcell_id):
     """Fetch a single flowcell."""
-    record = db.flowcell_id(flowcell_id)
+    record = db.flowcell(flowcell_id)
     if record is None:
         return abort(404)
     return jsonify(**record.to_dict(samples=True))

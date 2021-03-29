@@ -308,7 +308,7 @@ def _update_comment(comment, obj):
 @click.pass_context
 def flowcell(context, flowcell_name, status):
     """Update information about a flowcell"""
-    flowcell_obj = context.obj["status_db"].flowcell_id(flowcell_name)
+    flowcell_obj = context.obj["status_db"].flowcell(flowcell_name)
 
     if flowcell_obj is None:
         LOG.warning(f"flowcell not found: {flowcell_name}")

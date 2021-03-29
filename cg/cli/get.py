@@ -142,7 +142,7 @@ def family(
 @click.pass_context
 def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
-    flowcell_obj = context.obj["status_db"].flowcell_id(flowcell_id)
+    flowcell_obj = context.obj["status_db"].flowcell(flowcell_id)
     if flowcell_obj is None:
         LOG.error(f"{flowcell_id}: flowcell not found")
         context.abort()
