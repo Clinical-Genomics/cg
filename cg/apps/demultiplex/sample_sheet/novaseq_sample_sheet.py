@@ -107,7 +107,7 @@ class SampleSheetCreator:
 
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
-        sample_sheet = [",".join(self.SAMPLE_SHEET_HEADERS)]
+        sample_sheet = ["[Data]", ",".join(self.SAMPLE_SHEET_HEADERS)]
         for sample in self.lims_samples:
             sample_sheet.append(
                 ",".join(
@@ -123,13 +123,14 @@ class SampleSheetCreator:
     def construct_sample_sheet(self) -> str:
         """ Construct the sample sheet """
         # Create dummy samples for the indexes that is missing
-        if self.run_parameters.run_type == "wgs":
-            self.add_dummy_samples()
+        # if self.run_parameters.run_type == "wgs":
+        #    self.add_dummy_samples()
         self.remove_unwanted_samples()
         index.adapt_indexes(
             samples=self.lims_samples,
             control_software_version=self.run_parameters.control_software_version,
             reagent_kit_version=self.run_parameters.reagent_kit_version,
+            expected_index_length=self.run_parameters.index_length,
         )
 
         return self.convert_to_sample_sheet()

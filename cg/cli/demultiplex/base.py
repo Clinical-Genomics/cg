@@ -103,6 +103,13 @@ def demultiplex_flowcell(
     LOG.info("Sending demultiplex job for flowcell %s", flowcell_directory.name)
     demultiplex_api: DemultiplexingAPI = context.obj["demultiplex_api"]
     flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
+
+    if not flowcell_obj.validate_sample_sheet():
+        LOG.warning(
+            "Malformed sample sheet. Run cg samplesheet validate %s", flowcell_obj.sample_sheet_path
+        )
+        raise click.Abort
+
     demultiplex_api.start_demultiplexing(
         flowcell=flowcell_obj,
         out_dir=out_directory,

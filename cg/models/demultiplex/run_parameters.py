@@ -54,7 +54,7 @@ class RunParameters:
                 return flow_cell_name
         message = f"Unknown flowcell type {xml_node.text}"
         LOG.warning(message)
-        raise SyntaxError(message)
+        raise FlowcellError(message)
 
     @property
     def run_type(self) -> Literal["wgs", "fluffy"]:

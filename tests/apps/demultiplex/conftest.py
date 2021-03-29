@@ -11,7 +11,7 @@ from cg.models.demultiplex.valid_indexes import Index
 
 @pytest.fixture(name="flowcell_name")
 def fixture_flowcell_name() -> str:
-    return "AAAAAAA"
+    return "HVKJCDRXX"
 
 
 @pytest.fixture(name="index_obj")
@@ -34,7 +34,7 @@ def fixture_raw_samples_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(name="novaseq_dir")
 def fixture_novaseq_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
-    return demultiplex_fixtures / "novaseq_run"
+    return demultiplex_fixtures / "201203_A00689_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="hiseq_dir")
@@ -68,10 +68,10 @@ def fixture_novaseq_run_parameters(novaseq_dir: Path) -> Path:
 
 
 @pytest.fixture(name="raw_lims_sample")
-def fixture_raw_lims_sample() -> LimsFlowcellSample:
+def fixture_raw_lims_sample(flowcell_name: str) -> LimsFlowcellSample:
     """Return a raw lims sample"""
     sample = {
-        "flowcell_id": "HWHMWDMXX",
+        "flowcell_id": flowcell_name,
         "lane": 1,
         "sample_id": "ACC7628A20",
         "sample_ref": "hg19",

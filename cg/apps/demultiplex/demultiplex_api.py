@@ -1,7 +1,7 @@
 """This api should handle everything around demultiplexing"""
 import logging
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 from cg.apps.demultiplex.flowcell import Flowcell
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
@@ -30,12 +30,17 @@ class DemultiplexingAPI:
     This includes starting demultiplexing, creating sample sheets, creating base masks
     """
 
-    DEMUX_MAIL = "clinical-demux@scilifelab.se"
-
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, out_dir: Optional[Path]):
         self.slurm_api = SlurmAPI()
         self.slurm_account = config["demultiplex"]["slurm"]["account"]
+        self.mail = config["demultiplex"]["slurm"]["mail_user"]
+        self.out_dir = out_dir or config["demultiplex"]["out_dir"]
         self.dry_run = False
+
+    def set_dry_run(self, dry_run: bool) -> None:
+        LOG.info("Set dry run to %s", dry_run)
+        self.dry_run = dry_run
+        self.slurm_api.set_dry_run(dry_run=dry_run)
 
     @staticmethod
     def get_sbatch_error(flowcell_id: str, log_path: Path, email: str) -> str:
@@ -64,14 +69,16 @@ class DemultiplexingAPI:
         """Create the path to the logfile"""
         return out_dir / "Unaligned" / f"project.{flowcell.flowcell_id}.log"
 
-    def start_demultiplexing(self, flowcell: Flowcell, out_dir: Path):
+    def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
-        log_path: Path = self.get_logfile(out_dir=out_dir, flowcell=flowcell)
+        flowcell_out_dir: Path = self.out_dir / flowcell.path.name
+        LOG.info("Demultiplexing to %s", flowcell_out_dir)
+        log_path: Path = self.get_logfile(out_dir=flowcell_out_dir, flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
-            flowcell_id=flowcell.flowcell_id, log_path=log_path, email=self.DEMUX_MAIL
+            flowcell_id=flowcell.flowcell_id, log_path=log_path, email=self.mail
         )
         commands: str = self.get_sbatch_command(
-            run_dir=flowcell, out_dir=out_dir, sample_sheet=flowcell.sample_sheet_path
+            run_dir=flowcell.path, out_dir=flowcell_out_dir, sample_sheet=flowcell.sample_sheet_path
         )
 
         sbatch_info = {
@@ -80,13 +87,13 @@ class DemultiplexingAPI:
             "number_tasks": 18,
             "memory": 50,
             "log_dir": log_path.parent.as_posix(),
-            "email": self.DEMUX_MAIL,
+            "email": self.mail,
             "hours": 36,
             "commands": commands,
             "error": error_function,
         }
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path: Path = self.get_demultiplex_sbatch_path(directory=out_dir)
+        sbatch_path: Path = self.get_demultiplex_sbatch_path(directory=flowcell_out_dir)
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
