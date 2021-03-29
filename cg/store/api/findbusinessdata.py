@@ -105,7 +105,7 @@ class FindBusinessDataHandler(BaseHandler):
             customer_group_ids = []
             for customer in customers:
                 customer_group_ids.append(customer.customer_group_id)
-            records += records.filter(models.CustomerGroup.id.in_(customer_group_ids))
+            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
 
         records = (
             records.filter(
@@ -281,7 +281,7 @@ class FindBusinessDataHandler(BaseHandler):
             customer_group_ids = []
             for customer in customers:
                 customer_group_ids.append(customer.customer_group_id)
-            records += records.filter(models.CustomerGroup.id.in_(customer_group_ids))
+            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
 
         records = (
             records.filter(
