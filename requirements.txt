@@ -21,7 +21,7 @@ requests_cache
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
-cgmodels
+cgmodels>=0.5
 colorclass
 coloredlogs
 dataclasses<0.8
