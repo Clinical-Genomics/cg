@@ -123,8 +123,8 @@ class SampleSheetCreator:
     def construct_sample_sheet(self) -> str:
         """ Construct the sample sheet """
         # Create dummy samples for the indexes that is missing
-        # if self.run_parameters.run_type == "wgs":
-        #    self.add_dummy_samples()
+        if self.run_parameters.run_type == "wgs":
+            self.add_dummy_samples()
         self.remove_unwanted_samples()
         index.adapt_indexes(
             samples=self.lims_samples,

@@ -7,7 +7,6 @@ from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet
 def test_convert_to_sheet(novaseq_sample_sheet_object: SampleSheetCreator, project_dir: Path):
     # GIVEN a sample sheet object populated with samples
     assert novaseq_sample_sheet_object.lims_samples
-    print("nr samples: %s" % len(novaseq_sample_sheet_object.lims_samples))
 
     # WHEN converting to sample sheet
     sample_sheet: str = novaseq_sample_sheet_object.construct_sample_sheet()
