@@ -1,17 +1,17 @@
 # database
 Alchy
-SQLAlchemy<1.4
+SQLAlchemy
 
 # cli
-Click<7.0
+Click
 
 # server
 Flask-Admin
 Flask-Alchy
 Flask-CORS
 Flask-Dance
-Flask-SQLAlchemy==2.1
-Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
+Flask-SQLAlchemy
+Flask            # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
 blinker
 google-auth
 gunicorn
@@ -24,7 +24,6 @@ cgmodels
 
 colorclass
 coloredlogs
-dataclasses<0.8
 lxml
 marshmallow>3               # due to code expects behaviour from >3
 openpyxl
