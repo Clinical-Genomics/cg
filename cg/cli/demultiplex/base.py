@@ -31,8 +31,8 @@ def sample_sheet_commands(context: Context):
 
 
 @sample_sheet_commands.command(name="validate")
-@click.argument("sheet")
-def validate_sample_sheet(sheet: str):
+@click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
+def validate_sample_sheet(sheet: click.Path):
     """Command to validate a sample sheet"""
     LOG.info("Validating sample sheet %s", sheet)
     sheet: Path = Path(sheet)
