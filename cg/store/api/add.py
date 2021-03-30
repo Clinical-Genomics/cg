@@ -55,7 +55,7 @@ class AddHandler(BaseHandler):
         """Build a new user record."""
 
         new_user = self.User(name=name, email=email, is_admin=is_admin)
-        new_user.customer = customer
+        new_user.customers.append(customer)
         return new_user
 
     def add_application(

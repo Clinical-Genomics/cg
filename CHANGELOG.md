@@ -18,6 +18,9 @@ Try to use the following format:
 
 - Demultiplexing functionality to CG
 
+## [20.14.0]
+### Added
+- Possibility to associate more than one customer to each user 
 
 ## [20.13.0]
 ### Changed
