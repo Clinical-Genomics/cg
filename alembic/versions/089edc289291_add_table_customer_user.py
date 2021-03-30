@@ -47,7 +47,7 @@ class User(Base):
 
 
 def upgrade():
-    # Change direct connection user->customer into user<-user_customer->customer
+
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
 
@@ -66,8 +66,7 @@ def upgrade():
         sa.UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
     )
 
-    # customer_user.__table__.create(bind)
-
+    # Change direct connection user->customer into user<-user_customer->customer
     for user in session.query(User):
 
         user.customer.users.append(user)
@@ -87,10 +86,10 @@ def downgrade():
         ),
     )
 
-    # Change user<-user_customer->customer into direct connection user->customer
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
 
+    # Change user<-user_customer->customer into direct connection user->customer
     for customer in session.query(Customer):
 
         for user in customer.users:
