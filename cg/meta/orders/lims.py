@@ -20,10 +20,9 @@ def build_lims_sample(customer: str, samples: List[dict]) -> List[LimsSample]:
     return samples_lims
 
 
-def process_lims(lims_api: LimsAPI, lims_order: dict):
+def process_lims(lims_api: LimsAPI, lims_order: dict, new_samples: List[dict]):
     """Process samples to add them to LIMS."""
-    samples: List[dict] = lims_order["samples"]
-    samples_lims: List[LimsSample] = build_lims_sample(lims_order["customer"], samples)
+    samples_lims: List[LimsSample] = build_lims_sample(lims_order["customer"], samples=new_samples)
     project_name = lims_order.get("ticket", lims_order["name"])
     # Create new lims project
     project_data = lims_api.submit_project(
