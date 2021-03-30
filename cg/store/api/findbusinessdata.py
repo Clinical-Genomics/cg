@@ -240,7 +240,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(self, *, customers: [models.Customer] = None, enquiry: str = None) -> Query:
+    def samples(self, *, customers: Optional[List[[models.Customer]] = None, enquiry: str = None) -> Query:
         records = self.Sample.query
 
         if customers:
