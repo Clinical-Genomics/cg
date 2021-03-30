@@ -149,9 +149,9 @@ def test_families_to_status(mip_order_to_submit):
 
 def test_store_rml(orders_api, base_store, rml_status_data):
     # GIVEN a basic store with no samples and a rml order
-    assert base_store.pools(customer=None).count() == 0
-    assert base_store.families(customer=None).count() == 0
-    assert base_store.samples(customer=None).count() == 0
+    assert base_store.pools().count() == 0
+    assert base_store.families().count() == 0
+    assert base_store.samples().count() == 0
 
     # WHEN storing the order
     new_pools = orders_api.store_rml(
@@ -164,9 +164,9 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     # THEN it should update the database with new pools
     assert len(new_pools) == 2
 
-    assert base_store.pools(customer=None).count() == base_store.families(customer=None).count()
-    assert base_store.samples(customer=None).count() == 4
-    new_pool = base_store.pools(customer=None).first()
+    assert base_store.pools().count() == base_store.families().count()
+    assert base_store.samples().count() == 4
+    new_pool = base_store.pools().first()
 
     assert new_pool == new_pools[1]
 
@@ -178,7 +178,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
 
-    new_case = base_store.families(customer=None).first()
+    new_case = base_store.families().first()
     assert new_case.data_analysis == str(Pipeline.FLUFFY)
     assert new_case.data_delivery == str(DataDelivery.NIPT_VIEWER)
 
@@ -190,7 +190,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
 
 def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     # GIVEN a basic store with no samples and a rml order
-    assert base_store.pools(customer=None).count() == 0
+    assert base_store.pools().count() == 0
 
     for pool in rml_status_data["pools"]:
         pool["application"] = "nonexistingtag"

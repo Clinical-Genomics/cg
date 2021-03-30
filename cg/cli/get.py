@@ -5,7 +5,7 @@ from typing import List
 import click
 from tabulate import tabulate
 
-from cg.store import Store
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
@@ -109,17 +109,19 @@ def family(
         if customer_obj is None:
             LOG.error(f"{customer}: customer not found")
             context.abort()
-        families = context.obj["status_db"].families(customer=customer_obj, enquiry=family_ids[-1])
+        cases: List[models.Family] = context.obj["status_db"].families(
+            customers=[customer_obj], enquiry=family_ids[-1]
+        )
     else:
-        families = []
+        cases = []
         for family_id in family_ids:
             case_obj = context.obj["status_db"].family(family_id)
             if case_obj is None:
                 LOG.error(f"{family_id}: family doesn't exist")
                 context.abort()
-            families.append(case_obj)
+            cases.append(case_obj)
 
-    for case_obj in families:
+    for case_obj in cases:
         LOG.debug(f"{case_obj.internal_id}: get info about family")
         row = [
             case_obj.internal_id,
