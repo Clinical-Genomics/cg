@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [20.14.0]
 ### Added
 - Possibility to associate more than one customer to each user 
 
