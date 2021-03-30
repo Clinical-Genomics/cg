@@ -102,8 +102,8 @@ class AnalysisAPI(MetaAPI):
         return bool(
             sample_obj.reads
             and sample_obj.reads
-            >= sample_obj.application_version.percent_reads_guaranteed
-            * sample_obj.application_version.target_reads
+            >= sample_obj.application_version.application.percent_reads_guaranteed
+            * sample_obj.application_version.application.target_reads
             / 100
         )
 
