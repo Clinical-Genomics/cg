@@ -36,7 +36,7 @@ jobs:
 
     - name: Production Dependencies
       run: |
-        pip install . --no-deps
+        pip install .
         pip check
 
     - name: Development Dependencies
