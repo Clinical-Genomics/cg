@@ -271,7 +271,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(models.Sample.internal_id.asc())
 
     def samples_in_customer_group(
-        self, *, customers: [models.Customer] = None, enquiry: str = None
+        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
     ) -> Query:
         """Fetch all samples including those from collaborating customers."""
 
