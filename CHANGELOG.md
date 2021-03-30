@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [x.x.x]
+### Added
+
+- Demultiplexing functionality to CG
+
+
 ## [20.13.0]
 ### Changed
 - Update orderform 2184 to latest version 4
