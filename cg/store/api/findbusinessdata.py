@@ -96,7 +96,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(models.Family.created_at.desc())
 
     def families_in_customer_group(
-        self, *, customers: [models.Customer] = None, enquiry: str = None
+        self, *, customers: List[models.Customer] = None, enquiry: str = None
     ) -> Query:
         """Fetch all families including those from collaborating customers."""
         records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
