@@ -1,6 +1,6 @@
 # database
 Alchy
-SQLAlchemy
+SQLAlchemy<1.4
 
 # cli
 Click
@@ -32,7 +32,6 @@ pydantic
 pyschemes
 python-dateutil
 ruamel.yaml
-setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
 tabulate
 typing_extensions
 
