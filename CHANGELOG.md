@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.13.1]
+### Added
+- Add RNA validation cases to blacklist defining cases to not compress fastq files for 
+
 ## [20.13.0]
 ### Changed
 - Update orderform 2184 to latest version 4
