@@ -48,7 +48,7 @@ class Flowcell:
     def run_parameters_object(self) -> RunParameters:
         if not self.run_parameters_path.exists():
             raise FileNotFoundError(
-                "Could not find run parameters file %s".format(self.run_parameters_path)
+                f"Could not find run parameters file {self.run_parameters_path}"
             )
         return RunParameters(run_parameters_path=self.run_parameters_path)
 
