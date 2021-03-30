@@ -96,6 +96,16 @@ FASTQ_ANALYSIS_SAMPLE_TAGS = [
     {"fastq"},
 ]
 
+SARSCOV2_ANALYSIS_CASE_TAGS = [
+    {"SARS-CoV-2-articreport-variants"},
+    {"SARS-CoV-2-articreport-results"},
+]
+
+SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
+    {"variants"},
+    {"consensus"},
+]
+
 PIPELINE_ANALYSIS_TAG_MAP = {
     "balsamic": {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
@@ -114,14 +124,17 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "case_tags": MIP_RNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_RNA_ANALYSIS_SAMPLE_TAGS,
     },
-    # These are not ready yet, add when microsalt cases are stored in db
-    # "microsalt": {
-    #     "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
-    #     "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
-    # },
+    "microsalt": {
+        "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
+        "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
+    },
     "fastq": {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
+    },
+    "sarscov2": {
+        "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
+        "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
     },
 }
 
