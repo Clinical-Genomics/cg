@@ -97,6 +97,16 @@ class AnalysisAPI(MetaAPI):
             return "high"
         return "normal"
 
+    @staticmethod
+    def check_sample_read_count_above_threshold(sample_obj: models.Sample):
+        return bool(
+            sample_obj.reads
+            and sample_obj.reads
+            >= sample_obj.application_version.percent_reads_guaranteed
+            * sample_obj.application_version.target_reads
+            / 100
+        )
+
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory"""
         raise NotImplementedError
