@@ -4,6 +4,7 @@ import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
+from typing import Optional, List
 
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
@@ -15,6 +16,8 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.models.orders.order import OrderIn
+from cg.store import models
+from sqlalchemy.orm import Query
 
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
@@ -97,7 +100,9 @@ def families():
         records = db.cases_to_mip_analyze()
         count = len(records)
     else:
-        customer_objs = None if g.current_user.is_admin else g.current_user.customers
+        customer_objs: Optional[List[models.Customer]] = (
+            None if g.current_user.is_admin else g.current_user.customers
+        )
         case_query = db.families(
             enquiry=request.args.get("enquiry"),
             customers=customer_objs,
@@ -106,15 +111,17 @@ def families():
         count = case_query.count()
         records = case_query.limit(30)
 
-    data = [case_obj.to_dict(links=True) for case_obj in records]
-    return jsonify(families=data, total=count)
+    cases_data: List[dict] = [case_obj.to_dict(links=True) for case_obj in records]
+    return jsonify(families=cases_data, total=count)
 
 
 @BLUEPRINT.route("/families_in_customer_group")
 def families_in_customer_group():
     """Fetch families in customer_group."""
-    customer_objs = None if g.current_user.is_admin else g.current_user.customers
-    families_q = db.families_in_customer_group(
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
+    families_q: Query = db.families_in_customer_group(
         enquiry=request.args.get("enquiry"), customers=customer_objs
     )
     count = families_q.count()
@@ -164,7 +171,9 @@ def samples():
     elif request.args.get("status") == "sequencing":
         samples_q = db.samples_to_sequence()
     else:
-        customer_objs = None if g.current_user.is_admin else g.current_user.customers
+        customer_objs: Optional[models.Customer] = (
+            None if g.current_user.is_admin else g.current_user.customers
+        )
         samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
@@ -174,7 +183,9 @@ def samples():
 @BLUEPRINT.route("/samples_in_customer_group")
 def samples_in_customer_group():
     """Fetch samples in a customer group."""
-    customer_objs = None if g.current_user.is_admin else g.current_user.customers
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
     samples_q = db.samples_in_customer_group(
         enquiry=request.args.get("enquiry"), customers=customer_objs
     )
@@ -213,7 +224,9 @@ def sample_in_customer_group(sample_id):
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
-    customer_objs = None if g.current_user.is_admin else g.current_user.customers
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
     pools_q = db.pools(customers=customer_objs, enquiry=request.args.get("enquiry"))
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
@@ -263,7 +276,9 @@ def analyses():
 @BLUEPRINT.route("/options")
 def options():
     """Fetch various options."""
-    customer_objs = db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
+    customer_objs: Optional[models.Customer] = (
+        db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
+    )
 
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):

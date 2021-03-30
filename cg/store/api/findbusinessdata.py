@@ -1,6 +1,6 @@
 """Handler to find business data objects"""
 import datetime as dt
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
@@ -212,7 +212,9 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def pools(self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None) -> Query:
+    def pools(
+        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
+    ) -> Query:
         """Fetch all the pools for a customer."""
         records = self.Pool.query
 
@@ -240,7 +242,9 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(self, *, customers: Optional[List[[models.Customer]] = None, enquiry: str = None) -> Query:
+    def samples(
+        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
+    ) -> Query:
         records = self.Sample.query
 
         if customers:
