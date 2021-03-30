@@ -212,7 +212,7 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def pools(self, *, customers: [models.Customer] = None, enquiry: str = None) -> Query:
+    def pools(self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None) -> Query:
         """Fetch all the pools for a customer."""
         records = self.Pool.query
 
