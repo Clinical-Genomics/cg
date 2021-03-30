@@ -144,5 +144,5 @@ def test_add_pool(store: Store):
     store.add_commit(new_pool)
 
     # THEN the new pool should have no_invoice = False
-    pool = store.pools(customer=None).first()
+    pool = store.pools().first()
     assert pool.no_invoice is False

@@ -13,10 +13,17 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.15.0]
+### Added
+- CLI methods for starting mutant
+
+## [20.14.1]
+### Fixed
+- So that existing samples don't get added to lims again
 
 ## [20.14.0]
 ### Added
-- CLI methods for starting mutant
+- Possibility to associate more than one customer to each user 
 
 ## [20.13.0]
 ### Changed
