@@ -98,7 +98,8 @@ class AnalysisAPI(MetaAPI):
         return "normal"
 
     @staticmethod
-    def check_sample_read_count_above_threshold(sample_obj: models.Sample):
+    def check_sample_read_count_above_threshold(sample_obj: models.Sample) -> bool:
+        """Check if read count passes threshold for reads guaranteed specified for its application tag"""
         return bool(
             sample_obj.reads
             and sample_obj.reads
