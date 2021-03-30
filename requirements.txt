@@ -23,7 +23,6 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 cgmodels>=0.5
 colorclass
 coloredlogs
-dataclasses<0.8
 lxml
 marshmallow>3               # due to code expects behaviour from >3
 openpyxl
