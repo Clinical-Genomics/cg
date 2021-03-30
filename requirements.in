@@ -1,0 +1,43 @@
+# database
+Alchy
+SQLAlchemy<1.4
+
+# cli
+Click<7.0
+
+# server
+Flask-Admin
+Flask-Alchy
+Flask-CORS
+Flask-Dance
+Flask-SQLAlchemy==2.1
+Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
+blinker
+google-auth
+gunicorn
+requests[security]
+requests_cache
+werkzeug<1.0.0              # due to breaking changes in 1.0.0
+
+# utils
+cgmodels
+
+colorclass
+coloredlogs
+dataclasses<0.8
+lxml
+marshmallow>3               # due to code expects behaviour from >3
+openpyxl
+petname
+pydantic
+pyschemes
+python-dateutil
+ruamel.yaml
+setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
+tabulate
+typing_extensions
+
+# apps
+cgstats>=1.1.2
+genologics
+housekeeper>=2.5
