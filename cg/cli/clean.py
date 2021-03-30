@@ -7,7 +7,7 @@ from typing import List
 import click
 
 from cg.apps.scout.scout_export import ScoutExportCase
-from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs
+from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs, mutant_past_run_dirs
 from cg.meta.meta import MetaAPI
 
 LOG = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ def clean(context):
 
 clean.add_command(balsamic_past_run_dirs)
 clean.add_command(mip_past_run_dirs)
+clean.add_command(mutant_past_run_dirs)
 
 
 @clean.command("hk-alignment-files")
