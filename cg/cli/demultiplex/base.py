@@ -49,10 +49,10 @@ def validate_sample_sheet(sheet: click.Path):
 
 
 @sample_sheet_commands.command(name="create")
-@click.argument("flowcell")
+@click.argument("flowcell", type=click.Path(exists=True, file_okay=False))
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def create_sample_sheet(context: Context, flowcell: str, dry_run: bool):
+def create_sample_sheet(context: Context, flowcell: click.Path, dry_run: bool):
     """Command to create a sample sheet
 
     Search the flowcell directory for run parameters and create a sample sheet based on the information
