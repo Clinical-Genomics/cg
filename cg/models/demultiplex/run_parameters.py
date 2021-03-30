@@ -1,9 +1,10 @@
 import logging
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Optional
 from xml.etree import ElementTree
 
 from cg.exc import FlowcellError
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
