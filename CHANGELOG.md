@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.14.0]
+### Added
+- CLI methods for starting mutant
+
 ## [20.13.0]
 ### Changed
 - Update orderform 2184 to latest version 4
