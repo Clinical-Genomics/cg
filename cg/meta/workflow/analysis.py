@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
 import os
 
@@ -27,6 +28,8 @@ class AnalysisAPI(MetaAPI):
 
     @property
     def threshold_reads(self):
+        """Defines whether workflow case should be automatically analyzed
+        even when not all samples have adequate read count"""
         return False
 
     @property
@@ -215,7 +218,15 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def get_pipeline_version(self, case_id: str) -> str:
-        raise NotImplementedError
+        """
+        Calls the pipeline to get the pipeline version number. If fails, returns a placeholder value instead.
+        """
+        try:
+            self.process.run_command(["--version"])
+            return list(self.process.stdout_lines())[0].split()[-1]
+        except (Exception, CalledProcessError):
+            LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
+            return "0.0.0"
 
     def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
         """

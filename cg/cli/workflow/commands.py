@@ -199,7 +199,7 @@ def mip_past_run_dirs(
 def mutant_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MIP case run dirs"""
+    """Clean up of "old" MUTANT case run dirs"""
 
     context.obj["analysis_api"] = MutantAnalysisAPI(context.obj)
 

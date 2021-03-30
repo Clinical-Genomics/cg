@@ -132,15 +132,6 @@ class MutantAnalysisAPI(AnalysisAPI):
             dry_run=dry_run,
         )
 
-    def get_pipeline_version(self, case_id: str) -> str:
-        return str(
-            self.process.run_command(
-                [
-                    "--version",
-                ]
-            )
-        )
-
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
         return self.get_date_from_file_path(self.get_case_config_path(case_id=case_id))
 

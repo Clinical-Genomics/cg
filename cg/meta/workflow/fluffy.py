@@ -204,14 +204,3 @@ class FluffyAnalysisAPI(AnalysisAPI):
             for case_object in self.get_running_cases()
             if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
-
-    def get_pipeline_version(self, case_id: str) -> str:
-        """
-        Calls the pipeline to get the pipeline version number. If fails, returns a placeholder value instead.
-        """
-        try:
-            self.process.run_command(["--version"])
-            return list(self.process.stdout_lines())[0].split()[-1]
-        except (Exception, CalledProcessError):
-            LOG.warning("Could not retrieve fluffy version!")
-            return "0.0.0"
