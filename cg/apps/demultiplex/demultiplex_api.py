@@ -59,6 +59,43 @@ class DemultiplexingAPI:
         """Create the path to where the demuliplexed result should be produced"""
         return self.out_dir / flowcell.path.name
 
+    def demultiplexing_completed_path(self, flowcell: Flowcell) -> Path:
+        """Create the path to where the demuliplexed result should be produced"""
+        return self.flowcell_out_dir_path(flowcell) / "demuxcomplete.txt"
+
+    def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:
+        """Create the path to where the demuliplexed result should be produced"""
+        return self.demultiplexing_completed_path(flowcell).exists()
+
+    def is_demultiplexing_ongoing(self, flowcell: Flowcell) -> bool:
+        """Check if demultiplexing is ongoing
+
+        This is indicated by if the file demuxstarted.txt exists in the flowcell directory
+        AND
+        that the demultiplexing completed file does not exist
+        """
+        return (
+            flowcell.demultiplexing_ongoing_path.exists() and not self.is_demultiplexing_completed()
+        )
+
+    def is_demultiplexing_possible(self, flowcell: Flowcell) -> bool:
+        """Check if it is possible to start demultiplexing
+
+        This means that
+            - flowcell should be ready for demultiplexing (all files in place)
+            - sample sheet needs to exist
+            - demultiplexing should not be running
+        """
+        if not flowcell.is_flowcell_ready():
+            return False
+        if not flowcell.sample_sheet_exists():
+            LOG.warning("Could not find sample sheet for %s", flowcell.flowcell_id)
+            return False
+        if self.is_demultiplexing_ongoing():
+            LOG.warning("Demultiplexing is ongoing for %s", flowcell.flowcell_id)
+            return False
+        return True
+
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
         flowcell_out_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)

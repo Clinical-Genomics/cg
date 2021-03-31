@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.cli.demultiplex.base import validate_sample_sheet
+from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 from click.testing import CliRunner, Result
 

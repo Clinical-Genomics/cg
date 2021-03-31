@@ -25,7 +25,8 @@ This can be done since the run parameters are ready before the rest of the data 
 
 ### THIS IS THE PART I DON'T UNDERSTAND ATM
 
-- I think that the file delivery.txt indicates that demultiplexing has started.
+~I think that the file delivery.txt indicates that demultiplexing has started.~
+Seems like delivery.txt is a remnant from the old days
 
 
 - Then check if there is a SampleSheet.csv file, if not this is created by fetching raw information from LIMS and then

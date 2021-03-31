@@ -17,15 +17,12 @@ class Flowcell:
         LOG.info("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
         LOG.info("Set flowcell id to %s", self.flowcell_id)
-        self._flowcell_id: Optional[str] = None
         self._run_parameters: Optional[RunParameters] = None
 
     @property
     def flowcell_id(self) -> str:
-        if not self._flowcell_id:
-            base_name: str = self.path.name.split("_")[-1]
-            self._flowcell_id = base_name[1:]
-        return self._flowcell_id
+        base_name: str = self.path.name.split("_")[-1]
+        return base_name[1:]
 
     @property
     def sample_sheet_path(self) -> Path:
@@ -38,9 +35,9 @@ class Flowcell:
     @property
     def run_parameters_object(self) -> RunParameters:
         if not self.run_parameters_path.exists():
-            raise FileNotFoundError(
-                f"Could not find run parameters file {self.run_parameters_path}"
-            )
+            message = f"Could not find run parameters file {self.run_parameters_path}"
+            LOG.warning(message)
+            raise FileNotFoundError(message)
         if not self._run_parameters:
             self._run_parameters = RunParameters(run_parameters_path=self.run_parameters_path)
         return self._run_parameters
@@ -85,13 +82,6 @@ class Flowcell:
         """
         return self.copy_complete_path.exists()
 
-    def is_demultiplexing_ongoing(self) -> bool:
-        """Check if demultiplexing is ongoing
-
-        This is indicated by if the file demuxstarted.txt exists (?)
-        """
-        return self.demultiplexing_ongoing_path.exists()
-
     def is_flowcell_ready(self) -> bool:
         """Check if a flowcell is ready for demultiplexing
 
@@ -106,24 +96,6 @@ class Flowcell:
             return False
 
         LOG.info("Flowcell %s is ready for demultiplexing", self.flowcell_id)
-        return True
-
-    def is_demultiplexing_possible(self) -> bool:
-        """Check if it is possible to start demultiplexing
-
-        This means that
-            - flowcell should be ready for demultiplexing (all files in place)
-            - sample sheet needs to exist
-            - demultiplexing should not be running
-        """
-        if not self.is_flowcell_ready():
-            return False
-        if not self.sample_sheet_exists():
-            LOG.warning("Could not find sample sheet for %s", self.flowcell_id)
-            return False
-        if self.is_demultiplexing_ongoing():
-            LOG.warning("Demultiplexing is ongoing for %s", self.flowcell_id)
-            return False
         return True
 
     def __str__(self):
