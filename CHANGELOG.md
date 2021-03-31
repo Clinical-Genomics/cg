@@ -18,6 +18,18 @@ Try to use the following format:
 
 - Demultiplexing functionality to CG
 
+## [20.15.1]
+### Fixed
+- cg to rename mutant fastq files directly
+
+## [20.15.0]
+### Added
+- CLI methods for starting mutant
+
+## [20.14.2]
+### Added
+- Add RNA validation cases to blacklist, which defines cases to not compress fastq files for
+
 ## [20.14.1]
 ### Fixed
 - So that existing samples don't get added to lims again
