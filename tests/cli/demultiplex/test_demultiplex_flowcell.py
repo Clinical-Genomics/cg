@@ -61,3 +61,32 @@ def test_demultiplex_flowcell(
     assert demux_api.flowcell_out_dir_path(flowcell).exists()
     # THEN assert that the sbatch script was created
     assert demux_api.demultiplex_sbatch_path(flowcell).exists()
+
+
+def test_start_demultiplexing_when_already_completed(
+    cli_runner: testing.CliRunner,
+    demultiplex_ready_flowcell: Path,
+    demultiplex_context: Dict[str, DemultiplexingAPI],
+    caplog,
+):
+    caplog.set_level(logging.DEBUG)
+    # GIVEN that all files are present for demultiplexing
+    flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
+    demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    # GIVEN that demultiplexing has started
+    flowcell.demultiplexing_started_path.touch()
+    # GIVEN a out dir that exist
+    demux_api.flowcell_out_dir_path(flowcell).mkdir(parents=True)
+    # GIVEN that demultiplexing is completed
+    demux_api.demultiplexing_completed_path(flowcell=flowcell).touch()
+
+    # WHEN starting demultiplexing from the CLI
+    result: testing.Result = cli_runner.invoke(
+        demultiplex_flowcell,
+        [str(demultiplex_ready_flowcell)],
+        obj=demultiplex_context,
+    )
+    # THEN assert the command exits without problems
+    assert result.exit_code == 0
+    # THEN assert it was communicated that demultiplexing was completed
+    assert f"Demultiplexing is already completed for flowcell {flowcell.flowcell_id}"

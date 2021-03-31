@@ -26,7 +26,7 @@ class DemultiplexingAPI:
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
-        LOG.info("Set dry run to %s", dry_run)
+        LOG.debug("Set dry run to %s", dry_run)
         self.dry_run = dry_run
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
@@ -74,10 +74,16 @@ class DemultiplexingAPI:
         AND
         that the demultiplexing completed file does not exist
         """
-        return (
-            flowcell.demultiplexing_ongoing_path.exists()
-            and not self.is_demultiplexing_completed(flowcell)
-        )
+        LOG.debug("Check if demultiplexing is ongoing for %s", flowcell.flowcell_id)
+        if not flowcell.demultiplexing_started_path.exists():
+            LOG.debug("Demultiplexing has not been started")
+            return False
+        LOG.debug("Demultiplexing has been started!")
+        if self.is_demultiplexing_completed(flowcell):
+            LOG.debug("Demultiplexing is already completed for flowcell %s", flowcell.flowcell_id)
+            return False
+        LOG.debug("Demultiplexing is not finished!")
+        return True
 
     def is_demultiplexing_possible(self, flowcell: Flowcell) -> bool:
         """Check if it is possible to start demultiplexing
@@ -87,15 +93,23 @@ class DemultiplexingAPI:
             - sample sheet needs to exist
             - demultiplexing should not be running
         """
+        LOG.info("Check if demultiplexing is possible for %s", flowcell.flowcell_id)
+        demultiplexing_possible = True
         if not flowcell.is_flowcell_ready():
-            return False
+            demultiplexing_possible = False
+
         if not flowcell.sample_sheet_exists():
             LOG.warning("Could not find sample sheet for %s", flowcell.flowcell_id)
-            return False
-        if self.is_demultiplexing_ongoing(flowcell=flowcell):
-            LOG.warning("Demultiplexing is ongoing for %s", flowcell.flowcell_id)
-            return False
-        return True
+            demultiplexing_possible = False
+
+        if flowcell.demultiplexing_started_path.exists():
+            LOG.debug("Demultiplexing has already been started")
+            demultiplexing_possible = False
+
+        if self.is_demultiplexing_completed(flowcell):
+            LOG.debug("Demultiplexing is already completed for flowcell %s", flowcell.flowcell_id)
+            demultiplexing_possible = False
+        return demultiplexing_possible
 
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""

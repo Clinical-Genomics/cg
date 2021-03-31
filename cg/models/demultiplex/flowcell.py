@@ -14,9 +14,9 @@ class Flowcell:
     """Class to collect information about flowcell directories and there particular files"""
 
     def __init__(self, flowcell_path: Path):
-        LOG.info("Instantiating Flowcell with path %s", flowcell_path)
+        LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
-        LOG.info("Set flowcell id to %s", self.flowcell_id)
+        LOG.debug("Set flowcell id to %s", self.flowcell_id)
         self._run_parameters: Optional[RunParameters] = None
 
     @property
@@ -51,11 +51,12 @@ class Flowcell:
         return Path(self.path, "CopyComplete.txt")
 
     @property
-    def demultiplexing_ongoing_path(self) -> Path:
+    def demultiplexing_started_path(self) -> Path:
         return Path(self.path, "demuxstarted.txt")
 
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists"""
+        LOG.info("Check if sample sheet exists")
         return self.sample_sheet_path.exists()
 
     def validate_sample_sheet(self) -> bool:
@@ -73,6 +74,7 @@ class Flowcell:
 
         This is indicated by that the file RTAComplete.txt exists
         """
+        LOG.info("Check if sequencing is done")
         return self.rta_complete_path.exists()
 
     def is_copy_completed(self) -> bool:
@@ -80,6 +82,7 @@ class Flowcell:
 
         This is indicated by that the file CopyComplete.txt exists
         """
+        LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
 
     def is_flowcell_ready(self) -> bool:
@@ -87,14 +90,15 @@ class Flowcell:
 
         A flowcell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the flowcell directory
         """
+        LOG.info("Check if flowcell is ready for demultiplexing")
         if not self.is_sequencing_done():
             LOG.info("Sequencing is not completed for flowcell %s", self.flowcell_id)
             return False
-
+        LOG.debug("Sequence is done for flowcell %s", self.flowcell_id)
         if not self.is_copy_completed():
             LOG.info("Copy of sequence data is not ready for flowcell %s", self.flowcell_id)
             return False
-
+        LOG.debug("All data has been transferred for flowcell %s", self.flowcell_id)
         LOG.info("Flowcell %s is ready for demultiplexing", self.flowcell_id)
         return True
 

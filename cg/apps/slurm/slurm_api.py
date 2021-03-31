@@ -16,7 +16,7 @@ class SlurmAPI:
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
-        LOG.info("Set dry run to %s", dry_run)
+        LOG.debug("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
     @staticmethod

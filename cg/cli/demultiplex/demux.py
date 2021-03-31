@@ -53,8 +53,8 @@ def demultiplex_flowcell(
     dry_run: bool,
 ):
     """Demultiplex a flowcell on slurm using CG"""
+    LOG.info("Running cg demultiplex flowcell")
     flowcell_directory: Path = Path(str(flowcell_directory))
-    LOG.info("Sending demultiplex job for flowcell %s", flowcell_directory.name)
     demultiplex_api: DemultiplexingAPI = context.obj["demultiplex_api"]
     if out_directory:
         out_directory: Path = Path(out_directory)
@@ -64,7 +64,7 @@ def demultiplex_flowcell(
     flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
-        raise click.Abort
+        return
 
     if not flowcell_obj.validate_sample_sheet():
         LOG.warning(
