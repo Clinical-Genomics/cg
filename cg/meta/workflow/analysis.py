@@ -28,8 +28,8 @@ class AnalysisAPI(MetaAPI):
 
     @property
     def threshold_reads(self):
-        """Defines whether workflow case should be automatically analyzed
-        even when not all samples have adequate read count"""
+        """Defines whether the threshold for adequate read count should be passed for all samples
+        when determining if the analysis for a case should be automatically started"""
         return False
 
     @property
