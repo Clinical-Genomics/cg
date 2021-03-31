@@ -1,7 +1,9 @@
 import datetime as dt
 import logging
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
+import os
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
@@ -26,6 +28,8 @@ class AnalysisAPI(MetaAPI):
 
     @property
     def threshold_reads(self):
+        """Defines whether the threshold for adequate read count should be passed for all samples
+        when determining if the analysis for a case should be automatically started"""
         return False
 
     @property
@@ -95,6 +99,17 @@ class AnalysisAPI(MetaAPI):
         if case_obj.priority > 1:
             return "high"
         return "normal"
+
+    @staticmethod
+    def check_sample_read_count_above_threshold(sample_obj: models.Sample) -> bool:
+        """Check if read count passes threshold for reads guaranteed specified for its application tag"""
+        return bool(
+            sample_obj.reads
+            and sample_obj.reads
+            >= sample_obj.application_version.application.percent_reads_guaranteed
+            * sample_obj.application_version.application.target_reads
+            / 100
+        )
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory"""
@@ -200,10 +215,18 @@ class AnalysisAPI(MetaAPI):
         ).dict()
 
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
-        raise NotImplementedError
+        return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
     def get_pipeline_version(self, case_id: str) -> str:
-        raise NotImplementedError
+        """
+        Calls the pipeline to get the pipeline version number. If fails, returns a placeholder value instead.
+        """
+        try:
+            self.process.run_command(["--version"])
+            return list(self.process.stdout_lines())[0].split()[-1]
+        except (Exception, CalledProcessError):
+            LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
+            return "0.0.0"
 
     def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
         """
@@ -350,3 +373,10 @@ class AnalysisAPI(MetaAPI):
             raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
 
         LOG.info("Decompression for case %s not needed", case_id)
+
+    @staticmethod
+    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
+        """
+        Get date from deliverables path using date created metadata.
+        """
+        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))

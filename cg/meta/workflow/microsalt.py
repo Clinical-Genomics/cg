@@ -239,17 +239,3 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             raise click.Abort
         case_id = case_obj.internal_id
         return case_id, None
-
-    def get_bundle_created_date(self, case_id: str) -> datetime.date:
-        """ Get date from deliverables path using date created metadata """
-        return datetime.fromtimestamp(
-            int(os.path.getctime(self.get_deliverables_file_path(case_id=case_id)))
-        )
-
-    def get_pipeline_version(self, case_id: str) -> str:
-        try:
-            self.process.run_command(["--version"])
-            return list(self.process.stdout_lines())[0].split()[-1]
-        except CalledProcessError:
-            LOG.warning("Could not retrieve microsalt version!")
-            return "0.0.0"

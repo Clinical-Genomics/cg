@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.15.0]
+### Added
+- CLI methods for starting mutant
+
 ## [20.14.2]
 ### Added
 - Add RNA validation cases to blacklist, which defines cases to not compress fastq files for
