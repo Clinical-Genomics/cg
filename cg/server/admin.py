@@ -369,8 +369,7 @@ class UserView(BaseView):
     """Admin view for Model.User"""
 
     column_default_sort = "name"
-    column_editable_list = ["customer", "is_admin"]
-    column_filters = ["customer.internal_id"]
-    column_searchable_list = ["name", "email", "customer.internal_id"]
+    column_filters = []
+    column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
