@@ -58,13 +58,13 @@ class DeliverAPI:
         """
         case_id: str = case_obj.internal_id
         case_name: str = case_obj.name
+        link_objs: List[FamilySample] = self.store.family_samples(case_id)
+        if not link_objs:
+            LOG.warning("Could not find any samples linked to case %s", case_id)
+            return
         LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
         if last_version:
-            link_objs: List[FamilySample] = self.store.family_samples(case_id)
-            if not link_objs:
-                LOG.warning("Could not find any samples linked to case %s", case_id)
-                return
             samples: List[Sample] = [link.sample for link in link_objs]
             if not self.ticket_id:
                 self.set_ticket_id(sample_obj=samples[0])
