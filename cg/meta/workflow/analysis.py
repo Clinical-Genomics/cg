@@ -289,6 +289,7 @@ class AnalysisAPI(MetaAPI):
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 read=fastq_data["read"],
+                meta=self.get_additional_naming_metadata(sample_obj),
             )
             destination_path: Path = fastq_dir / fastq_name
             linked_reads_paths[fastq_data["read"]].append(destination_path)
@@ -380,3 +381,6 @@ class AnalysisAPI(MetaAPI):
         Get date from deliverables path using date created metadata.
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
+
+    def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
+        return None
