@@ -15,7 +15,7 @@ class CgError(Exception):
 
 
 class FlowcellError(CgError):
-    """Raised when decompression still needed to start analysis"""
+    """Raised when there is a problem with demultiplexing a flowcell"""
 
 
 class DecompressionNeededError(CgError):

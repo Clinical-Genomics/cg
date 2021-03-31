@@ -12,18 +12,6 @@ from cg.models.slurm.sbatch import Sbatch
 LOG = logging.getLogger(__name__)
 
 
-def fetch_flowcell_paths(in_path: Path) -> Iterable[Path]:
-    """Loop over a directory and find all flowcell files
-
-    It is assumed that the flowcell directories are situated as children to in_path
-    """
-    for child in in_path.iterdir():
-        if not child.is_dir():
-            continue
-        LOG.info("Found directory %s", child)
-        yield child
-
-
 class DemultiplexingAPI:
     """Demultiplexing API should deal with anything related to demultiplexing
 
@@ -86,18 +74,19 @@ class DemultiplexingAPI:
             run_dir=flowcell.path, out_dir=flowcell_out_dir, sample_sheet=flowcell.sample_sheet_path
         )
 
-        sbatch_info = {
-            "job_name": "_".join([flowcell.flowcell_id, "demultiplex"]),
-            "account": self.slurm_account,
-            "number_tasks": 18,
-            "memory": 50,
-            "log_dir": log_path.parent.as_posix(),
-            "email": self.mail,
-            "hours": 36,
-            "commands": commands,
-            "error": error_function,
-        }
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(
+            sbatch_parameters=Sbatch(
+                job_name="_".join([flowcell.flowcell_id, "demultiplex"]),
+                account=self.slurm_account,
+                number_tasks=18,
+                memory=50,
+                log_dir=log_path.parent.as_posix(),
+                email=self.mail,
+                hours=36,
+                commands=commands,
+                error=error_function,
+            )
+        )
         sbatch_path: Path = self.demultiplex_sbatch_path(flowcell=flowcell)
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path

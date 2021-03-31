@@ -18,11 +18,14 @@ class Flowcell:
         self.path = flowcell_path
         LOG.info("Set flowcell id to %s", self.flowcell_id)
         self._run_parameters: Optional[RunParameters] = None
+        self._flowcell_id: Optional[str] = None
 
     @property
     def flowcell_id(self) -> str:
-        base_name: str = self.path.name.split("_")[-1]
-        return base_name[1:]
+        if not self._flowcell_id:
+            base_name: str = self.path.name.split("_")[-1]
+            self._flowcell_id = base_name[1:]
+        return self._flowcell_id
 
     @property
     def sample_sheet_path(self) -> Path:

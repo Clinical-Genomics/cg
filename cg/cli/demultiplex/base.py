@@ -94,14 +94,31 @@ def create_sample_sheet(context: Context, flowcell: click.Path, dry_run: bool):
         outfile.write(sample_sheet)
 
 
+@click.command(name="all")
+@click.argument("flowcells-directory", type=click.Path(exists=True, file_okay=False))
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def demultiplex_all(
+    context: Context,
+    flowcells_directory: click.Path,
+    dry_run: bool,
+):
+    """Demultiplex all flowcells that are ready under the flowcells_directory"""
+    flowcells_directory: Path = Path(flowcells_directory)
+    for sub_dir in flowcells_directory.iterdir():
+        if not sub_dir.is_dir():
+            continue
+        LOG.info("Found directory %s", sub_dir)
+
+
 @click.command(name="flowcell")
-@click.argument("flowcell-directory")
+@click.argument("flowcell-directory", type=click.Path(file_okay=False, exists=True))
 @click.option("--out-directory")
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
 def demultiplex_flowcell(
-    context,
-    flowcell_directory: str,
+    context: Context,
+    flowcell_directory: click.Path,
     out_directory: Optional[str],
     dry_run: bool,
 ):
@@ -130,6 +147,3 @@ def demultiplex_flowcell(
 
 demultiplex.add_command(demultiplex_flowcell)
 demultiplex.add_command(sample_sheet_commands)
-
-if __name__ == "__main__":
-    demultiplex()

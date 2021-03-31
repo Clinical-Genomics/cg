@@ -4,8 +4,8 @@ import logging
 from typing import Dict, List, Set, Tuple
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.models.demultiplex.valid_indexes import Index
 from cg.resources import valid_indexes_path
+from pydantic import BaseModel
 
 LOG = logging.getLogger(__name__)
 NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
@@ -27,6 +27,11 @@ def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]
             indexes_by_lane[lane] = set()
         indexes_by_lane[lane].add(sample.index)
     return indexes_by_lane
+
+
+class Index(BaseModel):
+    name: str
+    sequence: str
 
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:

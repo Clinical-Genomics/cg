@@ -5,9 +5,9 @@ from typing import Dict, List, Set
 
 from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
+from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.models.demultiplex.run_parameters import RunParameters
-from cg.models.demultiplex.valid_indexes import Index
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet
 
 LOG = logging.getLogger(__name__)

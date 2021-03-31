@@ -17,17 +17,3 @@ bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 DEMULTIPLEX_ERROR = """
 mail -s 'ERROR demultiplexing of {flowcell_name}' {email} < '{logfile}'
 """
-
-if __name__ == "__main__":
-    demux_params = {
-        "run_dir": "path/to/a_flowcell/",
-        "out_dir": "path/to/output_dir/",
-        "sample_sheet": "path/to/SampleSheet.csv",
-    }
-    print(DEMULTIPLEX_COMMAND.format(**demux_params))
-    error_params = {
-        "flowcell_name": "a_flowcell",
-        "email": "clark.kent@mail.com",
-        "logfile": "path/to/logfile.txt",
-    }
-    print(DEMULTIPLEX_ERROR.format(**error_params))
