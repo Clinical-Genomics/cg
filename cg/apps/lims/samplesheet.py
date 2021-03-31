@@ -93,6 +93,6 @@ def flowcell_samples(lims: Lims, flowcell_id: str) -> Iterable[LimsFlowcellSampl
                 lane=lane,
                 sample_id=sample.id,
                 index=index,
-                sample_name=sample.project.name,
+                sample_name=sample.name,
                 project=sample.project.name,
             )

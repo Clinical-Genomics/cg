@@ -128,5 +128,5 @@ class DemultiplexingAPI:
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
-        LOG.info("Fastq compression running as job %s", sbatch_number)
+        LOG.info("Demultiplexing running as job %s", sbatch_number)
         return sbatch_number

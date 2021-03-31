@@ -65,14 +65,15 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
     """
     LOG.info("Check if run is reverse complement")
     if control_software_version != NEW_CONTROL_SOFTWARE_VERSION:
-        LOG.warning("Invalid control software version %s!", control_software_version)
+        LOG.warning(
+            "Old software version %s, no need for reverse complement", control_software_version
+        )
         return False
     reagent_kit_version: float = get_reagent_kit_version(reagent_kit_version_string)
     if reagent_kit_version != NEW_REAGENT_KIT_VERSION:
         LOG.warning(
-            "Reagent kit version %s does not match the valid version %s",
+            "Reagent kit version %s does not does not need reverse complement",
             reagent_kit_version,
-            NEW_CONTROL_SOFTWARE_VERSION,
         )
         return False
     return True
