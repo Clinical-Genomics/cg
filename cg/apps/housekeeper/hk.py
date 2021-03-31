@@ -2,6 +2,7 @@
 import datetime as dt
 import logging
 import os
+import traceback
 from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
@@ -20,6 +21,8 @@ class HousekeeperAPI:
     def __init__(self, config: dict) -> None:
         self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
+        LOG.debug(f"Initialising a HousekeeperAPI: {self._store.session}")
+        traceback.print_stack()
 
     def __getattr__(self, name):
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
