@@ -3,11 +3,11 @@ import json
 import logging
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store import models
 from cg.utils import Process
@@ -35,7 +35,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     @property
     def fastq_handler(self):
-        return MicrosaltFastqHandler
+        return MutantFastqHandler
 
     @property
     def threshold_reads(self):
@@ -113,6 +113,17 @@ class MutantAnalysisAPI(AnalysisAPI):
             LOG.info(case_config_list)
         json.dump(case_config_list, open(config_path, "w"), indent=4)
         LOG.info("Saved config to %s", config_path)
+
+    def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
+        sample_name = sample_obj.name
+        region_code = self.lims_api.get_sample_attribute(
+            lims_id=sample_obj.internal_id, key="region_code"
+        ).replace(" ", "_")
+        lab_code = self.lims_api.get_sample_attribute(
+            lims_id=sample_obj.internal_id, key="lab_code"
+        ).replace(" ", "_")
+
+        return f"{region_code}_{lab_code}_{sample_name}"
 
     def run_analysis(self, case_id: str, dry_run: bool) -> None:
         if self.get_case_output_path(case_id=case_id).exists():
