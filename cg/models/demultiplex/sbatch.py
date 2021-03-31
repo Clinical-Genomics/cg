@@ -11,3 +11,4 @@ class SbatchCommand(BaseModel):
     run_dir: str  # path/to/a_flowcell/
     out_dir: str  # path/to/output_dir/
     sample_sheet: str  # path/to/SampleSheet.csv
+    demux_completed_file: str  # path/to/demuxcomplete.txt

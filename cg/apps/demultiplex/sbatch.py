@@ -10,6 +10,7 @@ bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 --runfolder-dir {run_dir} --output-dir {out_dir} \
 --sample-sheet {sample_sheet} \
 --barcode-mismatches 1
+touch {demux_completed_file}
 """
 
 # This needs flowcell_name, email. logfile

@@ -39,11 +39,14 @@ class DemultiplexingAPI:
         return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
 
     @staticmethod
-    def get_sbatch_command(run_dir: Path, out_dir: Path, sample_sheet: Path) -> str:
+    def get_sbatch_command(
+        run_dir: Path, out_dir: Path, sample_sheet: Path, demux_completed: Path
+    ) -> str:
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
             out_dir=out_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
+            demux_completed_file=demux_completed.as_posix(),
         )
         return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
 
@@ -123,7 +126,10 @@ class DemultiplexingAPI:
             flowcell_id=flowcell.flowcell_id, log_path=log_path, email=self.mail
         )
         commands: str = self.get_sbatch_command(
-            run_dir=flowcell.path, out_dir=flowcell_out_dir, sample_sheet=flowcell.sample_sheet_path
+            run_dir=flowcell.path,
+            out_dir=flowcell_out_dir,
+            sample_sheet=flowcell.sample_sheet_path,
+            demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
         )
 
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
