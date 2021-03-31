@@ -18,6 +18,10 @@ Try to use the following format:
 
 - Demultiplexing functionality to CG
 
+## [20.14.1]
+### Fixed
+- So that existing samples don't get added to lims again
+
 ## [20.14.0]
 ### Added
 - Possibility to associate more than one customer to each user 

@@ -7,8 +7,11 @@ from cg.apps.lims import LimsAPI
 from click.testing import CliRunner
 from tests.apps.demultiplex.conftest import (
     fixture_demultiplex_fixtures,
+    fixture_lims_novaseq_samples,
+    fixture_lims_novaseq_samples_file,
     fixture_novaseq_dir,
     fixture_novaseq_run_parameters,
+    fixture_raw_samples_dir,
 )
 
 

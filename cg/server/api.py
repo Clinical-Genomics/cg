@@ -4,28 +4,20 @@ import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import DuplicateRecordError, OrderError, OrderFormError
-from cg.meta.orders import OrdersAPI, OrderType
-from cg.models.orders.order import OrderIn
-from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
-from google.auth import jwt
-from pydantic import ValidationError
-from requests.exceptions import HTTPError
-from werkzeug.utils import secure_filename
-
-<<<<<<< HEAD
-=======
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.models.orders.order import OrderIn
 from cg.store import models
+from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
+from google.auth import jwt
+from pydantic import ValidationError
+from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
+from werkzeug.utils import secure_filename
 
->>>>>>> master
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
 from ..models.orders.orderform_schema import Orderform
