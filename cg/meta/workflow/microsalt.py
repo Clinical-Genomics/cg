@@ -239,7 +239,3 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             raise click.Abort
         case_id = case_obj.internal_id
         return case_id, None
-
-    def get_bundle_created_date(self, case_id: str) -> datetime.date:
-        """ Get date from deliverables path using date created metadata """
-        return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))

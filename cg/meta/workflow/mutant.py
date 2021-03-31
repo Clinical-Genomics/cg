@@ -132,9 +132,6 @@ class MutantAnalysisAPI(AnalysisAPI):
             dry_run=dry_run,
         )
 
-    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
-        return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
-
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis has a deliverables file,
         and is ready to be stored in Housekeeper"""

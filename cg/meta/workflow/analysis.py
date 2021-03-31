@@ -215,7 +215,7 @@ class AnalysisAPI(MetaAPI):
         ).dict()
 
     def get_bundle_created_date(self, case_id: str) -> dt.datetime:
-        raise NotImplementedError
+        return self.get_date_from_file_path(self.get_deliverables_file_path(case_id=case_id))
 
     def get_pipeline_version(self, case_id: str) -> str:
         """
