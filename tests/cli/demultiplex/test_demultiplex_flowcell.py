@@ -18,9 +18,9 @@ def test_demultiplex_flowcell_dry_run(
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for demultiplexing
     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
-    assert flowcell.is_demultiplexing_possible()
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
     assert demux_api.flowcell_out_dir_path(flowcell).exists() is False
 
     # WHEN starting demultiplexing from the CLI with dry run flag
@@ -44,9 +44,9 @@ def test_demultiplex_flowcell(
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for demultiplexing
     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
-    assert flowcell.is_demultiplexing_possible()
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
     assert demux_api.flowcell_out_dir_path(flowcell).exists() is False
 
     # WHEN starting demultiplexing from the CLI with dry run flag

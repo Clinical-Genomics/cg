@@ -3,10 +3,9 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from click import Context
-
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.flowcell import Flowcell
+from click import Context
 
 LOG = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ def demultiplex_flowcell(
     dry_run: bool,
 ):
     """Demultiplex a flowcell on slurm using CG"""
-    flowcell_directory: Path = Path(flowcell_directory)
+    flowcell_directory: Path = Path(str(flowcell_directory))
     LOG.info("Sending demultiplex job for flowcell %s", flowcell_directory.name)
     demultiplex_api: DemultiplexingAPI = context.obj["demultiplex_api"]
     if out_directory:
@@ -64,7 +63,7 @@ def demultiplex_flowcell(
     demultiplex_api.set_dry_run(dry_run=dry_run)
     flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
 
-    if not flowcell_obj.is_demultiplexing_possible() and not dry_run:
+    if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
         raise click.Abort
 
     if not flowcell_obj.validate_sample_sheet():

@@ -1,7 +1,7 @@
 """This api should handle everything around demultiplexing"""
 import logging
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 from cg.apps.demultiplex.flowcell import Flowcell
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
@@ -75,7 +75,8 @@ class DemultiplexingAPI:
         that the demultiplexing completed file does not exist
         """
         return (
-            flowcell.demultiplexing_ongoing_path.exists() and not self.is_demultiplexing_completed()
+            flowcell.demultiplexing_ongoing_path.exists()
+            and not self.is_demultiplexing_completed(flowcell)
         )
 
     def is_demultiplexing_possible(self, flowcell: Flowcell) -> bool:
@@ -91,7 +92,7 @@ class DemultiplexingAPI:
         if not flowcell.sample_sheet_exists():
             LOG.warning("Could not find sample sheet for %s", flowcell.flowcell_id)
             return False
-        if self.is_demultiplexing_ongoing():
+        if self.is_demultiplexing_ongoing(flowcell=flowcell):
             LOG.warning("Demultiplexing is ongoing for %s", flowcell.flowcell_id)
             return False
         return True
