@@ -102,7 +102,7 @@ SARSCOV2_ANALYSIS_CASE_TAGS = [
 ]
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
-    {"variants"},
+    {"vcf-report"},
     {"consensus"},
 ]
 
