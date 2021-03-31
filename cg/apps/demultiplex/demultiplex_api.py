@@ -3,9 +3,9 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from cg.apps.demultiplex.flowcell import Flowcell
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch
 

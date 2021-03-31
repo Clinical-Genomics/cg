@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import List
 
 import click
-from cg.apps.demultiplex.flowcell import Flowcell
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.lims import LimsAPI
 from cg.apps.lims.samplesheet import LimsFlowcellSample, flowcell_samples
+from cg.models.demultiplex.flowcell import Flowcell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 from click import Context
 from pydantic import ValidationError

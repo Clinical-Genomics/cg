@@ -4,11 +4,11 @@ from typing import Dict
 
 import pytest
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.flowcell import Flowcell
 from cg.apps.lims import LimsAPI
-from click.testing import CliRunner
-
+from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
+from click.testing import CliRunner
+from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
     fixture_demultiplex_fixtures,
     fixture_lims_novaseq_samples,
@@ -17,7 +17,6 @@ from tests.apps.demultiplex.conftest import (
     fixture_novaseq_run_parameters,
     fixture_raw_samples_dir,
 )
-from tests.apps.crunchy.conftest import fixture_sbatch_process
 
 
 @pytest.fixture(name="novaseq_sample_sheet_path")

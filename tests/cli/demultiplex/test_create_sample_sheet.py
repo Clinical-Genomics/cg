@@ -2,9 +2,9 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cg.apps.demultiplex.flowcell import Flowcell
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.cli.demultiplex.sample_sheet import create_sheet
+from cg.models.demultiplex.flowcell import Flowcell
 from click import testing
 
 

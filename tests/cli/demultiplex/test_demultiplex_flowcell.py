@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Dict
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.flowcell import Flowcell
 from cg.cli.demultiplex.demux import demultiplex_flowcell
+from cg.models.demultiplex.flowcell import Flowcell
 from click import testing
 
 

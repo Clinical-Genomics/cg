@@ -4,7 +4,7 @@ from typing import Optional
 
 import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import Flowcell
 from click import Context
 
 LOG = logging.getLogger(__name__)
