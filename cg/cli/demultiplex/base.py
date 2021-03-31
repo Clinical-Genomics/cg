@@ -76,6 +76,10 @@ def create_sample_sheet(context: Context, flowcell: click.Path, dry_run: bool):
     lims_samples: Iterable[LimsFlowcellSample] = flowcell_samples(
         lims=context.obj["lims_api"], flowcell_id=flowcell_object.flowcell_id
     )
+    if not lims_samples:
+        LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)
+        raise click.Abort
+
     sample_sheet_creator = SampleSheetCreator(
         flowcell_id=flowcell_object.flowcell_id,
         lims_samples=list(lims_samples),
@@ -121,7 +125,6 @@ def demultiplex_flowcell(
         )
         if not dry_run:
             raise click.Abort
-
     demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
 
 

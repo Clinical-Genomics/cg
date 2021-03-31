@@ -59,25 +59,26 @@ class DemultiplexingAPI:
         )
         return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
 
-    @staticmethod
-    def get_demultiplex_sbatch_path(directory: Path) -> Path:
+    def demultiplex_sbatch_path(self, flowcell: Flowcell) -> Path:
         """Get the path to where sbatch file should be kept"""
-        return directory / "demux-novaseq.sh"
+        return self.flowcell_out_dir_path(flowcell) / "demux-novaseq.sh"
 
-    @staticmethod
-    def get_logfile(out_dir: Path, flowcell: Flowcell) -> Path:
+    def get_logfile(self, flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
-        # How to handle if a flowcell is redemuxed ?
-        return out_dir / f"project.{flowcell.flowcell_id}.log"
+        return self.flowcell_out_dir_path(flowcell=flowcell) / f"project.{flowcell.flowcell_id}.log"
+
+    def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
+        """Create the path to where the demuliplexed result should be produced"""
+        return self.out_dir / flowcell.path.name
 
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
-        flowcell_out_dir: Path = self.out_dir / flowcell.path.name
+        flowcell_out_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
         LOG.info("Demultiplexing to %s", flowcell_out_dir)
         if not self.dry_run:
             LOG.info("Creating out dir %s", flowcell_out_dir)
             flowcell_out_dir.mkdir(exist_ok=False, parents=True)
-        log_path: Path = self.get_logfile(out_dir=flowcell_out_dir, flowcell=flowcell)
+        log_path: Path = self.get_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
             flowcell_id=flowcell.flowcell_id, log_path=log_path, email=self.mail
         )
@@ -97,16 +98,9 @@ class DemultiplexingAPI:
             "error": error_function,
         }
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path: Path = self.get_demultiplex_sbatch_path(directory=flowcell_out_dir)
+        sbatch_path: Path = self.demultiplex_sbatch_path(flowcell=flowcell)
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         LOG.info("Fastq compression running as job %s", sbatch_number)
         return sbatch_number
-
-
-if __name__ == "__main__":
-    cg_dir = Path("/Users/mans.magnusson/PycharmProjects/cg/cg/")
-    for flowcell_directory in fetch_flowcell_paths(cg_dir):
-        run_name = flowcell_directory.name
-        print(type(flowcell_directory), flowcell_directory, run_name)

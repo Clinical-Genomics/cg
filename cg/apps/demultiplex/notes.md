@@ -17,6 +17,12 @@ Distinction can be made from that the
     - index length for fluffy is 8 and wgs 10
     - read length for fluffy is 51 and 151 for wgs
 
+### How the process is being done
+
+- One cronjob creates the sample sheet 
+- One cronjob starts demultiplexing
+This can be done since the run parameters are ready before the rest of the data is in place
+
 ### THIS IS THE PART I DON'T UNDERSTAND ATM
 
 - I think that the file delivery.txt indicates that demultiplexing has started.
