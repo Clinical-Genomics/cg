@@ -60,27 +60,26 @@ class DeliverAPI:
         case_name: str = case_obj.name
         LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
-        if not last_version:
-            raise SyntaxError("Could not find any version for {}".format(case_id))
-        link_objs: List[FamilySample] = self.store.family_samples(case_id)
-        if not link_objs:
-            LOG.warning("Could not find any samples linked to case %s", case_id)
-            return
-        samples: List[Sample] = [link.sample for link in link_objs]
-        if not self.ticket_id:
-            self.set_ticket_id(sample_obj=samples[0])
-        if not self.customer_id:
-            self.set_customer_id(case_obj=case_obj)
+        if last_version:
+            link_objs: List[FamilySample] = self.store.family_samples(case_id)
+            if not link_objs:
+                LOG.warning("Could not find any samples linked to case %s", case_id)
+                return
+            samples: List[Sample] = [link.sample for link in link_objs]
+            if not self.ticket_id:
+                self.set_ticket_id(sample_obj=samples[0])
+            if not self.customer_id:
+                self.set_customer_id(case_obj=case_obj)
 
-        sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+            sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 
-        if self.case_tags:
-            self.deliver_case_files(
-                case_id=case_id,
-                case_name=case_name,
-                version_obj=last_version,
-                sample_ids=sample_ids,
-            )
+            if self.case_tags:
+                self.deliver_case_files(
+                    case_id=case_id,
+                    case_name=case_name,
+                    version_obj=last_version,
+                    sample_ids=sample_ids,
+                )
 
         if not self.sample_tags:
             return
