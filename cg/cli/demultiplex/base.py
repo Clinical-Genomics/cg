@@ -105,10 +105,24 @@ def demultiplex_all(
 ):
     """Demultiplex all flowcells that are ready under the flowcells_directory"""
     flowcells_directory: Path = Path(flowcells_directory)
+    demultiplex_api: DemultiplexingAPI = context.obj["demultiplex_api"]
+    demultiplex_api.set_dry_run(dry_run=dry_run)
     for sub_dir in flowcells_directory.iterdir():
         if not sub_dir.is_dir():
             continue
         LOG.info("Found directory %s", sub_dir)
+        flowcell_obj = Flowcell(flowcell_path=sub_dir)
+        if not flowcell_obj.is_demultiplexing_possible() and not dry_run:
+            continue
+
+        if not flowcell_obj.validate_sample_sheet():
+            LOG.warning(
+                "Malformed sample sheet. Run cg samplesheet validate %s",
+                flowcell_obj.sample_sheet_path,
+            )
+            if not dry_run:
+                continue
+        demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
 
 
 @click.command(name="flowcell")

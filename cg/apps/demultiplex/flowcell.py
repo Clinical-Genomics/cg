@@ -17,8 +17,8 @@ class Flowcell:
         LOG.info("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
         LOG.info("Set flowcell id to %s", self.flowcell_id)
-        self._run_parameters: Optional[RunParameters] = None
         self._flowcell_id: Optional[str] = None
+        self._run_parameters: Optional[RunParameters] = None
 
     @property
     def flowcell_id(self) -> str:
