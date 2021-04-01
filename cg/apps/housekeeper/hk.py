@@ -17,12 +17,24 @@ LOG = logging.getLogger(__name__)
 
 class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
+    __instance = None
+
+    @staticmethod
+    def get_instance(config: dict):
+        """ Static access method. """
+        if HousekeeperAPI.__instance is None:
+            HousekeeperAPI(config)
+        return HousekeeperAPI.__instance
 
     def __init__(self, config: dict) -> None:
+        """ Virtually private constructor. """
+        if HousekeeperAPI.__instance is not None:
+            raise Exception("This class is a Singleton!")
+        else:
+            HousekeeperAPI.__instance = self
+
         self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
-        LOG.debug(f"Initialising a HousekeeperAPI: {self._store.session}")
-        traceback.print_stack()
 
     def __getattr__(self, name):
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
