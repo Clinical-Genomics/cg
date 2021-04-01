@@ -60,10 +60,10 @@ class DeliverAPI:
         case_name: str = case_obj.name
         LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
-        if not last_version and not self.case_tags:
-            last_version = self.hk_api.new_bundle(case_id)
+        # if not last_version and not self.case_tags:
+        #    last_version = self.hk_api.new_bundle(case_id)
         if not last_version:
-            raise SyntaxError("Could not find any version for {}".format(case_id))
+            LOG.warning("Could not find any version for {}".format(case_id))
         link_objs: List[FamilySample] = self.store.family_samples(case_id)
         if not link_objs:
             LOG.warning("Could not find any samples linked to case %s", case_id)
