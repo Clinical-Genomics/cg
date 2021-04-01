@@ -97,8 +97,7 @@ FASTQ_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 SARSCOV2_ANALYSIS_CASE_TAGS = [
-    {"SARS-CoV-2-articreport-variants"},
-    {"SARS-CoV-2-articreport-results"},
+    {"deliver", "visualization", "csv"},
 ]
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
