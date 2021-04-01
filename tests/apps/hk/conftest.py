@@ -18,7 +18,7 @@ def fixture_hk_config(root_path) -> dict:
 @pytest.fixture(scope="function", name="housekeeper_api")
 def fixture_housekeeper_api(hk_config):
     """Setup Housekeeper store."""
-    _api = HousekeeperAPI(hk_config)
+    _api = HousekeeperAPI.get_instance(hk_config)
     _api.initialise_db()
     yield _api
     _api.destroy_db()

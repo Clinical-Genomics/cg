@@ -21,7 +21,7 @@ def deliver(context):
     """Deliver files with CG."""
     LOG.info("Running CG deliver")
     context.obj["status_db"] = Store(context.obj["database"])
-    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["housekeeper_api"] = HousekeeperAPI.get_instance(context.obj)
 
 
 @click.command(name="analysis")

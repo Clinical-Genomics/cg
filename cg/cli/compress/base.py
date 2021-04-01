@@ -27,7 +27,7 @@ def compress(context):
     """Compress files"""
     context.obj["status_db"] = Store(context.obj.get("database"))
 
-    hk_api = HousekeeperAPI(context.obj)
+    hk_api = HousekeeperAPI.get_instance(context.obj)
     crunchy_api = CrunchyAPI(context.obj)
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
@@ -52,7 +52,7 @@ def decompress(context):
     """Decompress files"""
     context.obj["status_db"] = Store(context.obj.get("database"))
 
-    hk_api = HousekeeperAPI(context.obj)
+    hk_api = HousekeeperAPI.get_instance(context.obj)
     crunchy_api = CrunchyAPI(context.obj)
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)

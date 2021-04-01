@@ -24,7 +24,7 @@ def transfer(context):
 def flowcell(context, flowcell_name):
     """Populate results from a flowcell."""
     stats_api = StatsAPI(context.obj)
-    hk_api = HousekeeperAPI(context.obj)
+    hk_api = HousekeeperAPI.get_instance(context.obj)
     transfer_api = transfer_app.TransferFlowcell(context.obj["status_db"], stats_api, hk_api)
     new_record = transfer_api.transfer(flowcell_name)
     context.obj["status_db"].add_commit(new_record)

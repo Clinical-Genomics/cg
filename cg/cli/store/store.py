@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 def store(context):
     """Command for storing files"""
     LOG.info("Running CG store command")
-    housekeeper_api = HousekeeperAPI(context.obj)
+    housekeeper_api = HousekeeperAPI.get_instance(context.obj)
     crunchy_api = CrunchyAPI(context.obj)
 
     compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)

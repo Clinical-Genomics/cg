@@ -22,7 +22,7 @@ class MetaAPI:
 
     def __init__(self, config: dict):
         self.config = config or {}
-        self.housekeeper_api = HousekeeperAPI(self.config)
+        self.housekeeper_api = HousekeeperAPI.get_instance(self.config)
         self.trailblazer_api = TrailblazerAPI(self.config)
         self.status_db = Store(self.config["database"])
         self.lims_api = LimsAPI(self.config)
