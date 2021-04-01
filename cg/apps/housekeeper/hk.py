@@ -23,7 +23,7 @@ class HousekeeperAPI:
     def get_instance(config: dict):
         """ Static access method. """
         if HousekeeperAPI.__instance is None:
-            HousekeeperAPI.get_instance(config)
+            HousekeeperAPI.__init__(config)
         return HousekeeperAPI.__instance
 
     def __init__(self, config: dict) -> None:
