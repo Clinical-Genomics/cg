@@ -101,8 +101,7 @@ SARSCOV2_ANALYSIS_CASE_TAGS = [
 ]
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
-    {"vcf-report"},
-    {"consensus"},
+    {"fastq"},
 ]
 
 PIPELINE_ANALYSIS_TAG_MAP = {
