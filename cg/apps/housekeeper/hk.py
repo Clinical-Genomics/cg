@@ -27,6 +27,9 @@ class HousekeeperAPI:
         return HousekeeperAPI.__instance
 
     def __init__(self, config: dict) -> None:
+        LOG.debug(f"Initialising a HousekeeperAPI: {self._store.session}")
+        traceback.print_stack()
+
         """ Virtually private constructor. """
         if HousekeeperAPI.__instance is not None:
             raise Exception("This class is a Singleton!")
