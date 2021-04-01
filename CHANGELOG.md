@@ -13,6 +13,149 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.15.1]
+### Fixed
+- cg to rename mutant fastq files directly
+
+## [20.15.0]
+### Added
+- CLI methods for starting mutant
+
+## [20.14.2]
+### Added
+- Add RNA validation cases to blacklist, which defines cases to not compress fastq files for
+
+## [20.14.1]
+### Fixed
+- So that existing samples don't get added to lims again
+
+## [20.14.0]
+### Added
+- Possibility to associate more than one customer to each user 
+
+## [20.13.0]
+### Changed
+- Update orderform 2184 to latest version 4
+
+## [20.12.1]
+### Fixed
+- Fix skip MIP-DNA (for MAF) for tumours with wgs applications for fastq delivery
+
+## [20.12.0]
+### Added
+- Add support for fastq delivery
+
+## [20.11.0]
+### Added
+- functionality to upload synopsis, cohort and phenotype information to scout
+
+## [20.10.1]
+### Fixed
+- Mip start-available command
+
+## [20.10.0]
+### Added
+- Panel command to mip-rna analysis workflow
+- Add genome build 38 as default for mip-rna when exporting gene panels from Scout
+- Add genome build 37 as default for mip-dna when exporting gene panels from Scout
+- Add genome build 37 as default when exporting gene panels from Scout
+
+### Changed
+- Refactor start and start-available for mip
+
+## [20.9.12]
+### Changed
+- Use pydantic models for handling lims samples
+
+
+## [20.9.11]
+### Fixed
+- Fix bug that that prevented wgs fastq samples from being genotyped
+
+## [20.9.10]
+### Fixed
+- Move synopsis and cohorts from sample to case in the database since that is how they are used 
+
+## [20.9.9]
+### Fixed
+- Fixed bug in upload delivery report automation
+
+## [20.9.8]
+### Fixed
+- Fixed context in upload vogue
+
+## [20.9.7]
+### Fixed
+- Added missing pipeline option in database for SARS-CoV-2 on case in database
+
+## [20.9.6]
+### Fixed
+- Use `coverage_qc_report` instead of `delivery_report` when uploading balsamic cases to scout
+
+## [20.9.5]
+### Fixed
+- Balsamic crontab start-available auto-disables balsamic dry run
+
+## [20.9.4]
+### Fixed
+- Fix bug that pending path was not created 
+
+## [20.9.3]
+### Fixed
+- Bug in automation of delivery report upload
+
+## [20.9.2]
+### Fixed
+- Bug when updating crunchy metadata files
+
+## [20.9.1]
+### Fixed
+- Bug preventing MicroSALT to start automatically
+
+## [20.9.0]
+### Added
+- SlurmAPI to handle all communication with slurm from cg
+
+## [20.8.1]
+### Changed
+- Deletes unused files .gitlint, housekeeper, status, status_db
+
+## [20.8.0]
+### Added
+- Support for creating delivery reports for analyses that are not the latest ones
+
+## [20.7.0]
+### Added
+- DIAB and NBS-M to master list 
+
+### Fixed
+- Alphabetical order of master list
+
+## [20.6.0]
+### Changed
+- Use cgmodels for crunchy metadata files
+
+## [20.5.4]
+### Added
+- Change ending of lintjob from .py to .yml (accidentaly changed in previous pr)
+
+## [20.5.3]
+### Added
+- Support for SARS-CoV-2 Orderform 2184:3
+
+## [20.5.2]
+### Changed
+- Remove pipfile and pipfile.lock since they are not used
+
+## [20.5.1]
+### Changed
+- Removes linting gh actions job
+
+## [20.5.0]
+### Added
+- Add support for Microbial Orderform 1603:10
+- Add support for Metagenome Orderform 1605:09
+
 ## [20.4.0]
 ### Added
 - Support for SARS-CoV-2 Orderform 2184:1
@@ -34,7 +177,6 @@ Try to use the following format:
 ## [20.3.0]
 ### Changed
 - Refactored AnalysisAPI anf FastHandler classes into one class
-
 
 ## [20.2.1]
 ### Fixed

@@ -179,6 +179,8 @@ def start(
 ) -> None:
     """Start whole microSALT workflow by providing case, ticket or sample id"""
     LOG.info("Starting Microsalt workflow for %s", unique_id)
+    if not sample and not ticket:
+        context.invoke(resolve_compression, case_id=unique_id, dry_run=dry_run)
     context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
@@ -195,7 +197,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         try:
-            context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
+            context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
             LOG.error(error.message)
             exit_code = EXIT_FAIL

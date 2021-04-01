@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime as dt
 from typing import List
 
@@ -16,6 +15,7 @@ from cg.constants import (
     DataDelivery,
     Pipeline,
 )
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -26,6 +26,14 @@ flowcell_sample = Table(
     Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
     Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
     UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
+)
+
+customer_user = Table(
+    "customer_user",
+    Model.metadata,
+    Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
+    Column("user_id", types.Integer, ForeignKey("user.id"), nullable=False),
+    UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
 )
 
 
@@ -258,6 +266,7 @@ class Family(Model, PriorityMixin):
 
     action = Column(types.Enum(*CASE_ACTIONS))
     analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
+    _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -270,6 +279,34 @@ class Family(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
     priority = Column(types.Integer, default=1, nullable=False)
+    _synopsis = Column(types.Text)
+
+    @property
+    def cohorts(self) -> List[str]:
+        """Return a list of cohorts."""
+        return self._cohorts.split(",") if self._cohorts else []
+
+    @cohorts.setter
+    def cohorts(self, cohort_list: List[str]):
+        self._cohorts = ",".join(cohort_list) if cohort_list else None
+
+    @property
+    def panels(self) -> List[str]:
+        """Return a list of panels."""
+        return self._panels.split(",") if self._panels else []
+
+    @panels.setter
+    def panels(self, panel_list: List[str]):
+        self._panels = ",".join(panel_list) if panel_list else None
+
+    @property
+    def synopsis(self) -> List[str]:
+        """Return a list of synopsis."""
+        return self._synopsis.split(",") if self._synopsis else []
+
+    @synopsis.setter
+    def synopsis(self, synopsis_list: List[str]):
+        self._synopsis = ",".join(synopsis_list) if synopsis_list else None
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -287,15 +324,6 @@ class Family(Model, PriorityMixin):
                 analysis_obj.to_dict(family=False) for analysis_obj in self.analyses
             ]
         return data
-
-    @property
-    def panels(self) -> List[str]:
-        """Return a list of panels."""
-        return self._panels.split(",") if self._panels else []
-
-    @panels.setter
-    def panels(self, panel_list: List[str]):
-        self._panels = ",".join(panel_list) if panel_list else None
 
 
 class FamilySample(Model):
@@ -422,7 +450,6 @@ class Sample(Model, PriorityMixin):
         ApplicationVersion, foreign_keys=[application_version_id]
     )
     capture_kit = Column(types.String(64))
-    _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -452,22 +479,12 @@ class Sample(Model, PriorityMixin):
     reference_genome = Column(types.String(255))
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
-    _synopsis = Column(types.Text)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     ticket_number = Column(types.Integer)
     time_point = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
-
-    @property
-    def cohorts(self) -> List[str]:
-        """Return a list of cohorts."""
-        return self._cohorts.split(",") if self._cohorts else []
-
-    @cohorts.setter
-    def cohorts(self, cohort_list: List[str]):
-        self._cohorts = ",".join(cohort_list) if cohort_list else None
 
     @property
     def phenotype_terms(self) -> List[str]:
@@ -477,15 +494,6 @@ class Sample(Model, PriorityMixin):
     @phenotype_terms.setter
     def phenotype_terms(self, phenotype_term_list: List[str]):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
-
-    @property
-    def synopsis(self) -> List[str]:
-        """Return a list of synopsis."""
-        return self._synopsis.split(",") if self._synopsis else []
-
-    @synopsis.setter
-    def synopsis(self, synopsis_list: List[str]):
-        self._synopsis = ",".join(synopsis_list) if synopsis_list else None
 
     @property
     def state(self) -> str:
@@ -546,15 +554,12 @@ class User(Model):
     email = Column(types.String(128), unique=True, nullable=False)
     is_admin = Column(types.Boolean, default=False)
 
-    customer_id = Column(
-        ForeignKey("customer.id", ondelete="CASCADE", use_alter=True), nullable=False
-    )
-    customer = orm.relationship("Customer", foreign_keys=[customer_id])
+    customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
         data = super(User, self).to_dict()
-        data["customer"] = self.customer.to_dict()
+        data["customers"] = [record.to_dict() for record in self.customers]
         return data
 
     def __str__(self) -> str:

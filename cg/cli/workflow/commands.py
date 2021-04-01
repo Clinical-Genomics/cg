@@ -11,6 +11,7 @@ from cg.exc import FlowcellsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mutant import MutantAnalysisAPI
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Print command to console without executing", is_flag=True
@@ -186,5 +187,20 @@ def mip_past_run_dirs(
     """Clean up of "old" MIP case run dirs"""
 
     context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("mutant-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("before_str")
+@click.pass_context
+def mutant_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" MUTANT case run dirs"""
+
+    context.obj["analysis_api"] = MutantAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)

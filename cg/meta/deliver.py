@@ -24,6 +24,7 @@ class DeliverAPI:
         case_tags: List[Set[str]],
         sample_tags: List[Set[str]],
         project_base_path: Path,
+        fastq_delivery: bool = False,
     ):
         """Initialize a delivery api
 
@@ -43,6 +44,7 @@ class DeliverAPI:
         self.customer_id: str = ""
         self.ticket_id: str = ""
         self.dry_run = False
+        self.fastq_delivery: bool = fastq_delivery
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run"""
@@ -56,7 +58,10 @@ class DeliverAPI:
         """
         case_id: str = case_obj.internal_id
         case_name: str = case_obj.name
+        LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
+        if not last_version:
+            raise SyntaxError("Could not find any version for {}".format(case_id))
         link_objs: List[FamilySample] = self.store.family_samples(case_id)
         if not link_objs:
             LOG.warning("Could not find any samples linked to case %s", case_id)
@@ -67,7 +72,7 @@ class DeliverAPI:
         if not self.customer_id:
             self.set_customer_id(case_obj=case_obj)
 
-        sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+        sample_ids: Set[str] = {sample.internal_id for sample in samples}
 
         if self.case_tags:
             self.deliver_case_files(
@@ -84,6 +89,11 @@ class DeliverAPI:
         for link_obj in link_objs:
             sample_id: str = link_obj.sample.internal_id
             sample_name: str = link_obj.sample.name
+            if self.fastq_delivery:
+                LOG.debug("Fetch last version for sample bundle %s", sample_id)
+                last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
+                if not last_version:
+                    raise SyntaxError("Could not find any version for {}".format(sample_id))
             self.deliver_sample_files(
                 case_id=case_id,
                 case_name=case_name,
@@ -131,6 +141,8 @@ class DeliverAPI:
     ) -> None:
         """Deliver files on sample level"""
         # Make sure that the directory exists
+        if not self.case_tags:
+            case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
             case_name=case_name, sample_name=sample_name
         )
@@ -143,9 +155,10 @@ class DeliverAPI:
             self.get_sample_files_from_version(version_obj=version_obj, sample_id=sample_id), 1
         ):
             # Out path should include customer names
-            out_path: Path = delivery_base / file_path.name.replace(case_id, case_name).replace(
-                sample_id, sample_name
-            )
+            file_name: str = file_path.name.replace(sample_id, sample_name)
+            if case_name:
+                file_name: str = file_name.replace(case_id, case_name)
+            out_path: Path = delivery_base / file_name
             if self.dry_run:
                 LOG.info("Would hard link file %s to %s", file_path, out_path)
                 continue
@@ -181,7 +194,7 @@ class DeliverAPI:
         Do not include files with sample tags.
         """
         tag: hk_models.Tag
-        file_tags = set([tag.name for tag in file_obj.tags])
+        file_tags = {tag.name for tag in file_obj.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")
             return False
@@ -208,14 +221,17 @@ class DeliverAPI:
 
         At least one tag should match between file and tags.
         Only include files with sample tag.
+
+        For fastq delivery we know that we want to deliver all files of bundle
         """
         tag: hk_models.Tag
-        file_tags = set([tag.name for tag in file_obj.tags])
+        file_tags = {tag.name for tag in file_obj.tags}
         tags: Set[str]
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
-            working_copy.add(sample_id)
+            if self.fastq_delivery is False:
+                working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True
 
@@ -237,14 +253,14 @@ class DeliverAPI:
         """Set the ticket_id for this upload"""
         self._set_ticket_id(sample_obj.ticket_number)
 
-    def create_delivery_dir_path(self, case_name: str, sample_name: str = None) -> Path:
+    def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
         """Create a path for delivering files
 
         Note that case name and sample name needs to be the identifiers sent from customer
         """
-        delivery_path = (
-            self.project_base_path / self.customer_id / "inbox" / self.ticket_id / case_name
-        )
+        delivery_path = self.project_base_path / self.customer_id / "inbox" / self.ticket_id
+        if case_name:
+            delivery_path = delivery_path / case_name
         if sample_name:
             delivery_path = delivery_path / sample_name
 

@@ -4,6 +4,7 @@ import logging
 import tempfile
 from functools import wraps
 from pathlib import Path
+from typing import Optional, List
 
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
@@ -15,6 +16,8 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.models.orders.order import OrderIn
+from cg.store import models
+from sqlalchemy.orm import Query
 
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
@@ -74,27 +77,11 @@ def submit_order(order_type):
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
-        return abort(make_response(jsonify(message=error), 401))
+        return abort(make_response(jsonify(message=str(error)), 401))
 
     return jsonify(
         project=result["project"], records=[record.to_dict() for record in result["records"]]
     )
-
-
-@BLUEPRINT.route("/customers")
-def customers():
-    """Fetch customers."""
-    query = db.Customer.query
-    data = [record.to_dict() for record in query]
-    return jsonify(customers=data)
-
-
-@BLUEPRINT.route("/panels")
-def panels():
-    """Fetch panels."""
-    query = db.Panel.query
-    data = [record.to_dict() for record in query]
-    return jsonify(panels=data)
 
 
 @BLUEPRINT.route("/cases")
@@ -113,24 +100,29 @@ def families():
         records = db.cases_to_mip_analyze()
         count = len(records)
     else:
-        customer_obj = None if g.current_user.is_admin else g.current_user.customer
+        customer_objs: Optional[List[models.Customer]] = (
+            None if g.current_user.is_admin else g.current_user.customers
+        )
         case_query = db.families(
             enquiry=request.args.get("enquiry"),
-            customer=customer_obj,
+            customers=customer_objs,
             action=request.args.get("action"),
         )
         count = case_query.count()
         records = case_query.limit(30)
-    data = [case_obj.to_dict(links=True) for case_obj in records]
-    return jsonify(families=data, total=count)
+
+    cases_data: List[dict] = [case_obj.to_dict(links=True) for case_obj in records]
+    return jsonify(families=cases_data, total=count)
 
 
 @BLUEPRINT.route("/families_in_customer_group")
 def families_in_customer_group():
     """Fetch families in customer_group."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    families_q = db.families_in_customer_group(
-        enquiry=request.args.get("enquiry"), customer=customer_obj
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
+    families_q: Query = db.families_in_customer_group(
+        enquiry=request.args.get("enquiry"), customers=customer_objs
     )
     count = families_q.count()
     records = families_q.limit(30)
@@ -144,7 +136,7 @@ def family(family_id):
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(404)
-    if not g.current_user.is_admin and (g.current_user.customer != case_obj.customer):
+    if not g.current_user.is_admin and (case_obj.customer not in g.current_user.customers):
         return abort(401)
 
     data = case_obj.to_dict(links=True, analyses=True)
@@ -158,7 +150,8 @@ def family_in_customer_group(family_id):
     if case_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-        g.current_user.customer.customer_group != case_obj.customer.customer_group
+        case_obj.customer.customer_group
+        not in set(customer.customer_group for customer in g.current_user.customers)
     ):
         return abort(401)
 
@@ -178,8 +171,10 @@ def samples():
     elif request.args.get("status") == "sequencing":
         samples_q = db.samples_to_sequence()
     else:
-        customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        samples_q = db.samples(enquiry=request.args.get("enquiry"), customer=customer_obj)
+        customer_objs: Optional[models.Customer] = (
+            None if g.current_user.is_admin else g.current_user.customers
+        )
+        samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -188,9 +183,11 @@ def samples():
 @BLUEPRINT.route("/samples_in_customer_group")
 def samples_in_customer_group():
     """Fetch samples in a customer group."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
     samples_q = db.samples_in_customer_group(
-        enquiry=request.args.get("enquiry"), customer=customer_obj
+        enquiry=request.args.get("enquiry"), customers=customer_objs
     )
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
@@ -203,7 +200,7 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+    elif not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
@@ -216,7 +213,8 @@ def sample_in_customer_group(sample_id):
     if sample_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-        g.current_user.customer.customer_group != sample_obj.customer.customer_group
+        sample_obj.customer.customer_group
+        not in set(customer.customer_group for customer in g.current_user.customers)
     ):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
@@ -226,8 +224,10 @@ def sample_in_customer_group(sample_id):
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    pools_q = db.pools(customer=customer_obj, enquiry=request.args.get("enquiry"))
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
+    pools_q = db.pools(customers=customer_objs, enquiry=request.args.get("enquiry"))
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
 
@@ -238,7 +238,7 @@ def pool(pool_id):
     record = db.pool(pool_id)
     if record is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != record.customer):
+    elif not g.current_user.is_admin and (record.customer not in g.current_user.customers):
         return abort(401)
     return jsonify(**record.to_dict())
 
@@ -276,9 +276,10 @@ def analyses():
 @BLUEPRINT.route("/options")
 def options():
     """Fetch various options."""
-    customer_objs = (
-        db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
+    customer_objs: Optional[models.Customer] = (
+        db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
     )
+
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
 
@@ -319,6 +320,9 @@ def options():
 @BLUEPRINT.route("/me")
 def me():
     """Fetch information about current user."""
+    if not g.current_user.is_admin and not g.current_user.customers:
+        return abort(401)
+
     return jsonify(user=g.current_user.to_dict())
 
 
@@ -359,7 +363,11 @@ def orderform():
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
     except (OrderFormError, ValidationError) as error:
-        return abort(make_response(jsonify(message=error.message), 400))
+        if hasattr(error, "message"):
+            message = error.message
+        else:
+            message = str(error)
+        return abort(make_response(jsonify(message=message), 400))
     parsed_order: Orderform = order_parser.generate_orderform()
 
     return jsonify(**parsed_order.dict())

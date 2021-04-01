@@ -55,7 +55,7 @@ class AddHandler(BaseHandler):
         """Build a new user record."""
 
         new_user = self.User(name=name, email=email, is_admin=is_admin)
-        new_user.customer = customer
+        new_user.customers.append(customer)
         return new_user
 
     def add_application(
@@ -153,7 +153,9 @@ class AddHandler(BaseHandler):
         data_delivery: DataDelivery,
         name: str,
         panels: List[str],
+        cohorts: List[str] = None,
         priority: str = "standard",
+        synopsis: List[str] = None,
     ) -> models.Family:
         """Build a new Family record."""
 
@@ -167,13 +169,15 @@ class AddHandler(BaseHandler):
 
         priority_db = PRIORITY_MAP[priority]
         new_case = self.Family(
+            cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),
             internal_id=internal_id,
             name=name,
+            panels=panels,
             priority=priority_db,
+            synopsis=synopsis,
         )
-        new_case.panels = panels
         return new_case
 
     def relate_sample(

@@ -81,11 +81,17 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customer: models.Customer = None, enquiry: str = None, action: str = None
+        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
     ) -> Query:
         """Fetch families."""
+
         records = self.Family.query
-        records = records.filter_by(customer=customer) if customer else records
+
+        if customers:
+            customer_ids = []
+            for customer in customers:
+                customer_ids.append(customer.id)
+            records = records.filter(models.Family.customer_id.in_(customer_ids))
 
         records = (
             records.filter(
@@ -99,17 +105,19 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
         records = records.filter_by(action=action) if action else records
-
         return records.order_by(models.Family.created_at.desc())
 
     def families_in_customer_group(
-        self, *, customer: models.Customer = None, enquiry: str = None
+        self, *, customers: List[models.Customer] = None, enquiry: str = None
     ) -> Query:
         """Fetch all families including those from collaborating customers."""
         records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
 
-        if customer:
-            records = records.filter(models.CustomerGroup.id == customer.customer_group_id)
+        if customers:
+            customer_group_ids = []
+            for customer in customers:
+                customer_group_ids.append(customer.customer_group_id)
+            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
 
         records = (
             records.filter(
@@ -147,13 +155,6 @@ class FindBusinessDataHandler(BaseHandler):
     def find_sample(self, customer: models.Customer, name: str) -> Query:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
-
-    def find_sample_in_customer_group(self, customer: models.Customer, name: str) -> Query:
-        """Find samples within the customer group."""
-        return self.Sample.query.filter(
-            models.Sample.customer.customer_group == customer.customer_group,
-            models.Sample.name == name,
-        )
 
     def flowcell(self, name: str) -> models.Flowcell:
         """Fetch a flowcell."""
@@ -223,10 +224,17 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def pools(self, *, customer: models.Customer, enquiry: str = None) -> Query:
+    def pools(
+        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
+    ) -> Query:
         """Fetch all the pools for a customer."""
         records = self.Pool.query
-        records = records.filter_by(customer=customer) if customer else records
+
+        if customers:
+            customer_ids = []
+            for customer in customers:
+                customer_ids.append(customer.id)
+            records = records.filter(models.Pool.customer_id.in_(customer_ids))
 
         records = (
             records.filter(
@@ -246,9 +254,17 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
-    def samples(self, *, customer: models.Customer = None, enquiry: str = None) -> Query:
+    def samples(
+        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
+    ) -> Query:
         records = self.Sample.query
-        records = records.filter_by(customer=customer) if customer else records
+
+        if customers:
+            customer_ids = []
+            for customer in customers:
+                customer_ids.append(customer.id)
+            records = records.filter(models.Sample.customer_id.in_(customer_ids))
+
         records = (
             records.filter(
                 or_(
@@ -271,14 +287,17 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(models.Sample.internal_id.asc())
 
     def samples_in_customer_group(
-        self, *, customer: models.Customer = None, enquiry: str = None
+        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
     ) -> Query:
         """Fetch all samples including those from collaborating customers."""
 
         records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)
 
-        if customer:
-            records = records.filter(models.CustomerGroup.id == customer.customer_group_id)
+        if customers:
+            customer_group_ids = []
+            for customer in customers:
+                customer_group_ids.append(customer.customer_group_id)
+            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
 
         records = (
             records.filter(

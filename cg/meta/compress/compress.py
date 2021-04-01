@@ -4,8 +4,10 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
@@ -31,7 +33,7 @@ class CompressAPI:
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
 
-    def get_latest_version(self, bundle_name: str) -> housekeeper_models.Version:
+    def get_latest_version(self, bundle_name: str) -> Optional[housekeeper_models.Version]:
         """Fetch the latest version of a hk bundle"""
         last_version = self.hk_api.last_version(bundle_name)
         if not last_version:
@@ -109,7 +111,7 @@ class CompressAPI:
             )
 
             self.crunchy_api.spring_to_fastq(compression_obj, sample_id=sample_id)
-            self.crunchy_api.update_metadata_date(compression_obj.spring_metadata_path)
+            update_metadata_date(compression_obj.spring_metadata_path)
 
         return True
 

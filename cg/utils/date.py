@@ -2,6 +2,7 @@
 import datetime
 import logging
 import re
+from typing import Optional
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 DATETIME_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
@@ -15,23 +16,13 @@ FWD_SLASH = "/"
 LOG = logging.getLogger(__name__)
 
 
-def match_date(date):
-    """Check if a string is a valid date
-
-    Args:
-        date(str)
-
-    Returns:
-        bool
-    """
+def match_date(date: str) -> bool:
+    """Check if a string is a valid date"""
     date_pattern = re.compile(r"^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])")
-    if re.match(date_pattern, date):
-        return True
-
-    return False
+    return bool(re.match(date_pattern, date))
 
 
-def get_date(date, date_format=None):
+def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> datetime.datetime:
     """Return a datetime object if there is a valid date
 
     Raise exception if date is not valid
@@ -64,17 +55,17 @@ def get_date(date, date_format=None):
             LOG.info("Date is not in std format")
 
     for separator in [DASH, SPACE, DOT, FWD_SLASH]:
-        splited_date = date.split(separator)
-        if len(splited_date) == 3:
-            return datetime.datetime(*(int(number) for number in splited_date))
+        date_parts = date.split(separator)
+        if len(date_parts) == 3:
+            return datetime.datetime(*(int(number) for number in date_parts))
 
     raise ValueError("Date %s is invalid" % date)
 
 
-def get_date_str(date_time_obj: datetime.datetime, date_format: str = None) -> str:
+def get_date_str(date_time_obj: datetime.datetime = None, date_format: str = None) -> str:
     """Convert a datetime object to a string. Defaults to simple date string: 2020-06-15"""
     if date_format is None:
         date_format = SIMPLE_DATE_FORMAT
     if date_time_obj is None:
         date_time_obj = datetime.datetime.now()
-    return date_time_obj.strftime(SIMPLE_DATE_FORMAT)
+    return date_time_obj.strftime(date_format)
