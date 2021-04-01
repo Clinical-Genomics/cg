@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Tuple, Any, Optional, List
+from typing import Any, List, Optional, Tuple
 
 import click
 
