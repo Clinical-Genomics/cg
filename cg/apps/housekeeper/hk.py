@@ -27,10 +27,8 @@ class HousekeeperAPI:
         return HousekeeperAPI.__instance
 
     def __init__(self, config: dict) -> None:
-        LOG.debug(f"Initialising a HousekeeperAPI: {self._store.session}")
-        traceback.print_stack()
-
         """ Virtually private constructor. """
+
         if HousekeeperAPI.__instance is not None:
             raise Exception("This class is a Singleton!")
         else:
@@ -38,6 +36,8 @@ class HousekeeperAPI:
 
         self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
+        LOG.debug(f"Initialised a HousekeeperAPI: {self._store.session}")
+        traceback.print_stack()
 
     def __getattr__(self, name):
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)

@@ -9,6 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 def test_non_initialised_db(hk_config):
     """Test to use a database that is not initialised"""
     # GIVEN a housekeeper api and some hk configs
+    HousekeeperAPI.__instance = None
     api = HousekeeperAPI.get_instance(hk_config)
     # GIVEN a api without the database
     with pytest.raises(OperationalError):
@@ -19,6 +20,7 @@ def test_non_initialised_db(hk_config):
 def test_init_db(hk_config):
     """Test to setup the database"""
     # GIVEN a housekeeper api and some hk configs
+    HousekeeperAPI.__instance = None
     api = HousekeeperAPI.get_instance(hk_config)
 
     # WHEN initiating the database
