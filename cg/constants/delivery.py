@@ -2,6 +2,12 @@
 
 import copy
 
+ONLY_ONE_CASE_PER_TICKET = [
+    "fastq",
+    "microsalt",
+    "sarscov2",
+]
+
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnvkit", "filtered", "sv-vcf"},
     {"cnvkit", "filtered", "sv-vcf-index"},
