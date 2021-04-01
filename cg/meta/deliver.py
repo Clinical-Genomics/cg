@@ -233,7 +233,7 @@ class DeliverAPI:
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
-            if self.delivery_type == "fastq":
+            if self.delivery_type != "fastq":
                 working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True
