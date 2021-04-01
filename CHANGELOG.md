@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.15.1]
+### Fixed
+- cg to rename mutant fastq files directly
+
 ## [20.15.0]
 ### Added
 - CLI methods for starting mutant
