@@ -28,3 +28,28 @@ def test_init_db(hk_config):
 
     # THEN the api should work
     assert api.add_tag("a-tag")
+
+
+def test_singleton(hk_config):
+    """Test to setup the database"""
+    # GIVEN a housekeeper api and some hk configs
+    HousekeeperAPI.__instance = None
+    hk_api_1 = HousekeeperAPI.get_instance(hk_config)
+
+    # WHEN getting instance second time
+    hk_api_2 = HousekeeperAPI.get_instance(hk_config)
+
+    # THEN they should point to the same database session
+    assert hk_api_1._store.session == hk_api_2._store.session
+
+
+def test_singleton_constructor(hk_config):
+    """Test to setup the database"""
+    # GIVEN a housekeeper api and some hk configs
+    HousekeeperAPI.__instance = None
+    HousekeeperAPI(hk_config)
+
+    # WHEN using the constructor second time
+    with pytest.raises(Exception):
+        # THEN it should raise an exception
+        HousekeeperAPI(hk_config)
