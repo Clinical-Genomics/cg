@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 
 class HousekeeperAPI:
     """ API to decouple cg code from Housekeeper """
+
     __instance = None
 
     @staticmethod
