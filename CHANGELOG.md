@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- bug in upload auto where multiple instances of housekeeper was used
+
 ## [20.15.1]
 ### Fixed
 - cg to rename mutant fastq files directly
