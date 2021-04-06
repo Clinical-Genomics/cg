@@ -36,7 +36,10 @@ class RunParameters:
     def reagent_kit_version(self) -> str:
         node_name = "./RfidsInfo/SbsConsumableVersion"
         xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="reagent kit version")
+        if xml_node is None:
+            LOG.warning("Could not determine reagent kit version")
+            LOG.info("Set reagent kit version to 'unknown'")
+            return "unknown"
         return xml_node.text
 
     @property

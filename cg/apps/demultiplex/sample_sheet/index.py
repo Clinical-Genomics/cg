@@ -76,6 +76,7 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
             reagent_kit_version,
         )
         return False
+    LOG.info("Run is reverse complement")
     return True
 
 

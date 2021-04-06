@@ -128,6 +128,8 @@ class SampleSheetCreator:
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.run_type == "wgs":
             self.add_dummy_samples()
+        else:
+            LOG.info("Skip adding dummy samples since run is not WGS")
         self.remove_unwanted_samples()
         index.adapt_indexes(
             samples=self.lims_samples,
