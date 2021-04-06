@@ -30,7 +30,7 @@ class Flowcell:
 
     @property
     def run_parameters_path(self) -> Path:
-        return self.path / "runParameters.xml"
+        return self.path / "RunParameters.xml"
 
     @property
     def run_parameters_object(self) -> RunParameters:
