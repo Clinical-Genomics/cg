@@ -11,6 +11,7 @@ LOG = logging.getLogger(__name__)
 NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
 NEW_REAGENT_KIT_VERSION = 1.5
 DNA_COMPLEMENTS = {"A": "T", "C": "G", "G": "C", "T": "A"}
+REAGENT_KIT_PARAMETER_TO_VERSION = {"1": 1.0, "3": 1.5}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
@@ -51,11 +52,10 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
 def get_reagent_kit_version(reagent_kit_version: str) -> float:
     """ Derives the reagent kit version from the run parameters """
     LOG.info("Converting reagent kit parameter %s to version", reagent_kit_version)
-    parameter_to_version = {"1": 1.0, "3": 1.5}
-    if reagent_kit_version not in parameter_to_version:
+    if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
 
-    return parameter_to_version[reagent_kit_version]
+    return REAGENT_KIT_PARAMETER_TO_VERSION[reagent_kit_version]
 
 
 def is_reverse_complement(control_software_version: str, reagent_kit_version_string: str) -> bool:
