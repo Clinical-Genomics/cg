@@ -16,8 +16,16 @@ from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.store import Store
 
 
-class MetaAPI:
+class Singleton(object):
+    _instance = None
 
+    def __new__(cls, *args, **kwargs):
+        if not isinstance(cls._instance, cls):
+            cls._instance = object.__new__(cls, *args, **kwargs)
+        return cls._instance
+
+
+class BaseMetaAPI:
     """MetaAPI class initializing all complex API used within CG in non-conflicting manner"""
 
     def __init__(self, config: dict):
@@ -46,3 +54,7 @@ class MetaAPI:
             vogue_api=self.vogue_api,
             store=self.status_db,
         )
+
+
+class MetaAPI(BaseMetaAPI, metaclass=Singleton):
+    pass
