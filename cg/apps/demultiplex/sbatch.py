@@ -17,4 +17,8 @@ touch {demux_completed_file}
 
 DEMULTIPLEX_ERROR = """
 mail -s 'ERROR demultiplexing of {flowcell_name}' {email} < '{logfile}'
+if [[ -e {out_dir} ]]
+then
+    rm -r {out_dir}
+fi
 """

@@ -50,13 +50,15 @@ class DemultiplexingAPI:
         )
         return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
 
-    def demultiplex_sbatch_path(self, flowcell: Flowcell) -> Path:
+    @staticmethod
+    def demultiplex_sbatch_path(flowcell: Flowcell) -> Path:
         """Get the path to where sbatch file should be kept"""
-        return self.flowcell_out_dir_path(flowcell) / "demux-novaseq.sh"
+        return flowcell.path / "demux-novaseq.sh"
 
-    def get_logfile(self, flowcell: Flowcell) -> Path:
+    @staticmethod
+    def get_logfile(flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
-        return self.flowcell_out_dir_path(flowcell=flowcell) / f"project.{flowcell.flowcell_id}.log"
+        return flowcell.path / f"project.{flowcell.flowcell_id}.log"
 
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
