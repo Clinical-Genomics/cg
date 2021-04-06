@@ -21,4 +21,8 @@ if [[ -e {out_dir} ]]
 then
     rm -r {out_dir}
 fi
+if [[ -e {demux_started} ]]
+then
+    rm -r {demux_started}
+fi
 """

@@ -5,6 +5,8 @@ class SbatchError(BaseModel):
     flowcell_name: str
     email: str
     logfile: str
+    out_dir: str
+    demux_started: str
 
 
 class SbatchCommand(BaseModel):

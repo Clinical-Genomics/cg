@@ -31,10 +31,14 @@ class DemultiplexingAPI:
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
     @staticmethod
-    def get_sbatch_error(flowcell_id: str, log_path: Path, email: str) -> str:
+    def get_sbatch_error(flowcell: Flowcell, email: str) -> str:
         """Create the sbatch error string"""
         error_parameters: SbatchError = SbatchError(
-            flowcell_name=flowcell_id, email=email, logfile=log_path.as_posix()
+            flowcell_name=flowcell.flowcell_id,
+            email=email,
+            logfile=DemultiplexingAPI.get_logfile(flowcell).as_posix(),
+            out_dir=DemultiplexingAPI.flowcell_out_dir_path(flowcell).as_posix(),
+            demux_started=flowcell.demultiplexing_started_path.as_posix(),
         )
         return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
 
