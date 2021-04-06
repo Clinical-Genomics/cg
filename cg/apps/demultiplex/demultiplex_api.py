@@ -114,8 +114,15 @@ class DemultiplexingAPI:
             demultiplexing_possible = False
         return demultiplexing_possible
 
+    def create_demultiplexing_started_file(self, demultiplexing_started_path: Path) -> None:
+        LOG.info("Creating demultiplexing started file")
+        if self.dry_run:
+            return
+        demultiplexing_started_path.touch(exist_ok=False)
+
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
+        self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
         flowcell_out_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
         LOG.info("Demultiplexing to %s", flowcell_out_dir)
         if not self.dry_run:
