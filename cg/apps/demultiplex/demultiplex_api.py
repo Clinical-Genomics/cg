@@ -1,7 +1,9 @@
 """This api should handle everything around demultiplexing"""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Literal
+
+from typing_extensions import Literal
 
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
@@ -31,7 +33,11 @@ class DemultiplexingAPI:
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
     @staticmethod
-    def get_sbatch_error(flowcell: Flowcell, email: str, out_dir: Path) -> str:
+    def get_sbatch_error(
+        flowcell: Flowcell,
+        email: str,
+        out_dir: Path,
+    ) -> str:
         """Create the sbatch error string"""
         error_parameters: SbatchError = SbatchError(
             flowcell_name=flowcell.flowcell_id,
@@ -44,13 +50,18 @@ class DemultiplexingAPI:
 
     @staticmethod
     def get_sbatch_command(
-        run_dir: Path, out_dir: Path, sample_sheet: Path, demux_completed: Path
+        run_dir: Path,
+        out_dir: Path,
+        sample_sheet: Path,
+        demux_completed: Path,
+        environment: Literal["production", "stage"] = "stage",
     ) -> str:
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
             out_dir=out_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
             demux_completed_file=demux_completed.as_posix(),
+            environment=environment,
         )
         return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
 

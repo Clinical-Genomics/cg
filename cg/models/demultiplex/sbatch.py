@@ -8,7 +8,6 @@ class SbatchError(BaseModel):
     logfile: str
     out_dir: str
     demux_started: str
-    environment: Literal["stage", "production"] = "stage"
 
 
 class SbatchCommand(BaseModel):
@@ -16,3 +15,4 @@ class SbatchCommand(BaseModel):
     out_dir: str  # path/to/output_dir/
     sample_sheet: str  # path/to/SampleSheet.csv
     demux_completed_file: str  # path/to/demuxcomplete.txt
+    environment: Literal["stage", "production"]
