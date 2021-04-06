@@ -16,4 +16,3 @@ class Sbatch(BaseModel):
     priority: Literal["high", "normal", "low"] = "low"
     commands: str
     error: Optional[str]
-    environment: Optional[Literal["stage", "production"]] = "stage"

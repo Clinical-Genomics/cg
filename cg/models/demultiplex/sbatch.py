@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing_extensions import Literal
 
 
 class SbatchError(BaseModel):
@@ -7,6 +8,7 @@ class SbatchError(BaseModel):
     logfile: str
     out_dir: str
     demux_started: str
+    environment: Literal["stage", "production"] = "stage"
 
 
 class SbatchCommand(BaseModel):
