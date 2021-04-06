@@ -2,10 +2,10 @@
 
 DEMULTIPLEX_COMMAND = """
 singularity exec --bind \
-/home/proj/production/demultiplexed-runs,\
-/home/proj/production/flowcells/novaseq,\
-/home/proj/production/flowcells/novaseq/'$SLURM_JOB_ID':/run/user/$(id -u) \
-/home/proj/production/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
+/home/proj/{environment}/demultiplexed-runs,\
+/home/proj/{environment}/flowcells/novaseq,\
+/home/proj/{environment}/flowcells/novaseq/'$SLURM_JOB_ID':/run/user/$(id -u) \
+/home/proj/{environment}/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
 bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
 --runfolder-dir {run_dir} --output-dir {out_dir} \
 --sample-sheet {sample_sheet} \
