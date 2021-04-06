@@ -31,13 +31,13 @@ class DemultiplexingAPI:
         self.slurm_api.set_dry_run(dry_run=dry_run)
 
     @staticmethod
-    def get_sbatch_error(flowcell: Flowcell, email: str) -> str:
+    def get_sbatch_error(flowcell: Flowcell, email: str, out_dir: Path) -> str:
         """Create the sbatch error string"""
         error_parameters: SbatchError = SbatchError(
             flowcell_name=flowcell.flowcell_id,
             email=email,
-            logfile=DemultiplexingAPI.get_logfile(flowcell).as_posix(),
-            out_dir=DemultiplexingAPI.flowcell_out_dir_path(flowcell).as_posix(),
+            logfile=DemultiplexingAPI.get_logfile(flowcell=flowcell).as_posix(),
+            out_dir=out_dir.as_posix(),
             demux_started=flowcell.demultiplexing_started_path.as_posix(),
         )
         return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
@@ -112,11 +112,15 @@ class DemultiplexingAPI:
             demultiplexing_possible = False
 
         if flowcell.demultiplexing_started_path.exists():
-            LOG.debug("Demultiplexing has already been started")
+            LOG.warning("Demultiplexing has already been started")
+            demultiplexing_possible = False
+
+        if self.flowcell_out_dir_path(flowcell=flowcell).exists():
+            LOG.warning("Flowcell out dir exists")
             demultiplexing_possible = False
 
         if self.is_demultiplexing_completed(flowcell):
-            LOG.debug("Demultiplexing is already completed for flowcell %s", flowcell.flowcell_id)
+            LOG.warning("Demultiplexing is already completed for flowcell %s", flowcell.flowcell_id)
             demultiplexing_possible = False
         return demultiplexing_possible
 
@@ -136,7 +140,7 @@ class DemultiplexingAPI:
             flowcell_out_dir.mkdir(exist_ok=False, parents=True)
         log_path: Path = self.get_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
-            flowcell_id=flowcell.flowcell_id, log_path=log_path, email=self.mail
+            flowcell=flowcell, email=self.mail, out_dir=flowcell_out_dir
         )
         commands: str = self.get_sbatch_command(
             run_dir=flowcell.path,

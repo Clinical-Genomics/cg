@@ -64,6 +64,7 @@ def demultiplex_flowcell(
     flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
+        LOG.warning("Can not start demultiplexing!")
         return
 
     if not flowcell_obj.validate_sample_sheet():
