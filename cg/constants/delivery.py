@@ -103,7 +103,7 @@ FASTQ_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 SARSCOV2_ANALYSIS_CASE_TAGS = [
-    {"deliver", "visualization", "csv"},
+    {"pangolin"},
 ]
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
