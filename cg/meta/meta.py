@@ -17,16 +17,18 @@ from cg.store import Store
 
 
 class Singleton(object):
-    _instance = None
+    _instances = {}
 
     def __new__(cls, *args, **kwargs):
-        if not isinstance(cls._instance, cls):
-            cls._instance = object.__new__(cls, *args, **kwargs)
-        return cls._instance
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__new__(cls, *args, **kwargs)
+        return cls._instances[cls]
 
 
-class BaseMetaAPI:
+class MetaAPI:
     """MetaAPI class initializing all complex API used within CG in non-conflicting manner"""
+
+    __metaclass__ = Singleton
 
     def __init__(self, config: dict):
         self.config = config or {}
@@ -54,7 +56,3 @@ class BaseMetaAPI:
             vogue_api=self.vogue_api,
             store=self.status_db,
         )
-
-
-class MetaAPI(BaseMetaAPI, metaclass=Singleton):
-    pass

@@ -8,7 +8,7 @@ import os
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
-from cg.meta.meta import MetaAPI
+from cg.meta.meta import MetaAPI, Singleton
 from cg.meta.workflow.fastq import FastqHandler
 from cg.store import Store, models
 from housekeeper.store.models import Bundle, Version
