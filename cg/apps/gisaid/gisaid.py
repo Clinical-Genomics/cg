@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import List
 
 from cg.store import models
 from .constants import HEADERS
@@ -26,7 +27,8 @@ class GisaidAPI:
         sample_row = []
         return sample_row
 
-    def build_batch_csv(self, samples: list) -> Path:
+    def build_batch_csv(self, samples: List[models.Sample], family_id: str) -> Path:
+        samples =
         file_name = "jkhkj"
         file = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:

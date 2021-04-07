@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import List
 
 from cg.apps.gisaid.gisaid import GisaidAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -14,29 +15,33 @@ class UploadGisaidAPI(object):
         self,
         hk_api: HousekeeperAPI,
         gisaid_api: GisaidAPI,
+        samples: List[models.Sample],
+        family_id: str,
     ):
         LOG.info("Initializing UploadGisaidAPI")
         self.hk = hk_api
         self.gisaid_api = gisaid_api
+        self.samples = samples
+        self.family_id = family_id
 
-    def files(self, case_obj: models.Family) -> dict:
+    def files(self) -> dict:
         """Fetch csv file and fasta file for batch upload to GISAID."""
 
         return dict(
-            batch_csv=self.get_csv_file(case_obj=case_obj),
+            batch_csv=self.get_csv_file(),
             fasta_file=self.get_fasta_file(hk_version_obj=self.hk),
         )
 
-    def get_csv_file(self, case_obj: models.Family) -> Path:
+    def get_csv_file(self) -> Path:
         """Generates csv file for batch upload to gisaid."""
 
-        csv_file = "make file"
+        csv_file = self.gisaid_api.build_batch_csv(samples=self.samples, family_id=self.family_id)
         return csv_file
 
     def get_fasta_file(self, hk_version_obj: housekeeper_models.Version) -> Path:
         """Fetch a fasta file form house keeper for batch upload to gisaid"""
 
-        hk_mututnt_fasta = self.hk.files(version=hk_version_obj.id, tags=["?????"]).first()
+        hk_mututnt_fasta = self.hk.files(version=hk_version_obj.id, tags=["consensus"]).first()
         LOG.debug("Found  metrics file %s", hk_mututnt_fasta.full_path)
         return Path(hk_mututnt_fasta.full_path)
 

@@ -1,5 +1,6 @@
 """Code for uploading genotype data via CLI"""
 import logging
+from typing import List
 
 import click
 from cg.store import models
@@ -21,13 +22,12 @@ def gisaid(context, family_id):
     meta_api = MetaAPI(context.obj)
     click.echo(click.style("----------------- GISAID -------------------"))
 
-    case_obj: models.Family = meta_api.status_db.family(family_id)
-    print(case_obj)
+    samples: List[models.Sample] = meta_api.status_db.samples(family_id)
     return
     upload_gisaid_api = UploadGisaidAPI(
         hk_api=meta_api.housekeeper_api, gisaid_api=meta_api.gisaid_api
     )
-    files: dict = upload_gisaid_api.files(case_obj)
+    files: dict = upload_gisaid_api.files(samples=samples, family_id=family_id)
 
     if files:
         upload_gisaid_api.upload(**files)
