@@ -9,7 +9,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
-from cg.apps.gisaid import GisaidAPI
+from cg.apps.gisaid.gisaid import GisaidAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.vogue import UploadVogueAPI
