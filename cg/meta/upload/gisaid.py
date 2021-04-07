@@ -28,8 +28,8 @@ class UploadGisaidAPI(object):
         """Fetch csv file and fasta file for batch upload to GISAID."""
 
         return dict(
-            batch_csv=self.get_csv_file(),
-            fasta_file=self.get_fasta_file(hk_version_obj=self.hk),
+            csv_file=self.get_csv_file(),
+            fasta_file="file_path",  # self.get_fasta_file(hk_version_obj=self.hk),
         )
 
     def get_csv_file(self) -> Path:
@@ -47,4 +47,4 @@ class UploadGisaidAPI(object):
 
     def upload(self, csv_file: str, fasta_file: str):
         """Upload data about genotypes for a family of samples."""
-        self.gisaid_api.upload(csv_file=csv_file, fasta_file=fasta_file)
+        self.gisaid_api.upload(csv_file_path=csv_file, fasta_file_path=fasta_file)
