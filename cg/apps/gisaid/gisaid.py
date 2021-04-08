@@ -30,15 +30,17 @@ class GisaidAPI:
     def get_sample_row(self, sample: models.Sample, family_id: str):
         """Build row for a sample in the batch upload csv."""
 
-        orig_lab = sample.originating_lab
-        collection_cate = sample.collection_date
+        orig_lab = "Stockholm"  # sample.originating_lab
+        collection_cate = "201122"  # sample.collection_date
         gisaid_sample = GisaidSample(
-            submitter="hej",
+            covv_subm_sample_id=sample.name,
+            submitter="maya",
             fn=family_id,
             covv_collection_date=collection_cate,
-            covv_orig_lab=orig_lab,
+            lab=orig_lab,
         )
-        return [gisaid_sample.get(header) for header in HEADERS]
+        print(gisaid_sample)
+        return [gisaid_sample.dict().get(header) for header in HEADERS]
 
     def build_batch_csv(self, samples: List[models.Sample], family_id: str) -> str:
         """Build batch upload csv."""

@@ -2,18 +2,19 @@ from typing import Optional, Literal
 from pydantic import BaseModel, validator
 
 
-def Lab(BaseModel):
+class Lab(BaseModel):
     city: str
     address: str
     region_nr: str
+    institute: str
 
 
-def GisaidSample(BaseModel):
+class GisaidSample(BaseModel):
     lab: Lab
     submitter: str
     fn: str
     covv_collection_date: str
-    covv_orig_lab: Optional[Literal["Stockholm", "Visby"]]
+    covv_orig_lab: Optional[str]
     covv_virus_name: Optional[str]
     covv_type: Optional[str] = "betacoronavirus"
     covv_passage: Optional[str] = "Original"
@@ -31,25 +32,45 @@ def GisaidSample(BaseModel):
         str
     ] = "Jan Albert, Tobias Allander, Annelie Bjerkner, Sandra Broddesson, Robert Dyrdak, Martin Ekman, Lynda Eneh, Lina Guerra Blomqvist, Karolina Ininbergs, Tanja Normark, Isak Sylvin, Zhibing Yun, Martina Wahlund, Valtteri Wirta"
 
-    @validator("lab")
+    @validator("lab", pre=True)
     def lab_info(cls, v):
         if v == "Stockholm":
-            return Lab(city="Stockholm", address="171 76 Stockholm, Sweden", region_nr="01")
+            return Lab(
+                city="Stockholm",
+                address="171 76 Stockholm, Sweden",
+                region_nr="01",
+                institute="Karolinska University Hospital",
+            )
         elif v == "Visby":
-            Lab(city="Visby", address="621 84 Visby, Sweden", region_nr="09")
+            return Lab(
+                city="Visby",
+                address="621 84 Visby, Sweden",
+                region_nr="09",
+                institute="LaboratorieMedicinskt Centrum Gotland",
+            )
+        raise ValueError("must be Stockholm or Visby")
 
-    @validator("covv_virus_name")
+    @validator("covv_virus_name", always=True)
     def parse_virus_name(cls, v, values):
-        return f"hCoV-19/Sweden/{values.lab.region_nr}_SE100/"
+        lab = values.get("lab")
+        return f"hCoV-19/Sweden/{lab.region_nr}_SE100/"
 
-    @validator("covv_location")
+    @validator("covv_location", always=True)
     def parse_location(cls, v, values):
-        return f"Europe/Sweden/{values.lab.city}"
+        lab = values.get("lab")
+        return f"Europe/Sweden/{lab.city}"
 
-    @validator("covv_orig_lab_addr")
+    @validator("covv_orig_lab_addr", always=True)
     def parse_orig_lab_addr(cls, v, values):
-        return values.lab.address
+        lab = values.get("lab")
+        return lab.address
 
-    @validator("covv_subm_sample_id")
+    @validator("covv_orig_lab", always=True)
+    def parse_orig_lab(cls, v, values):
+        lab = values.get("lab")
+        return lab.institute
+
+    @validator("covv_subm_sample_id", always=True)
     def parse_subm_sample_id(cls, v, values):
-        return f"{values.lab.region_nr}_SE100_{v}"
+        lab = values.get("lab")
+        return f"{lab.region_nr}_SE100_{v}"
