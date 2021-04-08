@@ -35,14 +35,15 @@ class DemultiplexingAPI:
     def get_sbatch_error(
         flowcell: Flowcell,
         email: str,
-        out_dir: Path,
+        demux_dir: Path,
     ) -> str:
         """Create the sbatch error string"""
+        LOG.info("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
             flowcell_name=flowcell.flowcell_id,
             email=email,
             logfile=DemultiplexingAPI.get_logfile(flowcell=flowcell).as_posix(),
-            out_dir=out_dir.as_posix(),
+            demux_dir=demux_dir.as_posix(),
             demux_started=flowcell.demultiplexing_started_path.as_posix(),
         )
         return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
@@ -50,14 +51,17 @@ class DemultiplexingAPI:
     @staticmethod
     def get_sbatch_command(
         run_dir: Path,
-        out_dir: Path,
+        demux_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
+        LOG.info("Creating the sbatch command string")
+        unaligned_dir = demux_dir / "Unaligned"
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
-            out_dir=out_dir.as_posix(),
+            demux_dir=demux_dir.as_posix(),
+            unaligned_dir=unaligned_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
@@ -143,18 +147,18 @@ class DemultiplexingAPI:
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
         self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
-        flowcell_out_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
-        LOG.info("Demultiplexing to %s", flowcell_out_dir)
+        demux_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
+        LOG.info("Demultiplexing to %s", demux_dir)
         if not self.dry_run:
-            LOG.info("Creating out dir %s", flowcell_out_dir)
-            flowcell_out_dir.mkdir(exist_ok=False, parents=True)
+            LOG.info("Creating out dir %s", demux_dir)
+            demux_dir.mkdir(exist_ok=False, parents=True)
         log_path: Path = self.get_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
-            flowcell=flowcell, email=self.mail, out_dir=flowcell_out_dir
+            flowcell=flowcell, email=self.mail, demux_dir=demux_dir
         )
         commands: str = self.get_sbatch_command(
             run_dir=flowcell.path,
-            out_dir=flowcell_out_dir,
+            demux_dir=demux_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
         )

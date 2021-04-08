@@ -7,7 +7,7 @@ singularity exec --bind \
 /home/proj/{environment}/flowcells/novaseq/'$SLURM_JOB_ID':/run/user/$(id -u) \
 /home/proj/{environment}/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif \
 bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 \
---runfolder-dir {run_dir} --output-dir {out_dir} \
+--runfolder-dir {run_dir} --output-dir {unaligned_dir} \
 --sample-sheet {sample_sheet} \
 --barcode-mismatches 1
 touch {demux_completed_file}
@@ -17,9 +17,9 @@ touch {demux_completed_file}
 
 DEMULTIPLEX_ERROR = """
 mail -s 'ERROR demultiplexing of {flowcell_name}' {email} < '{logfile}'
-if [[ -e {out_dir} ]]
+if [[ -e {demux_dir} ]]
 then
-    rm -r {out_dir}
+    rm -r {demux_dir}
 fi
 if [[ -e {demux_started} ]]
 then
