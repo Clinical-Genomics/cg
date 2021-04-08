@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.17.0]
+### Added
+
+- Deliver sarscov2 cli
+
 ## [20.16.0]
 ### Added
 
