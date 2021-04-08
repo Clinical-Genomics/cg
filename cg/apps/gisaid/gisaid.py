@@ -7,6 +7,7 @@ from typing import List
 from cg.store import models
 from .constants import HEADERS
 from ...utils import Process
+from .models import GisaidSample
 
 LOG = logging.getLogger(__name__)
 
@@ -26,24 +27,36 @@ class GisaidAPI:
         """Set the dry run state"""
         self.dry_run = dry_run
 
-    def get_sample_row(self, sample: models.Sample):
-        sample_row = []
-        return sample_row
+    def get_sample_row(self, sample: models.Sample, family_id: str):
+        """Build row for a sample in the batch upload csv."""
 
-    def build_batch_csv(self, samples: List[models.Sample], family_id: str) -> Path:
-        file_name = "jkhkj"
+        orig_lab = sample.originating_lab
+        collection_cate = sample.collection_date
+        gisaid_sample = GisaidSample(
+            submitter="hej",
+            fn=family_id,
+            covv_collection_date=collection_cate,
+            covv_orig_lab=orig_lab,
+        )
+        return [gisaid_sample.get(header) for header in HEADERS]
+
+    def build_batch_csv(self, samples: List[models.Sample], family_id: str) -> str:
+        """Build batch upload csv."""
+
+        file_name = family_id
         file = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")
             wr.writerow(HEADERS)
             for sample in samples:
-                sample_row: list = self.get_sample_row(sample)
+                sample_row: list = self.get_sample_row(sample, family_id)
                 if sample_row:
                     wr.writerow(sample_row)
-        return file
+
+        return str(file.absolute())
 
     def upload(self, csv_file_path: str, fasta_file_path: str) -> None:
-        """Load genotype data from a dict."""
+        """Load batch data to GISAID using the gisiad cli."""
 
         load_call = ["CoV", "upload", "--csv", csv_file_path, "--fasta", fasta_file_path]
         self.process.run_command(parameters=load_call)
