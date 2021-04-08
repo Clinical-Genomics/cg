@@ -21,7 +21,10 @@ def test_demultiplex_flowcell_dry_run(
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
     assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
-    assert demux_api.flowcell_out_dir_path(flowcell).exists() is False
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    unaligned_dir: Path = demux_dir / "Unaligned"
+    assert demux_dir.exists() is False
+    assert unaligned_dir.exists() is False
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -32,7 +35,8 @@ def test_demultiplex_flowcell_dry_run(
     # THEN assert the command exits without problems
     assert result.exit_code == 0
     # THEN assert no results folder was created since it is run in dry run mode
-    assert demux_api.flowcell_out_dir_path(flowcell).exists() is False
+    assert demux_dir.exists() is False
+    assert unaligned_dir.exists() is False
 
 
 def test_demultiplex_flowcell(
@@ -46,8 +50,11 @@ def test_demultiplex_flowcell(
     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
-    assert demux_api.flowcell_out_dir_path(flowcell).exists() is False
+    assert demux_dir.exists() is False
+    assert unaligned_dir.exists() is False
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -58,7 +65,8 @@ def test_demultiplex_flowcell(
     # THEN assert the command exits without problems
     assert result.exit_code == 0
     # THEN assert the results folder was created
-    assert demux_api.flowcell_out_dir_path(flowcell).exists()
+    assert demux_dir.exists()
+    assert unaligned_dir.exists()
     # THEN assert that the sbatch script was created
     assert demux_api.demultiplex_sbatch_path(flowcell).exists()
 
