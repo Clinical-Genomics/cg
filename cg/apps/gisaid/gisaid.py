@@ -6,46 +6,44 @@ from typing import List
 
 from cg.store import models
 from .constants import HEADERS
+from ...meta.workflow.fastq import FastqHandler
 from ...utils import Process
-from .models import GisaidSample
+from .models import GisaidSample, UpploadFiles
+
+from cg.meta.meta import MetaAPI
 
 LOG = logging.getLogger(__name__)
 
 import csv
 
 
-class GisaidAPI:
+class GisaidAPI(MetaAPI):
     """Interface with Gisaid cli uppload"""
 
     def __init__(self, config: dict):
-        self.dry_run = False
+        super().__init__(config)
         self.gisaid_config = config["gisaid"]["config_path"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
-        self.process = Process(binary=self.gisaid_binary, config=self.gisaid_config)
-
-    def set_dry_run(self, dry_run: bool) -> None:
-        """Set the dry run state"""
-        self.dry_run = dry_run
+        self.process = Process(binary=self.gisaid_binary)
 
     def get_sample_row(self, sample: models.Sample, family_id: str):
         """Build row for a sample in the batch upload csv."""
 
         orig_lab = "Stockholm"  # sample.originating_lab
-        collection_cate = "201122"  # sample.collection_date
+        collection_date = "201122"  # sample.collection_date
         gisaid_sample = GisaidSample(
             covv_subm_sample_id=sample.name,
             submitter="maya",
             fn=family_id,
-            covv_collection_date=collection_cate,
+            covv_collection_date=collection_date,
             lab=orig_lab,
         )
-        print(gisaid_sample)
         return [gisaid_sample.dict().get(header) for header in HEADERS]
 
     def build_batch_csv(self, samples: List[models.Sample], family_id: str) -> str:
         """Build batch upload csv."""
 
-        file_name = family_id
+        file_name = f"{family_id}.csv"
         file = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")
@@ -57,10 +55,31 @@ class GisaidAPI:
 
         return str(file.absolute())
 
-    def upload(self, csv_file_path: str, fasta_file_path: str) -> None:
+    def get_fasta_file(self, family_id: str) -> Path:
+        """Fetch a fasta file form house keeper for batch upload to gisaid"""
+
+        hk_version = self.housekeeper_api.last_version(bundle=family_id)
+        fasta_files: list = []
+        # fasta_files: list = self.housekeeper_api.files(version=hk_version.id, tags=["consensus"])
+        fastq_handler = FastqHandler()
+        file_name = f"{family_id}.fasta"
+        fasta_file = Path(file_name)
+        # fasta_file = fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
+
+        return str(fasta_file.absolute())
+
+    def files(self, samples: List[models.Sample], family_id: str) -> UpploadFiles:
+        """Fetch csv file and fasta file for batch upload to GISAID."""
+
+        return UpploadFiles(
+            csv_file=self.build_batch_csv(samples=samples, family_id=family_id),
+            fasta_file=self.get_fasta_file(family_id),
+        )
+
+    def upload(self, csv_file: str, fasta_file: str) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
-        load_call = ["CoV", "upload", "--csv", csv_file_path, "--fasta", fasta_file_path]
+        load_call = ["CoV", "upload", "--csv", csv_file, "--fasta", fasta_file]
         self.process.run_command(parameters=load_call)
 
         # Execute command and print its stdout+stderr as it executes

@@ -3,12 +3,11 @@ import logging
 from typing import List
 
 import click
-from cg.store import models
 
-from cg.meta.upload.gisaid import UploadGisaidAPI
-
-from .utils import suggest_cases_to_upload
-from cg.meta.meta import MetaAPI
+from cg.apps.gisaid.gisaid import GisaidAPI
+from cg.apps.gisaid.models import UpploadFiles
+from cg.store import models, Store
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
@@ -19,23 +18,16 @@ LOG = logging.getLogger(__name__)
 def gisaid(context, family_id):
     """Upload mutant analysis data to GISAID."""
 
-    meta_api = MetaAPI(context.obj)
-    status_db = meta_api.status_db
-    click.echo(click.style("----------------- GISAID -------------------"))
+    gisaid_api: GisaidAPI = GisaidAPI(context.obj)
+    status_db: Store = gisaid_api.status_db
+    LOG.info("----------------- GISAID -------------------")
 
-    case_object = status_db.family(family_id)
-    ticket_number = case_object.name
+    case_object: Family = status_db.family(family_id)
+    ticket_number: str = case_object.name
     samples: List[models.Sample] = status_db.Sample.query.filter_by(
         ticket_number=ticket_number
     ).all()
-    upload_gisaid_api = UploadGisaidAPI(
-        hk_api=meta_api.housekeeper_api,
-        gisaid_api=meta_api.gisaid_api,
-        samples=samples,
-        family_id=family_id,
-    )
 
-    files: dict = upload_gisaid_api.files()
-
+    files: UpploadFiles = gisaid_api.files(samples=samples, family_id=family_id)
     if files:
-        upload_gisaid_api.upload(**files)
+        gisaid_api.upload(**dict(files))

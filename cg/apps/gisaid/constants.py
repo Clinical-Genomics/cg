@@ -18,3 +18,20 @@ HEADERS = [
     "covv_subm_lab_addr",
     "covv_authors",
 ]
+
+AUTHORS = [
+    "Jan Albert",
+    "Tobias Allander",
+    "Annelie Bjerkner",
+    "Sandra Broddesson",
+    "Robert Dyrdak",
+    "Martin Ekman",
+    "Lynda Eneh",
+    "Lina Guerra Blomqvist",
+    "Karolina Ininbergs",
+    "Tanja Normark",
+    "Isak Sylvin",
+    "Zhibing Yun",
+    "Martina Wahlund",
+    "Valtteri Wirta",
+]

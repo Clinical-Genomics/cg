@@ -9,7 +9,6 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
-from cg.apps.gisaid.gisaid import GisaidAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.vogue import UploadVogueAPI
@@ -31,7 +30,6 @@ class MetaAPI:
         self.hermes_api = HermesApi(self.config)
         self.scout_api = ScoutAPI(self.config)
         self.vogue_api = VogueAPI(self.config)
-        self.gisaid_api = GisaidAPI(self.config)
         self.crunchy_api = CrunchyAPI(self.config)
         self.madeline_api = MadelineAPI(self.config)
         self.mutacc_auto_api = MutaccAutoAPI(self.config)

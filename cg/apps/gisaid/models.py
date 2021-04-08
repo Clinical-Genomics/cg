@@ -1,5 +1,13 @@
+from pathlib import Path
 from typing import Optional, Literal
 from pydantic import BaseModel, validator
+
+from cg.apps.gisaid.constants import AUTHORS
+
+
+class UpploadFiles(BaseModel):
+    csv_file: str
+    fasta_file: str
 
 
 class Lab(BaseModel):
@@ -28,9 +36,7 @@ class GisaidSample(BaseModel):
     covv_subm_lab: Optional[str] = "Karolinska University Hospital"
     covv_subm_lab_addr: Optional[str] = "171 76 Stockholm, Sweden"
     covv_subm_sample_id: str
-    covv_authors: Optional[
-        str
-    ] = "Jan Albert, Tobias Allander, Annelie Bjerkner, Sandra Broddesson, Robert Dyrdak, Martin Ekman, Lynda Eneh, Lina Guerra Blomqvist, Karolina Ininbergs, Tanja Normark, Isak Sylvin, Zhibing Yun, Martina Wahlund, Valtteri Wirta"
+    covv_authors: Optional[str] = " ,".join(AUTHORS)
 
     @validator("lab", pre=True)
     def lab_info(cls, v):
