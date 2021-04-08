@@ -24,6 +24,8 @@ class DemultiplexingAPI:
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
         self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.environment: str = config.get("environment", "stage")
+        LOG.info("Set environment to %s", self.environment)
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
@@ -75,7 +77,7 @@ class DemultiplexingAPI:
     @staticmethod
     def get_logfile(flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
-        return flowcell.path / f"project.{flowcell.flowcell_id}.log"
+        return flowcell.path / f"{flowcell.flowcell_id}_demultiplex.stderr"
 
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
@@ -162,6 +164,7 @@ class DemultiplexingAPI:
             unaligned_dir=demux_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
+            environment=self.environment,
         )
 
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
