@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.16.0]
+### Added
+
+- Demultiplexing functionality to CG
+
 ## [20.15.1]
 ### Fixed
 - cg to rename mutant fastq files directly
