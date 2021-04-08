@@ -166,7 +166,7 @@ class DemultiplexingAPI:
         )
         commands: str = self.get_sbatch_command(
             run_dir=flowcell.path,
-            unaligned_dir=demux_dir,
+            unaligned_dir=unaligned_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
             environment=self.environment,
