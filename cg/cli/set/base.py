@@ -4,7 +4,6 @@ import getpass
 import logging
 
 import click
-
 from cg.apps.lims import LimsAPI
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
