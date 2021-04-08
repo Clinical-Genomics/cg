@@ -75,9 +75,14 @@ class DemultiplexingAPI:
         return flowcell.path / "demux-novaseq.sh"
 
     @staticmethod
+    def get_run_name(flowcell: Flowcell) -> str:
+        """Create the run name for the sbatch job"""
+        return f"{flowcell.flowcell_id}_demultiplex"
+
+    @staticmethod
     def get_logfile(flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
-        return flowcell.path / f"{flowcell.flowcell_id}_demultiplex.stderr"
+        return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stderr"
 
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
@@ -153,7 +158,7 @@ class DemultiplexingAPI:
         LOG.info("Demultiplexing to %s", unaligned_dir)
         if not self.dry_run:
             LOG.info("Creating demux dir %s", unaligned_dir)
-            demux_dir.mkdir(exist_ok=False, parents=True)
+            unaligned_dir.mkdir(exist_ok=False, parents=True)
 
         log_path: Path = self.get_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
@@ -169,7 +174,7 @@ class DemultiplexingAPI:
 
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=Sbatch(
-                job_name="_".join([flowcell.flowcell_id, "demultiplex"]),
+                job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
                 number_tasks=18,
                 memory=50,
