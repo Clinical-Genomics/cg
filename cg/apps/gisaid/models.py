@@ -1,5 +1,4 @@
-from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional
 from pydantic import BaseModel, validator
 
 from cg.apps.gisaid.constants import AUTHORS
