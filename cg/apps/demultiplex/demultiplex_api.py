@@ -51,16 +51,15 @@ class DemultiplexingAPI:
     @staticmethod
     def get_sbatch_command(
         run_dir: Path,
-        demux_dir: Path,
+        unaligned_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
         LOG.info("Creating the sbatch command string")
-        unaligned_dir = demux_dir / "Unaligned"
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
-            demux_dir=demux_dir.as_posix(),
+            demux_dir=unaligned_dir.parent.as_posix(),
             unaligned_dir=unaligned_dir.as_posix(),
             sample_sheet=sample_sheet.as_posix(),
             demux_completed_file=demux_completed.as_posix(),
@@ -148,17 +147,19 @@ class DemultiplexingAPI:
         """Start demultiplexing for a flowcell"""
         self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
         demux_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
-        LOG.info("Demultiplexing to %s", demux_dir)
+        unaligned_dir: Path = demux_dir / "Unaligned"
+        LOG.info("Demultiplexing to %s", unaligned_dir)
         if not self.dry_run:
-            LOG.info("Creating out dir %s", demux_dir)
+            LOG.info("Creating demux dir %s", unaligned_dir)
             demux_dir.mkdir(exist_ok=False, parents=True)
+
         log_path: Path = self.get_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
             flowcell=flowcell, email=self.mail, demux_dir=demux_dir
         )
         commands: str = self.get_sbatch_command(
             run_dir=flowcell.path,
-            demux_dir=demux_dir,
+            unaligned_dir=demux_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
         )
