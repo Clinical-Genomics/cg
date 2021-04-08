@@ -54,6 +54,10 @@ class Flowcell:
     def demultiplexing_started_path(self) -> Path:
         return Path(self.path, "demuxstarted.txt")
 
+    def is_demultiplexing_started(self) -> bool:
+        """Create the path to where the demuliplexed result should be produced"""
+        return self.demultiplexing_started_path.exists()
+
     def sample_sheet_exists(self) -> bool:
         """Check if sample sheet exists"""
         LOG.info("Check if sample sheet exists")
