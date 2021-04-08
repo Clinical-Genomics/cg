@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [x.x.x]
+## [20.16.0]
 ### Added
 
 - Demultiplexing functionality to CG
