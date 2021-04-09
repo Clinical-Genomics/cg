@@ -1,30 +1,31 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime
 
-import click
+from click.testing import CliRunner
 
 from cg.constants import DataDelivery, Pipeline
-from cg.store import Store
+from cg.store import Store, models
+from tests.store_helpers import StoreHelpers
+from cg.cli.add import add
 
 CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC
 CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 
-def test_add_family_required(invoke_cli, disk_store: Store):
+def test_add_family_required(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
+    disk_store: Store = base_context["status_db"]
 
-    # WHEN adding a case
-    db_uri = disk_store.uri
-    customer_id = add_customer(disk_store)
-    panel_id = add_panel(disk_store)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
+    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel_id = panel.name
     name = "case_name"
 
-    result = invoke_cli(
+    # WHEN adding a panel
+    result = cli_runner.invoke(add,
         [
-            "--database",
-            db_uri,
-            "add",
             "family",
             "--panel",
             panel_id,
@@ -34,7 +35,9 @@ def test_add_family_required(invoke_cli, disk_store: Store):
             CLI_OPTION_DELIVERY,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context
+
     )
 
     # THEN then it should be added
@@ -44,22 +47,22 @@ def test_add_family_required(invoke_cli, disk_store: Store):
     assert disk_store.Family.query.first().panels == [panel_id]
 
 
-def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
+def test_add_family_bad_pipeline(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
 
     # WHEN adding a case
-    db_uri = disk_store.uri
-    customer_id = add_customer(disk_store)
-    panel_id = add_panel(disk_store)
+    disk_store: Store = base_context["status_db"]
+
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
+    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel_id = panel.name
     non_existing_analysis = "epigenentic_alterations"
     name = "case_name"
 
-    result = invoke_cli(
+    result = cli_runner.invoke(add,
         [
-            "--database",
-            db_uri,
-            "add",
             "case",
             "--panel",
             panel_id,
@@ -77,22 +80,22 @@ def test_add_family_bad_pipeline(invoke_cli, disk_store: Store):
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
+def test_add_family_bad_data_delivery(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
 
     # WHEN adding a case without data delivery
-    db_uri = disk_store.uri
-    customer_id = add_customer(disk_store)
-    panel_id = add_panel(disk_store)
-    non_existing_data_delivery = "aws"
-    name = "case_name"
+    disk_store: Store = base_context["status_db"]
 
-    result = invoke_cli(
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
+    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel_id = panel.name
+    name = "case_name"
+    non_existing_data_delivery = "aws"
+
+    result = cli_runner.invoke(add,
         [
-            "--database",
-            db_uri,
-            "add",
             "case",
             "--panel",
             panel_id,
@@ -102,7 +105,8 @@ def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
             non_existing_data_delivery,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context
     )
 
     # THEN then it should not be added
@@ -110,20 +114,16 @@ def test_add_family_bad_data_delivery(invoke_cli, disk_store: Store):
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_customer(invoke_cli, disk_store: Store):
+def test_add_family_bad_customer(cli_runner: CliRunner, base_context: dict):
     """Test to add a case using a non-existing customer"""
     # GIVEN an empty database
-
+    disk_store: Store = base_context["status_db"]
     # WHEN adding a case
-    db_uri = disk_store.uri
     panel_id = "dummy_panel"
     customer_id = "dummy_customer"
     name = "dummy_name"
-    result = invoke_cli(
+    result = cli_runner.invoke(add,
         [
-            "--database",
-            db_uri,
-            "add",
             "family",
             "--panel",
             panel_id,
@@ -133,7 +133,8 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
             CLI_OPTION_DELIVERY,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context
     )
 
     # THEN then it should complain about missing customer instead of adding a case
@@ -141,20 +142,17 @@ def test_add_family_bad_customer(invoke_cli, disk_store: Store):
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_panel(invoke_cli, disk_store: Store):
+def test_add_family_bad_panel(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     """Test to add a case using a non-existing panel"""
     # GIVEN a database with a customer
-
+    disk_store: Store = base_context["status_db"]
     # WHEN adding a case
-    db_uri = disk_store.uri
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     panel_id = "dummy_panel"
-    customer_id = add_customer(disk_store)
     name = "dummy_name"
-    result = invoke_cli(
+    result = cli_runner.invoke(add,
         [
-            "--database",
-            db_uri,
-            "add",
             "family",
             "--panel",
             panel_id,
@@ -164,7 +162,8 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
             CLI_OPTION_DELIVERY,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context
     )
 
     # THEN then it should complain about missing panel instead of adding a case
@@ -172,23 +171,20 @@ def test_add_family_bad_panel(invoke_cli, disk_store: Store):
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_priority(invoke_cli, disk_store: Store):
+def test_add_family_priority(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     """Test that the added case get the priority we send in"""
     # GIVEN a database with a customer and an panel
-
+    disk_store: Store = base_context["status_db"]
     # WHEN adding a case
-    db_uri = disk_store.uri
-
-    customer_id = add_customer(disk_store)
-    panel_id = add_panel(disk_store)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
+    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel_id = panel.name
     name = "case_name"
     priority = "priority"
 
-    result = invoke_cli(
+    result = cli_runner.invoke(add,
         [
-            "--database",
-            db_uri,
-            "add",
             "family",
             "--panel",
             panel_id,
@@ -200,56 +196,11 @@ def test_add_family_priority(invoke_cli, disk_store: Store):
             CLI_OPTION_DELIVERY,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context
     )
 
     # THEN then it should be added
     assert result.exit_code == 0
     assert disk_store.Family.query.count() == 1
     assert disk_store.Family.query.first().priority_human == priority
-
-
-def add_customer(disk_store, customer_id="cust_test"):
-    customer_group = disk_store.add_customer_group("dummy_group", "dummy group")
-    customer = disk_store.add_customer(
-        internal_id=customer_id,
-        name="Test Customer",
-        scout_access=False,
-        customer_group=customer_group,
-        invoice_address="dummy_address",
-        invoice_reference="dummy_reference",
-    )
-    disk_store.add_commit(customer)
-    return customer_id
-
-
-def add_panel(disk_store, panel_id="panel_test", customer_id="cust_test"):
-    """utility function to add a panel to use in tests"""
-    customer = disk_store.customer(customer_id)
-    panel = disk_store.add_panel(
-        customer=customer,
-        name=panel_id,
-        abbrev=panel_id,
-        version=1.0,
-        date=datetime.now(),
-        genes=1,
-    )
-    disk_store.add_commit(panel)
-    return panel_id
-
-
-def add_application(disk_store, application_tag="dummy_tag"):
-    """utility function to add an application to use in tests"""
-    application = disk_store.add_application(
-        tag=application_tag,
-        category="wgs",
-        description="dummy_description",
-        percent_kth=80,
-        percent_reads_guaranteed=75,
-    )
-    disk_store.add_commit(application)
-    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
-    version = disk_store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
-
-    disk_store.add_commit(version)
-    return application_tag
