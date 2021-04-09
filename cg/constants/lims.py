@@ -47,7 +47,8 @@ MASTER_STEPS_UDFS = {
     "prep_method_step": {
         "Library Preparation (Cov) v1": {
             "method_number": "Method document",
-            "method_version": "Document version"},
+            "method_version": "Document version",
+        },
         "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
             "method_number": "Method document",
             "method_version": "Method document version",
