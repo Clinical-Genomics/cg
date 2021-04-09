@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.17.2]
+### Fixed
+- Fix duplicate Housekeeper session in scout upload
+
+
 ## [20.17.1]
 ### Changed
 - Status of mutant cases is set to running before running analysis, and revoked if start fails. 
