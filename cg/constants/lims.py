@@ -45,6 +45,10 @@ MASTER_STEPS_UDFS = {
         "Hybridize Library TWIST v2": "Bait Set",
     },
     "prep_method_step": {
+        "Library Preparation (Cov) v1": {
+            "method_number": "Method document",
+            "method_version": "Document version",
+        },
         "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
             "method_number": "Method document",
             "method_version": "Method document version",

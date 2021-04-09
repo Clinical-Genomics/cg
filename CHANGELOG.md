@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.17.4]
+### Added
+- Added new covid prep method to lims constants
 
 ## [20.17.3]
 ### Fixed
