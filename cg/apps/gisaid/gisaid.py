@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import List
 
+from sqlalchemy.orm import Query
+
 from cg.store import models
 from .constants import HEADERS
 from ...meta.workflow.fastq import FastqHandler
@@ -59,7 +61,9 @@ class GisaidAPI(MetaAPI):
         """Fetch a fasta file form house keeper for batch upload to gisaid"""
 
         hk_version = self.housekeeper_api.last_version(bundle=family_id)
-        fasta_files: list = self.housekeeper_api.files(version=hk_version.id, tags=["consensus"])
+        fasta_files: list = self.housekeeper_api.files(
+            version=hk_version.id, tags=["consensus"]
+        ).all()
         print(fasta_files)
         #        fasta_files = [
         #            "/Users/maya.brandi/opt/cg/f1.fasta",
