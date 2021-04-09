@@ -1,7 +1,6 @@
 import logging
 
 import click
-
 from cg.apps.pdc import PdcApi
 from cg.meta.backup import BackupApi
 from cg.store import Store
@@ -11,8 +10,7 @@ MAX_FLOWCELLS_ON_DISK = 1250  # Increased by 250 when the previous limit of 1000
 
 
 @click.group()
-@click.pass_context
-def backup(context: click.Context):
+def backup():
     """Backup utilities."""
     pass
 
@@ -23,7 +21,7 @@ def backup(context: click.Context):
 @click.pass_context
 def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
-    status_api = Store(context.obj["database"])
+    status_api: Store = context.obj["status_db"]
     max_flowcells_on_disk = context.obj.get("max_flowcells", MAX_FLOWCELLS_ON_DISK)
     root_dir = context.obj["backup"]["root"]
     pdc_api = PdcApi()

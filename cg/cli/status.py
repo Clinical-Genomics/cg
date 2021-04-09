@@ -1,10 +1,10 @@
+from typing import Iterable, List
+
 import click
+from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
+from cg.store import Store, models
 from colorclass import Color
 from tabulate import tabulate
-
-from cg.apps import tb
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
-from cg.store import Store
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
@@ -45,17 +45,18 @@ for header in CASE_HEADERS_LONG:
 
 
 @click.group()
-@click.pass_context
-def status(context):
+def status():
     """View status of things."""
-    context.obj["status_db"] = Store(context.obj["database"])
+    pass
 
 
 @status.command()
 @click.pass_context
 def analysis(context):
     """Which families will be analyzed?"""
-    records = context.obj["status_db"].cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    records: List[models.Family] = context.obj["status_db"].cases_to_analyze(
+        pipeline=Pipeline.MIP_DNA
+    )
     for case_obj in records:
         click.echo(case_obj)
 
@@ -88,7 +89,7 @@ def present_date(a_dict, param, show_negative, show_time):
     if show_negative:
         return str(value)
 
-    return "" if not value else value if value else str(value)
+    return "" if not value else value or str(value)
 
 
 def present_string(a_dict, param, show_negative):
@@ -98,7 +99,7 @@ def present_string(a_dict, param, show_negative):
     if show_negative:
         return str(value)
 
-    return "" if not value else value if value else str(value)
+    return "" if not value else value or str(value)
 
 
 @status.command()
@@ -170,7 +171,8 @@ def cases(
     exclude_invoiced,
 ):
     """progress of each case"""
-    records = context.obj["status_db"].cases(
+    status_db: Store = context.obj["status_db"]
+    records: List[models.Family] = status_db.cases(
         days=days,
         internal_id=internal_id,
         name=name,
@@ -350,7 +352,8 @@ def cases(
 @click.pass_context
 def samples(context, skip):
     """View status of samples."""
-    records = context.obj["status_db"].samples().offset(skip).limit(30)
+    status_db: Store = context.obj["status_db"]
+    records: Iterable[models.Sample] = status_db.samples().offset(skip).limit(30)
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
         if record.sequenced_at:
@@ -374,7 +377,8 @@ def samples(context, skip):
 def families(context, skip):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
-    records = context.obj["status_db"].families().offset(skip).limit(30)
+    status_db: Store = context.obj["status_db"]
+    records: List[models.Family] = status_db.families().offset(skip).limit(30)
     for case_obj in records:
         color = "red" if case_obj.priority > 1 else "blue"
         message = f"{case_obj.internal_id} ({case_obj.priority})"

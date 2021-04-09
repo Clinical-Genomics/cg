@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List
 
 import click
-
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs, mutant_past_run_dirs
 from cg.meta.meta import MetaAPI
@@ -14,8 +13,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def clean(context):
+def clean():
     """Clean up processes"""
     return
 
@@ -33,8 +31,7 @@ clean.add_command(mutant_past_run_dirs)
 def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
 
-    meta_api = context.obj.get("meta_api") or MetaAPI(context.obj)
-    context.obj["meta_api"] = meta_api
+    meta_api: MetaAPI = context.obj["meta_api"]
 
     if bundle is None:
         LOG.info("Please select a bundle")
@@ -72,8 +69,7 @@ def hk_alignment_files(context, bundle, yes: bool = False, dry_run: bool = False
 def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: bool = False):
     """Clean up of solved and archived scout cases"""
 
-    meta_api = context.obj.get("meta_api") or MetaAPI(context.obj)
-    context.obj["meta_api"] = meta_api
+    meta_api: MetaAPI = context.obj["meta_api"]
 
     bundles = []
     for status in ["archived", "solved"]:
@@ -99,8 +95,7 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
 def hk_past_files(context, case_id: str, tags: list, yes: bool, dry_run: bool):
     """ Remove files found in older housekeeper bundles """
 
-    meta_api = context.obj.get("meta_api") or MetaAPI(context.obj)
-    context.obj["meta_api"] = meta_api
+    meta_api: MetaAPI = context.obj["meta_api"]
 
     if case_id:
         cases = [meta_api.status_db.family(case_id)]

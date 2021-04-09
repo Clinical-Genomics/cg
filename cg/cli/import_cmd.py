@@ -1,26 +1,23 @@
 """Cli commands for importing data into the status database"""
-import logging
 import getpass
+import logging
 from pathlib import Path
 
 import click
 from cg.constants import PREP_CATEGORIES
-from cg.store import Store
 from cg.store.api.import_func import (
     import_application_versions,
     import_applications,
     import_apptags,
 )
-from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group("import")
-@click.pass_context
-def import_cmd(context):
+def import_cmd():
     """Import information into the database."""
-    context.obj["status_db"] = Store(context.obj["database"])
+    pass
 
 
 @import_cmd.command("application")
