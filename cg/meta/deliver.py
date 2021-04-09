@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterable, List, Set
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import delivery as constants
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 from housekeeper.store import models as hk_models
@@ -24,7 +25,7 @@ class DeliverAPI:
         case_tags: List[Set[str]],
         sample_tags: List[Set[str]],
         project_base_path: Path,
-        fastq_delivery: bool = False,
+        delivery_type: str,
     ):
         """Initialize a delivery api
 
@@ -44,7 +45,7 @@ class DeliverAPI:
         self.customer_id: str = ""
         self.ticket_id: str = ""
         self.dry_run = False
-        self.fastq_delivery: bool = fastq_delivery
+        self.delivery_type: str = delivery_type
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run"""
@@ -60,7 +61,9 @@ class DeliverAPI:
         case_name: str = case_obj.name
         LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
-        if not last_version:
+        if not last_version and not self.case_tags:
+            LOG.info("Could not find any version for {}".format(case_id))
+        elif not last_version:
             raise SyntaxError("Could not find any version for {}".format(case_id))
         link_objs: List[FamilySample] = self.store.family_samples(case_id)
         if not link_objs:
@@ -72,7 +75,7 @@ class DeliverAPI:
         if not self.customer_id:
             self.set_customer_id(case_obj=case_obj)
 
-        sample_ids: Set[str] = set([sample.internal_id for sample in samples])
+        sample_ids: Set[str] = {sample.internal_id for sample in samples}
 
         if self.case_tags:
             self.deliver_case_files(
@@ -89,7 +92,7 @@ class DeliverAPI:
         for link_obj in link_objs:
             sample_id: str = link_obj.sample.internal_id
             sample_name: str = link_obj.sample.name
-            if self.fastq_delivery:
+            if self.delivery_type == "fastq":
                 LOG.debug("Fetch last version for sample bundle %s", sample_id)
                 last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
                 if not last_version:
@@ -141,7 +144,7 @@ class DeliverAPI:
     ) -> None:
         """Deliver files on sample level"""
         # Make sure that the directory exists
-        if not self.case_tags:
+        if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
         delivery_base: Path = self.create_delivery_dir_path(
             case_name=case_name, sample_name=sample_name
@@ -194,7 +197,7 @@ class DeliverAPI:
         Do not include files with sample tags.
         """
         tag: hk_models.Tag
-        file_tags = set([tag.name for tag in file_obj.tags])
+        file_tags = {tag.name for tag in file_obj.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")
             return False
@@ -225,12 +228,12 @@ class DeliverAPI:
         For fastq delivery we know that we want to deliver all files of bundle
         """
         tag: hk_models.Tag
-        file_tags = set([tag.name for tag in file_obj.tags])
+        file_tags = {tag.name for tag in file_obj.tags}
         tags: Set[str]
         # Check if any of the file tags matches the sample tags
         for tags in self.sample_tags:
             working_copy = deepcopy(tags)
-            if self.fastq_delivery is False:
+            if self.delivery_type != "fastq":
                 working_copy.add(sample_id)
             if working_copy.issubset(file_tags):
                 return True

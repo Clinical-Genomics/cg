@@ -1,7 +1,6 @@
 import datetime as dt
 
 import pytest
-
 from cg.apps.lims import LimsAPI
 from cg.apps.stats import StatsAPI
 from cg.meta.transfer import TransferLims

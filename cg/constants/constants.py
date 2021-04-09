@@ -1,7 +1,5 @@
 """Constants for cg"""
-from enum import Enum
-
-from cg.utils.StrEnum import StrEnum
+from cgmodels.cg.constants import Pipeline, StrEnum
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate")
 
@@ -33,16 +31,6 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 CASE_ACTIONS = ("analyze", "running", "hold")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
-
-
-class Pipeline(StrEnum):
-    BALSAMIC: str = "balsamic"
-    FASTQ: str = "fastq"
-    FLUFFY: str = "fluffy"
-    MICROSALT: str = "microsalt"
-    MIP_DNA: str = "mip-dna"
-    MIP_RNA: str = "mip-rna"
-    SARS_COV_2: str = "sars-cov-2"
 
 
 class DataDelivery(StrEnum):

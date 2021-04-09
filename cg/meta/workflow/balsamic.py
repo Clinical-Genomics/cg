@@ -364,15 +364,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return None
         return self.get_target_bed_from_lims(link_object.family.internal_id)
 
-    def get_bundle_created_date(self, case_id: str) -> datetime:
-        """Parse the analysis config and return the analysis date"""
-        LOG.debug("Fetch analysis start for %s", case_id)
-        case_config_path = self.get_case_config_path(case_id=case_id)
-        if not case_config_path.exists():
-            raise CgError(f"Case config cannot be found at the expected path: {case_config_path}")
-        config_data: dict = json.load(open(case_config_path, "r"))
-        return datetime.strptime(config_data["analysis"]["config_creation_date"], "%Y-%m-%d %H:%M")
-
     def get_pipeline_version(self, case_id: str) -> str:
         LOG.debug("Fetch pipeline version")
         sample_config = self.get_case_config_path(case_id=case_id)

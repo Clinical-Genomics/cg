@@ -193,16 +193,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_bundle_created_date(self, case_id: str) -> dt.datetime:
-        return self.get_date_from_file_path(self.get_samplesheet_path(case_id=case_id))
-
-    @staticmethod
-    def get_date_from_file_path(file_path: Path) -> dt.datetime.date:
-        """
-        Get date from deliverables path using date created metadata.
-        """
-        return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
-
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
@@ -211,14 +201,3 @@ class FluffyAnalysisAPI(AnalysisAPI):
             for case_object in self.get_running_cases()
             if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
-
-    def get_pipeline_version(self, case_id: str) -> str:
-        """
-        Calls the pipeline to get the pipeline version number. If fails, returns a placeholder value instead.
-        """
-        try:
-            self.process.run_command(["--version"])
-            return list(self.process.stdout_lines())[0].split()[-1]
-        except (Exception, CalledProcessError):
-            LOG.warning("Could not retrieve fluffy version!")
-            return "0.0.0"

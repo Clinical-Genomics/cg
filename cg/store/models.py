@@ -2,6 +2,8 @@ import datetime as dt
 from typing import List
 
 import alchy
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
@@ -24,6 +26,14 @@ flowcell_sample = Table(
     Column("flowcell_id", types.Integer, ForeignKey("flowcell.id"), nullable=False),
     Column("sample_id", types.Integer, ForeignKey("sample.id"), nullable=False),
     UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
+)
+
+customer_user = Table(
+    "customer_user",
+    Model.metadata,
+    Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
+    Column("user_id", types.Integer, ForeignKey("user.id"), nullable=False),
+    UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
 )
 
 
@@ -543,15 +553,12 @@ class User(Model):
     email = Column(types.String(128), unique=True, nullable=False)
     is_admin = Column(types.Boolean, default=False)
 
-    customer_id = Column(
-        ForeignKey("customer.id", ondelete="CASCADE", use_alter=True), nullable=False
-    )
-    customer = orm.relationship("Customer", foreign_keys=[customer_id])
+    customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
         data = super(User, self).to_dict()
-        data["customer"] = self.customer.to_dict()
+        data["customers"] = [record.to_dict() for record in self.customers]
         return data
 
     def __str__(self) -> str:

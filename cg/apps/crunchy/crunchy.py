@@ -16,7 +16,6 @@ from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
-from pydantic import ValidationError
 
 from .sbatch import (
     FASTQ_TO_SPRING_COMMANDS,

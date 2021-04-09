@@ -90,7 +90,7 @@ class FastqHandler:
         raise NotImplementedError
 
     @staticmethod
-    def get_concatenated_name(linked_fastq_name) -> str:
+    def get_concatenated_name(linked_fastq_name: str) -> str:
         """"create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
@@ -219,6 +219,7 @@ class FastqHandler:
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
     ):
         raise NotImplementedError
 
@@ -233,6 +234,7 @@ class BalsamicFastqHandler(FastqHandler):
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following Balsamic conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
@@ -251,6 +253,7 @@ class MipFastqHandler(FastqHandler):
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following MIP conventions."""
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
@@ -268,6 +271,7 @@ class MicrosaltFastqHandler(FastqHandler):
         date: dt.datetime = DEFAULT_DATE_STR,
         index: str = DEFAULT_INDEX,
         undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
     ) -> str:
         """Name a FASTQ file following usalt conventions. Naming must be
         xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
@@ -275,3 +279,27 @@ class MicrosaltFastqHandler(FastqHandler):
 
         flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
         return f"{sample}_{flowcell}_L{lane}_{read}.fastq.gz"
+
+
+class MutantFastqHandler(FastqHandler):
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flowcell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
+        undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
+    ) -> str:
+        """Name a FASTQ file following mutant conventions. Naming must be
+        xxx_R_1.fastq.gz and xxx_R_2.fastq.gz"""
+        # ACC1234A1_FCAB1ABC2_L1_1.fastq.gz sample_flowcell_lane_read.fastq.gz
+
+        return f"{flowcell}_L{lane}_{meta}_{read}.fastq.gz"
+
+    @staticmethod
+    def get_concatenated_name(linked_fastq_name: str) -> str:
+        """"Create a name for the concatenated file from multiple lanes"""
+        return "_".join(linked_fastq_name.split("_")[2:])

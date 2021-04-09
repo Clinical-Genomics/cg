@@ -13,6 +13,46 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.17.2]
+### Fixed
+- Fix duplicate Housekeeper session in scout upload
+
+
+## [20.17.1]
+### Changed
+- Status of mutant cases is set to running before running analysis, and revoked if start fails. 
+  This prevents users and cron jobs from starting the case which already started, given they check in statusDB first.
+
+## [20.17.0]
+### Added
+
+- Deliver sarscov2 cli
+
+## [20.16.0]
+### Added
+
+- Demultiplexing functionality to CG
+
+## [20.15.1]
+### Fixed
+- cg to rename mutant fastq files directly
+
+## [20.15.0]
+### Added
+- CLI methods for starting mutant
+
+## [20.14.2]
+### Added
+- Add RNA validation cases to blacklist, which defines cases to not compress fastq files for
+
+## [20.14.1]
+### Fixed
+- So that existing samples don't get added to lims again
+
+## [20.14.0]
+### Added
+- Possibility to associate more than one customer to each user 
+
 ## [20.13.0]
 ### Changed
 - Update orderform 2184 to latest version 4

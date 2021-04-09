@@ -25,6 +25,7 @@ def fixture_deliver_api(
         case_tags=[{"case-tag"}],
         sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
+        delivery_type="balsamic",
     )
     yield _deliver_api
 
@@ -58,5 +59,6 @@ def fixture_populated_deliver_api(
         case_tags=["case-tag"],
         sample_tags=["sample-tag"],
         project_base_path=project_dir,
+        delivery_type="balsamic",
     )
     return _deliver_api
