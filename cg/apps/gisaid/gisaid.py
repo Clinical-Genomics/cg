@@ -31,6 +31,8 @@ class GisaidAPI(MetaAPI):
 
         orig_lab = "Stockholm"  # sample.originating_lab
         collection_date = "201122"  # sample.collection_date
+        print(sample.name)
+        print(sample.id)
         gisaid_sample = GisaidSample(
             covv_subm_sample_id=sample.name,
             submitter="maya",
