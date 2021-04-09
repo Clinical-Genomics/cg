@@ -1,44 +1,47 @@
 from pathlib import Path
-
+import logging
 import cg
 from cg.store import Store
+from click.testing import CliRunner, Result
+from cg.cli.base import base, init
 
 
-def test_cli_version(invoke_cli):
+def test_cli_version(cli_runner: CliRunner):
     # GIVEN I want to see the version of the program
     # WHEN asking to see the version
-    result = invoke_cli(["--version"])
+    result: Result = cli_runner.invoke(base, ["--version"])
     # THEN it should display the version of the program
     # THEN it should print the name and version of the tool only
     assert cg.__title__ in result.output
     assert cg.__version__ in result.output
 
 
-def test_list_commands(invoke_cli):
+def test_list_commands(cli_runner: CliRunner):
     # WHEN using simplest command 'cg'
-    result = invoke_cli()
+    result = cli_runner.invoke(base, [])
     # THEN it should just work ;-)
     assert result.exit_code == 0
 
 
-def test_missing_command(invoke_cli):
+def test_missing_command(cli_runner: CliRunner):
     # WHEN invoking a missing command
-    result = invoke_cli(["idontexist"])
+    result = cli_runner.invoke(cg, ["idontexist"])
     # THEN context should abort
     assert result.exit_code != 0
 
 
-def test_cli_init(cli_runner, invoke_cli):
-
+def test_cli_init(cli_runner, caplog):
+    caplog.set_level(logging.INFO)
     # GIVEN you want to setup a new database using the CLI
     database = "./test_db.sqlite3"
     database_path = Path(database)
     database_uri = f"sqlite:///{database}"
+    context: dict = {"status_db": Store(uri=database_uri)}
     with cli_runner.isolated_filesystem():
         assert database_path.exists() is False
 
         # WHEN calling "init"
-        result = invoke_cli(["--database", database_uri, "init"])
+        result = cli_runner.invoke(init, [], obj=context)
 
         # THEN it should setup the database with some tables
         assert result.exit_code == 0
@@ -47,16 +50,16 @@ def test_cli_init(cli_runner, invoke_cli):
 
         # GIVEN the database already exists
         # WHEN calling the init function
-        result = invoke_cli(["--database", database_uri, "init"])
+        result = cli_runner.invoke(init, [], obj=context)
 
         # THEN it should print an error and give error exit code
         assert result.exit_code != 0
-        assert "Database already exists" in result.output
+        assert "Database already exists" in caplog.text
 
         # GIVEN the database already exists
         # WHEN calling "init" with "--reset"
-        result = invoke_cli(["--database", database_uri, "init", "--reset"], input="Yes")
+        result = cli_runner.invoke(init, ["--reset"], input="Yes", obj=context)
 
         # THEN it should re-setup the tables and print new tables
         assert result.exit_code == 0
-        assert "Success!" in result.output
+        assert "Success!" in caplog.text
