@@ -60,11 +60,17 @@ class GisaidAPI(MetaAPI):
 
         hk_version = self.housekeeper_api.last_version(bundle=family_id)
         fasta_files: list = self.housekeeper_api.files(version=hk_version.id, tags=["consensus"])
+        print(fasta_files)
+        #        fasta_files = [
+        #            "/Users/maya.brandi/opt/cg/f1.fasta",
+        #            "/Users/maya.brandi/opt/cg/f3.fasta",
+        #            "/Users/maya.brandi/opt/cg/f2.fasta",
+        #        ]
+
         fastq_handler = FastqHandler()
         file_name = f"{family_id}.fasta"
-        fasta_file = fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
-
-        return str(fasta_file.absolute())
+        fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
+        return file_name
 
     def files(self, samples: List[models.Sample], family_id: str) -> UpploadFiles:
         """Fetch csv file and fasta file for batch upload to GISAID."""
