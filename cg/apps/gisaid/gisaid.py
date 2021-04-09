@@ -61,10 +61,8 @@ class GisaidAPI(MetaAPI):
         """Fetch a fasta file form house keeper for batch upload to gisaid"""
 
         hk_version = self.housekeeper_api.last_version(bundle=family_id)
-        fasta_files: list = self.housekeeper_api.files(
-            version=hk_version.id, tags=["consensus"]
-        ).all()
-        print(fasta_files)
+        hk_files: list = self.housekeeper_api.files(version=hk_version.id, tags=["consensus"]).all()
+        fasta_files = [file.path for file in hk_files]
         #        fasta_files = [
         #            "/Users/maya.brandi/opt/cg/f1.fasta",
         #            "/Users/maya.brandi/opt/cg/f3.fasta",
