@@ -9,6 +9,7 @@ import ruamel.yaml
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd
+from cg.meta.meta import MetaAPI
 from cg.store import Store
 
 from .add import add as add_cmd
@@ -26,7 +27,6 @@ from .status import status
 from .transfer import transfer_group
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
-from cg.meta.meta import MetaAPI
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -55,7 +55,6 @@ def base(context, config, database, log_level, verbose):
     context.obj["status_db"] = meta_api.status_db
     context.obj["housekeeper_api"] = meta_api.housekeeper_api
     context.obj["trailblazer_api"] = meta_api.trailblazer_api
-
 
 
 @base.command()
