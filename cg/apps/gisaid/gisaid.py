@@ -22,7 +22,7 @@ class GisaidAPI(MetaAPI):
 
     def __init__(self, config: dict):
         super().__init__(config)
-        self.gisaid_config = config["gisaid"]["config_path"]
+        #self.gisaid_config = config["gisaid"]["config_path"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
         self.process = Process(binary=self.gisaid_binary)
 
@@ -31,6 +31,8 @@ class GisaidAPI(MetaAPI):
 
         orig_lab = "Stockholm"  # sample.originating_lab
         collection_date = "201122"  # sample.collection_date
+        print(sample.name)
+        print(sample.id)
         gisaid_sample = GisaidSample(
             covv_subm_sample_id=sample.name,
             submitter="i.sylvin",
