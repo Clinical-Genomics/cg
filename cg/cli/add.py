@@ -10,11 +10,9 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def add(context):
+def add():
     """Add new things to the database."""
-    context.obj["status_db"] = Store(context.obj["database"])
-
+    pass
 
 @add.command()
 @click.argument("internal_id")
