@@ -1,23 +1,27 @@
 """This script tests the cli methods to get flowcells in status-db"""
 from datetime import datetime
 
+from cg.cli.get import get
 from cg.store import Store
+from click.testing import CliRunner
+from tests.store_helpers import StoreHelpers
 
 
-def test_get_flowcell_bad_flowcell(invoke_cli, disk_store: Store):
+def test_get_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: dict):
     """Test to get a flowcell using a non-existing flowcell """
     # GIVEN an empty database
 
     # WHEN getting a flowcell
-    db_uri = disk_store.uri
     name = "dummy_name"
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", name])
+    result = cli_runner.invoke(get, ["flowcell", name], obj=base_context)
 
     # THEN then it should complain in missing flowcell instead of getting a flowcell
     assert result.exit_code == 1
 
 
-def test_get_flowcell_required(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_required(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test to get a flowcell using only the required arguments"""
     # GIVEN a database with a flowcell
     flowcell = helpers.add_flowcell(disk_store)
@@ -25,15 +29,16 @@ def test_get_flowcell_required(invoke_cli, disk_store: Store, helpers):
     assert disk_store.Flowcell.query.count() == 1
 
     # WHEN getting a flowcell
-    db_uri = disk_store.uri
 
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
     # THEN then it should have been get
     assert result.exit_code == 0
 
 
-def test_get_flowcell_output(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_output(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
     flowcell = helpers.add_flowcell(disk_store)
@@ -44,9 +49,7 @@ def test_get_flowcell_output(invoke_cli, disk_store: Store, helpers):
     status = disk_store.Flowcell.query.first().status
 
     # WHEN getting a flowcell
-    db_uri = disk_store.uri
-
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
     # THEN then it should have been get
     assert result.exit_code == 0
@@ -57,7 +60,9 @@ def test_get_flowcell_output(invoke_cli, disk_store: Store, helpers):
     assert status in result.output
 
 
-def test_get_flowcell_archived_at_none(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_archived_at_none(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
     flowcell = helpers.add_flowcell(disk_store, archived_at=None)
@@ -65,16 +70,16 @@ def test_get_flowcell_archived_at_none(invoke_cli, disk_store: Store, helpers):
     flowcell_name = flowcell.name
 
     # WHEN getting a flowcell
-    db_uri = disk_store.uri
-
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
     # THEN then it should have been get
     assert result.exit_code == 0
     assert archived_at in result.output
 
 
-def test_get_flowcell_archived_at_date(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_archived_at_date(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
     archived_at = datetime.now()
@@ -83,16 +88,16 @@ def test_get_flowcell_archived_at_date(invoke_cli, disk_store: Store, helpers):
     archived_at_date = str(archived_at.date())
 
     # WHEN getting a flowcell
-    db_uri = disk_store.uri
-
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
     # THEN then it should have been get
     assert result.exit_code == 0
     assert archived_at_date in result.output
 
 
-def test_get_flowcell_samples_without_samples(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_samples_without_samples(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers, caplog
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
     flowcell = helpers.add_flowcell(disk_store)
@@ -100,16 +105,16 @@ def test_get_flowcell_samples_without_samples(invoke_cli, disk_store: Store, hel
     assert not disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --samples flag
-    db_uri = disk_store.uri
-
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--samples"])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name, "--samples"], obj=base_context)
 
     # THEN a message about no samples should have been displayed
     assert result.exit_code == 0
-    assert "no samples found on flowcell" in result.output
+    assert "no samples found on flowcell" in caplog.text
 
 
-def test_get_flowcell_samples(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_samples(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with related samples
     samples = helpers.add_samples(disk_store)
@@ -118,9 +123,7 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store, helpers):
     assert disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --samples flag
-    db_uri = disk_store.uri
-
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--samples"])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name, "--samples"], obj=base_context)
 
     # THEN all related samples should be listed in the output
     assert result.exit_code == 0
@@ -128,7 +131,9 @@ def test_get_flowcell_samples(invoke_cli, disk_store: Store, helpers):
         assert sample.internal_id in result.output
 
 
-def test_get_flowcell_no_samples_without_samples(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_no_samples_without_samples(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
     flowcell = helpers.add_flowcell(disk_store)
@@ -136,15 +141,15 @@ def test_get_flowcell_no_samples_without_samples(invoke_cli, disk_store: Store, 
     assert not disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --no-samples flag
-    db_uri = disk_store.uri
-
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--no-samples"])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name, "--no-samples"], obj=base_context)
 
     # THEN there are no samples to display but everything is OK
     assert result.exit_code == 0
 
 
-def test_get_flowcell_no_samples_with_samples(invoke_cli, disk_store: Store, helpers):
+def test_get_flowcell_no_samples_with_samples(
+    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with related samples
     samples = helpers.add_samples(disk_store)
@@ -155,7 +160,7 @@ def test_get_flowcell_no_samples_with_samples(invoke_cli, disk_store: Store, hel
     # WHEN getting a flowcell with the --no-samples flag
     db_uri = disk_store.uri
 
-    result = invoke_cli(["--database", db_uri, "get", "flowcell", flowcell_name, "--no-samples"])
+    result = cli_runner.invoke(get, ["flowcell", flowcell_name, "--no-samples"], obj=base_context)
 
     # THEN no related samples should be listed in the output
     assert result.exit_code == 0
