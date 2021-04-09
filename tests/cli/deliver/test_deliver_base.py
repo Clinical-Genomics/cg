@@ -1,11 +1,8 @@
 """Tests for the deliver base command"""
 
-from click.testing import CliRunner
-
-from cg.cli.base import base as base_command
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
-from cg.store import Store
+from click.testing import CliRunner
 
 
 def test_run_base_help():
@@ -14,7 +11,7 @@ def test_run_base_help():
     runner = CliRunner()
 
     # WHEN running cg deliver help
-    result = runner.invoke(base_command, ["deliver", "--help"])
+    result = runner.invoke(deliver_cmd, ["--help"])
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
@@ -22,15 +19,14 @@ def test_run_base_help():
     assert "Deliver files with CG" in result.output
 
 
-def test_run_deliver_analysis_help(hk_config_dict: dict):
+def test_run_deliver_analysis_help(base_context: dict):
     """Test to run the deliver base command with --help"""
     # GIVEN a cli runner
     runner = CliRunner()
     # GIVEN a context with store and housekeeper information
-    hk_config_dict["database"] = "sqlite:///:memory:"
 
     # WHEN running cg deliver help
-    result = runner.invoke(deliver_cmd, ["analysis", "--help"], obj=hk_config_dict)
+    result = runner.invoke(deliver_cmd, ["analysis", "--help"], obj=base_context)
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS

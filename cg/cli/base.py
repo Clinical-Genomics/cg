@@ -1,6 +1,7 @@
 """ Start of CLI """
 import logging
 import sys
+from typing import Optional
 
 import cg
 import click
@@ -41,7 +42,13 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.option("--verbose", is_flag=True, help="Show full log information, time stamp etc")
 @click.version_option(cg.__version__, prog_name=cg.__title__)
 @click.pass_context
-def base(context, config, database, log_level, verbose):
+def base(
+    context: click.Context,
+    config: click.File,
+    database: Optional[str],
+    log_level: str,
+    verbose: bool,
+):
     """cg - interface between tools at Clinical Genomics."""
     if verbose:
         log_format = "%(asctime)s %(hostname)s %(name)s[%(process)d] %(levelname)s %(message)s"

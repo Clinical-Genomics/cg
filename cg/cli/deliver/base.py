@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List
 
 import click
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
@@ -16,12 +15,9 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def deliver(context):
+def deliver():
     """Deliver files with CG."""
     LOG.info("Running CG deliver")
-    context.obj["status_db"] = Store(context.obj["database"])
-    context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
 
 
 @click.command(name="analysis")

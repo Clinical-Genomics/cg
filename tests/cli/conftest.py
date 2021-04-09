@@ -2,6 +2,7 @@
 from functools import partial
 
 import pytest
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli import base
 from cg.store import Store
 from click.testing import CliRunner
@@ -26,9 +27,9 @@ def invoke_cli(cli_runner):
 
 
 @pytest.fixture(name="base_context")
-def fixture_base_context(base_store: Store) -> dict:
+def fixture_base_context(base_store: Store, housekeeper_api: HousekeeperAPI) -> dict:
     """context to use in cli"""
-    return {"trailblazer_api": None, "status_db": base_store}
+    return {"trailblazer_api": None, "status_db": base_store, "housekeeper_api": housekeeper_api}
 
 
 @pytest.fixture(name="disk_store")
