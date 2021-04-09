@@ -1,7 +1,7 @@
 import logging
+from typing import List, Optional, Tuple
 
 import click
-
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -22,7 +22,6 @@ def add():
     "-cg",
     "--customer-group",
     "customer_group_id",
-    required=False,
     help="internal ID for the customer group of the customer, a new group will be "
     "created if left out",
 )
@@ -42,10 +41,10 @@ def add():
 )
 @click.pass_context
 def customer(
-    context,
+    context: click.Context,
     internal_id: str,
     name: str,
-    customer_group_id: str,
+    customer_group_id: Optional[str],
     invoice_address: str,
     invoice_reference: str,
 ):
@@ -86,15 +85,17 @@ def customer(
 @click.argument("email")
 @click.argument("name")
 @click.pass_context
-def user(context, admin, customer_id, email, name):
+def user(context: click.Context, admin: bool, customer_id: str, email: str, name: str):
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.obj["status_db"]
     customer_obj: models.Customer = status_db.customer(customer_id)
     existing: models.User = status_db.user(email)
     if existing:
         LOG.error(f"{existing.name}: user already added")
-        context.abort()
-    new_user: models.User = status_db.add_user(customer_obj, email, name, is_admin=admin)
+        raise click.Abort
+    new_user: models.User = status_db.add_user(
+        customer=customer_obj, email=email, name=name, is_admin=admin
+    )
     status_db.add_commit(new_user)
     LOG.info(f"user added: {new_user.email} ({new_user.id})")
 
@@ -121,7 +122,17 @@ def user(context, admin, customer_id, email, name):
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_context
-def sample(context, lims_id, downsampled, sex, order, application, priority, customer_id, name):
+def sample(
+    context: click.Context,
+    lims_id: Optional[str],
+    downsampled: Optional[int],
+    sex: str,
+    order: Optional[str],
+    application: str,
+    priority: str,
+    customer_id: str,
+    name: str,
+):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.obj["status_db"]
     customer_obj: models.Customer = status_db.customer(customer_id)
@@ -173,7 +184,7 @@ def sample(context, lims_id, downsampled, sex, order, application, priority, cus
 def family(
     context: click.Context,
     priority: str,
-    panels: [str],
+    panels: Tuple[str],
     data_analysis: Pipeline,
     data_delivery: DataDelivery,
     customer_id: str,
@@ -196,7 +207,7 @@ def family(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
-        panels=panels,
+        panels=list(panels),
         priority=priority,
     )
     new_case.customer = customer_obj
@@ -211,11 +222,18 @@ def family(
 @click.argument("family_id")
 @click.argument("sample_id")
 @click.pass_context
-def relationship(context, mother, father, status, family_id, sample_id):
+def relationship(
+    context: click.Context,
+    mother: Optional[str],
+    father: Optional[str],
+    status: str,
+    family_id: str,
+    sample_id: str,
+):
     """Create a link between a FAMILY_ID and a SAMPLE_ID."""
     status_db: Store = context.obj["status_db"]
-    mother_obj = None
-    father_obj = None
+    mother_obj: Optional[models.Sample] = None
+    father_obj: Optional[models.Sample] = None
     case_obj: models.Family = status_db.family(family_id)
     if case_obj is None:
         LOG.error("%s: family not found", family_id)
@@ -239,7 +257,7 @@ def relationship(context, mother, father, status, family_id, sample_id):
             raise click.Abort
 
     new_record = status_db.relate_sample(
-        case_obj, sample_obj, status, mother=mother_obj, father=father_obj
+        family=case_obj, sample=sample_obj, status=status, mother=mother_obj, father=father_obj
     )
     status_db.add_commit(new_record)
     LOG.info("related %s to %s", case_obj.internal_id, sample_obj.internal_id)
