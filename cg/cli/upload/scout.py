@@ -118,9 +118,8 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
     if not context.obj.get("analysis_api"):
         context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
-    scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
 
-    tag_name = scout_upload_api.get_load_config_tag()
+    tag_name = UploadScoutAPI.get_load_config_tag()
     version_obj = analysis_api.housekeeper_api.last_version(case_id)
     scout_config_file: Optional[
         hk_models.File
