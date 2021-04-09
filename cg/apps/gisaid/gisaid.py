@@ -22,7 +22,7 @@ class GisaidAPI(MetaAPI):
 
     def __init__(self, config: dict):
         super().__init__(config)
-        #self.gisaid_config = config["gisaid"]["config_path"]
+        # self.gisaid_config = config["gisaid"]["config_path"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
         self.process = Process(binary=self.gisaid_binary)
 
@@ -31,12 +31,10 @@ class GisaidAPI(MetaAPI):
 
         orig_lab = "Stockholm"  # sample.originating_lab
         collection_date = "201122"  # sample.collection_date
-        print(sample.name)
-        print(sample.id)
         gisaid_sample = GisaidSample(
             covv_subm_sample_id=sample.name,
             submitter="i.sylvin",
-            fn="{family_id}.fasta",
+            fn=f"{family_id}.fasta",
             covv_collection_date=collection_date,
             lab=orig_lab,
         )
@@ -64,7 +62,6 @@ class GisaidAPI(MetaAPI):
         fasta_files: list = self.housekeeper_api.files(version=hk_version.id, tags=["consensus"])
         fastq_handler = FastqHandler()
         file_name = f"{family_id}.fasta"
-        fasta_file = Path(file_name)
         fasta_file = fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
 
         return str(fasta_file.absolute())

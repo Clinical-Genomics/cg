@@ -13,7 +13,7 @@ HEADERS = [
     "covv_seq_technology",
     "covv_orig_lab",
     "covv_orig_lab_addr",
-    "covv_provider_sample_id",
+    "covv_subm_sample_id",
     "covv_subm_lab",
     "covv_subm_lab_addr",
     "covv_authors",
