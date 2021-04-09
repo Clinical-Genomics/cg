@@ -1,33 +1,26 @@
-from cg.store import Store
+from cg.cli.get import get
+from cg.store import Store, models
+from click.testing import CliRunner
+from tests.store_helpers import StoreHelpers
 
 
-def test_get_family_by_name(invoke_cli, disk_store: Store):
+def test_get_family_by_name(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     # GIVEN A database with a customer in it
-    customer_id = "customer-test"
-    customer_group = disk_store.add_customer_group("dummy_group", "dummy group")
-    customer = disk_store.add_customer(
-        internal_id=customer_id,
-        name="Test Customer",
-        scout_access=False,
-        customer_group=customer_group,
-        invoice_address="Street nr, 12345 Uppsala",
-        invoice_reference="ABCDEF",
-    )
-    disk_store.add_commit(customer)
+    status_db: Store = base_context["status_db"]
+    customer: models.Customer = helpers.ensure_customer(store=status_db)
+    customer_id = customer.internal_id
 
     # WHEN trying to get a non-existing case by name
-    db_uri = disk_store.uri
-    result = invoke_cli(
+    result = cli_runner.invoke(
+        get,
         [
-            "--database",
-            db_uri,
-            "get",
             "family",
             "-c",
             customer_id,
             "-n",
             "dummy-case-name",
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN it should not crash

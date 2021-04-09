@@ -18,7 +18,6 @@ FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Statu
 @click.pass_context
 def get(context: click.Context, identifier: str):
     """Get information about records in the database."""
-    context.obj["status_db"] = Store(context.obj["database"])
     if identifier and re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):
         context.invoke(sample, sample_ids=[identifier])
     elif identifier and re.match(r"^[a-z]*$", identifier):
