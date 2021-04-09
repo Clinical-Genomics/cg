@@ -45,7 +45,7 @@ def test_add_user(cli_runner: CliRunner, base_context: dict):
 
     # WHEN adding a new user
     name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
-    result = cli_runner.invoke(add["user", "-c", customer_id, email, name], obj=base_context)
+    result = cli_runner.invoke(add,["user", "-c", customer_id, email, name], obj=base_context)
 
     # THEN it should be stored in the database
     assert result.exit_code == 0
