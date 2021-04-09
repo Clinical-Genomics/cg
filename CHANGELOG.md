@@ -10,10 +10,12 @@ Try to use the following format:
 
 ## [x.x.x]
 ### Added
-- Added new covid prep method to lims constants
 ### Changed
 ### Fixed
 
+## [20.17.4]
+### Added
+- Added new covid prep method to lims constants
 
 ## [20.17.3]
 ### Fixed
