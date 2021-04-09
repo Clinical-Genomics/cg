@@ -311,7 +311,7 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_target_bed_from_lims(self, case_id: str) -> str:
+    def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
         """Get target bed filename from lims"""
         case_obj: models.Family = self.status_db.family(case_id)
         sample_obj: models.Sample = case_obj.links[0].sample
