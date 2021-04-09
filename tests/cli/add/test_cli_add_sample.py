@@ -1,22 +1,23 @@
 import datetime
 
-from cg.store import Store
+from cg.cli.add import add
+from cg.store import Store, models
+from click.testing import CliRunner
+from tests.store_helpers import StoreHelpers
 
 
-def test_add_sample_bad_customer(invoke_cli, disk_store: Store):
+def test_add_sample_bad_customer(cli_runner: CliRunner, base_context: dict):
     # GIVEN an empty database
+    disk_store: Store = base_context["status_db"]
 
     # WHEN adding a sample
-    db_uri = disk_store.uri
     sex = "male"
     application = "dummy_application"
     customer_id = "dummy_customer"
     name = "dummy_name"
-    result = invoke_cli(
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
@@ -24,7 +25,8 @@ def test_add_sample_bad_customer(invoke_cli, disk_store: Store):
             application,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should complain about missing customer instead of adding a sample
@@ -32,20 +34,21 @@ def test_add_sample_bad_customer(invoke_cli, disk_store: Store):
     assert disk_store.Sample.query.count() == 0
 
 
-def test_add_sample_bad_application(invoke_cli, disk_store: Store):
+def test_add_sample_bad_application(
+    cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers
+):
     # GIVEN a database with a customer
+    disk_store: Store = base_context["status_db"]
 
     # WHEN adding a sample
-    db_uri = disk_store.uri
     sex = "male"
     application = "dummy_application"
-    customer_id = add_customer(disk_store)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     name = "dummy_name"
-    result = invoke_cli(
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
@@ -53,7 +56,8 @@ def test_add_sample_bad_application(invoke_cli, disk_store: Store):
             application,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should complain about missing application instead of adding a sample
@@ -61,29 +65,30 @@ def test_add_sample_bad_application(invoke_cli, disk_store: Store):
     assert disk_store.Sample.query.count() == 0
 
 
-def test_add_sample_required(invoke_cli, disk_store: Store):
+def test_add_sample_required(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     # GIVEN a database with a customer and an application
-
-    # WHEN adding a sample
-    db_uri = disk_store.uri
+    disk_store: Store = base_context["status_db"]
     sex = "male"
-    application = add_application(disk_store)
-    customer_id = add_customer(disk_store)
+    application_tag = "dummy_tag"
+    helpers.ensure_application(store=disk_store, tag=application_tag)
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     name = "sample_name"
 
-    result = invoke_cli(
+    # WHEN adding a sample
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
             "--application",
-            application,
+            application_tag,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should be added
@@ -93,32 +98,33 @@ def test_add_sample_required(invoke_cli, disk_store: Store):
     assert disk_store.Sample.query.first().sex == sex
 
 
-def test_add_sample_lims_id(invoke_cli, disk_store: Store):
+def test_add_sample_lims_id(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
     # GIVEN a database with a customer and an application
-
+    disk_store: Store = base_context["status_db"]
+    application_tag = "dummy_tag"
+    helpers.ensure_application(store=disk_store, tag=application_tag)
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     # WHEN adding a sample
-    db_uri = disk_store.uri
     sex = "male"
-    application = add_application(disk_store)
-    customer_id = add_customer(disk_store)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     name = "sample_name"
     lims_id = "sample_lims_id"
 
-    result = invoke_cli(
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
             "--application",
-            application,
+            application_tag,
             "--lims",
             lims_id,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should be added
@@ -127,32 +133,37 @@ def test_add_sample_lims_id(invoke_cli, disk_store: Store):
     assert disk_store.Sample.query.first().internal_id == lims_id
 
 
-def test_add_sample_order(invoke_cli, disk_store: Store):
+def test_add_sample_order(
+    cli_runner: CliRunner,
+    base_context: dict,
+    disk_store: Store,
+    helpers: StoreHelpers,
+    application_tag: str,
+):
     # GIVEN a database with a customer and an application
-
-    # WHEN adding a sample
-    db_uri = disk_store.uri
+    helpers.ensure_application(store=disk_store, tag=application_tag)
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
     sex = "male"
-    application = add_application(disk_store)
-    customer_id = add_customer(disk_store)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     name = "sample_name"
     order = "sample_order"
 
-    result = invoke_cli(
+    # WHEN adding a sample
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
             "--application",
-            application,
+            application_tag,
             "--order",
             order,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should be added
@@ -161,32 +172,33 @@ def test_add_sample_order(invoke_cli, disk_store: Store):
     assert disk_store.Sample.query.first().order == order
 
 
-def test_add_sample_downsampled(invoke_cli, disk_store: Store):
+def test_add_sample_downsampled(
+    cli_runner, base_context: dict, disk_store: Store, application_tag: str, helpers: StoreHelpers
+):
     # GIVEN a database with a customer and an application
-
-    # WHEN adding a sample
-    db_uri = disk_store.uri
+    helpers.ensure_application(store=disk_store, tag=application_tag)
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     sex = "male"
-    application = add_application(disk_store)
-    customer_id = add_customer(disk_store)
     name = "sample_name"
     downsampled_to = "123"
 
-    result = invoke_cli(
+    # WHEN adding a sample
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
             "--application",
-            application,
+            application_tag,
             "--downsampled",
             downsampled_to,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should be added
@@ -195,68 +207,40 @@ def test_add_sample_downsampled(invoke_cli, disk_store: Store):
     assert str(disk_store.Sample.query.first().downsampled_to) == downsampled_to
 
 
-def test_add_sample_priority(invoke_cli, disk_store: Store):
+def test_add_sample_priority(
+    cli_runner: CliRunner,
+    base_context: dict,
+    disk_store: Store,
+    application_tag: str,
+    helpers: StoreHelpers,
+):
     # GIVEN a database with a customer and an application
-
-    # WHEN adding a sample
-    db_uri = disk_store.uri
+    helpers.ensure_application(store=disk_store, tag=application_tag)
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
+    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer_id = customer.internal_id
     sex = "male"
-    application = add_application(disk_store)
-    customer_id = add_customer(disk_store)
     name = "sample_name"
     priority = "priority"
 
-    result = invoke_cli(
+    # WHEN adding a sample
+    result = cli_runner.invoke(
+        add,
         [
-            "--database",
-            db_uri,
-            "add",
             "sample",
             "--sex",
             sex,
             "--application",
-            application,
+            application_tag,
             "--priority",
             priority,
             customer_id,
             name,
-        ]
+        ],
+        obj=base_context,
     )
 
     # THEN then it should be added
     assert result.exit_code == 0
     assert disk_store.Sample.query.count() == 1
     assert disk_store.Sample.query.first().priority_human == priority
-
-
-def add_customer(disk_store, customer_id="cust_test"):
-    customer_group = disk_store.add_customer_group("dummy_group", "dummy group")
-    customer = disk_store.add_customer(
-        internal_id=customer_id,
-        name="Test Customer",
-        scout_access=False,
-        customer_group=customer_group,
-        invoice_address="dummy_address",
-        invoice_reference="dummy_reference",
-    )
-    disk_store.add_commit(customer)
-    return customer_id
-
-
-def add_application(disk_store, application_tag="dummy_tag"):
-
-    application = disk_store.add_application(
-        tag=application_tag,
-        category="wgs",
-        description="dummy_description",
-        percent_kth=80,
-        percent_reads_guaranteed=75,
-    )
-    disk_store.add_commit(application)
-    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
-    version = disk_store.add_version(
-        application, 1, valid_from=datetime.datetime.now(), prices=prices
-    )
-
-    disk_store.add_commit(version)
-    return application_tag
