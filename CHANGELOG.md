@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.17.1]
+### Changed
+- Status of mutant cases is set to running before running analysis, and revoked if start fails. 
+  This prevents users and cron jobs from starting the case which already started, given they check in statusDB first.
+
 ## [20.17.0]
 ### Added
 
