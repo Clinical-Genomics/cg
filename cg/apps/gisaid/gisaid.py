@@ -22,7 +22,7 @@ class GisaidAPI(MetaAPI):
 
     def __init__(self, config: dict):
         super().__init__(config)
-        self.gisaid_config = config["gisaid"]["config_path"]
+        #self.gisaid_config = config["gisaid"]["config_path"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
         self.process = Process(binary=self.gisaid_binary)
 
