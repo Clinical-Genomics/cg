@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.17.3]
+### Fixed
+- Adds support to use original sample lims id in downsampled cases (affects balsamic)
+
 ## [20.17.2]
 ### Fixed
 - Fix duplicate Housekeeper session in scout upload

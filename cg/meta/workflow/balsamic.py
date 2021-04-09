@@ -292,7 +292,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
 
         case_obj: models.Family = self.status_db.family(case_id)
-        capture_kit = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
+        sample_obj: models.Sample = case_obj.links[0].sample
+        if sample_obj.from_sample:
+            sample_obj = self.status_db.sample(internal_id=sample_obj.from_sample)
+        capture_kit = self.lims_api.capture_kit(sample_obj.internal_id)
         if capture_kit:
             panel_shortname = self.status_db.bed_version(capture_kit).shortname
         elif self.get_application_type(case_obj.links[0].sample) == "wgs":
