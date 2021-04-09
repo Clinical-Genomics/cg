@@ -1,8 +1,7 @@
 import os
-from pathlib import Path
 
 from cg.meta.report.api import ReportAPI
-from tests.meta.report.comparison import is_similar_dicts, dict_values_exists_in
+from tests.meta.report.comparison import dict_values_exists_in, is_similar_dicts
 
 
 def test_collect_delivery_data(report_api, report_store, case_id):
@@ -225,7 +224,7 @@ def test_incorporate_coverage_data(report_api, report_samples):
         assert not sample.get("target_coverage")
         assert not sample.get("target_completeness")
         lims_id_found_in_warnings = False
-        for warning in report_api.LOG.get_warnings():
+        for warning in report_api.log.get_warnings():
             lims_id_found_in_warnings = lims_id in warning or lims_id_found_in_warnings
         assert lims_id_found_in_warnings
 
