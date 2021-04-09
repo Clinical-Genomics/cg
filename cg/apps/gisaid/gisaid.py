@@ -33,8 +33,8 @@ class GisaidAPI(MetaAPI):
         collection_date = "201122"  # sample.collection_date
         gisaid_sample = GisaidSample(
             covv_subm_sample_id=sample.name,
-            submitter="maya",
-            fn=family_id,
+            submitter="i.sylvin",
+            fn="{family_id}.fasta",
             covv_collection_date=collection_date,
             lab=orig_lab,
         )
