@@ -2,13 +2,12 @@
 import copy
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import click
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store
+from cg.store import Store, models
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +27,13 @@ def deliver():
 @click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def deliver_analysis(context, case_id: str, ticket_id: int, delivery_type: str, dry_run: bool):
+def deliver_analysis(
+    context: click.Context,
+    case_id: Optional[str],
+    ticket_id: Optional[int],
+    delivery_type: str,
+    dry_run: bool,
+):
     """Deliver analysis files to customer inbox
 
     Files can be delivered either on case level or for all cases connected to a ticket.
@@ -38,7 +43,7 @@ def deliver_analysis(context, case_id: str, ticket_id: int, delivery_type: str, 
         LOG.info("Please provide a case-id or ticket-id")
         return
 
-    inbox = context.obj.get("delivery_path")
+    inbox: str = context.obj.get("delivery_path")
     if not inbox:
         LOG.info("Please specify the root path for where files should be delivered")
         return
@@ -53,14 +58,15 @@ def deliver_analysis(context, case_id: str, ticket_id: int, delivery_type: str, 
         delivery_type=delivery_type,
     )
     deliver_api.set_dry_run(dry_run)
+    cases: List[models.Family] = []
     if case_id:
-        case_obj = status_db.family(case_id)
+        case_obj: models.Family = status_db.family(case_id)
         if not case_obj:
             LOG.warning("Could not find case %s", case_id)
             return
-        cases = [case_obj]
+        cases.append(case_obj)
     else:
-        cases: List[Family] = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         if not cases:
             LOG.warning("Could not find cases for ticket_id %s", ticket_id)
             return
