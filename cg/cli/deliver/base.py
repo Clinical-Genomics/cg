@@ -10,6 +10,7 @@ import subprocess
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
+from cg.meta.rsync import RsyncAPI
 from cg.store import Store
 from cg.store.models import Family
 
@@ -23,6 +24,7 @@ def deliver(context):
     LOG.info("Running CG deliver")
     context.obj["status_db"] = Store(context.obj["database"])
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
+    context.obj["rsync_api"] = RsyncAPI(context.obj)
 
 
 @click.command(name="analysis")
@@ -197,13 +199,8 @@ def rsync(context, ticket_id: int, dry_run: bool):
     """
     inbox = context.obj.get("delivery_path")
     status_db = context.obj["status_db"]
-    cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-    case_obj = cases[0]
-    customer_id = case_obj.customer.internal_id
-    destination_path = "caesar.scilifelab.se:/home/%s/inbox/%s/" % (customer_id, ticket_id)
-    source_path = str(inbox) + "/" + customer_id + "/inbox/" + str(ticket_id) + "/ "
-    rsync_string = "rsync -rvL --progress "
-    cmd = rsync_string + source_path + destination_path
+    rsync_api = RsyncAPI(store=status_db)
+    cmd = rsync_api.generate_rsync_command(ticket_id=ticket_id, base_path=str(inbox))
     if dry_run:
         LOG.info("Dry-run activated, skipping running the command: %s", cmd)
     else:
