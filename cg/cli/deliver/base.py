@@ -207,7 +207,7 @@ def rsync(context, ticket_id: int, dry_run: bool):
     if dry_run:
         LOG.info("Dry-run activated, skipping running the command: %s", cmd)
     else:
-        LOG.debug("Command ran: {}".format(cmd))
+        LOG.info("Command ran: {}".format(cmd))
         proc = subprocess.Popen(cmd.split())
         out, err = proc.communicate()
 
