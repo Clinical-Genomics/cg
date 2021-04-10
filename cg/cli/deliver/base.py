@@ -185,7 +185,7 @@ def deliver_old_analysis(context, case_id: str, ticket_id: int, delivery_type: s
         deliver_api.deliver_files(case_obj=case_obj)
 
 
-@click.command(name="rsync")
+@click.command(name="send")
 @click.option(
     "-t", "--ticket-id", type=int, help="Rsync the files for a specific ticket", required=True
 )
