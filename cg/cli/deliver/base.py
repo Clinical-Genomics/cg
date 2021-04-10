@@ -185,7 +185,7 @@ def deliver_old_analysis(context, case_id: str, ticket_id: int, delivery_type: s
         deliver_api.deliver_files(case_obj=case_obj)
 
 
-@click.command(name="send")
+@click.command(name="rsync")
 @click.option(
     "-t", "--ticket-id", type=int, help="Rsync the files for a specific ticket", required=True
 )
@@ -193,7 +193,8 @@ def deliver_old_analysis(context, case_id: str, ticket_id: int, delivery_type: s
 @click.pass_context
 def rsync(context, ticket_id: int, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
-    rsynced with this function to the customers inbox on caesar."""
+    rsynced with this function to the customers inbox on caesar.
+    """
     inbox = context.obj.get("delivery_path")
     status_db = context.obj["status_db"]
     cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
@@ -213,3 +214,4 @@ def rsync(context, ticket_id: int, dry_run: bool):
 
 deliver.add_command(deliver_analysis)
 deliver.add_command(deliver_old_analysis)
+deliver.add_command(rsync)
