@@ -1,7 +1,7 @@
 import logging
+from typing import List, Optional, Set, Tuple
 
 import click
-
 from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS
 from cg.store import Store, models
 
@@ -14,22 +14,21 @@ LOG = logging.getLogger(__name__)
 
 def _get_samples_by_identifiers(
     identifiers: click.Tuple([str, str]), store: Store
-) -> [models.Sample]:
+) -> List[models.Sample]:
     """Get samples matched by given set of identifiers"""
     identifier_args = dict(identifiers)
-    return store.samples_by_ids(**identifier_args)
+    return list(store.samples_by_ids(**identifier_args))
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Family]:
+def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[models.Family]:
     """Get cases that have samples that match identifiers if given"""
-    samples_by_id = _get_samples_by_identifiers(identifiers, store)
-    cases = set()
+    samples_by_id: List[models.Sample] = _get_samples_by_identifiers(identifiers, store)
+    cases: Set[models.Family] = set()
     for sample in samples_by_id:
-
         for link in sample.links:
             cases.add(link.family)
 
-    return cases
+    return list(cases)
 
 
 @click.command()
@@ -49,15 +48,15 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
 @click.pass_context
 def families(
     context: click.Context,
-    action,
-    priority,
-    panels,
-    customer_id,
+    action: Optional[str],
+    priority: Optional[str],
+    panels: Optional[Tuple[str]],
+    customer_id: Optional[str],
     identifiers: click.Tuple([str, str]),
 ):
     """Set values on many families at the same time"""
-    store = context.obj["status_db"]
-    cases = _get_cases(identifiers, store)
+    store: Store = context.obj["status_db"]
+    cases: List[models.Family] = _get_cases(identifiers, store)
 
     if not cases:
         LOG.error("No cases to alter!")
