@@ -199,7 +199,7 @@ def rsync(context, ticket_id: int, dry_run: bool):
     status_db = context.obj["status_db"]
     cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
     case_obj = cases[0]
-    customer_id = context.case_obj.customer.internal_id
+    customer_id = case_obj.customer.internal_id
     destination_path = "caesar.scilifelab.se:/home/%s/inbox/%s/" % (customer_id, ticket_id)
     source_path = str(inbox) + "/" + customer_id + "/inbox/" + str(ticket_id) + "/ "
     rsync_string = "rsync -rvL --progress "
