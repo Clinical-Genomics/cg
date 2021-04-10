@@ -4,6 +4,7 @@ from click.testing import CliRunner
 
 from cg.cli.base import base as base_command
 from cg.cli.deliver.base import deliver as deliver_cmd
+from cg.cli.deliver.base import rsync as rsync_cmd
 from cg.constants import EXIT_SUCCESS
 from cg.store import Store
 
@@ -36,3 +37,17 @@ def test_run_deliver_analysis_help(hk_config_dict: dict):
     assert result.exit_code == EXIT_SUCCESS
     # THEN assert the information is printed
     assert "Deliver analysis files to customer inbox" in result.output
+
+
+def test_rsync():
+    """Test to run the rsync function"""
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # WHEN running cg deliver rsync
+    result = runner.invoke(rsync_cmd, ["--dry-run", "--help"])
+
+    # THEN assert the command exists without problems
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN assert the information is printed
+    assert "The folder generated using the" in result.output

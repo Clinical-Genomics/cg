@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 
 import click
+import subprocess
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
@@ -165,6 +166,7 @@ def deliver_old_analysis(context, case_id: str, ticket_id: int, delivery_type: s
         case_tags=OLD_PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
         sample_tags=OLD_PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
         project_base_path=Path(inbox),
+        delivery_type=delivery_type,
     )
     deliver_api.set_dry_run(dry_run)
     if case_id:
@@ -181,6 +183,32 @@ def deliver_old_analysis(context, case_id: str, ticket_id: int, delivery_type: s
 
     for case_obj in cases:
         deliver_api.deliver_files(case_obj=case_obj)
+
+
+@click.command(name="rsync")
+@click.option(
+    "-t", "--ticket-id", type=int, help="Rsync the files for a specific ticket", required=True
+)
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def rsync(context, ticket_id: int, dry_run: bool):
+    """The folder generated using the "cg deliver analysis" command will be
+    rsynced with this function to the customers inbox on caesar."""
+    inbox = context.obj.get("delivery_path")
+    status_db = context.obj["status_db"]
+    cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+    case_obj = cases[0]
+    customer_id = context.case_obj.customer.internal_id
+    destination_path = "caesar.scilifelab.se:/home/%s/inbox/%s/" % (customer_id, ticket_id)
+    source_path = str(inbox) + "/" + customer_id + "/inbox/" + str(ticket_id) + "/ "
+    rsync_string = "rsync -rvL --progress "
+    cmd = rsync_string + source_path + destination_path
+    if dry_run:
+        LOG.info("Dry-run activated, skipping running the command: %s", cmd)
+    else:
+        LOG.debug("Command ran: {}".format(cmd))
+        proc = subprocess.Popen(cmd.split())
+        out, err = proc.communicate()
 
 
 deliver.add_command(deliver_analysis)
