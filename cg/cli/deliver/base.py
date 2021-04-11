@@ -192,8 +192,9 @@ def deliver_old_analysis(context, case_id: str, ticket_id: int, delivery_type: s
     "-t", "--ticket-id", type=int, help="Rsync the files for a specific ticket", required=True
 )
 @click.option("--dry-run", is_flag=True)
+@click.option("--covid", is_flag=True)
 @click.pass_context
-def rsync(context, ticket_id: int, dry_run: bool):
+def rsync(context, ticket_id: int, dry_run: bool, covid: bool):
     """The folder generated using the "cg deliver analysis" command will be
     rsynced with this function to the customers inbox on caesar.
     """
@@ -207,6 +208,16 @@ def rsync(context, ticket_id: int, dry_run: bool):
         LOG.info("Command ran: {}".format(cmd))
         proc = subprocess.Popen(cmd.split())
         out, err = proc.communicate()
+    if covid:
+        covid_cmd = rsync_api.generate_covid_rsync_command(ticket_id=ticket_id)
+        if dry_run:
+            LOG.info(
+                "Dry-run activated, will not send COVID results via the command: %s", covid_cmd
+            )
+        else:
+            LOG.info("COVID results sent by running: {}".format(covid_cmd))
+            proc = subprocess.Popen(covid_cmd.split())
+            out, err = proc.communicate()
 
 
 deliver.add_command(deliver_analysis)
