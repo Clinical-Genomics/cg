@@ -13,9 +13,10 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.store import Store
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
@@ -90,6 +91,20 @@ class BalsamicConfig(CommonAppConfig):
     slurm: SlurmConfig
 
 
+class MutantConfig(BaseModel):
+    root: str
+    binary_path: str
+    conda_env: str
+
+
+class MipConfig(BaseModel):
+    conda_env: str
+    mip_config: str
+    pipeline: str
+    root: str
+    script: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -129,6 +144,11 @@ class CGConfig(BaseModel):
     # Meta APIs that will use the apps from CGConfig
     fluffy: FluffyConfig = None
     balsamic: BalsamicConfig = None
+    mutant: MutantConfig = None
+    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
+    mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
+
+    analysis_api: AnalysisAPI = None
 
     class Config:
         arbitrary_types_allowed = True

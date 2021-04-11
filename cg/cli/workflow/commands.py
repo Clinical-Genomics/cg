@@ -4,14 +4,16 @@ import shutil
 from pathlib import Path
 
 import click
-from dateutil.parser import parse as parse_date
-
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Print command to console without executing", is_flag=True
@@ -23,10 +25,10 @@ LOG = logging.getLogger(__name__)
 
 @click.command("ensure-flowcells-ondisk")
 @ARGUMENT_CASE_ID
-@click.pass_context
-def ensure_flowcells_ondisk(context: click.Context, case_id: str):
+@click.pass_obj
+def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
     """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
-    analysis_api: AnalysisAPI = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.analysis_api
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not analysis_api.all_flowcells_on_disk(case_id=case_id):
         raise FlowcellsNeededError(
@@ -38,20 +40,20 @@ def ensure_flowcells_ondisk(context: click.Context, case_id: str):
 @click.command("resolve-compression")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.pass_context
-def resolve_compression(context: click.Context, case_id: str, dry_run: bool):
+@click.pass_obj
+def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis"""
-    analysis_api: AnalysisAPI = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.analysis_api
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
 
 
 @click.command()
 @ARGUMENT_CASE_ID
-@click.pass_context
-def link(context: click.Context, case_id: str):
+@click.pass_obj
+def link(context: CGConfig, case_id: str):
     """Link FASTQ files for all samples in a case"""
-    analysis_api: AnalysisAPI = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.analysis_api
     analysis_api.verify_case_id_in_statusdb(case_id)
     analysis_api.link_fastq_files(case_id=case_id)
 
@@ -59,11 +61,13 @@ def link(context: click.Context, case_id: str):
 @click.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
+@click.pass_obj
+def store(context: CGConfig, case_id: str, dry_run: bool):
     """Store finished analysis files in Housekeeper"""
 
-    analysis_api: AnalysisAPI = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.analysis_api
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
     if dry_run:
@@ -74,8 +78,8 @@ def store(context: click.Context, case_id: str, dry_run: bool):
         analysis_api.upload_bundle_statusdb(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except Exception as exception_object:
-        analysis_api.housekeeper_api.rollback()
-        analysis_api.status_db.rollback()
+        housekeeper_api.rollback()
+        status_db.rollback()
         LOG.error("Error storing deliverables for case %s - %s", case_id, exception_object)
         raise
 
@@ -86,7 +90,7 @@ def store(context: click.Context, case_id: str, dry_run: bool):
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper"""
 
-    analysis_api: AnalysisAPI = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj.analysis_api
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
@@ -104,11 +108,12 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @ARGUMENT_CASE_ID
-@click.pass_context
-def clean_run_dir(context, yes: bool, case_id: str, dry_run: bool = False):
+@click.pass_obj
+def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
     """Remove workflow run directory"""
 
-    analysis_api = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.analysis_api
+    status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id)
     analysis_api.verify_case_path_exists(case_id=case_id)
     analysis_api.check_analysis_ongoing(case_id=case_id)
@@ -127,10 +132,10 @@ def clean_run_dir(context, yes: bool, case_id: str, dry_run: bool = False):
 
         shutil.rmtree(analysis_path, ignore_errors=True)
         LOG.info("Cleaned %s", analysis_path)
-        analyses: list = analysis_api.status_db.family(case_id).analyses
+        analyses: list = status_db.family(case_id).analyses
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-            analysis_api.status_db.commit()
+            status_db.commit()
 
 
 @click.command("past-run-dirs")
@@ -138,11 +143,13 @@ def clean_run_dir(context, yes: bool, case_id: str, dry_run: bool = False):
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.argument("before_str")
 @click.pass_context
-def past_run_dirs(context, before_str: str, yes: bool = False, dry_run: bool = False):
+def past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
     """Clean up of old case run dirs"""
 
     exit_code = EXIT_SUCCESS
-    analysis_api = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj.analysis_api
 
     before = parse_date(before_str)
     possible_cleanups = analysis_api.get_analyses_to_clean(before=before)
@@ -171,7 +178,7 @@ def balsamic_past_run_dirs(
 ):
     """Clean up of "old" Balsamic case run dirs"""
 
-    context.obj["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+    context.obj.analysis_api = BalsamicAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
@@ -186,7 +193,7 @@ def mip_past_run_dirs(
 ):
     """Clean up of "old" MIP case run dirs"""
 
-    context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.obj.analysis_api = MipDNAAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
@@ -201,6 +208,6 @@ def mutant_past_run_dirs(
 ):
     """Clean up of "old" MUTANT case run dirs"""
 
-    context.obj["analysis_api"] = MutantAnalysisAPI(context.obj)
+    context.obj.analysis_api = MutantAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)

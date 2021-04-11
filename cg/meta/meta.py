@@ -22,7 +22,7 @@ class MetaAPI:
     """MetaAPI class initializing all complex API used within CG in non-conflicting manner"""
 
     def __init__(self, config: CGConfig):
-        self.config = config.dict()
+        self.config = config
         self.housekeeper_api = config.housekeeper_api
         self.trailblazer_api = config.trailblazer_api
         self.status_db = config.status_db

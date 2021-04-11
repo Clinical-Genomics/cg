@@ -8,6 +8,7 @@ from typing import List, Optional
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store import models
 from cg.utils import Process
@@ -18,18 +19,18 @@ LOG = logging.getLogger(__name__)
 class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
-        config: dict = None,
+        config: CGConfig,
         pipeline: Pipeline = Pipeline.SARS_COV_2,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config["mutant"]["root"]
+        self.root_dir = config.mutant.root
 
     @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
-                binary=self.config["mutant"]["binary_path"],
-                environment=self.config["mutant"]["conda_env"],
+                binary=self.config.mutant.binary_path,
+                environment=self.config.mutant.conda_env,
             )
         return self._process
 
