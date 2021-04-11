@@ -23,11 +23,8 @@ def gisaid(context, family_id):
     LOG.info("----------------- GISAID -------------------")
 
     case_object: Family = status_db.family(family_id)
-    ticket_number: str = case_object.name
-    samples: List[models.Sample] = status_db.Sample.query.filter_by(
-        ticket_number=ticket_number
-    ).all()
-
-    files: UpploadFiles = gisaid_api.files(samples=samples, family_id=family_id)
+    if not case_object:
+        return "error"
+    files: UpploadFiles = gisaid_api.files(family_id=family_id)
     if files:
         gisaid_api.upload(**dict(files))

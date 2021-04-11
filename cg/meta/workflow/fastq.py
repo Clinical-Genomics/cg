@@ -95,6 +95,14 @@ class FastqHandler:
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
+    def get_header(fastq_path: Path) -> str:
+        """Get header from fasta file"""
+        # HAndel if ziped file??
+
+        with open(fastq_path) as handle:
+            return handle.readline()
+
+    @staticmethod
     def parse_header(line: str) -> dict:
         """Generates a dict with parsed lanes, flowcells and read numbers
         Handle illumina's two different header formats

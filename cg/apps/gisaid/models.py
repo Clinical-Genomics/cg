@@ -22,7 +22,7 @@ class GisaidSample(BaseModel):
     fn: str
     covv_collection_date: str
     covv_orig_lab: Optional[str]
-    covv_virus_name: Optional[str]
+    covv_virus_name: str
     covv_type: Optional[str] = "betacoronavirus"
     covv_passage: Optional[str] = "Original"
     covv_location: Optional[str]
@@ -54,11 +54,6 @@ class GisaidSample(BaseModel):
                 institute="LaboratorieMedicinskt Centrum Gotland",
             )
         raise ValueError("must be Stockholm or Visby")
-
-    @validator("covv_virus_name", always=True)
-    def parse_virus_name(cls, v, values):
-        lab = values.get("lab")
-        return f"hCoV-19/Sweden/{lab.region_nr}_SE100/"
 
     @validator("covv_location", always=True)
     def parse_location(cls, v, values):

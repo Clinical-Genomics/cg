@@ -132,6 +132,11 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
+    def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
+        """Get samples on a given case-id"""
+        case = self.family(internal_id=family_id)
+        return [link.sample for link in case.links] if case else []
+
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
