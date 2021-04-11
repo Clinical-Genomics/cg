@@ -1,9 +1,8 @@
 """Fixtures for cli tests"""
-from functools import partial
 
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli import base
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
@@ -20,19 +19,17 @@ def fixture_application_tag() -> str:
     return "dummy_tag"
 
 
-@pytest.fixture
-def invoke_cli(cli_runner):
-    """Create a CLiRunner with our CLI preloaded"""
-    return partial(cli_runner.invoke, base)
-
-
 @pytest.fixture(name="base_context")
-def fixture_base_context(base_store: Store, housekeeper_api: HousekeeperAPI) -> dict:
+def fixture_base_context(
+    base_store: Store, housekeeper_api: HousekeeperAPI, cg_config_object: CGConfig
+) -> CGConfig:
     """context to use in cli"""
-    return {"trailblazer_api": None, "status_db": base_store, "housekeeper_api": housekeeper_api}
+    cg_config_object.status_db_ = base_store
+    cg_config_object.housekeeper_api_ = housekeeper_api
+    return cg_config_object
 
 
 @pytest.fixture(name="disk_store")
-def fixture_disk_store(base_context: dict) -> Store:
+def fixture_disk_store(base_context: CGConfig) -> Store:
     """context to use in cli"""
-    return base_context["status_db"]
+    return base_context.status_db

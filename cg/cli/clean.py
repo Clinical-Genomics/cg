@@ -5,11 +5,14 @@ from pathlib import Path
 from typing import List, Iterable, Optional
 
 import click
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs, mutant_past_run_dirs
-from cg.meta.meta import MetaAPI
 from housekeeper.store import models as hk_models
-from cg.store import models
+from cg.store import models, Store
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -30,19 +33,16 @@ clean.add_command(mutant_past_run_dirs)
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
 @click.pass_context
-def hk_alignment_files(
-    context: click.Context, bundle: str, yes: bool = False, dry_run: bool = False
-):
+def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
 
-    meta_api: MetaAPI = context.obj["meta_api"]
-
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
     if bundle is None:
         LOG.info("Please select a bundle")
         raise click.Abort
     files: List[hk_models.File] = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
-        files.extend(meta_api.housekeeper_api.get_files(bundle=bundle, tags=[tag]))
+        files.extend(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
     for file_obj in files:
         if file_obj.is_included:
             question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
@@ -56,7 +56,7 @@ def hk_alignment_files(
 
             if not dry_run:
                 file_obj.delete()
-                meta_api.housekeeper_api.commit()
+                housekeeper_api.commit()
                 click.echo(f"{file_path} deleted")
 
 
@@ -70,14 +70,14 @@ def hk_alignment_files(
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
-def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: bool = False):
+def scout_finished_cases(
+    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+):
     """Clean up of solved and archived scout cases"""
-
-    meta_api: MetaAPI = context.obj["meta_api"]
-
+    scout_api: ScoutAPI = context.obj.scout_api
     bundles: List[str] = []
     for status in ["archived", "solved"]:
-        cases: List[ScoutExportCase] = meta_api.scout_api.get_cases(status=status, reruns=False)
+        cases: List[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
         cases_added = 0
         for case in cases:
             x_days_ago = datetime.now() - case.analysis_date
@@ -95,34 +95,33 @@ def scout_finished_cases(context, days_old: int, yes: bool = False, dry_run: boo
 @click.option("-t", "--tags", multiple=True)
 @click.option("-y", "--yes", is_flag=True, help="skip checks")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.pass_context
-def hk_past_files(context, case_id: str, tags: list, yes: bool, dry_run: bool):
+@click.pass_obj
+def hk_past_files(context: CGConfig, case_id: str, tags: list, yes: bool, dry_run: bool):
     """ Remove files found in older housekeeper bundles """
 
-    meta_api: MetaAPI = context.obj["meta_api"]
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    status_db: Store = context.status_db
 
     cases: Iterable[models.Family]
     if case_id:
-        cases: List[models.Family] = [meta_api.status_db.family(case_id)]
+        cases: List[models.Family] = [status_db.family(case_id)]
     else:
-        cases: Iterable[models.Family] = meta_api.status_db.families()
+        cases: Iterable[models.Family] = status_db.families()
     for case in cases:
         case_id = case.internal_id
-        last_version: Optional[hk_models.Version] = meta_api.housekeeper_api.last_version(
-            bundle=case_id
-        )
+        last_version: Optional[hk_models.Version] = housekeeper_api.last_version(bundle=case_id)
         if not last_version:
             continue
         last_version_file_paths: List[Path] = [
             Path(hk_file.full_path)
-            for hk_file in meta_api.housekeeper_api.get_files(
+            for hk_file in housekeeper_api.get_files(
                 bundle=case_id, tags=None, version=last_version.id
             )
         ]
         LOG.info("Searching %s bundle for outdated files", case_id)
         hk_files: List[hk_models.File] = []
         for tag in tags:
-            hk_files.extend(meta_api.housekeeper_api.get_files(bundle=case_id, tags=[tag]))
+            hk_files.extend(housekeeper_api.get_files(bundle=case_id, tags=[tag]))
         for hk_file in hk_files:
             file_path = Path(hk_file.full_path)
             if file_path in last_version_file_paths:
@@ -130,7 +129,7 @@ def hk_past_files(context, case_id: str, tags: list, yes: bool, dry_run: bool):
             LOG.info("Will remove %s", file_path)
             if (yes or click.confirm("Do you want to remove this file?")) and not dry_run:
                 hk_file.delete()
-                meta_api.housekeeper_api.commit()
+                housekeeper_api.commit()
                 if file_path.exists():
                     file_path.unlink()
                 LOG.info("File removed")

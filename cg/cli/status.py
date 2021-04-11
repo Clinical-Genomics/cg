@@ -2,6 +2,7 @@ from typing import Iterable, List
 
 import click
 from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from colorclass import Color
 from tabulate import tabulate
@@ -103,7 +104,7 @@ def present_string(a_dict, param, show_negative):
 
 
 @status.command()
-@click.pass_context
+@click.pass_obj
 @click.option(
     "-o",
     "--output",
@@ -141,7 +142,7 @@ def present_string(a_dict, param, show_negative):
 @click.option("-i", "--only-invoiced", is_flag=True, help="only completely invoiced cases")
 @click.option("-I", "--exclude-invoiced", is_flag=True, help="exclude completely invoiced cases")
 def cases(
-    context,
+    context: CGConfig,
     output_type,
     verbose,
     days,
@@ -171,7 +172,7 @@ def cases(
     exclude_invoiced,
 ):
     """progress of each case"""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     records: List[models.Family] = status_db.cases(
         days=days,
         internal_id=internal_id,
@@ -349,10 +350,10 @@ def cases(
 
 @status.command()
 @click.option("-s", "--skip", default=0, help="skip initial records")
-@click.pass_context
-def samples(context, skip):
+@click.pass_obj
+def samples(context: CGConfig, skip: int):
     """View status of samples."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     records: Iterable[models.Sample] = status_db.samples().offset(skip).limit(30)
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
@@ -373,11 +374,11 @@ def samples(context, skip):
 
 @status.command()
 @click.option("-s", "--skip", default=0, help="skip initial records")
-@click.pass_context
-def families(context, skip):
+@click.pass_obj
+def families(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     records: List[models.Family] = status_db.families().offset(skip).limit(30)
     for case_obj in records:
         color = "red" if case_obj.priority > 1 else "blue"

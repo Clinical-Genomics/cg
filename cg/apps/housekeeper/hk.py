@@ -124,7 +124,9 @@ class HousekeeperAPI:
         """ Wrap property in Housekeeper Store """
         return self._store.session.no_autoflush
 
-    def get_files(self, bundle: str, tags: list, version: int = None) -> Iterable[models.File]:
+    def get_files(
+        self, bundle: str, tags: Optional[list], version: int = None
+    ) -> Iterable[models.File]:
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
 

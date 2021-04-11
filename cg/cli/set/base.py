@@ -2,7 +2,7 @@
 import datetime
 import getpass
 import logging
-from typing import List, Optional, Iterable
+from typing import Iterable, List, Optional
 
 import click
 from cg.apps.lims import LimsAPI
@@ -213,7 +213,7 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
 def sample(
     context: click.Context,
     sample_id: Optional[str],
-    kwargs: click.Tuple[str, str],
+    kwargs: click.Tuple([str, str]),
     skip_lims: bool,
     yes: bool,
     help: bool,

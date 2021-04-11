@@ -12,11 +12,11 @@ LOG = logging.getLogger(__name__)
 class BackupApi:
     """ Class for retrieving FCs from backup """
 
-    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int, root_dir: str):
-        self.status = status
-        self.pdc = pdc_api
-        self.max_flowcells_on_disk = max_flowcells_on_disk
-        self.root_dir = root_dir
+    def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int, root_dir: dict):
+        self.status: Store = status
+        self.pdc: PdcApi = pdc_api
+        self.max_flowcells_on_disk: int = max_flowcells_on_disk
+        self.root_dir: dict = root_dir
 
     def maximum_flowcells_ondisk(self) -> bool:
         """Check if there's too many flowcells already "ondisk"."""

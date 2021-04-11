@@ -10,7 +10,7 @@ import ruamel.yaml
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd
-from cg.meta.meta import MetaAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 from .add import add as add_cmd
@@ -56,21 +56,17 @@ def base(
         log_format = "%(message)s" if sys.stdout.isatty() else None
 
     coloredlogs.install(level=log_level, fmt=log_format)
-    context.obj = ruamel.yaml.safe_load(config) if config else {}
-    meta_api = MetaAPI(context.obj)
-    context.obj["meta_api"] = meta_api
-    context.obj["status_db"] = meta_api.status_db
-    context.obj["housekeeper_api"] = meta_api.housekeeper_api
-    context.obj["trailblazer_api"] = meta_api.trailblazer_api
+    raw_configs: dict = ruamel.yaml.safe_load(config) if config else {"database": database}
+    context.obj = CGConfig(**raw_configs)
 
 
 @base.command()
 @click.option("--reset", is_flag=True, help="reset database before setting up tables")
 @click.option("--force", is_flag=True, help="bypass manual confirmations")
-@click.pass_context
-def init(context: click.Context, reset: bool, force: bool):
+@click.pass_obj
+def init(context: CGConfig, reset: bool, force: bool):
     """Setup the database."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     existing_tables = status_db.engine.table_names()
     if force or reset:
         if existing_tables and not force:

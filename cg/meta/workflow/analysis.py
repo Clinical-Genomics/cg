@@ -1,15 +1,16 @@
 import datetime as dt
 import logging
+import os
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
-import os
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store.models import Bundle, Version
 
@@ -21,7 +22,7 @@ class AnalysisAPI(MetaAPI):
     Parent class containing all methods that are either shared or overridden by other workflow APIs.
     """
 
-    def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
+    def __init__(self, pipeline: Pipeline, config: CGConfig):
         super().__init__(config=config)
         self.pipeline = pipeline
         self._process = None

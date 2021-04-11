@@ -3,16 +3,18 @@ import datetime as dt
 import logging
 import sys
 import traceback
+from typing import Optional
 
 import click
-
-
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError, CgError
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import models
 from cg.utils.click.EnumChoice import EnumChoice
+
 from . import vogue
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
@@ -22,7 +24,6 @@ from .observations import observations
 from .scout import create_scout_load_config, scout, upload_case_to_scout
 from .utils import suggest_cases_to_upload
 from .validate import validate
-from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -37,12 +38,12 @@ LOG = logging.getLogger(__name__)
     help="Force upload of analysis " "marked as started",
 )
 @click.pass_context
-def upload(context, family_id, force_restart):
+def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
     """Upload results from analyses."""
 
     if not context.obj.get("analysis_api"):
         context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj["analysis_api"]
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
 
@@ -52,18 +53,18 @@ def upload(context, family_id, force_restart):
         except CgError:
             raise context.abort()
 
-        case_obj = analysis_api.status_db.family(family_id)
+        case_obj: models.Family = analysis_api.status_db.family(family_id)
         if not case_obj.analyses:
             message = f"no analysis exists for family: {family_id}"
             click.echo(click.style(message, fg="red"))
-            context.abort()
+            raise click.Abort
 
-        analysis_obj = case_obj.analyses[0]
+        analysis_obj: models.Analysis = case_obj.analyses[0]
 
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg="red"))
-            context.abort()
+            raise click.Abort
 
         if not force_restart and analysis_obj.upload_started_at is not None:
             if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):

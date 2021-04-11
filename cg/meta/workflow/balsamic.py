@@ -10,6 +10,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
@@ -25,17 +26,17 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def __init__(
         self,
-        config: dict = None,
+        config: CGConfig,
         pipeline: Pipeline = Pipeline.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config["balsamic"]["root"]
-        self.singularity = config["balsamic"]["singularity"]
-        self.reference_config = config["balsamic"]["reference_config"]
-        self.account = config["balsamic"]["slurm"]["account"]
-        self.email = config["balsamic"]["slurm"]["mail_user"]
-        self.qos = config["balsamic"]["slurm"]["qos"]
-        self.bed_path = config["bed_path"]
+        self.root_dir = config.balsamic.root
+        self.singularity = config.balsamic.singularity
+        self.reference_config = config.balsamic.reference_config
+        self.account = config.balsamic.slurm.account
+        self.email = config.balsamic.slurm.mail_user
+        self.qos = config.balsamic.slurm.qos
+        self.bed_path = config.bed_path
 
     @property
     def threshold_reads(self):

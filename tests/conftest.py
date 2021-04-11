@@ -18,6 +18,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
 from cg.models import CompressionData
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -31,16 +32,8 @@ from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 
-CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
-CRUNCHY_CONFIG = {
-    "crunchy": {
-        "cram_reference": "/path/to/fasta",
-        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
-    }
-}
-
-
 LOG = logging.getLogger(__name__)
+
 
 # Case fixtures
 
@@ -164,20 +157,42 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> d
 # Config fixtures
 
 
+@pytest.fixture(name="base_config_dict")
+def fixture_base_config_dict() -> dict:
+    """Returns the basic configs necessary for running CG"""
+    return {
+        "database": "sqlite:///",
+        "madeline_exe": "path/to/madeline",
+        "bed_path": "path/to/bed",
+        "delivery_path": "path/to/delivery",
+        "housekeeper": {
+            "database": "sqlite:///",
+            "root": "path/to/root",
+        },
+    }
+
+
+@pytest.fixture(name="cg_config_object")
+def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
+    """Return a CG config dict"""
+    return CGConfig(**base_config_dict)
+
+
 @pytest.fixture
-def chanjo_config_dict():
+def chanjo_config_dict() -> dict:
     """Chanjo configs"""
-    _config = {}
-    _config.update(CHANJO_CONFIG)
-    return _config
+    return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
 @pytest.fixture
 def crunchy_config_dict():
     """Crunchy configs"""
-    _config = {}
-    _config.update(CRUNCHY_CONFIG)
-    return _config
+    return {
+        "crunchy": {
+            "cram_reference": "/path/to/fasta",
+            "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
+        }
+    }
 
 
 @pytest.fixture(name="hk_config_dict")
@@ -1043,24 +1058,24 @@ def sample_store(base_store) -> Store:
     return base_store
 
 
-@pytest.fixture(scope="function")
-def disk_store(cli_runner, invoke_cli) -> Store:
-    """Store on disk"""
-    database = "./test_db.sqlite3"
-    database_path = Path(database)
-    with cli_runner.isolated_filesystem():
-        assert database_path.exists() is False
-
-        database_uri = f"sqlite:///{database}"
-        # WHEN calling "init"
-        result = invoke_cli(["--database", database_uri, "init"])
-
-        # THEN it should setup the database with some tables
-        assert result.exit_code == 0
-        assert database_path.exists()
-        assert len(Store(database_uri).engine.table_names()) > 0
-
-        yield Store(database_uri)
+# @pytest.fixture(scope="function")
+# def disk_store(cli_runner, invoke_cli) -> Store:
+#     """Store on disk"""
+#     database = "./test_db.sqlite3"
+#     database_path = Path(database)
+#     with cli_runner.isolated_filesystem():
+#         assert database_path.exists() is False
+#
+#         database_uri = f"sqlite:///{database}"
+#         # WHEN calling "init"
+#         result = invoke_cli(["--database", database_uri, "init"])
+#
+#         # THEN it should setup the database with some tables
+#         assert result.exit_code == 0
+#         assert database_path.exists()
+#         assert len(Store(database_uri).engine.table_names()) > 0
+#
+#         yield Store(database_uri)
 
 
 @pytest.fixture(scope="function", name="trailblazer_api")

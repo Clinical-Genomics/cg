@@ -4,6 +4,7 @@ from typing import Optional
 import click
 from cg.apps.pdc import PdcApi
 from cg.meta.backup import BackupApi
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -19,12 +20,12 @@ def backup():
 @backup.command("fetch-flowcell")
 @click.option("-f", "--flowcell", help="Retrieve a specific flowcell")
 @click.option("--dry-run", is_flag=True, help="Don't retrieve from PDC or set flowcell's status")
-@click.pass_context
-def fetch_flowcell(context: click.Context, dry_run: bool, flowcell: str):
+@click.pass_obj
+def fetch_flowcell(context: CGConfig, dry_run: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
-    status_api: Store = context.obj["status_db"]
-    max_flowcells_on_disk: int = context.obj.get("max_flowcells", MAX_FLOWCELLS_ON_DISK)
-    root_dir: str = context.obj["backup"]["root"]
+    status_api: Store = context.status_db
+    max_flowcells_on_disk: int = context.max_flowcells or MAX_FLOWCELLS_ON_DISK
+    root_dir: dict = context.backup.root.dict()
     pdc_api = PdcApi()
     backup_api = BackupApi(
         status=status_api,

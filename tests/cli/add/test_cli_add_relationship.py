@@ -4,12 +4,13 @@ from cg.cli.add import add
 from cg.store import Store
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
+from cg.models.cg_config import CGConfig
 
 
-def test_add_relationship_required(cli_runner: CliRunner, base_context: dict, helpers):
+def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig, helpers):
     """Test to add a relationship using only the required arguments"""
     # GIVEN a database with a sample and an case
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
     case = helpers.add_case(disk_store)
@@ -28,10 +29,10 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: dict, he
     assert disk_store.FamilySample.query.first().sample.internal_id == sample_id
 
 
-def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: dict, helpers):
+def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConfig, helpers):
     """Test to add a relationship using a non-existing sample"""
     # GIVEN an empty database
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     # WHEN adding a relationship
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
@@ -54,10 +55,10 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: dict, 
     assert disk_store.FamilySample.query.count() == 0
 
 
-def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: dict, helpers):
+def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConfig, helpers):
     """Test to add a relationship using a non-existing case"""
     # GIVEN a database with a sample
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     # WHEN adding a relationship
     case_id = "dummy_family"
     sample = helpers.add_sample(disk_store)
@@ -81,10 +82,10 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: dict, 
     assert disk_store.FamilySample.query.count() == 0
 
 
-def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: dict, helpers):
+def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConfig, helpers):
     """Test that the added relationship get the status we send in"""
     # GIVEN a database with a sample and an case
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     # WHEN adding a relationship
 
     sample = helpers.add_sample(disk_store)
@@ -110,10 +111,12 @@ def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: dict, 
     assert disk_store.FamilySample.query.count() == 0
 
 
-def test_add_relationship_mother(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
+def test_add_relationship_mother(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+):
     """Test to add a relationship with a mother"""
     # GIVEN a database with a sample and an case
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
     mother = helpers.add_sample(disk_store, sample_id="mother")
@@ -144,11 +147,11 @@ def test_add_relationship_mother(cli_runner: CliRunner, base_context: dict, help
 
 
 def test_add_relationship_bad_mother(
-    cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test to add a relationship using a non-existing mother"""
     # GIVEN a database with a sample and an case
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
     mother_id = "dummy_mother"
@@ -176,10 +179,12 @@ def test_add_relationship_bad_mother(
     assert disk_store.FamilySample.query.count() == 0
 
 
-def test_add_relationship_father(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
+def test_add_relationship_father(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+):
     """Test to add a relationship using a father"""
     # GIVEN a database with a sample and an case
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
 
@@ -213,11 +218,11 @@ def test_add_relationship_father(cli_runner: CliRunner, base_context: dict, help
 
 
 def test_add_relationship_bad_father(
-    cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test to add a relationship using a non-existing father"""
     # GIVEN a database with a sample and an case
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
 

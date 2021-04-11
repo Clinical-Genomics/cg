@@ -13,6 +13,7 @@ from cg.meta.compress import CompressAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 
@@ -20,20 +21,20 @@ class MetaAPI:
 
     """MetaAPI class initializing all complex API used within CG in non-conflicting manner"""
 
-    def __init__(self, config: dict):
-        self.config = config or {}
-        self.housekeeper_api = HousekeeperAPI(self.config)
-        self.trailblazer_api = TrailblazerAPI(self.config)
-        self.status_db = Store(self.config["database"])
-        self.lims_api = LimsAPI(self.config)
-        self.hermes_api = HermesApi(self.config)
-        self.scout_api = ScoutAPI(self.config)
-        self.vogue_api = VogueAPI(self.config)
-        self.crunchy_api = CrunchyAPI(self.config)
-        self.madeline_api = MadelineAPI(self.config)
-        self.mutacc_auto_api = MutaccAutoAPI(self.config)
-        self.genotype_api = GenotypeAPI(self.config)
-        self.chanjo_api = ChanjoAPI(self.config)
+    def __init__(self, config: CGConfig):
+        self.config = config.dict()
+        self.housekeeper_api = config.housekeeper_api
+        self.trailblazer_api = config.trailblazer_api
+        self.status_db = config.status_db
+        self.lims_api = config.lims_api
+        self.hermes_api = config.hermes_api
+        self.scout_api = config.scout_api
+        self.vogue_api = config.vogue_api
+        self.crunchy_api = config.crunchy_api
+        self.madeline_api = config.madeline_api
+        self.mutacc_auto_api = config.mutacc_auto_api
+        self.genotype_api = config.genotype_api
+        self.chanjo_api = config.chanjo_api
         self.prepare_fastq_api = PrepareFastqAPI(
             store=self.status_db,
             compress_api=CompressAPI(hk_api=self.housekeeper_api, crunchy_api=self.crunchy_api),

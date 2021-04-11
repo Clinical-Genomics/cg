@@ -1,14 +1,13 @@
-import datetime
-
 from cg.cli.add import add
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 
-def test_add_sample_bad_customer(cli_runner: CliRunner, base_context: dict):
+def test_add_sample_bad_customer(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN an empty database
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
 
     # WHEN adding a sample
     sex = "male"
@@ -35,10 +34,10 @@ def test_add_sample_bad_customer(cli_runner: CliRunner, base_context: dict):
 
 
 def test_add_sample_bad_application(
-    cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     # GIVEN a database with a customer
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
 
     # WHEN adding a sample
     sex = "male"
@@ -65,9 +64,9 @@ def test_add_sample_bad_application(
     assert disk_store.Sample.query.count() == 0
 
 
-def test_add_sample_required(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
+def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a database with a customer and an application
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     sex = "male"
     application_tag = "dummy_tag"
     helpers.ensure_application(store=disk_store, tag=application_tag)
@@ -98,9 +97,9 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: dict, helpers:
     assert disk_store.Sample.query.first().sex == sex
 
 
-def test_add_sample_lims_id(cli_runner: CliRunner, base_context: dict, helpers: StoreHelpers):
+def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     # GIVEN a database with a customer and an application
-    disk_store: Store = base_context["status_db"]
+    disk_store: Store = base_context.status_db
     application_tag = "dummy_tag"
     helpers.ensure_application(store=disk_store, tag=application_tag)
     helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
@@ -135,7 +134,7 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: dict, helpers: 
 
 def test_add_sample_order(
     cli_runner: CliRunner,
-    base_context: dict,
+    base_context: CGConfig,
     disk_store: Store,
     helpers: StoreHelpers,
     application_tag: str,
@@ -173,7 +172,11 @@ def test_add_sample_order(
 
 
 def test_add_sample_downsampled(
-    cli_runner, base_context: dict, disk_store: Store, application_tag: str, helpers: StoreHelpers
+    cli_runner,
+    base_context: CGConfig,
+    disk_store: Store,
+    application_tag: str,
+    helpers: StoreHelpers,
 ):
     # GIVEN a database with a customer and an application
     helpers.ensure_application(store=disk_store, tag=application_tag)
@@ -209,7 +212,7 @@ def test_add_sample_downsampled(
 
 def test_add_sample_priority(
     cli_runner: CliRunner,
-    base_context: dict,
+    base_context: CGConfig,
     disk_store: Store,
     application_tag: str,
     helpers: StoreHelpers,

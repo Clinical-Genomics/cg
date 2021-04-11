@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 import click
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
@@ -39,9 +40,9 @@ def add():
     required=True,
     help="Invoice reference (text)",
 )
-@click.pass_context
+@click.pass_obj
 def customer(
-    context: click.Context,
+    context: CGConfig,
     internal_id: str,
     name: str,
     customer_group_id: Optional[str],
@@ -49,7 +50,7 @@ def customer(
     invoice_reference: str,
 ):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     existing: models.Customer = status_db.customer(internal_id)
     if existing:
         LOG.error(f"{existing.name}: customer already added")
@@ -84,10 +85,10 @@ def customer(
 )
 @click.argument("email")
 @click.argument("name")
-@click.pass_context
-def user(context: click.Context, admin: bool, customer_id: str, email: str, name: str):
+@click.pass_obj
+def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str):
     """Add a new user with an EMAIL (login) and a NAME (full)."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
     existing: models.User = status_db.user(email)
     if existing:
@@ -121,9 +122,9 @@ def user(context: click.Context, admin: bool, customer_id: str, email: str, name
 )
 @click.argument("customer_id")
 @click.argument("name")
-@click.pass_context
+@click.pass_obj
 def sample(
-    context: click.Context,
+    context: CGConfig,
     lims_id: Optional[str],
     downsampled: Optional[int],
     sex: str,
@@ -134,7 +135,7 @@ def sample(
     name: str,
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
     if customer_obj is None:
         LOG.error("customer not found")
@@ -180,9 +181,9 @@ def sample(
 )
 @click.argument("customer_id")
 @click.argument("name")
-@click.pass_context
+@click.pass_obj
 def family(
-    context: click.Context,
+    context: CGConfig,
     priority: str,
     panels: Tuple[str],
     data_analysis: Pipeline,
@@ -191,7 +192,7 @@ def family(
     name: str,
 ):
     """Add a family to CUSTOMER_ID with a NAME."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
     if customer_obj is None:
         LOG.error(f"{customer_id}: customer not found")
@@ -221,9 +222,9 @@ def family(
 @click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
 @click.argument("family_id")
 @click.argument("sample_id")
-@click.pass_context
+@click.pass_obj
 def relationship(
-    context: click.Context,
+    context: CGConfig,
     mother: Optional[str],
     father: Optional[str],
     status: str,
@@ -231,7 +232,7 @@ def relationship(
     sample_id: str,
 ):
     """Create a link between a FAMILY_ID and a SAMPLE_ID."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     mother_obj: Optional[models.Sample] = None
     father_obj: Optional[models.Sample] = None
     case_obj: models.Family = status_db.family(family_id)
