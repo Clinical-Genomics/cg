@@ -97,7 +97,6 @@ class FastqHandler:
     @staticmethod
     def get_header(fastq_path: Path) -> str:
         """Get header from fasta file"""
-        # HAndel if ziped file??
 
         with open(fastq_path) as handle:
             return handle.readline()
