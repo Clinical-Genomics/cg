@@ -13,8 +13,6 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.store import Store
 from pydantic import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -148,7 +146,8 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
 
-    analysis_api: AnalysisAPI = None
+    # These are meta APIs that gets instantiated in the code
+    meta_apis: dict = {}
 
     class Config:
         arbitrary_types_allowed = True

@@ -7,6 +7,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.store import Store
 
+from ...models.cg_config import CGConfig
 from .fastq import (
     clean_fastq,
     decompress_case,
@@ -21,15 +22,15 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def compress(context):
+@click.pass_obj
+def compress(context: CGConfig):
     """Compress files"""
 
-    hk_api = context.obj["meta_api"]["housekeeper_api"]
-    crunchy_api = context.obj["meta_api"]["crunchy_api"]
+    hk_api = context.housekeeper_api
+    crunchy_api = context.crunchy_api
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
-    context.obj["compress_api"] = compress_api
+    context.meta_apis["compress_api"] = compress_api
 
 
 compress.add_command(fastq_cmd)
@@ -45,14 +46,14 @@ clean.add_command(fix_spring)
 
 
 @click.group()
-@click.pass_context
-def decompress(context):
+@click.pass_obj
+def decompress(context: CGConfig):
     """Decompress files"""
-    hk_api = context.obj["meta_api"]["housekeeper_api"]
-    crunchy_api = context.obj["meta_api"]["crunchy_api"]
+    hk_api = context.housekeeper_api
+    crunchy_api = context.crunchy_api
 
     compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
-    context.obj["compress_api"] = compress_api
+    context.meta_apis["compress_api"] = compress_api
     LOG.info("Running decompress spring")
 
 

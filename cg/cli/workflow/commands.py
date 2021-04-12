@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
     """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
-    analysis_api: AnalysisAPI = context.analysis_api
+    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not analysis_api.all_flowcells_on_disk(case_id=case_id):
         raise FlowcellsNeededError(
@@ -43,7 +43,7 @@ def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
 @click.pass_obj
 def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis"""
-    analysis_api: AnalysisAPI = context.analysis_api
+    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
 
@@ -53,7 +53,7 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
 @click.pass_obj
 def link(context: CGConfig, case_id: str):
     """Link FASTQ files for all samples in a case"""
-    analysis_api: AnalysisAPI = context.analysis_api
+    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
     analysis_api.link_fastq_files(case_id=case_id)
 
@@ -65,7 +65,7 @@ def link(context: CGConfig, case_id: str):
 def store(context: CGConfig, case_id: str, dry_run: bool):
     """Store finished analysis files in Housekeeper"""
 
-    analysis_api: AnalysisAPI = context.analysis_api
+    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -90,7 +90,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper"""
 
-    analysis_api: AnalysisAPI = context.obj.analysis_api
+    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
@@ -112,7 +112,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
     """Remove workflow run directory"""
 
-    analysis_api: AnalysisAPI = context.analysis_api
+    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id)
     analysis_api.verify_case_path_exists(case_id=case_id)
@@ -149,7 +149,7 @@ def past_run_dirs(
     """Clean up of old case run dirs"""
 
     exit_code = EXIT_SUCCESS
-    analysis_api: AnalysisAPI = context.obj.analysis_api
+    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     before = parse_date(before_str)
     possible_cleanups = analysis_api.get_analyses_to_clean(before=before)
@@ -178,7 +178,7 @@ def balsamic_past_run_dirs(
 ):
     """Clean up of "old" Balsamic case run dirs"""
 
-    context.obj.analysis_api = BalsamicAnalysisAPI(context.obj)
+    context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
@@ -193,7 +193,7 @@ def mip_past_run_dirs(
 ):
     """Clean up of "old" MIP case run dirs"""
 
-    context.obj.analysis_api = MipDNAAnalysisAPI(context.obj)
+    context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
@@ -208,6 +208,6 @@ def mutant_past_run_dirs(
 ):
     """Clean up of "old" MUTANT case run dirs"""
 
-    context.obj.analysis_api = MutantAnalysisAPI(context.obj)
+    context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
