@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from cg.cli.upload.base import upload
 from cg.cli.upload.utils import LinkHelper
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store import Store, models
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
@@ -30,7 +30,10 @@ def test_all_samples_list_analyses(analysis_store: Store, case_id: str):
 
 
 def test_upload_started_long_time_ago_raises_exception(
-    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    helpers: StoreHelpers,
+    case_id: str,
 ):
     """Test that an upload for a missing case does fail hard """
 
@@ -55,8 +58,8 @@ def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, hel
 
     # GIVEN an analysis that is already uploading
     disk_store: Store = base_context.status_db
-    case = helpers.add_case(disk_store)
-    case_id = case.internal_id
+    case: models.Family = helpers.add_case(disk_store)
+    case_id: str = case.internal_id
 
     helpers.add_analysis(disk_store, case=case, uploading=True)
 

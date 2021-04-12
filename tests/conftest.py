@@ -841,9 +841,10 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
     )
 
 
-@pytest.fixture(scope="function", name="store")
+@pytest.fixture(name="store")
 def fixture_store() -> Store:
     """Fixture with a CG store"""
+    LOG.warning("Setting upp store")
     _store = Store(uri="sqlite:///")
     _store.create_all()
     yield _store
@@ -1117,36 +1118,25 @@ def cg_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("cg")
 
 
-@pytest.fixture(name="database_copy_path")
-def database_copy_path(tmpdir_factory):
-    return tmpdir_factory.mktemp("database/")
-
-
 @pytest.fixture(scope="function")
 def microsalt_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("microsalt")
 
 
-@pytest.fixture(name="fixture_cg_url")
-def fixture_cg_url(database_copy_path) -> str:
-    new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
-    url = f"sqlite:///{new_path}"
-    store = Store(url)
-    store.drop_all()
-    store.create_all()
-    return url
+@pytest.fixture(name="fixture_cg_uri")
+def fixture_cg_uri() -> str:
+    return "sqlite:///"
 
 
-@pytest.fixture(name="fixture_hk_url")
-def fixture_hk_url(database_copy_path) -> str:
-    new_path = shutil.copy("tests/fixtures/data/hkstore.db", database_copy_path)
-    return f"sqlite:///{new_path}"
+@pytest.fixture(name="fixture_hk_uri")
+def fixture_hk_uri() -> str:
+    return "sqlite:///"
 
 
 @pytest.fixture(name="context_config")
 def fixture_context_config(
-    fixture_cg_url: str,
-    fixture_hk_url: str,
+    fixture_cg_uri: str,
+    fixture_hk_uri: str,
     fluffy_dir: str,
     housekeeper_dir: str,
     mip_dir: str,
@@ -1155,7 +1145,7 @@ def fixture_context_config(
     microsalt_dir: str,
 ) -> dict:
     return {
-        "database": fixture_cg_url,
+        "database": fixture_cg_uri,
         "madeline_exe": "echo",
         "bed_path": str(cg_dir),
         "delivery_path": str(cg_dir),
@@ -1167,7 +1157,7 @@ def fixture_context_config(
             "root_dir": str(fluffy_dir),
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": fixture_hk_url, "root": str(housekeeper_dir)},
+        "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
@@ -1242,5 +1232,10 @@ def fixture_context_config(
 
 
 @pytest.fixture(name="cg_context")
-def fixture_cg_context(context_config: dict) -> CGConfig:
-    return CGConfig(**context_config)
+def fixture_cg_context(
+    context_config: dict, base_store: Store, housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = base_store
+    cg_config.housekeeper_api_ = housekeeper_api
+    return cg_config

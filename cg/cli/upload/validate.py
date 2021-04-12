@@ -3,9 +3,8 @@ from typing import List, Optional
 
 import click
 from cg.apps.coverage import ChanjoAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
-from models.cg_config import CGConfig
 
 from .utils import suggest_cases_to_upload
 

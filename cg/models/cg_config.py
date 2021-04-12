@@ -194,8 +194,10 @@ class CGConfig(BaseModel):
     @property
     def status_db(self) -> Store:
         status_db = self.__dict__.get("status_db_")
+        print(f"Found store {status_db}")
         if status_db is None:
             LOG.info("Instantiating status db")
+            print("Instantiating status db")
             status_db = Store(self.database)
             self.status_db_ = status_db
         return status_db

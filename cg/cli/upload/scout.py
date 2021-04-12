@@ -5,17 +5,16 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from apps.housekeeper.hk import HousekeeperAPI
-from apps.scout.scoutapi import ScoutAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
-from models.cg_config import CGConfig
 from ruamel.yaml import YAML
 
-from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)

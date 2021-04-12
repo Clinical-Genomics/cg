@@ -10,6 +10,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -121,24 +122,24 @@ def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadCon
     return ScoutLoadConfig(**case_data)
 
 
-@pytest.fixture(scope="function", name="base_context")
-def fixture_base_cli_context(
+@pytest.fixture(name="base_context")
+def fixture_base_context(
     analysis_store: Store,
     housekeeper_api: HousekeeperAPI,
     upload_scout_api: UploadScoutAPI,
     trailblazer_api: TrailblazerAPI,
-    base_context: CGConfig,
+    cg_context: CGConfig,
 ) -> CGConfig:
     """context to use in cli"""
-    base_context.status_db_ = analysis_store
-    base_context.housekeeper_api_ = housekeeper_api
-    base_context.trailblazer_api_ = trailblazer_api
-    base_context.scout_api_ = MockScoutApi()
-    base_context.meta_apis["report_api"] = MockReportApi()
-    base_context.meta_apis["scout_upload_api"] = upload_scout_api
-    base_context.mip_rd_dna.root = tempdir
+    cg_context.status_db_ = analysis_store
+    cg_context.housekeeper_api_ = housekeeper_api
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.scout_api_ = MockScoutApi()
+    cg_context.meta_apis["report_api"] = MockReportApi()
+    cg_context.meta_apis["scout_upload_api"] = upload_scout_api
+    cg_context.mip_rd_dna.root = tempdir
 
-    return base_context
+    return cg_context
 
 
 @pytest.fixture(scope="function", name="upload_scout_api")
