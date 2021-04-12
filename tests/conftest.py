@@ -844,7 +844,6 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
 @pytest.fixture(name="store")
 def fixture_store() -> Store:
     """Fixture with a CG store"""
-    LOG.warning("Setting upp store")
     _store = Store(uri="sqlite:///")
     _store.create_all()
     yield _store
