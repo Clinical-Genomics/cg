@@ -92,7 +92,7 @@ def samples(
         LOG.info(f"{sample_obj}")
 
     if not (yes or click.confirm(CONFIRM)):
-        context.abort()
+        raise click.Abort
 
     for sample_obj in sample_objs:
         context.invoke(
@@ -104,8 +104,8 @@ def _get_samples(
     case_id: str, identifiers: click.Tuple([str, str]), store: Store
 ) -> List[models.Sample]:
     """Get samples that match both case_id and identifiers if given"""
-    samples_by_case_id: List[models.Sample] = []
-    samples_by_id: List[models.Sample] = []
+    samples_by_case_id = None
+    samples_by_id = None
 
     if case_id:
         samples_by_case_id = _get_samples_by_case_id(case_id, store)
@@ -114,9 +114,11 @@ def _get_samples(
         samples_by_id = _get_samples_by_identifiers(identifiers, store)
 
     if case_id and identifiers:
-        return list(set(samples_by_case_id).union(set(samples_by_id)))
+        sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
+    else:
+        sample_objs = samples_by_case_id or samples_by_id
 
-    return samples_by_case_id or samples_by_id
+    return sample_objs
 
 
 def _get_samples_by_identifiers(
