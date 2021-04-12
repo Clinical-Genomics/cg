@@ -2,15 +2,17 @@
 
 import logging
 from pathlib import Path
-from typing import Tuple, Any, Optional, List
+from typing import Any, List, Optional, Tuple
 
 import click
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
+from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -18,12 +20,12 @@ VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
 
 
 @click.group()
-@click.pass_context
-def vogue(context):
+@click.pass_obj
+def vogue(context: CGConfig):
     """Load trending data into trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    if not context.meta_apis.get("analysis_api"):
+        context.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context)
 
     click.echo(click.style("----------------- TRENDING -----------------------"))
 
@@ -32,82 +34,61 @@ def vogue(context):
 @click.option(
     "-d", "--days", type=int, required="True", help="load X days old sampels from genotype to vogue"
 )
-@click.pass_context
-def genotype(context, days: int):
+@click.pass_obj
+def genotype(context: CGConfig, days: int):
     """Loading samples from the genotype database to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
-
+    upload_vogue_api = UploadVogueAPI(
+        genotype_api=context.genotype_api, vogue_api=context.vogue_api, store=context.status_db
+    )
     click.echo(click.style("----------------- GENOTYPE -----------------------"))
 
-    analysis_api.upload_vogue_api.load_genotype(days=days)
+    upload_vogue_api.load_genotype(days=days)
 
 
 @vogue.command("apptags", short_help="Getting application tags to the trending database.")
-@click.pass_context
-def apptags(context):
+@click.pass_obj
+def apptags(context: CGConfig):
     """Loading apptags from status db to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
-
+    upload_vogue_api = UploadVogueAPI(
+        genotype_api=context.genotype_api, vogue_api=context.vogue_api, store=context.status_db
+    )
     click.echo(click.style("----------------- APPLICATION TAGS -----------------------"))
-
-    analysis_api.upload_vogue_api.load_apptags()
+    upload_vogue_api.load_apptags()
 
 
 @vogue.command("flowcells", short_help="Getting flowcell data from the lims.")
 @click.option(
     "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue"
 )
-@click.pass_context
-def flowcells(context, days: int):
+@click.pass_obj
+def flowcells(context: CGConfig, days: int):
     """Loading runs from lims to the trending database"""
-
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
-
     LOG.info("----------------- FLOWCELLS -----------------------")
-
-    analysis_api.vogue_api.load_flowcells(days=days)
+    context.vogue_api.load_flowcells(days=days)
 
 
 @vogue.command("samples", short_help="Getting sample data from lims.")
 @click.option(
     "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue"
 )
-@click.pass_context
-def samples(context, days: int):
+@click.pass_obj
+def samples(context: CGConfig, days: int):
     """Loading samples from lims to the trending database"""
-
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
-
     LOG.info("----------------- SAMPLES -----------------------")
-
-    analysis_api.vogue_api.load_samples(days=days)
+    context.vogue_api.load_samples(days=days)
 
 
 @vogue.command("reagent-labels", short_help="Getting reagent_label data from lims.")
 @click.option(
     "-d", "--days", type=int, required=True, help="load X days old sampels from lims to vogue"
 )
-@click.pass_context
-def reagent_labels(context, days: int):
+@click.pass_obj
+def reagent_labels(context: CGConfig, days: int):
     """Loading reagent_labels from lims to the trending database"""
-
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
-
     LOG.info("----------------- REAGENT LABELS -----------------------")
-
-    analysis_api.vogue_api.load_reagent_labels(days=days)
+    context.vogue_api.load_reagent_labels(days=days)
 
 
 @vogue.command("bioinfo", short_help="Load bioinfo results into vogue")
@@ -135,24 +116,26 @@ def reagent_labels(context, days: int):
     ),
 )
 @click.option("--dry/--no-dry", default=False, help="Dry run...")
-@click.pass_context
-def bioinfo(context, case_name, cleanup, target_load, dry):
+@click.pass_obj
+def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, dry: bool):
     """Load bioinfo case results to the trending database"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    upload_vogue_api = UploadVogueAPI(
+        genotype_api=context.genotype_api, vogue_api=context.vogue_api, store=context.status_db
+    )
+    status_db: Store = context.status_db
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 
     load_bioinfo_raw_inputs = dict()
 
     # Probably get samples for a case_name through statusdb api
-    load_bioinfo_raw_inputs["samples"] = _get_samples(analysis_api.status_db, case_name)
+    load_bioinfo_raw_inputs["samples"] = _get_samples(status_db, case_name)
 
     # Probably get analysis result file through housekeeper ai
     load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(
-        analysis_api.housekeeper_api, case_name
+        housekeeper_api, case_name
     )
 
     # Probably get analysis_type [multiqc or microsalt or all] from cli
@@ -168,9 +151,7 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     load_bioinfo_raw_inputs["case_analysis_type"] = "multiqc"
 
     # Get workflow_name and workflow_version
-    workflow_name, workflow_version = _get_analysis_workflow_details(
-        analysis_api.status_db, case_name
-    )
+    workflow_name, workflow_version = _get_analysis_workflow_details(status_db, case_name)
     if workflow_name not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
@@ -182,43 +163,44 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
     if target_load in ("raw", "all"):
         click.echo(click.style("----------------- UPLOAD UNPROCESSED -----------------------"))
         if not dry:
-            analysis_api.upload_vogue_api.load_bioinfo_raw(load_bioinfo_raw_inputs)
+            upload_vogue_api.load_bioinfo_raw(load_bioinfo_raw_inputs)
 
     if target_load in ("process", "all"):
         click.echo(click.style("----------------- PROCESS CASE -----------------------"))
         if not dry:
-            analysis_api.upload_vogue_api.load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
+            upload_vogue_api.load_bioinfo_process(load_bioinfo_raw_inputs, cleanup)
         click.echo(click.style("----------------- PROCESS SAMPLE -----------------------"))
         if not dry:
-            analysis_api.upload_vogue_api.load_bioinfo_sample(load_bioinfo_raw_inputs)
+            upload_vogue_api.load_bioinfo_sample(load_bioinfo_raw_inputs)
 
 
 @vogue.command("bioinfo-all", short_help="Load all bioinfo results into vogue")
 @click.option("--dry/--no-dry", is_flag=True, help="Dry run...")
 @click.pass_context
-def bioinfo_all(context, dry):
+def bioinfo_all(context: click.Context, dry: bool):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    status_db: Store = context.obj.status_db
+    housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
 
-    cases = analysis_api.status_db.families()
+    cases: List[models.Family] = status_db.families().all()
     for case in cases:
-        case_name = case.internal_id
-        version_obj = analysis_api.housekeeper_api.last_version(case_name)
+        case_name: str = case.internal_id
+        version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
 
         # confirm multiqc.json exists
-        multiqc_file_obj = analysis_api.housekeeper_api.get_files(
-            bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+        multiqc_file_obj: List[hk_models.File] = list(
+            housekeeper_api.get_files(
+                bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+            )
         )
-        if len(list(multiqc_file_obj)) == 0:
+        if not multiqc_file_obj:
             continue
 
         # confirm that file exists
-        existing_multiqc_file = multiqc_file_obj[0].full_path
+        existing_multiqc_file: str = multiqc_file_obj[0].full_path
         if not Path(existing_multiqc_file).exists():
             continue
 

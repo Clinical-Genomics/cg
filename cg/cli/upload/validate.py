@@ -1,32 +1,32 @@
 """Code for validating an upload via CLI"""
+from typing import List, Optional
 
 import click
-
 from cg.apps.coverage import ChanjoAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.store import Store
+from models.cg_config import CGConfig
 
 from .utils import suggest_cases_to_upload
-from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
 @click.command()
 @click.argument("family_id", required=False)
-@click.pass_context
-def validate(context, family_id):
+@click.pass_obj
+def validate(context: CGConfig, family_id: Optional[str]):
     """Validate a family of samples."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    status_db: Store = context.status_db
+    chanjo_api: ChanjoAPI = context.chanjo_api
 
     click.echo(click.style("----------------- VALIDATE --------------------"))
 
     if not family_id:
         suggest_cases_to_upload(context)
-        context.abort()
+        raise click.Abort
 
-    case_obj = analysis_api.status_db.family(family_id)
-    chanjo_api = analysis_api.chanjo_api
-    chanjo_samples = []
+    case_obj = status_db.family(family_id)
+    chanjo_samples: List[dict] = []
     for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id
         chanjo_sample = chanjo_api.sample(sample_id)

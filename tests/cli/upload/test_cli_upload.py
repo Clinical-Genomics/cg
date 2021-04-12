@@ -3,19 +3,20 @@ from datetime import datetime, timedelta
 
 from cg.cli.upload.base import upload
 from cg.cli.upload.utils import LinkHelper
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 
-def test_all_samples_are_non_tumor(analysis_store, case_id):
+def test_all_samples_are_non_tumor(analysis_store: Store, case_id: str):
     """Test that all samples are non tumor"""
 
     case_obj = analysis_store.family(case_id)
     assert LinkHelper.all_samples_are_non_tumour(case_obj.links)
 
 
-def test_all_samples_list_analyses(analysis_store, case_id):
+def test_all_samples_list_analyses(analysis_store: Store, case_id: str):
     """Test that all samples have an analysis type"""
 
     # GIVEN case obj where each sample is wgs analysis
@@ -29,11 +30,12 @@ def test_all_samples_list_analyses(analysis_store, case_id):
 
 
 def test_upload_started_long_time_ago_raises_exception(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test that an upload for a missing case does fail hard """
 
     # GIVEN an analysis that is already uploading since a week ago
+    disk_store: Store = base_context.status_db
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
     today = datetime.now()
@@ -48,12 +50,11 @@ def test_upload_started_long_time_ago_raises_exception(
     assert result.exception
 
 
-def test_upload_force_restart(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
-):
+def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     """Test that a case that is already uploading can be force restarted"""
 
     # GIVEN an analysis that is already uploading
+    disk_store: Store = base_context.status_db
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
 

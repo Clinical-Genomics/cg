@@ -1,10 +1,10 @@
 """Utility functions for the upload cli commands"""
 import logging
 from typing import List
-import click
 
+import click
 from cg.constants import Pipeline
-from cg.store import models
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -23,17 +23,15 @@ class LinkHelper:
         return [link.sample.application_version.application.analysis_type for link in links]
 
 
-def suggest_cases_to_upload(context: click.Context, pipeline: Pipeline) -> None:
+def suggest_cases_to_upload(status_db: Store, pipeline: Pipeline) -> None:
     LOG.warning("provide a case, suggestions:")
-    records = context.obj["analysis_api"].status_db.analyses_to_upload(pipeline=pipeline)[:50]
+    records = status_db.analyses_to_upload(pipeline=pipeline)[:50]
     for case_obj in records:
         click.echo(case_obj)
 
 
-def suggest_cases_delivery_report(context: click.Context, pipeline: Pipeline) -> None:
+def suggest_cases_delivery_report(status_db: Store, pipeline: Pipeline) -> None:
     LOG.error("provide a case, suggestions:")
-    records = context.obj["analysis_api"].status_db.analyses_to_delivery_report(pipeline=pipeline)[
-        :50
-    ]
+    records = status_db.analyses_to_delivery_report(pipeline=pipeline)[:50]
     for case_obj in records:
         click.echo(case_obj)

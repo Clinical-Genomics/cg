@@ -12,7 +12,8 @@ from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.store import models
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
@@ -41,9 +42,10 @@ LOG = logging.getLogger(__name__)
 def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
     """Upload results from analyses."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api: AnalysisAPI = context.obj["analysis_api"]
+    if not context.obj.meta_apis.get("analysis_api"):
+        context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context)
+    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+    status_db: Store = context.obj.status_db
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
 
@@ -51,9 +53,9 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         try:
             analysis_api.verify_case_id_in_statusdb(case_id=family_id)
         except CgError:
-            raise context.abort()
+            raise click.Abort
 
-        case_obj: models.Family = analysis_api.status_db.family(family_id)
+        case_obj: models.Family = status_db.family(family_id)
         if not case_obj.analyses:
             message = f"no analysis exists for family: {family_id}"
             click.echo(click.style(message, fg="red"))
@@ -77,20 +79,20 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
             click.echo(click.style(message, fg="yellow"))
             return
 
-    context.obj["report_api"] = ReportAPI(
-        store=analysis_api.status_db,
-        lims_api=analysis_api.lims_api,
-        chanjo_api=analysis_api.chanjo_api,
+    context.obj.meta_apis["report_api"] = ReportAPI(
+        store=status_db,
+        lims_api=context.obj.lims_api,
+        chanjo_api=context.obj.chanjo_api,
         analysis_api=analysis_api,
-        scout_api=analysis_api.scout_api,
+        scout_api=context.obj.scout_api,
     )
 
-    context.obj["scout_upload_api"] = UploadScoutAPI(
-        hk_api=analysis_api.housekeeper_api,
-        scout_api=analysis_api.scout_api,
-        madeline_api=analysis_api.madeline_api,
+    context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
+        hk_api=context.obj.housekeeper_api,
+        scout_api=context.obj.scout_api,
+        madeline_api=context.obj.madeline_api,
         analysis_api=analysis_api,
-        lims_api=analysis_api.lims_api,
+        lims_api=context.obj.lims_api,
     )
 
     if context.invoked_subcommand is not None:
@@ -98,7 +100,7 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
 
     if not family_id:
         suggest_cases_to_upload(context)
-        context.abort()
+        raise click.Abort
 
     case_obj: models.Family = analysis_api.status_db.family(family_id)
     analysis_obj: models.Analysis = case_obj.analyses[0]
@@ -107,14 +109,14 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         click.echo(click.style(message, fg="yellow"))
     else:
         analysis_obj.upload_started_at = dt.datetime.now()
-        analysis_api.status_db.commit()
+        status_db.commit()
         context.invoke(coverage, re_upload=True, family_id=family_id)
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
         context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
-        analysis_api.status_db.commit()
+        status_db.commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
 
 
@@ -124,14 +126,12 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
 def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    status_db: Store = context.obj.status_db
 
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
-    for analysis_obj in analysis_api.status_db.analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
