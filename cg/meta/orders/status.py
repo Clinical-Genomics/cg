@@ -274,8 +274,8 @@ class StatusHandler:
                     self.status.add(new_delivery)
 
             for sample in case["samples"]:
-                mother_obj = family_samples[sample["mother"]] if sample.get("mother") else None
-                father_obj = family_samples[sample["father"]] if sample.get("father") else None
+                mother_obj = family_samples.get(sample["mother"]) if sample.get("mother") else None
+                father_obj = family_samples.get(sample["father"]) if sample.get("father") else None
                 with self.status.session.no_autoflush:
                     link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
                 if link_obj:
