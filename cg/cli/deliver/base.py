@@ -24,7 +24,6 @@ def deliver(context):
     LOG.info("Running CG deliver")
     context.obj["status_db"] = Store(context.obj["database"])
     context.obj["housekeeper_api"] = HousekeeperAPI(context.obj)
-    context.obj["rsync_api"] = RsyncAPI(context.obj)
 
 
 @click.command(name="analysis")
