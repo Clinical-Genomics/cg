@@ -27,13 +27,15 @@ class GisaidAPI(MetaAPI):
         self.fastq_handler = FastqHandler()
 
     def get_headers(self) -> list:
+        """Get GisaidSample keys as list."""
+
         return list(GisaidSample.schema().get("properties").keys())
 
-    def get_sample_row(self, sample: models.Sample, family_id: str, fasta_header: str):
+    def get_sample_row(self, sample: models.Sample, family_id: str, fasta_header: str) -> List[str]:
         """Build row for a sample in the batch upload csv."""
 
-        orig_lab = "Stockholm"  # sample.originating_lab
-        collection_date = "201122"  # sample.collection_date
+        orig_lab: str = "Stockholm"  # sample.originating_lab
+        collection_date: str = "201122"  # sample.collection_date str or date, we dont know yet
         gisaid_sample = GisaidSample(
             covv_virus_name=fasta_header,
             covv_subm_sample_id=sample.name,
@@ -47,11 +49,11 @@ class GisaidAPI(MetaAPI):
     def build_batch_csv(self, family_id: str) -> str:
         """Build batch upload csv."""
 
-        file_name = f"{family_id}.csv"
-        file = Path(file_name)
+        file_name: str = f"{family_id}.csv"
+        file: Path = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")
-            headers = self.get_headers()
+            headers: List[str] = self.get_headers()
             wr.writerow(headers)
             sample_rows: List[List[str]] = self.get_sample_rows(family_id=family_id)
             wr.writerows(sample_rows)
@@ -60,11 +62,10 @@ class GisaidAPI(MetaAPI):
 
     def get_fasta_file(self, sample_id: str, hk_version_id: str) -> str:
 
-        fasta_file = self.housekeeper_api.files(
+        fasta_file = self.housekeeper_api.files(  # not sure about this type!!!
             version=hk_version_id, tags=["consensus", sample_id]
         ).first()
         return fasta_file.full_path
-        # return "/Users/maya.brandi/opt/cg/f1.fasta"
 
     def get_sample_rows(self, family_id: str) -> List[List[str]]:
         """Build sample row list for gisad csv file"""
@@ -74,32 +75,31 @@ class GisaidAPI(MetaAPI):
 
         sample_rows = []
         for sample in samples:
-            fasta_file = self.get_fasta_file(
+            fasta_file: str = self.get_fasta_file(
                 sample_id=sample.internal_id, hk_version_id=hk_version.id
             )
-            header = self.fastq_handler.get_header(fasta_file)
-            sample_row: list = self.get_sample_row(
+            header: str = self.fastq_handler.get_header(fasta_file)
+            sample_row: List[str] = self.get_sample_row(
                 sample=sample, family_id=family_id, fasta_header=header
             )
             sample_rows.append(sample_row)
-        file_name = f"{family_id}.fasta"
 
         return sample_rows
 
-    def build_batch_fasta(self, family_id: str) -> Path:
+    def build_batch_fasta(self, family_id: str) -> str:
         """Fetch a fasta files form house keeper for batch upload to gisaid"""
 
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
-        hk_version = self.housekeeper_api.last_version(bundle=family_id)
+        hk_version = self.housekeeper_api.last_version(bundle=family_id)  # type?
 
         fasta_files = []
         for sample in samples:
-            fasta_file = self.get_fasta_file(
+            fasta_file: str = self.get_fasta_file(
                 sample_id=sample.internal_id, hk_version_id=hk_version.id
             )
             fasta_files.append(fasta_file)
 
-        file_name = f"{family_id}.fasta"
+        file_name: str = f"{family_id}.fasta"
         self.fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
         return file_name
 
@@ -114,7 +114,7 @@ class GisaidAPI(MetaAPI):
     def upload(self, csv_file: str, fasta_file: str) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
-        load_call = ["CoV", "upload", "--csv", csv_file, "--fasta", fasta_file]
+        load_call: list = ["CoV", "upload", "--csv", csv_file, "--fasta", fasta_file]
         self.process.run_command(parameters=load_call)
 
         # Execute command and print its stdout+stderr as it executes
