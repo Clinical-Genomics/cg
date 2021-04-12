@@ -8,6 +8,7 @@ from cg.store import models
 from cg.meta.workflow.fastq import FastqHandler
 from ...utils import Process
 from .models import GisaidSample, UpploadFiles
+from housekeeper.store import models as hk_models
 
 from cg.meta.meta import MetaAPI
 
@@ -62,7 +63,7 @@ class GisaidAPI(MetaAPI):
 
     def get_fasta_file(self, sample_id: str, hk_version_id: str) -> str:
 
-        fasta_file = self.housekeeper_api.files(  # not sure about this type!!!
+        fasta_file: hk_models.File = self.housekeeper_api.files(  # not sure about this type!!!
             version=hk_version_id, tags=["consensus", sample_id]
         ).first()
         return fasta_file.full_path
@@ -71,7 +72,7 @@ class GisaidAPI(MetaAPI):
         """Build sample row list for gisad csv file"""
 
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
-        hk_version = self.housekeeper_api.last_version(bundle=family_id)
+        hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
 
         sample_rows = []
         for sample in samples:
@@ -90,7 +91,7 @@ class GisaidAPI(MetaAPI):
         """Fetch a fasta files form house keeper for batch upload to gisaid"""
 
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
-        hk_version = self.housekeeper_api.last_version(bundle=family_id)  # type?
+        hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
 
         fasta_files = []
         for sample in samples:
