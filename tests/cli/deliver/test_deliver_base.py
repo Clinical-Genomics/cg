@@ -2,6 +2,7 @@
 
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
+from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 
 
@@ -19,7 +20,7 @@ def test_run_base_help():
     assert "Deliver files with CG" in result.output
 
 
-def test_run_deliver_analysis_help(base_context: dict):
+def test_run_deliver_analysis_help(base_context: CGConfig):
     """Test to run the deliver base command with --help"""
     # GIVEN a cli runner
     runner = CliRunner()
