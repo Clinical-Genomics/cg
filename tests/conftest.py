@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -1129,7 +1128,7 @@ def microsalt_dir(tmpdir_factory):
 
 
 @pytest.fixture(name="fixture_cg_url")
-def fixture_cg_url(database_copy_path):
+def fixture_cg_url(database_copy_path) -> str:
     new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
     url = f"sqlite:///{new_path}"
     store = Store(url)
@@ -1139,36 +1138,36 @@ def fixture_cg_url(database_copy_path):
 
 
 @pytest.fixture(name="fixture_hk_url")
-def fixture_hk_url(database_copy_path):
+def fixture_hk_url(database_copy_path) -> str:
     new_path = shutil.copy("tests/fixtures/data/hkstore.db", database_copy_path)
     return f"sqlite:///{new_path}"
 
 
 @pytest.fixture(name="context_config")
-def context_config(
-    fixture_cg_url,
-    fixture_hk_url,
-    fluffy_dir,
-    housekeeper_dir,
-    mip_dir,
-    cg_dir,
-    balsamic_dir,
-    microsalt_dir,
+def fixture_context_config(
+    fixture_cg_url: str,
+    fixture_hk_url: str,
+    fluffy_dir: str,
+    housekeeper_dir: str,
+    mip_dir: str,
+    cg_dir: str,
+    balsamic_dir: str,
+    microsalt_dir: str,
 ) -> dict:
     return {
         "database": fixture_cg_url,
         "madeline_exe": "echo",
-        "bed_path": cg_dir,
-        "delivery_path": cg_dir,
+        "bed_path": str(cg_dir),
+        "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "fluffy": {
             "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
-            "root_dir": fluffy_dir,
+            "root_dir": str(fluffy_dir),
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": fixture_hk_url, "root": housekeeper_dir},
+        "housekeeper": {"database": fixture_hk_url, "root": str(housekeeper_dir)},
         "trailblazer": {
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
@@ -1181,12 +1180,11 @@ def context_config(
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "genotype": {
-            "database": "sqlite:///./genotype",
             "binary_path": "echo",
             "config_path": "genotype-stage.yaml",
         },
         "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
-        "cgstats": {"database": "sqlite:///./cgstats", "root": cg_dir},
+        "cgstats": {"database": "sqlite:///./cgstats", "root": str(cg_dir)},
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
@@ -1195,7 +1193,7 @@ def context_config(
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
         "balsamic": {
-            "root": balsamic_dir,
+            "root": str(balsamic_dir),
             "singularity": "BALSAMIC_release_v6.0.1.sif",
             "reference_config": "reference.json",
             "binary_path": "echo",
@@ -1207,7 +1205,7 @@ def context_config(
             },
         },
         "microsalt": {
-            "root": microsalt_dir,
+            "root": str(microsalt_dir),
             "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "binary_path": "echo",
             "conda_env": "S_microSALT",
@@ -1216,14 +1214,14 @@ def context_config(
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "pipeline": "analyse rd_dna",
-            "root": mip_dir,
+            "root": str(mip_dir),
             "script": "mip",
         },
         "mip-rd-rna": {
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "pipeline": "analyse rd_rna",
-            "root": mip_dir,
+            "root": str(mip_dir),
             "script": "mip",
         },
         "mutacc-auto": {
@@ -1241,3 +1239,8 @@ def context_config(
         },
         "backup": {"root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"}},
     }
+
+
+@pytest.fixture(name="cg_context")
+def fixture_cg_context(context_config: dict) -> CGConfig:
+    return CGConfig(**context_config)

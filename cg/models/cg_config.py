@@ -8,9 +8,12 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.shipping import ShippingAPI
+from cg.apps.stats import StatsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.store import Store
@@ -48,8 +51,6 @@ class DemultiplexConfig(BaseModel):
 
 
 class TrailblazerConfig(BaseModel):
-    database: str
-    root: str
     service_account: str
     service_account_auth_file: str
     host: str
@@ -103,6 +104,18 @@ class MipConfig(BaseModel):
     script: str
 
 
+class CGStatsConfig(BaseModel):
+    database: str
+    root: str
+
+
+class MicrosaltConfig(BaseModel):
+    root: str
+    queries_path: str
+    binary_path: str
+    conda_env: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -132,12 +145,19 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = None
+    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    shipping: CommonAppConfig = None
+    shipping_api_: ShippingAPI = None
+    cg_stats: CGStatsConfig = None
+    cg_stats_api_: StatsAPI = None
+    loqusdb: CommonAppConfig = None
+    loqusdb_wes: CommonAppConfig = Field(None, alias="loqusdb-wes")
+    loqusdb_api_: LoqusdbAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     fluffy: FluffyConfig = None
@@ -145,6 +165,7 @@ class CGConfig(BaseModel):
     mutant: MutantConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
+    microsalt: MicrosaltConfig = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
@@ -165,6 +186,9 @@ class CGConfig(BaseModel):
             "mutacc_auto_api_": "mutacc_auto_api",
             "genotype_api_": "genotype_api",
             "chanjo_api_": "chanjo_api",
+            "shipping_api_": "shipping_api",
+            "cg_stats_api_": "cg_stats_api",
+            "loqusdb_api_": "loqusdb_api",
         }
 
     @property
@@ -282,6 +306,33 @@ class CGConfig(BaseModel):
             LOG.info("Instantiating chanjo api")
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
+        return api
+
+    @property
+    def shipping_api(self) -> ShippingAPI:
+        api = self.__dict__.get("shipping_api_")
+        if api is None:
+            LOG.info("Instantiating shipping api")
+            api = ShippingAPI(config=self.shipping.dict())
+            self.shipping_api_ = api
+        return api
+
+    @property
+    def cg_stats_api(self) -> StatsAPI:
+        api = self.__dict__.get("cg_stats_api_")
+        if api is None:
+            LOG.info("Instantiating cg_stats api")
+            api = StatsAPI(config=self.dict())
+            self.cg_stats_api_ = api
+        return api
+
+    @property
+    def loqusdb_api(self) -> LoqusdbAPI:
+        api = self.__dict__.get("loqusdb_api_")
+        if api is None:
+            LOG.info("Instantiating loqusdb api")
+            api = LoqusdbAPI(config=self.dict())
+            self.loqusdb_api_ = api
         return api
 
 
