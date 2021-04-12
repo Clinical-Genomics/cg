@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List
 
 from cg.store import models
-from .constants import HEADERS
 from ...meta.workflow.fastq import FastqHandler
 from ...utils import Process
 from .models import GisaidSample, UpploadFiles
