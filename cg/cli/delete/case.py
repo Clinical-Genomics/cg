@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.option("--dry-run", is_flag=True)
 @click.option("--yes", is_flag=True)
 @click.pass_context
-def case(context, case_id: str, dry_run: bool, yes: bool):
+def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     """Delete case with links and samples
 
     The command will stop if the case has any analyses made on it.
@@ -26,7 +26,7 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
     The command will not delete a sample that has been marked as mother or father to another
     sample.
     """
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.obj.status_db
     case_obj: models.Family = status_db.family(case_id)
     if not case_obj:
         LOG.error("Could not find case %s", case_id)
@@ -35,7 +35,6 @@ def case(context, case_id: str, dry_run: bool, yes: bool):
     if case_obj.analyses:
         LOG.error("Can NOT delete case with analyses %s", case_obj.analyses)
         raise click.Abort
-
     context.invoke(print_case, family_ids=[case_id])
 
     if case_obj.links and not (

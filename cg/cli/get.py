@@ -3,6 +3,7 @@ import re
 from typing import Iterable, List
 
 import click
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tabulate import tabulate
 
@@ -39,7 +40,7 @@ def get(context: click.Context, identifier: str):
 @click.pass_context
 def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: List[str]):
     """Get information about a sample."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
         LOG.debug("%s: get info about sample", sample_id)
         sample_obj: models.Sample = status_db.sample(sample_id)
@@ -67,10 +68,10 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 
 @get.command()
 @click.argument("family_id")
-@click.pass_context
-def relations(context: click.Context, family_id: str):
+@click.pass_obj
+def relations(context: CGConfig, family_id: str):
     """Get information about a family relations."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     case_obj: models.Family = status_db.family(family_id)
     if case_obj is None:
         LOG.error("%s: family doesn't exist", family_id)
@@ -104,7 +105,7 @@ def family(
     family_ids: List[str],
 ):
     """Get information about a family."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.obj.status_db
     cases: List[models.Family] = []
     if name:
         customer_obj: models.Customer = status_db.customer(customer)
@@ -146,7 +147,7 @@ def family(
 @click.pass_context
 def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.obj.status_db
     flowcell_obj: models.Flowcell = status_db.flowcell(flowcell_id)
     if flowcell_obj is None:
         LOG.error(f"{flowcell_id}: flowcell not found")
