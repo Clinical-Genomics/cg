@@ -21,7 +21,7 @@ class GisaidAPI(MetaAPI):
 
     def __init__(self, config: dict):
         super().__init__(config)
-        # self.gisaid_config = config["gisaid"]["config_path"]
+        self.gisaid_submitter = config["gisaid"]["submitter"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
         self.process = Process(binary=self.gisaid_binary)
         self.fastq_handler = FastqHandler()
@@ -37,7 +37,7 @@ class GisaidAPI(MetaAPI):
         gisaid_sample = GisaidSample(
             covv_virus_name=fasta_header,
             covv_subm_sample_id=sample.name,
-            submitter="i.sylvin",  # get from config. But wich? Add gisaid config to servers, or add to gisaid section in cg config..
+            submitter=self.gisaid_submitter,
             fn=f"{family_id}.fasta",
             covv_collection_date=collection_date,
             lab=orig_lab,
