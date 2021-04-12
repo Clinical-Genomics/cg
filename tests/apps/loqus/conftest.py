@@ -5,13 +5,12 @@
 from subprocess import CalledProcessError
 
 import pytest
-
 from cg.apps.loqus import LoqusdbAPI
 from cg.utils import Process
 
 CONFIG = {
     "loqusdb": {"config_path": "loqusdb_config_wes", "binary_path": "loqus_binary"},
-    "loqusdb-wes": {
+    "loqusdb_wes": {
         "config_path": "loqusdb_config_wes",
         "binary_path": "loqusdb_wes_binary",
     },

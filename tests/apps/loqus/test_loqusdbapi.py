@@ -6,7 +6,6 @@ import json
 import subprocess
 
 import pytest
-
 from cg.apps.loqus import LoqusdbAPI
 from cg.exc import CaseNotFoundError
 
@@ -27,8 +26,8 @@ def test_instatiate(loqus_config):
     loqusdb = LoqusdbAPI(loqus_config, analysis_type="wes")
 
     # THEN assert that the adapter was properly instantiated
-    assert loqusdb.loqusdb_config == loqus_config["loqusdb-wes"]["config_path"]
-    assert loqusdb.loqusdb_binary == loqus_config["loqusdb-wes"]["binary_path"]
+    assert loqusdb.loqusdb_config == loqus_config["loqusdb_wes"]["config_path"]
+    assert loqusdb.loqusdb_binary == loqus_config["loqusdb_wes"]["binary_path"]
 
 
 def test_get_case(loqusdbapi, loqusdb_case_output):
