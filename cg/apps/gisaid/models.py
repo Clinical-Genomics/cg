@@ -21,8 +21,8 @@ class GisaidSample(BaseModel):
     submitter: str
     fn: str
     covv_collection_date: str
-    covv_orig_lab: Optional[str]
     covv_virus_name: str
+    covv_orig_lab: Optional[str]
     covv_type: Optional[str] = "betacoronavirus"
     covv_passage: Optional[str] = "Original"
     covv_location: Optional[str]

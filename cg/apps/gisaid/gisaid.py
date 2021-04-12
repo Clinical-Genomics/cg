@@ -7,7 +7,6 @@ from typing import List
 from cg.store import models
 from .constants import HEADERS
 from ...meta.workflow.fastq import FastqHandler
-from ...store.models import Family
 from ...utils import Process
 from .models import GisaidSample, UpploadFiles
 
@@ -28,6 +27,9 @@ class GisaidAPI(MetaAPI):
         self.process = Process(binary=self.gisaid_binary)
         self.fastq_handler = FastqHandler()
 
+    def get_headers(self) -> list:
+        return list(GisaidSample.schema().get("properties").keys())
+
     def get_sample_row(self, sample: models.Sample, family_id: str, fasta_header: str):
         """Build row for a sample in the batch upload csv."""
 
@@ -36,22 +38,22 @@ class GisaidAPI(MetaAPI):
         gisaid_sample = GisaidSample(
             covv_virus_name=fasta_header,
             covv_subm_sample_id=sample.name,
-            submitter="i.sylvin",
+            submitter="i.sylvin",  # get from config. But wich? Add gisaid config to servers, or add to gisaid section in cg config..
             fn=f"{family_id}.fasta",
             covv_collection_date=collection_date,
             lab=orig_lab,
         )
-        return [gisaid_sample.dict().get(header) for header in HEADERS]
+        return [gisaid_sample.dict().get(header) for header in self.get_headers()]
 
     def build_batch_csv(self, family_id: str) -> str:
-        # validate that family id fins i status
         """Build batch upload csv."""
 
         file_name = f"{family_id}.csv"
         file = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")
-            wr.writerow(HEADERS)
+            headers = self.get_headers()
+            wr.writerow(headers)
             sample_rows: List[List[str]] = self.get_sample_rows(family_id=family_id)
             wr.writerows(sample_rows)
 

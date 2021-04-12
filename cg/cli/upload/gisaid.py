@@ -24,7 +24,8 @@ def gisaid(context, family_id):
 
     case_object: Family = status_db.family(family_id)
     if not case_object:
-        return "error"
+        LOG.warning("Could not family: %s in status-db", family_id)
+        raise click.Abort
     files: UpploadFiles = gisaid_api.files(family_id=family_id)
     if files:
         gisaid_api.upload(**dict(files))
