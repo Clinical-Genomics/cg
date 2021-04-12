@@ -3,6 +3,7 @@ import logging
 from typing import List
 
 import petname
+from cg.apps.avatar.api import Avatar
 
 from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
 from cg.store import models
@@ -167,8 +168,16 @@ class AddHandler(BaseHandler):
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
+        while True:
+            avatar_url = Avatar.get_avatar_url(internal_id)
+            if self.find_family_by_avatar_url(avatar_url=avatar_url) is None:
+                break
+            else:
+                LOG.debug(f"{avatar_url} already used - trying another url")
+
         priority_db = PRIORITY_MAP[priority]
         new_case = self.Family(
+            avatar_url=avatar_url,
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),

@@ -265,6 +265,7 @@ class Family(Model, PriorityMixin):
 
     action = Column(types.Enum(*CASE_ACTIONS))
     analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
+    avatar_url = Column(types.Text)
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)

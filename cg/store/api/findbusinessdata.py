@@ -136,6 +136,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
 
+    def find_family_by_avatar_url(self, avatar_url: str) -> models.Family:
+        """Fetch a family by avatar_url from the database."""
+        return self.Family.query.filter_by(avatar_url=avatar_url).first()
+
     def find_family_by_name(self, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
