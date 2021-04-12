@@ -54,7 +54,6 @@ def test_cli_link(
             case_id=fluffy_case_id_existing, sample_id=fluffy_sample_lims_id
         )
     )
-    print(f"Check path {fastq_path}")
     assert not fastq_path.exists()
     # GIVEN a case_id that does exist in database
 

@@ -96,9 +96,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
             LOG.info("Fastq directory exists, removing and re-linking files!")
             shutil.rmtree(workdir_path, ignore_errors=True)
         workdir_path.mkdir(parents=True, exist_ok=True)
-        for familysample in case_obj.links:
-            sample_id = familysample.sample.internal_id
+        for family_sample in case_obj.links:
+            sample_id = family_sample.sample.internal_id
             files: Query = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
+
             sample_path: Path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
             for file in files:
                 if not dry_run:
