@@ -43,28 +43,6 @@ class GisaidAPI(MetaAPI):
         )
         return [gisaid_sample.dict().get(header) for header in HEADERS]
 
-    def get_sample_rows(self, family_id: str) -> List[List[str]]:
-        """"""
-
-        samples: List[models.Sample] = self.status_db.get_samples_by_family_id(family_id)
-        ## Add filer to get only samples that have been seuenced.
-        hk_version = self.housekeeper_api.last_version(bundle=family_id)
-        sample_rows = []
-        for sample in samples:
-            if not sample.sequenced_at:
-                continue
-            # fasta_file = Path("/Users/maya.brandi/opt/cg/f1.fasta")
-            fasta_file = self.housekeeper_api.files(
-                version=hk_version.id, tags=["consensus", sample.internal_id]
-            ).first()
-            header = self.fastq_handler.get_header(fasta_file)
-            sample_row: list = self.get_sample_row(
-                sample=sample, family_id=family_id, fasta_header=header
-            )
-            if sample_row:
-                sample_rows.append(sample_row)
-        return sample_rows
-
     def build_batch_csv(self, family_id: str) -> str:
         # validate that family id fins i status
         """Build batch upload csv."""
@@ -79,13 +57,46 @@ class GisaidAPI(MetaAPI):
 
         return str(file.absolute())
 
-    def build_batch_fasta(self, family_id: str) -> Path:
-        """Fetch a fasta file form house keeper for batch upload to gisaid"""
+    def get_fasta_file(self, sample_id: str, hk_version_id: str) -> str:
 
+        fasta_file = self.housekeeper_api.files(
+            version=hk_version_id, tags=["consensus", sample_id]
+        ).first()
+        return fasta_file.full_path
+        # return "/Users/maya.brandi/opt/cg/f1.fasta"
+
+    def get_sample_rows(self, family_id: str) -> List[List[str]]:
+        """Build sample row list for gisad csv file"""
+
+        samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         hk_version = self.housekeeper_api.last_version(bundle=family_id)
-        # should get files per sample only with sequenced at
-        hk_files: list = self.housekeeper_api.files(version=hk_version.id, tags=["consensus"]).all()
-        fasta_files = [file.full_path for file in hk_files]
+
+        sample_rows = []
+        for sample in samples:
+            fasta_file = self.get_fasta_file(
+                sample_id=sample.internal_id, hk_version_id=hk_version.id
+            )
+            header = self.fastq_handler.get_header(fasta_file)
+            sample_row: list = self.get_sample_row(
+                sample=sample, family_id=family_id, fasta_header=header
+            )
+            sample_rows.append(sample_row)
+        file_name = f"{family_id}.fasta"
+
+        return sample_rows
+
+    def build_batch_fasta(self, family_id: str) -> Path:
+        """Fetch a fasta files form house keeper for batch upload to gisaid"""
+
+        samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
+        hk_version = self.housekeeper_api.last_version(bundle=family_id)
+
+        fasta_files = []
+        for sample in samples:
+            fasta_file = self.get_fasta_file(
+                sample_id=sample.internal_id, hk_version_id=hk_version.id
+            )
+            fasta_files.append(fasta_file)
 
         file_name = f"{family_id}.fasta"
         self.fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
