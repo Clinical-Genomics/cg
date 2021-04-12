@@ -9,10 +9,10 @@ from subprocess import CalledProcessError
 from typing import List
 
 from alchy import Query
-
 from cg.constants import Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
@@ -22,11 +22,12 @@ LOG = logging.getLogger(__name__)
 class FluffyAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
-        config: dict,
+        config: CGConfig,
         pipeline: Pipeline = Pipeline.FLUFFY,
     ):
-        self.root_dir = Path(config["fluffy"]["root_dir"])
-        self.fluffy_config = Path(config["fluffy"]["config_path"])
+        self.root_dir = Path(config.fluffy.root_dir)
+        LOG.info("Set root dir to %s", config.fluffy.root_dir)
+        self.fluffy_config = Path(config.fluffy.config_path)
         super().__init__(
             pipeline,
             config,
@@ -39,7 +40,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
     @property
     def process(self) -> Process:
         if not self._process:
-            self._process = Process(binary=self.config["fluffy"]["binary_path"])
+            self._process = Process(binary=self.config.fluffy.binary_path)
         return self._process
 
     def get_samplesheet_path(self, case_id: str) -> Path:

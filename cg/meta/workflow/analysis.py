@@ -63,6 +63,7 @@ class AnalysisAPI(MetaAPI):
         elif not case_obj.links:
             LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
+        LOG.info("Case %s exists in status db", case_id)
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
