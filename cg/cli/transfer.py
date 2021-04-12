@@ -46,7 +46,9 @@ def lims(context: click.Context, status: str, include: str, sample_id: str):
     lims_api = LimsAPI(context.obj)
     status_db: Store = context.obj["status_db"]
     transfer_api = TransferLims(status=status_db, lims=lims_api)
-    transfer_api.transfer_samples(status_type=SampleState[status.upper()], include=include, sample_id=sample_id)
+    transfer_api.transfer_samples(
+        status_type=SampleState[status.upper()], include=include, sample_id=sample_id
+    )
 
 
 @transfer_group.command()
