@@ -1,12 +1,13 @@
 """This script tests the cli methods to get samples in status-db"""
 
 from cg.cli.get import get
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_sample_bad_sample(cli_runner: CliRunner, base_context: dict):
+def test_get_sample_bad_sample(cli_runner: CliRunner, base_context: CGConfig):
     """Test to get a sample using a non-existing sample-id """
     # GIVEN an empty database
 
@@ -20,7 +21,7 @@ def test_get_sample_bad_sample(cli_runner: CliRunner, base_context: dict):
 
 
 def test_get_sample_required(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get a sample using only the required argument"""
     # GIVEN a database with a sample
@@ -37,7 +38,7 @@ def test_get_sample_required(
 
 
 def test_get_samples_required(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get several samples using only the required arguments"""
     # GIVEN a database with two samples
@@ -58,7 +59,7 @@ def test_get_samples_required(
 
 
 def test_get_sample_output(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the sample"""
     # GIVEN a database with a sample with data
@@ -84,7 +85,7 @@ def test_get_sample_output(
 
 
 def test_get_sample_external_false(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
@@ -103,7 +104,7 @@ def test_get_sample_external_false(
 
 
 def test_get_sample_external_true(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the external-value of the sample"""
     # GIVEN a database with a sample with data
@@ -122,7 +123,7 @@ def test_get_sample_external_true(
 
 
 def test_get_sample_no_families_without_family(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --no-families flag works without families"""
     # GIVEN a database with a sample without related samples
@@ -138,7 +139,7 @@ def test_get_sample_no_families_without_family(
 
 
 def test_get_sample_no_families_with_family(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --no-families flag doesn't show case info"""
     # GIVEN a database with a sample with related samples
@@ -158,7 +159,7 @@ def test_get_sample_no_families_with_family(
 
 
 def test_get_sample_families_without_family(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --families flag works without families"""
     # GIVEN a database with a sample without related samples
@@ -174,7 +175,7 @@ def test_get_sample_families_without_family(
 
 
 def test_get_sample_families_with_family(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the --families flag does show case info"""
     # GIVEN a database with a sample with related samples
@@ -194,7 +195,7 @@ def test_get_sample_families_with_family(
 
 
 def test_get_sample_flowcells_without_flowcell(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that we can query samples for flowcells even when there are none"""
     # GIVEN a database with a sample without related flowcells
@@ -210,7 +211,7 @@ def test_get_sample_flowcells_without_flowcell(
 
 
 def test_get_sample_flowcells_with_flowcell(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that we can query samples for flowcells and that the flowcell name is in the output"""
     # GIVEN a database with a sample and a related flowcell

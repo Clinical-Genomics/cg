@@ -2,12 +2,13 @@
 from datetime import datetime
 
 from cg.cli.get import get
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: dict):
+def test_get_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: CGConfig):
     """Test to get a flowcell using a non-existing flowcell """
     # GIVEN an empty database
 
@@ -20,7 +21,7 @@ def test_get_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: dict):
 
 
 def test_get_flowcell_required(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test to get a flowcell using only the required arguments"""
     # GIVEN a database with a flowcell
@@ -37,7 +38,7 @@ def test_get_flowcell_required(
 
 
 def test_get_flowcell_output(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
@@ -61,7 +62,7 @@ def test_get_flowcell_output(
 
 
 def test_get_flowcell_archived_at_none(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
@@ -78,7 +79,7 @@ def test_get_flowcell_archived_at_none(
 
 
 def test_get_flowcell_archived_at_date(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with data
@@ -96,7 +97,7 @@ def test_get_flowcell_archived_at_date(
 
 
 def test_get_flowcell_samples_without_samples(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers, caplog
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers, caplog
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
@@ -113,7 +114,7 @@ def test_get_flowcell_samples_without_samples(
 
 
 def test_get_flowcell_samples(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with related samples
@@ -132,7 +133,7 @@ def test_get_flowcell_samples(
 
 
 def test_get_flowcell_no_samples_without_samples(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell without related samples
@@ -148,7 +149,7 @@ def test_get_flowcell_no_samples_without_samples(
 
 
 def test_get_flowcell_no_samples_with_samples(
-    cli_runner: CliRunner, base_context: dict, disk_store: Store, helpers: StoreHelpers
+    cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
     """Test that the output has the data of the flowcell"""
     # GIVEN a database with a flowcell with related samples
