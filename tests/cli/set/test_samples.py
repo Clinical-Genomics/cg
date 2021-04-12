@@ -4,6 +4,7 @@ import logging
 import pytest
 
 from cg.cli.set.base import samples
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 SUCCESS = 0
@@ -119,12 +120,14 @@ def test_set_samples_by_valid_case_id_and_valid_identifier(
 
 
 def test_set_samples_by_invalid_case_id_and_valid_identifier(
-    cli_runner, base_context, base_store: Store, helpers, caplog
+    cli_runner, base_context: CGConfig, helpers, caplog
 ):
     # GIVEN a database with a sample that belongs to a case
+    base_store: Store = base_context.status_db
     case_obj = helpers.add_case(store=base_store)
     sample_obj = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
+    base_store.commit()
 
     # WHEN calling set samples with bad case_id for sample and valid identifier for sample
     with caplog.at_level(logging.INFO):
@@ -141,12 +144,14 @@ def test_set_samples_by_invalid_case_id_and_valid_identifier(
 
 
 def test_set_samples_by_valid_case_id_and_invalid_identifier(
-    cli_runner, base_context, base_store: Store, helpers, caplog
+    cli_runner, base_context: CGConfig, helpers, caplog
 ):
     # GIVEN a database with a sample that belongs to a case
+    base_store: Store = base_context.status_db
     case_obj = helpers.add_case(store=base_store)
     sample_obj = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
+    base_store.commit()
 
     # WHEN calling set samples with valid case_id for sample and wrong valid identifier for sample
     with caplog.at_level(logging.INFO):
