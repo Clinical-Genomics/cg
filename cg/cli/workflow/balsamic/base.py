@@ -252,7 +252,7 @@ def store(context: click.Context, case_id: str, analysis_type: str, dry_run: boo
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper"""
 
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
