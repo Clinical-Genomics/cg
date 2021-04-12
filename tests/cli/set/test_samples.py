@@ -2,7 +2,6 @@
 import logging
 
 import pytest
-
 from cg.cli.set.base import samples
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -127,7 +126,6 @@ def test_set_samples_by_invalid_case_id_and_valid_identifier(
     case_obj = helpers.add_case(store=base_store)
     sample_obj = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
-    base_store.commit()
 
     # WHEN calling set samples with bad case_id for sample and valid identifier for sample
     with caplog.at_level(logging.INFO):
@@ -151,7 +149,6 @@ def test_set_samples_by_valid_case_id_and_invalid_identifier(
     case_obj = helpers.add_case(store=base_store)
     sample_obj = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
-    base_store.commit()
 
     # WHEN calling set samples with valid case_id for sample and wrong valid identifier for sample
     with caplog.at_level(logging.INFO):

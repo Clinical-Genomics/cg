@@ -55,7 +55,7 @@ def families(
     identifiers: click.Tuple([str, str]),
 ):
     """Set values on many families at the same time"""
-    store: Store = context.obj["status_db"]
+    store: Store = context.obj.status_db
     cases: List[models.Family] = _get_cases(identifiers, store)
 
     if not cases:

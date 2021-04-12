@@ -10,6 +10,7 @@ from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.store import Store, models
 
+from ...models.cg_config import CGConfig
 from .families import families
 from .family import family
 
@@ -41,10 +42,9 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group("set")
-@click.pass_context
-def set_cmd(context):
+def set_cmd():
     """Update information in the database."""
-    context.obj["lims_api"] = context.obj["meta_api"].lims_api
+    pass
 
 
 @set_cmd.command()
@@ -79,7 +79,7 @@ def samples(
     case_id: str,
 ):
     """Set values on many samples at the same time"""
-    store: Store = context.obj["status_db"]
+    store: Store = context.obj.status_db
     sample_objs = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
 
     if not sample_objs:
@@ -209,16 +209,16 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
 @click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
 @click.option("--help", is_flag=True)
-@click.pass_context
+@click.pass_obj
 def sample(
-    context: click.Context,
+    context: CGConfig,
     sample_id: Optional[str],
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
     yes: bool,
     help: bool,
 ):
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
 
     if help:
@@ -278,7 +278,7 @@ def sample(
                 raise click.Abort
 
             try:
-                context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: new_value})
+                context.lims_api.update_sample(lims_id=sample_id, **{new_key: new_value})
                 LOG.info(f"Set LIMS/{new_key} to {new_value}")
             except LimsDataError as err:
                 LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}")
@@ -302,10 +302,10 @@ def _update_comment(comment, obj):
 @set_cmd.command()
 @click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
 @click.argument("flowcell_name")
-@click.pass_context
-def flowcell(context: click.Context, flowcell_name: str, status: Optional[str]):
+@click.pass_obj
+def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
     """Update information about a flowcell"""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     flowcell_obj: models.Flowcell = status_db.flowcell(flowcell_name)
 
     if flowcell_obj is None:
