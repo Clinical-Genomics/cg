@@ -2,21 +2,21 @@
 import logging
 import sys
 
+import cg
 import click
 import coloredlogs
 import ruamel.yaml
-
-import cg
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd
 from cg.store import Store
 
-from .add import add
+from .add import add as add_cmd
 from .backup import backup
 from .clean import clean
 from .compress.base import compress, decompress
 from .deliver.base import deliver as deliver_cmd
+from .demultiplex.base import demultiplex as demultiplex_cmd
 from .deploy.base import deploy as deploy_cmd
 from .export import export
 from .get import get
@@ -74,7 +74,7 @@ def init(context, reset, force):
     LOG.info("Success! New tables: %s", ", ".join(status_db.engine.table_names()))
 
 
-base.add_command(add)
+base.add_command(add_cmd)
 base.add_command(backup)
 base.add_command(clean)
 base.add_command(compress)
@@ -92,3 +92,4 @@ base.add_command(workflow_cmd)
 base.add_command(store_cmd)
 base.add_command(deploy_cmd)
 base.add_command(deliver_cmd)
+base.add_command(demultiplex_cmd)

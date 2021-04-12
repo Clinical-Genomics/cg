@@ -52,8 +52,12 @@ def config_case(context: click.Context, dry_run: bool, case_id: str) -> None:
 def run(context: click.Context, dry_run: bool, case_id: str) -> None:
     """Run mutant analysis command for a case"""
     analysis_api: MutantAnalysisAPI = context.obj["analysis_api"]
-    analysis_api.run_analysis(case_id=case_id, dry_run=dry_run)
     analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    try:
+        analysis_api.run_analysis(case_id=case_id, dry_run=dry_run)
+    except:
+        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        raise
 
 
 @mutant.command("start")
