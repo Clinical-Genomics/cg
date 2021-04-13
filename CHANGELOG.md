@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Bugfix allowing orders of single samples from existing families
+
 ## [20.17.4]
 ### Added
 - Added new covid prep method to lims constants
