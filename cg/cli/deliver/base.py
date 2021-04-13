@@ -197,10 +197,15 @@ def rsync(context, ticket_id: int, dry_run: bool, covid: bool):
     """The folder generated using the "cg deliver analysis" command will be
     rsynced with this function to the customers inbox on caesar.
     """
-    inbox = context.obj.get("delivery_path")
+    paths = {
+        "base_source_path": context.obj.get("delivery_path"),
+        "destination_path": context.obj.get["data-delivery"]["destination_path"],
+        "covid_destination_path": context.obj.get["data-delivery"]["covid_destination_path"],
+        "covid_source_path": context.obj.get["data-delivery"]["covid_source_path"],
+    }
     status_db = context.obj["status_db"]
     rsync_api = RsyncAPI(store=status_db)
-    cmd = rsync_api.generate_rsync_command(ticket_id=ticket_id, base_path=str(inbox))
+    cmd = rsync_api.generate_rsync_command(ticket_id=ticket_id, paths=paths)
     if dry_run:
         LOG.info("Dry-run activated, skipping running the command: %s", cmd)
     else:

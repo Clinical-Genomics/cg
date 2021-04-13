@@ -22,24 +22,21 @@ class RsyncAPI:
         customer_id = case_obj.customer.internal_id
         return customer_id
 
-    def generate_rsync_command(self, ticket_id: int, base_path: str) -> str:
+    def generate_rsync_command(self, ticket_id: int, paths: dict) -> str:
         customer_id = self.get_customer_id(ticket_id=ticket_id)
-        destination_path = "caesar.scilifelab.se:/home/%s/inbox/%s/" % (customer_id, ticket_id)
-        source_path = base_path + "/" + customer_id + "/inbox/" + str(ticket_id) + "/ "
-        rsync_string = "rsync -rvL --progress "
+        destination_path = paths["destination_path"] % (customer_id, ticket_id)
+        source_path = (
+            paths["base_source_path"] + "/" + customer_id + "/inbox/" + str(ticket_id) + "/ "
+        )
+        rsync_string = "rsync -rvL "
         cmd = rsync_string + source_path + destination_path
         return cmd
 
-    def generate_covid_rsync_command(self, ticket_id: int) -> str:
+    def generate_covid_rsync_command(self, ticket_id: int, paths: dict) -> str:
         case_id = self.get_case_id(ticket_id=ticket_id)
-        source_path = (
-            "/home/proj/production/mutant/cases/%s/results/sars-cov-2_%s_results_*.csv "
-            % (case_id, ticket_id)
-        )
+        source_path = paths["covid_source_path"] % (case_id, ticket_id)
         customer_id = self.get_customer_id(ticket_id=ticket_id)
-        destination_path = "caesar.scilifelab.se:/home/%s/inbox/wwLab_automatisk_hamtning/" % (
-            customer_id
-        )
-        rsync_string = "rsync -rvL --progress "
+        destination_path = paths["covid_destination_path"] % customer_id
+        rsync_string = "rsync -rvL "
         cmd = rsync_string + source_path + destination_path
         return cmd
