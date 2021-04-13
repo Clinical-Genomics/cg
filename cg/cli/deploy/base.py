@@ -55,7 +55,6 @@ def deploy_hermes_cmd(context):
 def deploy_loqusdb_cmd(context):
     """Deploy the LoqusDB tool"""
     LOG.info("Deploying LoqusDB with CG")
-    loqusdb_config: Path = Path(context.obj["loqusdb"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
     shipping_api.deploy(app_name="loqusdb", app_config=loqusdb_config)
 
