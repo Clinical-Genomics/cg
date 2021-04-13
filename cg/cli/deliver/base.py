@@ -207,7 +207,7 @@ def rsync(context, ticket_id: int, dry_run: bool, covid: bool):
     rsync_api = RsyncAPI(store=status_db)
     rsync_api.run_rsync_command(ticket_id=ticket_id, paths=paths, dry_run=dry_run)
     if covid:
-        rsync_api.run_covid_rsync_command(ticket_id=ticket_id)
+        rsync_api.run_covid_rsync_command(ticket_id=ticket_id, paths=paths, dry_run=dry_run)
 
 
 deliver.add_command(deliver_analysis)
