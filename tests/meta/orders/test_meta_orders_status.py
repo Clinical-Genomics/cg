@@ -662,3 +662,55 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert base_store.deliveries().count() == base_store.samples().count()
     for link in new_case.links:
         assert len(link.sample.deliveries) == 1
+
+
+def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_status_data):
+
+    # GIVEN a stored trio case
+    new_families = orders_api.store_cases(
+        customer=mip_status_data["customer"],
+        order=mip_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=123456,
+        cases=mip_status_data["families"],
+    )
+
+    new_case = new_families[0]
+    assert new_case.name == "family1"
+    assert set(new_case.panels) == {"IEM"}
+    assert new_case.priority_human == "standard"
+
+    assert len(new_case.links) == 3
+    new_link = new_case.links[0]
+    assert new_link.mother
+    assert new_link.father
+    name = new_link.sample.name
+    internal_id = new_link.sample.internal_id
+    assert base_store.sample(internal_id)
+
+    # WHEN storing a new case with one sample from the trio
+    for family in mip_status_data["families"]:
+        for sample_idx, sample in enumerate(family["samples"]):
+            if sample["name"] == name:
+                sample["internal_id"] = internal_id
+                family["name"] = "single-from-trio"
+            else:
+                family["samples"][sample_idx] = {}
+
+        family["samples"] = list(filter(None, family["samples"]))
+
+    print(mip_status_data)
+
+    new_families = orders_api.store_cases(
+        customer=mip_status_data["customer"],
+        order=mip_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=123456,
+        cases=mip_status_data["families"],
+    )
+
+    # THEN there should be no complaints about missing parents
+    assert len(new_families) == 1
+    assert len(new_families[0].links) == 1
+    assert not new_families[0].links[0].mother
+    assert not new_families[0].links[0].father
