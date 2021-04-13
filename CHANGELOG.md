@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [20.17.5]
 ### Fixed
 - Bugfix allowing orders of single samples from existing families
 
