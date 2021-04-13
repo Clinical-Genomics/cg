@@ -6,15 +6,8 @@ from subprocess import CalledProcessError
 
 import pytest
 from cg.apps.loqus import LoqusdbAPI
-from cg.utils import Process
-
-CONFIG = {
-    "loqusdb": {"config_path": "loqusdb_config_wes", "binary_path": "loqus_binary"},
-    "loqusdb_wes": {
-        "config_path": "loqusdb_config_wes",
-        "binary_path": "loqusdb_wes_binary",
-    },
-}
+from cg.models.cg_config import CGConfig, CommonAppConfig
+from tests.mocks.process_mock import ProcessMock
 
 LOQUSDB_OUTPUT = (
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local "
@@ -48,39 +41,26 @@ LOQUSDB_OUTPUT = (
 )
 
 
-class ProcessMock(Process):
-    """Mock a process object"""
-
-    def __init__(
-        self,
-        binary,
-        config=None,
-        config_parameter="--config",
-        base_call=None,
-        error=False,
-    ):
-        self.binary = binary
-        self.config = config
-        self._stdout = ""
-        self._stderr = ""
-        self._error = error
-
-    def run_command(self, parameters):
-        if self._error:
-            raise CalledProcessError(1, "")
-        return 0
-
-
 # Loqusdb fixtures
-@pytest.fixture(scope="function")
-def loqus_config():
+@pytest.fixture(name="loqus_config")
+def fixture_loqus_config():
     """
     loqusdb config fixture
     """
+    return {
+        "loqusdb": {"config_path": "loqusdb_config_wes", "binary_path": "loqus_binary"},
+        "loqusdb_wes": {
+            "config_path": "loqusdb_config_wes",
+            "binary_path": "loqusdb_wes_binary",
+        },
+    }
 
-    _config = CONFIG
 
-    return _config
+@pytest.fixture(name="loqus_config_object")
+def fixture_loqus_config_object(loqus_config: dict, cg_config_object: CGConfig):
+    cg_config_object.loqusdb = CommonAppConfig(**loqus_config["loqusdb"])
+    cg_config_object.loqusdb_wes = CommonAppConfig(**loqus_config["loqusdb-wes"])
+    return cg_config_object
 
 
 @pytest.fixture(scope="function")
@@ -102,8 +82,7 @@ def loqus_config_path(loqus_config):
 
 
 @pytest.fixture(scope="function")
-def loqus_process(loqus_binary_path, loqus_config_path):
-
+def loqus_process(loqus_binary_path: str, loqus_config_path: str):
     """
     Return mocked cg.utils.Process instance
     """
@@ -113,7 +92,6 @@ def loqus_process(loqus_binary_path, loqus_config_path):
 
 @pytest.fixture(scope="function")
 def loqus_process_exception(loqus_binary_path, loqus_config_path):
-
     """
     Return mocked cg.utils.Process instance
     """
@@ -122,7 +100,7 @@ def loqus_process_exception(loqus_binary_path, loqus_config_path):
 
 
 @pytest.fixture(scope="function")
-def loqusdbapi(loqus_config, loqus_process):
+def loqusdbapi(loqus_config: dict, loqus_process):
     """
     loqusdb API fixture
     """
@@ -194,7 +172,6 @@ def loqusdb_case_output():
 
 @pytest.fixture(scope="function")
 def loqusdb_duplicate_output():
-
     """ loqusdb output for a 'loqusdb profile --check-vcf' call"""
 
     _output = (
@@ -207,33 +184,3 @@ def loqusdb_duplicate_output():
     )
 
     return _output
-
-
-@pytest.fixture(scope="function")
-def popen_obj_mock():
-
-    """
-    Return mocked subprocess.Popen instance
-    """
-
-    return PopenMock(mock_stdout=LOQUSDB_OUTPUT.decode("utf-8").split("\n"))
-
-
-class PopenMock:
-    """
-    Mock subprocess.Popen class
-    """
-
-    def __init__(self, mock_stdout):
-        self.mock_stdout = mock_stdout
-
-    @staticmethod
-    def poll():
-        "mock poll method of Popen"
-        return 0
-
-    @property
-    def stdout(self):
-        "mock stdout of Popen"
-        for line in self.mock_stdout:
-            yield line.encode()

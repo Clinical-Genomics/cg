@@ -10,7 +10,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.exc import CaseNotFoundError
 
 
-def test_instatiate(loqus_config):
+def test_instantiate(loqus_config: dict):
 
     """Test to instantiate a loqusdb api"""
     # GIVEN a loqusdb api with some configs
@@ -22,7 +22,7 @@ def test_instatiate(loqus_config):
     assert loqusdb.loqusdb_config == loqus_config["loqusdb"]["config_path"]
     assert loqusdb.loqusdb_binary == loqus_config["loqusdb"]["binary_path"]
 
-    # WHEN instatiating with analysis_type argument as 'wes'
+    # WHEN instantiating with analysis_type argument as 'wes'
     loqusdb = LoqusdbAPI(loqus_config, analysis_type="wes")
 
     # THEN assert that the adapter was properly instantiated
