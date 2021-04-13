@@ -199,9 +199,9 @@ def rsync(context, ticket_id: int, dry_run: bool, covid: bool):
     """
     paths = {
         "base_source_path": context.obj.get("delivery_path"),
-        "destination_path": context.obj.get["data-delivery"]["destination_path"],
-        "covid_destination_path": context.obj.get["data-delivery"]["covid_destination_path"],
-        "covid_source_path": context.obj.get["data-delivery"]["covid_source_path"],
+        "destination_path": context.obj["data-delivery"]["destination_path"],
+        "covid_destination_path": context.obj["data-delivery"]["covid_destination_path"],
+        "covid_source_path": context.obj["data-delivery"]["covid_source_path"],
     }
     status_db = context.obj["status_db"]
     rsync_api = RsyncAPI(store=status_db)
