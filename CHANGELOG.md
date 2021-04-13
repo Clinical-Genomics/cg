@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.18.0]
+### Added
+- Trailblazer support for mutant/sars-cov-2
+
 ## [20.17.5]
 ### Fixed
 - Bugfix allowing orders of single samples from existing families
