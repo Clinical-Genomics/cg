@@ -205,23 +205,9 @@ def rsync(context, ticket_id: int, dry_run: bool, covid: bool):
     }
     status_db = context.obj["status_db"]
     rsync_api = RsyncAPI(store=status_db)
-    cmd = rsync_api.generate_rsync_command(ticket_id=ticket_id, paths=paths)
-    if dry_run:
-        LOG.info("Dry-run activated, skipping running the command: %s", cmd)
-    else:
-        LOG.info("Command ran: {}".format(cmd))
-        proc = subprocess.Popen(cmd.split())
-        out, err = proc.communicate()
+    rsync_api.run_rsync_command(ticket_id=ticket_id, paths=paths, dry_run=dry_run)
     if covid:
-        covid_cmd = rsync_api.generate_covid_rsync_command(ticket_id=ticket_id)
-        if dry_run:
-            LOG.info(
-                "Dry-run activated, will not send COVID results via the command: %s", covid_cmd
-            )
-        else:
-            LOG.info("COVID results sent by running: {}".format(covid_cmd))
-            proc = subprocess.Popen(covid_cmd.split())
-            out, err = proc.communicate()
+        rsync_api.run_covid_rsync_command(ticket_id=ticket_id)
 
 
 deliver.add_command(deliver_analysis)
