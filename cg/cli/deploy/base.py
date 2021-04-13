@@ -79,8 +79,9 @@ def deploy_shipping_cmd(context):
     shipping_api.deploy(app_name="shipping")
 
 
-deploy.add_command(deploy_shipping_cmd)
-deploy.add_command(deploy_genotype_cmd)
-deploy.add_command(deploy_scout_cmd)
 deploy.add_command(deploy_fluffy_cmd)
+deploy.add_command(deploy_genotype_cmd)
 deploy.add_command(deploy_hermes_cmd)
+deploy.add_command(deploy_loqusdb_cmd)
+deploy.add_command(deploy_scout_cmd)
+deploy.add_command(deploy_shipping_cmd)
