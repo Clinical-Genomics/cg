@@ -5,19 +5,22 @@ import petname
 from flask_admin.form import thumbgen_filename
 from simple_image_download import simple_image_download as simp
 
-RANDOMIZING_WORDS = ['cute', 'cuddly', 'small', 'pet']
+RANDOMIZING_WORDS = ["cute", "cuddly", "small", "pet"]
 
 response = simp.simple_image_download
 
 
 class Avatar:
-
     @staticmethod
     def get_avatar_url(internal_id):
 
         adjective, animal = Avatar._split_petname(internal_id)
         seed = random.choice(RANDOMIZING_WORDS)
-        urls = response().urls(keywords=f"{seed} {adjective} {animal} animal", limit=25, extensions={'.gif', '.jpg', '.jpeg', '.png', '.tiff'})
+        urls = response().urls(
+            keywords=f"{seed} {adjective} {animal} animal",
+            limit=25,
+            extensions={".gif", ".jpg", ".jpeg", ".png", ".tiff"},
+        )
         random.shuffle(urls)
         for url in urls:
             thumb_url = thumbgen_filename(url)
@@ -29,6 +32,7 @@ class Avatar:
     @staticmethod
     def is_url_image(image_url):
         from PIL import Image
+
         try:
             img = Image.open(urllib.request.urlopen(image_url))
             width, height = img.size

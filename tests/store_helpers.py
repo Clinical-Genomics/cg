@@ -15,6 +15,7 @@ LOG = logging.getLogger(__name__)
 Avatar.get_avatar_url = lambda internal_id: str(uuid.uuid4())
 Avatar.is_url_image = lambda: True
 
+
 class StoreHelpers:
     """Class to hold helper functions that needs to be used all over"""
 

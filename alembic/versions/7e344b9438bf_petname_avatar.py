@@ -15,8 +15,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 # revision identifiers, used by Alembic.
-revision = '7e344b9438bf'
-down_revision = '089edc289291'
+revision = "7e344b9438bf"
+down_revision = "089edc289291"
 branch_labels = None
 depends_on = None
 
@@ -32,9 +32,7 @@ class Family(Base):
     avatar_url = sa.Column(sa.types.TEXT)
 
     def __str__(self) -> str:
-        return (
-            f"{self.internal_id} ({self.name}) {self.avatar_url or 'None'}"
-        )
+        return f"{self.internal_id} ({self.name}) {self.avatar_url or 'None'}"
 
 
 def find_family_by_avatar_url(avatar_url, session):
@@ -47,7 +45,7 @@ def upgrade():
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    for family in (session.query(Family)):
+    for family in session.query(Family):
 
         print(f"Processing family: {str(family)}")
         while True:
