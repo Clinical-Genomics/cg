@@ -5,12 +5,11 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
-from cg.apps.lims import LimsAPI
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
-from ...models.cg_config import CGConfig
 from .families import families
 from .family import family
 

@@ -12,9 +12,16 @@ MAX_FLOWCELLS_ON_DISK = 1250  # Increased by 250 when the previous limit of 1000
 
 
 @click.group()
-def backup():
+@click.pass_obj
+def backup(context: CGConfig):
     """Backup utilities."""
-    pass
+    pdc_api = PdcApi()
+    context.meta_apis["backup_api"] = BackupApi(
+        status=context.status_db,
+        pdc_api=pdc_api,
+        max_flowcells_on_disk=context.max_flowcells or MAX_FLOWCELLS_ON_DISK,
+        root_dir=context.backup.root.dict(),
+    )
 
 
 @backup.command("fetch-flowcell")
@@ -24,15 +31,8 @@ def backup():
 def fetch_flowcell(context: CGConfig, dry_run: bool, flowcell: str):
     """Fetch the first flowcell in the requested queue from backup."""
     status_api: Store = context.status_db
-    max_flowcells_on_disk: int = context.max_flowcells or MAX_FLOWCELLS_ON_DISK
-    root_dir: dict = context.backup.root.dict()
-    pdc_api = PdcApi()
-    backup_api = BackupApi(
-        status=status_api,
-        pdc_api=pdc_api,
-        max_flowcells_on_disk=max_flowcells_on_disk,
-        root_dir=root_dir,
-    )
+    backup_api: BackupApi = context.meta_apis["backup_api"]
+
     flowcell_obj: Optional[models.Flowcell] = None
     if flowcell:
         flowcell_obj: Optional[models.Flowcell] = status_api.flowcell(flowcell)
@@ -40,7 +40,9 @@ def fetch_flowcell(context: CGConfig, dry_run: bool, flowcell: str):
             LOG.error(f"{flowcell}: not found in database")
             raise click.Abort
 
-    retrieval_time: float = backup_api.fetch_flowcell(flowcell_obj=flowcell_obj, dry_run=dry_run)
+    retrieval_time: Optional[float] = backup_api.fetch_flowcell(
+        flowcell_obj=flowcell_obj, dry_run=dry_run
+    )
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60

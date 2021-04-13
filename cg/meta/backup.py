@@ -2,6 +2,7 @@
 import logging
 import subprocess
 import time
+from typing import Optional
 
 from cg.apps.pdc import PdcApi
 from cg.store import Store, models
@@ -30,19 +31,20 @@ class BackupApi:
         LOG.debug("processing flowcells: %s", processing_flowcells)
         return processing_flowcells < max_processing_flowcells
 
-    def pop_flowcell(self, dry_run) -> models.Flowcell:
+    def pop_flowcell(self, dry_run: bool) -> Optional[models.Flowcell]:
         """
         Get the top flowcell from the requested queue and update status to
         "processing".
         """
-        flowcell_obj = self.status.flowcells(status="requested").first()
-        if flowcell_obj is not None:
-            flowcell_obj.status = "processing"
-            if not dry_run:
-                self.status.commit()
+        flowcell_obj: Optional[models.Flowcell] = self.status.flowcells(status="requested").first()
+        if not flowcell_obj:
+            return None
+
         return flowcell_obj
 
-    def fetch_flowcell(self, flowcell_obj: models.Flowcell = None, dry_run: bool = False) -> float:
+    def fetch_flowcell(
+        self, flowcell_obj: Optional[models.Flowcell] = None, dry_run: bool = False
+    ) -> Optional[float]:
         """Start fetching a flowcell from backup if possible.
 
         1. The processing queue is not full
@@ -56,25 +58,26 @@ class BackupApi:
             LOG.info("maximum flowcells ondisk reached")
             return None
 
-        if flowcell_obj:
-            flowcell_obj.status = "processing"
-            if not dry_run:
-                self.status.commit()
-
-        else:
+        if not flowcell_obj:
             flowcell_obj = self.pop_flowcell(dry_run)
-            if flowcell_obj is None:
-                LOG.info("no flowcells requested")
-                return None
 
+        if not flowcell_obj:
+            LOG.info("no flowcells requested")
+            return None
+
+        flowcell_obj.status = "processing"
         if not dry_run:
+            self.status.commit()
             LOG.info("%s: retrieving from PDC", flowcell_obj.name)
 
         start_time = time.time()
 
         try:
             self.pdc.retrieve_flowcell(
-                flowcell_obj.name, flowcell_obj.sequencer_type, self.root_dir, dry_run
+                flowcell_id=flowcell_obj.name,
+                sequencer_type=flowcell_obj.sequencer_type,
+                root_dir=self.root_dir,
+                dry=dry_run,
             )
             if not dry_run:
                 flowcell_obj.status = "retrieved"
