@@ -21,25 +21,6 @@ def deploy(context, dry_run):
     context.obj["shipping_api"] = shipping_api
 
 
-@click.command(name="shipping")
-@click.pass_context
-def deploy_shipping_cmd(context):
-    """Deploy the shipping tool"""
-    LOG.info("Deploying shipping with CG")
-    shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_name="shipping")
-
-
-@click.command(name="hermes")
-@click.pass_context
-def deploy_hermes_cmd(context):
-    """Deploy the hermes tool"""
-    LOG.info("Deploying hermes with CG")
-    hermes_config: Path = Path(context.obj["hermes"]["deploy_config"])
-    shipping_api: ShippingAPI = context.obj["shipping_api"]
-    shipping_api.deploy(app_name="hermes", app_config=hermes_config)
-
-
 @click.command(name="fluffy")
 @click.pass_context
 def deploy_fluffy_cmd(context):
@@ -59,6 +40,26 @@ def deploy_genotype_cmd(context):
     shipping_api.deploy(app_name="genotype")
 
 
+@click.command(name="hermes")
+@click.pass_context
+def deploy_hermes_cmd(context):
+    """Deploy the hermes tool"""
+    LOG.info("Deploying hermes with CG")
+    hermes_config: Path = Path(context.obj["hermes"]["deploy_config"])
+    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api.deploy(app_name="hermes", app_config=hermes_config)
+
+
+@click.command(name="loqusdb")
+@click.pass_context
+def deploy_loqusdb_cmd(context):
+    """Deploy the LoqusDB tool"""
+    LOG.info("Deploying LoqusDB with CG")
+    hermes_config: Path = Path(context.obj["loqusdb"]["deploy_config"])
+    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api.deploy(app_name="loqusdb", app_config=loqusdb_config)
+
+
 @click.command(name="scout")
 @click.pass_context
 def deploy_scout_cmd(context):
@@ -67,6 +68,15 @@ def deploy_scout_cmd(context):
     scout_config: Path = Path(context.obj["scout"]["deploy_config"])
     shipping_api: ShippingAPI = context.obj["shipping_api"]
     shipping_api.deploy(app_name="scout", app_config=scout_config)
+
+
+@click.command(name="shipping")
+@click.pass_context
+def deploy_shipping_cmd(context):
+    """Deploy the shipping tool"""
+    LOG.info("Deploying shipping with CG")
+    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api.deploy(app_name="shipping")
 
 
 deploy.add_command(deploy_shipping_cmd)
