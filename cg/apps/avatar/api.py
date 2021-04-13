@@ -11,6 +11,7 @@ response = simp.simple_image_download
 
 
 class Avatar:
+
     @staticmethod
     def get_avatar_url(internal_id):
 
@@ -20,13 +21,13 @@ class Avatar:
         random.shuffle(urls)
         for url in urls:
             thumb_url = thumbgen_filename(url)
-            if Avatar._is_url_image(thumb_url):
+            if Avatar.is_url_image(thumb_url):
                 return thumb_url
 
         return None
 
     @staticmethod
-    def _is_url_image(image_url):
+    def is_url_image(image_url):
         from PIL import Image
         try:
             img = Image.open(urllib.request.urlopen(image_url))
