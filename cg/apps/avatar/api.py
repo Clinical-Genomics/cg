@@ -1,5 +1,6 @@
 import random
 import urllib
+from typing import Optional
 
 import petname
 from flask_admin.form import thumbgen_filename
@@ -12,25 +13,24 @@ response = simp.simple_image_download
 
 class Avatar:
     @staticmethod
-    def get_avatar_url(internal_id):
+    def get_avatar_url(internal_id: str, tries: int = 25) -> Optional[bool]:
 
         adjective, animal = Avatar._split_petname(internal_id)
         seed = random.choice(RANDOMIZING_WORDS)
         urls = response().urls(
-            keywords=f"{seed} {adjective} {animal} animal",
-            limit=25,
+            keywords=f"{seed} {adjective} {animal} icon animal",
+            limit=tries,
             extensions={".gif", ".jpg", ".jpeg", ".png", ".tiff"},
         )
         random.shuffle(urls)
         for url in urls:
-            thumb_url = thumbgen_filename(url)
-            if Avatar.is_url_image(thumb_url):
-                return thumb_url
+            if Avatar.is_url_image(url):
+                return url
 
         return None
 
     @staticmethod
-    def is_url_image(image_url):
+    def is_url_image(image_url: str) -> bool:
         from PIL import Image
 
         try:
@@ -44,7 +44,7 @@ class Avatar:
         return False
 
     @classmethod
-    def _split_petname(cls, merged_name):
+    def _split_petname(cls, merged_name: str) -> (str, str):
 
         found_adj = ""
         for adjective in petname.adjectives:
