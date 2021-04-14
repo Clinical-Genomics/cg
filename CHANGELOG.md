@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.1]
+
+### Fixed
+- Bug when fetching the api in mip workflow cli base
+
 ## [20.19.0]
 
 ### Changed
