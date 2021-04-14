@@ -50,7 +50,7 @@ def family(
     if case_obj is None:
         LOG.error("Can't find case %s,", family_id)
         raise click.Abort
-    if not any([action, panels, priority, customer_id, data_analysis, data_delivery]):
+    if not any([action, avatar_url, panels, priority, customer_id, data_analysis, data_delivery]):
         LOG.error("Nothing to change")
         raise click.Abort
     if action:
