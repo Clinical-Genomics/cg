@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.0]
+
+### Changed
+- use pydantic to control CLI context 
+
 ## [20.18.0]
 ### Added
 - Trailblazer support for mutant/sars-cov-2

@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Tuple, Optional
-
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import Query
+from typing import List, Optional, Tuple
 
 from cg.constants import PRIORITY_MAP, Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Query
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -66,7 +65,7 @@ class StatusHandler(BaseHandler):
 
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
-    ) -> list:
+    ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
@@ -154,7 +153,7 @@ class StatusHandler(BaseHandler):
         exclude_delivered: bool = False,
         exclude_delivery_reported: bool = False,
         exclude_invoiced: bool = False,
-    ) -> list:
+    ) -> List[models.Family]:
         """Fetch cases with and w/o analyses"""
         case_q = self._get_filtered_case_query(
             case_action,

@@ -28,6 +28,7 @@ marshmallow>3               # due to code expects behaviour from >3
 openpyxl
 petname
 pydantic
+email-validator
 pyschemes
 python-dateutil
 ruamel.yaml

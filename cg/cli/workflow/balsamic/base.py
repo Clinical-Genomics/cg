@@ -3,12 +3,14 @@
 import logging
 
 import click
-from pydantic import ValidationError
-
-from cg.cli.workflow.commands import link, resolve_compression, store_available
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.workflow.commands import link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
 
@@ -52,7 +54,7 @@ def balsamic(context: click.Context):
         click.echo(context.get_help())
         return None
     config = context.obj
-    context.obj["analysis_api"] = BalsamicAnalysisAPI(
+    context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(
         config=config,
     )
 
@@ -65,11 +67,11 @@ balsamic.add_command(link)
 @ARGUMENT_CASE_ID
 @OPTION_PANEL_BED
 @OPTION_DRY
-@click.pass_context
-def config_case(context: click.Context, panel_bed: str, case_id: str, dry_run: bool):
+@click.pass_obj
+def config_case(context: CGConfig, panel_bed: str, case_id: str, dry_run: bool):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
 
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -88,9 +90,9 @@ def config_case(context: click.Context, panel_bed: str, case_id: str, dry_run: b
 @OPTION_PRIORITY
 @OPTION_ANALYSIS_TYPE
 @OPTION_RUN_ANALYSIS
-@click.pass_context
+@click.pass_obj
 def run(
-    context: click.Context,
+    context: CGConfig,
     analysis_type: str,
     run_analysis: bool,
     priority: str,
@@ -98,7 +100,7 @@ def run(
     dry_run: bool,
 ):
     """Run balsamic analysis for given CASE ID"""
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.verify_case_id_in_statusdb(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
@@ -126,11 +128,11 @@ def run(
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @OPTION_ANALYSIS_TYPE
-@click.pass_context
-def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
+@click.pass_obj
+def report_deliver(context: CGConfig, case_id: str, analysis_type: str, dry_run: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
 
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.meta_apis["analysis_api"]
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -147,11 +149,13 @@ def report_deliver(context: click.Context, case_id: str, analysis_type: str, dry
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
-@click.pass_context
-def store_housekeeper(context: click.Context, case_id: str):
+@click.pass_obj
+def store_housekeeper(context: CGConfig, case_id: str):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.meta_apis["analysis_api"]
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    status_db: Store = context.status_db
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -168,8 +172,8 @@ def store_housekeeper(context: click.Context, case_id: str):
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
-        analysis_api.housekeeper_api.rollback()
-        analysis_api.status_db.rollback()
+        housekeeper_api.rollback()
+        status_db.rollback()
         raise click.Abort()
 
 
@@ -214,7 +218,7 @@ def start(
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full workflow for all cases ready for analysis"""
 
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
@@ -248,7 +252,7 @@ def store(context: click.Context, case_id: str, analysis_type: str, dry_run: boo
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper"""
 
-    analysis_api: BalsamicAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():

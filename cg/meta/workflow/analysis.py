@@ -1,15 +1,16 @@
 import datetime as dt
 import logging
+import os
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
-import os
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store.models import Bundle, Version
 
@@ -21,7 +22,7 @@ class AnalysisAPI(MetaAPI):
     Parent class containing all methods that are either shared or overridden by other workflow APIs.
     """
 
-    def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
+    def __init__(self, pipeline: Pipeline, config: CGConfig):
         super().__init__(config=config)
         self.pipeline = pipeline
         self._process = None
@@ -62,6 +63,7 @@ class AnalysisAPI(MetaAPI):
         elif not case_obj.links:
             LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
+        LOG.info("Case %s exists in status db", case_id)
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):

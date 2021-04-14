@@ -5,6 +5,7 @@ from typing import Dict
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_flowcell
+from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from click import testing
 
@@ -12,14 +13,14 @@ from click import testing
 def test_demultiplex_flowcell_dry_run(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flowcell: Path,
-    demultiplex_context: Dict[str, DemultiplexingAPI],
+    demultiplex_context: CGConfig,
     caplog,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for demultiplexing
     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
     # GIVEN a out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
     demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
     unaligned_dir: Path = demux_dir / "Unaligned"
@@ -42,14 +43,14 @@ def test_demultiplex_flowcell_dry_run(
 def test_demultiplex_flowcell(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flowcell: Path,
-    demultiplex_context: Dict[str, DemultiplexingAPI],
+    demultiplex_context: CGConfig,
     caplog,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for demultiplexing
     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
     # GIVEN a out dir that does not exist
-    demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
@@ -74,13 +75,13 @@ def test_demultiplex_flowcell(
 def test_start_demultiplexing_when_already_completed(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flowcell: Path,
-    demultiplex_context: Dict[str, DemultiplexingAPI],
+    demultiplex_context: CGConfig,
     caplog,
 ):
     caplog.set_level(logging.DEBUG)
     # GIVEN that all files are present for demultiplexing
     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
-    demux_api: DemultiplexingAPI = demultiplex_context["demultiplex_api"]
+    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     # GIVEN that demultiplexing has started
     flowcell.demultiplexing_started_path.touch()
     # GIVEN a out dir that exist
