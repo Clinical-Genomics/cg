@@ -1,9 +1,8 @@
 import random
-import urllib
 from typing import Optional
 
 import petname
-from flask_admin.form import thumbgen_filename
+import requests
 from simple_image_download import simple_image_download as simp
 
 RANDOMIZING_WORDS = ["cute", "cuddly", "small", "pet"]
@@ -41,7 +40,7 @@ class Avatar:
         from PIL import Image
 
         try:
-            img = Image.open(urllib.request.urlopen(image_url))
+            img = Image.open(requests.get(image_url, stream=True).raw)
             width, height = img.size
 
             if 0 < width and 0 < height:
