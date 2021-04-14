@@ -33,7 +33,6 @@ def test_upload_started_long_time_ago_raises_exception(
     cli_runner: CliRunner,
     base_context: CGConfig,
     helpers: StoreHelpers,
-    case_id: str,
 ):
     """Test that an upload for a missing case does fail hard """
 
