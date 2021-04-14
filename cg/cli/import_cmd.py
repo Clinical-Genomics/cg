@@ -1,16 +1,16 @@
 """Cli commands for importing data into the status database"""
 import getpass
 import logging
-from pathlib import Path
 
 import click
 from cg.constants import PREP_CATEGORIES
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 from cg.store.api.import_func import (
     import_application_versions,
     import_applications,
     import_apptags,
 )
-from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -28,12 +28,10 @@ def import_cmd():
     "-d", "--dry-run", "dry_run", is_flag=True, help="Test run, no changes to the " "database"
 )
 @click.option("-s", "--sheet-name", help="Sheet name in workbook")
-@click.pass_context
-def application(
-    context: click.Context, excel_path: str, signature: str, sheet_name: str, dry_run: bool
-):
+@click.pass_obj
+def application(context: CGConfig, excel_path: str, signature: str, sheet_name: str, dry_run: bool):
     """Import new applications to status-db"""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     if not signature:
         signature: str = getpass.getuser()
 
@@ -55,12 +53,12 @@ def application(
 @click.option(
     "--skip-missing", "skip_missing", is_flag=True, help="continue despite missing " "applications"
 )
-@click.pass_context
+@click.pass_obj
 def application_version(
-    context: click.Context, excel_path: str, signature: str, dry_run: bool, skip_missing: bool
+    context: CGConfig, excel_path: str, signature: str, dry_run: bool, skip_missing: bool
 ):
     """Import new application versions to status-db"""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     if not signature:
         signature = getpass.getuser()
 
@@ -101,9 +99,9 @@ def application_version(
     "-a", "--activate", is_flag=True, help="Activate archived tags found in the " "orderform"
 )
 @click.option("-i", "--inactivate", is_flag=True, help="Inactivate tags not found in the orderform")
-@click.pass_context
+@click.pass_obj
 def apptag(
-    context: click.Context,
+    context: CGConfig,
     excel_path: click.Path,
     prep_category: str,
     signature: str,
@@ -128,7 +126,7 @@ def apptag(
         :param excel_path:          Path to orderform excel file
         :param signature:           Signature of user running the script
     """
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     if not signature:
         signature = getpass.getuser()
 

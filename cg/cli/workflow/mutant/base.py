@@ -1,18 +1,18 @@
 import logging
 
 import click
-
 from cg.cli.workflow.commands import (
-    store,
-    store_available,
-    resolve_compression,
-    link,
     ARGUMENT_CASE_ID,
     OPTION_DRY,
+    link,
+    resolve_compression,
+    store,
+    store_available,
 )
-from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.exc import DecompressionNeededError, CgError
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.mutant import MutantAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def mutant(context: click.Context) -> None:
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return None
-    context.obj["analysis_api"] = MutantAnalysisAPI(
+    context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(
         config=context.obj,
     )
 
@@ -38,20 +38,20 @@ mutant.add_command(store_available)
 @mutant.command("config-case")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
-@click.pass_context
-def config_case(context: click.Context, dry_run: bool, case_id: str) -> None:
+@click.pass_obj
+def config_case(context: CGConfig, dry_run: bool, case_id: str) -> None:
     """Create config file for a case"""
-    analysis_api: MutantAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MutantAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.create_case_config(case_id=case_id, dry_run=dry_run)
 
 
 @mutant.command("run")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
-@click.pass_context
-def run(context: click.Context, dry_run: bool, case_id: str) -> None:
+@click.pass_obj
+def run(context: CGConfig, dry_run: bool, case_id: str) -> None:
     """Run mutant analysis command for a case"""
-    analysis_api: MutantAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MutantAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.set_statusdb_action(case_id=case_id, action="running")
     try:
         analysis_api.run_analysis(case_id=case_id, dry_run=dry_run)
@@ -82,7 +82,7 @@ def start(context: click.Context, dry_run: bool, case_id: str) -> None:
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
 
-    analysis_api: MutantAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():

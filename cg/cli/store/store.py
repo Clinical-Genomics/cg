@@ -6,7 +6,7 @@ import click
 from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress.compress import CompressAPI
-from cg.store import Store
+from cg.models.cg_config import CGConfig
 
 from .fastq import store_case, store_flowcell, store_sample, store_ticket
 
@@ -14,15 +14,15 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def store(context: click.Context):
+@click.pass_obj
+def store(context: CGConfig):
     """Command for storing files"""
     LOG.info("Running CG store command")
-    housekeeper_api = context.obj["housekeeper_api"]
-    crunchy_api = context.obj["meta_api"].crunchy_api
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    crunchy_api: CrunchyAPI = context.crunchy_api
 
     compress_api = CompressAPI(hk_api=housekeeper_api, crunchy_api=crunchy_api)
-    context.obj["compress_api"] = compress_api
+    context.meta_apis["compress_api"] = compress_api
 
 
 store.add_command(store_sample)

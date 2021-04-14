@@ -9,9 +9,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
-from ...models.cg_config import CGConfig
 from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
         if not case_obj:
             LOG.warning("Could not find case %s", case_id)
             return
-        cases = cases.append(case_obj)
+        cases.append(case_obj)
     else:
         date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
         cases = compress_api.get_cases_to_compress(store, date_threshold=date_threshold)
@@ -155,7 +155,7 @@ def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
     update_compress_api(compress_api, dry_run=dry_run)
 
     was_decompressed: bool = compress_api.decompress_spring(sample_id)
-    if was_decompressed is False:
+    if not was_decompressed:
         LOG.info(f"Skipping sample {sample_id}")
         return 0
     LOG.info(f"Decompressed sample {sample_id}")

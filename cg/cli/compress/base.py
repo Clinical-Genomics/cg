@@ -2,12 +2,9 @@
 import logging
 
 import click
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
-from cg.store import Store
+from cg.models.cg_config import CGConfig
 
-from ...models.cg_config import CGConfig
 from .fastq import (
     clean_fastq,
     decompress_case,

@@ -1,7 +1,8 @@
 import logging
-from typing import Iterable
+from typing import Iterable, Optional
 
 import click
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -15,10 +16,10 @@ def reset_cmd():
 
 @reset_cmd.command()
 @click.option("-c", "--case_id", help="internal case id, leave empty to process all")
-@click.pass_context
-def observations(context, case_id):
+@click.pass_obj
+def observations(context: CGConfig, case_id: Optional[str]):
     """Reset observation links from an analysis to LoqusDB."""
-    status_db: Store = context.obj["status_db"]
+    status_db: Store = context.status_db
     observations_uploaded: Iterable[models.Family]
     if case_id:
         observations_uploaded = [status_db.family(case_id)]

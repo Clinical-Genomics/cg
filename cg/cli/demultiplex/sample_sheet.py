@@ -4,21 +4,19 @@ from typing import List
 
 import click
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
-from cg.apps.lims import LimsAPI
 from cg.apps.lims.samplesheet import LimsFlowcellSample, flowcell_samples
+from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
-from click import Context
 from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group(name="samplesheet")
-@click.pass_context
-def sample_sheet_commands(context: Context):
+def sample_sheet_commands():
     """Command group for the sample sheet commands"""
-    context.obj["lims_api"] = LimsAPI(config=context.obj)
+    pass
 
 
 @sample_sheet_commands.command(name="validate")
@@ -42,8 +40,8 @@ def validate_sample_sheet(sheet: click.Path):
 @sample_sheet_commands.command(name="create")
 @click.argument("flowcell", type=click.Path(exists=True, file_okay=False))
 @click.option("--dry-run", is_flag=True)
-@click.pass_context
-def create_sheet(context: Context, flowcell: click.Path, dry_run: bool):
+@click.pass_obj
+def create_sheet(context: CGConfig, flowcell: click.Path, dry_run: bool):
     """Command to create a sample sheet
 
     Search the flowcell directory for run parameters and create a sample sheet based on the information
@@ -51,7 +49,7 @@ def create_sheet(context: Context, flowcell: click.Path, dry_run: bool):
     LOG.info("Creating sample sheet for flowcell %s", flowcell)
     flowcell_object = Flowcell(flowcell_path=Path(str(flowcell)))
     lims_samples: List[LimsFlowcellSample] = list(
-        flowcell_samples(lims=context.obj["lims_api"], flowcell_id=flowcell_object.flowcell_id)
+        flowcell_samples(lims=context.lims_api, flowcell_id=flowcell_object.flowcell_id)
     )
     if not lims_samples:
         LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)
@@ -73,8 +71,8 @@ def create_sheet(context: Context, flowcell: click.Path, dry_run: bool):
 @sample_sheet_commands.command(name="create-all")
 @click.argument("flowcells", type=click.Path(exists=True, file_okay=False))
 @click.option("--dry-run", is_flag=True)
-@click.pass_context
-def create_all_sheets(context: Context, flowcells: click.Path, dry_run: bool):
+@click.pass_obj
+def create_all_sheets(context: CGConfig, flowcells: click.Path, dry_run: bool):
     """Command to create sample sheets for all flowcells that lack a sample sheet
 
     Search flowcell directories for run parameters and create a sample sheets based on the information
@@ -87,7 +85,7 @@ def create_all_sheets(context: Context, flowcells: click.Path, dry_run: bool):
         flowcell_object = Flowcell(flowcell_path=sub_dir)
         LOG.info("Creating sample sheet for flowcell %s", flowcell_object.flowcell_id)
         lims_samples: List[LimsFlowcellSample] = list(
-            flowcell_samples(lims=context.obj["lims_api"], flowcell_id=flowcell_object.flowcell_id)
+            flowcell_samples(lims=context.lims_api, flowcell_id=flowcell_object.flowcell_id)
         )
         if not lims_samples:
             LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)

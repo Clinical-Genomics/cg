@@ -129,35 +129,35 @@ class CGConfig(BaseModel):
     housekeeper_api_: HousekeeperAPI = None
 
     # App APIs that can be instantiated in CGConfig
-    demultiplex: DemultiplexConfig = None
-    demultiplex_api_: DemultiplexingAPI = None
-    hermes: CommonAppConfig = None
-    hermes_api_: HermesApi = None
     backup: BackupConfig = None
-    scout: CommonAppConfig = None
-    scout_api_: ScoutAPI = None
-    trailblazer: TrailblazerConfig = None
-    trailblazer_api_: TrailblazerAPI = None
-    lims: LimsConfig = None
-    lims_api_: LimsAPI = None
-    vogue: CommonAppConfig = None
-    vogue_api_: VogueAPI = None
+    cg_stats: CGStatsConfig = None
+    cg_stats_api_: StatsAPI = None
+    chanjo: CommonAppConfig = None
+    chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
+    demultiplex: DemultiplexConfig = None
+    demultiplex_api_: DemultiplexingAPI = None
+    genotype: CommonAppConfig = None
+    genotype_api_: GenotypeAPI = None
+    hermes: CommonAppConfig = None
+    hermes_api_: HermesApi = None
+    lims: LimsConfig = None
+    lims_api_: LimsAPI = None
+    loqusdb: CommonAppConfig = None
+    loqusdb_api_: LoqusdbAPI = None
+    loqusdb_wes: CommonAppConfig = Field(None, alias="loqusdb-wes")
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
-    genotype: CommonAppConfig = None
-    genotype_api_: GenotypeAPI = None
-    chanjo: CommonAppConfig = None
-    chanjo_api_: ChanjoAPI = None
+    scout: CommonAppConfig = None
+    scout_api_: ScoutAPI = None
     shipping: CommonAppConfig = None
     shipping_api_: ShippingAPI = None
-    cg_stats: CGStatsConfig = None
-    cg_stats_api_: StatsAPI = None
-    loqusdb: CommonAppConfig = None
-    loqusdb_wes: CommonAppConfig = Field(None, alias="loqusdb-wes")
-    loqusdb_api_: LoqusdbAPI = None
+    trailblazer: TrailblazerConfig = None
+    trailblazer_api_: TrailblazerAPI = None
+    vogue: CommonAppConfig = None
+    vogue_api_: VogueAPI = None
 
     # Meta APIs that will use the apps from CGConfig
     fluffy: FluffyConfig = None
@@ -173,22 +173,22 @@ class CGConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         fields = {
-            "status_db_": "status_db",
-            "housekeeper_api_": "housekeeper_api",
-            "demultiplex_api_": "demultiplex_api",
-            "hermes_api_": "hermes_api",
-            "scout_api_": "scout_api",
-            "trailblazer_api_": "trailblazer_api",
-            "lims_api_": "lims_api",
-            "vogue_api_": "vogue_api",
+            "cg_stats_api_": "cg_stats_api",
+            "chanjo_api_": "chanjo_api",
             "crunchy_api_": "crunchy_api",
+            "demultiplex_api_": "demultiplex_api",
+            "genotype_api_": "genotype_api",
+            "hermes_api_": "hermes_api",
+            "housekeeper_api_": "housekeeper_api",
+            "lims_api_": "lims_api",
+            "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
-            "genotype_api_": "genotype_api",
-            "chanjo_api_": "chanjo_api",
+            "scout_api_": "scout_api",
             "shipping_api_": "shipping_api",
-            "cg_stats_api_": "cg_stats_api",
-            "loqusdb_api_": "loqusdb_api",
+            "status_db_": "status_db",
+            "trailblazer_api_": "trailblazer_api",
+            "vogue_api_": "vogue_api",
         }
 
     @property

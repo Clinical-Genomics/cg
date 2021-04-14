@@ -2,17 +2,16 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Iterable, Optional
+from typing import Iterable, List, Optional
 
 import click
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.workflow.commands import balsamic_past_run_dirs, mip_past_run_dirs, mutant_past_run_dirs
-from housekeeper.store import models as hk_models
-from cg.store import models, Store
 from cg.models.cg_config import CGConfig
+from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -32,17 +31,16 @@ clean.add_command(mutant_past_run_dirs)
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
-@click.pass_context
+@click.pass_obj
 def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
-
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    if bundle is None:
-        LOG.info("Please select a bundle")
-        raise click.Abort
     files: List[hk_models.File] = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
         files.extend(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
+    if not files:
+        LOG.warning("Could not find any files ready for cleaning for bundle %s", bundle)
+        return
     for file_obj in files:
         if file_obj.is_included:
             question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
@@ -57,7 +55,7 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
             if not dry_run:
                 file_obj.delete()
                 housekeeper_api.commit()
-                click.echo(f"{file_path} deleted")
+            click.echo(f"{file_path} deleted")
 
 
 @clean.command("scout-finished-cases")

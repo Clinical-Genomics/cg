@@ -119,12 +119,11 @@ def reagent_labels(context: CGConfig, days: int):
 @click.pass_obj
 def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, dry: bool):
     """Load bioinfo case results to the trending database"""
-
-    upload_vogue_api = UploadVogueAPI(
-        genotype_api=context.genotype_api, vogue_api=context.vogue_api, store=context.status_db
-    )
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    upload_vogue_api = UploadVogueAPI(
+        genotype_api=context.genotype_api, vogue_api=context.vogue_api, store=status_db
+    )
 
     click.echo(click.style("----------------- BIOINFO -----------------------"))
 

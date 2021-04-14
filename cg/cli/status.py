@@ -52,12 +52,10 @@ def status():
 
 
 @status.command()
-@click.pass_context
-def analysis(context):
+@click.pass_obj
+def analysis(context: CGConfig):
     """Which families will be analyzed?"""
-    records: List[models.Family] = context.obj["status_db"].cases_to_analyze(
-        pipeline=Pipeline.MIP_DNA
-    )
+    records: List[models.Family] = context.status_db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
     for case_obj in records:
         click.echo(case_obj)
 
