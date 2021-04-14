@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.19.2]
+
+### Fixed
+- Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
+
 ## [20.19.1]
 
 ### Fixed
