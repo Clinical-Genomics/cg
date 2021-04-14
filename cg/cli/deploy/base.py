@@ -40,21 +40,21 @@ def deploy_genotype_cmd(context: CGConfig):
 
 
 @click.command(name="hermes")
-@click.pass_context
+@click.pass_obj
 def deploy_hermes_cmd(context: CGConfig):
     """Deploy the hermes tool"""
     LOG.info("Deploying hermes with CG")
-    hermes_config: Path = Path(context.obj["hermes"]["deploy_config"])
-    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    hermes_config: Path = Path(context.hermes.deploy_config)
+    shipping_api: ShippingAPI = context.shipping_api
     shipping_api.deploy(app_name="hermes", app_config=hermes_config)
 
 
 @click.command(name="loqusdb")
-@click.pass_context
+@click.pass_obj
 def deploy_loqusdb_cmd(context: CGConfig):
     """Deploy the LoqusDB tool"""
     LOG.info("Deploying LoqusDB with CG")
-    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api: ShippingAPI = context.shipping_api
     shipping_api.deploy(app_name="loqusdb")
 
 
@@ -69,11 +69,11 @@ def deploy_scout_cmd(context: CGConfig):
 
 
 @click.command(name="shipping")
-@click.pass_context
+@click.pass_obj
 def deploy_shipping_cmd(context: CGConfig):
     """Deploy the shipping tool"""
     LOG.info("Deploying shipping with CG")
-    shipping_api: ShippingAPI = context.obj["shipping_api"]
+    shipping_api: ShippingAPI = context.shipping_api
     shipping_api.deploy(app_name="shipping")
 
 
