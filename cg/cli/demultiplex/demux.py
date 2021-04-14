@@ -21,7 +21,7 @@ def demultiplex_all(
 ):
     """Demultiplex all flowcells that are ready under the flowcells_directory"""
     flowcells_directory: Path = Path(str(flowcells_directory))
-    demultiplex_api: DemultiplexingAPI = context.meta_apis["demultiplex_api"]
+    demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     for sub_dir in flowcells_directory.iterdir():
         if not sub_dir.is_dir():
@@ -55,7 +55,7 @@ def demultiplex_flowcell(
     """Demultiplex a flowcell on slurm using CG"""
     LOG.info("Running cg demultiplex flowcell")
     flowcell_directory: Path = Path(str(flowcell_directory))
-    demultiplex_api: DemultiplexingAPI = context.meta_apis["demultiplex_api"]
+    demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     if out_directory:
         out_directory: Path = Path(out_directory)
         LOG.info("Set out_dir to %s", out_directory)
