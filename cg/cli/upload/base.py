@@ -41,11 +41,11 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
     """Upload results from analyses."""
-
-    if not context.obj.meta_apis.get("analysis_api"):
-        context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context)
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
-    status_db: Store = context.obj.status_db
+    config_object: CGConfig = context.obj
+    if not config_object.meta_apis.get("analysis_api"):
+        config_object.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api: AnalysisAPI = config_object.meta_apis["analysis_api"]
+    status_db: Store = config_object.status_db
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
 
@@ -81,28 +81,28 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
 
     context.obj.meta_apis["report_api"] = ReportAPI(
         store=status_db,
-        lims_api=context.obj.lims_api,
-        chanjo_api=context.obj.chanjo_api,
+        lims_api=config_object.lims_api,
+        chanjo_api=config_object.chanjo_api,
         analysis_api=analysis_api,
-        scout_api=context.obj.scout_api,
+        scout_api=config_object.scout_api,
     )
 
     context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
-        hk_api=context.obj.housekeeper_api,
-        scout_api=context.obj.scout_api,
-        madeline_api=context.obj.madeline_api,
+        hk_api=config_object.housekeeper_api,
+        scout_api=config_object.scout_api,
+        madeline_api=config_object.madeline_api,
         analysis_api=analysis_api,
-        lims_api=context.obj.lims_api,
+        lims_api=config_object.lims_api,
     )
 
     if context.invoked_subcommand is not None:
         return
 
     if not family_id:
-        suggest_cases_to_upload(context)
+        suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    case_obj: models.Family = analysis_api.status_db.family(family_id)
+    case_obj: models.Family = status_db.family(family_id)
     analysis_obj: models.Analysis = case_obj.analyses[0]
     if analysis_obj.uploaded_at is not None:
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"

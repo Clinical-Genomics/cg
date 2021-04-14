@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.2]
+
+### Fixed
+- Bug when instantiating analysis api in upload
+
 ## [20.19.1]
 
 ### Fixed
