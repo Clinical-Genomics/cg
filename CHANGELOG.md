@@ -13,7 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.4]
 
+### Fixed
+- fixed bug that cgstats configs was saved as cg_stats in CGConfig
 
 ## [20.19.3]
 
