@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Avatars for cases
+
 ## [20.18.0]
 ### Added
 - Trailblazer support for mutant/sars-cov-2
