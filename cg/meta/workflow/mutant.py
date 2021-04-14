@@ -50,6 +50,9 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_case_fastq_dir(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "fastq")
 
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
+
     def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
         return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
 
