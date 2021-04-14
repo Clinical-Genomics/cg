@@ -29,6 +29,7 @@ def finish_flowcell(context: click.Context, flowcell_directory: click.Path, dry_
     unaligned_dir: Path = demultiplex_api.unaligned_dir_path(flowcell=flowcell)
     for sub_dir in unaligned_dir.iterdir():
         if not sub_dir.is_dir():
+            LOG.debug("Skipping %s since it is not a directory", sub_dir)
             continue
         dir_name: str = sub_dir.name
         if dir_name in ["Stats", "Reports"]:
