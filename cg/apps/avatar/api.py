@@ -17,15 +17,16 @@ class Avatar:
 
         adjective, animal = Avatar._split_petname(internal_id)
         seed = random.choice(RANDOMIZING_WORDS)
+        keywords = f"{seed} {adjective} {animal} icon animal"
         try:
             urls = response().urls(
-                keywords=f"{seed} {adjective} {animal} icon animal",
+                keywords=keywords,
                 limit=tries,
                 extensions={".gif", ".jpg", ".jpeg", ".png", ".tiff"},
             )
         except TypeError:
             urls = response().urls(
-                keywords=f"{seed} {adjective} {animal} icon animal",
+                keywords=keywords,
                 limit=tries,
             )
         random.shuffle(urls)
