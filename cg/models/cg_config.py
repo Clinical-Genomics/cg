@@ -194,10 +194,8 @@ class CGConfig(BaseModel):
     @property
     def status_db(self) -> Store:
         status_db = self.__dict__.get("status_db_")
-        print(f"Found store {status_db}")
         if status_db is None:
             LOG.info("Instantiating status db")
-            print("Instantiating status db")
             status_db = Store(self.database)
             self.status_db_ = status_db
         return status_db
@@ -336,24 +334,3 @@ class CGConfig(BaseModel):
             api = LoqusdbAPI(config=self.dict())
             self.loqusdb_api_ = api
         return api
-
-
-if __name__ == "__main__":
-    config = {
-        "database": "mysql+pymysql://auser:apwd@localhost:3308/cg-stage",
-        "madeline_exe": "path/to/madeline",
-        "bed_path": "path/to/bed",
-        "delivery_path": "path/to/delivery",
-        "housekeeper": {
-            "database": "mysql+pymysql://auser:apwd@localhost:3308/housekeeper-stage",
-            "root": "path/to/root",
-        },
-    }
-    #
-    # This will replace context.ob
-    cg_configs = CGConfig(**config)
-    print(cg_configs)
-    store = cg_configs.status_db
-    print(store)
-    another_store = cg_configs.status_db
-    print(another_store)

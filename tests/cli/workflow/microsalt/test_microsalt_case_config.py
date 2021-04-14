@@ -3,12 +3,11 @@
 import logging
 from pathlib import Path
 
-from click.testing import CliRunner
-from snapshottest import Snapshot
-
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.microsalt.base import config_case
 from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
+from snapshottest import Snapshot
 
 EXIT_SUCCESS = 0
 
@@ -42,7 +41,7 @@ def test_no_sample_found(cli_runner: CliRunner, base_context: CGConfig, caplog):
 
 
 def test_no_order_found(
-    cli_runner: CliRunner, base_context: CGConfig, caplog, invalid_ticket_number
+    cli_runner: CliRunner, base_context: CGConfig, caplog, invalid_ticket_number: int
 ):
     """Test missing order command """
 
@@ -80,7 +79,7 @@ def test_no_case_found(cli_runner: CliRunner, base_context: CGConfig, caplog):
 def test_dry_sample(
     cli_runner: CliRunner,
     base_context: CGConfig,
-    microbial_sample_id,
+    microbial_sample_id: str,
     snapshot: Snapshot,
     lims_api: LimsAPI,
 ):

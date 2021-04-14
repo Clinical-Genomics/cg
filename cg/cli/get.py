@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 import click
 from cg.models.cg_config import CGConfig
@@ -15,9 +15,9 @@ FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Statu
 
 
 @click.group(invoke_without_command=True)
-@click.option("-i", "identifier", help="made a guess what type you are looking for")
+@click.option("-i", "--identifier", help="made a guess what type you are looking for")
 @click.pass_context
-def get(context: click.Context, identifier: str):
+def get(context: click.Context, identifier: Optional[str]):
     """Get information about records in the database."""
     if identifier:
         if re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):

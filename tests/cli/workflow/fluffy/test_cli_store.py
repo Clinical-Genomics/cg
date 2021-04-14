@@ -8,7 +8,7 @@ from click.testing import CliRunner
 
 def test_cli_store_dry_no_case(
     cli_runner: CliRunner,
-    fluffy_case_id_non_existing,
+    fluffy_case_id_non_existing: str,
     fluffy_context: CGConfig,
     caplog,
 ):
@@ -31,7 +31,7 @@ def test_cli_store_dry_no_case(
 
 def test_cli_store(
     cli_runner: CliRunner,
-    fluffy_case_id_existing,
+    fluffy_case_id_existing: str,
     deliverables_yaml_fixture_path,
     fluffy_hermes_deliverables_response_data,
     fluffy_context: CGConfig,

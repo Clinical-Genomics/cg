@@ -3,12 +3,12 @@ import logging
 from typing import Optional
 
 import click
+from cg.apps.gt import GenotypeAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
-from ...apps.gt import GenotypeAPI
-from ...apps.housekeeper.hk import HousekeeperAPI
-from ...models.cg_config import CGConfig
 from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)
