@@ -40,6 +40,7 @@ VALIDATION_CASES = [
     "finequagga",
     "firstfawn",
     "fleetjay",
+    "frankhusky",
     "gamedeer",
     "gladthrush",
     "helpedfilly",

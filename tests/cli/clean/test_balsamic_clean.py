@@ -6,11 +6,15 @@ from pathlib import Path
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import clean_run_dir, past_run_dirs
 from cg.constants import Pipeline
+from click.testing import CliRunner
+
+from cg.models.cg_config import CGConfig
+from tests.store_helpers import StoreHelpers
 
 EXIT_SUCCESS = 0
 
 
-def test_past_run_dirs_without_options(cli_runner, clean_context: dict):
+def test_past_run_dirs_without_options(cli_runner: CliRunner, clean_context: CGConfig):
     """Test command without options"""
     # GIVEN no case_id or options
     # WHEN dry running without anything specified
@@ -20,7 +24,7 @@ def test_past_run_dirs_without_options(cli_runner, clean_context: dict):
     assert "Missing argument" in result.output
 
 
-def test_run_dir_without_options(cli_runner, clean_context: dict):
+def test_run_dir_without_options(cli_runner: CliRunner, clean_context: CGConfig):
     """Test command without options"""
     # GIVEN no case_id or options
     # WHEN dry running without anything specified
@@ -31,16 +35,21 @@ def test_run_dir_without_options(cli_runner, clean_context: dict):
 
 
 def test_with_yes(
-    cli_runner, clean_context: dict, timestamp_today: dt.datetime, helpers, caplog, mocker
+    cli_runner: CliRunner,
+    clean_context: CGConfig,
+    timestamp_today: dt.datetime,
+    helpers: StoreHelpers,
+    caplog,
+    mocker,
 ):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
-    analysis_api = clean_context["analysis_api"]
+    analysis_api = clean_context.meta_apis["analysis_api"]
     timestamp_now = timestamp_today
 
     case_id = "balsamic_case_clean"
     analysis_to_clean = analysis_api.status_db.family(case_id).analyses[0]
-    case_path = clean_context["analysis_api"].get_case_path(case_id)
+    case_path = analysis_api.get_case_path(case_id)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
     mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
@@ -56,13 +65,18 @@ def test_with_yes(
 
 
 def test_dry_run(
-    cli_runner, clean_context: dict, timestamp_yesterday: dt.datetime, helpers, caplog, mocker
+    cli_runner: CliRunner,
+    clean_context: CGConfig,
+    timestamp_yesterday: dt.datetime,
+    helpers: StoreHelpers,
+    caplog,
+    mocker,
 ):
     """Test command with dry run options"""
 
     # GIVEN a case on disk that could be deleted
     caplog.set_level(logging.INFO)
-    base_store = clean_context["analysis_api"].status_db
+    base_store = clean_context.status_db
     helpers.add_analysis(
         base_store,
         pipeline=Pipeline.BALSAMIC,
@@ -72,7 +86,7 @@ def test_dry_run(
     )
     case_id = "balsamic_case_clean"
     analysis_to_clean = base_store.family(case_id).analyses[0]
-    case_path = clean_context["analysis_api"].get_case_path(case_id)
+    case_path = clean_context.meta_apis["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
     mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
@@ -87,12 +101,12 @@ def test_dry_run(
     assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
 
 
-def test_cleaned_at_valid(cli_runner, clean_context: dict, caplog, mocker):
+def test_cleaned_at_valid(cli_runner: CliRunner, clean_context: CGConfig, caplog, mocker):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
-    base_store = clean_context["analysis_api"].status_db
+    base_store = clean_context.status_db
     case_id = "balsamic_case_clean"
-    case_path = clean_context["analysis_api"].get_case_path(case_id)
+    case_path = clean_context.meta_apis["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
     mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing")
@@ -107,12 +121,12 @@ def test_cleaned_at_valid(cli_runner, clean_context: dict, caplog, mocker):
     assert not Path(case_path).exists()
 
 
-def test_cleaned_at_invalid(cli_runner, clean_context: dict, caplog):
+def test_cleaned_at_invalid(cli_runner: CliRunner, clean_context: CGConfig, caplog):
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
-    base_store = clean_context["analysis_api"].status_db
+    base_store = clean_context.status_db
     case_id = "balsamic_case_not_clean"
-    case_path = clean_context["analysis_api"].get_case_path(case_id)
+    case_path = clean_context.meta_apis["analysis_api"].get_case_path(case_id)
     Path(case_path).mkdir(exist_ok=True, parents=True)
     assert not base_store.family("balsamic_case_not_clean").analyses[0].cleaned_at
     # WHEN dry running with dry run specified

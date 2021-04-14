@@ -2,6 +2,12 @@
 
 import copy
 
+ONLY_ONE_CASE_PER_TICKET = [
+    "fastq",
+    "microsalt",
+    "sarscov2",
+]
+
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnvkit", "filtered", "sv-vcf"},
     {"cnvkit", "filtered", "sv-vcf-index"},
@@ -96,6 +102,14 @@ FASTQ_ANALYSIS_SAMPLE_TAGS = [
     {"fastq"},
 ]
 
+SARSCOV2_ANALYSIS_CASE_TAGS = [
+    {"pangolin"},
+]
+
+SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
+    {"fastq"},
+]
+
 PIPELINE_ANALYSIS_TAG_MAP = {
     "balsamic": {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
@@ -114,14 +128,17 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "case_tags": MIP_RNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_RNA_ANALYSIS_SAMPLE_TAGS,
     },
-    # These are not ready yet, add when microsalt cases are stored in db
-    # "microsalt": {
-    #     "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
-    #     "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
-    # },
+    "microsalt": {
+        "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
+        "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
+    },
     "fastq": {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
+    },
+    "sarscov2": {
+        "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
+        "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
     },
 }
 

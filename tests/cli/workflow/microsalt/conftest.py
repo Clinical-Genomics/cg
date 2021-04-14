@@ -3,10 +3,11 @@
 from pathlib import Path
 
 import pytest
-
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 class MockLims:
@@ -75,15 +76,12 @@ def lims_api():
 
 
 @pytest.fixture(scope="function")
-def base_context(context_config, helpers, lims_api):
+def base_context(cg_context: CGConfig, helpers: StoreHelpers, lims_api):
     """ The click context for the microsalt cli """
-    analysis_api = MicrosaltAnalysisAPI(context_config)
-    helpers.add_microbial_sample(analysis_api.status_db)
-    analysis_api.lims_api = lims_api
-
-    return {
-        "analysis_api": analysis_api,
-    }
+    helpers.add_microbial_sample(cg_context.status_db)
+    cg_context.lims_api_ = lims_api
+    cg_context.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(cg_context)
+    return cg_context
 
 
 @pytest.fixture(name="microbial_sample_id")

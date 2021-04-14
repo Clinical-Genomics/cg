@@ -13,6 +13,42 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.0]
+
+### Changed
+- use pydantic to control CLI context 
+
+## [20.18.0]
+### Added
+- Trailblazer support for mutant/sars-cov-2
+
+## [20.17.5]
+### Fixed
+- Bugfix allowing orders of single samples from existing families
+
+## [20.17.4]
+### Added
+- Added new covid prep method to lims constants
+
+## [20.17.3]
+### Fixed
+- Adds support to use original sample lims id in downsampled cases (affects balsamic)
+
+## [20.17.2]
+### Fixed
+- Fix duplicate Housekeeper session in scout upload
+
+
+## [20.17.1]
+### Changed
+- Status of mutant cases is set to running before running analysis, and revoked if start fails. 
+  This prevents users and cron jobs from starting the case which already started, given they check in statusDB first.
+
+## [20.17.0]
+### Added
+
+- Deliver sarscov2 cli
+
 ## [20.16.0]
 ### Added
 

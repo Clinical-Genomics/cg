@@ -4,14 +4,14 @@ import datetime as dt
 import json
 import logging
 from pathlib import Path
-from typing import Any, Optional, List
+from typing import Any, List, Optional
 
 import click
-
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import File
 
@@ -45,7 +45,7 @@ def microsalt(context: click.Context) -> None:
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return None
-    context.obj["analysis_api"] = MicrosaltAnalysisAPI(
+    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
         config=context.obj,
     )
 
@@ -59,11 +59,11 @@ microsalt.add_command(resolve_compression)
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
-@click.pass_context
-def link(context: click.Context, ticket: bool, sample: bool, unique_id: str) -> None:
+@click.pass_obj
+def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str) -> None:
     """Link microbial FASTQ files to dedicated analysis folder for a given case, ticket or sample"""
 
-    analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
@@ -78,13 +78,13 @@ def link(context: click.Context, ticket: bool, sample: bool, unique_id: str) -> 
 @OPTION_TICKET
 @OPTION_SAMPLE
 @ARGUMENT_UNIQUE_IDENTIFIER
-@click.pass_context
+@click.pass_obj
 def config_case(
-    context: click.Context, dry_run: bool, ticket: bool, sample: bool, unique_id: str
+    context: CGConfig, dry_run: bool, ticket: bool, sample: bool, unique_id: str
 ) -> None:
     """ Create a config file for a case or a sample analysis in microSALT """
 
-    analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
@@ -118,9 +118,9 @@ def config_case(
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config-case",
 )
-@click.pass_context
+@click.pass_obj
 def run(
-    context: click.Context,
+    context: CGConfig,
     dry_run: bool,
     config_case_path: click.Path,
     ticket: bool,
@@ -129,7 +129,7 @@ def run(
 ) -> None:
     """ Start microSALT workflow by providing case, ticket or sample id """
 
-    analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
@@ -192,7 +192,7 @@ def start(
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
 
-    analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
@@ -211,11 +211,11 @@ def start_available(context: click.Context, dry_run: bool = False):
 @microsalt.command("upload-analysis-vogue")
 @OPTION_DRY_RUN
 @ARGUMENT_UNIQUE_IDENTIFIER
-@click.pass_context
-def upload_analysis_vogue(context: click.Context, unique_id: str, dry_run: bool) -> None:
+@click.pass_obj
+def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> None:
     """Upload the trending report for latest analysis of given case_id to Vogue"""
 
-    analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_obj = analysis_api.status_db.family(unique_id)
     if not case_obj or not case_obj.analyses:
         LOG.error("No analysis available for %s", unique_id)
@@ -266,7 +266,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
     """Upload the trending reports for all un-uploaded latest analyses to Vogue"""
 
     EXIT_CODE: int = EXIT_SUCCESS
-    analysis_api: MicrosaltAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
     latest_analyses = list(
         analysis_api.status_db.latest_analyses()
         .filter(models.Analysis.pipeline == Pipeline.MICROSALT)

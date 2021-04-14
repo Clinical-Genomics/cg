@@ -329,6 +329,8 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not case_obj:
+            case_obj: Optional[models.Family] = store.family(internal_id=case_id)
+        if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,

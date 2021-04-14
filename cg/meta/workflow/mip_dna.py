@@ -1,31 +1,32 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Pipeline
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
 
 class MipDNAAnalysisAPI(MipAnalysisAPI):
-    def __init__(self, config: dict, pipeline: Pipeline = Pipeline.MIP_DNA):
+    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MIP_DNA):
         super().__init__(config, pipeline)
 
     @property
     def root(self) -> str:
-        return self.config["mip-rd-dna"]["root"]
+        return self.config.mip_rd_dna.root
 
     @property
     def conda_env(self) -> str:
-        return self.config["mip-rd-dna"]["conda_env"]
+        return self.config.mip_rd_dna.conda_env
 
     @property
     def mip_pipeline(self) -> str:
-        return self.config["mip-rd-dna"]["pipeline"]
+        return self.config.mip_rd_dna.pipeline
 
     @property
     def script(self) -> str:
-        return self.config["mip-rd-dna"]["script"]
+        return self.config.mip_rd_dna.script
 
     @property
     def threshold_reads(self):
@@ -36,7 +37,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         if not self._process:
             self._process = Process(
                 binary=f"{self.script} {self.mip_pipeline}",
-                config=self.config["mip-rd-dna"]["mip_config"],
+                config=self.config.mip_rd_dna.mip_config,
                 environment=self.conda_env,
             )
         return self._process
