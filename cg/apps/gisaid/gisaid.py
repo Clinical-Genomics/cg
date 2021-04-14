@@ -6,15 +6,14 @@ from typing import List
 
 from cg.store import models
 from cg.meta.workflow.fastq import FastqHandler
-from ...utils import Process
+from cg.utils import Process
 from .models import GisaidSample, UpploadFiles
 from housekeeper.store import models as hk_models
-
 from cg.meta.meta import MetaAPI
+import csv
+
 
 LOG = logging.getLogger(__name__)
-
-import csv
 
 
 class GisaidAPI(MetaAPI):
@@ -36,7 +35,7 @@ class GisaidAPI(MetaAPI):
         """Build row for a sample in the batch upload csv."""
 
         orig_lab: str = "Stockholm"  # sample.originating_lab
-        collection_date: str = "201122"  # sample.collection_date str or date, we dont know yet
+        collection_date: str = "2020-11-22"  # sample.collection_date str or date, we dont know yet
         gisaid_sample = GisaidSample(
             covv_virus_name=fasta_header,
             covv_subm_sample_id=sample.name,
@@ -103,14 +102,6 @@ class GisaidAPI(MetaAPI):
         file_name: str = f"{family_id}.fasta"
         self.fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
         return file_name
-
-    def files(self, family_id: str) -> UpploadFiles:
-        """get csv file and fasta file for batch upload to GISAID."""
-
-        return UpploadFiles(
-            csv_file=self.build_batch_csv(family_id=family_id),
-            fasta_file=self.build_batch_fasta(family_id=family_id),
-        )
 
     def upload(self, csv_file: str, fasta_file: str) -> None:
         """Load batch data to GISAID using the gisiad cli."""

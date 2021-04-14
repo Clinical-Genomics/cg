@@ -1,9 +1,6 @@
 """Code for uploading genotype data via CLI"""
 import logging
-from typing import List
-
 import click
-
 from cg.apps.gisaid.gisaid import GisaidAPI
 from cg.apps.gisaid.models import UpploadFiles
 from cg.store import models, Store
@@ -26,6 +23,9 @@ def gisaid(context, family_id):
     if not case_object:
         LOG.warning("Could not family: %s in status-db", family_id)
         raise click.Abort
-    files: UpploadFiles = gisaid_api.files(family_id=family_id)
+    files: UpploadFiles = UpploadFiles(
+        csv_file=gisaid_api.build_batch_csv(family_id=family_id),
+        fasta_file=gisaid_api.build_batch_fasta(family_id=family_id),
+    )
     if files:
         gisaid_api.upload(**dict(files))
