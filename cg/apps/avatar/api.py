@@ -1,4 +1,5 @@
 import random
+import secrets
 from typing import Optional
 
 import petname
@@ -15,7 +16,7 @@ class Avatar:
     def get_avatar_url(internal_id: str, tries: int = 25) -> Optional[bool]:
 
         adjective, animal = Avatar._split_petname(internal_id)
-        seed = random.choice(RANDOMIZING_WORDS)
+        seed = secrets.choice(RANDOMIZING_WORDS)
         keywords = f"{seed} {adjective} {animal} icon animal"
         try:
             urls = response().urls(
