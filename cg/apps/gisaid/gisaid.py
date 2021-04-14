@@ -12,6 +12,7 @@ from housekeeper.store import models as hk_models
 from cg.meta.meta import MetaAPI
 import csv
 
+from ...exc import HousekeeperVersionMissing
 
 LOG = logging.getLogger(__name__)
 
@@ -72,6 +73,9 @@ class GisaidAPI(MetaAPI):
 
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
+        if not hk_version:
+            LOG.info("Family ID: %s not found in hose keeper", family_id)
+            raise HousekeeperVersionMissing()
 
         sample_rows = []
         for sample in samples:
@@ -91,6 +95,9 @@ class GisaidAPI(MetaAPI):
 
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
+        if not hk_version:
+            LOG.info("Family ID: %s not found in hose keeper", family_id)
+            return
 
         fasta_files = []
         for sample in samples:

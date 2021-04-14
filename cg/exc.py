@@ -131,6 +131,12 @@ class MandatoryFilesMissing(CgError):
     """
 
 
+class HousekeeperVersionMissing(CgError):
+    """
+    Exception raised when family version is missing in Housekeeper.
+    """
+
+
 class StoreError(CgError):
     """
     Exception related to storing an analysis
