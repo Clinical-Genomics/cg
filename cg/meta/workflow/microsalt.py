@@ -15,11 +15,11 @@ from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Tuple
 
 import click
-
 from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
@@ -29,11 +29,11 @@ LOG = logging.getLogger(__name__)
 class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
-    def __init__(self, config: dict, pipeline: Pipeline = Pipeline.MICROSALT):
+    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MICROSALT):
 
         super().__init__(pipeline, config)
-        self.root_dir = config["microsalt"]["root"]
-        self.queries_path = config["microsalt"]["queries_path"]
+        self.root_dir = config.microsalt.root
+        self.queries_path = config.microsalt.queries_path
 
     @property
     def threshold_reads(self):
@@ -47,8 +47,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
-                binary=self.config["microsalt"]["binary_path"],
-                environment=self.config["microsalt"]["conda_env"],
+                binary=self.config.microsalt.binary_path,
+                environment=self.config.microsalt.conda_env,
             )
         return self._process
 

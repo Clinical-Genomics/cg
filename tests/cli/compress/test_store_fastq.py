@@ -3,9 +3,11 @@
 import logging
 
 from cg.cli.store.fastq import store_case
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
-def test_store_fastq_cli_no_family(compress_context, cli_runner, caplog):
+def test_store_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):
     """Test to run the compress command without providing any case id"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context
@@ -17,7 +19,9 @@ def test_store_fastq_cli_no_family(compress_context, cli_runner, caplog):
     assert res.exit_code == 2
 
 
-def test_store_fastq_cli_non_existing_family(compress_context, cli_runner, caplog):
+def test_store_fastq_cli_non_existing_family(
+    compress_context: CGConfig, cli_runner: CliRunner, caplog
+):
     """Test to run the compress command with a non existing case"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context and a non existing case id

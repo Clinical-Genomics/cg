@@ -2,10 +2,12 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
-
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
 from cg.constants import Pipeline
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.models.cg_config import CGConfig
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
@@ -127,14 +129,16 @@ def fluffy_samplesheet_bundle_data(samplesheet_fixture_path) -> dict:
 
 @pytest.fixture(scope="function")
 def fluffy_context(
-    context_config,
-    helpers,
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
     fluffy_samplesheet_bundle_data,
     fluffy_fastq_hk_bundle_data,
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
-) -> dict:
-    fluffy_analysis_api = FluffyAnalysisAPI(config=context_config)
+) -> CGConfig:
+    cg_context.housekeeper_api_ = real_housekeeper_api
+    fluffy_analysis_api = FluffyAnalysisAPI(config=cg_context)
     helpers.ensure_hk_version(
         fluffy_analysis_api.housekeeper_api, bundle_data=fluffy_samplesheet_bundle_data
     )
@@ -159,4 +163,5 @@ def fluffy_context(
     helpers.add_relationship(
         fluffy_analysis_api.status_db, case=example_fluffy_case, sample=example_fluffy_sample
     )
-    return {"analysis_api": fluffy_analysis_api}
+    cg_context.meta_apis["analysis_api"] = fluffy_analysis_api
+    return cg_context

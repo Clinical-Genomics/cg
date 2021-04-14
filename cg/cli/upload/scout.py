@@ -5,13 +5,16 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
+from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
 from ruamel.yaml import YAML
 
-from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 from .utils import suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)
@@ -24,14 +27,12 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def scout(context, re_upload: bool, print_console: bool, case_id: str):
     """Upload variants from analysis to Scout."""
-
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    status_db: Store = context.obj.status_db
 
     LOG.info("----------------- SCOUT -----------------------")
 
     if not case_id:
-        suggest_cases_to_upload(context)
+        suggest_cases_to_upload(status_db=status_db)
         return
 
     context.invoke(
@@ -45,19 +46,17 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 @click.argument("case-id")
 @click.option("-p", "--print", "print_console", is_flag=True, help="Only print config")
 @click.option("-r", "--re-upload", is_flag=True, help="Delete existing load configs")
-@click.pass_context
-def create_scout_load_config(context, case_id: str, print_console: bool, re_upload: bool):
+@click.pass_obj
+def create_scout_load_config(context: CGConfig, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
-    scout_upload_api: UploadScoutAPI = context.obj["scout_upload_api"]
+    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
+    status_db: Store = context.status_db
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
 
     LOG.info("Fetching family object")
-    case_obj: Family = analysis_api.status_db.family(case_id)
+    case_obj: Family = status_db.family(case_id)
     LOG.info("Create load config")
     if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)
@@ -68,10 +67,10 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
         LOG.warning("%s", err)
         raise click.Abort
     LOG.info("Found load config %s", scout_load_config)
-    analysis_context: str = "mip-rd-dna"
     if scout_load_config.track == "cancer":
-        analysis_context = "balsamic"
-    root_dir: Path = Path(context.obj[analysis_context]["root"])
+        root_dir: Path = Path(context.balsamic.root)
+    else:
+        root_dir: Path = Path(context.mip_rd_dna.root)
     LOG.info("Set root dir to %s", root_dir)
     file_path: Path = root_dir / case_id / "scout_load.yaml"
 
@@ -109,21 +108,18 @@ def create_scout_load_config(context, case_id: str, print_console: bool, re_uplo
 @click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
-@click.pass_context
-def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
+@click.pass_obj
+def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case_id: str):
     """Upload variants and case from analysis to Scout."""
 
     LOG.info("----------------- UPLOAD -----------------------")
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    scout_api: ScoutAPI = context.scout_api
 
     tag_name = UploadScoutAPI.get_load_config_tag()
-    version_obj = analysis_api.housekeeper_api.last_version(case_id)
-    scout_config_file: Optional[
-        hk_models.File
-    ] = analysis_api.housekeeper_api.fetch_file_from_version(
+    version_obj = housekeeper_api.last_version(case_id)
+    scout_config_file: Optional[hk_models.File] = housekeeper_api.fetch_file_from_version(
         version_obj=version_obj, tags={tag_name}
     )
 
@@ -133,9 +129,7 @@ def upload_case_to_scout(context, re_upload: bool, dry_run: bool, case_id: str):
     LOG.info("uploading case %s to scout", case_id)
 
     if not dry_run:
-        analysis_api.scout_api.upload(
-            scout_load_config=scout_config_file.full_path, force=re_upload
-        )
+        scout_api.upload(scout_load_config=scout_config_file.full_path, force=re_upload)
 
     LOG.info("uploaded to scout using load config %s", scout_config_file.full_path)
-    LOG.info("Case loaded succesfully to Scout")
+    LOG.info("Case loaded successfully to Scout")

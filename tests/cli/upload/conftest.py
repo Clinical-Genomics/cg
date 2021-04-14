@@ -9,12 +9,16 @@ import pytest
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store, models
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 
@@ -22,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="scout_load_config")
-def fixture_scout_load_config(apps_dir) -> Path:
+def fixture_scout_load_config(apps_dir: Path) -> Path:
     """Yaml file with load information from scout"""
     return apps_dir / "scout/643594.config.yaml"
 
@@ -90,15 +94,16 @@ def fixture_upload_genotypes_hk_api(
 
 @pytest.fixture(name="upload_genotypes_context")
 def fixture_upload_genotypes_context(
-    upload_genotypes_hk_api: HousekeeperAPI, genotype_api: GenotypeAPI, analysis_store_trio: Store
-) -> dict:
+    upload_genotypes_hk_api: HousekeeperAPI,
+    genotype_api: GenotypeAPI,
+    analysis_store_trio: Store,
+    base_context: CGConfig,
+) -> CGConfig:
     """Create a upload genotypes context"""
-
-    return {
-        "genotype_api": genotype_api,
-        "housekeeper_api": upload_genotypes_hk_api,
-        "status_db": analysis_store_trio,
-    }
+    base_context.genotype_api_ = genotype_api
+    base_context.housekeeper_api_ = upload_genotypes_hk_api
+    base_context.status_db_ = analysis_store_trio
+    return base_context
 
 
 @pytest.fixture(name="scout_load_object")
@@ -117,20 +122,24 @@ def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadCon
     return ScoutLoadConfig(**case_data)
 
 
-@pytest.fixture(scope="function", name="base_context")
-def fixture_base_cli_context(
-    analysis_store: Store, housekeeper_api, upload_scout_api, trailblazer_api
-) -> dict:
+@pytest.fixture(name="base_context")
+def fixture_base_context(
+    analysis_store: Store,
+    housekeeper_api: HousekeeperAPI,
+    upload_scout_api: UploadScoutAPI,
+    trailblazer_api: TrailblazerAPI,
+    cg_context: CGConfig,
+) -> CGConfig:
     """context to use in cli"""
-    return {
-        "housekeeper_api": housekeeper_api,
-        "mip-rd-dna": {"root": tempdir},
-        "report_api": MockReportApi(),
-        "scout_api": MockScoutApi(),
-        "scout_upload_api": upload_scout_api,
-        "status_db": analysis_store,
-        "trailblazer_api": trailblazer_api,
-    }
+    cg_context.status_db_ = analysis_store
+    cg_context.housekeeper_api_ = housekeeper_api
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.scout_api_ = MockScoutApi()
+    cg_context.meta_apis["report_api"] = MockReportApi()
+    cg_context.meta_apis["scout_upload_api"] = upload_scout_api
+    cg_context.mip_rd_dna.root = tempdir
+
+    return cg_context
 
 
 @pytest.fixture(scope="function", name="upload_scout_api")
@@ -234,23 +243,22 @@ class MockLims:
 
 
 @pytest.fixture(name="upload_context")
-def upload_context(context_config):
-    analysis_api = MipDNAAnalysisAPI(context_config)
+def upload_context(cg_context: CGConfig) -> CGConfig:
+    analysis_api = MipDNAAnalysisAPI(config=cg_context)
+    cg_context.meta_apis["analysis_api"] = analysis_api
+    cg_context.meta_apis["report_api"] = ReportAPI(
+        store=cg_context.status_db,
+        lims_api=cg_context.lims_api,
+        chanjo_api=cg_context.chanjo_api,
+        analysis_api=analysis_api,
+        scout_api=cg_context.scout_api,
+    )
+    cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
+        hk_api=cg_context.housekeeper_api,
+        scout_api=cg_context.scout_api,
+        madeline_api=cg_context.madeline_api,
+        analysis_api=analysis_api,
+        lims_api=cg_context.lims_api,
+    )
 
-    return {
-        "analysis_api": analysis_api,
-        "report_api": ReportAPI(
-            store=analysis_api.status_db,
-            lims_api=analysis_api.lims_api,
-            chanjo_api=analysis_api.chanjo_api,
-            analysis_api=analysis_api,
-            scout_api=analysis_api.scout_api,
-        ),
-        "scout_upload_api": UploadScoutAPI(
-            hk_api=analysis_api.housekeeper_api,
-            scout_api=analysis_api.scout_api,
-            madeline_api=analysis_api.madeline_api,
-            analysis_api=analysis_api,
-            lims_api=analysis_api.lims_api,
-        ),
-    }
+    return cg_context
