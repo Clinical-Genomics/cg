@@ -47,7 +47,8 @@ class Avatar:
             if 0 < width and 0 < height:
                 return True
         except Exception:
-            pass
+            return False
+
         return False
 
     @classmethod
