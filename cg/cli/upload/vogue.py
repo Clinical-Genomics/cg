@@ -1,5 +1,6 @@
 """Base command for trending"""
 
+import datetime as dt
 import logging
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
@@ -11,10 +12,21 @@ from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store, models
+from cg.store.api.update import update_uploaded_to_vogue_date
 
 LOG = logging.getLogger(__name__)
 
 VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
+
+
+def validate_date(context, date_: str) -> Optional[dt.date]:
+    """validates the cli input of a date (if any) and returns the date in the proper format"""
+    if not date_:
+        return
+    try:
+        return dt.datetime.strptime(date_, "%Y-%m-%d").date() or None
+    except ValueError:
+        raise click.BadParameter("Date should be in ISO format: YYYY-MM-DD")
 
 
 @click.group()
@@ -195,15 +207,29 @@ def bioinfo(context, case_name, cleanup, target_load, dry):
 
 @vogue.command("bioinfo-all", short_help="Load all bioinfo results into vogue")
 @click.option("--dry/--no-dry", is_flag=True, help="Dry run...")
+@click.option(
+    "--date-start",
+    callback=validate_date,
+    default=str(dt.date.today() - dt.timedelta(days=7)),
+    help="Only upload cases with an analysis that was completed after this date. Default is one "
+    "week ago",
+)
+@click.option(
+    "--date-end",
+    callback=validate_date,
+    default=None,
+    help="Only upload cases with an analysis that was completed before after this date. By "
+    "default, this date is not used.",
+)
 @click.pass_context
-def bioinfo_all(context, dry):
+def bioinfo_all(context: click.Context, date_start: str, date_end: str, dry: bool):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     if not context.obj.get("analysis_api"):
         context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
     analysis_api = context.obj["analysis_api"]
 
-    cases = analysis_api.status_db.families()
+    cases = analysis_api.status_db.cases_ready_for_vogue_upload(date_start, date_end)
     for case in cases:
         case_name = case.internal_id
         version_obj = analysis_api.housekeeper_api.last_version(case_name)
@@ -225,6 +251,8 @@ def bioinfo_all(context, dry):
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
+            update_uploaded_to_vogue_date(case_name)
+            analysis_api.status_db.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 

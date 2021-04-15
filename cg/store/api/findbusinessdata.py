@@ -44,12 +44,29 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Analysis.query
         if after:
             return records.filter(models.Analysis.uploaded_to_vogue_at > after)
-        return records.filter(models.Analysis.uploaded_to_vogue_at.isnot(None))
+        return records.filter(models.Analysis.uploaded_to_vogue_at.is_(None))
 
     def analyses_not_uploaded_to_vogue(self) -> Query:
         """Fetch all (recent) analyses that have been uploaded to Vogue"""
         records = self.Analysis.query
         return records.filter(models.Analysis.uploaded_to_vogue_at.is_(None))
+
+    def cases_ready_for_vogue_upload(
+        self,
+        completed_after: Optional[dt.date],
+        completed_before: Optional[dt.date],
+    ) -> Query:
+        """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
+        Optionally fetch those cases finished before and/or after a specified date"""
+        records = self.Family.query.join(models.Family.analyses).filter(
+            models.Analysis.uploaded_to_vogue_at.is_(None)
+        )
+        if completed_after:
+            records = records.filter(models.Analysis.completed_at > completed_after)
+        if completed_before:
+            records = records.filter(models.Analysis.completed_at < completed_before)
+
+        return records
 
     def latest_analyses(self) -> Query:
         """Fetch latest analysis for all cases."""

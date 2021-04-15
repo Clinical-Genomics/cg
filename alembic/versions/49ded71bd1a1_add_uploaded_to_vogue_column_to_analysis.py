@@ -1,7 +1,7 @@
 """add uploaded to vogue column to analysis
 
 Revision ID: 49ded71bd1a1
-Revises: 6d74453565f2
+Revises: 089edc289291
 Create Date: 2021-03-10 13:32:40.247574
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "49ded71bd1a1"
-down_revision = "6d74453565f2"
+down_revision = "089edc289291"
 branch_labels = None
 depends_on = None
 
