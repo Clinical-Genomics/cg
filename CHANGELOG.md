@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.5]
+
+### Fixed
+- fixed bug where CgError was raised with wrong arguments in AnalysisAPI
+
 ## [20.19.4]
 
 ### Fixed

@@ -68,7 +68,7 @@ class AnalysisAPI(MetaAPI):
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
-            raise CgError("Analysis still ongoing for case %s", case_id)
+            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def verify_case_path_exists(self, case_id: str) -> None:
         if not self.get_case_path(case_id=case_id).exists():
