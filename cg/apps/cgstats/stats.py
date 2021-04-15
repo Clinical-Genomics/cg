@@ -5,6 +5,7 @@ from typing import Iterator, List, Optional
 import alchy
 import sqlalchemy as sqa
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
+
 from cgstats.db import api, models
 
 LOG = logging.getLogger(__name__)
