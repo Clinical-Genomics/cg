@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import List
 
 from cg.store import models
-from cg.meta.workflow.fastq import FastqHandler
 from cg.utils import Process
-from .models import GisaidSample, UpploadFiles
+from .constants import HEADERS
+from .models import GisaidSample, FastaFile
 from housekeeper.store import models as hk_models
 from cg.meta.meta import MetaAPI
 import csv
 
-from ...exc import HousekeeperVersionMissing
+from cg.exc import HousekeeperVersionMissingError, FastaSequenceMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -25,90 +25,95 @@ class GisaidAPI(MetaAPI):
         self.gisaid_submitter = config["gisaid"]["submitter"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
         self.process = Process(binary=self.gisaid_binary)
-        self.fastq_handler = FastqHandler()
 
-    def get_headers(self) -> list:
-        """Get GisaidSample keys as list."""
+    def get_fasta_sequence(self, fastq_path: str) -> str:
+        """Get header from fasta file. Assuming un zipped file"""
 
-        return list(GisaidSample.schema().get("properties").keys())
+        with open(fastq_path) as handle:
+            fasta_lines = handle.readlines()
+            try:
+                return fasta_lines[1].rstrip("\n")
+            except:
+                raise FastaSequenceMissingError
 
-    def get_sample_row(self, sample: models.Sample, family_id: str, fasta_header: str) -> List[str]:
+    def get_gisaid_fasta_objects(self, gsaid_samples: List[GisaidSample]) -> List[FastaFile]:
+        """Fetch a fasta files form house keeper for batch upload to gisaid"""
+
+        fasta_objects = []
+        for sample in gsaid_samples:
+            hk_version: hk_models.Version = self.housekeeper_api.last_version(
+                bundle=sample.family_id
+            )
+            if not hk_version:
+                LOG.info("Family ID: %s not found in hose keeper", sample.family_id)
+                raise HousekeeperVersionMissingError
+            # fasta_file: str =self.housekeeper_api.files(version=hk_version.id, tags=["consensus", sample.cg_lims_id]).first()
+            fasta_file = "/Users/maya.brandi/opt/cg/f1.fasta"
+            fasta_sequence = self.get_fasta_sequence(fastq_path=fasta_file)
+            fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
+            fasta_objects.append(fasta_obj)
+        return fasta_objects
+
+    def build_gisiad_fasta_file(self, fasta_objects: List[FastaFile], concat_file: str):
+        """Concatenates a list of consensus fastq objects"""
+
+        with open(concat_file, "w") as write_file_obj:
+            for fasta_object in fasta_objects:
+                write_file_obj.write(f">{fasta_object.header}\n")
+                write_file_obj.write(f"{fasta_object.sequence}\n")
+
+    def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample]) -> str:
+        file_name: str = "gisaid.fasta"
+        file: Path = Path(file_name)
+        gisaid_fasta_objects = self.get_gisaid_fasta_objects(gsaid_samples=gsaid_samples)
+        self.build_gisiad_fasta_file(fasta_objects=gisaid_fasta_objects, concat_file=file_name)
+        return str(file.absolute())
+
+    def get_sample_row(self, gisaid_sample: GisaidSample) -> List[str]:
         """Build row for a sample in the batch upload csv."""
 
-        orig_lab: str = "Stockholm"  # sample.originating_lab
-        collection_date: str = "2020-11-22"  # sample.collection_date str or date, we dont know yet
-        gisaid_sample = GisaidSample(
-            covv_virus_name=fasta_header,
-            covv_subm_sample_id=sample.name,
-            submitter=self.gisaid_submitter,
-            fn=f"{family_id}.fasta",
-            covv_collection_date=collection_date,
-            lab=orig_lab,
-        )
-        return [gisaid_sample.dict().get(header) for header in self.get_headers()]
+        sample_dict = gisaid_sample.dict()
+        return [sample_dict.get(header, "") for header in HEADERS]
 
-    def build_batch_csv(self, family_id: str) -> str:
+    def get_sample_rows(self, gsaid_samples: List[GisaidSample]) -> List[List[str]]:
+        """Build sample row list for gisad csv file"""
+
+        sample_rows = []
+        for sample in gsaid_samples:
+            sample_row: List[str] = self.get_sample_row(gisaid_sample=sample)
+            sample_rows.append(sample_row)
+        return sample_rows
+
+    def build_gisaid_csv(self, gsaid_samples: List[GisaidSample]) -> str:
         """Build batch upload csv."""
 
-        file_name: str = f"{family_id}.csv"
+        file_name: str = "gisad.csv"
         file: Path = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")
-            headers: List[str] = self.get_headers()
-            wr.writerow(headers)
-            sample_rows: List[List[str]] = self.get_sample_rows(family_id=family_id)
+            wr.writerow(HEADERS)
+            sample_rows: List[List[str]] = self.get_sample_rows(gsaid_samples=gsaid_samples)
             wr.writerows(sample_rows)
 
         return str(file.absolute())
 
-    def get_fasta_file(self, sample_id: str, hk_version_id: str) -> str:
-
-        fasta_file: hk_models.File = self.housekeeper_api.files(  # not sure about this type!!!
-            version=hk_version_id, tags=["consensus", sample_id]
-        ).first()
-        return fasta_file.full_path
-
-    def get_sample_rows(self, family_id: str) -> List[List[str]]:
-        """Build sample row list for gisad csv file"""
+    def get_gsaid_samples(self, family_id: str) -> List[GisaidSample]:
+        """Get list of Gisaid sample objects."""
 
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
-        hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
-        if not hk_version:
-            LOG.info("Family ID: %s not found in hose keeper", family_id)
-            raise HousekeeperVersionMissing()
-
-        sample_rows = []
+        gisaid_samples = []
         for sample in samples:
-            fasta_file: str = self.get_fasta_file(
-                sample_id=sample.internal_id, hk_version_id=hk_version.id
+            gisaid_sample = GisaidSample(
+                family_id=family_id,
+                cg_lims_id=sample.internal_id,
+                covv_subm_sample_id=sample.name,
+                submitter=self.gisaid_submitter,
+                fn=f"{family_id}.fasta",
+                covv_collection_date="2020-11-22",  # sample.collection_date
+                lab="Stockholm",  # sample.originating_lab,
             )
-            header: str = self.fastq_handler.get_header(fasta_file)
-            sample_row: List[str] = self.get_sample_row(
-                sample=sample, family_id=family_id, fasta_header=header
-            )
-            sample_rows.append(sample_row)
-
-        return sample_rows
-
-    def build_batch_fasta(self, family_id: str) -> str:
-        """Fetch a fasta files form house keeper for batch upload to gisaid"""
-
-        samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
-        hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
-        if not hk_version:
-            LOG.info("Family ID: %s not found in hose keeper", family_id)
-            return
-
-        fasta_files = []
-        for sample in samples:
-            fasta_file: str = self.get_fasta_file(
-                sample_id=sample.internal_id, hk_version_id=hk_version.id
-            )
-            fasta_files.append(fasta_file)
-
-        file_name: str = f"{family_id}.fasta"
-        self.fastq_handler.concatenate(files=fasta_files, concat_file=file_name)
-        return file_name
+            gisaid_samples.append(gisaid_sample)
+        return gisaid_samples
 
     def upload(self, csv_file: str, fasta_file: str) -> None:
         """Load batch data to GISAID using the gisiad cli."""
@@ -116,9 +121,10 @@ class GisaidAPI(MetaAPI):
         load_call: list = ["CoV", "upload", "--csv", csv_file, "--fasta", fasta_file]
         self.process.run_command(parameters=load_call)
 
-        # Execute command and print its stdout+stderr as it executes
-        for line in self.process.stderr_lines():
-            LOG.info("gisaid output: %s", line)
+        if self.process.stderr:
+            LOG.info(f"gisaid stderr:\n{self.process.stderr}")
+        if self.process.stdout:
+            LOG.info(f"gisaid stdout:\n{self.process.stdout}")
 
     def __str__(self):
         return f"GisaidAPI(dry_run: {self.dry_run})"

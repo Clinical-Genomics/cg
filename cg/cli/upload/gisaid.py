@@ -23,9 +23,10 @@ def gisaid(context, family_id):
     if not case_object:
         LOG.warning("Could not family: %s in status-db", family_id)
         raise click.Abort
+    gsaid_samples = gisaid_api.get_gsaid_samples(family_id=family_id)
     files: UpploadFiles = UpploadFiles(
-        csv_file=gisaid_api.build_batch_csv(family_id=family_id),
-        fasta_file=gisaid_api.build_batch_fasta(family_id=family_id),
+        csv_file=gisaid_api.build_gisaid_csv(gsaid_samples=gsaid_samples),
+        fasta_file=gisaid_api.build_gisaid_fasta(gsaid_samples=gsaid_samples),
     )
     if files:
         gisaid_api.upload(**dict(files))

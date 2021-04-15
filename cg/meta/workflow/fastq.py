@@ -14,6 +14,8 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
+from pydantic.main import BaseModel
+
 LOG = logging.getLogger(__name__)
 
 DEFAULT_DATE_STR = (
@@ -93,13 +95,6 @@ class FastqHandler:
     def get_concatenated_name(linked_fastq_name: str) -> str:
         """"create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
-
-    @staticmethod
-    def get_header(fastq_path: Path) -> str:
-        """Get header from fasta file. Assuming un zipped file"""
-
-        with open(fastq_path) as handle:
-            return handle.readline()
 
     @staticmethod
     def parse_header(line: str) -> dict:

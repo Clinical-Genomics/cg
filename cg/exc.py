@@ -131,9 +131,15 @@ class MandatoryFilesMissing(CgError):
     """
 
 
-class HousekeeperVersionMissing(CgError):
+class HousekeeperVersionMissingError(CgError):
     """
     Exception raised when family version is missing in Housekeeper.
+    """
+
+
+class FastaSequenceMissingError(CgError):
+    """
+    Exception raised when expected sequence in fasta file is missing.
     """
 
 
