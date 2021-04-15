@@ -116,6 +116,10 @@ class MicrosaltConfig(BaseModel):
     conda_env: str
 
 
+class ShippingConfig(CommonAppConfig):
+    host_config: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -152,7 +156,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    shipping: CommonAppConfig = None
+    shipping: ShippingConfig = None
     shipping_api_: ShippingAPI = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
