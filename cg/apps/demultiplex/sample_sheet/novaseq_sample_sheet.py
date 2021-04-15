@@ -16,19 +16,6 @@ LOG = logging.getLogger(__name__)
 class SampleSheetCreator:
     """ Create a raw sample sheet for Novaseq flowcells """
 
-    HEADER_TO_LIMS_KEY = {
-        "FCID": "flowcell_id",
-        "Lane": "lane",
-        "SampleID": "sample_id",
-        "SampleRef": "sample_ref",
-        "index": "index",
-        "index2": "index2",
-        "SampleName": "sample_name",
-        "Control": "control",
-        "Recipe": "recipe",
-        "Operator": "operator",
-        "Project": "project",
-    }
     SAMPLE_SHEET_HEADERS = [
         "FCID",
         "Lane",
@@ -99,12 +86,12 @@ class SampleSheetCreator:
 
     @staticmethod
     def convert_sample_to_header_dict(
-        sample: LimsFlowcellSample, sample_sheet_headers: List[str], header_to_lims: Dict[str, str]
+        sample: LimsFlowcellSample, sample_sheet_headers: List[str]
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet headers"""
         LOG.debug("Use sample sheet header %s", sample_sheet_headers)
-        sample_dict = sample.dict()
-        return [str(sample_dict[header_to_lims[header]]) for header in sample_sheet_headers]
+        sample_dict = sample.dict(by_alias=True)
+        return [str(sample_dict[header]) for header in sample_sheet_headers]
 
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
@@ -116,7 +103,6 @@ class SampleSheetCreator:
                     self.convert_sample_to_header_dict(
                         sample=sample,
                         sample_sheet_headers=self.SAMPLE_SHEET_HEADERS,
-                        header_to_lims=self.HEADER_TO_LIMS_KEY,
                     )
                 )
             )

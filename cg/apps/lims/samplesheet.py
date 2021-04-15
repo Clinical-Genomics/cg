@@ -19,7 +19,7 @@ class LimsFlowcellSample(BaseModel):
     index2: str = ""
     description: str = ""
     sample_name: str = Field(..., alias="SampleName")
-    control: str = Field("N", alias="SampleRef")
+    control: str = Field("N", alias="Control")
     recipe: str = Field("R1", alias="Recipe")
     operator: str = Field("script", alias="Operator")
     project: str = Field(..., alias="Project")
