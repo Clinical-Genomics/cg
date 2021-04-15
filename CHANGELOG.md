@@ -13,6 +13,28 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.19.4]
+
+### Fixed
+- fixed bug that cgstats configs was saved as cg_stats in CGConfig
+
+## [20.19.3]
+
+### Fixed
+- Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
+
+
+## [20.19.2]
+
+### Fixed
+- Bug when instantiating analysis api in upload
+
+
+## [20.19.1]
+
+### Fixed
+- Bug when fetching the api in mip workflow cli base
+
 ## [20.19.0]
 
 ### Changed
