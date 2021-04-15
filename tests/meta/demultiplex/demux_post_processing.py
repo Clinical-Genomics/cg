@@ -12,6 +12,10 @@ class DemuxPostProcessingAPI:
     def __init__(self):
         self.dry_run = False
 
+    def set_dry_run(self, dry_run: bool) -> None:
+        LOG.debug("Set dry run to %s", dry_run)
+        self.dry_run = dry_run
+
     @staticmethod
     def rename_index_dir(unaligned_dir: Path, dry_run: bool = False) -> None:
         """Rename the index directory by adding the prefix Project_"""
