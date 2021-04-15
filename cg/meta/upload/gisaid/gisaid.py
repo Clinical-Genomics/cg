@@ -49,9 +49,11 @@ class GisaidAPI:
             if not hk_version:
                 LOG.info("Family ID: %s not found in hose keeper", sample.family_id)
                 raise HousekeeperVersionMissingError
-            # fasta_file: str =self.housekeeper_api.files(version=hk_version.id, tags=["consensus", sample.cg_lims_id]).first()
+            fasta_file: str = self.housekeeper_api.files(
+                version=hk_version.id, tags=["consensus", sample.cg_lims_id]
+            ).first()
             fasta_file = "/Users/maya.brandi/opt/cg/f1.fasta"
-            fasta_sequence = self.get_fasta_sequence(fastq_path=fasta_file)
+            fasta_sequence: str = self.get_fasta_sequence(fastq_path=fasta_file)
             fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
             fasta_objects.append(fasta_obj)
         return fasta_objects
