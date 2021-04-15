@@ -10,6 +10,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.meta.compress import CompressAPI
+from cg.meta.upload.gisaid import GisaidAPI
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig

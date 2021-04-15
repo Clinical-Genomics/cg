@@ -1,9 +1,12 @@
 """Code for uploading genotype data via CLI"""
 import logging
 import click
-from cg.apps.gisaid.gisaid import GisaidAPI
-from cg.apps.gisaid.models import UpploadFiles
-from cg.store import models, Store
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.upload.gisaid import GisaidAPI
+from cg.meta.upload.gisaid.models import UpploadFiles
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
@@ -12,11 +15,12 @@ LOG = logging.getLogger(__name__)
 @click.command()
 @click.argument("family_id", required=True)
 @click.pass_context
-def gisaid(context, family_id):
+def gisaid(context: CGConfig, family_id):
     """Upload mutant analysis data to GISAID."""
 
-    gisaid_api: GisaidAPI = GisaidAPI(context.obj)
-    status_db: Store = gisaid_api.status_db
+    status_db: Store = context.status_db
+    hk: HousekeeperAPI = context.housekeeper_api
+    gisaid_api: GisaidAPI(context, status_db, hk)
     LOG.info("----------------- GISAID -------------------")
 
     case_object: Family = status_db.family(family_id)

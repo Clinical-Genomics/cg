@@ -4,12 +4,13 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cg.store import models
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.models.cg_config import CGConfig
+from cg.store import models, Store
 from cg.utils import Process
 from .constants import HEADERS
 from .models import GisaidSample, FastaFile
 from housekeeper.store import models as hk_models
-from cg.meta.meta import MetaAPI
 import csv
 
 from cg.exc import HousekeeperVersionMissingError, FastaSequenceMissingError
@@ -17,11 +18,13 @@ from cg.exc import HousekeeperVersionMissingError, FastaSequenceMissingError
 LOG = logging.getLogger(__name__)
 
 
-class GisaidAPI(MetaAPI):
+class GisaidAPI:
     """Interface with Gisaid cli uppload"""
 
-    def __init__(self, config: dict):
+    def __init__(self, config: CGConfig, status_db: Store, hk: HousekeeperAPI):
         super().__init__(config)
+        self.housekeeper_api = hk
+        self.status_db = status_db
         self.gisaid_submitter = config["gisaid"]["submitter"]
         self.gisaid_binary = config["gisaid"]["binary_path"]
         self.process = Process(binary=self.gisaid_binary)
@@ -48,7 +51,7 @@ class GisaidAPI(MetaAPI):
                 LOG.info("Family ID: %s not found in hose keeper", sample.family_id)
                 raise HousekeeperVersionMissingError
             # fasta_file: str =self.housekeeper_api.files(version=hk_version.id, tags=["consensus", sample.cg_lims_id]).first()
-            fasta_file = "/Users/maya.brandi/opt/cg/f1.fasta"
+            fasta_file = "/f1.fasta"
             fasta_sequence = self.get_fasta_sequence(fastq_path=fasta_file)
             fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
             fasta_objects.append(fasta_obj)
