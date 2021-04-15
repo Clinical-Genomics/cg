@@ -1,11 +1,15 @@
 """Fixtures for cli compress functions"""
 
 import datetime as dt
+from pathlib import Path
 
 import pytest
-
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 class MockCompressAPI(CompressAPI):
@@ -50,15 +54,18 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 
 @pytest.fixture(name="real_compress_api")
-def fixture_real_compress_api(housekeeper_api, real_crunchy_api):
+def fixture_real_compress_api(
+    housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+) -> CompressAPI:
     """Return a compress context"""
-    hk_api = housekeeper_api
-    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=hk_api)
+    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=housekeeper_api)
     yield _api
 
 
 @pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
-def fixture_real_populated_compress_fastq_api(real_compress_api, compress_hk_fastq_bundle, helpers):
+def fixture_real_populated_compress_fastq_api(
+    real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
+) -> CompressAPI:
     """Populated compress api fixture"""
     helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
 
@@ -157,56 +164,71 @@ def fixture_populated_compress_multiple_store(
 
 # Context fixtures
 @pytest.fixture(name="compress_context")
-def fixture_base_compress_context(compress_api, store):
+def fixture_base_compress_context(
+    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context"""
-    ctx = {"compress_api": compress_api, "status_db": store}
-    return ctx
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = store
+    return cg_config_object
 
 
 @pytest.fixture(name="store_fastq_context")
-def fixture_store_fastq_context(compress_api, store):
+def fixture_store_fastq_context(
+    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context"""
-    ctx = {"compress": compress_api, "status_db": store}
-    return ctx
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = store
+    return cg_config_object
 
 
 @pytest.fixture(name="populated_multiple_compress_context")
-def fixture_populated_multiple_compress_context(compress_api, populated_compress_multiple_store):
+def fixture_populated_multiple_compress_context(
+    compress_api: CompressAPI, populated_compress_multiple_store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a case where anaylis is completer
-    return {"compress_api": compress_api, "status_db": populated_compress_multiple_store}
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = populated_compress_multiple_store
+    return cg_config_object
 
 
 @pytest.fixture(name="populated_compress_context")
-def fixture_populated_compress_context(compress_api, populated_compress_store):
+def fixture_populated_compress_context(
+    compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a case where analysis is completed
-    return {"compress_api": compress_api, "status_db": populated_compress_store}
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = populated_compress_store
+    return cg_config_object
 
 
 @pytest.fixture(name="real_populated_compress_context")
 def fixture_real_populated_compress_context(
-    real_populated_compress_fastq_api, populated_compress_store
-):
+    real_populated_compress_fastq_api: CompressAPI,
+    populated_compress_store: Store,
+    cg_config_object: CGConfig,
+) -> CGConfig:
     """Return a compress context populated with a completed analysis"""
     # Make sure that there is a case where analysis is completed
-    return {
-        "compress_api": real_populated_compress_fastq_api,
-        "status_db": populated_compress_store,
-    }
+    cg_config_object.meta_apis["compress_api"] = real_populated_compress_fastq_api
+    cg_config_object.status_db_ = populated_compress_store
+    return cg_config_object
 
 
 # Bundle fixtures
 
 
 @pytest.fixture(scope="function", name="sample")
-def fixture_sample():
+def fixture_sample() -> str:
     """Return the sample id for first sample"""
     return "sample_1"
 
 
 @pytest.fixture(scope="function", name="new_dir")
-def fixture_new_dir(project_dir):
+def fixture_new_dir(project_dir: Path) -> Path:
     """Return the path to a subdirectory"""
     new_dir = project_dir / "new_dir/"
     new_dir.mkdir()
@@ -261,7 +283,7 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
 
 
 @pytest.fixture(name="symlinked_fastqs")
-def fixture_symlinked_fastqs(project_dir, new_dir):
+def fixture_symlinked_fastqs(project_dir: Path, new_dir: Path) -> dict:
     """Setup an environment that is similar to the case we want to solve"""
     fastq_first = project_dir / "first.fastq.gz"
     fastq_second = project_dir / "second.fastq.gz"

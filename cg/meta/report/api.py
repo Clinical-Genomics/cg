@@ -2,13 +2,11 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import TextIO, Optional
+from typing import Optional, TextIO
 
 import housekeeper
 import requests
 import ruamel.yaml
-from jinja2 import Environment, PackageLoader, select_autoescape
-
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -18,8 +16,9 @@ from cg.meta.report.presenter import Presenter
 from cg.meta.report.report_helper import ReportHelper
 from cg.meta.report.report_validator import ReportValidator
 from cg.meta.report.sample_calculator import SampleCalculator
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store, models
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 
 class ReportAPI:
@@ -30,7 +29,7 @@ class ReportAPI:
         store: Store,
         lims_api: LimsAPI,
         chanjo_api: ChanjoAPI,
-        analysis_api: MipAnalysisAPI,
+        analysis_api: AnalysisAPI,
         scout_api: ScoutAPI,
         logger=logging.getLogger(__name__),
         yaml_loader=ruamel.yaml,

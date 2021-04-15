@@ -2,15 +2,15 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional
 
-from ruamel.yaml import ruamel, safe_load
-
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import models
+from ruamel.yaml import ruamel, safe_load
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -31,7 +31,7 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, config: dict, pipeline: Pipeline):
+    def __init__(self, config: CGConfig, pipeline: Pipeline):
         super().__init__(pipeline, config)
 
     @property

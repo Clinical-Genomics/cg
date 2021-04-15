@@ -63,10 +63,12 @@ class GisaidAPI(MetaAPI):
                 write_file_obj.write(f"{fasta_object.sequence}\n")
 
     def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample]) -> str:
+        """"""
+
         file_name: str = "gisaid.fasta"
         file: Path = Path(file_name)
-        gisaid_fasta_objects = self.get_gisaid_fasta_objects(gsaid_samples=gsaid_samples)
-        self.build_gisiad_fasta_file(fasta_objects=gisaid_fasta_objects, concat_file=file_name)
+        fasta_objects: List[FastaFile] = self.get_gisaid_fasta_objects(gsaid_samples=gsaid_samples)
+        self.build_gisiad_fasta_file(fasta_objects=fasta_objects, concat_file=file_name)
         return str(file.absolute())
 
     def get_sample_row(self, gisaid_sample: GisaidSample) -> List[str]:

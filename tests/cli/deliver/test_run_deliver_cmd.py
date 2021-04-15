@@ -3,13 +3,13 @@
 import logging
 from pathlib import Path
 
+from cg.cli.deliver.base import deliver_analysis
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 from click.testing import CliRunner
 
-from cg.cli.deliver.base import deliver_analysis
-from cg.store import Store
 
-
-def test_run_deliver_with_help(base_context: dict):
+def test_run_deliver_with_help(base_context: CGConfig):
     # GIVEN a cli runner and a base context
     runner = CliRunner()
 
@@ -22,7 +22,7 @@ def test_run_deliver_with_help(base_context: dict):
     assert "Deliver analysis files to customer inbox" in result.output
 
 
-def test_run_deliver_without_specifying_case_or_ticket(base_context: dict, caplog):
+def test_run_deliver_without_specifying_case_or_ticket(base_context: CGConfig, caplog):
     caplog.set_level(logging.INFO)
     # GIVEN a cli runner and a base context
     runner = CliRunner()
@@ -36,13 +36,13 @@ def test_run_deliver_without_specifying_case_or_ticket(base_context: dict, caplo
     assert "Please provide a case-id or ticket-id" in caplog.text
 
 
-def test_run_deliver_non_existing_case(base_context: dict, case_id: str, caplog):
+def test_run_deliver_non_existing_case(base_context: CGConfig, case_id: str, caplog):
     """Test to run the deliver command when the provided case does not exist"""
     caplog.set_level(logging.WARNING)
     # GIVEN a cli runner and a base context
     runner = CliRunner()
     # GIVEN a case_id that does not exist in the database
-    store: Store = base_context["status_db"]
+    store: Store = base_context.status_db
     assert store.family(case_id) is None
 
     # WHEN running the deliver command with the non existing case
@@ -57,7 +57,7 @@ def test_run_deliver_non_existing_case(base_context: dict, case_id: str, caplog)
 
 
 def test_delivery_with_dry_run(
-    populated_mip_context: dict, case_id: str, delivery_inbox: Path, caplog
+    populated_mip_context: CGConfig, case_id: str, delivery_inbox: Path, caplog
 ):
     """Test to run the delivery command with dry run enabled"""
     caplog.set_level(logging.DEBUG)
@@ -82,7 +82,7 @@ def test_delivery_with_dry_run(
 
 
 def test_delivery_path_created(
-    populated_mip_context: dict, case_id: str, delivery_inbox: Path, project_dir: Path
+    populated_mip_context: CGConfig, case_id: str, delivery_inbox: Path, project_dir: Path
 ):
     """Test that the delivery path is created when running the deliver analysis command"""
     # GIVEN a context with a case that have files in housekeeper to deliver
@@ -104,7 +104,7 @@ def test_delivery_path_created(
 
 
 def test_delivery_ticket_id(
-    populated_mip_context: dict,
+    populated_mip_context: CGConfig,
     case_id: str,
     delivery_inbox: Path,
     project_dir: Path,
@@ -130,7 +130,7 @@ def test_delivery_ticket_id(
 
 
 def test_case_file_is_delivered(
-    populated_mip_context: dict,
+    populated_mip_context: CGConfig,
     case_id: str,
     delivery_inbox: Path,
     project_dir: Path,

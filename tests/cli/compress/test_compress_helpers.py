@@ -3,10 +3,11 @@
 import os
 from pathlib import Path
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
 
 
-def test_get_true_dir_no_symlinks(project_dir):
+def test_get_true_dir_no_symlinks(project_dir: Path):
     """Test to get a true dir when there are no symlinks"""
     # GIVEN a directory with some files but no symlinked files
     a_file = project_dir / "hello.txt"
@@ -18,7 +19,7 @@ def test_get_true_dir_no_symlinks(project_dir):
     assert true_dir is None
 
 
-def test_get_true_dir_when_symlinks(project_dir):
+def test_get_true_dir_when_symlinks(project_dir: Path):
     """Test to get a true dir when there are symlinks to another directory
 
     The function should return the path to another directory when there are symlinks in one
@@ -44,7 +45,7 @@ def test_get_true_dir_when_symlinks(project_dir):
     assert true_dir == project_dir
 
 
-def test_get_versions_no_bundle(housekeeper_api):
+def test_get_versions_no_bundle(housekeeper_api: HousekeeperAPI):
     """Test to get latest versions of bundles when no bundles exists"""
     # GIVEN a empty housekeeper_api
 
@@ -55,7 +56,7 @@ def test_get_versions_no_bundle(housekeeper_api):
     assert sum(1 for version in versions) == 0
 
 
-def test_get_versions_one_bundle(housekeeper_api, spring_bundle):
+def test_get_versions_one_bundle(housekeeper_api: HousekeeperAPI, spring_bundle: dict):
     """Test to get latest versions of bundles when no bundles exists"""
     # GIVEN a populated housekeeper_api
     housekeeper_api.add_bundle(spring_bundle)
@@ -68,7 +69,10 @@ def test_get_versions_one_bundle(housekeeper_api, spring_bundle):
 
 
 def test_correct_spring_paths(
-    housekeeper_api, spring_bundle_symlink_problem, symlinked_fastqs, new_dir
+    housekeeper_api: HousekeeperAPI,
+    spring_bundle_symlink_problem: dict,
+    symlinked_fastqs: dict,
+    new_dir: Path,
 ):
     """docstring for test_correct_spring_paths"""
     # GIVEN a populated housekeeper_api
