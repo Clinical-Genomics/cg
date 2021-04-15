@@ -5,24 +5,27 @@ from typing import Iterable, List, Optional
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 LOG = logging.getLogger(__name__)
 
 
 class LimsFlowcellSample(BaseModel):
-    flowcell_id: str
-    lane: int
-    sample_id: str
-    sample_ref: str = "hg19"
+    flowcell_id: str = Field(..., alias="FCID")
+    lane: int = Field(..., alias="Lane")
+    sample_id: str = Field(..., alias="SampleID")
+    sample_ref: str = Field("hg19", alias="SampleRef")
     index: str
     index2: str = ""
     description: str = ""
-    sample_name: str
-    control: str = "N"
-    recipe: str = "R1"
-    operator: str = "script"
-    project: str
+    sample_name: str = Field(..., alias="SampleName")
+    control: str = Field("N", alias="SampleRef")
+    recipe: str = Field("R1", alias="Recipe")
+    operator: str = Field("script", alias="Operator")
+    project: str = Field(..., alias="Project")
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 def get_placement_lane(lane: str) -> int:
