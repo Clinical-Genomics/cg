@@ -291,6 +291,7 @@ class AnalysisAPI(MetaAPI):
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 read=fastq_data["read"],
+                undetermined=fastq_data["undetermined"],
                 meta=self.get_additional_naming_metadata(sample_obj),
             )
             destination_path: Path = fastq_dir / fastq_name

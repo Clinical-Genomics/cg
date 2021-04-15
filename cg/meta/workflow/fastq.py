@@ -86,10 +86,6 @@ class FastqHandler:
             file_path.unlink()
 
     @staticmethod
-    def create(lane: str, flowcell: str, sample: str, read: str, more: dict = None) -> str:
-        raise NotImplementedError
-
-    @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:
         """"create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
@@ -150,49 +146,6 @@ class FastqHandler:
         return fastq_meta
 
     @staticmethod
-    def link(sample_id: str, files: List[dict], concatenate: bool, working_dir: Path) -> None:
-        """Link FASTQ files for a balsamic sample.
-        Shall be linked to /<balsamic root directory>/case-id/fastq/"""
-
-        working_dir.mkdir(parents=True, exist_ok=True)
-
-        linked_reads_paths = {1: [], 2: []}
-        concatenated_paths = {1: "", 2: ""}
-
-        sorted_files = sorted(files, key=lambda k: k["path"])
-
-        for fastq_data in sorted_files:
-            original_fastq_path = Path(fastq_data["path"])
-            linked_fastq_name = FastqHandler.create(
-                lane=fastq_data["lane"],
-                flowcell=fastq_data["flowcell"],
-                sample=sample_id,
-                read=fastq_data["read"],
-                more={"undetermined": fastq_data["undetermined"]},
-            )
-
-            linked_fastq_path = working_dir / linked_fastq_name
-
-            linked_reads_paths[fastq_data["read"]].append(linked_fastq_path)
-            concatenated_paths[
-                fastq_data["read"]
-            ] = f"{working_dir}/{FastqHandler.get_concatenated_name(linked_fastq_name)}"
-
-            if not linked_fastq_path.exists():
-                LOG.info("linking: %s -> %s", original_fastq_path, linked_fastq_path)
-                linked_fastq_path.symlink_to(original_fastq_path)
-            else:
-                LOG.debug("destination path already exists: %s", linked_fastq_path)
-
-        if not concatenate:
-            return
-
-        LOG.info("Concatenation in progress for sample %s.", sample_id)
-        for read, value in linked_reads_paths.items():
-            FastqHandler.concatenate(linked_reads_paths[read], concatenated_paths[read])
-            FastqHandler.remove_files(value)
-
-    @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
@@ -203,7 +156,7 @@ class FastqHandler:
                 "lane": int(header_info["lane"]),
                 "flowcell": header_info["flowcell"],
                 "read": int(header_info["readnumber"]),
-                "undetermined": ("_Undetermined_" in fastq_path),
+                "undetermined": ("Undetermined" in fastq_path),
             }
             matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
             if len(matches) > 0:
