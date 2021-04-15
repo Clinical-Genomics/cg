@@ -1,14 +1,17 @@
 import datetime as dt
 
 import pytest
+from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.stats import StatsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.flowcell import TransferFlowcell
+from cg.store import Store, models
+from cgstats.db import models as stats_models
 
 
 @pytest.fixture(name="data")
-def fixture_data():
+def fixture_data() -> dict:
     return {
         "samples": [
             {
@@ -22,7 +25,7 @@ def fixture_data():
 
 
 @pytest.fixture(scope="function")
-def store_stats():
+def store_stats() -> StatsAPI:
     """Setup base CGStats store."""
     _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
     _store.create_all()
@@ -31,31 +34,39 @@ def store_stats():
 
 
 @pytest.fixture(scope="function")
-def base_store_stats(store_stats, data):
+def base_store_stats(store_stats: StatsAPI, data: dict) -> StatsAPI:
     """Setup CGStats store with sample data."""
     demuxes = {}
     for sample_data in data["samples"]:
-        project = store_stats.Project(projectname="test", time=dt.datetime.now())
-        sample = store_stats.Sample(
+        project: stats_models.Project = store_stats.Project(
+            projectname="test", time=dt.datetime.now()
+        )
+        sample: stats_models.Sample = store_stats.Sample(
             samplename=sample_data["name"],
             barcode=sample_data["index"],
             limsid=sample_data["name"],
         )
         sample.project = project
-        unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)
+        unaligned: stats_models.Unaligned = store_stats.Unaligned(
+            readcounts=300000000, q30_bases_pct=85
+        )
         unaligned.sample = sample
 
         if sample_data["flowcell"] in demuxes:
             demux = demuxes[sample_data["flowcell"]]
         else:
-            flowcell = store_stats.Flowcell(
+            flowcell: stats_models.Flowcell = store_stats.Flowcell(
                 flowcellname=sample_data["flowcell"],
                 flowcell_pos="A",
                 hiseqtype=sample_data["type"],
                 time=dt.datetime.now(),
             )
-            supportparams = store_stats.Supportparams(document_path="NA", idstring="NA")
-            datasource = store_stats.Datasource(document_path="NA", document_type="html")
+            supportparams: stats_models.Supportparams = store_stats.Supportparams(
+                document_path="NA", idstring="NA"
+            )
+            datasource: stats_models.Datasource = store_stats.Datasource(
+                document_path="NA", document_type="html"
+            )
             datasource.supportparams = supportparams
             demux = store_stats.Demux()
             demux.flowcell = flowcell
@@ -69,12 +80,16 @@ def base_store_stats(store_stats, data):
 
 
 @pytest.fixture(scope="function")
-def flowcell_store(base_store, data):
+def flowcell_store(base_store: Store, data: dict) -> Store:
     """Setup store with sample data for testing flowcell transfer."""
     for sample_data in data["samples"]:
-        customer_obj = base_store.customers().first()
-        application_version = base_store.application("WGTPCFC030").versions[0]
-        sample = base_store.add_sample(name="NA", sex="male", internal_id=sample_data["name"])
+        customer_obj: models.Customer = base_store.customers().first()
+        application_version: models.ApplicationVersion = base_store.application(
+            "WGTPCFC030"
+        ).versions[0]
+        sample: models.Sample = base_store.add_sample(
+            name="NA", sex="male", internal_id=sample_data["name"]
+        )
         sample.customer = customer_obj
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
@@ -84,17 +99,20 @@ def flowcell_store(base_store, data):
 
 
 @pytest.fixture(scope="function")
-def transfer_flowcell_api(flowcell_store, housekeeper_api, base_store_stats):
+def transfer_flowcell_api(
+    flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
+) -> TransferFlowcell:
     """Setup flowcell transfer API."""
-    transfer_api = TransferFlowcell(flowcell_store, base_store_stats, housekeeper_api)
+    transfer_api = TransferFlowcell(
+        db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api
+    )
     yield transfer_api
 
 
 @pytest.fixture(scope="function")
-def transfer_lims_api(sample_store):
+def transfer_lims_api(sample_store: Store) -> TransferLims:
     """Setup flowcell transfer API."""
-    transfer_api = TransferLims(sample_store, MockLims(config=""))
-    yield transfer_api
+    yield TransferLims(sample_store, MockLims(config=""))
 
 
 class MockLims(LimsAPI):

@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -13,7 +14,6 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.shipping import ShippingAPI
-from cg.apps.stats import StatsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.store import Store

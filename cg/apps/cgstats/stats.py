@@ -1,9 +1,10 @@
 import logging
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List, Optional
 
 import alchy
 import sqlalchemy as sqa
+from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
 from cgstats.db import api, models
 
 LOG = logging.getLogger(__name__)
@@ -24,20 +25,17 @@ class StatsAPI(alchy.Manager):
         super(StatsAPI, self).__init__(config=alchy_config, Model=models.Model)
         self.root_dir = Path(config["cgstats"]["root"])
 
-    def flowcell(self, flowcell_name: str) -> dict:
-        """Fetch information about a flowcell."""
-        record = self.Flowcell.query.filter_by(flowcellname=flowcell_name).first()
-        data = {
-            "name": record.flowcellname,
-            "sequencer": record.demux[0].datasource.machine,
-            "sequencer_type": record.hiseqtype,
-            "date": record.time,
-            "samples": [],
-        }
-        for sample_obj in self.flowcell_samples(record):
-            raw_samplename = sample_obj.samplename.split("_", 1)[0]
-            curated_samplename = raw_samplename.rstrip("AB")
-            sample_data = {"name": curated_samplename, "reads": 0, "fastqs": []}
+    @staticmethod
+    def get_curated_sample_name(sample_name: str) -> str:
+        """Create new sample name"""
+        raw_sample_name: str = sample_name.split("_", 1)[0]
+        return raw_sample_name.rstrip("AB")
+
+    def get_flowcell_samples(self, flowcell_object: models.Flowcell) -> List[StatsSample]:
+        flowcell_samples: List[StatsSample] = []
+        for sample_obj in self.flowcell_samples(flowcell_obj=flowcell_object):
+            curated_sample_name: str = self.get_curated_sample_name(sample_obj.samplename)
+            sample_data = {"name": curated_sample_name, "reads": 0, "fastqs": []}
             for fc_data in self.sample_reads(sample_obj):
                 if fc_data.type == "hiseqga" and fc_data.q30 >= 80:
                     sample_data["reads"] += fc_data.reads
@@ -47,18 +45,33 @@ class StatsAPI(alchy.Manager):
                     sample_data["reads"] += fc_data.reads
                 else:
                     LOG.warning(
-                        f"q30 too low for {curated_samplename} on {fc_data.name}:"
+                        f"q30 too low for {curated_sample_name} on {fc_data.name}:"
                         f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%"
                     )
                     continue
                 for fastq_path in self.fastqs(fc_data.name, sample_obj):
-                    if self.is_lane_pooled(flowcell_obj=record, lane=fc_data.lane):
-                        if "Undetermined" in str(fastq_path):
-                            continue
+                    if self.is_lane_pooled(
+                        flowcell_obj=flowcell_object, lane=fc_data.lane
+                    ) and "Undetermined" in str(fastq_path):
+                        continue
                     sample_data["fastqs"].append(str(fastq_path))
-            data["samples"].append(sample_data)
+            flowcell_samples.append(StatsSample(**sample_data))
+        return flowcell_samples
 
-        return data
+    def flowcell(self, flowcell_name: str) -> StatsFlowcell:
+        """Fetch information about a flowcell."""
+        flowcell_object: models.Flowcell = self.Flowcell.query.filter_by(
+            flowcellname=flowcell_name
+        ).first()
+        flowcell_data = {
+            "name": flowcell_object.flowcellname,
+            "sequencer": flowcell_object.demux[0].datasource.machine,
+            "sequencer_type": flowcell_object.hiseqtype,
+            "date": flowcell_object.time,
+            "samples": self.get_flowcell_samples(flowcell_object),
+        }
+
+        return StatsFlowcell(**flowcell_data)
 
     def flowcell_samples(self, flowcell_obj: models.Flowcell) -> Iterator[models.Sample]:
         """Fetch all the samples from a flowcell."""
@@ -78,7 +91,7 @@ class StatsAPI(alchy.Manager):
 
     def sample_reads(self, sample_obj: models.Sample) -> Iterator:
         """Calculate reads for a sample."""
-        query = (
+        return (
             self.session.query(
                 models.Flowcell.flowcellname.label("name"),
                 models.Flowcell.hiseqtype.label("type"),
@@ -90,7 +103,6 @@ class StatsAPI(alchy.Manager):
             .filter(models.Unaligned.sample == sample_obj)
             .group_by(models.Flowcell.flowcellname)
         )
-        return query
 
     def sample(self, sample_name: str) -> models.Sample:
         """Fetch a sample for the database by name."""
@@ -105,28 +117,26 @@ class StatsAPI(alchy.Manager):
             files = self.root_dir.glob(pattern)
             yield from files
 
-    def document_path(self, flowcell_obj: models.Flowcell) -> str:
+    def document_path(self, flowcell_name: str) -> str:
         """Get the latest document path of a flowcell from supportparams"""
         query = (
             self.session.query(
                 models.Supportparams.document_path,
             )
             .join(models.Flowcell.demux, models.Demux.datasource, models.Datasource.supportparams)
-            .filter(models.Flowcell.flowcellname == flowcell_obj)
+            .filter(models.Flowcell.flowcellname == flowcell_name)
             .order_by(models.Supportparams.supportparams_id.desc())
             .first()
         )
-        document_path = query.document_path
-        return document_path
+        return query.document_path
 
-    def run_name(self, flowcell_obj: models.Flowcell) -> str:
+    def run_name(self, flowcell_name: str) -> str:
         """Get the latest run name of a flowcell from datasource"""
         query = (
             self.session.query(models.Datasource.runname)
             .join(models.Flowcell.demux, models.Demux.datasource)
-            .filter(models.Flowcell.flowcellname == flowcell_obj)
+            .filter(models.Flowcell.flowcellname == flowcell_name)
             .order_by(models.Datasource.time.desc())
             .first()
         )
-        run_name = query.runname
-        return run_name
+        return query.runname

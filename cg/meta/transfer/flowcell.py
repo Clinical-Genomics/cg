@@ -4,9 +4,11 @@ import logging
 from pathlib import Path
 from typing import List
 
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.stats import StatsAPI
+from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -14,10 +16,10 @@ LOG = logging.getLogger(__name__)
 class TransferFlowcell:
     """Transfer flowcell API"""
 
-    def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI = None):
-        self.db = db
-        self.stats = stats_api
-        self.hk = hk_api
+    def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI):
+        self.db: Store = db
+        self.stats: StatsAPI = stats_api
+        self.hk: HousekeeperAPI = hk_api
 
     def transfer(self, flowcell_name: str, store: bool = True) -> models.Flowcell:
         """Populate the database with the information."""
@@ -27,15 +29,15 @@ class TransferFlowcell:
             self.hk.add_commit(self.hk.new_tag("samplesheet"))
         if store and self.hk.tag(flowcell_name) is None:
             self.hk.add_commit(self.hk.new_tag(flowcell_name))
-        stats_data = self.stats.flowcell(flowcell_name)
-        flowcell_obj = self.db.flowcell(flowcell_name)
+        stats_data: StatsFlowcell = self.stats.flowcell(flowcell_name)
+        flowcell_obj: models.Flowcell = self.db.flowcell(flowcell_name)
 
         if flowcell_obj is None:
-            flowcell_obj = self.db.add_flowcell(
+            flowcell_obj: models.Flowcell = self.db.add_flowcell(
                 name=flowcell_name,
-                sequencer=stats_data["sequencer"],
-                sequencer_type=stats_data["sequencer_type"],
-                date=stats_data["date"],
+                sequencer=stats_data.sequencer,
+                sequencer_type=stats_data.sequencer_type,
+                date=stats_data.date,
             )
         flowcell_obj.status = "ondisk"
 
@@ -45,21 +47,21 @@ class TransferFlowcell:
         elif store:
             self.store_samplesheet(flowcell_name, sample_sheet_path)
 
-        for sample_data in stats_data["samples"]:
-            LOG.debug(f"adding reads/fastqs to sample: {sample_data['name']}")
-            sample_obj = self.db.sample(sample_data["name"])
+        for sample_data in stats_data.samples:
+            LOG.debug(f"adding reads/fastqs to sample: {sample_data.name}")
+            sample_obj = self.db.sample(sample_data.name)
             if sample_obj is None:
-                LOG.warning(f"unable to find sample: {sample_data['name']}")
+                LOG.warning(f"unable to find sample: {sample_data.name}")
                 continue
 
             if store:
                 self.store_fastqs(
                     sample=sample_obj.internal_id,
                     flowcell=flowcell_name,
-                    fastq_files=sample_data["fastqs"],
+                    fastq_files=sample_data.fastqs,
                 )
 
-            sample_obj.reads = sample_data["reads"]
+            sample_obj.reads = sample_data.reads
             enough_reads = (
                 sample_obj.reads > sample_obj.application_version.application.expected_reads
             )
@@ -73,7 +75,7 @@ class TransferFlowcell:
                 flowcell_obj.samples.append(sample_obj)
 
             LOG.info(
-                f"added reads to sample: {sample_data['name']} - {sample_data['reads']} "
+                f"added reads to sample: {sample_data.name} - {sample_data.reads} "
                 f"[{'DONE' if enough_reads else 'NOT DONE'}]"
             )
 
@@ -122,8 +124,8 @@ class TransferFlowcell:
 
     def _sample_sheet_path(self, flowcell: str) -> str:
         """Construct the path to the samplesheet to be stored"""
-        run_name = self.stats.run_name(flowcell)
-        document_path = self.stats.document_path(flowcell)
-        unaligned_dir = Path(document_path).name
-        root_dir = self.stats.root_dir
+        run_name: str = self.stats.run_name(flowcell)
+        document_path: str = self.stats.document_path(flowcell)
+        unaligned_dir: str = Path(document_path).name
+        root_dir: Path = self.stats.root_dir
         return str(root_dir.joinpath(run_name, unaligned_dir, "SampleSheet.csv"))
