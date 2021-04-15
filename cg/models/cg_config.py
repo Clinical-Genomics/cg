@@ -134,7 +134,7 @@ class CGConfig(BaseModel):
 
     # App APIs that can be instantiated in CGConfig
     backup: BackupConfig = None
-    cg_stats: CGStatsConfig = None
+    cgstats: CGStatsConfig = None
     cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
@@ -164,12 +164,12 @@ class CGConfig(BaseModel):
     vogue_api_: VogueAPI = None
 
     # Meta APIs that will use the apps from CGConfig
-    fluffy: FluffyConfig = None
     balsamic: BalsamicConfig = None
-    mutant: MutantConfig = None
+    fluffy: FluffyConfig = None
+    microsalt: MicrosaltConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
-    microsalt: MicrosaltConfig = None
+    mutant: MutantConfig = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
