@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.20.0]
+
+## Added
+- CLI command to deploy Loqusdb via shipping
+
 ## [20.19.5]
 
 ### Fixed
