@@ -21,12 +21,11 @@ LOG = logging.getLogger(__name__)
 class GisaidAPI:
     """Interface with Gisaid cli uppload"""
 
-    def __init__(self, config: CGConfig, status_db: Store, hk: HousekeeperAPI):
-        super().__init__(config)
-        self.housekeeper_api = hk
-        self.status_db = status_db
-        self.gisaid_submitter = config["gisaid"]["submitter"]
-        self.gisaid_binary = config["gisaid"]["binary_path"]
+    def __init__(self, config: CGConfig):
+        self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.status_db: Store = config.status_db
+        self.gisaid_submitter: str = config.gisaid.submitter
+        self.gisaid_binary: str = config.gisaid.binary_path
         self.process = Process(binary=self.gisaid_binary)
 
     def get_fasta_sequence(self, fastq_path: str) -> str:
@@ -51,7 +50,7 @@ class GisaidAPI:
                 LOG.info("Family ID: %s not found in hose keeper", sample.family_id)
                 raise HousekeeperVersionMissingError
             # fasta_file: str =self.housekeeper_api.files(version=hk_version.id, tags=["consensus", sample.cg_lims_id]).first()
-            fasta_file = "/f1.fasta"
+            fasta_file = "/Users/maya.brandi/opt/cg/f1.fasta"
             fasta_sequence = self.get_fasta_sequence(fastq_path=fasta_file)
             fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
             fasta_objects.append(fasta_obj)

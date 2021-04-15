@@ -116,8 +116,7 @@ class MicrosaltConfig(BaseModel):
     conda_env: str
 
 
-class GisaidConfig(BaseModel):
-    binary_path: str
+class GisaidConfig(CommonAppConfig):
     submitter: str
 
 
