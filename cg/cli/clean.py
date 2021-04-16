@@ -39,7 +39,9 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
 
         for file_obj in set(housekeeper_api.get_files(bundle=bundle, tags=[tag])):
             if file_obj.is_included:
-                question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+                question = (
+                    f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+                )
             else:
                 question = f"{bundle}: remove file from database: {file_obj.full_path}"
 
