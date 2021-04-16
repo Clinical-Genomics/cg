@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- bug in cg clean scout-finished-cases
+
 ## [20.20.0]
 
 ## Added
