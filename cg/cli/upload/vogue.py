@@ -231,11 +231,13 @@ def bioinfo_all(
             )
         )
         if not multiqc_file_obj:
+            LOG.warning("No multiqc file found in Housekeeper for case %s", case_name)
             continue
 
         # confirm that file exists
         existing_multiqc_file: str = multiqc_file_obj[0].full_path
         if not Path(existing_multiqc_file).exists():
+            LOG.warning("No multiqc file does not exists for case %s", case_name)
             continue
 
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
