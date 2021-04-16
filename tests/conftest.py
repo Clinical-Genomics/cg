@@ -1155,6 +1155,11 @@ def fixture_context_config(
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
         },
+        "data-delivery": {
+            "destination_path": "server.name.se:/some/%s/path/%s/",
+            "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
+        },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
