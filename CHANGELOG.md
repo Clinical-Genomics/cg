@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.21.0]
+### Added
+- Added cg deliver rsync <ticket_id>
+
 ## [20.20.1]
 ### Fixed
 - bug in cg clean scout-finished-cases

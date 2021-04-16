@@ -43,7 +43,7 @@ def test_run_rsync_command(cg_context: CGConfig, cli_runner, helpers, caplog):
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN process generates command string for linking analysis files
-    assert "cust000/inbox/999999 server.name.se:/some/cust000/path/999999/" in caplog.text
+    assert "cust000/inbox/999999/ server.name.se:/some/cust000/path/999999/" in caplog.text
     # THEN process generates command string for linking report file
     assert (
         "rsync -rvL /folder_structure/angrybird/yet_another_folder/filename_999999_data_*.csv "
