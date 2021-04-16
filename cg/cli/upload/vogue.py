@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 import click
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
@@ -202,13 +203,15 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     "default, this date is not used.",
 )
 @click.pass_context
-def bioinfo_all(context: click.Context, date_start: str, date_end: str, dry: bool):
+def bioinfo_all(
+    context: click.Context, date_start: Optional[str], date_end: Optional[str], dry: bool
+):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
 
-    cases = analysis_api.status_db.cases_ready_for_vogue_upload(date_start, date_end)
+    cases = status_db.cases_ready_for_vogue_upload(date_start, date_end)
     for case in cases:
         case_name: str = case.internal_id
         version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
@@ -232,8 +235,8 @@ def bioinfo_all(context: click.Context, date_start: str, date_end: str, dry: boo
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
-            update_uploaded_to_vogue_date(case_name)
-            analysis_api.status_db.commit()
+            update_uploaded_to_vogue_date(case)
+            status_db.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 

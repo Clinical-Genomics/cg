@@ -1234,7 +1234,6 @@ def fixture_context_config(
     }
 
 
-
 @pytest.fixture
 def patch_datetime_now(monkeypatch):
     class mydatetime:
@@ -1253,4 +1252,3 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
-
