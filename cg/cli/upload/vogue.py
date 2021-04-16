@@ -199,14 +199,16 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
 @vogue.command("bioinfo-all", short_help="Load all bioinfo results into vogue")
 @click.option("--dry/--no-dry", is_flag=True, help="Dry run...")
 @click.option(
-    "--date-start",
+    "--completed-after",
+    "-a",
     callback=validate_date,
     default=str(dt.date.today() - dt.timedelta(days=7)),
     help="Only upload cases with an analysis that was completed after this date. Default is one "
     "week ago",
 )
 @click.option(
-    "--date-end",
+    "--completed-before",
+    "-b",
     callback=validate_date,
     default=None,
     help="Only upload cases with an analysis that was completed before after this date. By "
@@ -214,14 +216,17 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
 )
 @click.pass_context
 def bioinfo_all(
-    context: click.Context, date_start: Optional[str], date_end: Optional[str], dry: bool
+    context: click.Context,
+    completed_after: Optional[str],
+    completed_before: Optional[str],
+    dry: bool,
 ):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
 
-    cases = status_db.cases_ready_for_vogue_upload(date_start, date_end)
+    cases = status_db.cases_ready_for_vogue_upload(completed_after, completed_before)
     for case in cases:
         case_name: str = case.internal_id
         version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
