@@ -19,7 +19,7 @@ from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
+VOGUE_VALID_BIOINFO = [str(Pipeline.BALSAMIC)]
 
 
 def validate_date(context, date_: str) -> Optional[dt.date]:
@@ -164,8 +164,14 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
 
     # Get workflow_name and workflow_version
     workflow_name, workflow_version = _get_analysis_workflow_details(status_db, case_name)
+
+    if workflow_name is None:
+        raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+    workflow_name = workflow_name.lower()
+
     if workflow_name not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
     load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
 
@@ -288,4 +294,4 @@ def _get_analysis_workflow_details(status_api: Store, case_name: str) -> Tuple[A
         workflow_name = case_obj.analyses[0].pipeline
         workflow_version = case_obj.analyses[0].pipeline_version
 
-    return workflow_name.lower(), workflow_version
+    return workflow_name, workflow_version
