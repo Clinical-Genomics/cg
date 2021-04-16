@@ -43,8 +43,9 @@ def get_flowcell_id(manager: StatsAPI, flowcell_name: str) -> Optional[int]:
     return None
 
 
-def get_demux_id(manager: StatsAPI, flowcell_id: int) -> Optional[int]:
-    demux_id: Optional[int] = manager.Demux.exists(flowcell_id=flowcell_id, basemask="")
+def get_demux_id(manager: StatsAPI, flowcell_object_id: int) -> Optional[int]:
+    """Flowcell object id refers to a database object"""
+    demux_id: Optional[int] = manager.Demux.exists(flowcell_id=flowcell_object_id, basemask="")
     if demux_id:
         return demux_id
     return None

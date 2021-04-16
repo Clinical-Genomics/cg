@@ -101,7 +101,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             manager=manager, demux_results=demux_results
         )
         flowcell_id: int = flowcell.flowcell_id
-    demux_id: Optional[int] = find.get_demux_id(manager=manager, flowcell_id=flowcell_id)
+    demux_id: Optional[int] = find.get_demux_id(manager=manager, flowcell_object_id=flowcell_id)
     if not demux_id:
         demux_object: stats_models.Demux = create_demux(
             manager=manager, flowcell_id=flowcell_id, datasource_id=datasource_id

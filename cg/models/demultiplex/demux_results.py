@@ -1,3 +1,4 @@
+import datetime
 import socket
 from pathlib import Path
 from typing import Literal
@@ -12,7 +13,7 @@ class LogfileParameters(BaseModel):
     # This is the binary that was executed (atm only bcl2fastq)
     program: Literal["bcl2fastq"] = "bcl2fastq"
     command_line: str
-    time: str  # This is the time in format YYYYMMDDHHMMSS
+    time: datetime.datetime
 
 
 class DemuxResults:
@@ -27,8 +28,10 @@ class DemuxResults:
         return self.demux_dir.name
 
     @property
-    def run_date(self) -> str:
-        return self.run_name.split("_")[0]
+    def run_date(self) -> datetime.date:
+        raw_time: str = self.run_name.split("_")[0]
+        time_object: datetime.datetime = datetime.datetime.strptime(raw_time, "%y%m%d")
+        return time_object.date()
 
     @property
     def machine_name(self) -> str:
@@ -63,7 +66,8 @@ class DemuxResults:
                     split_line = line.split(" ")
                     command_line: str = " ".join(split_line[1:])
                     # Time is in format 20210403115107, YYYYMMDDHHMMSS
-                    time: str = split_line[0].strip("[]")  # remove the brackets around the date
+                    raw_time: str = split_line[0].strip("[]")  # remove the brackets around the date
+                    time: datetime.datetime = datetime.datetime.strptime(raw_time, "%Y%m%d%H%M%S")
                     program = split_line[6]  # get the executed program
 
                 if "bcl2fastq v" in line:
