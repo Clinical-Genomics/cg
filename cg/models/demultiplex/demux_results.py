@@ -9,7 +9,8 @@ from pydantic import BaseModel
 
 class LogfileParameters(BaseModel):
     id_string: str  # This indicate software and version
-    program: Literal["bcl2fastq"]  # This is the binary that was executed (atm only bcl2fastq)
+    # This is the binary that was executed (atm only bcl2fastq)
+    program: Literal["bcl2fastq"] = "bcl2fastq"
     command_line: str
     time: str  # This is the time in format YYYYMMDDHHMMSS
 
@@ -51,7 +52,7 @@ class DemuxResults:
 
     @property
     def sample_sheet_path(self) -> Path:
-        self.flowcell.sample_sheet_path
+        return self.flowcell.sample_sheet_path
 
     def get_logfile_parameters(self) -> LogfileParameters:
         with open(self.log_path, "r") as logfile:
@@ -63,7 +64,7 @@ class DemuxResults:
                     command_line: str = " ".join(split_line[1:])
                     # Time is in format 20210403115107, YYYYMMDDHHMMSS
                     time: str = split_line[0].strip("[]")  # remove the brackets around the date
-                    program = split_line[5]  # get the executed program
+                    program = split_line[6]  # get the executed program
 
                 if "bcl2fastq v" in line:
                     id_string = line.strip()

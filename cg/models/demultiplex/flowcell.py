@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
+from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
 from pydantic import ValidationError
 
@@ -80,6 +80,9 @@ class Flowcell:
             LOG.warning(error)
             return False
         return True
+
+    def get_sample_sheet(self) -> SampleSheet:
+        return get_sample_sheet_from_file(infile=self.sample_sheet_path, sheet_type="S4")
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done
