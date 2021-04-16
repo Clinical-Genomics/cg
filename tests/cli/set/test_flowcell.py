@@ -1,13 +1,14 @@
 """This script tests the cli methods to set flowcells in status-db"""
-
 from cg.cli.set.base import flowcell
 from cg.constants import FLOWCELL_STATUS
+from cg.models.cg_config import CGConfig
 from cg.store import Store
+from click.testing import CliRunner
 
 SUCCESS = 0
 
 
-def test_set_flowcell_bad_flowcell(cli_runner, base_context):
+def test_set_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: CGConfig):
     """Test to set a flowcell using a non-existing flowcell """
     # GIVEN an empty database
 
@@ -19,7 +20,9 @@ def test_set_flowcell_bad_flowcell(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_set_flowcell_required(cli_runner, base_context, base_store: Store, helpers):
+def test_set_flowcell_required(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a flowcell using only the required arguments"""
     # GIVEN a database with a flowcell
     flowcell_name = helpers.add_flowcell(base_store).name
@@ -32,7 +35,9 @@ def test_set_flowcell_required(cli_runner, base_context, base_store: Store, help
     assert result.exit_code == SUCCESS
 
 
-def test_set_flowcell_status(cli_runner, base_context, base_store: Store, helpers):
+def test_set_flowcell_status(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test that the updated flowcell get the status we send in"""
     # GIVEN a database with a flowcell
     flowcell_name = helpers.add_flowcell(base_store).name

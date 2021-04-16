@@ -3,13 +3,16 @@
 import logging
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.cli.workflow.balsamic.base import report_deliver
+from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
 NO_CONFIG_FOUND = "No config file found"
 
 
-def test_without_options(cli_runner, balsamic_context: dict):
+def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
     """Test command without case_id argument"""
     # GIVEN no case_id
     # WHEN dry running without anything specified
@@ -20,12 +23,12 @@ def test_without_options(cli_runner, balsamic_context: dict):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
+def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.WARNING)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["analysis_api"].status_db.family(case_id)
+    assert not balsamic_context.status_db.family(case_id)
     # WHEN running
     result = cli_runner.invoke(report_deliver, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates
@@ -35,7 +38,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     assert "could not be found" in caplog.text
 
 
-def test_without_samples(cli_runner, balsamic_context: dict, caplog):
+def test_without_samples(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -50,7 +53,7 @@ def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     assert "no samples" in caplog.text
 
 
-def test_without_config(cli_runner, balsamic_context: dict, caplog):
+def test_without_config(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and no config file"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -63,16 +66,19 @@ def test_without_config(cli_runner, balsamic_context: dict, caplog):
     assert NO_CONFIG_FOUND in caplog.text
 
 
-def test_case_without_analysis_finish(cli_runner, balsamic_context: dict, caplog):
+def test_case_without_analysis_finish(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and config file but no analysis_finish"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
     # WHEN ensuring case config exists where it should be stored
     Path.mkdir(
-        Path(balsamic_context["analysis_api"].get_case_config_path(case_id)).parent, exist_ok=True
+        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
+        exist_ok=True,
     )
-    Path(balsamic_context["analysis_api"].get_case_config_path(case_id)).touch(exist_ok=True)
+    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
+        exist_ok=True
+    )
     # WHEN dry running with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should NOT execute successfully
@@ -81,21 +87,26 @@ def test_case_without_analysis_finish(cli_runner, balsamic_context: dict, caplog
     assert "No analysis_finish file" in caplog.text
 
 
-def test_dry_run(cli_runner, balsamic_context: dict, caplog):
+def test_dry_run(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and analysis_finish which should execute successfully"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id = "balsamic_case_wgs_single"
     # WHEN ensuring case config and analysis_finish exist where they should be stored
     Path.mkdir(
-        Path(balsamic_context["analysis_api"].get_case_config_path(case_id)).parent, exist_ok=True
-    )
-    Path(balsamic_context["analysis_api"].get_case_config_path(case_id)).touch(exist_ok=True)
-    Path.mkdir(
-        Path(balsamic_context["analysis_api"].get_analysis_finish_path(case_id)).parent,
+        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
         exist_ok=True,
     )
-    Path(balsamic_context["analysis_api"].get_analysis_finish_path(case_id)).touch(exist_ok=True)
+    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(balsamic_context.meta_apis["analysis_api"].get_analysis_finish_path(case_id)).parent,
+        exist_ok=True,
+    )
+    Path(balsamic_context.meta_apis["analysis_api"].get_analysis_finish_path(case_id)).touch(
+        exist_ok=True
+    )
     # WHEN dry running with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=balsamic_context)
     # THEN command should execute successfully
@@ -105,7 +116,7 @@ def test_dry_run(cli_runner, balsamic_context: dict, caplog):
     assert case_id + ".json" in caplog.text
 
 
-def test_qc_option(cli_runner, balsamic_context: dict, caplog):
+def test_qc_option(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and qc option + config and analysis_finish
     which should execute successfully"""
     caplog.set_level(logging.INFO)
@@ -115,14 +126,19 @@ def test_qc_option(cli_runner, balsamic_context: dict, caplog):
     option_value = "qc"
     # WHEN ensuring case config and analysis_finish exist where they should be stored
     Path.mkdir(
-        Path(balsamic_context["analysis_api"].get_case_config_path(case_id)).parent, exist_ok=True
-    )
-    Path(balsamic_context["analysis_api"].get_case_config_path(case_id)).touch(exist_ok=True)
-    Path.mkdir(
-        Path(balsamic_context["analysis_api"].get_analysis_finish_path(case_id)).parent,
+        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
         exist_ok=True,
     )
-    Path(balsamic_context["analysis_api"].get_analysis_finish_path(case_id)).touch(exist_ok=True)
+    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(balsamic_context.meta_apis["analysis_api"].get_analysis_finish_path(case_id)).parent,
+        exist_ok=True,
+    )
+    Path(balsamic_context.meta_apis["analysis_api"].get_analysis_finish_path(case_id)).touch(
+        exist_ok=True
+    )
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
         report_deliver, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context

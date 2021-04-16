@@ -20,6 +20,7 @@ class HousekeeperAPI:
     def __init__(self, config: dict) -> None:
         self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
+        LOG.info(f"Initialised HousekeeperAPI: {self._store.session}")
 
     def __getattr__(self, name):
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
@@ -123,7 +124,9 @@ class HousekeeperAPI:
         """ Wrap property in Housekeeper Store """
         return self._store.session.no_autoflush
 
-    def get_files(self, bundle: str, tags: list, version: int = None) -> Iterable[models.File]:
+    def get_files(
+        self, bundle: str, tags: Optional[list], version: Optional[int] = None
+    ) -> Iterable[models.File]:
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
 

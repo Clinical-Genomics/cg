@@ -3,7 +3,6 @@
 import logging
 
 import click
-
 from cg.cli.workflow.commands import link, resolve_compression
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
 from cg.cli.workflow.mip.store import store as store_cmd
@@ -21,7 +20,7 @@ def mip_rna(context: click.Context):
         click.echo(context.get_help())
         return
 
-    context.obj["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
+    context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
 
 
 mip_rna.add_command(config_case)

@@ -23,6 +23,7 @@ def test_get_delivery_path(
         case_tags=["case-tag"],
         sample_tags=["sample-tag"],
         project_base_path=project_dir,
+        delivery_type="balsamic",
     )
     customer_id = "cust000"
     ticket_id = 1234
@@ -77,6 +78,7 @@ def test_get_case_files_from_version(
         case_tags=[{"case-tag"}],
         sample_tags=[{"sample-tag"}],
         project_base_path=project_dir,
+        delivery_type="balsamic",
     )
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file

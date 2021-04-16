@@ -1,15 +1,16 @@
 import datetime as dt
 import logging
+import os
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
-import os
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store.models import Bundle, Version
 
@@ -21,7 +22,7 @@ class AnalysisAPI(MetaAPI):
     Parent class containing all methods that are either shared or overridden by other workflow APIs.
     """
 
-    def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
+    def __init__(self, pipeline: Pipeline, config: CGConfig):
         super().__init__(config=config)
         self.pipeline = pipeline
         self._process = None
@@ -62,11 +63,12 @@ class AnalysisAPI(MetaAPI):
         elif not case_obj.links:
             LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
+        LOG.info("Case %s exists in status db", case_id)
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
-            raise CgError("Analysis still ongoing for case %s", case_id)
+            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def verify_case_path_exists(self, case_id: str) -> None:
         if not self.get_case_path(case_id=case_id).exists():
@@ -311,10 +313,13 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_target_bed_from_lims(self, case_id: str) -> str:
+    def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
         """Get target bed filename from lims"""
         case_obj: models.Family = self.status_db.family(case_id)
-        target_bed_shortname: str = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
+        sample_obj: models.Sample = case_obj.links[0].sample
+        if sample_obj.from_sample:
+            sample_obj = self.status_db.sample(internal_id=sample_obj.internal_id)
+        target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
         if not target_bed_shortname:
             return target_bed_shortname
         bed_version_obj: Optional[models.BedVersion] = self.status_db.bed_version(

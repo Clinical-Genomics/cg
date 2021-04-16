@@ -1,9 +1,12 @@
 from typing import List, Optional
 
+from cg.apps.lims import LimsAPI
 from pydantic import BaseModel
 from typing_extensions import Literal
 
-from cg.apps.lims import LimsAPI
+
+class LimsProject(BaseModel):
+    id: str = "1"
 
 
 class LimsSample(BaseModel):
@@ -19,7 +22,7 @@ class LimsSample(BaseModel):
     family: str = None
     panels: List[str] = None
     comment: str = None
-    project: str = None
+    project: LimsProject = LimsProject()
     received: str = None
     source: str = None
     priority: str = None
@@ -32,6 +35,21 @@ class MockLimsAPI(LimsAPI):
         self.config = config
         self.sample_vars = {}
         self._samples = samples
+        self._prep_method = (
+            "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free "
+            ""
+            "DNA)"
+        )
+        self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
+        self._delivery_method = "CG002 - Delivery"
+
+    def set_prep_method(self, method: str = "1337:00 Test prep method"):
+        """Mock function"""
+        self._prep_method = method
+
+    def set_sequencing_method(self, method: str = "1338:00 Test sequencing method"):
+        """Mock function"""
+        self._prep_method = method
 
     def sample(self, sample_id: str) -> Optional[dict]:
         for sample in self._samples:
@@ -43,7 +61,7 @@ class MockLimsAPI(LimsAPI):
         self.sample_vars[internal_id] = {}
 
     def add_capture_kit(self, internal_id: str, capture_kit):
-        if not internal_id in self.sample_vars:
+        if internal_id not in self.sample_vars:
             self.add_sample(internal_id)
         self.sample_vars[internal_id]["capture_kit"] = capture_kit
 
@@ -53,17 +71,20 @@ class MockLimsAPI(LimsAPI):
         return None
 
     def get_prep_method(self, lims_id: str) -> str:
-        return (
-            "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free "
-            ""
-            "DNA)"
-        )
+        return self._prep_method
 
     def get_sequencing_method(self, lims_id: str) -> str:
-        return "CG002 - Cluster Generation (HiSeq X)"
+        return self._sequencing_method
 
     def get_delivery_method(self, lims_id: str) -> str:
-        return "CG002 - Delivery"
+        return self._delivery_method
+
+    def get_sample_project(self, sample_id: str) -> str:
+
+        return self.sample(sample_id).get("project").get("id")
+
+    def get_sample_comment(self, sample_id: str) -> str:
+        return self.sample(sample_id).get("comment")
 
     def update_sample(
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs

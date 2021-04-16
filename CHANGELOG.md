@@ -13,6 +13,79 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.20.0]
+
+## Added
+- CLI command to deploy Loqusdb via shipping
+
+## [20.19.5]
+
+### Fixed
+- fixed bug where CgError was raised with wrong arguments in AnalysisAPI
+
+## [20.19.4]
+
+### Fixed
+- fixed bug that cgstats configs was saved as cg_stats in CGConfig
+
+## [20.19.3]
+
+### Fixed
+- Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
+
+
+## [20.19.2]
+
+### Fixed
+- Bug when instantiating analysis api in upload
+
+
+## [20.19.1]
+
+### Fixed
+- Bug when fetching the api in mip workflow cli base
+
+## [20.19.0]
+
+### Changed
+- use pydantic to control CLI context 
+
+## [20.18.0]
+### Added
+- Trailblazer support for mutant/sars-cov-2
+
+## [20.17.5]
+### Fixed
+- Bugfix allowing orders of single samples from existing families
+
+## [20.17.4]
+### Added
+- Added new covid prep method to lims constants
+
+## [20.17.3]
+### Fixed
+- Adds support to use original sample lims id in downsampled cases (affects balsamic)
+
+## [20.17.2]
+### Fixed
+- Fix duplicate Housekeeper session in scout upload
+
+
+## [20.17.1]
+### Changed
+- Status of mutant cases is set to running before running analysis, and revoked if start fails. 
+  This prevents users and cron jobs from starting the case which already started, given they check in statusDB first.
+
+## [20.17.0]
+### Added
+
+- Deliver sarscov2 cli
+
+## [20.16.0]
+### Added
+
+- Demultiplexing functionality to CG
+
 ## [20.15.1]
 ### Fixed
 - cg to rename mutant fastq files directly

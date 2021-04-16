@@ -20,6 +20,7 @@ class ProcessMock(Process):
         config: str = None,
         config_parameter: str = "--config",
         environment: str = None,
+        error: bool = False,
     ):
         """
         Args:
@@ -41,8 +42,9 @@ class ProcessMock(Process):
             if self.config:
                 self.base_call.extend([self.config_parameter, self.config])
             LOG.debug("Use base call %s", self.base_call)
-
         self._exit_code: int = RETURN_SUCCESS
+        if error:
+            self._exit_code = 1
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell.

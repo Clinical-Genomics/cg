@@ -11,13 +11,13 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
 from cg.models import CompressionData
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -31,17 +31,12 @@ from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 
-CHANJO_CONFIG = {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
-CRUNCHY_CONFIG = {
-    "crunchy": {
-        "cram_reference": "/path/to/fasta",
-        "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
-    }
-}
+
 FAKE_NOW = dt.datetime(2021, 3, 1)
 
 
 LOG = logging.getLogger(__name__)
+
 
 # Case fixtures
 
@@ -165,20 +160,42 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> d
 # Config fixtures
 
 
+@pytest.fixture(name="base_config_dict")
+def fixture_base_config_dict() -> dict:
+    """Returns the basic configs necessary for running CG"""
+    return {
+        "database": "sqlite:///",
+        "madeline_exe": "path/to/madeline",
+        "bed_path": "path/to/bed",
+        "delivery_path": "path/to/delivery",
+        "housekeeper": {
+            "database": "sqlite:///",
+            "root": "path/to/root",
+        },
+    }
+
+
+@pytest.fixture(name="cg_config_object")
+def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
+    """Return a CG config dict"""
+    return CGConfig(**base_config_dict)
+
+
 @pytest.fixture
-def chanjo_config_dict():
+def chanjo_config_dict() -> dict:
     """Chanjo configs"""
-    _config = {}
-    _config.update(CHANJO_CONFIG)
-    return _config
+    return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
 @pytest.fixture
 def crunchy_config_dict():
     """Crunchy configs"""
-    _config = {}
-    _config.update(CRUNCHY_CONFIG)
-    return _config
+    return {
+        "crunchy": {
+            "cram_reference": "/path/to/fasta",
+            "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
+        }
+    }
 
 
 @pytest.fixture(name="hk_config_dict")
@@ -828,7 +845,7 @@ def fixture_wgs_application_info(wgs_application_tag) -> dict:
     )
 
 
-@pytest.fixture(scope="function", name="store")
+@pytest.fixture(name="store")
 def fixture_store() -> Store:
     """Fixture with a CG store"""
     _store = Store(uri="sqlite:///")
@@ -1044,24 +1061,24 @@ def sample_store(base_store) -> Store:
     return base_store
 
 
-@pytest.fixture(scope="function")
-def disk_store(cli_runner, invoke_cli) -> Store:
-    """Store on disk"""
-    database = "./test_db.sqlite3"
-    database_path = Path(database)
-    with cli_runner.isolated_filesystem():
-        assert database_path.exists() is False
-
-        database_uri = f"sqlite:///{database}"
-        # WHEN calling "init"
-        result = invoke_cli(["--database", database_uri, "init"])
-
-        # THEN it should setup the database with some tables
-        assert result.exit_code == 0
-        assert database_path.exists()
-        assert len(Store(database_uri).engine.table_names()) > 0
-
-        yield Store(database_uri)
+# @pytest.fixture(scope="function")
+# def disk_store(cli_runner, invoke_cli) -> Store:
+#     """Store on disk"""
+#     database = "./test_db.sqlite3"
+#     database_path = Path(database)
+#     with cli_runner.isolated_filesystem():
+#         assert database_path.exists() is False
+#
+#         database_uri = f"sqlite:///{database}"
+#         # WHEN calling "init"
+#         result = invoke_cli(["--database", database_uri, "init"])
+#
+#         # THEN it should setup the database with some tables
+#         assert result.exit_code == 0
+#         assert database_path.exists()
+#         assert len(Store(database_uri).engine.table_names()) > 0
+#
+#         yield Store(database_uri)
 
 
 @pytest.fixture(scope="function", name="trailblazer_api")
@@ -1104,57 +1121,46 @@ def cg_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("cg")
 
 
-@pytest.fixture(name="database_copy_path")
-def database_copy_path(tmpdir_factory):
-    return tmpdir_factory.mktemp("database/")
-
-
 @pytest.fixture(scope="function")
 def microsalt_dir(tmpdir_factory):
     return tmpdir_factory.mktemp("microsalt")
 
 
-@pytest.fixture(name="fixture_cg_url")
-def fixture_cg_url(database_copy_path):
-    new_path = shutil.copy("tests/fixtures/data/cgfixture.db", database_copy_path)
-    url = f"sqlite:///{new_path}"
-    store = Store(url)
-    store.drop_all()
-    store.create_all()
-    return url
+@pytest.fixture(name="fixture_cg_uri")
+def fixture_cg_uri() -> str:
+    return "sqlite:///"
 
 
-@pytest.fixture(name="fixture_hk_url")
-def fixture_hk_url(database_copy_path):
-    new_path = shutil.copy("tests/fixtures/data/hkstore.db", database_copy_path)
-    return f"sqlite:///{new_path}"
+@pytest.fixture(name="fixture_hk_uri")
+def fixture_hk_uri() -> str:
+    return "sqlite:///"
 
 
 @pytest.fixture(name="context_config")
-def context_config(
-    fixture_cg_url,
-    fixture_hk_url,
-    fluffy_dir,
-    housekeeper_dir,
-    mip_dir,
-    cg_dir,
-    balsamic_dir,
-    microsalt_dir,
+def fixture_context_config(
+    fixture_cg_uri: str,
+    fixture_hk_uri: str,
+    fluffy_dir: str,
+    housekeeper_dir: str,
+    mip_dir: str,
+    cg_dir: str,
+    balsamic_dir: str,
+    microsalt_dir: str,
 ) -> dict:
     return {
-        "database": fixture_cg_url,
+        "database": fixture_cg_uri,
         "madeline_exe": "echo",
-        "bed_path": cg_dir,
-        "delivery_path": cg_dir,
+        "bed_path": str(cg_dir),
+        "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "fluffy": {
             "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
-            "root_dir": fluffy_dir,
+            "root_dir": str(fluffy_dir),
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": fixture_hk_url, "root": housekeeper_dir},
+        "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
@@ -1167,12 +1173,11 @@ def context_config(
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "genotype": {
-            "database": "sqlite:///./genotype",
             "binary_path": "echo",
             "config_path": "genotype-stage.yaml",
         },
         "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
-        "cgstats": {"database": "sqlite:///./cgstats", "root": cg_dir},
+        "cgstats": {"database": "sqlite:///./cgstats", "root": str(cg_dir)},
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
@@ -1181,7 +1186,7 @@ def context_config(
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
         "balsamic": {
-            "root": balsamic_dir,
+            "root": str(balsamic_dir),
             "singularity": "BALSAMIC_release_v6.0.1.sif",
             "reference_config": "reference.json",
             "binary_path": "echo",
@@ -1193,7 +1198,7 @@ def context_config(
             },
         },
         "microsalt": {
-            "root": microsalt_dir,
+            "root": str(microsalt_dir),
             "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "binary_path": "echo",
             "conda_env": "S_microSALT",
@@ -1202,14 +1207,14 @@ def context_config(
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "pipeline": "analyse rd_dna",
-            "root": mip_dir,
+            "root": str(mip_dir),
             "script": "mip",
         },
         "mip-rd-rna": {
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "pipeline": "analyse rd_rna",
-            "root": mip_dir,
+            "root": str(mip_dir),
             "script": "mip",
         },
         "mutacc-auto": {
@@ -1229,6 +1234,7 @@ def context_config(
     }
 
 
+
 @pytest.fixture
 def patch_datetime_now(monkeypatch):
     class mydatetime:
@@ -1237,3 +1243,14 @@ def patch_datetime_now(monkeypatch):
             return FAKE_NOW
 
     monkeypatch.setattr(dt, "datetime", mydatetime)
+
+
+@pytest.fixture(name="cg_context")
+def fixture_cg_context(
+    context_config: dict, base_store: Store, housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = base_store
+    cg_config.housekeeper_api_ = housekeeper_api
+    return cg_config
+

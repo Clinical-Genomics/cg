@@ -2,15 +2,17 @@
 from datetime import datetime
 
 import pytest
-
 from cg.constants import Pipeline
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def base_context(analysis_store) -> dict:
+def base_context(cg_context: CGConfig, analysis_store: Store) -> CGConfig:
     """context to use in cli"""
-    return {"status_db": analysis_store}
+    cg_context.status_db_ = analysis_store
+    return cg_context
 
 
 @pytest.fixture(name="workflow_case_id")
@@ -32,7 +34,9 @@ def fixture_rna_sample_id() -> str:
 
 
 @pytest.fixture(scope="function", name="analysis_store")
-def fixture_analysis_store(base_store: Store, workflow_case_id, helpers) -> Store:
+def fixture_analysis_store(
+    base_store: Store, workflow_case_id: str, helpers: StoreHelpers
+) -> Store:
     """Store to be used in tests"""
     _store = base_store
 

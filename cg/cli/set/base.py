@@ -2,12 +2,12 @@
 import datetime
 import getpass
 import logging
+from typing import Iterable, List, Optional
 
 import click
-
-from cg.apps.lims import LimsAPI
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
 from .families import families
@@ -41,11 +41,9 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group("set")
-@click.pass_context
-def set_cmd(context):
+def set_cmd():
     """Update information in the database."""
-    context.obj["status_db"] = Store(context.obj["database"])
-    context.obj["lims_api"] = LimsAPI(context.obj)
+    pass
 
 
 @set_cmd.command()
@@ -80,8 +78,8 @@ def samples(
     case_id: str,
 ):
     """Set values on many samples at the same time"""
-    store = context.obj["status_db"]
-    sample_objs = _get_samples(case_id, identifiers, store)
+    store: Store = context.obj.status_db
+    sample_objs = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
 
     if not sample_objs:
         LOG.error("No samples to alter!")
@@ -93,7 +91,7 @@ def samples(
         LOG.info(f"{sample_obj}")
 
     if not (yes or click.confirm(CONFIRM)):
-        context.abort()
+        raise click.Abort
 
     for sample_obj in sample_objs:
         context.invoke(
@@ -103,7 +101,7 @@ def samples(
 
 def _get_samples(
     case_id: str, identifiers: click.Tuple([str, str]), store: Store
-) -> [models.Sample]:
+) -> List[models.Sample]:
     """Get samples that match both case_id and identifiers if given"""
     samples_by_case_id = None
     samples_by_id = None
@@ -124,43 +122,42 @@ def _get_samples(
 
 def _get_samples_by_identifiers(
     identifiers: click.Tuple([str, str]), store: Store
-) -> models.Sample:
+) -> List[models.Sample]:
     """Get samples matched by given set of identifiers"""
-    identifier_args = {}
-    for identifier_name, identifier_value in identifiers:
-        identifier_args[identifier_name] = identifier_value
-    return store.samples_by_ids(**identifier_args)
+    identifier_args = {
+        identifier_name: identifier_value for identifier_name, identifier_value in identifiers
+    }
+
+    return list(store.samples_by_ids(**identifier_args))
 
 
-def _get_samples_by_case_id(case_id: str, store: Store) -> [models.Sample]:
+def _get_samples_by_case_id(case_id: str, store: Store) -> List[models.Sample]:
     """Get samples on a given case-id"""
-    case = store.family(internal_id=case_id)
+    case: models.Family = store.family(internal_id=case_id)
     return [link.sample for link in case.links] if case else []
 
 
-def is_locked_attribute_on_sample(key, skip_attributes):
+def is_locked_attribute_on_sample(key: str, skip_attributes: List[str]) -> bool:
     """Returns true if the attribute is private or in the skip list"""
     return is_private_attribute(key) or key in skip_attributes
 
 
-def is_private_attribute(key):
+def is_private_attribute(key: str) -> bool:
     """Returns true if key has name indicating it is private"""
     return key.startswith("_")
 
 
-def list_changeable_sample_attributes(sample_obj: models.Sample = None, skip_attributes: [] = None):
+def list_changeable_sample_attributes(
+    sample_obj: Optional[models.Sample] = None, skip_attributes: List[str] = []
+) -> None:
     """List changeable attributes on sample and its current value"""
-
-    sample_attributes = models.Sample.__dict__.keys()
+    sample_attributes: Iterable[str] = models.Sample.__dict__.keys()
     for attribute in sample_attributes:
         if is_locked_attribute_on_sample(attribute, skip_attributes):
             continue
-
-        message = attribute
-
+        message: str = attribute
         if sample_obj:
             message += f": {sample_obj.__dict__.get(attribute)}"
-
         LOG.info(message)
 
 
@@ -180,7 +177,7 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     )
 
 
-def show_option_help(short_name: str = None, long_name: str = None, help_text: str = None):
+def show_option_help(short_name: str = "", long_name: str = "", help_text: str = "") -> None:
     """Show help for one option"""
     help_message = f"Use "
 
@@ -213,16 +210,24 @@ def show_option_help(short_name: str = None, long_name: str = None, help_text: s
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
 @click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
 @click.option("--help", is_flag=True)
-@click.pass_context
-def sample(context, sample_id, kwargs, skip_lims, yes, help):
-    sample_obj = context.obj["status_db"].sample(internal_id=sample_id)
+@click.pass_obj
+def sample(
+    context: CGConfig,
+    sample_id: Optional[str],
+    kwargs: click.Tuple([str, str]),
+    skip_lims: bool,
+    yes: bool,
+    help: bool,
+):
+    status_db: Store = context.status_db
+    sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
 
     if help:
         show_set_sample_help(sample_obj)
 
     if sample_obj is None:
         LOG.error(f"Can't find sample {sample_id}")
-        context.abort()
+        raise click.Abort
 
     for key, value in kwargs:
 
@@ -233,21 +238,21 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
             LOG.warning(f"{key} is not a property of sample")
             continue
 
-        new_key = key
-        new_value = value
+        new_key: str = key
+        new_value: str = value
 
         if key in ["customer", "application_version", "priority"]:
             if key == "priority":
                 if isinstance(value, str) and not value.isdigit():
                     new_key = "priority_human"
             elif key == "customer":
-                new_value = context.obj["status_db"].customer(value)
+                new_value: models.Customer = status_db.customer(value)
             elif key == "application_version":
-                new_value = context.obj["status_db"].current_application_version(value)
+                new_value: models.ApplicationVersion = status_db.current_application_version(value)
 
             if not new_value:
                 LOG.error(f"{key} {value} not found, aborting")
-                context.abort()
+                raise click.Abort
 
         old_value = getattr(sample_obj, new_key)
 
@@ -260,29 +265,21 @@ def sample(context, sample_id, kwargs, skip_lims, yes, help):
 
         setattr(sample_obj, new_key, new_value)
         _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
-        context.obj["status_db"].commit()
+        status_db.commit()
 
     if not skip_lims:
 
         for key, value in kwargs:
 
-            if key == "application_version":
-                new_key = "application"
-            else:
-                new_key = key
-
-            if key == "priority":
-                new_value = sample_obj.priority_human
-            else:
-                new_value = value
-
+            new_key = "application" if key == "application_version" else key
+            new_value = sample_obj.priority_human if key == "priority" else value
             LOG.info(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
-                context.abort()
+                raise click.Abort
 
             try:
-                context.obj["lims_api"].update_sample(lims_id=sample_id, **{new_key: new_value})
+                context.lims_api.update_sample(lims_id=sample_id, **{new_key: new_value})
                 LOG.info(f"Set LIMS/{new_key} to {new_value}")
             except LimsDataError as err:
                 LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}")
@@ -306,18 +303,19 @@ def _update_comment(comment, obj):
 @set_cmd.command()
 @click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
 @click.argument("flowcell_name")
-@click.pass_context
-def flowcell(context, flowcell_name, status):
+@click.pass_obj
+def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
     """Update information about a flowcell"""
-    flowcell_obj = context.obj["status_db"].flowcell(flowcell_name)
+    status_db: Store = context.status_db
+    flowcell_obj: models.Flowcell = status_db.flowcell(flowcell_name)
 
     if flowcell_obj is None:
         LOG.warning(f"flowcell not found: {flowcell_name}")
-        context.abort()
-    prev_status = flowcell_obj.status
+        raise click.Abort
+    prev_status: str = flowcell_obj.status
     flowcell_obj.status = status
 
-    context.obj["status_db"].commit()
+    status_db.commit()
     LOG.info(f"{flowcell_name} set: {prev_status} -> {status}")
 
 

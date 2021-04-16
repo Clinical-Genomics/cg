@@ -1,11 +1,11 @@
 import logging
 
 import click
-
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
@@ -24,7 +24,7 @@ def fluffy(context: click.Context):
     if context.invoked_subcommand is None:
         LOG.info(context.get_help())
         return None
-    context.obj["analysis_api"] = FluffyAnalysisAPI(
+    context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(
         config=context.obj,
     )
 
@@ -38,12 +38,12 @@ fluffy.add_command(store_available)
 @fluffy.command("create-samplesheet")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.pass_context
-def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
+@click.pass_obj
+def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
     """
     Write modified samplesheet file to case folder
     """
-    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
 
@@ -51,12 +51,12 @@ def create_samplesheet(context: click.Context, case_id: str, dry_run: bool):
 @fluffy.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@click.pass_context
-def run(context: click.Context, case_id: str, dry_run: bool):
+@click.pass_obj
+def run(context: CGConfig, case_id: str, dry_run: bool):
     """
     Run Fluffy analysis
     """
-    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     analysis_api.run_fluffy(case_id=case_id, dry_run=dry_run)
     if dry_run:
@@ -97,7 +97,7 @@ def start(context: click.Context, case_id: str, dry_run: bool):
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis"""
 
-    analysis_api: FluffyAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: FluffyAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():

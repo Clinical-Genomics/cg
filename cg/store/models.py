@@ -97,7 +97,7 @@ class Application(Model):
 
     @property
     def expected_reads(self):
-        return self.target_reads * 0.75
+        return self.target_reads * self.percent_reads_guaranteed / 100
 
     @property
     def analysis_type(self):

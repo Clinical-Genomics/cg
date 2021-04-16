@@ -10,6 +10,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
@@ -25,17 +26,17 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def __init__(
         self,
-        config: dict = None,
+        config: CGConfig,
         pipeline: Pipeline = Pipeline.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config["balsamic"]["root"]
-        self.singularity = config["balsamic"]["singularity"]
-        self.reference_config = config["balsamic"]["reference_config"]
-        self.account = config["balsamic"]["slurm"]["account"]
-        self.email = config["balsamic"]["slurm"]["mail_user"]
-        self.qos = config["balsamic"]["slurm"]["qos"]
-        self.bed_path = config["bed_path"]
+        self.root_dir = config.balsamic.root
+        self.singularity = config.balsamic.singularity
+        self.reference_config = config.balsamic.reference_config
+        self.account = config.balsamic.slurm.account
+        self.email = config.balsamic.slurm.mail_user
+        self.qos = config.balsamic.slurm.qos
+        self.bed_path = config.bed_path
 
     @property
     def threshold_reads(self):
@@ -48,7 +49,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(self.config["balsamic"]["binary_path"])
+            self._process = Process(self.config.balsamic.binary_path)
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
@@ -293,7 +294,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
 
         case_obj: models.Family = self.status_db.family(case_id)
-        capture_kit = self.lims_api.capture_kit(case_obj.links[0].sample.internal_id)
+        sample_obj: models.Sample = case_obj.links[0].sample
+        if sample_obj.from_sample:
+            sample_obj = self.status_db.sample(internal_id=sample_obj.from_sample)
+        capture_kit = self.lims_api.capture_kit(sample_obj.internal_id)
         if capture_kit:
             panel_shortname = self.status_db.bed_version(capture_kit).shortname
         elif self.get_application_type(case_obj.links[0].sample) == "wgs":

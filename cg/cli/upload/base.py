@@ -3,16 +3,19 @@ import datetime as dt
 import logging
 import sys
 import traceback
+from typing import Optional
 
 import click
-
-
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError, CgError
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
-from cg.store import models
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
+
 from . import vogue
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
@@ -22,7 +25,6 @@ from .observations import observations
 from .scout import create_scout_load_config, scout, upload_case_to_scout
 from .utils import suggest_cases_to_upload
 from .validate import validate
-from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -37,12 +39,13 @@ LOG = logging.getLogger(__name__)
     help="Force upload of analysis " "marked as started",
 )
 @click.pass_context
-def upload(context, family_id, force_restart):
+def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
     """Upload results from analyses."""
-
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    config_object: CGConfig = context.obj
+    if not config_object.meta_apis.get("analysis_api"):
+        config_object.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api: AnalysisAPI = config_object.meta_apis["analysis_api"]
+    status_db: Store = config_object.status_db
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
 
@@ -50,20 +53,20 @@ def upload(context, family_id, force_restart):
         try:
             analysis_api.verify_case_id_in_statusdb(case_id=family_id)
         except CgError:
-            raise context.abort()
+            raise click.Abort
 
-        case_obj = analysis_api.status_db.family(family_id)
+        case_obj: models.Family = status_db.family(family_id)
         if not case_obj.analyses:
             message = f"no analysis exists for family: {family_id}"
             click.echo(click.style(message, fg="red"))
-            context.abort()
+            raise click.Abort
 
-        analysis_obj = case_obj.analyses[0]
+        analysis_obj: models.Analysis = case_obj.analyses[0]
 
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg="red"))
-            context.abort()
+            raise click.Abort
 
         if not force_restart and analysis_obj.upload_started_at is not None:
             if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
@@ -76,44 +79,44 @@ def upload(context, family_id, force_restart):
             click.echo(click.style(message, fg="yellow"))
             return
 
-    context.obj["report_api"] = ReportAPI(
-        store=analysis_api.status_db,
-        lims_api=analysis_api.lims_api,
-        chanjo_api=analysis_api.chanjo_api,
+    context.obj.meta_apis["report_api"] = ReportAPI(
+        store=status_db,
+        lims_api=config_object.lims_api,
+        chanjo_api=config_object.chanjo_api,
         analysis_api=analysis_api,
-        scout_api=analysis_api.scout_api,
+        scout_api=config_object.scout_api,
     )
 
-    context.obj["scout_upload_api"] = UploadScoutAPI(
-        hk_api=analysis_api.housekeeper_api,
-        scout_api=analysis_api.scout_api,
-        madeline_api=analysis_api.madeline_api,
+    context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
+        hk_api=config_object.housekeeper_api,
+        scout_api=config_object.scout_api,
+        madeline_api=config_object.madeline_api,
         analysis_api=analysis_api,
-        lims_api=analysis_api.lims_api,
+        lims_api=config_object.lims_api,
     )
 
     if context.invoked_subcommand is not None:
         return
 
     if not family_id:
-        suggest_cases_to_upload(context)
-        context.abort()
+        suggest_cases_to_upload(status_db=status_db)
+        raise click.Abort
 
-    case_obj: models.Family = analysis_api.status_db.family(family_id)
+    case_obj: models.Family = status_db.family(family_id)
     analysis_obj: models.Analysis = case_obj.analyses[0]
     if analysis_obj.uploaded_at is not None:
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
         click.echo(click.style(message, fg="yellow"))
     else:
         analysis_obj.upload_started_at = dt.datetime.now()
-        analysis_api.status_db.commit()
+        status_db.commit()
         context.invoke(coverage, re_upload=True, family_id=family_id)
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
         context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
-        analysis_api.status_db.commit()
+        status_db.commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
 
 
@@ -123,14 +126,12 @@ def upload(context, family_id, force_restart):
 def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    status_db: Store = context.obj.status_db
 
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
-    for analysis_obj in analysis_api.status_db.analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(

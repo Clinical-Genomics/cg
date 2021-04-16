@@ -1,7 +1,6 @@
 import logging
 
 import click
-
 from cg.store import Store, models
 
 from .case import case
@@ -49,7 +48,7 @@ def cases(
     identifiers: click.Tuple([str, str]),
 ):
     """Delete many cases of samples at the same time"""
-    store = context.obj["status_db"]
+    store = context.obj.status_db
     _cases = _get_cases(identifiers, store)
 
     if not _cases:
