@@ -39,9 +39,9 @@ class RsyncAPI(MetaAPI):
 
         customer_id: str = cases[0].customer.internal_id
         rsync_destination_path = self.destination_path % (customer_id, ticket_id)
-        delivery_source_path = Path(
-            self.delivery_path, customer_id, "inbox", str(ticket_id)
-        ).as_posix()
+        delivery_source_path = (
+            Path(self.delivery_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
+        )
         rsync_options = "-rvL"
         parameters = [rsync_options, delivery_source_path, rsync_destination_path]
         self.process.run_command(parameters=parameters, dry_run=dry_run)
