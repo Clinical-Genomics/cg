@@ -35,27 +35,23 @@ clean.add_command(mutant_past_run_dirs)
 def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    files: List[hk_models.File] = []
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
-        files.extend(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
-    if not files:
-        LOG.warning("Could not find any files ready for cleaning for bundle %s", bundle)
-        return
-    for file_obj in files:
-        if file_obj.is_included:
-            question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
-        else:
-            question = f"{bundle}: remove file from database: {file_obj.full_path}"
 
-        if yes or click.confirm(question):
-            file_path: Path = Path(file_obj.full_path)
-            if file_obj.is_included and file_path.exists() and not dry_run:
-                file_path.unlink()
+        for file_obj in set(housekeeper_api.get_files(bundle=bundle, tags=[tag])):
+            if file_obj.is_included:
+                question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+            else:
+                question = f"{bundle}: remove file from database: {file_obj.full_path}"
 
-            if not dry_run:
-                file_obj.delete()
-                housekeeper_api.commit()
-            click.echo(f"{file_path} deleted")
+            if yes or click.confirm(question):
+                file_path: Path = Path(file_obj.full_path)
+                if file_obj.is_included and file_path.exists() and not dry_run:
+                    file_path.unlink()
+
+                if not dry_run:
+                    file_obj.delete()
+                    housekeeper_api.commit()
+                click.echo(f"{file_path} deleted")
 
 
 @clean.command("scout-finished-cases")
