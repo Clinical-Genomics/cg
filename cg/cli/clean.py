@@ -40,7 +40,9 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:
-            LOG.warning("Could not find any files ready for cleaning for bundle %s and tag %s", bundle, tag)
+            LOG.warning(
+                "Could not find any files ready for cleaning for bundle %s and tag %s", bundle, tag
+            )
 
         for file_obj in tag_files:
             if not (yes or click.confirm(_get_confirm_question(bundle, file_obj))):
@@ -60,9 +62,7 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
 
 def _get_confirm_question(bundle, file_obj):
     if file_obj.is_included:
-        question = (
-            f"{bundle}: remove file from file system and database: {file_obj.full_path}"
-        )
+        question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
     else:
         question = f"{bundle}: remove file from database: {file_obj.full_path}"
     return question
