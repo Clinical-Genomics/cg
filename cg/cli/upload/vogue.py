@@ -237,7 +237,7 @@ def bioinfo_all(
         # confirm that file exists
         existing_multiqc_file: str = multiqc_file_obj[0].full_path
         if not Path(existing_multiqc_file).exists():
-            LOG.warning("No multiqc file does not exists for case %s", case_name)
+            LOG.warning("The file %s does not exist for case %s", existing_multiqc_file, case_name)
             continue
 
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
