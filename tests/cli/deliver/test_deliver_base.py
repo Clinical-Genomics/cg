@@ -34,17 +34,3 @@ def test_run_deliver_analysis_help(base_context: CGConfig):
     assert result.exit_code == EXIT_SUCCESS
     # THEN assert the information is printed
     assert "Deliver analysis files to customer inbox" in result.output
-
-
-def test_rsync():
-    """Test to run the rsync function"""
-    # GIVEN a cli runner
-    runner = CliRunner()
-
-    # WHEN running cg deliver rsync
-    result = runner.invoke(rsync_cmd, ["--dry-run", "--help"])
-
-    # THEN assert the command exists without problems
-    assert result.exit_code == EXIT_SUCCESS
-    # THEN assert the information is printed
-    assert "The folder generated using the" in result.output
