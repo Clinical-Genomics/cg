@@ -14,7 +14,7 @@ from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-from cg.store.api.update import update_uploaded_to_vogue_date
+from cg.store.api.update import update_analysis_uploaded_to_vogue_date
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
@@ -235,7 +235,7 @@ def bioinfo_all(
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
-            update_uploaded_to_vogue_date(case)
+            update_analysis_uploaded_to_vogue_date(case)
             status_db.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
