@@ -166,11 +166,15 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     workflow_name, workflow_version = _get_analysis_workflow_details(status_db, case_name)
 
     if workflow_name is None:
-        raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+        raise AnalysisUploadError(
+            f"Case upload failed: {case_name}. Reason: Workflow name not found."
+        )
     workflow_name = workflow_name.lower()
 
     if workflow_name not in VOGUE_VALID_BIOINFO:
-        raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+        raise AnalysisUploadError(
+            f"Case upload failed: {case_name}. Reason: Bad workflow name: {workflow_name}."
+        )
 
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
     load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
