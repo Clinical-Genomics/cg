@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 VOGUE_VALID_BIOINFO = [str(Pipeline.BALSAMIC)]
 
 
-def validate_date(context, date_: str) -> Optional[dt.date]:
+def validate_date(context, param, date_: str) -> Optional[dt.date]:
     """validates the cli input of a date (if any) and returns the date in the proper format"""
     if not date_:
         return
