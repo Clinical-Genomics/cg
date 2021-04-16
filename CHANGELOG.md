@@ -13,6 +13,51 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.20.0]
+
+## Added
+- CLI command to deploy Loqusdb via shipping
+
+## [20.19.5]
+
+### Fixed
+- fixed bug where CgError was raised with wrong arguments in AnalysisAPI
+
+## [20.19.4]
+
+### Fixed
+- fixed bug that cgstats configs was saved as cg_stats in CGConfig
+
+## [20.19.3]
+
+### Fixed
+- Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
+
+
+## [20.19.2]
+
+### Fixed
+- Bug when instantiating analysis api in upload
+
+
+## [20.19.1]
+
+### Fixed
+- Bug when fetching the api in mip workflow cli base
+
+## [20.19.0]
+
+### Changed
+- use pydantic to control CLI context 
+
+## [20.18.0]
+### Added
+- Trailblazer support for mutant/sars-cov-2
+
+## [20.17.5]
+### Fixed
+- Bugfix allowing orders of single samples from existing families
+
 ## [20.17.4]
 ### Added
 - Added new covid prep method to lims constants

@@ -1,15 +1,16 @@
 """Fixtures for cli balsamic tests"""
 
 import pytest
-
 from cg.apps.lims import LimsAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 
 @pytest.fixture
-def base_context(base_store: Store) -> dict:
+def base_context(cg_context: CGConfig) -> CGConfig:
     """context to use in cli"""
-    return {"lims_api": MockLims(), "status_db": base_store}
+    cg_context.lims_api_ = MockLims()
+    return cg_context
 
 
 class MockLims(LimsAPI):

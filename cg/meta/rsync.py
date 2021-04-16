@@ -1,12 +1,27 @@
 """Module for building the rsync command to send files to customer inbox on caesar"""
+import logging
+from pathlib import Path
+from typing import List
 
-from cg.store import Store
+
+from cg.exc import CgError
+from cg.meta.meta import MetaAPI
+from cg.models.cg_config import CGConfig
+from cg.store import models
 from cg.utils import Process
+from cgmodels.cg.constants import Pipeline
+
+LOG = logging.getLogger(__name__)
 
 
-class RsyncAPI:
-    def __init__(self, store: Store):
-        self.store: Store = store
+class RsyncAPI(MetaAPI):
+    def __init__(self, config: CGConfig):
+        super().__init__(config)
+        self.config = config
+        self.delivery_path = config.delivery_path
+        self.destination_path = config.data_delivery.destination_path
+        self.covid_destination_path = config.data_delivery.covid_destination_path
+        self.covid_report_path = config.data_delivery.covid_report_path
         self._process = None
 
     @property
@@ -15,36 +30,25 @@ class RsyncAPI:
             self._process = Process("rsync")
         return self._process
 
-    def get_case_object(self, ticket_id: int) -> object:
-        cases = self.store.get_cases_from_ticket(ticket_id=ticket_id).all()
-        case_obj = cases[0]
-        return case_obj
+    def run_rsync_command(self, ticket_id: int = None, dry_run: bool = False) -> None:
 
-    def get_case_id(self, ticket_id: int) -> str:
-        case_obj = self.get_case_object(ticket_id=ticket_id)
-        case_id = case_obj.internal_id
-        return case_id
+        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        if not cases:
+            LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
+            raise CgError()
 
-    def get_customer_id(self, ticket_id: int) -> str:
-        case_obj = self.get_case_object(ticket_id=ticket_id)
-        customer_id = case_obj.customer.internal_id
-        return customer_id
-
-    def run_rsync_command(self, ticket_id: int, paths: dict, dry_run: bool) -> None:
-        customer_id = self.get_customer_id(ticket_id=ticket_id)
-        destination_path = paths["destination_path"] % (customer_id, ticket_id)
-        source_path = (
-            paths["base_source_path"] + "/" + customer_id + "/inbox/" + str(ticket_id) + "/"
-        )
+        customer_id: str = cases[0].customer.internal_id
+        rsync_destination_path = self.destination_path % (customer_id, ticket_id)
+        delivery_source_path = Path(
+            self.delivery_path, customer_id, "inbox", str(ticket_id)
+        ).as_posix()
         rsync_options = "-rvL"
-        parameters = [rsync_options, source_path, destination_path]
+        parameters = [rsync_options, delivery_source_path, rsync_destination_path]
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    def run_covid_rsync_command(self, ticket_id: int, paths: dict, dry_run: bool) -> None:
-        case_id = self.get_case_id(ticket_id=ticket_id)
-        source_path = paths["covid_source_path"] % (case_id, ticket_id)
-        customer_id = self.get_customer_id(ticket_id=ticket_id)
-        destination_path = paths["covid_destination_path"] % customer_id
-        rsync_options = "-rvL"
-        parameters = [rsync_options, source_path, destination_path]
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
+        if cases[0].data_analysis == Pipeline.SARS_COV_2:
+            LOG.info("Delivering report for SARS-COV-2 analysis")
+            covid_report_path = self.covid_report_path % (str(cases[0].internal_id), ticket_id)
+            covid_destination_path = self.covid_destination_path % customer_id
+            parameters = [rsync_options, covid_report_path, covid_destination_path]
+            self.process.run_command(parameters=parameters, dry_run=dry_run)

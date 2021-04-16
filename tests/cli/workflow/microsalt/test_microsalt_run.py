@@ -2,11 +2,13 @@
 import logging
 
 from cg.cli.workflow.microsalt.base import run
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 EXIT_SUCCESS = 0
 
 
-def test_no_arguments(cli_runner, base_context):
+def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig):
     """Test command without any options"""
 
     # GIVEN
@@ -18,7 +20,7 @@ def test_no_arguments(cli_runner, base_context):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_dry_arguments(cli_runner, base_context, microbial_ticket, caplog):
+def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, microbial_ticket, caplog):
     """Test command dry """
 
     # GIVEN

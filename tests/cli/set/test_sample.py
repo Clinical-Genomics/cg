@@ -2,14 +2,16 @@
 import logging
 
 import pytest
+from click.testing import CliRunner
 
 from cg.cli.set.base import sample
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 SUCCESS = 0
 
 
-def test_invalid_sample(cli_runner, base_context):
+def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN an empty database
 
     # WHEN running set with a sample that does not exist
@@ -20,7 +22,7 @@ def test_invalid_sample(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_skip_lims(cli_runner, base_context, base_store: Store, helpers):
+def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
@@ -36,11 +38,13 @@ def test_skip_lims(cli_runner, base_context, base_store: Store, helpers):
 
     # THEN update sample should have no recorded update key and value
     assert result.exit_code == SUCCESS
-    assert base_context["lims_api"].get_updated_sample_key() != key
-    assert base_context["lims_api"].get_updated_sample_value() != new_value
+    assert base_context.lims_api.get_updated_sample_key() != key
+    assert base_context.lims_api.get_updated_sample_value() != new_value
 
 
-def test_help_without_sample(cli_runner, base_context, base_store: Store, helpers, caplog):
+def test_help_without_sample(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
+):
     # GIVEN a database with no sample
 
     # WHEN setting sample but asking for help
@@ -59,7 +63,9 @@ def test_help_without_sample(cli_runner, base_context, base_store: Store, helper
     assert "name" in caplog.text
 
 
-def test_help_with_sample(cli_runner, base_context, base_store: Store, helpers, caplog):
+def test_help_with_sample(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
+):
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
@@ -84,7 +90,7 @@ def test_help_with_sample(cli_runner, base_context, base_store: Store, helpers, 
 
 
 @pytest.mark.parametrize("key", ["name", "capture_kit"])
-def test_set_sample(cli_runner, base_context, base_store: Store, key, helpers):
+def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, key, helpers):
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
@@ -102,11 +108,11 @@ def test_set_sample(cli_runner, base_context, base_store: Store, key, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, key) == new_value
-    assert base_context["lims_api"].get_updated_sample_key() == key
-    assert base_context["lims_api"].get_updated_sample_value() == new_value
+    assert base_context.lims_api.get_updated_sample_key() == key
+    assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
-def test_sex(cli_runner, base_context, base_store: Store, helpers):
+def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
@@ -122,11 +128,11 @@ def test_sex(cli_runner, base_context, base_store: Store, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, key) == new_value
-    assert base_context["lims_api"].get_updated_sample_key() == key
-    assert base_context["lims_api"].get_updated_sample_value() == new_value
+    assert base_context.lims_api.get_updated_sample_key() == key
+    assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
-def test_priority_text(cli_runner, base_context, base_store: Store, helpers):
+def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
     sample_obj = helpers.add_sample(base_store, gender="female")
     key = "priority"
@@ -141,11 +147,11 @@ def test_priority_text(cli_runner, base_context, base_store: Store, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert sample_obj.priority_human == new_value
-    assert base_context["lims_api"].get_updated_sample_key() == key
-    assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
+    assert base_context.lims_api.get_updated_sample_key() == key
+    assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
 
 
-def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
+def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
     sample_obj = helpers.add_sample(base_store, gender="female")
     key = "priority"
@@ -163,11 +169,13 @@ def test_priority_number(cli_runner, base_context, base_store: Store, helpers):
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert sample_obj.priority == new_value
-    assert base_context["lims_api"].get_updated_sample_key() == key
-    assert base_context["lims_api"].get_updated_sample_value() == sample_obj.priority_human
+    assert base_context.lims_api.get_updated_sample_key() == key
+    assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
 
 
-def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
+def test_invalid_customer(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     customer_id = "dummy_customer_id"
@@ -183,7 +191,7 @@ def test_invalid_customer(cli_runner, base_context, base_store: Store, helpers):
     assert base_store.Sample.query.first().customer.internal_id != customer_id
 
 
-def test_customer(cli_runner, base_context, base_store: Store, helpers):
+def test_customer(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample and two customers
     sample_id = helpers.add_sample(base_store).internal_id
     customer_id = helpers.ensure_customer(base_store, "another_customer").internal_id
@@ -199,7 +207,7 @@ def test_customer(cli_runner, base_context, base_store: Store, helpers):
     assert base_store.Sample.query.first().customer.internal_id == customer_id
 
 
-def test_invalid_downsampled_to(cli_runner, base_context):
+def test_invalid_downsampled_to(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN a database with a sample
     downsampled_to = "downsampled_to"
 
@@ -212,7 +220,7 @@ def test_invalid_downsampled_to(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
+def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     downsampled_to = 111111
@@ -228,7 +236,9 @@ def test_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
     assert base_store.Sample.query.first().downsampled_to == downsampled_to
 
 
-def test_reset_downsampled_to(cli_runner, base_context, base_store: Store, helpers):
+def test_reset_downsampled_to(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     downsampled_to = 0
@@ -244,7 +254,9 @@ def test_reset_downsampled_to(cli_runner, base_context, base_store: Store, helpe
     assert not base_store.Sample.query.first().downsampled_to
 
 
-def test_invalid_application(cli_runner, base_context, base_store: Store, helpers):
+def test_invalid_application(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     application_tag = "dummy_application"
@@ -262,7 +274,7 @@ def test_invalid_application(cli_runner, base_context, base_store: Store, helper
     assert base_store.Sample.query.first().application_version.application.tag != application_tag
 
 
-def test_application(cli_runner, base_context, base_store: Store, helpers):
+def test_application(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample and two applications
     sample_obj = helpers.add_sample(base_store)
     application_tag = helpers.ensure_application_version(
@@ -287,5 +299,5 @@ def test_application(cli_runner, base_context, base_store: Store, helpers):
     assert result.exit_code == SUCCESS
     assert sample_obj.application_version.application.tag == application_tag
     # THEN then the application should have been set in LIMS
-    assert base_context["lims_api"].get_updated_sample_key() == "application"
-    assert base_context["lims_api"].get_updated_sample_value() == application_tag
+    assert base_context.lims_api.get_updated_sample_key() == "application"
+    assert base_context.lims_api.get_updated_sample_value() == application_tag

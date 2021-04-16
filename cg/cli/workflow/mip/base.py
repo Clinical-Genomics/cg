@@ -1,9 +1,7 @@
 import logging
-
 from typing import List
 
 import click
-
 from cg.apps.environ import environ_email
 from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
 from cg.cli.workflow.mip.options import (
@@ -19,6 +17,7 @@ from cg.cli.workflow.mip.options import (
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -27,11 +26,11 @@ LOG = logging.getLogger(__name__)
 @OPTION_DRY
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
-@click.pass_context
-def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: bool):
+@click.pass_obj
+def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
 
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
 
     panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
@@ -49,11 +48,11 @@ def config_case(context: click.Context, case_id: str, panel_bed: str, dry_run: b
 @click.command()
 @OPTION_DRY
 @ARGUMENT_CASE_ID
-@click.pass_context
-def panel(context: click.Context, case_id: str, dry_run: bool):
+@click.pass_obj
+def panel(context: CGConfig, case_id: str, dry_run: bool):
     """Write aggregated gene panel file exported from Scout"""
 
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
     bed_lines: List[str] = analysis_api.panel(case_id=case_id)
@@ -72,9 +71,9 @@ def panel(context: click.Context, case_id: str, dry_run: bool):
 @OPTION_DRY
 @OPTION_MIP_DRY_RUN
 @OPTION_SKIP_EVALUATION
-@click.pass_context
+@click.pass_obj
 def run(
-    context: click.Context,
+    context: CGConfig,
     case_id: str,
     dry_run: bool = False,
     email: str = None,
@@ -85,7 +84,7 @@ def run(
 ):
     """Run the analysis for a case"""
 
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
 
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
@@ -141,7 +140,7 @@ def start(
 ):
     """Start full MIP analysis workflow for a case"""
 
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     LOG.info("Starting full MIP analysis workflow for case %s", case_id)
@@ -171,7 +170,7 @@ def start(
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full MIP analysis workflow for all cases ready for analysis"""
 
-    analysis_api: MipAnalysisAPI = context.obj["analysis_api"]
+    analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
