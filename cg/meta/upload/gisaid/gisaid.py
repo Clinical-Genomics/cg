@@ -13,7 +13,12 @@ from .models import GisaidSample, FastaFile
 from housekeeper.store import models as hk_models
 import csv
 
-from cg.exc import HousekeeperVersionMissingError, FastaSequenceMissingError
+from cg.exc import (
+    HousekeeperVersionMissingError,
+    FastaSequenceMissingError,
+    MultipleFamilyLinksError,
+    FamilyLinkMissingError,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -66,10 +71,9 @@ class GisaidAPI:
                 write_file_obj.write(f">{fasta_object.header}\n")
                 write_file_obj.write(f"{fasta_object.sequence}\n")
 
-    def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample]) -> str:
+    def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample], file_name: str) -> str:
         """"""
 
-        file_name: str = "gisaid.fasta"
         file: Path = Path(file_name)
         fasta_objects: List[FastaFile] = self.get_gisaid_fasta_objects(gsaid_samples=gsaid_samples)
         self.build_gisiad_fasta_file(fasta_objects=fasta_objects, concat_file=file_name)
@@ -90,10 +94,9 @@ class GisaidAPI:
             sample_rows.append(sample_row)
         return sample_rows
 
-    def build_gisaid_csv(self, gsaid_samples: List[GisaidSample]) -> str:
+    def build_gisaid_csv(self, gsaid_samples: List[GisaidSample], file_name: str) -> str:
         """Build batch upload csv."""
 
-        file_name: str = "gisad.csv"
         file: Path = Path(file_name)
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")

@@ -171,3 +171,11 @@ class TrailblazerAPIHTTPError(CgError):
 
 class TrailblazerMissingAnalysisError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
+
+
+class MultipleFamilyLinksError(CgError):
+    """Raised when only one family was expected but more than one was found"""
+
+
+class FamilyLinkMissingError(CgError):
+    """Raised when faimly link missing for a sample"""
