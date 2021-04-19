@@ -13,9 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Add command `cg get analysis` to view analysis information
 
 ## [20.21.1]
-### Added
+### Fixed
 - Fix subprocess wildcard issue in deliver rsync
 
 ## [20.21.0]
