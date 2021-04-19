@@ -8,10 +8,11 @@ from cg.store import Store, models
 from tabulate import tabulate
 
 LOG = logging.getLogger(__name__)
-SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
+ANALYSIS_HEADERS = ["Date", "Pipeline", "Version"]
 FAMILY_HEADERS = ["Family", "Name", "Customer", "Priority", "Panels", "Action"]
-LINK_HEADERS = ["Sample", "Mother", "Father"]
 FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
+LINK_HEADERS = ["Sample", "Mother", "Father"]
+SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
 
 
 @click.group(invoke_without_command=True)
@@ -67,10 +68,33 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
 
 
 @get.command()
+@click.argument("case_id")
+@click.pass_obj
+def analysis(context: CGConfig, case_id: str):
+    """Get information about case analysis."""
+    status_db: Store = context.status_db
+    case_obj: models.Family = status_db.family(case_id)
+    if case_obj is None:
+        LOG.error("%s: case doesn't exist", case_id)
+        raise click.Abort
+
+    LOG.debug("%s: get info about case analysis", case_obj.internal_id)
+
+    for analysis_obj in case_obj.analyses:
+
+        row = [
+            analysis_obj.started_at,
+            analysis_obj.pipeline,
+            analysis_obj.pipeline_version,
+        ]
+        click.echo(tabulate([row], headers=ANALYSIS_HEADERS, tablefmt="psql"))
+
+
+@get.command()
 @click.argument("family_id")
 @click.pass_obj
 def relations(context: CGConfig, family_id: str):
-    """Get information about a family relations."""
+    """Get information about family relations."""
     status_db: Store = context.status_db
     case_obj: models.Family = status_db.family(family_id)
     if case_obj is None:
@@ -94,6 +118,7 @@ def relations(context: CGConfig, family_id: str):
 @click.option("-n", "--name", is_flag=True, help="search family by name")
 @click.option("--samples/--no-samples", default=True, help="display related samples")
 @click.option("--relate/--no-relate", default=True, help="display relations to samples")
+@click.option("--analysis/--no-analysis", default=True, help="display related analyses")
 @click.argument("family_ids", nargs=-1)
 @click.pass_context
 def family(
@@ -102,6 +127,7 @@ def family(
     name: bool,
     samples: bool,
     relate: bool,
+    analysis: bool,
     family_ids: List[str],
 ):
     """Get information about a family."""
@@ -139,6 +165,8 @@ def family(
         if samples:
             sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case_obj.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
+        if analyses:
+            context.invoke(analysis, case_id=case_obj.internal_id)
 
 
 @get.command()
