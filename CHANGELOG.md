@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.21.1]
+### Added
+- Fix subprocess wildcard issue in deliver rsync
+
 ## [20.21.0]
 ### Added
 - Added cg deliver rsync <ticket_id>

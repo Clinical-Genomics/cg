@@ -1,4 +1,5 @@
 """Module for building the rsync command to send files to customer inbox on caesar"""
+import glob
 import logging
 from pathlib import Path
 from typing import List
@@ -48,7 +49,9 @@ class RsyncAPI(MetaAPI):
 
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
-            covid_report_path = self.covid_report_path % (str(cases[0].internal_id), ticket_id)
+            covid_report_path = glob.glob(
+                self.covid_report_path % (str(cases[0].internal_id), ticket_id)
+            )[0]
             covid_destination_path = self.covid_destination_path % customer_id
             parameters = [rsync_options, covid_report_path, covid_destination_path]
             self.process.run_command(parameters=parameters, dry_run=dry_run)
