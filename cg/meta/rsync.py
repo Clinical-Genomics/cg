@@ -43,20 +43,21 @@ class RsyncAPI(MetaAPI):
             Path(self.delivery_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
         )
         rsync_options = "-rvL"
-        parameters: str = [rsync_options, delivery_source_path, rsync_destination_path]
+        parameters: List[str] = [rsync_options, delivery_source_path, rsync_destination_path]
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
-            covid_report_options: list = glob.glob(
+            covid_report_options: List[str] = glob.glob(
                 self.covid_report_path % (str(cases[0].internal_id), ticket_id)
             )
             if not covid_report_options:
                 LOG.error(
-                    f"No report file could be found with path {self.covid_report_path % (str(cases[0].internal_id), ticket_id)}!"
+                    f"No report file could be found with path"
+                    f" {self.covid_report_path % (str(cases[0].internal_id), ticket_id)}!"
                 )
                 return
-            covid_report_path = covid_report_options[0]
-            covid_destination_path = self.covid_destination_path % customer_id
-            parameters = [rsync_options, covid_report_path, covid_destination_path]
+            covid_report_path: str = covid_report_options[0]
+            covid_destination_path: str = self.covid_destination_path % customer_id
+            parameters: List[str] = [rsync_options, covid_report_path, covid_destination_path]
             self.process.run_command(parameters=parameters, dry_run=dry_run)
