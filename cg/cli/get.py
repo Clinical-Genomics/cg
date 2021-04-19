@@ -118,7 +118,7 @@ def relations(context: CGConfig, family_id: str):
 @click.option("-n", "--name", is_flag=True, help="search family by name")
 @click.option("--samples/--no-samples", default=True, help="display related samples")
 @click.option("--relate/--no-relate", default=True, help="display relations to samples")
-@click.option("--analysis/--no-analysis", default=True, help="display related analyses")
+@click.option("--analyses/--no-analyses", default=True, help="display related analyses")
 @click.argument("family_ids", nargs=-1)
 @click.pass_context
 def family(
@@ -127,7 +127,7 @@ def family(
     name: bool,
     samples: bool,
     relate: bool,
-    analysis: bool,
+    analyses: bool,
     family_ids: List[str],
 ):
     """Get information about a family."""
