@@ -57,26 +57,20 @@ class GisaidAPI:
             fasta_file: str = self.housekeeper_api.files(
                 version=hk_version.id, tags=["consensus", sample.cg_lims_id]
             ).first()
-            fasta_file = "/Users/maya.brandi/opt/cg/f1.fasta"
-            fasta_sequence: str = self.get_fasta_sequence(fastq_path=fasta_file)
+            fasta_sequence: str = self.get_fasta_sequence(fastq_path=fasta_file.full_path)
             fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
             fasta_objects.append(fasta_obj)
         return fasta_objects
 
-    def build_gisiad_fasta_file(self, fasta_objects: List[FastaFile], concat_file: str):
-        """Concatenates a list of consensus fastq objects"""
-
-        with open(concat_file, "w") as write_file_obj:
-            for fasta_object in fasta_objects:
-                write_file_obj.write(f">{fasta_object.header}\n")
-                write_file_obj.write(f"{fasta_object.sequence}\n")
-
     def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample], file_name: str) -> str:
-        """"""
+        """Concatenates a list of consensus fastq objects"""
 
         file: Path = Path(file_name)
         fasta_objects: List[FastaFile] = self.get_gisaid_fasta_objects(gsaid_samples=gsaid_samples)
-        self.build_gisiad_fasta_file(fasta_objects=fasta_objects, concat_file=file_name)
+        with open(file, "w") as write_file_obj:
+            for fasta_object in fasta_objects:
+                write_file_obj.write(f">{fasta_object.header}\n")
+                write_file_obj.write(f"{fasta_object.sequence}\n")
         return str(file.absolute())
 
     def get_sample_row(self, gisaid_sample: GisaidSample) -> List[str]:
