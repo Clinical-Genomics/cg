@@ -8,7 +8,7 @@ from cg.store import Store, models
 from tabulate import tabulate
 
 LOG = logging.getLogger(__name__)
-ANALYSIS_HEADERS = ["Date", "Pipeline", "Version"]
+ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
 FAMILY_HEADERS = ["Family", "Name", "Customer", "Priority", "Panels", "Action"]
 FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
 LINK_HEADERS = ["Sample", "Mother", "Father"]
