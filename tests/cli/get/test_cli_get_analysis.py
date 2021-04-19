@@ -37,4 +37,3 @@ def test_get_analysis_required(
     assert str(analysis.started_at) in result.output
     assert analysis.pipeline in result.output
     assert analysis.pipeline_version in result.output
-
