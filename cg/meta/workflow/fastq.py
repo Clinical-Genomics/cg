@@ -14,6 +14,8 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
+from pydantic.main import BaseModel
+
 LOG = logging.getLogger(__name__)
 
 DEFAULT_DATE_STR = (

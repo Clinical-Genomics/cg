@@ -10,6 +10,9 @@ Try to use the following format:
 
 ## [x.x.x]
 ### Added
+- gisaid uppload support via cli
+- gisaid API
+
 ### Changed
 ### Fixed
 
