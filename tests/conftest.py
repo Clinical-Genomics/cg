@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -30,10 +31,6 @@ from .mocks.scout import MockScoutAPI
 from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
-
-
-FAKE_NOW = dt.datetime(2021, 3, 1)
-
 
 LOG = logging.getLogger(__name__)
 
@@ -1232,16 +1229,6 @@ def fixture_context_config(
         },
         "backup": {"root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"}},
     }
-
-
-@pytest.fixture
-def patch_datetime_now(monkeypatch):
-    class mydatetime:
-        @classmethod
-        def now(cls):
-            return FAKE_NOW
-
-    monkeypatch.setattr(dt, "datetime", mydatetime)
 
 
 @pytest.fixture(name="cg_context")
