@@ -125,12 +125,17 @@ class DeliverAPI:
             if out_path.exists():
                 LOG.warning("File %s already exists!", out_path)
                 continue
-            number_linked_files += 1
+
             if self.dry_run:
                 LOG.info("Would hard link file %s to %s", file_path, out_path)
+                number_linked_files += 1
                 continue
             LOG.info("Hard link file %s to %s", file_path, out_path)
-            os.link(file_path, out_path)
+            try:
+                os.link(file_path, out_path)
+                number_linked_files += 1
+            except FileExistsError:
+                LOG.info("Path %s exists, skipping", out_path)
 
         LOG.info("Linked %s files for case %s", number_linked_files, case_id)
 
@@ -153,9 +158,9 @@ class DeliverAPI:
         if not self.dry_run:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
-        nr_files: int = 0
-        for nr_files, file_path in enumerate(
-            self.get_sample_files_from_version(version_obj=version_obj, sample_id=sample_id), 1
+        number_linked_files: int = 0
+        for file_path in self.get_sample_files_from_version(
+            version_obj=version_obj, sample_id=sample_id
         ):
             # Out path should include customer names
             file_name: str = file_path.name.replace(sample_id, sample_name)
@@ -164,10 +169,15 @@ class DeliverAPI:
             out_path: Path = delivery_base / file_name
             if self.dry_run:
                 LOG.info("Would hard link file %s to %s", file_path, out_path)
+                number_linked_files += 1
                 continue
             LOG.info("Hard link file %s to %s", file_path, out_path)
-            os.link(file_path, out_path)
-        LOG.info("Linked %s files for sample %s, case %s", nr_files, sample_id, case_id)
+            try:
+                os.link(file_path, out_path)
+                number_linked_files += 1
+            except FileExistsError:
+                LOG.info("Path %s exists, skipping", out_path)
+        LOG.info("Linked %s files for sample %s, case %s", number_linked_files, sample_id, case_id)
 
     def get_case_files_from_version(
         self, version_obj: hk_models.Version, sample_ids: Set[str]

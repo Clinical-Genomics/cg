@@ -16,6 +16,27 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.22.0]
+### Added
+- Add command `cg get analysis` to view analysis information
+
+## [20.21.1]
+### Fixed
+- Fix subprocess wildcard issue in deliver rsync
+
+## [20.21.0]
+### Added
+- Added cg deliver rsync <ticket_id>
+
+## [20.20.1]
+### Fixed
+- bug in cg clean scout-finished-cases
+
+## [20.20.0]
+
+## Added
+- CLI command to deploy Loqusdb via shipping
+
 ## [20.19.5]
 
 ### Fixed

@@ -120,6 +120,17 @@ class GisaidConfig(CommonAppConfig):
     submitter: str
 
 
+class ShippingConfig(CommonAppConfig):
+    host_config: str
+
+
+class DataDeliveryConfig(BaseModel):
+    destination_path: str
+    covid_destination_path: str
+    covid_source_path = str
+    covid_report_path: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -140,6 +151,7 @@ class CGConfig(BaseModel):
     chanjo_api_: ChanjoAPI = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
+    data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     genotype: CommonAppConfig = None
@@ -156,7 +168,7 @@ class CGConfig(BaseModel):
     mutacc_auto_api_: MutaccAutoAPI = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    shipping: CommonAppConfig = None
+    shipping: ShippingConfig = None
     shipping_api_: ShippingAPI = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
@@ -200,7 +212,7 @@ class CGConfig(BaseModel):
     def status_db(self) -> Store:
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
-            LOG.info("Instantiating status db")
+            LOG.debug("Instantiating status db")
             status_db = Store(self.database)
             self.status_db_ = status_db
         return status_db
@@ -209,7 +221,7 @@ class CGConfig(BaseModel):
     def housekeeper_api(self) -> HousekeeperAPI:
         housekeeper_api = self.__dict__.get("housekeeper_api_")
         if housekeeper_api is None:
-            LOG.info("Instantiating housekeeper api")
+            LOG.debug("Instantiating housekeeper api")
             housekeeper_api = HousekeeperAPI(config=self.dict())
             self.housekeeper_api_ = housekeeper_api
         return housekeeper_api
@@ -218,7 +230,7 @@ class CGConfig(BaseModel):
     def demultiplex_api(self) -> DemultiplexingAPI:
         demultiplex_api = self.__dict__.get("demultiplex_api_")
         if demultiplex_api is None:
-            LOG.info("Instantiating demultiplexing api")
+            LOG.debug("Instantiating demultiplexing api")
             demultiplex_api = DemultiplexingAPI(config=self.dict())
             self.demultiplex_api_ = demultiplex_api
         return demultiplex_api
@@ -227,7 +239,7 @@ class CGConfig(BaseModel):
     def hermes_api(self) -> HermesApi:
         hermes_api = self.__dict__.get("hermes_api_")
         if hermes_api is None:
-            LOG.info("Instantiating hermes api")
+            LOG.debug("Instantiating hermes api")
             hermes_api = HermesApi(config=self.dict())
             self.hermes_api_ = hermes_api
         return hermes_api
@@ -236,7 +248,7 @@ class CGConfig(BaseModel):
     def scout_api(self) -> ScoutAPI:
         api = self.__dict__.get("scout_api_")
         if api is None:
-            LOG.info("Instantiating scout api")
+            LOG.debug("Instantiating scout api")
             api = ScoutAPI(config=self.dict())
             self.scout_api_ = api
         return api
@@ -245,7 +257,7 @@ class CGConfig(BaseModel):
     def trailblazer_api(self) -> TrailblazerAPI:
         api = self.__dict__.get("trailblazer_api_")
         if api is None:
-            LOG.info("Instantiating trailblazer api")
+            LOG.debug("Instantiating trailblazer api")
             api = TrailblazerAPI(config=self.dict())
             self.trailblazer_api_ = api
         return api
@@ -254,7 +266,7 @@ class CGConfig(BaseModel):
     def lims_api(self) -> LimsAPI:
         api = self.__dict__.get("lims_api_")
         if api is None:
-            LOG.info("Instantiating lims api")
+            LOG.debug("Instantiating lims api")
             api = LimsAPI(config=self.dict())
             self.lims_api_ = api
         return api
@@ -263,7 +275,7 @@ class CGConfig(BaseModel):
     def vogue_api(self) -> VogueAPI:
         api = self.__dict__.get("vogue_api_")
         if api is None:
-            LOG.info("Instantiating vogue api")
+            LOG.debug("Instantiating vogue api")
             api = VogueAPI(config=self.dict())
             self.vogue_api_ = api
         return api
@@ -272,7 +284,7 @@ class CGConfig(BaseModel):
     def crunchy_api(self) -> CrunchyAPI:
         api = self.__dict__.get("crunchy_api_")
         if api is None:
-            LOG.info("Instantiating crunchy api")
+            LOG.debug("Instantiating crunchy api")
             api = CrunchyAPI(config=self.dict())
             self.crunchy_api_ = api
         return api
@@ -281,7 +293,7 @@ class CGConfig(BaseModel):
     def madeline_api(self) -> MadelineAPI:
         api = self.__dict__.get("madeline_api_")
         if api is None:
-            LOG.info("Instantiating madeline api")
+            LOG.debug("Instantiating madeline api")
             api = MadelineAPI(config=self.dict())
             self.madeline_api_ = api
         return api
@@ -290,7 +302,7 @@ class CGConfig(BaseModel):
     def mutacc_auto_api(self) -> MutaccAutoAPI:
         api = self.__dict__.get("mutacc_auto_api_")
         if api is None:
-            LOG.info("Instantiating mutacc_auto api")
+            LOG.debug("Instantiating mutacc_auto api")
             api = MutaccAutoAPI(config=self.dict())
             self.mutacc_auto_api_ = api
         return api
@@ -299,7 +311,7 @@ class CGConfig(BaseModel):
     def genotype_api(self) -> GenotypeAPI:
         api = self.__dict__.get("genotype_api_")
         if api is None:
-            LOG.info("Instantiating genotype api")
+            LOG.debug("Instantiating genotype api")
             api = GenotypeAPI(config=self.dict())
             self.genotype_api_ = api
         return api
@@ -308,7 +320,7 @@ class CGConfig(BaseModel):
     def chanjo_api(self) -> ChanjoAPI:
         api = self.__dict__.get("chanjo_api_")
         if api is None:
-            LOG.info("Instantiating chanjo api")
+            LOG.debug("Instantiating chanjo api")
             api = ChanjoAPI(config=self.dict())
             self.chanjo_api_ = api
         return api
@@ -317,7 +329,7 @@ class CGConfig(BaseModel):
     def shipping_api(self) -> ShippingAPI:
         api = self.__dict__.get("shipping_api_")
         if api is None:
-            LOG.info("Instantiating shipping api")
+            LOG.debug("Instantiating shipping api")
             api = ShippingAPI(config=self.shipping.dict())
             self.shipping_api_ = api
         return api
@@ -326,7 +338,7 @@ class CGConfig(BaseModel):
     def cg_stats_api(self) -> StatsAPI:
         api = self.__dict__.get("cg_stats_api_")
         if api is None:
-            LOG.info("Instantiating cg_stats api")
+            LOG.debug("Instantiating cg_stats api")
             api = StatsAPI(config=self.dict())
             self.cg_stats_api_ = api
         return api
@@ -335,7 +347,7 @@ class CGConfig(BaseModel):
     def loqusdb_api(self) -> LoqusdbAPI:
         api = self.__dict__.get("loqusdb_api_")
         if api is None:
-            LOG.info("Instantiating loqusdb api")
+            LOG.debug("Instantiating loqusdb api")
             api = LoqusdbAPI(config=self.dict())
             self.loqusdb_api_ = api
         return api
