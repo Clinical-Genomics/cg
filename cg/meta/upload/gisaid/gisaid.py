@@ -13,12 +13,7 @@ from .models import GisaidSample, FastaFile
 from housekeeper.store import models as hk_models
 import csv
 
-from cg.exc import (
-    HousekeeperVersionMissingError,
-    FastaSequenceMissingError,
-    MultipleFamilyLinksError,
-    FamilyLinkMissingError,
-)
+from cg.exc import HousekeeperVersionMissingError, FastaSequenceMissingError
 
 LOG = logging.getLogger(__name__)
 

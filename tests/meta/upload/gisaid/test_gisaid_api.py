@@ -92,10 +92,6 @@ def test_build_gisaid_fasta(
     assert file.read_text() == valid_concat_fasta_file
 
 
-# def test_get_sample_row
-# def test_get_sample_rows
-
-
 def test_get_gisaid_samples(gisaid_api, case_id):
     # GIVEN a gisaid_api with a Store populated with sequenced samples with family_id=case_id
 
