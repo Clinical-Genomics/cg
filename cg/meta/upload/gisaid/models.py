@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, validator
 
@@ -10,8 +11,8 @@ class FastaFile(BaseModel):
 
 
 class UpploadFiles(BaseModel):
-    csv_file: str
-    fasta_file: str
+    csv_file: Path
+    fasta_file: Path
 
 
 class Lab(BaseModel):

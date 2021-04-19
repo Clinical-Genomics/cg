@@ -21,12 +21,6 @@ def gisaid(context: CGConfig, family_id: str):
 
     LOG.info("----------------- GISAID -------------------")
 
-    # status_db: Store = context.status_db
-    # case_object: Family = status_db.family(family_id)
-    # if not case_object:
-    #    LOG.warning("Could not ticket: %s in status-db", ticket_id)
-    #    raise click.Abort
-
     gisaid_api = GisaidAPI(config=context)
     gsaid_samples: List[GisaidSample] = gisaid_api.get_gsaid_samples(family_id=family_id)
     files: UpploadFiles = UpploadFiles(
@@ -39,3 +33,5 @@ def gisaid(context: CGConfig, family_id: str):
     )
     if files:
         gisaid_api.upload(**dict(files))
+        files.csv_file.unlink()
+        files.fasta_file.unlink()

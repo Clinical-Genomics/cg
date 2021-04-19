@@ -57,7 +57,7 @@ class GisaidAPI:
             fasta_objects.append(fasta_obj)
         return fasta_objects
 
-    def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample], file_name: str) -> str:
+    def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample], file_name: str) -> Path:
         """Concatenates a list of consensus fastq objects"""
 
         file: Path = Path(file_name)
@@ -66,7 +66,7 @@ class GisaidAPI:
             for fasta_object in fasta_objects:
                 write_file_obj.write(f">{fasta_object.header}\n")
                 write_file_obj.write(f"{fasta_object.sequence}\n")
-        return str(file.absolute())
+        return file
 
     def get_sample_row(self, gisaid_sample: GisaidSample) -> List[str]:
         """Build row for a sample in the batch upload csv."""
@@ -83,7 +83,7 @@ class GisaidAPI:
             sample_rows.append(sample_row)
         return sample_rows
 
-    def build_gisaid_csv(self, gsaid_samples: List[GisaidSample], file_name: str) -> str:
+    def build_gisaid_csv(self, gsaid_samples: List[GisaidSample], file_name: str) -> Path:
         """Build batch upload csv."""
 
         file: Path = Path(file_name)
@@ -93,7 +93,7 @@ class GisaidAPI:
             sample_rows: List[List[str]] = self.get_sample_rows(gsaid_samples=gsaid_samples)
             wr.writerows(sample_rows)
 
-        return str(file.absolute())
+        return file
 
     def get_gsaid_samples(self, family_id: str) -> List[GisaidSample]:
         """Get list of Gisaid sample objects."""
@@ -113,10 +113,17 @@ class GisaidAPI:
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
 
-    def upload(self, csv_file: str, fasta_file: str) -> None:
+    def upload(self, csv_file: Path, fasta_file: Path) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
-        load_call: list = ["CoV", "upload", "--csv", csv_file, "--fasta", fasta_file]
+        load_call: list = [
+            "CoV",
+            "upload",
+            "--csv",
+            str(csv_file.absolute()),
+            "--fasta",
+            str(fasta_file.absolute()),
+        ]
         self.process.run_command(parameters=load_call)
 
         if self.process.stderr:
