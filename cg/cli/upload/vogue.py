@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 import click
+from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
@@ -226,7 +227,7 @@ def bioinfo_all(
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
 
-    cases = status_db.cases_ready_for_vogue_upload(completed_after, completed_before)
+    cases: Query = status_db.cases_ready_for_vogue_upload(completed_after, completed_before)
     for case in cases:
         case_name: str = case.internal_id
         version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
