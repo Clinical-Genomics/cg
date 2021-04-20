@@ -69,7 +69,6 @@ Try to use the following format:
 
 
 ## [20.19.1]
-d
 ### Fixed
 - Bug when fetching the api in mip workflow cli base
 
