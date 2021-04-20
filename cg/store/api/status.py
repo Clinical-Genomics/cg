@@ -76,21 +76,19 @@ class StatusHandler(BaseHandler):
                 or_(
                     models.Family.action == "analyze",
                     and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
+                    and_(
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at > models.Sample.sequenced_at,
+                    ),
                 )
             )
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
 
-        families = [
-            case_obj
-            for case_obj in families_query
-            if self._all_samples_have_sequence_data(case_obj.links)
-        ]
-
         if threshold:
             families = [
                 case_obj
-                for case_obj in families
+                for case_obj in families_query
                 if self.all_samples_have_enough_reads(case_obj.links)
             ]
         return families[:limit]
