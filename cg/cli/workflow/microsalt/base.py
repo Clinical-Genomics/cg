@@ -156,12 +156,10 @@ def run(
             "--input",
             Path(fastq_path, sample_id).absolute().as_posix(),
         ]
-    analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
 
     if sample_id or dry_run:
+        analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
         return
-
-    analysis_api.set_statusdb_action(case_id=case_id, action="running")
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
     except Exception as e:
@@ -170,6 +168,13 @@ def run(
             case_id,
             e.__class__.__name__,
         )
+    try:
+        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
+    except:
+        LOG.error("Failed to run analysis!")
+        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        raise
 
 
 @microsalt.command()
