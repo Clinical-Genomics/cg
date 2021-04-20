@@ -58,11 +58,13 @@ microsalt.add_command(resolve_compression)
 @microsalt.command()
 @OPTION_TICKET
 @OPTION_SAMPLE
+@OPTION_DRY_RUN
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_obj
-def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str) -> None:
+def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run: bool) -> None:
     """Link microbial FASTQ files to dedicated analysis folder for a given case, ticket or sample"""
-
+    if dry_run:
+        return
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
@@ -188,8 +190,8 @@ def start(
 ) -> None:
     """Start whole microSALT workflow by providing case, ticket or sample id"""
     LOG.info("Starting Microsalt workflow for %s", unique_id)
-    if not dry_run:
-        context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
+
+    context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
 
