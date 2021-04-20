@@ -183,7 +183,8 @@ def start(
 ) -> None:
     """Start whole microSALT workflow by providing case, ticket or sample id"""
     LOG.info("Starting Microsalt workflow for %s", unique_id)
-    context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
+    if not dry_run:
+        context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id)
     context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
 
