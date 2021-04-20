@@ -321,6 +321,16 @@ class Family(Model, PriorityMixin):
                 sequenced_dates.append(link.sample.sequenced_at)
         return max(sequenced_dates) if sequenced_dates else None
 
+    @property
+    def all_samples_pass_qc(self) -> bool:
+        pass_qc = []
+        for link in self.links:
+            if link.sample.is_external or link.sample.sequencing_qc:
+                pass_qc.append(True)
+            else:
+                pass_qc.append(False)
+        return all(pass_qc)
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 

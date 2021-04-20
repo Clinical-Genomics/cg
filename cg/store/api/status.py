@@ -97,9 +97,7 @@ class StatusHandler(BaseHandler):
 
         if threshold:
             families_query = [
-                case_obj
-                for case_obj in families_query
-                if self.all_samples_have_enough_reads(case_obj.links)
+                case_obj for case_obj in families_query if case_obj.all_samples_pass_qc
             ]
         return families_query[:limit]
 
@@ -544,42 +542,6 @@ class StatusHandler(BaseHandler):
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced in-house."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
-
-    def all_samples_have_enough_reads(self, links: List[models.FamilySample]) -> bool:
-
-        samples_have_enough_reads = []
-        for link in links:
-            target_reads = (
-                self.Application.query.filter_by(
-                    id=self.ApplicationVersion.query.filter_by(
-                        id=link.sample.application_version_id
-                    )
-                    .first()
-                    .application_id
-                )
-                .first()
-                .target_reads
-            )
-            threshold = (
-                self.Application.query.filter_by(
-                    id=self.ApplicationVersion.query.filter_by(
-                        id=link.sample.application_version_id
-                    )
-                    .first()
-                    .application_id
-                )
-                .first()
-                .percent_reads_guaranteed
-            ) / 100
-
-            if link.sample.is_external:
-                samples_have_enough_reads.append(True)
-            elif link.sample.reads > target_reads * threshold:
-                samples_have_enough_reads.append(True)
-            else:
-                samples_have_enough_reads.append(False)
-
-        return all(samples_have_enough_reads)
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
