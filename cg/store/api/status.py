@@ -572,7 +572,9 @@ class StatusHandler(BaseHandler):
                 .percent_reads_guaranteed
             ) / 100
 
-            if link.sample.reads > target_reads * threshold:
+            if link.sample.is_external:
+                samples_have_enough_reads.append(True)
+            elif link.sample.reads > target_reads * threshold:
                 samples_have_enough_reads.append(True)
             else:
                 samples_have_enough_reads.append(False)
