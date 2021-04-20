@@ -68,7 +68,7 @@ class StatusHandler(BaseHandler):
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = list(
-            self.Family.query.outerjoin(models.Analysis)
+            self.Family.query.outerjoin(self.latest_analyses())
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
             .filter(models.Family.data_analysis == str(pipeline))
