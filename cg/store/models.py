@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List
+from typing import List, Optional
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
@@ -306,6 +306,21 @@ class Family(Model, PriorityMixin):
     @synopsis.setter
     def synopsis(self, synopsis_list: List[str]):
         self._synopsis = ",".join(synopsis_list) if synopsis_list else None
+
+    @property
+    def latest_analyzed(self) -> Optional[dt.datetime]:
+        analyses = self.analyses
+        if not analyses:
+            return None
+        return analyses[0].completed_at
+
+    @property
+    def latest_sequenced(self) -> Optional[dt.datetime]:
+        links = self.links
+        dates = [link.sample.sequenced_at for link in links if link.sample.sequenced_at is not None]
+        if not dates:
+            return
+        return max(dates)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"

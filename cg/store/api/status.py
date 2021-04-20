@@ -78,7 +78,7 @@ class StatusHandler(BaseHandler):
                     and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
                     and_(
                         models.Family.action.is_(None),
-                        models.Analysis.created_at < models.Sample.sequenced_at,
+                        models.Family.latest_analyzed < models.Family.latest_sequenced,
                     ),
                 )
             )
