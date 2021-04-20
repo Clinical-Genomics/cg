@@ -10,11 +10,20 @@ Try to use the following format:
 
 ## [x.x.x]
 ### Added
-- gisaid uppload support via cli
-- gisaid API
-
 ### Changed
 ### Fixed
+
+
+## [20.24.0]
+### Changed
+- Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
+- Microsalt config-case wont include samples that dont pass sequencing qc
+
+
+## [20.23.0]
+### Added
+- gisaid uppload support via cli
+- gisaid API
 
 ## [20.22.0]
 ### Added
@@ -60,7 +69,7 @@ Try to use the following format:
 
 
 ## [20.19.1]
-
+d
 ### Fixed
 - Bug when fetching the api in mip workflow cli base
 
