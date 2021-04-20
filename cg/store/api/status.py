@@ -86,12 +86,12 @@ class StatusHandler(BaseHandler):
         )
 
         if threshold:
-            families = [
+            families_query = [
                 case_obj
                 for case_obj in families_query
                 if self.all_samples_have_enough_reads(case_obj.links)
             ]
-        return families[:limit]
+        return families_query[:limit]
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
         """Returns a list of cases that may be available to store in Housekeeper"""
