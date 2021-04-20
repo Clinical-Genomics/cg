@@ -369,7 +369,7 @@ class UserView(BaseView):
     """Admin view for Model.User"""
 
     column_default_sort = "name"
-    column_filters = []
+    column_filters = ['customers']
     column_hide_backrefs = False
     column_list = ('name', 'is_admin', 'email', 'customers')
     column_searchable_list = ["name", "email"]
