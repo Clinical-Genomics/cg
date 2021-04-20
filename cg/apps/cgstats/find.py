@@ -49,3 +49,10 @@ def get_demux_id(manager: StatsAPI, flowcell_object_id: int) -> Optional[int]:
     if demux_id:
         return demux_id
     return None
+
+
+def get_project_id(manager: StatsAPI, project_name: str) -> Optional[int]:
+    project_id: Optional[int] = manager.Project.exists(project_name=project_name)
+    if project_id:
+        return project_id
+    return None

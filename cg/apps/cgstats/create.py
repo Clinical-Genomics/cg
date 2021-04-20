@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Dict, Iterable, Optional
 
 import sqlalchemy
 from cg.apps.cgstats import find
@@ -63,7 +63,7 @@ def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> stats_mod
     return flowcell
 
 
-def create_demux(manager: StatsAPI, flowcell_id: int, datasource_id: int):
+def create_demux(manager: StatsAPI, flowcell_id: int, datasource_id: int) -> stats_models.Demux:
     demux: stats_models.Demux = manager.Demux()
     demux.flowcell_id = flowcell_id
     demux.datasource_id = datasource_id
@@ -73,6 +73,15 @@ def create_demux(manager: StatsAPI, flowcell_id: int, datasource_id: int):
     manager.add(demux)
     manager.flush()
     return demux
+
+
+def create_project(manager: StatsAPI, project_name: str) -> stats_models.Project:
+    project: stats_models.Project = manager.Project()
+    project.projectname = project_name
+    project.time = sqlalchemy.func.now()
+    manager.add(project)
+    manager.flush()
+    return project
 
 
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
@@ -107,3 +116,14 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             manager=manager, flowcell_id=flowcell_id, datasource_id=datasource_id
         )
         demux_id: int = demux_object.demux_id
+
+    projects: Iterable[str] = demux_results.projects
+    project_name_to_id: Dict[str, int] = {}
+    for project_name in projects:
+        project_id: Optional[int] = find.get_project_id(manager=manager, project_name=project_name)
+        if not project_id:
+            project_object: stats_models.Project = create_project(
+                manager=manager, project_name=project_name
+            )
+            project_id: int = project_object.project_id
+        project_name_to_id[project_name] = project_id

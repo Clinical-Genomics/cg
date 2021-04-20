@@ -1,11 +1,14 @@
+import logging
 import datetime
 import socket
 from pathlib import Path
-from typing import Literal
+from typing import Iterable, Literal
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from pydantic import BaseModel
+
+LOG = logging.getLogger(__name__)
 
 
 class LogfileParameters(BaseModel):
@@ -56,6 +59,20 @@ class DemuxResults:
     @property
     def sample_sheet_path(self) -> Path:
         return self.flowcell.sample_sheet_path
+
+    @property
+    def projects(self) -> Iterable[str]:
+        """Return the project names created after demultiplexing
+
+        How do we handle the Project_indexcheck directory?
+        """
+        for sub_dir in self.results_dir.iterdir():
+            if not sub_dir.is_dir():
+                continue
+            if sub_dir.name.startswith("Project_"):
+                project_name: str = sub_dir.name.split("_")[1]
+                LOG.debug("Found project %s", project_name)
+                yield project_name
 
     def get_logfile_parameters(self) -> LogfileParameters:
         with open(self.log_path, "r") as logfile:
