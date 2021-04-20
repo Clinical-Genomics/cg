@@ -87,7 +87,10 @@ class StatusHandler(BaseHandler):
         families_query = [
             case_obj
             for case_obj in families_query
-            if case_obj.latest_analyzed < case_obj.latest_sequenced
+            if case_obj.latest_sequenced
+            and (
+                not case_obj.latest_analyzed or case_obj.latest_analyzed < case_obj.latest_sequenced
+            )
         ]
 
         if threshold:

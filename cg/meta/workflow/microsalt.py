@@ -60,16 +60,16 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         case_obj: models.Family = self.status_db.family(case_id)
-        order_id = case_obj.name
+        project_id: str = self.get_project(case_obj.links[0].sample.internal_id)
         return Path(
-            self.root_dir, "results", "reports", "trailblazer", f"{order_id}_slurm_ids.yaml"
+            self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
         )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
         case_obj: models.Family = self.status_db.family(case_id)
-        order_id = case_obj.name
+        order_id: str = case_obj.name
         deliverables_file_path = Path(
             self.root_dir,
             "results",
@@ -89,7 +89,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def link_fastq_files(
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False
     ) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj: models.Family = self.status_db.family(case_id)
         samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
@@ -110,7 +110,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_lims_comment(self, sample_id: str) -> str:
         """ Returns the comment associated with a sample stored in lims"""
-        comment = self.lims_api.get_sample_comment(sample_id) or ""
+        comment: str = self.lims_api.get_sample_comment(sample_id) or ""
         if re.match(r"\w{4}\d{2,3}", comment):
             return comment
 
@@ -124,8 +124,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if not sample_obj.organism:
             raise CgDataError(f"Organism missing on Sample")
 
-        organism = sample_obj.organism.internal_id.strip()
-        comment = self.get_lims_comment(sample_id=sample_obj.internal_id)
+        organism: str = sample_obj.organism.internal_id.strip()
+        comment: str = self.get_lims_comment(sample_id=sample_obj.internal_id)
         has_comment = bool(comment)
 
         if "gonorrhoeae" in organism:

@@ -313,10 +313,13 @@ class Family(Model, PriorityMixin):
 
     @property
     def latest_sequenced(self) -> Optional[dt.datetime]:
-        analysis_dates = [
-            link.sample.sequenced_at for link in self.links if link.sample.sequenced_at is not None
-        ]
-        return max(analysis_dates) if analysis_dates else None
+        sequenced_dates = []
+        for link in self.links:
+            if link.sample.is_external:
+                sequenced_dates.append(link.sample.ordered_at)
+            elif link.sample.sequenced_at:
+                sequenced_dates.append(link.sample.sequenced_at)
+        return max(sequenced_dates) if sequenced_dates else None
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
