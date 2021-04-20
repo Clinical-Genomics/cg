@@ -6,13 +6,22 @@ Create Date: 2021-04-19 17:43:37.671078
 
 """
 from alembic import op
-from sqlalchemy import types, Column, ForeignKey, orm, Integer, ForeignKeyConstraint, UniqueConstraint, String
+from sqlalchemy import (
+    types,
+    Column,
+    ForeignKey,
+    orm,
+    Integer,
+    ForeignKeyConstraint,
+    UniqueConstraint,
+    String,
+)
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 
 # revision identifiers, used by Alembic.
-revision = '1dadcefd3bbf'
-down_revision = '089edc289291'
+revision = "1dadcefd3bbf"
+down_revision = "089edc289291"
 branch_labels = None
 depends_on = None
 
@@ -56,15 +65,21 @@ def upgrade():
     for customer in session.query(Customer):
         if customer.delivery_contact:
             customer.delivery_contact_email = customer.delivery_contact.email
-            print(f"setting {customer.delivery_contact.email} to customer.delivery_contact_email for customer {customer.id} ")
+            print(
+                f"setting {customer.delivery_contact.email} to customer.delivery_contact_email for customer {customer.id} "
+            )
             count += 1
         if customer.invoice_contact:
             customer.invoice_contact_email = customer.invoice_contact.email
-            print(f"setting {customer.invoice_contact.email} to customer.invoice_contact_email for customer {customer.id} ")
+            print(
+                f"setting {customer.invoice_contact.email} to customer.invoice_contact_email for customer {customer.id} "
+            )
             count += 1
         if customer.primary_contact:
             customer.primary_contact_email = customer.primary_contact.email
-            print(f"setting {customer.primary_contact.email} to customer.primary_contact_email for customer {customer.id} ")
+            print(
+                f"setting {customer.primary_contact.email} to customer.primary_contact_email for customer {customer.id} "
+            )
             count += 1
 
     session.commit()
@@ -82,21 +97,15 @@ def downgrade():
 
     op.add_column(
         "customer",
-        Column(
-            "delivery_contact_id", mysql.INTEGER(display_width=11), autoincrement=False
-        ),
+        Column("delivery_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
     )
     op.add_column(
         "customer",
-        Column(
-            "invoice_contact_id", mysql.INTEGER(display_width=11), autoincrement=False
-        ),
+        Column("invoice_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
     )
     op.add_column(
         "customer",
-        Column(
-            "primary_contact_id", mysql.INTEGER(display_width=11), autoincrement=False
-        ),
+        Column("primary_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
     )
 
     bind = op.get_bind()
@@ -113,10 +122,14 @@ def downgrade():
             user = session.query(User).filter(User.email == customer.delivery_contact_email).first()
             if user:
                 customer.delivery_contact_id = user.id
-                print(f"connecting user {user.id} directly to customer {customer.id} as delivery_contact")
+                print(
+                    f"connecting user {user.id} directly to customer {customer.id} as delivery_contact"
+                )
                 count += 1
             else:
-                print(f"WARNING: could not connect find any user with email {customer.delivery_contact_email} to customer {user.customer.id} as delivery_contact")
+                print(
+                    f"WARNING: could not connect find any user with email {customer.delivery_contact_email} to customer {user.customer.id} as delivery_contact"
+                )
 
         # invoice contact
         if customer.invoice_contact_email:
@@ -125,11 +138,14 @@ def downgrade():
             user = session.query(User).filter(User.email == customer.invoice_contact_email).first()
             if user:
                 customer.invoice_contact_id = user.id
-                print(f"connecting user {user.id} directly to customer {customer.id} as invoice_contact")
+                print(
+                    f"connecting user {user.id} directly to customer {customer.id} as invoice_contact"
+                )
                 count += 1
             else:
                 print(
-                    f"WARNING: could not connect find any user with email {customer.invoice_contact_email} to customer {user.customer.id} as invoice_contact")
+                    f"WARNING: could not connect find any user with email {customer.invoice_contact_email} to customer {user.customer.id} as invoice_contact"
+                )
 
         # primary contact
         if customer.primary_contact_email:
@@ -138,23 +154,38 @@ def downgrade():
             user = session.query(User).filter(User.email == customer.primary_contact_email).first()
             if user:
                 customer.primary_contact_id = user.id
-                print(f"connecting user {user.id} directly to customer {customer.id} as primary_contact")
+                print(
+                    f"connecting user {user.id} directly to customer {customer.id} as primary_contact"
+                )
                 count += 1
             else:
                 print(
-                    f"WARNING: could not connect find any user with email {customer.primary_contact_email} to customer {user.customer.id} as primary_contact")
+                    f"WARNING: could not connect find any user with email {customer.primary_contact_email} to customer {user.customer.id} as primary_contact"
+                )
 
     session.commit()
     print(f"Changed {count} connections")
 
     op.create_foreign_key(
-        "delivery_contact_ibfk_1", "customer", "user", ["delivery_contact_id"], ["id"],
+        "delivery_contact_ibfk_1",
+        "customer",
+        "user",
+        ["delivery_contact_id"],
+        ["id"],
     )
     op.create_foreign_key(
-        "invoice_contact_ibfk_1", "customer", "user", ["invoice_contact_id"], ["id"],
+        "invoice_contact_ibfk_1",
+        "customer",
+        "user",
+        ["invoice_contact_id"],
+        ["id"],
     )
     op.create_foreign_key(
-        "primary_contact_ibfk_1", "customer", "user", ["primary_contact_id"], ["id"],
+        "primary_contact_ibfk_1",
+        "customer",
+        "user",
+        ["primary_contact_id"],
+        ["id"],
     )
 
     op.drop_column("customer", "delivery_contact_email")
