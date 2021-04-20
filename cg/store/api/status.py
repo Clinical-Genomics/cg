@@ -68,7 +68,7 @@ class StatusHandler(BaseHandler):
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = list(
-            self.Family.query.outerjoin(self.latest_analyses())
+            self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
             .filter(models.Family.data_analysis == str(pipeline))
@@ -84,6 +84,11 @@ class StatusHandler(BaseHandler):
             )
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
+        families_query = [
+            case_obj
+            for case_obj in families_query
+            if case_obj.latest_analyzed < case_obj.latest_sequenced
+        ]
 
         if threshold:
             families_query = [
