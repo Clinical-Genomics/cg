@@ -257,6 +257,7 @@ class StoreHelpers:
         sample.application_version_id = application_version_id
         sample.customer = customer
         sample.is_external = is_external
+        sample.ordered_at = datetime.now()
 
         if loqusdb_id:
             sample.loqusdb_id = loqusdb_id

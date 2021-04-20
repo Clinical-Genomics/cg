@@ -89,7 +89,9 @@ class StatusHandler(BaseHandler):
             for case_obj in families_query
             if case_obj.latest_sequenced
             and (
-                not case_obj.latest_analyzed or case_obj.latest_analyzed < case_obj.latest_sequenced
+                case_obj.action == "analyze"
+                or not case_obj.latest_analyzed
+                or case_obj.latest_analyzed < case_obj.latest_sequenced
             )
         ]
 
