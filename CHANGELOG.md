@@ -17,8 +17,17 @@ Try to use the following format:
 ### Changed
 - Changes that customer contact persons are referred to as emails instead of users. This removes the need to add each contact as a user in the system and it becomes easier to manage the user list
 
-## [20.21.1]
+## [20.23.0]
 ### Added
+- gisaid uppload support via cli
+- gisaid API
+
+## [20.22.0]
+### Added
+- Add command `cg get analysis` to view analysis information
+
+## [20.21.1]
+### Fixed
 - Fix subprocess wildcard issue in deliver rsync
 
 ## [20.21.0]

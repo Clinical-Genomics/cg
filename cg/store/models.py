@@ -482,6 +482,12 @@ class Sample(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
+    def sequencing_qc(self) -> bool:
+        """Return sequencing qc passed or failed."""
+        application = self.application_version.application
+        return self.reads > application.expected_reads
+
+    @property
     def phenotype_terms(self) -> List[str]:
         """Return a list of phenotype_terms."""
         return self._phenotype_terms.split(",") if self._phenotype_terms else []

@@ -116,6 +116,10 @@ class MicrosaltConfig(BaseModel):
     conda_env: str
 
 
+class GisaidConfig(CommonAppConfig):
+    submitter: str
+
+
 class ShippingConfig(CommonAppConfig):
     host_config: str
 
@@ -175,6 +179,7 @@ class CGConfig(BaseModel):
     balsamic: BalsamicConfig = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
+    gisaid: GisaidConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
