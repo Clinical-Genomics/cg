@@ -203,7 +203,7 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     "--completed-after",
     "-a",
     callback=validate_date,
-    default=str(dt.date.today() - dt.timedelta(days=7)),
+    default=None,
     help="Only upload cases with an analysis that was completed after this date. Default is one "
     "week ago",
 )
