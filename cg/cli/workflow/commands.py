@@ -50,11 +50,14 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
 
 @click.command()
 @ARGUMENT_CASE_ID
+@OPTION_DRY
 @click.pass_obj
-def link(context: CGConfig, case_id: str):
+def link(context: CGConfig, case_id: str, dry_run: bool):
     """Link FASTQ files for all samples in a case"""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
+    if dry_run:
+        return
     analysis_api.link_fastq_files(case_id=case_id)
 
 

@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.26.0]
+### Changed
+- Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
+- Microsalt config-case wont include samples that dont pass sequencing qc
+
+
 ## [20.25.0]
 ### Changed
 - Changes that customer contact persons are referred to as emails instead of users. This removes the need to add each contact as a user in the system and it becomes easier to manage the user list
@@ -25,6 +31,9 @@ Try to use the following format:
 ### Added
 - gisaid uppload support via cli
 - gisaid API
+
+### Changed
+### Fixed
 
 ## [20.22.0]
 ### Added
@@ -68,7 +77,6 @@ Try to use the following format:
 - Bug when instantiating analysis api in upload
 
 ## [20.19.1]
-
 ### Fixed
 - Bug when fetching the api in mip workflow cli base
 
