@@ -246,6 +246,7 @@ class MipAnalysisAPI(AnalysisAPI):
                 not self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
                 == "completed"
             ):
+                print(self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id))
                 cases_to_analyze.append(case_obj)
         return cases_to_analyze
 
