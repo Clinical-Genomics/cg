@@ -17,6 +17,86 @@ Try to use the following format:
 ### Added
 - Avatars for cases
 
+## [20.26.1]
+### Fixed
+- Workflow linking also links undetermined files when
+
+## [20.26.0]
+### Changed
+- Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
+- Microsalt config-case wont include samples that dont pass sequencing qc
+
+
+## [20.25.0]
+### Changed
+- Changes that customer contact persons are referred to as emails instead of users. This removes the need to add each contact as a user in the system and it becomes easier to manage the user list
+
+## [20.24.0]
+### Added
+- Show customers in user admin view
+
+## [20.23.0]
+### Added
+- gisaid uppload support via cli
+- gisaid API
+
+### Changed
+### Fixed
+
+## [20.22.0]
+### Added
+- Add command `cg get analysis` to view analysis information
+
+## [20.21.1]
+### Fixed
+- Fix subprocess wildcard issue in deliver rsync
+
+## [20.21.0]
+### Added
+- Added cg deliver rsync <ticket_id>
+
+## [20.20.1]
+### Fixed
+- bug in cg clean scout-finished-cases
+
+## [20.20.0]
+
+## Added
+- CLI command to deploy Loqusdb via shipping
+
+## [20.19.5]
+
+### Fixed
+- fixed bug where CgError was raised with wrong arguments in AnalysisAPI
+
+## [20.19.4]
+
+### Fixed
+- fixed bug that cgstats configs was saved as cg_stats in CGConfig
+
+## [20.19.3]
+
+### Fixed
+- Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
+
+## [20.19.2]
+
+### Fixed
+- Bug when instantiating analysis api in upload
+
+## [20.19.1]
+### Fixed
+- Bug when fetching the api in mip workflow cli base
+
+## [20.19.0]
+
+### Changed
+- use pydantic to control CLI context 
+
+## [NG.NG.NG]
+### Added
+- Avatars for cases
+
 ## [20.18.0]
 ### Added
 - Trailblazer support for mutant/sars-cov-2

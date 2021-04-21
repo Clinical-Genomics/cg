@@ -1,8 +1,7 @@
 import os
-from pathlib import Path
 
 from cg.meta.report.api import ReportAPI
-from tests.meta.report.comparison import is_similar_dicts, dict_values_exists_in
+from tests.meta.report.comparison import dict_values_exists_in, is_similar_dicts
 
 
 def test_collect_delivery_data(report_api, report_store, case_id):

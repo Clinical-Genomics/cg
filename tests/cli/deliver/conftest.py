@@ -3,11 +3,11 @@
 from pathlib import Path
 
 import pytest
-from tests.store_helpers import StoreHelpers
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 from housekeeper.store import models as hk_models
+from tests.store_helpers import StoreHelpers
 
 # Paths
 
@@ -26,13 +26,11 @@ def fixture_deliver_vcf_path(
 
 @pytest.fixture(name="base_context")
 def fixture_base_context(
-    base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path
-) -> dict:
-    return {
-        "status_db": base_store,
-        "housekeeper_api": real_housekeeper_api,
-        "delivery_path": str(project_dir),
-    }
+    base_context: CGConfig, real_housekeeper_api: HousekeeperAPI, project_dir: Path
+) -> CGConfig:
+    base_context.housekeeper_api_ = real_housekeeper_api
+    base_context.delivery_path = str(project_dir)
+    return base_context
 
 
 @pytest.fixture(name="mip_delivery_bundle")
@@ -61,10 +59,12 @@ def fixture_mip_dna_housekeeper(
 
 @pytest.fixture(name="populated_mip_context")
 def fixture_populated_mip_context(
-    analysis_store: Store, mip_dna_housekeeper: HousekeeperAPI, project_dir: Path
-) -> dict:
-    return {
-        "status_db": analysis_store,
-        "housekeeper_api": mip_dna_housekeeper,
-        "delivery_path": str(project_dir),
-    }
+    base_context: CGConfig,
+    analysis_store: Store,
+    mip_dna_housekeeper: HousekeeperAPI,
+    project_dir: Path,
+) -> CGConfig:
+    base_context.housekeeper_api_ = mip_dna_housekeeper
+    base_context.status_db_ = analysis_store
+    base_context.delivery_path = str(project_dir)
+    return base_context

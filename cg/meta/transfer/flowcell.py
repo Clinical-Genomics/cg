@@ -66,7 +66,7 @@ class TransferFlowcell:
             newest_date = (sample_obj.sequenced_at is None) or (
                 flowcell_obj.sequenced_at > sample_obj.sequenced_at
             )
-            if enough_reads and newest_date:
+            if newest_date:
                 sample_obj.sequenced_at = flowcell_obj.sequenced_at
 
             if isinstance(sample_obj, models.Sample):

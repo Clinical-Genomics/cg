@@ -3,7 +3,6 @@
 import logging
 
 import click
-
 from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
 from cg.cli.workflow.mip.store import store as store_cmd
@@ -22,7 +21,7 @@ def mip_dna(
         click.echo(context.get_help())
         return
 
-    context.obj["analysis_api"] = MipDNAAnalysisAPI(config=context.obj)
+    context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(config=context.obj)
 
 
 mip_dna.add_command(config_case)

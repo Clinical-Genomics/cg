@@ -1,15 +1,17 @@
 """Code for uploading observations data via CLI"""
 import logging
+from typing import Optional
 
 import click
-
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants import Pipeline
 from cg.exc import DuplicateRecordError, DuplicateSampleError
 from cg.meta.upload.observations import UploadObservationsAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 
 from .utils import LinkHelper
-from ...meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -18,25 +20,25 @@ LOG = logging.getLogger(__name__)
 @click.option("-c", "--case_id", help="internal case id, leave empty to process all")
 @click.option("-l", "--case-limit", type=int, help="maximum number of cases to upload")
 @click.option("--dry-run", is_flag=True, help="only print cases to be processed")
-@click.pass_context
-def observations(context, case_id, case_limit, dry_run):
+@click.pass_obj
+def observations(
+    context: CGConfig, case_id: Optional[str], case_limit: Optional[int], dry_run: bool
+):
     """Upload observations from an analysis to LoqusDB."""
 
     click.echo(click.style("----------------- OBSERVATIONS ----------------"))
-
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    status_db: Store = context.status_db
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
     loqus_apis = {
-        "wgs": LoqusdbAPI(context.obj),
-        "wes": LoqusdbAPI(context.obj, analysis_type="wes"),
+        "wgs": LoqusdbAPI(context.dict()),
+        "wes": LoqusdbAPI(context.dict(), analysis_type="wes"),
     }
 
     if case_id:
-        families_to_upload = [analysis_api.status_db.family(case_id)]
+        families_to_upload = [status_db.family(case_id)]
     else:
-        families_to_upload = analysis_api.status_db.observations_to_upload()
+        families_to_upload = status_db.observations_to_upload()
 
     nr_uploaded = 0
     for case_obj in families_to_upload:
@@ -78,12 +80,12 @@ def observations(context, case_id, case_limit, dry_run):
             LOG.info("%s: Would upload observations", case_obj.internal_id)
             continue
 
-        api = UploadObservationsAPI(
-            analysis_api.status_db, analysis_api.housekeeper_api, loqus_apis[analysis_type]
+        upload_observations_api = UploadObservationsAPI(
+            status_api=status_db, hk_api=housekeeper_api, loqus_api=loqus_apis[analysis_type]
         )
 
         try:
-            api.process(case_obj.analyses[0])
+            upload_observations_api.process(case_obj.analyses[0])
             LOG.info("%s: observations uploaded!", case_obj.internal_id)
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:

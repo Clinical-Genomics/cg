@@ -1,13 +1,17 @@
 """This script tests the cli methods to set values of cases in status-db"""
+from click.testing import CliRunner
 
 from cg.cli.set.family import family
 from cg.constants import DataDelivery, Pipeline
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 SUCCESS = 0
 
 
-def test_set_family_without_options(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_without_options(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using only the required arguments"""
     # GIVEN a database with a case
     case_id = helpers.add_case(base_store).internal_id
@@ -32,7 +36,9 @@ def test_set_family_bad_family(cli_runner, base_context):
     assert result.exit_code != SUCCESS
 
 
-def test_set_family_bad_panel(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_bad_panel(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using a non-existing panel"""
     # GIVEN a database with a case
 
@@ -46,7 +52,9 @@ def test_set_family_bad_panel(cli_runner, base_context, base_store: Store, helpe
     assert panel_id not in base_store.Family.query.first().panels
 
 
-def test_set_family_panel(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_panel(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using an existing panel"""
     # GIVEN a database with a case and a panel not yet added to the case
     panel_id = helpers.ensure_panel(base_store, "a_panel").name
@@ -61,7 +69,9 @@ def test_set_family_panel(cli_runner, base_context, base_store: Store, helpers):
     assert panel_id in base_store.Family.query.first().panels
 
 
-def test_set_family_priority(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_priority(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test that the added case gets the priority we send in"""
     # GIVEN a database with a case
     case_id = helpers.add_case(base_store).internal_id
@@ -78,7 +88,9 @@ def test_set_family_priority(cli_runner, base_context, base_store: Store, helper
     assert base_store.Family.query.first().priority_human == priority
 
 
-def test_set_family_customer(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_customer(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using an existing customer"""
     # GIVEN a database with a case and a customer not yet on the case
     customer_id = helpers.ensure_customer(base_store, customer_id="a_customer").internal_id
@@ -95,7 +107,9 @@ def test_set_family_customer(cli_runner, base_context, base_store: Store, helper
     assert customer_id == case.customer.internal_id
 
 
-def test_set_family_bad_data_analysis(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_bad_data_analysis(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using a non-existing data_analysis"""
     # GIVEN a database with a case
 
@@ -111,7 +125,9 @@ def test_set_family_bad_data_analysis(cli_runner, base_context, base_store: Stor
     assert str(data_analysis) != base_store.Family.query.first().data_analysis
 
 
-def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_data_analysis(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using an existing data_analysis"""
 
     # GIVEN a database with a case and a data_analysis not yet set on the case
@@ -132,7 +148,9 @@ def test_set_family_data_analysis(cli_runner, base_context, base_store: Store, h
     assert str(data_analysis) == case_obj.data_analysis
 
 
-def test_set_family_bad_data_delivery(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_bad_data_delivery(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using a non-existing data_delivery"""
     # GIVEN a database with a case
 
@@ -148,7 +166,9 @@ def test_set_family_bad_data_delivery(cli_runner, base_context, base_store: Stor
     assert str(data_delivery) != base_store.Family.query.first().data_delivery
 
 
-def test_set_family_data_delivery(cli_runner, base_context, base_store: Store, helpers):
+def test_set_family_data_delivery(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     """Test to set a case using an existing data_delivery"""
 
     # GIVEN a database with a case and a data_delivery not yet set on the case

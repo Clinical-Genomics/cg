@@ -8,9 +8,13 @@ from cg.cli.compress.fastq import (
     decompress_sample,
     decompress_ticket,
 )
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
-def test_decompress_spring_cli_no_family(compress_context, case_id, cli_runner, caplog):
+def test_decompress_spring_cli_no_family(
+    compress_context: CGConfig, case_id: str, cli_runner: CliRunner, caplog
+):
     """Test to run the decompress command when no families are found"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context without families
@@ -24,7 +28,9 @@ def test_decompress_spring_cli_no_family(compress_context, case_id, cli_runner, 
     assert "Could not find case" in caplog.text
 
 
-def test_decompress_spring_cli_one_family(populated_compress_context, cli_runner, case_id, caplog):
+def test_decompress_spring_cli_one_family(
+    populated_compress_context: CGConfig, cli_runner: CliRunner, case_id: str, caplog
+):
     """Test to run the decompress command with one case"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a case

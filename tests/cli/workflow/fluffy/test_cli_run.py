@@ -1,8 +1,12 @@
 from cg.cli.workflow.fluffy.base import run
 from cg.constants import EXIT_SUCCESS
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
-def test_cli_run_dry(cli_runner, fluffy_case_id_existing, fluffy_context, caplog):
+def test_cli_run_dry(
+    cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
+):
 
     caplog.set_level("INFO")
 
@@ -19,9 +23,9 @@ def test_cli_run_dry(cli_runner, fluffy_case_id_existing, fluffy_context, caplog
 
 
 def test_cli_run_dry_no_case(
-    cli_runner,
-    fluffy_case_id_non_existing,
-    fluffy_context,
+    cli_runner: CliRunner,
+    fluffy_case_id_non_existing: str,
+    fluffy_context: CGConfig,
     caplog,
 ):
     caplog.set_level("ERROR")
@@ -39,7 +43,9 @@ def test_cli_run_dry_no_case(
     assert "could not be found" in caplog.text
 
 
-def test_cli_run(cli_runner, fluffy_case_id_existing, fluffy_context, caplog):
+def test_cli_run(
+    cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
+):
 
     caplog.set_level("INFO")
 

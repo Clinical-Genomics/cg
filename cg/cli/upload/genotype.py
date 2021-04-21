@@ -1,13 +1,15 @@
 """Code for uploading genotype data via CLI"""
 import logging
+from typing import Optional
 
 import click
-from cg.store import models
-
+from cg.apps.gt import GenotypeAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
 
 from .utils import suggest_cases_to_upload
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -15,24 +17,24 @@ LOG = logging.getLogger(__name__)
 @click.command()
 @click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
 @click.argument("family_id", required=False)
-@click.pass_context
-def genotypes(context, re_upload, family_id):
+@click.pass_obj
+def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
     """Upload genotypes from an analysis to Genotype."""
 
-    if not context.obj.get("analysis_api"):
-        context.obj["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api = context.obj["analysis_api"]
+    status_db: Store = context.status_db
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    genotype_api: GenotypeAPI = context.genotype_api
 
     click.echo(click.style("----------------- GENOTYPES -------------------"))
 
     if not family_id:
-        suggest_cases_to_upload(context)
-        context.abort()
-    case_obj: models.Family = analysis_api.status_db.family(family_id)
-    upload_genotypes_api = UploadGenotypesAPI(
-        hk_api=analysis_api.housekeeper_api, gt_api=analysis_api.genotype_api
-    )
-    results = upload_genotypes_api.data(case_obj.analyses[0])
+        suggest_cases_to_upload(status_db=status_db)
+        raise click.Abort
+    case_obj: models.Family = status_db.family(family_id)
+    upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
+    results: dict = upload_genotypes_api.data(case_obj.analyses[0])
 
-    if results:
-        upload_genotypes_api.upload(results, replace=re_upload)
+    if not results:
+        LOG.warning("Could not find any results to upload")
+        return
+    upload_genotypes_api.upload(results, replace=re_upload)

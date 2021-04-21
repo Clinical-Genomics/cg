@@ -8,6 +8,7 @@ from typing import List, Optional
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store import models
 from cg.utils import Process
@@ -18,18 +19,18 @@ LOG = logging.getLogger(__name__)
 class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
         self,
-        config: dict = None,
+        config: CGConfig,
         pipeline: Pipeline = Pipeline.SARS_COV_2,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config["mutant"]["root"]
+        self.root_dir = config.mutant.root
 
     @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
-                binary=self.config["mutant"]["binary_path"],
-                environment=self.config["mutant"]["conda_env"],
+                binary=self.config.mutant.binary_path,
+                environment=self.config.mutant.conda_env,
             )
         return self._process
 
@@ -66,7 +67,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
         for sample_obj in samples:
-            if not self.check_sample_read_count_above_threshold(sample_obj=sample_obj):
+            if not sample_obj.sequencing_qc:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
             self.link_fastq_files_for_sample(
@@ -79,7 +80,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             case_ID=sample_obj.links[0].family.internal_id,
             Customer_ID_sample=sample_obj.name,
             customer_id=sample_obj.customer.internal_id,
-            sequencing_qc_pass=self.check_sample_read_count_above_threshold(sample_obj=sample_obj),
+            sequencing_qc_pass=sample_obj.sequencing_qc,
             CG_ID_project=sample_obj.links[0].family.name,
             Customer_ID_project=sample_obj.ticket_number,
             application_tag=sample_obj.application_version.application.tag,

@@ -1,16 +1,23 @@
 """Fixtures for cli clean tests"""
 
+import datetime
 from pathlib import Path
 
 import pytest
-
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture()
-def clean_context(context_config, helpers, timestamp_yesterday, timestamp_today):
-    analysis_api = BalsamicAnalysisAPI(context_config)
+def clean_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    timestamp_yesterday: datetime.datetime,
+    timestamp_today: datetime.datetime,
+) -> CGConfig:
+    analysis_api = BalsamicAnalysisAPI(cg_context)
     store = analysis_api.status_db
 
     # Create textbook case for cleaning
@@ -61,5 +68,5 @@ def clean_context(context_config, helpers, timestamp_yesterday, timestamp_today)
         cleaned_at=None,
     )
     Path(analysis_api.get_case_path("balsamic_case_not_clean")).mkdir(exist_ok=True, parents=True)
-    context_config["analysis_api"] = analysis_api
-    return context_config
+    cg_context.meta_apis["analysis_api"] = analysis_api
+    return cg_context

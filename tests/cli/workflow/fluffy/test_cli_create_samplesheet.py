@@ -1,16 +1,18 @@
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
 def test_create_samplesheet_dry(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_existing,
-    fluffy_context,
+    fluffy_context: CGConfig,
     caplog,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # WHEN running command to create samplesheet with dry-run flag
@@ -29,9 +31,9 @@ def test_create_samplesheet_dry(
 
 
 def test_create_samplesheet_dry_no_case(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_non_existing,
-    fluffy_context,
+    fluffy_context: CGConfig,
     caplog,
 ):
     caplog.set_level("ERROR")
@@ -50,10 +52,15 @@ def test_create_samplesheet_dry_no_case(
 
 
 def test_create_samplesheet_success(
-    cli_runner, fluffy_case_id_existing, fluffy_context, samplesheet_fixture_path, caplog, mocker
+    cli_runner: CliRunner,
+    fluffy_case_id_existing,
+    fluffy_context: CGConfig,
+    samplesheet_fixture_path,
+    caplog,
+    mocker,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
 
     # GIVEN an existing samplesheet in Housekeeper

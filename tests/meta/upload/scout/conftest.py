@@ -302,7 +302,7 @@ def fixture_upload_scout_api(
     )
 
 
-@pytest.yield_fixture(name="upload_mip_analysis_scout_api")
+@pytest.fixture(name="upload_mip_analysis_scout_api")
 def fixture_upload_mip_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
@@ -324,7 +324,7 @@ def fixture_upload_mip_analysis_scout_api(
     yield _api
 
 
-@pytest.yield_fixture(name="upload_balsamic_analysis_scout_api")
+@pytest.fixture(name="upload_balsamic_analysis_scout_api")
 def fixture_upload_balsamic_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,

@@ -3,18 +3,20 @@ from pathlib import Path
 from cg.cli.workflow.commands import link
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
 def test_cli_link_no_case(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_non_existing,
     fluffy_sample_lims_id,
-    fluffy_context,
+    fluffy_context: CGConfig,
     caplog,
 ):
 
     caplog.set_level("ERROR")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does not exist in database
 
@@ -36,17 +38,23 @@ def test_cli_link_no_case(
 
 
 def test_cli_link(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
-    fluffy_context,
+    fluffy_context: CGConfig,
     fastq_file_fixture_path,
     caplog,
 ):
 
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
-
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
+    # GIVEN that a fastq path does not exist
+    fastq_path: Path = Path(
+        fluffy_analysis_api.get_fastq_path(
+            case_id=fluffy_case_id_existing, sample_id=fluffy_sample_lims_id
+        )
+    )
+    assert not fastq_path.exists()
     # GIVEN a case_id that does exist in database
 
     # WHEN running command
@@ -59,23 +67,19 @@ def test_cli_link(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN file directories were created
-    assert Path(
-        fluffy_analysis_api.get_fastq_path(
-            case_id=fluffy_case_id_existing, sample_id=fluffy_sample_lims_id
-        )
-    ).exists()
+    assert fastq_path.exists()
 
 
 def test_cli_link_dir_exists(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
-    fluffy_context,
+    fluffy_context: CGConfig,
     fastq_file_fixture_path,
     caplog,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
