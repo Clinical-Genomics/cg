@@ -363,10 +363,18 @@ class AnalysisAPI(MetaAPI):
                         case_id,
                     )
             else:
-                LOG.warning(
-                    "Decompression can not be started for %s",
-                    case_id,
-                )
+                is_decompression_running = self.prepare_fastq_api.is_spring_decompression_running(case_id)
+                if is_decompression_running:
+                    LOG.info(
+                        "Decompression is running for %s, analysis will be started when decompression is done",
+                        case_id,
+                    )
+                    self.set_statusdb_action(case_id=case_id, action="analyze")
+                else:
+                    LOG.warning(
+                        "Decompression can not be started for %s",
+                        case_id,
+                    )
             raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
