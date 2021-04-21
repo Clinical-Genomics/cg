@@ -10,8 +10,27 @@ Try to use the following format:
 
 ## [x.x.x]
 ### Added
+- gisaid uppload support via cli
+- gisaid API
+
 ### Changed
 ### Fixed
+
+## [20.22.0]
+### Added
+- Add command `cg get analysis` to view analysis information
+
+## [20.21.1]
+### Fixed
+- Fix subprocess wildcard issue in deliver rsync
+
+## [20.21.0]
+### Added
+- Added cg deliver rsync <ticket_id>
+
+## [20.20.1]
+### Fixed
+- bug in cg clean scout-finished-cases
 
 ## [20.20.0]
 
