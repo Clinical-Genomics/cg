@@ -131,6 +131,18 @@ class MandatoryFilesMissing(CgError):
     """
 
 
+class HousekeeperVersionMissingError(CgError):
+    """
+    Exception raised when family version is missing in Housekeeper.
+    """
+
+
+class FastaSequenceMissingError(CgError):
+    """
+    Exception raised when expected sequence in fasta file is missing.
+    """
+
+
 class StoreError(CgError):
     """
     Exception related to storing an analysis
@@ -159,3 +171,11 @@ class TrailblazerAPIHTTPError(CgError):
 
 class TrailblazerMissingAnalysisError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
+
+
+class MultipleFamilyLinksError(CgError):
+    """Raised when only one family was expected but more than one was found"""
+
+
+class FamilyLinkMissingError(CgError):
+    """Raised when faimly link missing for a sample"""

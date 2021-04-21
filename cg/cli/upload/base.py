@@ -17,6 +17,7 @@ from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
+from .gisaid import gisaid
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
@@ -165,3 +166,4 @@ upload.add_command(delivery_report)
 upload.add_command(delivery_reports)
 upload.add_command(delivery_report_to_scout)
 upload.add_command(vogue)
+upload.add_command(gisaid)
