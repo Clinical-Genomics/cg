@@ -204,16 +204,14 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     "-a",
     callback=validate_date,
     default=None,
-    help="Only upload cases with an analysis that was completed after this date. Default is one "
-    "week ago",
+    help="Only upload cases with an analysis that was completed after this date",
 )
 @click.option(
     "--completed-before",
     "-b",
     callback=validate_date,
     default=None,
-    help="Only upload cases with an analysis that was completed before after this date. By "
-    "default, this date is not used.",
+    help="Only upload cases with an analysis that was completed before this date",
 )
 @click.pass_context
 def bioinfo_all(
