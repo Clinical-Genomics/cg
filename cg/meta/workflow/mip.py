@@ -234,6 +234,21 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
+    def get_cases_to_analyze(self) -> List[models.Family]:
+        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.threshold_reads
+        )
+        cases_to_analyze = []
+        for case_obj in cases_query:
+            if not case_obj.latest_analyzed:
+                cases_to_analyze.append(case_obj)
+            elif (
+                not self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+                == "completed"
+            ):
+                cases_to_analyze.append(case_obj)
+        return cases_to_analyze
+
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:
         """Add the value of the non boolean options to the parameters"""
