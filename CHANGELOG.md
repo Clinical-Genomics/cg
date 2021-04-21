@@ -10,11 +10,17 @@ Try to use the following format:
 
 ## [x.x.x]
 ### Added
-- gisaid uppload support via cli
-- gisaid API
-
 ### Changed
 ### Fixed
+
+## [20.23.1]
+### Added
+- Added more DNA and RNA positive control cases to VALIDATION_CASES
+
+## [20.23.0]
+### Added
+- gisaid uppload support via cli
+- gisaid API
 
 ## [20.22.0]
 ### Added
