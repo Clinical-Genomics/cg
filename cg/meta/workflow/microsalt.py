@@ -60,7 +60,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         case_obj: models.Family = self.status_db.family(case_id)
-        project_id: str = self.get_project(case_obj.links[0].sample.internal_id)
+        sample_obj: model.Sample = case_obj.links[0].sample
+        project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
             self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
         )
