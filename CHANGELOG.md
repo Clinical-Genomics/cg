@@ -17,6 +17,10 @@ Try to use the following format:
 ### Changed
 - Changes that customer contact persons are referred to as emails instead of users. This removes the need to add each contact as a user in the system and it becomes easier to manage the user list
 
+## [20.24.0]
+### Added
+- Show customers in user admin view
+
 ## [20.23.0]
 ### Added
 - gisaid uppload support via cli
@@ -58,12 +62,10 @@ Try to use the following format:
 ### Fixed
 - Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
 
-
 ## [20.19.2]
 
 ### Fixed
 - Bug when instantiating analysis api in upload
-
 
 ## [20.19.1]
 
