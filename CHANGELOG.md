@@ -16,6 +16,15 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Show customers in user admin view
+
+## [20.23.0]
+### Added
+- gisaid uppload support via cli
+- gisaid API
+
 ## [20.22.0]
 ### Added
 - Add command `cg get analysis` to view analysis information
@@ -52,12 +61,10 @@ Try to use the following format:
 ### Fixed
 - Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
 
-
 ## [20.19.2]
 
 ### Fixed
 - Bug when instantiating analysis api in upload
-
 
 ## [20.19.1]
 
