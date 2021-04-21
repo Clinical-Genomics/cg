@@ -10,13 +10,14 @@ Try to use the following format:
 
 ## [x.x.x]
 ### Added
-- gisaid uppload support via cli
-- gisaid API
-
 ### Changed
 ### Fixed
 
 ## [NG.NG.NG]
+### Changed
+- Changes that customer contact persons are referred to as emails instead of users. This removes the need to add each contact as a user in the system and it becomes easier to manage the user list
+
+## [20.24.0]
 ### Added
 - Show customers in user admin view
 
