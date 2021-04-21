@@ -272,6 +272,8 @@ class DeliverAPI:
         Note that case name and sample name needs to be the identifiers sent from customer
         """
         delivery_path = self.project_base_path / self.customer_id / "inbox" / self.ticket_id
+        if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
+            return delivery_path
         if case_name:
             delivery_path = delivery_path / case_name
         if sample_name:
