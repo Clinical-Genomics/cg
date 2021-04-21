@@ -251,8 +251,9 @@ def bioinfo_all(
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
-            update_analysis_uploaded_to_vogue_date(case)
-            status_db.commit()
+            if not dry:
+                update_analysis_uploaded_to_vogue_date(case)
+                status_db.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
