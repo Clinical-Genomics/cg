@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [20.26.1]
+### Fixed
+- Workflow linking also links undetermined files when
+
 ## [20.26.0]
 ### Changed
 - Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
