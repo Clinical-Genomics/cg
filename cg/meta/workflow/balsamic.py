@@ -65,8 +65,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if not case_obj.latest_analyzed:
                 cases_to_analyze.append(case_obj)
             elif (
-                not self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "completed"
+                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+                == "failed"
             ):
                 cases_to_analyze.append(case_obj)
         return cases_to_analyze

@@ -247,8 +247,6 @@ class MipAnalysisAPI(AnalysisAPI):
                 == "failed"
             ):
                 cases_to_analyze.append(case_obj)
-                print(case_obj.internal_id)
-                print(self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id))
         return cases_to_analyze
 
     @staticmethod
