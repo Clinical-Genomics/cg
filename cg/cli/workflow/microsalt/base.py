@@ -90,7 +90,9 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
+    sample_objs: List[models.Sample] = analysis_api.get_samples(
+        case_id=case_id, sample_id=sample_id
+    )
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
