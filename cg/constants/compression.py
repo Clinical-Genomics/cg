@@ -30,6 +30,7 @@ PROBLEMATIC_CASES = [
 VALIDATION_CASES = [
     "bigdrum",
     "bosssponge",
+    "brightcaiman",  # DNA rare disease positive control
     "busycolt",
     "casualgannet",  # DNA rare disease positive control
     "civilkoala",  # RNA rare disease positive control
@@ -48,30 +49,38 @@ VALIDATION_CASES = [
     "helpedfilly",  # DNA rare disease positive control
     "hotskink",  # DNA rare disease positive control
     "hotviper",
+    "inferret",  # DNA rare disease positive control
     "intentcorgi",  # DNA rare disease positive control
     "intentmayfly",  # DNA rare disease positive control
+    "justhusky",  # DNA rare disease positive control
     "keencalf",
     "keenviper",
+    "kindcaiman",  # DNA rare disease positive control
     "lightprawn",  # DNA rare disease positive control
     "livingox",  # DNA rare disease positive control
     "luckyhog",
     "meetpossum",
     "newaphid",  # RNA rare disease positive control
+    "nextjackal",  # DNA rare disease positive control
     "mintbaboon",
     "mintyeti",
+    "modernmule",  # DNA rare disease positive control
     "moralcattle",  # RNA rare disease positive control
     "moralgoat",
     "onemite",  # DNA rare disease positive control
     "proeagle",
     "propercoral",
+    "proudcougar",  # DNA rare disease positive control
     "pumpedcat",
     "rightmacaw",  # DNA rare disease positive control
     "safeguinea",  # DNA rare disease positive control
     "sharpparrot",  # RNA rare disease positive control
     "sharppigeon",  # DNA rare disease positive control
+    "sharpwhale",  # DNA rare disease positive control
     "smoothboa",  # RNA rare disease positive control
     "strongbison",  # DNA rare disease positive control
     "strongman",
+    "tenderoriole",  # DNA rare disease positive control
     "topsrhino",  # DNA rare disease positive control
     "unitedbeagle",
     "usablemarten",  # DNA rare disease positive control
