@@ -15,7 +15,6 @@ from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-from cg.store.api.update import update_analysis_uploaded_to_vogue_date
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
@@ -225,9 +224,9 @@ def bioinfo_all(
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
 
-    cases: Query = status_db.cases_ready_for_vogue_upload(completed_after, completed_before)
-    for case in cases:
-        case_name: str = case.internal_id
+    analyses: Query = status_db.analyses_ready_for_vogue_upload(completed_after, completed_before)
+    for analysis in analyses:
+        case_name: str = analysis.family.internal_id
         version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
@@ -252,7 +251,7 @@ def bioinfo_all(
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
             if not dry:
-                update_analysis_uploaded_to_vogue_date(case)
+                UploadVogueAPI.update_analysis_uploaded_to_vogue_date(analysis=analysis)
                 status_db.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
