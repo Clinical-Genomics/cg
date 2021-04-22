@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, Optional
 
 import sqlalchemy
 from cg.apps.cgstats.crud import find

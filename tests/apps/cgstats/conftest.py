@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from cg.apps.cgstats.stats import StatsAPI
+from cg.models.demultiplex.demux_results import DemuxResults
 from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
 from tests.models.demultiplexing.conftest import (
     fixture_demultiplexed_flowcell,
@@ -21,3 +22,8 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
     _store.create_all()
     yield _store
     _store.drop_all()
+
+
+@pytest.fixture(name="demultiplexing_stats_path")
+def fixture_demultiplexing_stats_path(demux_results: DemuxResults) -> Path:
+    return demux_results.demux_stats_path
