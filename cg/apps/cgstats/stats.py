@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterator, List, Optional
 
 import alchy
 import sqlalchemy as sqa

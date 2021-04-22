@@ -109,18 +109,15 @@ def get_demux_samples(
         ]
         lane_raw_cluster: int = raw_clusters[lane]
         sample_id: str = sample.sample_id
-        try:
-            demux_samples[lane][sample_id] = create_demux_sample(
-                sample_id=sample_id,
-                flowcell=flowcell_id,
-                lane=lane,
-                barcode_stats=barcode_stats,
-                conversion_stats=conversion_stats,
-                nr_raw_clusters=lane_raw_cluster,
-            )
-        except ZeroDivisionError as err:
-            print(err)
-            print(sample_id, barcode, lane)
+        demux_samples[lane][sample_id] = create_demux_sample(
+            sample_id=sample_id,
+            flowcell=flowcell_id,
+            lane=lane,
+            barcode_stats=barcode_stats,
+            conversion_stats=conversion_stats,
+            nr_raw_clusters=lane_raw_cluster,
+        )
+
     return demux_samples
 
 

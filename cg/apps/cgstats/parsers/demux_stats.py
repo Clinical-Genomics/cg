@@ -1,7 +1,6 @@
 """Parse statistics from the demultiplexing stats file"""
 import logging
 from pathlib import Path
-from pprint import pprint as pp
 from typing import Dict, Optional, Set
 from xml.etree.ElementTree import Element, iterparse
 
@@ -126,10 +125,3 @@ class DemuxStats:
         return (
             f"DemuxStats(flowcell_id={self.flowcell_id},projects={self.projects},lanes={self.lanes}"
         )
-
-
-if __name__ == "__main__":
-    xml_file = Path("/Users/mans.magnusson/PycharmProjects/cg/local/DemultiplexingStats.xml")
-    parser = DemuxStats(stats_file=xml_file)
-    print(parser)
-    pp(parser.lanes_to_barcode)

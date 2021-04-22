@@ -171,7 +171,7 @@ def create_samples(
             manager=manager, sample_id=sample_id, demux_id=demux_id, lane=sample.lane
         )
         if not unaligned_id:
-            demux_sample: DemuxSample = demux_samples[lane][barcode]
+            demux_sample: DemuxSample = demux_samples[lane][sample.sample_id]
             create_unaligned(
                 manager=manager, demux_sample=demux_sample, sample_id=sample_id, demux_id=demux_id
             )

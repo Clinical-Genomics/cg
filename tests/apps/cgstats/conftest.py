@@ -27,3 +27,8 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
 @pytest.fixture(name="demultiplexing_stats_path")
 def fixture_demultiplexing_stats_path(demux_results: DemuxResults) -> Path:
     return demux_results.demux_stats_path
+
+
+@pytest.fixture(name="conversion_stats_path")
+def fixture_conversion_stats_path(demux_results: DemuxResults) -> Path:
+    return demux_results.conversion_stats_path
