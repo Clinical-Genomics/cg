@@ -2,11 +2,12 @@ import datetime
 import logging
 import socket
 from pathlib import Path
-from typing import Iterable, Literal
+from typing import Iterable
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from pydantic import BaseModel
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
