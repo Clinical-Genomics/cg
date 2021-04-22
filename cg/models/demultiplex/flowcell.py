@@ -1,11 +1,12 @@
 import logging
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Optional
 
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
 from pydantic import ValidationError
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
