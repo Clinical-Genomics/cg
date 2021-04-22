@@ -35,7 +35,7 @@ from typing_extensions import Literal
 LOG = logging.getLogger(__name__)
 
 
-class ConversionResults(BaseModel):
+class SampleConversionResults(BaseModel):
     """Class to collect the demultiplexing conversion results for a sample on a lane"""
 
     raw_cluster_count: int = 0
@@ -52,10 +52,11 @@ class ConversionResults(BaseModel):
 
 
 class ConversionStats:
-    def __init__(self):
+    def __init__(self, conversion_stats: Path):
+        self.conversion_stats: Path = conversion_stats
         self._current_sample = ""
         self._current_barcode = ""
-        self._results: ConversionResults = ConversionResults()
+        self._results: SampleConversionResults = SampleConversionResults()
         self._skip_entry: bool = False
         self._current_lane: int = 0
         # Keep track where we are in the xml file
@@ -68,6 +69,9 @@ class ConversionStats:
         self.lanes: Set[int] = set()
         self.lanes_to_barcode = {}
         self.barcode_to_lanes = {}
+        # This is just a summary of all raw clusters per lane
+        self.raw_clusters_per_lane: Dict[int, int] = {}
+        self.parse_file()
 
     @staticmethod
     def get_current_tag(node: Element) -> str:
@@ -77,10 +81,10 @@ class ConversionStats:
             current_tag = "_".join(["Read", read_number])
         return current_tag
 
-    def parse_file(self, conversion_stats: Path):
+    def parse_file(self):
         event: str
         node: Element
-        for (event, node) in iterparse(str(conversion_stats), ["start", "end"]):
+        for (event, node) in iterparse(str(self.conversion_stats), ["start", "end"]):
             # Only search nodes when correct
             # print("Path", self.current_path, self._current_barcode)
             current_tag: str = self.get_current_tag(node=node)
@@ -95,23 +99,40 @@ class ConversionStats:
             # Release element tree from memory
             node.clear()
 
-    def create_entry(self, node: Element) -> None:
+    @staticmethod
+    def update_quality_score(entry: SampleConversionResults) -> None:
+        """Calculate the quality score for the lane results"""
+        if not entry.pass_filter_yield:
+            LOG.debug("Could not find pass filter yield")
+            return
+        quality_score: float = entry.pass_filter_quality_score_sum / entry.pass_filter_yield
+        LOG.debug("Set pass filter quality score to %s", quality_score)
+        entry.pass_filter_quality_score = quality_score
 
-        entry: ConversionResults = copy.deepcopy(self._results)
-        if entry.pass_filter_yield:
-            quality_score: float = entry.pass_filter_quality_score_sum / entry.pass_filter_yield
-            entry.pass_filter_quality_score = quality_score
+    @staticmethod
+    def update_summaries(entry: SampleConversionResults) -> None:
         entry.pass_filter_q30 = entry.pass_filter_read1_q30 + entry.pass_filter_read2_q30
         entry.pass_filter_yield = entry.pass_filter_read1_yield + entry.pass_filter_read2_yield
+
+    def update_lane_clusters(self, entry: SampleConversionResults) -> None:
+        if self._current_lane not in self.raw_clusters_per_lane:
+            self.raw_clusters_per_lane[self._current_lane] = 0
+        self.raw_clusters_per_lane[self._current_lane] += entry.raw_cluster_count
+
+    def create_entry(self) -> None:
+        entry: SampleConversionResults = copy.deepcopy(self._results)
+        self.update_summaries(entry)
+        self.update_quality_score(entry)
+        self.update_lane_clusters(entry)
         if self._current_lane not in self.lanes_to_barcode:
             self.lanes_to_barcode[self._current_lane] = {}
         self.lanes_to_barcode[self._current_lane][self._current_barcode] = entry
         if self._current_barcode not in self.barcode_to_lanes:
             self.barcode_to_lanes[self._current_barcode] = {}
         self.barcode_to_lanes[self._current_barcode][self._current_lane] = entry
-        message = f"Adding entry for barcode {self._current_barcode}"
-        # print(message)
-        self._results = ConversionResults()
+        LOG.debug("Adding entry %s for barcode %s", entry, self._current_barcode)
+        LOG.debug("Reset conversion results")
+        self._results = SampleConversionResults()
 
     def evaluate_start_event(self, node: Element, current_tag: str) -> None:
         # print("Start!", current_tag, node, node.attrib, node.text)
@@ -151,7 +172,7 @@ class ConversionStats:
         if "Tile" in self.current_path:
             self.process_tile_info(node=node, current_tag=current_tag)
         if node.tag == "Lane":
-            self.create_entry(node)
+            self.create_entry()
 
     def update_cluster_count(self, cluster_count: int) -> None:
         if "Raw" in self.current_path:
@@ -229,3 +250,4 @@ if __name__ == "__main__":
     parser.parse_file(conversion_stats=xml_file)
     print(f"Time to parse xml {datetime.datetime.now() - time_start}")
     print(parser)
+    print(parser.raw_clusters_per_lane)

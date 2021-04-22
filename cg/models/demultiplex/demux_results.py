@@ -1,5 +1,5 @@
-import logging
 import datetime
+import logging
 import socket
 from pathlib import Path
 from typing import Iterable, Literal
@@ -47,6 +47,10 @@ class DemuxResults:
     @property
     def conversion_stats_path(self) -> Path:
         return self.results_dir / "Stats" / "ConversionStats.xml"
+
+    @property
+    def demux_stats_path(self) -> Path:
+        return self.results_dir / "Stats" / "DemultiplexingStats.xml"
 
     @property
     def log_path(self) -> Path:

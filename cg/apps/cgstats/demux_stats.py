@@ -10,7 +10,7 @@ from pydantic import BaseModel
 LOG = logging.getLogger(__name__)
 
 
-class LaneResults(BaseModel):
+class SampleBarcodeStats(BaseModel):
     barcode_count: int
     perfect_barcode_count: int
     one_mismatch_barcode_count: Optional[int]
@@ -35,9 +35,10 @@ class DemuxStats:
         self.lanes: Set[int] = set()
         self.lanes_to_barcode = {}
         self.barcode_to_lanes = {}
+        self.parse_file()
 
     def create_entry(self):
-        entry: LaneResults = LaneResults(
+        entry: SampleBarcodeStats = SampleBarcodeStats(
             barcode_count=self._current_barcode_count,
             perfect_barcode_count=self._current_perfect_barcode_count,
             one_mismatch_barcode_count=self._current_mismatch_barcode_count,
@@ -51,49 +52,45 @@ class DemuxStats:
         self.barcode_to_lanes[self._current_barcode][self._current_lane] = entry
 
     def parse_file(self):
-        line_nr: int = 0
         for (event, node) in iterparse(str(self.stats_file), ["start", "end"]):
-            line_nr += 1
-            if node.tag == "Lane" and event == "end":
-                if self._skip_entry:
-                    continue
-                self.create_entry()
+            if event == "start":
+                self.evaluate_start_event(node)
                 continue
-            self.evaluate_node(node, event)
+            if not self._skip_entry:
+                self.evaluate_end_event(node)
+            node.clear()
 
-    def evaluate_node(self, node: Element, event: str):
-        # Only search nodes when correct
-        if node.tag == "Flowcell" and event == "start":
+    def evaluate_start_event(self, node: Element) -> None:
+        if node.tag == "Flowcell":
             self.set_flowcell_id(node)
-        if node.tag == "Project" and event == "start":
+        elif node.tag == "Project":
             self.set_project(node)
-        if node.tag == "Sample" and event == "start":
+        elif node.tag == "Sample":
             if node.attrib["name"].lower() in ["all", "undetermined"]:
                 self._skip_entry = True
                 LOG.debug("Skip sample %s" % node.attrib["name"])
             self._skip_entry = False
             self.set_current_sample(node)
-        if self._skip_entry:
-            return
-        if node.tag == "Barcode" and event == "start":
+        elif node.tag == "Barcode":
             # Skip the barcode="All"
             if node.attrib["name"].lower() == "all":
                 self._skip_entry = True
                 return
             self._skip_entry = False
             self.set_current_barcode(node)
-        if self._skip_entry:
-            return
-
-        elif node.tag == "Lane" and event == "start":
+        elif node.tag == "Lane":
             self.set_current_lane(node)
+
+    def evaluate_end_event(self, node: Element) -> None:
         # These needs to operate on end tags to ensure value exists
-        elif node.tag == "BarcodeCount" and event == "end":
+        if node.tag == "BarcodeCount":
             self._current_barcode_count = int(node.text)
-        elif node.tag == "PerfectBarcodeCount" and event == "end":
+        elif node.tag == "PerfectBarcodeCount":
             self._current_perfect_barcode_count = int(node.text.strip())
-        elif node.tag == "OneMismatchBarcodeCount" and event == "end":
+        elif node.tag == "OneMismatchBarcodeCount":
             self._current_mismatch_barcode_count = int(node.text)
+        elif node.tag == "Lane":
+            self.create_entry()
 
     def set_current_lane(self, node: Element) -> None:
         lane: int = int(node.attrib["number"].strip())
@@ -134,33 +131,5 @@ class DemuxStats:
 if __name__ == "__main__":
     xml_file = Path("/Users/mans.magnusson/PycharmProjects/cg/local/DemultiplexingStats.xml")
     parser = DemuxStats(stats_file=xml_file)
-    parser.parse_file()
     print(parser)
-    pp(parser.barcode_to_lanes)
-    # barcode_count: dict = get_barcode_count(
-    #    xml_path=xml_file,
-    #    project_name="150392",
-    #    barcode_name="CTATAGCGAG+AGTCGACTAG",
-    #    lane_number=1,
-    # )
-    # from pprint import pprint as pp
-    #
-    # pp(barcode_count)
-    # barcode_name = "AACACAGCCG+AGACCTTGGT"
-    # lane_number = 1
-    # xml_file = Path("/Users/mans.magnusson/PycharmProjects/cg/local/ConversionStats.xml")
-    # get_cluster_values(
-    #     xml_path=xml_file,
-    #     project_name="150392",
-    #     barcode_name=barcode_name,
-    #     lane_number=lane_number,
-    # )
-    # print(node.tag, node.attrib)
-    # nr_tiles: int = 0
-    # for nr_tiles, child in enumerate(
-    #     node.iterfind(
-    #         f"./Sample/Barcode[@name='{barcode_name}']/Lane[@number='{lane_number}']/Tile/Raw/ClusterCount"
-    #     )
-    # ):
-    #     print(child.text)
-    # print(nr_tiles)
+    pp(parser.lanes_to_barcode)

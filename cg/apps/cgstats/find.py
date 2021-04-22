@@ -56,3 +56,19 @@ def get_project_id(manager: StatsAPI, project_name: str) -> Optional[int]:
     if project_id:
         return project_id
     return None
+
+
+def get_sample_id(manager: StatsAPI, sample_id: str, barcode: str) -> Optional[int]:
+    sample_id: Optional[int] = manager.Sample.exists(sample_name=sample_id, barcode=barcode)
+    if sample_id:
+        return sample_id
+    return None
+
+
+def get_unaligned_id(manager: StatsAPI, sample_id: int, demux_id: int, lane: int) -> Optional[int]:
+    unaligned_id: Optional[int] = manager.Unaligned.exists(
+        sample_id=sample_id, demux_id=demux_id, lane=lane
+    )
+    if unaligned_id:
+        return unaligned_id
+    return None
