@@ -198,7 +198,7 @@ def start(
     LOG.info(f"Starting analysis for {case_id}")
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-        context.invoke(link, case_id=case_id)
+        context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
         context.invoke(
             run,
