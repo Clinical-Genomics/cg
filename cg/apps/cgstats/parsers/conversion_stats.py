@@ -22,15 +22,12 @@ There are many tiles for each lane. We are not interested about the tile level b
 lane level, just like we do in the demux stats.
 """
 import copy
-import datetime
 import logging
 from pathlib import Path
-from pprint import pprint as pp
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Set
 from xml.etree.ElementTree import Element, iterparse
 
 from pydantic import BaseModel
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -241,13 +238,3 @@ class ConversionStats:
 
     def __repr__(self):
         return f"ConversionStats(flowcell_id={self.flowcell_id},projects={self.projects},lanes={self.lanes}"
-
-
-if __name__ == "__main__":
-    xml_file = Path("/Users/mans.magnusson/PycharmProjects/cg/local/ConversionStats.xml")
-    time_start = datetime.datetime.now()
-    parser = ConversionStats()
-    parser.parse_file(conversion_stats=xml_file)
-    print(f"Time to parse xml {datetime.datetime.now() - time_start}")
-    print(parser)
-    print(parser.raw_clusters_per_lane)
