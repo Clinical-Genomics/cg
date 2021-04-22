@@ -1,7 +1,7 @@
 """add uploaded to vogue column to analysis
 
 Revision ID: 49ded71bd1a1
-Revises: 089edc289291
+Revises: 1dadcefd3bbf
 Create Date: 2021-03-10 13:32:40.247574
 
 """
