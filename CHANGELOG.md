@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.26.2]
+### Added
+- Added more DNA and RNA positive control cases to VALIDATION_CASES
 
 ## [20.26.1]
 ### Fixed
@@ -22,7 +25,6 @@ Try to use the following format:
 ### Changed
 - Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
 - Microsalt config-case wont include samples that dont pass sequencing qc
-
 
 ## [20.25.0]
 ### Changed
@@ -37,10 +39,6 @@ Try to use the following format:
 - gisaid uppload support via cli
 - gisaid API
 
-### Changed
-### Fixed
-
-## [20.22.0]
 ### Added
 - Add command `cg get analysis` to view analysis information
 
