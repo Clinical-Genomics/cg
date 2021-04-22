@@ -18,9 +18,9 @@ class MutaccAutoAPI:
 
     def __init__(self, config: dict):
 
-        self.mutacc_auto_config = config["mutacc-auto"]["config_path"]
-        self.mutacc_auto_binary = config["mutacc-auto"]["binary_path"]
-        self.mutacc_padding = config["mutacc-auto"]["padding"]
+        self.mutacc_auto_config = config["mutacc_auto"]["config_path"]
+        self.mutacc_auto_binary = config["mutacc_auto"]["binary_path"]
+        self.mutacc_padding = config["mutacc_auto"]["padding"]
         self.base_call = [self.mutacc_auto_binary, "--config-file", self.mutacc_auto_config]
 
     def extract_reads(self, case: dict, variants: dict):

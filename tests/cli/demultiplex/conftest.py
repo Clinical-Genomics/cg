@@ -5,6 +5,7 @@ from typing import Dict
 import pytest
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.lims import LimsAPI
+from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from click.testing import CliRunner
@@ -55,8 +56,9 @@ def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq
 
 
 @pytest.fixture(name="sample_sheet_context")
-def fixture_sample_sheet_context(lims_api: LimsAPI) -> dict:
-    return {"lims_api": lims_api}
+def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGConfig:
+    cg_context.lims_api_ = lims_api
+    return cg_context
 
 
 @pytest.fixture(name="demultiplex_configs")
@@ -73,11 +75,12 @@ def fixture_demultiplex_configs(project_dir: Path) -> dict:
 
 @pytest.fixture(name="demultiplex_context")
 def fixture_demultiplex_context(
-    demultiplex_configs: dict, sbatch_process: Process
-) -> Dict[str, DemultiplexingAPI]:
+    demultiplex_configs: dict, sbatch_process: Process, cg_context: CGConfig
+) -> CGConfig:
     demux_api = DemultiplexingAPI(config=demultiplex_configs)
     demux_api.slurm_api.process = sbatch_process
-    return {"demultiplex_api": demux_api}
+    cg_context.demultiplex_api_ = demux_api
+    return cg_context
 
 
 @pytest.fixture(name="cli_runner")

@@ -1,13 +1,13 @@
 """This script tests the cli mip store functions"""
 import logging
 
-from click.testing import CliRunner
-
 from cg.cli.workflow.mip.store import analysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
-def test_store_no_config(cli_runner: CliRunner, dna_mip_context: dict, caplog):
+def test_store_no_config(cli_runner: CliRunner, dna_mip_context: CGConfig, caplog):
     """Test the function to check for config files"""
 
     caplog.set_level(logging.INFO)
@@ -20,7 +20,7 @@ def test_store_no_config(cli_runner: CliRunner, dna_mip_context: dict, caplog):
 
 
 def test_store_analysis_exception(
-    cli_runner: CliRunner, dna_mip_context: dict, mip_configs: dict, caplog
+    cli_runner: CliRunner, dna_mip_context: CGConfig, mip_configs: dict, caplog
 ):
     """Test that the analysis function enters the exception clause"""
     with caplog.at_level("ERROR", "INFO"):
@@ -37,7 +37,7 @@ def test_store_analysis_exception(
 def test_store_analysis(
     cli_runner: CliRunner,
     mip_configs: dict,
-    dna_mip_context: dict,
+    dna_mip_context: CGConfig,
     mip_qc_sample_info: dict,
     caplog,
 ):

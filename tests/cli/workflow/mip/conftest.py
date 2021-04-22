@@ -1,13 +1,17 @@
 import copy
 import datetime as dt
 from pathlib import Path
+from typing import List
 
 import pytest
 from ruamel.yaml import YAML
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.models.cg_config import CGConfig
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="mip_case_ids")
@@ -154,28 +158,31 @@ def fixture_mip_configs(
 
 @pytest.fixture(name="rna_mip_context")
 def fixture_rna_mip_context(
-    context_config, analysis_family_single_case, helpers, apptag_rna, case_id, housekeeper_api
-):
-    analysis_api = MipRNAAnalysisAPI(context_config)
-    analysis_api.housekeeper_api = housekeeper_api
+    cg_context: CGConfig,
+    analysis_family_single_case: dict,
+    helpers: StoreHelpers,
+    apptag_rna: str,
+    case_id: str,
+    housekeeper_api: HousekeeperAPI,
+) -> CGConfig:
+    cg_context.housekeeper_api_ = housekeeper_api
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
-    if not analysis_api.status_db.family(case_id):
+    if not cg_context.status_db.family(case_id):
         helpers.ensure_case_from_dict(
-            analysis_api.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
+            cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
         )
-    return {
-        "analysis_api": analysis_api,
-    }
+    cg_context.meta_apis["analysis_api"] = MipRNAAnalysisAPI(cg_context)
+    return cg_context
 
 
 @pytest.fixture(name="dna_mip_context")
-def fixture_dna_mip_context(context_config: dict, helpers, mip_case_ids, housekeeper_api):
-    analysis_api = MipDNAAnalysisAPI(context_config)
-    _store = analysis_api.status_db
-    analysis_api.housekeeper_api = housekeeper_api
+def fixture_dna_mip_context(
+    cg_context: CGConfig, helpers: StoreHelpers, mip_case_ids: dict, housekeeper_api: HousekeeperAPI
+) -> CGConfig:
+    _store = cg_context.status_db
+    cg_context.housekeeper_api_ = housekeeper_api
 
     # Add apptag to db
-
     helpers.ensure_application_version(store=_store, application_tag="WGSA", application_type="wgs")
 
     # Add sample, cases and relationships to db
@@ -197,5 +204,5 @@ def fixture_dna_mip_context(context_config: dict, helpers, mip_case_ids, houseke
                 gender="unknown",
             )
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
-
-    return {"analysis_api": analysis_api}
+    cg_context.meta_apis["analysis_api"] = MipDNAAnalysisAPI(cg_context)
+    return cg_context

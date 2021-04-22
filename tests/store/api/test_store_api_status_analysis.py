@@ -148,7 +148,7 @@ def test_one_of_two_sequenced_samples(base_store: Store, helpers):
     base_store.relate_sample(test_case, test_sample2, "unknown")
 
     # WHEN getting cases to analyse
-    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=True)
 
     # THEN cases should not contain the test case
     assert not cases

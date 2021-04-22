@@ -2,28 +2,28 @@
 
 import logging
 
-from click.testing import CliRunner
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.genotype import genotypes as upload_genotypes_cmd
+from cg.models.cg_config import CGConfig
 from cg.store import Store
+from click.testing import CliRunner
 
 
 def test_upload_genotype(
-    upload_context: dict,
+    upload_context: CGConfig,
     case_id: str,
     cli_runner: CliRunner,
-    caplog,
     analysis_store_trio: Store,
     upload_genotypes_hk_api: HousekeeperAPI,
+    caplog,
 ):
     """Test to upload genotypes via the CLI"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a case that is ready for upload sequence genotypes
-    analysis_api = upload_context["analysis_api"]
-    analysis_api.status_db = analysis_store_trio
-    analysis_api.housekeeper_api = upload_genotypes_hk_api
-    case_obj = upload_context["analysis_api"].status_db.family(case_id)
+    analysis_api = upload_context.meta_apis["analysis_api"]
+    upload_context.status_db_ = analysis_store_trio
+    upload_context.housekeeper_api_ = upload_genotypes_hk_api
+    case_obj = upload_context.status_db.family(case_id)
     assert case_obj
 
     # WHEN uploading the genotypes

@@ -4,6 +4,7 @@ from typing import List
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.cli.demultiplex.sample_sheet import create_sheet
+from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from click import testing
 
@@ -11,7 +12,7 @@ from click import testing
 def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
     demultiplex_fixtures: Path,
-    sample_sheet_context: dict,
+    sample_sheet_context: CGConfig,
     caplog,
     mocker,
 ):
@@ -34,7 +35,7 @@ def test_create_sample_sheet_no_run_parameters(
 def test_create_sample_sheet(
     cli_runner: testing.CliRunner,
     flowcell_working_directory: Path,
-    sample_sheet_context: dict,
+    sample_sheet_context: CGConfig,
     lims_novaseq_samples: List[LimsFlowcellSample],
     mocker,
 ):

@@ -2,12 +2,14 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.cli.workflow.fluffy.base import store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
 def test_cli_store_dry_no_case(
-    cli_runner,
-    fluffy_case_id_non_existing,
-    fluffy_context,
+    cli_runner: CliRunner,
+    fluffy_case_id_non_existing: str,
+    fluffy_context: CGConfig,
     caplog,
 ):
     caplog.set_level("ERROR")
@@ -28,18 +30,18 @@ def test_cli_store_dry_no_case(
 
 
 def test_cli_store(
-    cli_runner,
-    fluffy_case_id_existing,
+    cli_runner: CliRunner,
+    fluffy_case_id_existing: str,
     deliverables_yaml_fixture_path,
     fluffy_hermes_deliverables_response_data,
-    fluffy_context,
+    fluffy_context: CGConfig,
     timestamp_yesterday,
     caplog,
     mocker,
 ):
 
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -73,11 +75,11 @@ def test_cli_store(
 
 
 def test_cli_store_bundle_already_added(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_existing,
     deliverables_yaml_fixture_path,
     fluffy_hermes_deliverables_response_data,
-    fluffy_context,
+    fluffy_context: CGConfig,
     timestamp_yesterday,
     caplog,
     mocker,
@@ -111,17 +113,17 @@ def test_cli_store_bundle_already_added(
 
 
 def test_cli_store_available_case_is_running(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_existing,
     deliverables_yaml_fixture_path,
     fluffy_hermes_deliverables_response_data,
-    fluffy_context,
+    fluffy_context: CGConfig,
     timestamp_yesterday,
     caplog,
     mocker,
 ):
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 
@@ -158,18 +160,18 @@ def test_cli_store_available_case_is_running(
 
 
 def test_cli_store_available_case_not_running(
-    cli_runner,
+    cli_runner: CliRunner,
     fluffy_case_id_existing,
     deliverables_yaml_fixture_path,
     fluffy_hermes_deliverables_response_data,
-    fluffy_context,
+    fluffy_context: CGConfig,
     timestamp_yesterday,
     caplog,
     mocker,
 ):
 
     caplog.set_level("INFO")
-    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context["analysis_api"]
+    fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
     # GIVEN a case_id that does exist in database
 

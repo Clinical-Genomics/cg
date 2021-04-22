@@ -11,8 +11,8 @@ class PdcApi:
 
     @classmethod
     def retrieve_flowcell(
-        cls, flowcell_id: str, sequencer_type: str, root_dir: str, dry: bool = False
-    ) -> str:
+        cls, flowcell_id: str, sequencer_type: str, root_dir: dict, dry: bool = False
+    ) -> None:
         """Fetch a flowcell back from the backup solution."""
         server = {
             "hiseqga": "thalamus",

@@ -18,7 +18,7 @@ def test_spring_decompression_needed_and_started(
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context["analysis_api"]
+    mip_api = dna_mip_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -66,7 +66,7 @@ def test_spring_decompression_needed_and_start_failed(
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context["analysis_api"]
+    mip_api = dna_mip_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -110,7 +110,7 @@ def test_spring_decompression_needed_and_cant_start(
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context["analysis_api"]
+    mip_api = dna_mip_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -148,7 +148,7 @@ def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_co
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context["analysis_api"]
+    mip_api = dna_mip_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis

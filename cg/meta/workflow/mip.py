@@ -2,15 +2,15 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional
 
-from ruamel.yaml import ruamel, safe_load
-
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import models
+from ruamel.yaml import ruamel, safe_load
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -31,7 +31,7 @@ class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
     hooks into the status database that makes managing analyses simpler"""
 
-    def __init__(self, config: dict, pipeline: Pipeline):
+    def __init__(self, config: CGConfig, pipeline: Pipeline):
         super().__init__(pipeline, config)
 
     @property
@@ -233,6 +233,21 @@ class MipAnalysisAPI(AnalysisAPI):
                 )
                 return True
         return False
+
+    def get_cases_to_analyze(self) -> List[models.Family]:
+        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.threshold_reads
+        )
+        cases_to_analyze = []
+        for case_obj in cases_query:
+            if not case_obj.latest_analyzed:
+                cases_to_analyze.append(case_obj)
+            elif (
+                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+                == "failed"
+            ):
+                cases_to_analyze.append(case_obj)
+        return cases_to_analyze
 
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:

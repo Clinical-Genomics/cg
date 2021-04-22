@@ -2,11 +2,13 @@ import logging
 from pathlib import Path
 
 from cg.cli.workflow.balsamic.base import link
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 EXIT_SUCCESS = 0
 
 
-def test_without_options(cli_runner, balsamic_context: dict):
+def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
     """Test command without case_id"""
     # GIVEN NO case_id
     # WHEN dry running without anything specified
@@ -16,12 +18,12 @@ def test_without_options(cli_runner, balsamic_context: dict):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
+def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context["analysis_api"].status_db.family(case_id)
+    assert not balsamic_context.status_db.family(case_id)
     # WHEN running
     result = cli_runner.invoke(link, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates
@@ -30,7 +32,7 @@ def test_with_missing_case(cli_runner, balsamic_context: dict, caplog):
     assert "could not be found in StatusDB!" in caplog.text
 
 
-def test_without_samples(cli_runner, balsamic_context: dict, caplog):
+def test_without_samples(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -44,7 +46,7 @@ def test_without_samples(cli_runner, balsamic_context: dict, caplog):
     assert "no samples" in caplog.text
 
 
-def test_single_panel(balsamic_context: dict, cli_runner, caplog):
+def test_single_panel(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test with case_id that requires SINGLE TGS analysis"""
     caplog.set_level(logging.INFO)
     # GIVEN case_id containing ONE tumor, TGS application

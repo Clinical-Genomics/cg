@@ -3,9 +3,11 @@
 import logging
 
 from cg.cli.upload.vogue import flowcells, reagent_labels, samples
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
-def test_cli_upload_vogue_reagent_labes(upload_context, cli_runner, caplog):
+def test_cli_upload_vogue_reagent_labes(upload_context: CGConfig, cli_runner: CliRunner, caplog):
     """Testing cli for upload vogue reagent_labels with correct argument"""
 
     # GIVEN a vogue api
@@ -20,7 +22,7 @@ def test_cli_upload_vogue_reagent_labes(upload_context, cli_runner, caplog):
     assert result.exit_code == 0
 
 
-def test_cli_upload_vogue_reagent_labes_no_days(upload_context, cli_runner):
+def test_cli_upload_vogue_reagent_labes_no_days(upload_context: CGConfig, cli_runner: CliRunner):
     """"""
 
     # GIVEN a vogue api
@@ -32,7 +34,7 @@ def test_cli_upload_vogue_reagent_labes_no_days(upload_context, cli_runner):
     assert result.exit_code != 0
 
 
-def test_cli_upload_vogue_samples(upload_context, cli_runner, caplog):
+def test_cli_upload_vogue_samples(upload_context: CGConfig, cli_runner: CliRunner, caplog):
     """Testing cli for upload vogue samples with correct argument"""
 
     # GIVEN a vogue api
@@ -47,7 +49,7 @@ def test_cli_upload_vogue_samples(upload_context, cli_runner, caplog):
     assert result.exit_code == 0
 
 
-def test_cli_upload_vogue_samples_no_days(upload_context, cli_runner):
+def test_cli_upload_vogue_samples_no_days(upload_context: CGConfig, cli_runner: CliRunner):
     """Testing cli for upload vogue samples with wrong argument"""
 
     # GIVEN a vogue api
@@ -59,7 +61,7 @@ def test_cli_upload_vogue_samples_no_days(upload_context, cli_runner):
     assert result.exit_code != 0
 
 
-def test_cli_upload_vogue_flowcells(upload_context, cli_runner, caplog):
+def test_cli_upload_vogue_flowcells(upload_context: CGConfig, cli_runner: CliRunner, caplog):
     """Testing cli for upload vogue flowcells with correct argument"""
 
     # GIVEN a vogue api
@@ -74,7 +76,7 @@ def test_cli_upload_vogue_flowcells(upload_context, cli_runner, caplog):
     assert result.exit_code == 0
 
 
-def test_cli_upload_vogue_flowcells_no_days(upload_context, cli_runner):
+def test_cli_upload_vogue_flowcells_no_days(upload_context: CGConfig, cli_runner: CliRunner):
     """Testing cli for upload vogue flowcells with wrong argument"""
 
     # GIVEN a vogue api

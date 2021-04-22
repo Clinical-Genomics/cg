@@ -1,15 +1,16 @@
 import datetime as dt
 import logging
+import os
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
-import os
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store.models import Bundle, Version
 
@@ -21,7 +22,7 @@ class AnalysisAPI(MetaAPI):
     Parent class containing all methods that are either shared or overridden by other workflow APIs.
     """
 
-    def __init__(self, pipeline: Pipeline, config: Optional[dict] = None):
+    def __init__(self, pipeline: Pipeline, config: CGConfig):
         super().__init__(config=config)
         self.pipeline = pipeline
         self._process = None
@@ -62,11 +63,12 @@ class AnalysisAPI(MetaAPI):
         elif not case_obj.links:
             LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
+        LOG.info("Case %s exists in status db", case_id)
 
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
-            raise CgError("Analysis still ongoing for case %s", case_id)
+            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def verify_case_path_exists(self, case_id: str) -> None:
         if not self.get_case_path(case_id=case_id).exists():
@@ -99,17 +101,6 @@ class AnalysisAPI(MetaAPI):
         if case_obj.priority > 1:
             return "high"
         return "normal"
-
-    @staticmethod
-    def check_sample_read_count_above_threshold(sample_obj: models.Sample) -> bool:
-        """Check if read count passes threshold for reads guaranteed specified for its application tag"""
-        return bool(
-            sample_obj.reads
-            and sample_obj.reads
-            >= sample_obj.application_version.application.percent_reads_guaranteed
-            * sample_obj.application_version.application.target_reads
-            / 100
-        )
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory"""
@@ -289,6 +280,7 @@ class AnalysisAPI(MetaAPI):
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 read=fastq_data["read"],
+                undetermined=fastq_data["undetermined"],
                 meta=self.get_additional_naming_metadata(sample_obj),
             )
             destination_path: Path = fastq_dir / fastq_name

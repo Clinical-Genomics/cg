@@ -2,14 +2,14 @@
 
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from cg.exc import BalsamicStartError, CgError
+from cg.exc import BalsamicStartError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
+from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
@@ -25,16 +25,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def __init__(
         self,
-        config: dict = None,
+        config: CGConfig,
         pipeline: Pipeline = Pipeline.BALSAMIC,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config["balsamic"]["root"]
-        self.account = config["balsamic"]["slurm"]["account"]
-        self.email = config["balsamic"]["slurm"]["mail_user"]
-        self.qos = config["balsamic"]["slurm"]["qos"]
-        self.bed_path = config["bed_path"]
-        self.balsamic_cache = config["balsamic"]["balsamic_cache"]
+        self.root_dir = config.balsamic.root
+        self.account = config.balsamic.slurm.account
+        self.balsamic_cache = config.balsamic.balsamic_cache
+        self.email = config.balsamic.slurm.mail_user
+        self.qos = config.balsamic.slurm.qos
+        self.bed_path = config.bed_path
 
     @property
     def threshold_reads(self):
@@ -47,12 +47,27 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(self.config["balsamic"]["binary_path"])
+            self._process = Process(self.config.balsamic.binary_path)
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
+
+    def get_cases_to_analyze(self) -> List[models.Family]:
+        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
+            pipeline=self.pipeline, threshold=self.threshold_reads
+        )
+        cases_to_analyze = []
+        for case_obj in cases_query:
+            if not case_obj.latest_analyzed:
+                cases_to_analyze.append(case_obj)
+            elif (
+                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
+                == "failed"
+            ):
+                cases_to_analyze.append(case_obj)
+        return cases_to_analyze
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.

@@ -257,6 +257,7 @@ class StoreHelpers:
         sample.application_version_id = application_version_id
         sample.customer = customer
         sample.is_external = is_external
+        sample.ordered_at = datetime.now()
 
         if loqusdb_id:
             sample.loqusdb_id = loqusdb_id
@@ -328,6 +329,8 @@ class StoreHelpers:
         for panel_name in panels:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
+        if not case_obj:
+            case_obj: Optional[models.Family] = store.family(internal_id=case_id)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,

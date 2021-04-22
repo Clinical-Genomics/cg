@@ -1,9 +1,15 @@
+from pathlib import Path
+
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
+from cg.models.cg_config import CGConfig
+from click.testing import CliRunner
 
 
-def test_start_available_dry(cli_runner, fluffy_case_id_existing, fluffy_context, caplog):
+def test_start_available_dry(
+    cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
+):
 
     caplog.set_level("INFO")
 
@@ -29,7 +35,12 @@ def test_start_available_dry(cli_runner, fluffy_case_id_existing, fluffy_context
 
 
 def test_start_available(
-    cli_runner, fluffy_case_id_existing, fluffy_context, caplog, mocker, samplesheet_fixture_path
+    cli_runner: CliRunner,
+    fluffy_case_id_existing: str,
+    fluffy_context: CGConfig,
+    caplog,
+    mocker,
+    samplesheet_fixture_path: str,
 ):
     caplog.set_level("INFO")
 

@@ -9,7 +9,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models
 from housekeeper.store import models as hk_models
@@ -29,7 +29,7 @@ class UploadScoutAPI:
         hk_api: HousekeeperAPI,
         scout_api: ScoutAPI,
         lims_api: LimsAPI,
-        analysis_api: MipAnalysisAPI,
+        analysis_api: AnalysisAPI,
         madeline_api: MadelineAPI,
     ):
         self.housekeeper = hk_api
