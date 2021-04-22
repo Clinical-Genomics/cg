@@ -1,8 +1,10 @@
 import logging
 from typing import Optional
 
+import alchy
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
+from sqlalchemy import func
 
 LOG = logging.getLogger(__name__)
 
@@ -72,3 +74,42 @@ def get_unaligned_id(manager: StatsAPI, sample_id: int, demux_id: int, lane: int
     if unaligned_id:
         return unaligned_id
     return None
+
+
+def project_sample_stats(manager: StatsAPI, flowcell: str, project_name: str) -> alchy.Query:
+    query: alchy.Query = manager.Sample.query.join(
+        manager.Sample.unaligned, manager.Unaligned.demux, manager.Demux.flowcell
+    )
+    query = query.join(manager.Sample.project).filter(manager.Project.projectname == project_name)
+
+    query = query.with_entities(
+        manager.Sample.samplename,
+        manager.Flowcell.flowcellname,
+        func.group_concat(manager.Unaligned.lane.op("ORDER BY")(manager.Unaligned.lane)).label(
+            "lanes"
+        ),
+        func.group_concat(
+            manager.Unaligned.readcounts.op("ORDER BY")(manager.Unaligned.lane)
+        ).label("reads"),
+        func.sum(manager.Unaligned.readcounts).label("readsum"),
+        func.group_concat(manager.Unaligned.yield_mb.op("ORDER BY")(manager.Unaligned.lane)).label(
+            "yld"
+        ),
+        func.sum(manager.Unaligned.yield_mb).label("yieldsum"),
+        func.group_concat(
+            func.truncate(manager.Unaligned.q30_bases_pct, 2).op("ORDER BY")(manager.Unaligned.lane)
+        ).label("q30"),
+        func.group_concat(
+            func.truncate(manager.Unaligned.mean_quality_score, 2).op("ORDER BY")(
+                manager.Unaligned.lane
+            )
+        ).label("meanq"),
+    )
+
+    query = query.filter(manager.Flowcell.flowcellname == flowcell)
+    query = query.group_by(manager.Sample.samplename, manager.Flowcell.flowcell_id)
+    query = query.order_by(
+        manager.Unaligned.lane, manager.Sample.samplename, manager.Flowcell.flowcellname
+    )
+
+    return query
