@@ -1,11 +1,9 @@
 """Get samples with information from demultiplexing"""
 from pathlib import Path
-from pprint import pprint as pp
 from typing import Dict
 
-from cg.apps.cgstats.conversion_stats import ConversionStats, SampleConversionResults
-from cg.apps.cgstats.demux_stats import DemuxStats, SampleBarcodeStats
-from cg.models.demultiplex.demux_results import DemuxResults
+from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
+from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 from pydantic import BaseModel
 
@@ -152,6 +150,5 @@ if __name__ == "__main__":
         demux_stats_path=files["demux"],
         sample_sheet=get_sample_sheet_from_file(files["sample_sheet"], sheet_type="S4"),
     )
-    pp(result[1]["ACC7769A10"])
     for lane_nr in result.keys():
         print(f"Nr samples in lane {lane_nr}: {len(result[lane_nr])}")

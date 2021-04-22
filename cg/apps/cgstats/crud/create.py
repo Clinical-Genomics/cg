@@ -2,14 +2,12 @@ import logging
 from typing import Dict, Iterable, List, Optional
 
 import sqlalchemy
-from cg.apps.cgstats import find
+from cg.apps.cgstats.crud import find
+from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples
+from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-
 from cgstats.db import models as stats_models
-
-from .demux_sample import DemuxSample, get_demux_samples
-from .stats import StatsAPI
 
 LOG = logging.getLogger(__name__)
 
