@@ -39,18 +39,6 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
-    def analyses_uploaded_to_vogue(self, after: Optional[dt.datetime] = None) -> Query:
-        """Fetch all analyses that have been uploaded to Vogue after a given date"""
-        records = self.Analysis.query
-        if after:
-            return records.filter(models.Analysis.uploaded_to_vogue_at > after)
-        return records.filter(models.Analysis.uploaded_to_vogue_at.is_(None))
-
-    def analyses_not_uploaded_to_vogue(self) -> Query:
-        """Fetch all (recent) analyses that have been uploaded to Vogue"""
-        records = self.Analysis.query
-        return records.filter(models.Analysis.uploaded_to_vogue_at.is_(None))
-
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
