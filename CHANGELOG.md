@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.27.0]
+### Added
+- Functionality for the cgstats api in CG
+
+
 ## [20.26.2]
 ### Added
 - Added more DNA and RNA positive control cases to VALIDATION_CASES
