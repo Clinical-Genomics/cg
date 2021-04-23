@@ -37,6 +37,5 @@ tabulate
 typing_extensions
 
 # apps
-cgstats>=1.1.2
 genologics
 housekeeper>=2.5

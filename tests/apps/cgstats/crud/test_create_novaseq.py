@@ -7,12 +7,10 @@ def test_create_novaseq_flowcell(stats_api: StatsAPI, demux_results: DemuxResult
     # GIVEN a setup with an existing sample sheet with information
     assert demux_results.flowcell.sample_sheet_path.read_text()
     # GIVEN that the flowcell does not exist in the database
-    assert not find.get_flowcell_id(
-        manager=stats_api, flowcell_name=demux_results.flowcell.flowcell_id
-    )
+    assert not find.get_flowcell_id(flowcell_name=demux_results.flowcell.flowcell_id)
 
     # WHEN creating the novaseq flowcell
     create.create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
 
     # THEN assert that the flowcell was created
-    assert find.get_flowcell_id(manager=stats_api, flowcell_name=demux_results.flowcell.flowcell_id)
+    assert find.get_flowcell_id(flowcell_name=demux_results.flowcell.flowcell_id)

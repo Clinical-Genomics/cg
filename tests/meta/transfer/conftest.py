@@ -1,13 +1,13 @@
 import datetime as dt
 
 import pytest
+from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.flowcell import TransferFlowcell
 from cg.store import Store, models
-from cgstats.db import models as stats_models
 
 
 @pytest.fixture(name="data")

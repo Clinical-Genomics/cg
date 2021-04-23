@@ -7,7 +7,7 @@ from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-from cgstats.db import models as stats_models
+from cg.apps.cgstats.db import models as stats_models
 
 LOG = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ def create_unaligned(
 def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str, int]:
     project_name_to_id: Dict[str, int] = {}
     for project_name in project_names:
-        project_id: Optional[int] = find.get_project_id(manager=manager, project_name=project_name)
+        project_id: Optional[int] = find.get_project_id(project_name=project_name)
         if not project_id:
             project_object: stats_models.Project = create_project(
                 manager=manager, project_name=project_name
@@ -157,9 +157,7 @@ def create_samples(
             else "+".join([sample.index, sample.second_index])
         )
         lane: int = sample.lane
-        sample_id: Optional[int] = find.get_sample_id(
-            manager=manager, sample_id=sample.sample_id, barcode=barcode
-        )
+        sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
         project_id: int = project_name_to_id[sample.project]
         if not sample_id:
             sample_object: stats_models.Sample = create_sample(
@@ -168,7 +166,7 @@ def create_samples(
             sample_id: int = sample_object.sample_id
 
         unaligned_id: Optional[int] = find.get_unaligned_id(
-            manager=manager, sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
         )
         if not unaligned_id:
             demux_sample: DemuxSample = demux_samples[lane][sample.sample_id]
@@ -180,16 +178,14 @@ def create_samples(
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     support_parameters_id: Optional[int] = find.get_support_parameters_id(
-        manager=manager, demux_results=demux_results
+        demux_results=demux_results
     )
     if not support_parameters_id:
         support_parameters: stats_models.Supportparams = create_support_parameters(
             manager=manager, demux_results=demux_results
         )
         support_parameters_id: int = support_parameters.supportparams_id
-    datasource_id: Optional[int] = find.get_datasource_id(
-        manager=manager, demux_results=demux_results
-    )
+    datasource_id: Optional[int] = find.get_datasource_id(demux_results=demux_results)
     if not datasource_id:
         datasource_object: stats_models.Datasource = create_datasource(
             manager=manager,
@@ -198,7 +194,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         )
         datasource_id: int = datasource_object.datasource_id
     flowcell_id: Optional[int] = find.get_flowcell_id(
-        manager=manager, flowcell_name=demux_results.flowcell.flowcell_id
+        flowcell_name=demux_results.flowcell.flowcell_id
     )
     if not flowcell_id:
         flowcell: stats_models.Flowcell = create_flowcell(
@@ -206,7 +202,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         )
         flowcell_id: int = flowcell.flowcell_id
 
-    demux_id: Optional[int] = find.get_demux_id(manager=manager, flowcell_object_id=flowcell_id)
+    demux_id: Optional[int] = find.get_demux_id(flowcell_object_id=flowcell_id)
     if not demux_id:
         demux_object: stats_models.Demux = create_demux(
             manager=manager, flowcell_id=flowcell_id, datasource_id=datasource_id
