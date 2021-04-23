@@ -119,33 +119,3 @@ def get_demux_samples(
         )
 
     return demux_samples
-
-
-if __name__ == "__main__":
-    from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
-
-    small_run = False
-    small_set = {
-        "conversion": Path(
-            "/Users/mans.magnusson/PycharmProjects/cg/local/SmallConversionStats.xml"
-        ),
-        "demux": Path(
-            "/Users/mans.magnusson/PycharmProjects/cg/local/SmallDemultiplexingStats.xml"
-        ),
-        "sample_sheet": Path("/Users/mans.magnusson/PycharmProjects/cg/local/SmallSampleSheet.csv"),
-    }
-    full_set = {
-        "conversion": Path("/Users/mans.magnusson/PycharmProjects/cg/local/ConversionStats.xml"),
-        "demux": Path("/Users/mans.magnusson/PycharmProjects/cg/local/DemultiplexingStats.xml"),
-        "sample_sheet": Path("/Users/mans.magnusson/PycharmProjects/cg/local/SampleSheet.csv"),
-    }
-    files = small_set
-    if not small_run:
-        files = full_set
-    result = get_demux_samples(
-        conversion_stats_path=files["conversion"],
-        demux_stats_path=files["demux"],
-        sample_sheet=get_sample_sheet_from_file(files["sample_sheet"], sheet_type="S4"),
-    )
-    for lane_nr in result.keys():
-        print(f"Nr samples in lane {lane_nr}: {len(result[lane_nr])}")
