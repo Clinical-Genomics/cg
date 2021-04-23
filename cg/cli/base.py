@@ -6,7 +6,7 @@ from typing import Optional
 import cg
 import click
 import coloredlogs
-import ruamel.yaml
+import yaml
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd
@@ -56,7 +56,7 @@ def base(
         log_format = "%(message)s" if sys.stdout.isatty() else None
 
     coloredlogs.install(level=log_level, fmt=log_format)
-    raw_configs: dict = ruamel.yaml.safe_load(config) if config else {"database": database}
+    raw_configs: dict = yaml.full_load(config) if config else {"database": database}
     context.obj = CGConfig(**raw_configs)
 
 

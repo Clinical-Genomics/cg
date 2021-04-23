@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Any, List, Optional
 
+import yaml
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
@@ -10,7 +11,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
-from ruamel.yaml import ruamel, safe_load
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -92,9 +92,7 @@ class MipAnalysisAPI(AnalysisAPI):
         out_dir = self.get_case_path(case_id=case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
         pedigree_config_path = self.get_pedigree_config_path(case_id=case_id)
-        pedigree_config_path.write_text(
-            ruamel.yaml.round_trip_dump(data, indent=4, block_seq_indent=2)
-        )
+        pedigree_config_path.write_text(yaml.dump(data))
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
@@ -179,7 +177,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """Open a bundle file and return it as an Python object."""
 
         full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
-        return safe_load(open(full_file_path))
+        return yaml.safe_load(open(full_file_path))
 
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""

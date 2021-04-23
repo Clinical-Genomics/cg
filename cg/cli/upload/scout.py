@@ -1,10 +1,10 @@
 """Code for uploading to scout via CLI"""
 import logging
-import sys
 from pathlib import Path
 from typing import Optional
 
 import click
+import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
@@ -13,7 +13,6 @@ from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
 from housekeeper.store import models as hk_models
-from ruamel.yaml import YAML
 
 from .utils import suggest_cases_to_upload
 
@@ -75,9 +74,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     file_path: Path = root_dir / case_id / "scout_load.yaml"
 
     if print_console:
-        yaml = YAML()
-        yaml.indent(mapping=4, sequence=6, offset=3)
-        yaml.dump(scout_load_config.dict(exclude_none=True), sys.stdout)
+        click.echo(yaml.dump(scout_load_config.dict(exclude_none=True)))
         LOG.info("Would save file to %s", file_path)
         return
 

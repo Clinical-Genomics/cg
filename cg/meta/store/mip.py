@@ -2,9 +2,7 @@
 import logging
 from pathlib import Path
 
-import ruamel.yaml
-
-from cg.exc import AnalysisNotFinishedError
+import yaml
 from cg.meta.store import base as store_base
 
 LOG = logging.getLogger(__name__)
@@ -12,12 +10,12 @@ LOG = logging.getLogger(__name__)
 
 def add_mip_analysis(config_stream):
     """Gather information from MIP analysis to store."""
-    config_raw = ruamel.yaml.safe_load(config_stream)
+    config_raw = yaml.safe_load(config_stream)
     config_data = parse_config(config_raw)
-    sampleinfo_raw = ruamel.yaml.safe_load(Path(config_data["sampleinfo_path"]).open())
+    sampleinfo_raw = yaml.safe_load(Path(config_data["sampleinfo_path"]).open())
     sampleinfo_data = parse_sampleinfo(sampleinfo_raw)
 
-    deliverables_raw = ruamel.yaml.safe_load(Path(config_raw["store_file"]).open())
+    deliverables_raw = yaml.safe_load(Path(config_raw["store_file"]).open())
     return store_base.build_bundle(config_data, sampleinfo_data, deliverables_raw)
 
 

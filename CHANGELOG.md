@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.28.0]
+### Changed
+- Remove dependency `cgstats` from requirements.txt and move used functionality into CG
+
 ## [20.27.0]
 ### Added
 - Functionality for the cgstats api in CG
