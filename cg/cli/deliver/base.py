@@ -6,6 +6,7 @@ from typing import List, Optional
 import click
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
+from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -18,7 +19,7 @@ def deliver():
     LOG.info("Running CG deliver")
 
 
-@click.command(name="analysis")
+@deliver.command(name="analysis")
 @click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
     "-t", "--ticket-id", type=int, help="Deliver the files for ALL cases connected to a ticket"
@@ -74,4 +75,13 @@ def deliver_analysis(
         deliver_api.deliver_files(case_obj=case_obj)
 
 
-deliver.add_command(deliver_analysis)
+@deliver.command(name="rsync")
+@click.argument("ticket_id", type=int, required=True)
+@click.option("--dry-run", is_flag=True)
+@click.pass_obj
+def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
+    """The folder generated using the "cg deliver analysis" command will be
+    rsynced with this function to the customers inbox on caesar.
+    """
+    rsync_api = RsyncAPI(config=context)
+    rsync_api.run_rsync_command(ticket_id=ticket_id, dry_run=dry_run)

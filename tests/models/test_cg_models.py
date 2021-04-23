@@ -15,7 +15,7 @@ def test_instantiate_correct_configs(base_config_dict: dict):
 
 
 def test_fetching_the_status_db(base_config_dict: dict, caplog):
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
     # GIVEN a dictionary with the basic configs
 
     # WHEN instantiating a CGConfig object
@@ -28,7 +28,7 @@ def test_fetching_the_status_db(base_config_dict: dict, caplog):
 
 
 def test_api_instantiated_once(base_config_dict: dict, caplog):
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
     # GIVEN a dictionary with the basic configs
     # GIVEN a CGConfig object
     config_object = CGConfig(**base_config_dict)

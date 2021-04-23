@@ -1,6 +1,7 @@
 """Tests for the deliver base command"""
 
 from cg.cli.deliver.base import deliver as deliver_cmd
+from cg.cli.deliver.base import rsync as rsync_cmd
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner

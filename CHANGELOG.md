@@ -13,6 +13,47 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [20.26.2]
+### Added
+- Added more DNA and RNA positive control cases to VALIDATION_CASES
+
+## [20.26.1]
+### Fixed
+- Workflow linking also links undetermined files when
+
+## [20.26.0]
+### Changed
+- Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
+- Microsalt config-case wont include samples that dont pass sequencing qc
+
+## [20.25.0]
+### Changed
+- Changes that customer contact persons are referred to as emails instead of users. This removes the need to add each contact as a user in the system and it becomes easier to manage the user list
+
+## [20.24.0]
+### Added
+- Show customers in user admin view
+
+## [20.23.0]
+### Added
+- gisaid uppload support via cli
+- gisaid API
+
+### Added
+- Add command `cg get analysis` to view analysis information
+
+## [20.21.1]
+### Fixed
+- Fix subprocess wildcard issue in deliver rsync
+
+## [20.21.0]
+### Added
+- Added cg deliver rsync <ticket_id>
+
+## [20.20.1]
+### Fixed
+- bug in cg clean scout-finished-cases
+
 ## [20.20.0]
 
 ## Added
@@ -33,15 +74,12 @@ Try to use the following format:
 ### Fixed
 - Update sequenced at timestamp of sample whenever sample has been sequenced and flowcell transferred
 
-
 ## [20.19.2]
 
 ### Fixed
 - Bug when instantiating analysis api in upload
 
-
 ## [20.19.1]
-
 ### Fixed
 - Bug when fetching the api in mip workflow cli base
 
