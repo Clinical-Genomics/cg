@@ -20,7 +20,6 @@ Try to use the following format:
 
 ### Changed
 - Add support for balsamic 7.x.x
-- Remove analysis type qc
 - Rework Balsamic server configurations
 
 ### Fixed
