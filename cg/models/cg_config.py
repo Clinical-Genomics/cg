@@ -83,8 +83,7 @@ class MutaccAutoConfig(CommonAppConfig):
 
 class BalsamicConfig(CommonAppConfig):
     root: str
-    singularity: str
-    reference_config: str
+    balsamic_cache: str
     binary_path: str
     conda_env: str
     slurm: SlurmConfig
