@@ -13,6 +13,19 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+----------------
+----------------
+
+## [21.0.0]
+
+### Changed
+- Add support for balsamic 7.x.x
+- Rework Balsamic server configurations
+
+### Fixed
+- Upload to scout now possible for all analysis types through cg upload scout
+
+
 ## [20.26.2]
 ### Added
 - Added more DNA and RNA positive control cases to VALIDATION_CASES
