@@ -11,7 +11,7 @@ def test_parse_demux_stats(demultiplexing_stats_path: Path):
     assert demux_info
 
     # WHEN instantiating a demux stats parser
-    parser: DemuxStats = DemuxStats(stats_file=demultiplexing_stats_path)
+    parser: DemuxStats = DemuxStats(demux_stats_path=demultiplexing_stats_path)
 
     # THEN assert that the the parser have some content
     assert parser.lanes_to_barcode

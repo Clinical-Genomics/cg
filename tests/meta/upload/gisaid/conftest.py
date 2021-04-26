@@ -1,12 +1,11 @@
 from pathlib import Path
 from typing import List
 
+import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.upload.gisaid import GisaidAPI
 from cg.meta.upload.gisaid.models import GisaidSample
 from cg.models.cg_config import CGConfig, GisaidConfig
-import pytest
-
-from cg.meta.upload.gisaid import GisaidAPI
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -81,8 +80,15 @@ def gisaid_case_id():
     return "gisaid_case"
 
 
+@pytest.fixture(name="gisaid_file_name")
+def fixture_gisaid_file_name() -> Path:
+    file_path = Path("test.fasta")
+    yield file_path
+    file_path.unlink()
+
+
 @pytest.fixture
-def four_gisaid_samples(gisaid_case_id) -> List[GisaidSample]:
+def four_gisaid_samples(gisaid_case_id: str, gisaid_file_name: Path) -> List[GisaidSample]:
 
     return [
         GisaidSample(
@@ -90,7 +96,7 @@ def four_gisaid_samples(gisaid_case_id) -> List[GisaidSample]:
             cg_lims_id=f"s{i}",
             covv_subm_sample_id="test_name",
             submitter="test_submitter",
-            fn=f"test.fasta",
+            fn=gisaid_file_name.name,
             covv_collection_date="2020-11-22",
             lab="Stockholm",
         )
@@ -99,14 +105,14 @@ def four_gisaid_samples(gisaid_case_id) -> List[GisaidSample]:
 
 
 @pytest.fixture
-def dummy_gisaid_sample() -> GisaidSample:
+def dummy_gisaid_sample(gisaid_file_name: Path) -> GisaidSample:
 
     return GisaidSample(
         family_id="dummy_id",
         cg_lims_id=f"dummy_sample",
         covv_subm_sample_id="test_name",
         submitter="test_submitter",
-        fn=f"test.fasta",
+        fn=gisaid_file_name.name,
         covv_collection_date="2020-11-22",
         lab="Stockholm",
     )

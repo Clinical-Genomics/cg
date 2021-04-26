@@ -4,11 +4,10 @@
 from pathlib import Path
 from typing import List
 
+import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FastaSequenceMissingError, HousekeeperVersionMissingError
-import pytest
-
-from cg.meta.upload.gisaid.models import GisaidSample, FastaFile
+from cg.meta.upload.gisaid.models import FastaFile, GisaidSample
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
@@ -114,14 +113,13 @@ def test_get_gisaid_samples_no_samples(gisaid_api):
     assert gisaid_samples == []
 
 
-def test_build_gisaid_csv(gisaid_api, four_gisaid_samples, four_samples_csv):
+def test_build_gisaid_csv(
+    gisaid_api, four_gisaid_samples, four_samples_csv, gisaid_file_name: Path
+):
     # GIVEN four gisiad samples
-    file_name = "test.csv"
-    file = Path(file_name)
 
     # WHEN running build_gisaid_csv
-    gisaid_api.build_gisaid_csv(gsaid_samples=four_gisaid_samples, file_name=file_name)
+    gisaid_api.build_gisaid_csv(gsaid_samples=four_gisaid_samples, file_name=gisaid_file_name)
 
     # THEN the generated file should have the expected content
-    assert file.read_text() == four_samples_csv
-    file.unlink()
+    assert gisaid_file_name.read_text() == four_samples_csv
