@@ -9,7 +9,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_family_bad_case(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to get a analysis using a non-existing analysis-id """
+    """Test to get a analysis using a non-existing analysis-id"""
     # GIVEN an empty database
 
     # WHEN getting a analysis

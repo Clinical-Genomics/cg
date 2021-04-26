@@ -9,7 +9,7 @@ SUCCESS = 0
 
 
 def test_set_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to set a flowcell using a non-existing flowcell """
+    """Test to set a flowcell using a non-existing flowcell"""
     # GIVEN an empty database
 
     # WHEN setting a flowcell

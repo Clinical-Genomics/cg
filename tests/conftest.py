@@ -66,7 +66,7 @@ def fixture_case_id() -> str:
 
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
-    """ Returns a sample id """
+    """Returns a sample id"""
     return "ADM1"
 
 
