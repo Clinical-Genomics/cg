@@ -7,7 +7,7 @@ LOG = logging.getLogger(__name__)
 
 
 class PdcApi:
-    """ Group PDC related commands """
+    """Group PDC related commands"""
 
     @classmethod
     def retrieve_flowcell(

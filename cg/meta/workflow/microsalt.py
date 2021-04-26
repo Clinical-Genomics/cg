@@ -110,7 +110,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
-        """ Returns the comment associated with a sample stored in lims"""
+        """Returns the comment associated with a sample stored in lims"""
         comment: str = self.lims_api.get_sample_comment(sample_id) or ""
         if re.match(r"\w{4}\d{2,3}", comment):
             return comment
@@ -146,7 +146,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return organism
 
     def get_parameters(self, sample_obj: models.Sample) -> Dict[str, str]:
-        """Fill a dict with case config information for one sample """
+        """Fill a dict with case config information for one sample"""
 
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims_api.get_prep_method(sample_id)
@@ -190,7 +190,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def resolve_case_sample_id(
         self, sample: bool, ticket: bool, unique_id: Any
     ) -> Tuple[str, Optional[str]]:
-        """Resolve case_id and sample_id w based on input arguments. """
+        """Resolve case_id and sample_id w based on input arguments."""
         if ticket and sample:
             LOG.error("Flags -t and -s are mutually exclusive!")
             raise click.Abort
