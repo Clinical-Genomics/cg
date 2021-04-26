@@ -1,10 +1,13 @@
 """Base command for trending"""
 
+import datetime as dt
 import logging
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 import click
+from sqlalchemy.orm import Query
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError
@@ -16,7 +19,17 @@ from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
-VOGUE_VALID_BIOINFO = [str(Pipeline.MIP_DNA), str(Pipeline.BALSAMIC)]
+VOGUE_VALID_BIOINFO = [str(Pipeline.BALSAMIC)]
+
+
+def validate_date(context, param, date_: str) -> Optional[dt.date]:
+    """validates the cli input of a date (if any) and returns the date in the proper format"""
+    if not date_:
+        return
+    try:
+        return dt.datetime.strptime(date_, "%Y-%m-%d").date() or None
+    except ValueError:
+        raise click.BadParameter("Date should be in ISO format: YYYY-MM-DD")
 
 
 @click.group()
@@ -151,8 +164,18 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
 
     # Get workflow_name and workflow_version
     workflow_name, workflow_version = _get_analysis_workflow_details(status_db, case_name)
+
+    if workflow_name is None:
+        raise AnalysisUploadError(
+            f"Case upload failed: {case_name}. Reason: Workflow name not found."
+        )
+    workflow_name = workflow_name.lower()
+
     if workflow_name not in VOGUE_VALID_BIOINFO:
-        raise AnalysisUploadError(f"Case upload failed: {case_name}. Reason: Bad workflow name.")
+        raise AnalysisUploadError(
+            f"Case upload failed: {case_name}. Reason: Bad workflow name: {workflow_name}."
+        )
+
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
     load_bioinfo_raw_inputs["analysis_workflow_version"] = workflow_version
 
@@ -175,16 +198,35 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
 
 @vogue.command("bioinfo-all", short_help="Load all bioinfo results into vogue")
 @click.option("--dry/--no-dry", is_flag=True, help="Dry run...")
+@click.option(
+    "--completed-after",
+    "-a",
+    callback=validate_date,
+    default=None,
+    help="Only upload cases with an analysis that was completed after this date",
+)
+@click.option(
+    "--completed-before",
+    "-b",
+    callback=validate_date,
+    default=None,
+    help="Only upload cases with an analysis that was completed before this date",
+)
 @click.pass_context
-def bioinfo_all(context: click.Context, dry: bool):
+def bioinfo_all(
+    context: click.Context,
+    completed_after: Optional[str],
+    completed_before: Optional[str],
+    dry: bool,
+):
     """Load all cases with recent analysis and a multiqc-json to the trending database."""
 
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
 
-    cases: List[models.Family] = status_db.families().all()
-    for case in cases:
-        case_name: str = case.internal_id
+    analyses: Query = status_db.analyses_ready_for_vogue_upload(completed_after, completed_before)
+    for analysis in analyses:
+        case_name: str = analysis.family.internal_id
         version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
@@ -196,16 +238,21 @@ def bioinfo_all(context: click.Context, dry: bool):
             )
         )
         if not multiqc_file_obj:
+            LOG.warning("No multiqc file found in Housekeeper for case %s", case_name)
             continue
 
         # confirm that file exists
         existing_multiqc_file: str = multiqc_file_obj[0].full_path
         if not Path(existing_multiqc_file).exists():
+            LOG.warning("The file %s does not exist for case %s", existing_multiqc_file, case_name)
             continue
 
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
+            if not dry:
+                UploadVogueAPI.update_analysis_uploaded_to_vogue_date(analysis=analysis)
+                status_db.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
@@ -257,4 +304,4 @@ def _get_analysis_workflow_details(status_api: Store, case_name: str) -> Tuple[A
         workflow_name = case_obj.analyses[0].pipeline
         workflow_version = case_obj.analyses[0].pipeline_version
 
-    return workflow_name.lower(), workflow_version
+    return workflow_name, workflow_version
