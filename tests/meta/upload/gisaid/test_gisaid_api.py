@@ -8,12 +8,11 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import FastaSequenceMissingError, HousekeeperVersionMissingError
 from cg.meta.upload.gisaid.models import FastaFile, GisaidSample
-from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_fasta_sequence(valid_fasta_file, gisaid_api):
-    # GIVEN a valid consencus fasta file
+    # GIVEN a valid consensus fasta file
 
     # WHEN running get_fasta_sequence
     sequence = gisaid_api.get_fasta_sequence(fastq_path=valid_fasta_file)
@@ -25,7 +24,7 @@ def test_get_fasta_sequence(valid_fasta_file, gisaid_api):
 
 
 def test_get_fasta_sequence_invalid_file(gisaid_api, invalid_fasta_file):
-    # GIVEN a invalid consencus fasta file
+    # GIVEN a invalid consensus fasta file
     # WHEN running get_fasta_sequence
     # THEN FastaSequenceMissingError is raised
     with pytest.raises(FastaSequenceMissingError):
@@ -44,7 +43,7 @@ def test_get_gisaid_fasta_objects(
         real_housekeeper_api, bundle_with_four_samples, include=True
     )
 
-    # WHEN running get_gisaid_fasta_objects with the four gisaid sampoles
+    # WHEN running get_gisaid_fasta_objects with the four gisaid samples
     fasta_objects: List[FastaFile] = gisaid_api.get_gisaid_fasta_objects(
         gsaid_samples=four_gisaid_samples
     )
@@ -75,6 +74,7 @@ def test_build_gisaid_fasta(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     valid_concat_fasta_file,
+    gisaid_file_name: Path,
 ):
     # GIVEN four gisaid samples and a hk api populated with a bundle with consensus files related to the samples
     gisaid_api.housekeeper_api_ = helpers.ensure_hk_bundle(
@@ -82,19 +82,17 @@ def test_build_gisaid_fasta(
     )
 
     # WHEN running build_gisaid_fasta with the four gisaid samples
-    file_path: str = gisaid_api.build_gisaid_fasta(
-        gsaid_samples=four_gisaid_samples, file_name="test.fasta"
+    gisaid_api.build_gisaid_fasta(
+        gsaid_samples=four_gisaid_samples, file_name=gisaid_file_name.name
     )
-    file = Path(file_path)
-
     # THEN the concatenated fasta file has the expected content
-    assert file.read_text() == valid_concat_fasta_file
+    assert gisaid_file_name.read_text() == valid_concat_fasta_file
 
 
 def test_get_gisaid_samples(gisaid_api, case_id):
     # GIVEN a gisaid_api with a Store populated with sequenced samples with family_id=case_id
 
-    # WHEN running get_gsaid_samples
+    # WHEN running get_gisaid_samples
     gisaid_samples = gisaid_api.get_gsaid_samples(family_id=case_id)
 
     # THEN assert
@@ -106,7 +104,7 @@ def test_get_gisaid_samples(gisaid_api, case_id):
 def test_get_gisaid_samples_no_samples(gisaid_api):
     # GIVEN a
 
-    # WHEN running get_gsaid_samples
+    # WHEN running get_gisaid_samples
     gisaid_samples = gisaid_api.get_gsaid_samples(family_id="dummy_case")
 
     # THEN assert
@@ -116,7 +114,7 @@ def test_get_gisaid_samples_no_samples(gisaid_api):
 def test_build_gisaid_csv(
     gisaid_api, four_gisaid_samples, four_samples_csv, gisaid_file_name: Path
 ):
-    # GIVEN four gisiad samples
+    # GIVEN four gisaid samples
 
     # WHEN running build_gisaid_csv
     gisaid_api.build_gisaid_csv(gsaid_samples=four_gisaid_samples, file_name=gisaid_file_name)

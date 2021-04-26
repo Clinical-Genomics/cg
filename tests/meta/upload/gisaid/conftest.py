@@ -84,7 +84,10 @@ def gisaid_case_id():
 def fixture_gisaid_file_name() -> Path:
     file_path = Path("test.fasta")
     yield file_path
-    file_path.unlink()
+    try:
+        file_path.unlink()
+    except FileNotFoundError:
+        pass
 
 
 @pytest.fixture
