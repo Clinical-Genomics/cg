@@ -58,13 +58,13 @@ class DemuxSample(BaseModel):
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
         return conversion_stats.pass_filter_cluster_count
 
-    @validator("pass_filter_yield")
+    @validator("pass_filter_yield", always=True)
     def set_pass_filter_yield(cls, _, values) -> int:
         """Set the number of pass filter yield (reads)"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
         return conversion_stats.pass_filter_yield
 
-    @validator("pass_filter_Q30")
+    @validator("pass_filter_Q30", always=True)
     def set_pass_filter_Q30(cls, value, values) -> float:
         """Set the percentage of pass filter high quality reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -72,7 +72,7 @@ class DemuxSample(BaseModel):
             return value
         return round(conversion_stats.pass_filter_q30 / conversion_stats.pass_filter_yield * 100, 2)
 
-    @validator("pass_filter_read1_q30")
+    @validator("pass_filter_read1_q30", always=True)
     def set_percentage_high_quality_read_one(cls, value, values) -> float:
         """Calculate the percentage of high quality read one reads of all reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -83,7 +83,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @validator("pass_filter_read2_q30")
+    @validator("pass_filter_read2_q30", always=True)
     def set_percentage_high_quality_read_two(cls, value, values) -> float:
         """Calculate the percentage of high quality read two reads of all reads"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -94,7 +94,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @validator("pass_filter_qscore")
+    @validator("pass_filter_qscore", always=True)
     def set_pass_filter_qscore(cls, value, values) -> float:
         """Calculate the average quality score per read"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -107,7 +107,7 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @validator("undetermined_pc")
+    @validator("undetermined_pc", always=True)
     def set_undetermined_pc(cls, value, values) -> float:
         """Calculate the average quality score per read"""
         conversion_stats: SampleConversionResults = values["conversion_stats_"]
@@ -121,19 +121,19 @@ class DemuxSample(BaseModel):
             2,
         )
 
-    @validator("barcodes")
+    @validator("barcodes", always=True)
     def set_nr_barcodes(cls, _, values) -> int:
         """Set the total number of barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
         return barcode_stats.barcode_count or 0
 
-    @validator("perfect_barcodes")
+    @validator("perfect_barcodes", always=True)
     def set_nr_perfect_barcodes(cls, _, values) -> int:
         """Set the total number of perfect barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
         return barcode_stats.perfect_barcode_count or 0
 
-    @validator("one_mismatch_barcodes")
+    @validator("one_mismatch_barcodes", always=True)
     def set_nr_one_mismatch_barcodes(cls, _, values) -> int:
         """Set the total number of mismatch barcodes"""
         barcode_stats: SampleBarcodeStats = values["barcode_stats_"]
