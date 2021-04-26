@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
