@@ -90,7 +90,7 @@ class StatsAPI(alchy.Manager):
         )
         return query.first().sample_count > 1
 
-    def sample_reads(self, sample_obj: models.Sample) -> Iterator:
+    def sample_reads(self, sample_obj: models.Sample) -> alchy.Query:
         """Calculate reads for a sample."""
         return (
             self.session.query(

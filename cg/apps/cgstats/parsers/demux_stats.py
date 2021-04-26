@@ -16,8 +16,8 @@ class SampleBarcodeStats(BaseModel):
 
 
 class DemuxStats:
-    def __init__(self, stats_file: Path):
-        self.stats_file: Path = stats_file
+    def __init__(self, demux_stats_path: Path):
+        self.demux_stats_path: Path = demux_stats_path
         self._current_project = ""
         self._current_sample = ""
         self._current_barcode = ""
@@ -51,7 +51,7 @@ class DemuxStats:
         self.barcode_to_lanes[self._current_barcode][self._current_lane] = entry
 
     def parse_file(self):
-        for (event, node) in iterparse(str(self.stats_file), ["start", "end"]):
+        for (event, node) in iterparse(str(self.demux_stats_path), ["start", "end"]):
             if event == "start":
                 self.evaluate_start_event(node)
                 continue

@@ -49,8 +49,8 @@ class SampleConversionResults(BaseModel):
 
 
 class ConversionStats:
-    def __init__(self, conversion_stats: Path):
-        self.conversion_stats: Path = conversion_stats
+    def __init__(self, conversion_stats_path: Path):
+        self.conversion_stats_path: Path = conversion_stats_path
         self._current_sample = ""
         self._current_barcode = ""
         self._results: SampleConversionResults = SampleConversionResults()
@@ -81,7 +81,7 @@ class ConversionStats:
     def parse_file(self):
         event: str
         node: Element
-        for (event, node) in iterparse(str(self.conversion_stats), ["start", "end"]):
+        for (event, node) in iterparse(str(self.conversion_stats_path), ["start", "end"]):
             # Only search nodes when correct
             # print("Path", self.current_path, self._current_barcode)
             current_tag: str = self.get_current_tag(node=node)

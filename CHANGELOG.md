@@ -13,13 +13,22 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [20.28.0]
+## [21.2.0]
 ### Changed
 - Remove dependency `cgstats` from requirements.txt and move used functionality into CG
 
-## [20.27.0]
+## [21.1.0]
 ### Added
 - Functionality for the cgstats api in CG
+
+## [21.0.0]
+
+### Changed
+- Add support for balsamic 7.x.x
+- Rework Balsamic server configurations
+
+### Fixed
+- Upload to scout now possible for all analysis types through cg upload scout
 
 
 ## [20.26.2]
