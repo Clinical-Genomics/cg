@@ -62,12 +62,14 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
 
 
 @pytest.fixture(name="demultiplex_configs")
-def fixture_demultiplex_configs(project_dir: Path) -> dict:
+def fixture_demultiplex_configs(project_dir: Path, demultiplex_fixtures: Path) -> dict:
     out_dir: Path = project_dir / "demultiplexed-runs"
+    run_dir: Path = demultiplex_fixtures / "flowcell_runs"
     out_dir.mkdir(parents=True)
     return {
         "demultiplex": {
             "out_dir": str(out_dir),
+            "run_dir": str(run_dir),
             "slurm": {"account": "test", "mail_user": "testuser@github.se"},
         }
     }
