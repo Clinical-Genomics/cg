@@ -34,7 +34,7 @@ class InvoiceAPI:
         )
 
         customer = self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
-        user = customer.invoice_contact
+        user = customer.invoice_contact_email
 
         if not user:
             self.log.append(msg)
