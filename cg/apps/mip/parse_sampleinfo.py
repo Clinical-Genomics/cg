@@ -1,8 +1,6 @@
-from pathlib import Path
 from typing import List
 
-import ruamel
-
+import yaml
 from cg.apps.tb.models import TrailblazerAnalysis
 
 
@@ -162,6 +160,7 @@ def get_multiple_paths(sample_data: dict, path_key: str) -> list:
 
 def get_sampleinfo(analysis_obj: TrailblazerAnalysis) -> str:
     """Get the sample info path for an analysis."""
-    raw_data = ruamel.yaml.safe_load(Path(analysis_obj.config_path).open())
+    with open(analysis_obj.config_path, "r") as config_handle:
+        raw_data = yaml.full_load(config_handle)
     data = parse_config(raw_data)
     return data["sampleinfo_path"]

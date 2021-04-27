@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
@@ -13,7 +14,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models
 from housekeeper.store import models as hk_models
-from ruamel import yaml
 
 from .balsamic_config_builder import BalsamicConfigBuilder
 from .mip_config_builder import MipConfigBuilder
@@ -77,8 +77,7 @@ class UploadScoutAPI:
         """Save a scout load config file to <file_path>"""
 
         LOG.info("Save Scout load config to %s", file_path)
-        yml = yaml.YAML()
-        yml.dump(upload_config.dict(exclude_none=True), file_path)
+        yaml.dump(upload_config.dict(exclude_none=True), file_path.open("w"))
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False

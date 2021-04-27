@@ -4,9 +4,9 @@ from typing import Iterator, List, Optional
 
 import alchy
 import sqlalchemy as sqa
+from cg.apps.cgstats.crud import find
+from cg.apps.cgstats.db import models
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
-
-from cgstats.db import api, models
 
 LOG = logging.getLogger(__name__)
 
@@ -105,9 +105,10 @@ class StatsAPI(alchy.Manager):
             .group_by(models.Flowcell.flowcellname)
         )
 
-    def sample(self, sample_name: str) -> models.Sample:
+    @staticmethod
+    def sample(sample_name: str) -> models.Sample:
         """Fetch a sample for the database by name."""
-        return api.get_sample(sample_name).first()
+        return find.get_sample(sample_name).first()
 
     def fastqs(self, flowcell: str, sample_obj: models.Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
