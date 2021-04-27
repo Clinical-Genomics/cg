@@ -34,7 +34,7 @@ def test_upload_started_long_time_ago_raises_exception(
     base_context: CGConfig,
     helpers: StoreHelpers,
 ):
-    """Test that an upload for a missing case does fail hard """
+    """Test that an upload for a missing case does fail hard"""
 
     # GIVEN an analysis that is already uploading since a week ago
     disk_store: Store = base_context.status_db

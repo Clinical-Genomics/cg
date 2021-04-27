@@ -165,7 +165,7 @@ class Analysis(Model):
 
 
 class Bed(Model):
-    """Model for bed target captures """
+    """Model for bed target captures"""
 
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
@@ -181,7 +181,7 @@ class Bed(Model):
 
 
 class BedVersion(Model):
-    """Model for bed target captures versions """
+    """Model for bed target captures versions"""
 
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 

@@ -26,7 +26,7 @@ def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig, caplog):
 
 
 def test_no_sample_found(cli_runner: CliRunner, base_context: CGConfig, caplog):
-    """Test missing sample command """
+    """Test missing sample command"""
 
     # GIVEN a not existing sample
     microbial_sample_id = "not_existing_sample"
@@ -43,7 +43,7 @@ def test_no_sample_found(cli_runner: CliRunner, base_context: CGConfig, caplog):
 def test_no_order_found(
     cli_runner: CliRunner, base_context: CGConfig, caplog, invalid_ticket_number: int
 ):
-    """Test missing order command """
+    """Test missing order command"""
 
     # GIVEN a not existing ticket
     ticket = invalid_ticket_number
@@ -58,7 +58,7 @@ def test_no_order_found(
 
 
 def test_no_case_found(cli_runner: CliRunner, base_context: CGConfig, caplog):
-    """Test missing sample and order command """
+    """Test missing sample and order command"""
 
     # GIVEN a not existing order
     microbial_case = "smallzergling"
@@ -129,7 +129,7 @@ def test_sample(base_context, cli_runner, lims_api, microbial_sample_id, snapsho
 
 
 def test_gonorrhoeae(cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id):
-    """ Test if the substitution of the organism happens """
+    """Test if the substitution of the organism happens"""
     # GIVEN a sample with organism set to gonorrhea
     sample_obj = base_context.meta_apis["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "gonorrhoeae"
@@ -142,7 +142,7 @@ def test_gonorrhoeae(cli_runner: CliRunner, base_context: CGConfig, microbial_sa
 
 
 def test_cutibacterium_acnes(cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id):
-    """ Test if this bacteria gets its name changed """
+    """Test if this bacteria gets its name changed"""
     # GIVEN a sample with organism set to Cutibacterium acnes
     sample_obj = base_context.meta_apis["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "Cutibacterium acnes"
@@ -155,7 +155,7 @@ def test_cutibacterium_acnes(cli_runner: CliRunner, base_context: CGConfig, micr
 
 
 def test_vre_nc_017960(cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id):
-    """ Test if this bacteria gets its name changed """
+    """Test if this bacteria gets its name changed"""
     # GIVEN a sample with organism set to VRE
     sample_obj = base_context.meta_apis["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
@@ -169,7 +169,7 @@ def test_vre_nc_017960(cli_runner: CliRunner, base_context: CGConfig, microbial_
 
 
 def test_vre_nc_004668(cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id):
-    """ Test if this bacteria gets its name changed """
+    """Test if this bacteria gets its name changed"""
     # GIVEN a sample with organism set to VRE
     sample_obj = base_context.meta_apis["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"
@@ -183,7 +183,7 @@ def test_vre_nc_004668(cli_runner: CliRunner, base_context: CGConfig, microbial_
 
 
 def test_vre_comment(cli_runner: CliRunner, base_context: CGConfig, lims_api, microbial_sample_id):
-    """ Test if this bacteria gets its name changed """
+    """Test if this bacteria gets its name changed"""
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
     sample_obj = base_context.meta_apis["analysis_api"].status_db.sample(microbial_sample_id)
     sample_obj.organism.internal_id = "VRE"

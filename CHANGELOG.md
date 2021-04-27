@@ -13,8 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-----------------
-----------------
+## [21.1.0]
+### Added
+- Functionality for the cgstats api in CG
 
 ## [21.0.0]
 

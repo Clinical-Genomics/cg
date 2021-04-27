@@ -4,19 +4,19 @@ import datetime
 
 
 class Analysis:
-    """ Mock Analysis object """
+    """Mock Analysis object"""
 
     def __init__(self, case_obj):
         self.case_obj = case_obj
 
     @property
     def started_at(self):
-        """ mock started_at date """
+        """mock started_at date"""
         return str(datetime.datetime.today())
 
     @property
     def family(self):
-        """ mock case """
+        """mock case"""
         return self.case_obj
 
 
