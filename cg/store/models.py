@@ -151,6 +151,7 @@ class Analysis(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
@@ -164,7 +165,7 @@ class Analysis(Model):
 
 
 class Bed(Model):
-    """Model for bed target captures """
+    """Model for bed target captures"""
 
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
@@ -180,7 +181,7 @@ class Bed(Model):
 
 
 class BedVersion(Model):
-    """Model for bed target captures versions """
+    """Model for bed target captures versions"""
 
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 

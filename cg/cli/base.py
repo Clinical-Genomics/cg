@@ -18,7 +18,7 @@ from .backup import backup
 from .clean import clean
 from .compress.base import compress, decompress
 from .deliver.base import deliver as deliver_cmd
-from .demultiplex.base import demultiplex as demultiplex_cmd
+from .demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from .deploy.base import deploy as deploy_cmd
 from .export import export
 from .get import get

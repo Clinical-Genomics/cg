@@ -8,7 +8,7 @@ import yaml
 
 @pytest.fixture(scope="function")
 def config_stream(files):
-    """ config stream fixture """
+    """config stream fixture"""
     return {
         "rna_config_store": Path(files["rna_config_store"]).open(),
     }
@@ -16,13 +16,13 @@ def config_stream(files):
 
 @pytest.fixture(scope="function")
 def config_raw(files_raw):
-    """ config stream fixture """
+    """config stream fixture"""
     return files_raw["rna_config_store"]
 
 
 @pytest.fixture(scope="function")
 def config_data_rna():
-    """ config data fixture for rna analyses"""
+    """config data fixture for rna analyses"""
     return {
         "email": None,
         "case": "case_id",
@@ -36,7 +36,7 @@ def config_data_rna():
 
 @pytest.fixture(scope="function")
 def config_data_dna():
-    """ config data fixture for dna analyses"""
+    """config data fixture for dna analyses"""
     return {
         "email": None,
         "case": "case_id",
@@ -50,7 +50,7 @@ def config_data_dna():
 
 @pytest.fixture(scope="function")
 def sampleinfo_data():
-    """ sampleinfo data fixture """
+    """sampleinfo data fixture"""
     return {
         "date": datetime.datetime(2020, 3, 1),
         "is_finished": True,
@@ -61,17 +61,17 @@ def sampleinfo_data():
 
 @pytest.fixture(scope="function")
 def rna_deliverables_raw(config_data_rna):
-    """ raw_deliverables fixture """
+    """raw_deliverables fixture"""
     return yaml.safe_load(Path(config_data_rna["out_dir"], "case_id_deliverables.yaml").open())
 
 
 @pytest.fixture(scope="function")
 def dna_deliverables_raw(config_data_dna):
-    """ raw_deliverables fixture """
+    """raw_deliverables fixture"""
     return yaml.safe_load(Path(config_data_dna["out_dir"], "case_id_deliverables.yaml").open())
 
 
 @pytest.fixture(scope="function")
 def bundle_data():
-    """ bundle data fixture """
+    """bundle data fixture"""
     return yaml.safe_load(open("tests/fixtures/apps/mip/rna/store/bundle_data.yaml"))

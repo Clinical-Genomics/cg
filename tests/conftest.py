@@ -65,7 +65,7 @@ def fixture_case_id() -> str:
 
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
-    """ Returns a sample id """
+    """Returns a sample id"""
     return "ADM1"
 
 
@@ -1149,6 +1149,14 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "demultiplex": {
+            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
+            "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
+            "slurm": {
+                "account": "development",
+                "mail_user": "mans.magnusson@scilifelab.se",
+            },
+        },
         "fluffy": {
             "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
@@ -1226,7 +1234,7 @@ def fixture_context_config(
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "slurm": {
                 "account": "development",
-                "mail_user": "magnus.mansson@scilifelab.se",
+                "mail_user": "mans.magnusson@scilifelab.se",
                 "conda_env": "S_crunchy",
             },
         },

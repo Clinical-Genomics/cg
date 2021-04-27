@@ -46,7 +46,8 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    out_dir: str
+    run_dir: str  # Base path to  un demultiplexed flowcells
+    out_dir: str  # Base path to where the demultiplexed results lives
     slurm: SlurmConfig
 
 

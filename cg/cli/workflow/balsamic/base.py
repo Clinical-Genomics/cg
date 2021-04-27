@@ -49,7 +49,7 @@ OPTION_PRIORITY = click.option(
 @click.group(invoke_without_command=True)
 @click.pass_context
 def balsamic(context: click.Context):
-    """Cancer analysis workflow """
+    """Cancer analysis workflow"""
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return None

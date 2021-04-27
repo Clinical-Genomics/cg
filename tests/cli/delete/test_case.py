@@ -27,7 +27,7 @@ def test_delete_case_without_options(
 
 
 def test_delete_case_bad_case(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to delete a case using a non-existing case """
+    """Test to delete a case using a non-existing case"""
     # GIVEN an empty database
 
     # WHEN deleting a case
@@ -76,7 +76,7 @@ def test_delete_case_with_analysis(
 def test_delete_case_with_dry_run(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, caplog
 ):
-    """Test that the delete case will not delete the case in dry-run mode """
+    """Test that the delete case will not delete the case in dry-run mode"""
     # GIVEN a database with a case
     base_store: Store = base_context.status_db
     case_obj = helpers.add_case(base_store)
@@ -107,7 +107,7 @@ def test_delete_case_with_dry_run(
 def test_delete_case_without_yes(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
-    """Test that the delete case will not delete the case in dry-run mode """
+    """Test that the delete case will not delete the case in dry-run mode"""
     # GIVEN a database with a case
     base_store: Store = base_context.status_db
     case_obj = helpers.add_case(base_store)

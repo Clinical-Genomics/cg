@@ -55,13 +55,13 @@ class MockAnalysis:
 
 @pytest.fixture(name="lims_family")
 def fixture_lims_family() -> dict:
-    """ Returns a lims-like case of samples """
+    """Returns a lims-like case of samples"""
     return json.load(open("tests/fixtures/report/lims_family.json"))
 
 
 @pytest.fixture(name="lims_samples")
 def fixture_lims_samples(lims_family: dict) -> List[dict]:
-    """ Returns the samples of a lims case """
+    """Returns the samples of a lims case"""
     return lims_family["samples"]
 
 

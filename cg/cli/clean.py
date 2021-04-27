@@ -105,7 +105,7 @@ def scout_finished_cases(
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_obj
 def hk_past_files(context: CGConfig, case_id: str, tags: list, yes: bool, dry_run: bool):
-    """ Remove files found in older housekeeper bundles """
+    """Remove files found in older housekeeper bundles"""
 
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db

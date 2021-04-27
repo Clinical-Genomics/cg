@@ -21,6 +21,10 @@ class Flowcell:
         self._run_parameters: Optional[RunParameters] = None
 
     @property
+    def flowcell_full_name(self) -> str:
+        return self.path.name
+
+    @property
     def base_name(self) -> str:
         return self.path.name.split("_")[-1]
 

@@ -36,7 +36,7 @@ def test_set_cases_by_sample_identifiers(
 
 
 def test_delete_cases_with_dry_run(cli_runner, base_context, base_store: Store, helpers, caplog):
-    """Test that the delete cases will not delete the cases in dry-run mode """
+    """Test that the delete cases will not delete the cases in dry-run mode"""
     # GIVEN a database with a case
     case_obj = helpers.add_case(base_store)
     case_id = case_obj.internal_id
