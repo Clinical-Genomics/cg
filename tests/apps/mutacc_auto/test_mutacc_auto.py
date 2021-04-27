@@ -7,7 +7,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI, run_command
 
 
 def test_instatiate(mutacc_config):
-    """ Test to instatiate an MutaccAutoAPI object """
+    """Test to instatiate an MutaccAutoAPI object"""
     # GIVEN a dict with config data to
 
     # WHEN instatiating a mutacc_auto API

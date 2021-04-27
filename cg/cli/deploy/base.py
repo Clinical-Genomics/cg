@@ -20,25 +20,6 @@ def deploy(context: CGConfig, dry_run: bool):
     shipping_api.set_dry_run(dry_run)
 
 
-@click.command(name="shipping")
-@click.pass_obj
-def deploy_shipping_cmd(context: CGConfig):
-    """Deploy the shipping tool"""
-    LOG.info("Deploying shipping with CG")
-    shipping_api: ShippingAPI = context.shipping_api
-    shipping_api.deploy(app_name="shipping")
-
-
-@click.command(name="hermes")
-@click.pass_obj
-def deploy_hermes_cmd(context: CGConfig):
-    """Deploy the hermes tool"""
-    LOG.info("Deploying hermes with CG")
-    hermes_config: Path = Path(context.hermes.deploy_config)
-    shipping_api: ShippingAPI = context.shipping_api
-    shipping_api.deploy(app_name="hermes", app_config=hermes_config)
-
-
 @click.command(name="fluffy")
 @click.pass_obj
 def deploy_fluffy_cmd(context: CGConfig):
@@ -58,6 +39,25 @@ def deploy_genotype_cmd(context: CGConfig):
     shipping_api.deploy(app_name="genotype")
 
 
+@click.command(name="hermes")
+@click.pass_obj
+def deploy_hermes_cmd(context: CGConfig):
+    """Deploy the hermes tool"""
+    LOG.info("Deploying hermes with CG")
+    hermes_config: Path = Path(context.hermes.deploy_config)
+    shipping_api: ShippingAPI = context.shipping_api
+    shipping_api.deploy(app_name="hermes", app_config=hermes_config)
+
+
+@click.command(name="loqusdb")
+@click.pass_obj
+def deploy_loqusdb_cmd(context: CGConfig):
+    """Deploy the LoqusDB tool"""
+    LOG.info("Deploying LoqusDB with CG")
+    shipping_api: ShippingAPI = context.shipping_api
+    shipping_api.deploy(app_name="loqusdb")
+
+
 @click.command(name="scout")
 @click.pass_obj
 def deploy_scout_cmd(context: CGConfig):
@@ -68,8 +68,18 @@ def deploy_scout_cmd(context: CGConfig):
     shipping_api.deploy(app_name="scout", app_config=scout_config)
 
 
-deploy.add_command(deploy_shipping_cmd)
-deploy.add_command(deploy_genotype_cmd)
-deploy.add_command(deploy_scout_cmd)
+@click.command(name="shipping")
+@click.pass_obj
+def deploy_shipping_cmd(context: CGConfig):
+    """Deploy the shipping tool"""
+    LOG.info("Deploying shipping with CG")
+    shipping_api: ShippingAPI = context.shipping_api
+    shipping_api.deploy(app_name="shipping")
+
+
 deploy.add_command(deploy_fluffy_cmd)
+deploy.add_command(deploy_genotype_cmd)
 deploy.add_command(deploy_hermes_cmd)
+deploy.add_command(deploy_loqusdb_cmd)
+deploy.add_command(deploy_scout_cmd)
+deploy.add_command(deploy_shipping_cmd)

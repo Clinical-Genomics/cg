@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from cg.cli.clean import hk_alignment_files
@@ -12,6 +13,7 @@ def test_clean_hk_alignment_files_no_files(cli_runner: CliRunner, cg_context: CG
     assert not cg_context.housekeeper_api.bundle(bundle_name)
 
     # WHEN running the clean hk alignment files command
+    caplog.set_level(logging.INFO)
     result = cli_runner.invoke(hk_alignment_files, [bundle_name], obj=cg_context)
 
     # THEN assert it exits with success
@@ -26,6 +28,7 @@ def test_clean_hk_alignment_files_dry_run(
     helpers: StoreHelpers,
     case_id: str,
     timestamp: datetime,
+    caplog,
 ):
     # GIVEN a housekeeper api with some alignment files
     file_path = "path/to_file.cram"
@@ -40,9 +43,10 @@ def test_clean_hk_alignment_files_dry_run(
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
     # WHEN running the clean command in dry run mode
+    caplog.set_level(logging.INFO)
     result = cli_runner.invoke(hk_alignment_files, [case_id, "--yes", "--dry-run"], obj=cg_context)
 
     # THEN assert it exits with success
     assert result.exit_code == 0
     # THEN assert that the files where removed
-    assert f"{file_path} deleted" in result.output
+    assert f"Deleting {file_path} from database" in caplog.text

@@ -15,43 +15,42 @@ LOG = logging.getLogger(__name__)
 
 
 class HousekeeperAPI:
-    """ API to decouple cg code from Housekeeper """
+    """API to decouple cg code from Housekeeper"""
 
     def __init__(self, config: dict) -> None:
         self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
         self.root_dir = config["housekeeper"]["root"]
-        LOG.info(f"Initialised HousekeeperAPI: {self._store.session}")
 
     def __getattr__(self, name):
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
         return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> models.Bundle:
-        """ Create a new file bundle """
+        """Create a new file bundle"""
         return self._store.new_bundle(name, created_at)
 
     def add_bundle(self, bundle_data) -> Tuple[models.Bundle, models.Version]:
-        """ Build a new bundle version of files """
+        """Build a new bundle version of files"""
         return self._store.add_bundle(bundle_data)
 
     def bundle(self, name: str) -> models.Bundle:
-        """ Fetch a bundle """
+        """Fetch a bundle"""
         return self._store.bundle(name)
 
     def bundles(self) -> List[models.Bundle]:
-        """ Fetch bundles """
+        """Fetch bundles"""
         return self._store.bundles()
 
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
     ) -> models.File:
-        """ Create a new file """
+        """Create a new file"""
         if tags is None:
             tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
     def get_file(self, file_id: int) -> Optional[models.File]:
-        """ Fetch a file based on file id """
+        """Fetch a file based on file id"""
         LOG.info("Fetching file %s", file_id)
         file_obj = self._store.file_(file_id)
         if not file_obj:
@@ -60,7 +59,7 @@ class HousekeeperAPI:
         return file_obj
 
     def delete_file(self, file_id: int) -> Optional[models.File]:
-        """ Delete a file both from database and disk (if included) """
+        """Delete a file both from database and disk (if included)"""
         file_obj: models.File = self.get_file(file_id)
         if not file_obj:
             LOG.info("Could not find file %s", file_id)
@@ -96,7 +95,7 @@ class HousekeeperAPI:
     def files(
         self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
     ) -> Query:
-        """ Fetch files """
+        """Fetch files"""
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
     @staticmethod
@@ -117,11 +116,11 @@ class HousekeeperAPI:
         LOG.info("Could not find any files matching the tags")
 
     def rollback(self):
-        """ Wrap method in Housekeeper Store """
+        """Wrap method in Housekeeper Store"""
         return self._store.rollback()
 
     def session_no_autoflush(self):
-        """ Wrap property in Housekeeper Store """
+        """Wrap property in Housekeeper Store"""
         return self._store.session.no_autoflush
 
     def get_files(
@@ -165,11 +164,11 @@ class HousekeeperAPI:
     def new_version(
         self, created_at: dt.datetime, expires_at: dt.datetime = None
     ) -> models.Version:
-        """ Create a new bundle version """
+        """Create a new bundle version"""
         return self._store.new_version(created_at, expires_at)
 
     def version(self, bundle: str, date: dt.datetime) -> models.Version:
-        """ Fetch a version """
+        """Fetch a version"""
         LOG.info("Fetch version %s from bundle %s", date, bundle)
         return self._store.version(bundle, date)
 
@@ -184,17 +183,17 @@ class HousekeeperAPI:
         )
 
     def new_tag(self, name: str, category: str = None):
-        """ Create a new tag """
+        """Create a new tag"""
         return self._store.new_tag(name, category)
 
     def add_tag(self, name: str, category: str = None):
-        """ Add a tag to the database """
+        """Add a tag to the database"""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
     def tag(self, name: str):
-        """ Fetch a tag """
+        """Fetch a tag"""
         return self._store.tag(name)
 
     def include(self, version_obj: models.Version):
@@ -203,15 +202,15 @@ class HousekeeperAPI:
         version_obj.included_at = dt.datetime.now()
 
     def add_commit(self, *args, **kwargs):
-        """ Wrap method in Housekeeper Store """
+        """Wrap method in Housekeeper Store"""
         return self._store.add_commit(*args, **kwargs)
 
     def commit(self):
-        """ Wrap method in Housekeeper Store """
+        """Wrap method in Housekeeper Store"""
         return self._store.commit()
 
     def session_no_autoflush(self):
-        """ Wrap property in Housekeeper Store """
+        """Wrap property in Housekeeper Store"""
         return self._store.session.no_autoflush
 
     def get_root_dir(self):

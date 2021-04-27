@@ -39,6 +39,25 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
+    def analyses_ready_for_vogue_upload(
+        self,
+        completed_after: Optional[dt.date],
+        completed_before: Optional[dt.date],
+    ) -> Query:
+        """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
+        Optionally fetch those cases finished before and/or after a specified date"""
+        # records = self.Family.query.join(models.Family.analyses).filter(
+        #     models.Analysis.uploaded_to_vogue_at.is_(None)
+        # )
+        records = self.latest_analyses().filter(models.Analysis.uploaded_to_vogue_at.is_(None))
+
+        if completed_after:
+            records = records.filter(models.Analysis.completed_at > completed_after)
+        if completed_before:
+            records = records.filter(models.Analysis.completed_at < completed_before)
+
+        return records
+
     def latest_analyses(self) -> Query:
         """Fetch latest analysis for all cases."""
 
@@ -131,6 +150,17 @@ class FindBusinessDataHandler(BaseHandler):
             .filter(models.Family.internal_id == family_id)
             .all()
         )
+
+    def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
+        """Get samples on a given family_id"""
+        case: models.Family = self.family(internal_id=family_id)
+        return [link.sample for link in case.links] if case else []
+
+    def get_sequenced_samples(self, family_id: str) -> List[models.Sample]:
+        """Get sequenced samples by family_id"""
+
+        samples: List[models.Sample] = self.get_samples_by_family_id(family_id)
+        return [sample for sample in samples if sample.sequencing_qc]
 
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""

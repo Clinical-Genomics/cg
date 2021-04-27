@@ -65,7 +65,7 @@ def fixture_case_id() -> str:
 
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
-    """ Returns a sample id """
+    """Returns a sample id"""
     return "ADM1"
 
 
@@ -1149,11 +1149,24 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "demultiplex": {
+            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
+            "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
+            "slurm": {
+                "account": "development",
+                "mail_user": "mans.magnusson@scilifelab.se",
+            },
+        },
         "fluffy": {
             "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
+        },
+        "data-delivery": {
+            "destination_path": "server.name.se:/some/%s/path/%s/",
+            "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
@@ -1183,10 +1196,9 @@ def fixture_context_config(
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
         "balsamic": {
             "root": str(balsamic_dir),
-            "singularity": "BALSAMIC_release_v6.0.1.sif",
-            "reference_config": "reference.json",
             "binary_path": "echo",
             "conda_env": "S_BALSAMIC",
+            "balsamic_cache": "hello",
             "slurm": {
                 "mail_user": "test.email@scilifelab.se",
                 "account": "development",
@@ -1222,7 +1234,7 @@ def fixture_context_config(
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "slurm": {
                 "account": "development",
-                "mail_user": "magnus.mansson@scilifelab.se",
+                "mail_user": "mans.magnusson@scilifelab.se",
                 "conda_env": "S_crunchy",
             },
         },

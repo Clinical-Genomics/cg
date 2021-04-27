@@ -30,49 +30,61 @@ PROBLEMATIC_CASES = [
 VALIDATION_CASES = [
     "bigdrum",
     "bosssponge",
+    "brightcaiman",  # DNA rare disease positive control
     "busycolt",
-    "casualgannet",
-    "civilkoala",
-    "cleanshrimp",
+    "casualgannet",  # DNA rare disease positive control
+    "civilkoala",  # RNA rare disease positive control
+    "cleanshrimp",  # DNA rare disease positive control
     "daringpony",
-    "easybeetle",
-    "epicasp",
-    "finequagga",
-    "firstfawn",
+    "drivenmolly",  # RNA rare disease positive control
+    "easybeetle",  # DNA rare disease positive control
+    "epicasp",  # DNA rare disease positive control
+    "expertmole",  # RNA rare disease positive control
+    "finequagga",  # RNA rare disease positive control
+    "firstfawn",  # DNA rare disease positive control
     "fleetjay",
     "frankhusky",
     "gamedeer",
-    "gladthrush",
-    "helpedfilly",
-    "hotskink",
+    "gladthrush",  # DNA rare disease positive control
+    "helpedfilly",  # DNA rare disease positive control
+    "hotskink",  # DNA rare disease positive control
     "hotviper",
-    "intentcorgi",
-    "intentmayfly",
+    "inferret",  # DNA rare disease positive control
+    "intentcorgi",  # DNA rare disease positive control
+    "intentmayfly",  # DNA rare disease positive control
+    "justhusky",  # DNA rare disease positive control
     "keencalf",
     "keenviper",
-    "lightprawn",
-    "livingox",
+    "kindcaiman",  # DNA rare disease positive control
+    "lightprawn",  # DNA rare disease positive control
+    "livingox",  # DNA rare disease positive control
     "luckyhog",
     "meetpossum",
-    "newaphid",
+    "newaphid",  # RNA rare disease positive control
+    "nextjackal",  # DNA rare disease positive control
     "mintbaboon",
     "mintyeti",
-    "moralcattle",
+    "modernmule",  # DNA rare disease positive control
+    "moralcattle",  # RNA rare disease positive control
     "moralgoat",
-    "onemite",
+    "onemite",  # DNA rare disease positive control
     "proeagle",
     "propercoral",
+    "proudcougar",  # DNA rare disease positive control
     "pumpedcat",
-    "rightmacaw",
-    "safeguinea",
-    "sharpparrot",
-    "sharppigeon",
-    "strongbison",
+    "rightmacaw",  # DNA rare disease positive control
+    "safeguinea",  # DNA rare disease positive control
+    "sharpparrot",  # RNA rare disease positive control
+    "sharppigeon",  # DNA rare disease positive control
+    "sharpwhale",  # DNA rare disease positive control
+    "smoothboa",  # RNA rare disease positive control
+    "strongbison",  # DNA rare disease positive control
     "strongman",
-    "topsrhino",
+    "tenderoriole",  # DNA rare disease positive control
+    "topsrhino",  # DNA rare disease positive control
     "unitedbeagle",
-    "usablemarten",
-    "vitalmouse",
+    "usablemarten",  # DNA rare disease positive control
+    "vitalmouse",  # DNA rare disease positive control
 ]
 
 CASES_TO_IGNORE = PROBLEMATIC_CASES + VALIDATION_CASES

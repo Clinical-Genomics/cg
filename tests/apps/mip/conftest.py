@@ -48,13 +48,13 @@ def simple(tmpdir):
 
 
 def _simple_files(tmpdir):
-    """"Some files to test with"""
+    """ "Some files to test with"""
     return simple(tmpdir)["files"]
 
 
 @pytest.fixture
 def simple_files(tmpdir):
-    """"Some files to test with"""
+    """ "Some files to test with"""
     return _simple_files(tmpdir)
 
 

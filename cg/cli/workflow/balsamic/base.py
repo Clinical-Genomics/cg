@@ -49,7 +49,7 @@ OPTION_PRIORITY = click.option(
 @click.group(invoke_without_command=True)
 @click.pass_context
 def balsamic(context: click.Context):
-    """Cancer analysis workflow """
+    """Cancer analysis workflow"""
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return None
@@ -198,7 +198,7 @@ def start(
     LOG.info(f"Starting analysis for {case_id}")
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-        context.invoke(link, case_id=case_id)
+        context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
         context.invoke(
             run,

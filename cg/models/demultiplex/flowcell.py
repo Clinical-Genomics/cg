@@ -3,9 +3,10 @@ from pathlib import Path
 from typing import Optional
 
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
+from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
 from pydantic import ValidationError
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -20,9 +21,21 @@ class Flowcell:
         self._run_parameters: Optional[RunParameters] = None
 
     @property
+    def flowcell_full_name(self) -> str:
+        return self.path.name
+
+    @property
+    def base_name(self) -> str:
+        return self.path.name.split("_")[-1]
+
+    @property
     def flowcell_id(self) -> str:
-        base_name: str = self.path.name.split("_")[-1]
-        return base_name[1:]
+        return self.base_name[1:]
+
+    @property
+    def flowcell_position(self) -> Literal["A", "B"]:
+        """get the flowcell position: A|B"""
+        return self.base_name[0]
 
     @property
     def sample_sheet_path(self) -> Path:
@@ -72,6 +85,9 @@ class Flowcell:
             LOG.warning(error)
             return False
         return True
+
+    def get_sample_sheet(self) -> SampleSheet:
+        return get_sample_sheet_from_file(infile=self.sample_sheet_path, sheet_type="S4")
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done

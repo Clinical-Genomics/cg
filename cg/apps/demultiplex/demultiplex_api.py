@@ -23,6 +23,7 @@ class DemultiplexingAPI:
         self.slurm_api = SlurmAPI()
         self.slurm_account: str = config["demultiplex"]["slurm"]["account"]
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
+        self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
         self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
         self.environment: str = config.get("environment", "stage")
         LOG.info("Set environment to %s", self.environment)

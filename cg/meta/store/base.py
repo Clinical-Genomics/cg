@@ -111,12 +111,12 @@ def deliverables_files(deliverables: dict, analysis_type: str) -> list:
 def _is_deliverables_tags_missing_in_analysis_tags(
     analysis_type_tags: dict, deliverables_tag_map: tuple
 ) -> bool:
-    """Check if deliverable tags are represented in analysis tags """
+    """Check if deliverable tags are represented in analysis tags"""
     return deliverables_tag_map not in analysis_type_tags
 
 
 def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
-    """ Get all files and their tags from the deliverables file """
+    """Get all files and their tags from the deliverables file"""
 
     parsed_files = []
     for file_ in deliverables["files"]:

@@ -13,6 +13,18 @@ from tests.apps.shipping.conftest import (
 )
 
 
+@pytest.fixture(name="fluffy_config")
+def fixture_fluffy_config(apps_dir: Path) -> Path:
+    """Return the path to a shipping config for fluffy"""
+    return apps_dir / "shipping" / "fluffy-deploy.yaml"
+
+
+@pytest.fixture(name="hermes_config")
+def fixture_hermes_config(apps_dir: Path) -> Path:
+    """Return the path to a shipping config for hermes"""
+    return apps_dir / "shipping" / "hermes-deploy.yaml"
+
+
 @pytest.fixture(name="scout_config")
 def fixture_scout_config(apps_dir: Path) -> Path:
     """Return the path to a shipping config for scout"""

@@ -172,7 +172,7 @@ def loqusdb_case_output():
 
 @pytest.fixture(scope="function")
 def loqusdb_duplicate_output():
-    """ loqusdb output for a 'loqusdb profile --check-vcf' call"""
+    """loqusdb output for a 'loqusdb profile --check-vcf' call"""
 
     _output = (
         b'{"ind_id": "proband", "name": "proband", "case_id": "recessive_trio_test", '
