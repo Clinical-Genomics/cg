@@ -1,23 +1,47 @@
 import shutil
 from pathlib import Path
-from typing import Dict
 
 import pytest
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from click.testing import CliRunner
+from tests.apps.cgstats.conftest import fixture_stats_api
 from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
     fixture_demultiplex_fixtures,
+    fixture_flowcell_name,
     fixture_lims_novaseq_samples,
     fixture_lims_novaseq_samples_file,
     fixture_novaseq_dir,
     fixture_novaseq_run_parameters,
     fixture_raw_samples_dir,
 )
+
+
+@pytest.fixture(name="flowcell_full_name")
+def fixture_flowcell_full_name() -> str:
+    return "201203_A00689_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(name="demux_run_dir")
+def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flowcells ready for demultiplexing"""
+    return demultiplex_fixtures / "flowcell_runs"
+
+
+@pytest.fixture(name="demux_results_dir")
+def fixture_demux_results_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with demultiplexing results"""
+    return demultiplex_fixtures / "demultiplexed-runs"
+
+
+@pytest.fixture(name="flowcell_object")
+def fixture_flowcell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
+    return Flowcell(flowcell_path=demux_run_dir / flowcell_full_name)
 
 
 @pytest.fixture(name="novaseq_sample_sheet_path")
@@ -75,13 +99,21 @@ def fixture_demultiplex_configs(project_dir: Path, demultiplex_fixtures: Path) -
     }
 
 
-@pytest.fixture(name="demultiplex_context")
-def fixture_demultiplex_context(
-    demultiplex_configs: dict, sbatch_process: Process, cg_context: CGConfig
-) -> CGConfig:
+@pytest.fixture(name="demultiplexing_api")
+def fixture_demultiplexing_api(
+    demultiplex_configs: dict, sbatch_process: Process
+) -> DemultiplexingAPI:
     demux_api = DemultiplexingAPI(config=demultiplex_configs)
     demux_api.slurm_api.process = sbatch_process
-    cg_context.demultiplex_api_ = demux_api
+    return demux_api
+
+
+@pytest.fixture(name="demultiplex_context")
+def fixture_demultiplex_context(
+    demultiplexing_api: DemultiplexingAPI, stats_api: StatsAPI, cg_context: CGConfig
+) -> CGConfig:
+    cg_context.demultiplex_api_ = demultiplexing_api
+    cg_context.cg_stats_api_ = stats_api
     return cg_context
 
 
