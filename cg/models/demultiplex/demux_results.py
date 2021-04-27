@@ -79,6 +79,34 @@ class DemuxResults:
                 LOG.debug("Found project %s", project_name)
                 yield project_name
 
+    @property
+    def raw_index_dir(self) -> Path:
+        """Return the path to a index dir that is not given the 'Project_'-prefix"""
+        return self.results_dir / "indexcheck"
+
+    @property
+    def raw_projects(self) -> Iterable[Path]:
+        """Return the raw project names created after demultiplexing
+
+        These are either 'indexcheck' or a number
+        """
+        for sub_dir in self.results_dir.iterdir():
+            if not sub_dir.is_dir():
+                LOG.debug("Skipping %s since it is not a directory", sub_dir)
+                continue
+            dir_name: str = sub_dir.name
+            if dir_name in ["Stats", "Reports"]:
+                LOG.debug("Skipping %s dir %s", dir_name, sub_dir)
+                continue
+            if dir_name.startswith("Project_"):
+                LOG.debug("Skipping already renamed project dir %s", sub_dir)
+                continue
+            if "index" in dir_name:
+                LOG.debug("Skipping 'indexcheck' dir %s", sub_dir)
+                continue
+                # We now know that the rest of the directories are project directories
+            yield sub_dir
+
     def get_logfile_parameters(self) -> LogfileParameters:
         with open(self.log_path, "r") as logfile:
             for line in logfile.readlines():
@@ -99,3 +127,6 @@ class DemuxResults:
         return LogfileParameters(
             id_string=id_string, program=program, command_line=command_line, time=time
         )
+
+    def __str__(self):
+        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=Flowcell(flowcell_path={self.flowcell.path})"

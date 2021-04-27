@@ -33,20 +33,39 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "flowcell_runs"
 
 
-@pytest.fixture(name="demux_results_dir")
-def fixture_demux_results_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with demultiplexing results"""
+@pytest.fixture(name="demux_results_finished_dir")
+def fixture_demux_results_finished_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with demultiplexing results where files are renamed etc"""
     return demultiplex_fixtures / "demultiplexed-runs"
+
+
+@pytest.fixture(name="demux_results_not_finished_dir")
+def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned"""
+    return demultiplex_fixtures / "demultiplexed-runs-unfinished"
 
 
 @pytest.fixture(name="flowcell_object")
 def fixture_flowcell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
+    """Create a flowcell object with flowcell that is demultiplexed"""
     return Flowcell(flowcell_path=demux_run_dir / flowcell_full_name)
 
 
 @pytest.fixture(name="novaseq_sample_sheet_path")
 def fixture_novaseq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a novaseq sample sheet"""
     return demultiplex_fixtures / "SampleSheetS2.csv"
+
+
+@pytest.fixture(name="demultiplexed_flowcell_working_directory")
+def fixture_demultiplexed_flowcell_working_directory(
+    demux_results_not_finished_dir: Path, project_dir: Path
+) -> Path:
+    """Copy the content of a demultiplexed but not finished directory to a temporary location"""
+    source: Path = demux_results_not_finished_dir
+    destination: Path = project_dir / demux_results_not_finished_dir.name
+    shutil.copytree(src=source, dst=destination)
+    return destination
 
 
 @pytest.fixture(name="flowcell_working_directory")
