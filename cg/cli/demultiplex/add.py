@@ -41,6 +41,8 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
 @click.pass_obj
 def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[str]):
     """Select a flowcell to fetch statistics from"""
+    # Need to instantiate API
+    stats_api: StatsAPI = context.cg_stats_api
     query: alchy.Query = project_sample_stats(flowcell=flowcell_id, project_name=project)
     stats_header = [
         "sample",
