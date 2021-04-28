@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 import alchy
 import click
@@ -36,14 +37,11 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
 
 @click.command(name="select")
 @click.argument("flowcell-id")
-@click.option("--project", help="Name of project to fetch data for", required=True)
+@click.option("--project", help="Name of project to fetch data for")
 @click.pass_obj
-def select_project_cmd(context: CGConfig, flowcell_id: str, project: str):
+def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[str]):
     """Select a flowcell to fetch statistics from"""
-    stats_api: StatsAPI = context.cg_stats_api
-    query: alchy.Query = project_sample_stats(
-        manager=stats_api, flowcell=flowcell_id, project_name=project
-    )
+    query: alchy.Query = project_sample_stats(flowcell=flowcell_id, project_name=project)
     stats_header = [
         "sample",
         "Flowcell",

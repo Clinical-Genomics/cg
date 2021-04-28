@@ -85,11 +85,12 @@ def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
     return None
 
 
-def project_sample_stats(flowcell: str, project_name: str) -> alchy.Query:
+def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
     query: alchy.Query = models.Sample.query.join(
         models.Sample.unaligned, models.Unaligned.demux, models.Demux.flowcell
     )
-    query = query.join(models.Sample.project).filter(models.Project.projectname == project_name)
+    if project_name:
+        query = query.join(models.Sample.project).filter(models.Project.projectname == project_name)
 
     query = query.with_entities(
         models.Sample.samplename,
