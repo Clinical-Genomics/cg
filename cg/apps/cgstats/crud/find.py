@@ -86,11 +86,29 @@ def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
 
 
 def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
+    #    query = """ SELECT sample.samplename AS smp, flowcell.flowcellname AS flc,
+    #    GROUP_CONCAT(unaligned.lane ORDER BY unaligned.lane) AS lanes,
+    #    GROUP_CONCAT(unaligned.readcounts ORDER BY unaligned.lane) AS rds, SUM(unaligned.readcounts) AS readsum,
+    #    GROUP_CONCAT(unaligned.yield_mb ORDER BY unaligned.lane) AS yield, SUM(unaligned.yield_mb) AS yieldsum,
+    #    GROUP_CONCAT(TRUNCATE(q30_bases_pct,2) ORDER BY unaligned.lane) AS q30,
+    #    GROUP_CONCAT(TRUNCATE(mean_quality_score,2) ORDER BY unaligned.lane) AS meanq
+    #    FROM sample, flowcell, unaligned, project, demux
+    #    WHERE sample.sample_id = unaligned.sample_id
+    #    AND flowcell.flowcell_id = demux.flowcell_id
+    #    AND unaligned.demux_id = demux.demux_id
+    #    AND sample.project_id = project.project_id
+    #    AND project.projectname = '""" + proje + """'
+    #    AND flowcell.flowcellname = '""" + flowc + """'
+    #    GROUP BY samplename, flowcell.flowcell_id
+    #    ORDER BY lane, sample.samplename, flowcellname """
+
     query: alchy.Query = models.Sample.query.join(
         models.Sample.unaligned, models.Unaligned.demux, models.Demux.flowcell
     )
     if project_name:
         query = query.join(models.Sample.project).filter(models.Project.projectname == project_name)
+
+    query = query.filter(models.Flowcell.flowcellname == flowcell)
 
     query = query.with_entities(
         models.Sample.samplename,
@@ -116,7 +134,6 @@ def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> a
         ).label("meanq"),
     )
 
-    query = query.filter(models.Flowcell.flowcellname == flowcell)
     query = query.group_by(models.Sample.samplename, models.Flowcell.flowcell_id)
     query = query.order_by(
         models.Unaligned.lane, models.Sample.samplename, models.Flowcell.flowcellname
