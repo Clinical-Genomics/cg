@@ -7,6 +7,7 @@ LOG = logging.getLogger(__name__)
 
 SERVER = "hasta"
 
+
 class PdcApi:
     """Group PDC related commands"""
 
