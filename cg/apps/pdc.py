@@ -16,11 +16,7 @@ class PdcApi:
     ) -> None:
         """Fetch a flowcell back from the backup solution."""
         path = root_dir[sequencer_type]
-
-        if server is None:
-            raise ValueError(f"{sequencer_type}: invalid sequencer type")
-
-        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {HASTA} {path}"
+        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {SERVER} {path}"
         command = ["ssh", "nas-9.scilifelab.se", bash_command]
         LOG.info(" ".join(command))
         if not dry:
