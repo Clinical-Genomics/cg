@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.4.1]
+### Fixed
+- By default fetch related flowcell information using `cg get sample <sample_id>`
+
 ## [21.4.0]
 ### Added
 - A column in customer-group admin view in to show customers in the group
