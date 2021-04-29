@@ -36,10 +36,10 @@ def get(context: click.Context, identifier: Optional[str]):
 
 @get.command()
 @click.option("--families/--no-families", default=True, help="display related families")
-@click.option("-f", "--flowcells", is_flag=True, help="display related flowcells")
+@click.option("-hf", "--hide-flowcells", is_flag=True, help="hide related flowcells")
 @click.argument("sample_ids", nargs=-1)
 @click.pass_context
-def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: List[str]):
+def sample(context: click.Context, families: bool, hide_flowcells: bool, sample_ids: List[str]):
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
@@ -61,7 +61,7 @@ def sample(context: click.Context, families: bool, flowcells: bool, sample_ids: 
         if families:
             family_ids: List[str] = [link_obj.family.internal_id for link_obj in sample_obj.links]
             context.invoke(family, family_ids=family_ids, samples=False)
-        if flowcells:
+        if not hide_flowcells:
             for flowcell_obj in sample_obj.flowcells:
                 LOG.debug(f"{flowcell_obj.name}: get info about flowcell")
                 context.invoke(flowcell, flowcell_id=flowcell_obj.name, samples=False)
