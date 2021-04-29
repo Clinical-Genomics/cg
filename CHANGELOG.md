@@ -13,6 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.4.1]
+### Changed
+- Change how samples are fetched for cgstats select command
+### Fixed
+- Bug when fetching info with `cg demultiplex select`-command
+
+
 ## [21.4.0]
 ### Added
 - A column in customer-group admin view in to show customers in the group
