@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- A column in customer-group admin view in to show customers in the group
+
 ## [21.3.1]
 ### Fixed
 - PDC backup destination server for 2500 flowcells

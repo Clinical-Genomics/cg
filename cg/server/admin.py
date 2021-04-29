@@ -177,6 +177,8 @@ class CustomerGroupView(BaseView):
 
     column_editable_list = ["name"]
     column_filters = []
+    column_hide_backrefs = False
+    column_list = ("internal_id", "name", "customers")
     column_searchable_list = ["internal_id", "name"]
 
 
