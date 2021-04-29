@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
-from typing import List, Iterable
+from typing import Iterable, List, Optional
 
-import alchy
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
 from cg.constants.cgstats import STATS_HEADER
@@ -37,7 +36,7 @@ class DemuxPostProcessingAPI:
         create.create_novaseq_flowcell(manager=self.stats_api, demux_results=demux_results)
 
     @staticmethod
-    def fetch_report_data(flowcell_id: str, project_name: str) -> List[StatsSample]:
+    def fetch_report_samples(flowcell_id: str, project_name: str) -> List[StatsSample]:
         return find.project_sample_stats(flowcell=flowcell_id, project_name=project_name)
 
     @staticmethod
@@ -66,38 +65,32 @@ class DemuxPostProcessingAPI:
             )
 
     @staticmethod
-    def write_report(report_path: Path, report_content: alchy.Query):
+    def write_report(report_path: Path, report_data: List[str]):
         LOG.info("Write demux report to %s", report_path)
         with report_path.open("w") as report_file:
             report_file.write("\t".join(STATS_HEADER) + "\n")
-            for line in report_content:
-                report_file.write(
-                    "\t".join(
-                        str(s)
-                        for s in [
-                            line.samplename,
-                            line.flowcellname,
-                            line.lanes,
-                            line.reads,
-                            line.readsum,
-                            line.yld,
-                            line.yieldsum,
-                            line.q30,
-                            line.meanq,
-                        ]
-                    )
-                    + "\n"
-                )
+            for line in report_data:
+                report_file.write(line + "\n")
 
-    def get_report_data(self, demux_results: DemuxResults) -> Iterable[str]:
+    def get_report_data(self, flowcell_id: str, project_name: Optional[str] = None) -> List[str]:
+        """Fetch the lines that are used to make a report from a flowcell"""
+        project_samples: List[StatsSample] = self.fetch_report_samples(
+            flowcell_id=flowcell_id, project_name=project_name
+        )
+        return [
+            sample_line
+            for sample_line in self.get_report_lines(
+                stats_samples=project_samples, flowcell_id=flowcell_id
+            )
+        ]
 
     def create_cgstats_reports(self, demux_results: DemuxResults) -> None:
         """Create a report for every project that was demultiplexed"""
         flowcell_id: str = demux_results.flowcell.flowcell_id
         for project in demux_results.projects:
             project_name: str = project.split("_")[-1]
-            report_data: alchy.Query = self.fetch_report_data(
+            report_data: List[str] = self.get_report_data(
                 flowcell_id=flowcell_id, project_name=project_name
             )
             report_path: Path = demux_results.demux_dir / f"stats-{project_name}-{flowcell_id}.txt"
-            self.write_report(report_path=report_path, report_content=report_data)
+            self.write_report(report_path=report_path, report_data=report_data)

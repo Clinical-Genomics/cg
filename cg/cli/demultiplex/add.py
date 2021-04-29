@@ -8,6 +8,7 @@ from cg.apps.cgstats.crud.find import project_sample_stats
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -44,14 +45,14 @@ def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[st
     """Select a flowcell to fetch statistics from"""
     # Need to instantiate API
     stats_api: StatsAPI = context.cg_stats_api
-    stats_samples: List[StatsSample] = project_sample_stats(
-        flowcell=flowcell_id, project_name=project
+    post_processing_api = DemuxPostProcessingAPI(stats_api=stats_api)
+    report_content: List[str] = post_processing_api.get_report_data(
+        flowcell_id=flowcell_id, project_name=project
     )
 
     click.echo("\t".join(STATS_HEADER))
-    if not stats_samples:
+    if not report_content:
         LOG.warning("Could not find any samples for flowcell %s, project %s", flowcell_id, project)
         return
-    print_lanes: List[str] = ",".join(str(lane) for lane in stats_samples[0].lanes)
-    for stats_sample in sorted(stats_samples, key=lambda x: x.sample_name):
-        click.echo()
+    for report_line in report_content:
+        click.echo(report_line)
