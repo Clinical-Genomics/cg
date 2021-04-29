@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.3.2]
+### Fixed
+- Remove default option for mip-dna priority
+
 ## [21.3.1]
 ### Fixed
 - PDC backup destination server for 2500 flowcells
