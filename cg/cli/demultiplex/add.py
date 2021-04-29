@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
-import alchy
 import click
 from cg.apps.cgstats.crud.create import create_novaseq_flowcell
 from cg.apps.cgstats.crud.find import project_sample_stats
@@ -10,6 +9,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.models.cg_config import CGConfig
+from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 
@@ -44,23 +44,14 @@ def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[st
     """Select a flowcell to fetch statistics from"""
     # Need to instantiate API
     stats_api: StatsAPI = context.cg_stats_api
-    query: alchy.Query = project_sample_stats(flowcell=flowcell_id, project_name=project)
+    stats_samples: List[StatsSample] = project_sample_stats(
+        flowcell=flowcell_id, project_name=project
+    )
 
     click.echo("\t".join(STATS_HEADER))
-    for line in query:
-        click.echo(
-            "\t".join(
-                str(s)
-                for s in [
-                    line.samplename,
-                    line.flowcellname,
-                    line.lanes,
-                    line.reads,
-                    line.readsum,
-                    line.yld,
-                    line.yieldsum,
-                    line.q30,
-                    line.meanq,
-                ]
-            )
-        )
+    if not stats_samples:
+        LOG.warning("Could not find any samples for flowcell %s, project %s", flowcell_id, project)
+        return
+    print_lanes: List[str] = ",".join(str(lane) for lane in stats_samples[0].lanes)
+    for stats_sample in sorted(stats_samples, key=lambda x: x.sample_name):
+        click.echo()

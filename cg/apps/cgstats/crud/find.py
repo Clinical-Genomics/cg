@@ -1,10 +1,11 @@
 import logging
-from typing import Optional
+from typing import List, Optional
 
 import alchy
 from cg.apps.cgstats.db import models
 from cg.models.demultiplex.demux_results import DemuxResults
-from sqlalchemy import func, or_
+from cg.models.cgstats.stats_sample import StatsSample
+from sqlalchemy import or_
 
 LOG = logging.getLogger(__name__)
 SAMPLE_PATTERN = "{}\_%"
@@ -85,7 +86,7 @@ def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
     return None
 
 
-def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
+def get_samples(flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
     query: alchy.Query = models.Sample.query.join(
         models.Sample.unaligned, models.Unaligned.demux, models.Demux.flowcell
     )
@@ -94,33 +95,13 @@ def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> a
 
     query = query.filter(models.Flowcell.flowcellname == flowcell)
 
-    query = query.with_entities(
-        models.Sample.samplename,
-        models.Flowcell.flowcellname,
-        func.group_concat(models.Unaligned.lane.op("ORDER BY")(models.Unaligned.lane)).label(
-            "lanes"
-        ),
-        func.group_concat(models.Unaligned.readcounts.op("ORDER BY")(models.Unaligned.lane)).label(
-            "reads"
-        ),
-        func.sum(models.Unaligned.readcounts).label("readsum"),
-        func.group_concat(models.Unaligned.yield_mb.op("ORDER BY")(models.Unaligned.lane)).label(
-            "yld"
-        ),
-        func.sum(models.Unaligned.yield_mb).label("yieldsum"),
-        func.group_concat(
-            func.truncate(models.Unaligned.q30_bases_pct, 2).op("ORDER BY")(models.Unaligned.lane)
-        ).label("q30"),
-        func.group_concat(
-            func.truncate(models.Unaligned.mean_quality_score, 2).op("ORDER BY")(
-                models.Unaligned.lane
-            )
-        ).label("meanq"),
-    )
-
-    query = query.group_by(models.Sample.samplename, models.Flowcell.flowcell_id)
-    query = query.order_by(
-        models.Unaligned.lane, models.Sample.samplename, models.Flowcell.flowcellname
-    )
-
     return query
+
+
+def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> List[StatsSample]:
+    samples_query: alchy.Query = get_samples(flowcell=flowcell, project_name=project_name)
+    db_sample: models.Sample
+    sample_stats: List[StatsSample] = [
+        StatsSample.from_orm(db_sample) for db_sample in samples_query
+    ]
+    return sample_stats

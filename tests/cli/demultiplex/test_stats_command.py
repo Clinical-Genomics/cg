@@ -29,7 +29,5 @@ def test_select_command(
 
     # THEN assert that the command exits with success
     assert result.exit_code == 0
-    # THEN assert that the sample information was printed
-    print(result.exit_code)
-    print(result.output)
-    assert 0
+    # THEN assert that the flowcell id if in the printing
+    assert flowcell_id in result.output
