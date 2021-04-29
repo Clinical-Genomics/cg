@@ -13,6 +13,14 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.4.0]
+### Added
+- A column in customer-group admin view in to show customers in the group
+
+## [21.3.1]
+### Fixed
+- PDC backup destination server for 2500 flowcells
+
 ## [21.3.0]
 ### Changed
 - Remove dependency `cgstats` from requirements.txt and move used functionality into CG
@@ -20,6 +28,12 @@ Try to use the following format:
 ## [21.2.0]
 ### Added
 - Functionality for the cgstats api in CG
+
+## [21.1.0]
+### Added
+Select analyses to be uploaded to vogue based on analysis completed date (before or after a date, of between two dates)
+Add uploaded to vogue date to analysis table
+Only select potential analyses to upload that have not been uploaded
 
 ## [21.0.0]
 
