@@ -1,14 +1,12 @@
 import logging
 
 import click
-
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.apps.stats import StatsAPI
-from cg.meta.transfer import TransferFlowcell, TransferLims, SampleState, PoolState
+from cg.meta.transfer import PoolState, SampleState, TransferFlowcell, TransferLims
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store import models
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 

@@ -62,7 +62,7 @@ def _file_is_yaml(file_path):
 def test_save_config_creates_file(
     upload_scout_api: UploadScoutAPI, mip_load_config: ScoutLoadConfig, tmp_file
 ):
-    """"Tests that save config creates a file"""
+    """ "Tests that save config creates a file"""
 
     # GIVEN a scout_config object and a path to save it on
 
@@ -76,7 +76,7 @@ def test_save_config_creates_file(
 def test_save_config_creates_yaml(
     upload_scout_api: UploadScoutAPI, mip_load_config: ScoutLoadConfig, tmp_file
 ):
-    """Tests that the file created by save_config_file create a yaml """
+    """Tests that the file created by save_config_file create a yaml"""
 
     # GIVEN a scout_config dict and a path to save it on
 

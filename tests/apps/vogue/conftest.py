@@ -42,7 +42,7 @@ def genotype_dict():
 
 @pytest.fixture(scope="function", name="process")
 def fixture_process():
-    """"""
+    """ """
 
     return MockProcess()
 

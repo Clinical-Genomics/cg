@@ -6,7 +6,7 @@ from cg.store import Store
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
-    """test that the estimated turnaround time is affected by the delivered_at date """
+    """test that the estimated turnaround time is affected by the delivered_at date"""
 
     # GIVEN a database with a case and a samples receive_at, prepared_at, sequenced_at,
     # delivered_at one week ago
@@ -32,7 +32,7 @@ def test_delivered_at_affects_tat(base_store: Store, helpers):
 
 
 def test_sequenced_at_affects_tat(base_store: Store, helpers):
-    """test that the estimated turnaround time is affected by the sequenced_at date """
+    """test that the estimated turnaround time is affected by the sequenced_at date"""
 
     # GIVEN a database with a case and a samples receive_at, prepared_at, sequenced_at one week
     # ago
@@ -57,7 +57,7 @@ def test_sequenced_at_affects_tat(base_store: Store, helpers):
 
 
 def test_prepared_at_affects_tat(base_store: Store, helpers):
-    """test that the estimated turnaround time is affected by the prepared_at date """
+    """test that the estimated turnaround time is affected by the prepared_at date"""
 
     # GIVEN a database with a case and a samples receive_at, prepared_at one week ago
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
@@ -80,7 +80,7 @@ def test_prepared_at_affects_tat(base_store: Store, helpers):
 
 
 def test_received_at_affects_tat(base_store: Store, helpers):
-    """test that the estimated turnaround time is affected by the received_at date """
+    """test that the estimated turnaround time is affected by the received_at date"""
 
     # GIVEN a database with a case and a samples received one week ago
     new_case = add_case(helpers, base_store, ordered_days_ago=7)
@@ -102,7 +102,7 @@ def test_received_at_affects_tat(base_store: Store, helpers):
 
 
 def test_samples_flowcell(base_store: Store, helpers):
-    """Test to that cases displays the flowcell status """
+    """Test to that cases displays the flowcell status"""
 
     # GIVEN a database with a case with a sample that belongs to a flowcell with status ondisk
     # and a sample not yet on a flowcell
@@ -125,7 +125,7 @@ def test_samples_flowcell(base_store: Store, helpers):
 
 
 def test_sample_flowcell(base_store: Store, helpers):
-    """Test to that cases displays the flowcell status """
+    """Test to that cases displays the flowcell status"""
 
     # GIVEN a database with a case with a sample that belongs to a flowcell with status ondisk
     new_case = add_case(helpers, base_store)
@@ -146,7 +146,7 @@ def test_sample_flowcell(base_store: Store, helpers):
 
 
 def test_case_action(base_store: Store, helpers):
-    """Test that case action is fetched by cases() method """
+    """Test that case action is fetched by cases() method"""
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
     analysis = helpers.add_analysis(
@@ -164,7 +164,7 @@ def test_case_action(base_store: Store, helpers):
 
 
 def test_analysis_dates_for_rerun(base_store: Store, helpers):
-    """Test to that cases displays no analysis dates for active reruns """
+    """Test to that cases displays no analysis dates for active reruns"""
 
     # GIVEN a database with an analysis that was completed but has an active rerun in progress
     analysis = helpers.add_analysis(
@@ -1214,7 +1214,7 @@ def test_one_invoiced_sample(base_store: Store, helpers):
 
 
 def test_analysis_uploaded_at(base_store: Store, helpers):
-    """Test to that cases displays when uploaded """
+    """Test to that cases displays when uploaded"""
 
     # GIVEN a database with an analysis that was uploaded
     analysis = helpers.add_analysis(base_store, uploaded_at=datetime.now())
@@ -1230,7 +1230,7 @@ def test_analysis_uploaded_at(base_store: Store, helpers):
 
 
 def test_analysis_pipeline(base_store: Store, helpers):
-    """Test to that cases displays pipeline """
+    """Test to that cases displays pipeline"""
 
     # GIVEN a database with an analysis that has pipeline
     pipeline = Pipeline.BALSAMIC
@@ -1247,7 +1247,7 @@ def test_analysis_pipeline(base_store: Store, helpers):
 
 
 def test_samples_delivered(base_store: Store, helpers):
-    """Test to that cases displays when they were delivered """
+    """Test to that cases displays when they were delivered"""
 
     # GIVEN a database with a sample that is delivered
     new_case = add_case(helpers, base_store)
@@ -1265,7 +1265,7 @@ def test_samples_delivered(base_store: Store, helpers):
 
 
 def test_analysis_completed_at(base_store: Store, helpers):
-    """Test to that cases displays when they were completed """
+    """Test to that cases displays when they were completed"""
 
     # GIVEN a database with an analysis that is completed
     analysis = helpers.add_analysis(base_store, completed_at=datetime.now())
@@ -1283,7 +1283,7 @@ def test_analysis_completed_at(base_store: Store, helpers):
 
 
 def test_case_ordered_date(base_store: Store, helpers):
-    """Test to that cases displays when they were ordered """
+    """Test to that cases displays when they were ordered"""
 
     # GIVEN a database with a case without samples and no analyses
     new_case = add_case(helpers, base_store)

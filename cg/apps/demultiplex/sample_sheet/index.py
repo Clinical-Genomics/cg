@@ -15,7 +15,7 @@ REAGENT_KIT_PARAMETER_TO_VERSION = {"1": 1.0, "3": 1.5}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
-    """ Determines if a index is already present in the existing indexes """
+    """Determines if a index is already present in the existing indexes"""
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
@@ -50,7 +50,7 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
 
 
 def get_reagent_kit_version(reagent_kit_version: str) -> float:
-    """ Derives the reagent kit version from the run parameters """
+    """Derives the reagent kit version from the run parameters"""
     LOG.info("Converting reagent kit parameter %s to version", reagent_kit_version)
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
@@ -81,7 +81,7 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
 
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
-    """ Generates the reverse complement of a DNA sequence"""
+    """Generates the reverse complement of a DNA sequence"""
     LOG.debug("Reverse complement string %s", dna)
 
     return "".join(DNA_COMPLEMENTS[base] for base in reversed(dna))
@@ -129,5 +129,5 @@ def adapt_indexes(
 
 
 def is_dual_index(index: str) -> bool:
-    """ Determines if an index in the raw sample sheet is dual index or not """
+    """Determines if an index in the raw sample sheet is dual index or not"""
     return "-" in index

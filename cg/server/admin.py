@@ -24,7 +24,7 @@ class BaseView(ModelView):
 def view_human_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
-    return Markup(u"%s" % (model.priority_human)) if model else u""
+    return Markup("%s" % (model.priority_human)) if model else ""
 
 
 def view_family_sample_link(unused1, unused2, model, unused3):
@@ -33,7 +33,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
 
     return Markup(
-        u"<a href='%s'>%s</a>"
+        "<a href='%s'>%s</a>"
         % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
     )
 
@@ -41,7 +41,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 def is_external_application(unused1, unused2, model, unused3):
     """column formatter to open this view"""
     del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else u""
+    return model.application_version.application.is_external if model.application_version else ""
 
 
 class ApplicationView(BaseView):
@@ -82,14 +82,14 @@ class ApplicationView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (
                     url_for("application.index_view", search=model.application.tag),
                     model.application.tag,
                 )
             )
             if model.application
-            else u""
+            else ""
         )
 
 
@@ -122,11 +122,11 @@ class BedView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (url_for("bed.index_view", search=model.bed.name), model.bed.name)
             )
             if model.bed
-            else u""
+            else ""
         )
 
 
@@ -206,11 +206,11 @@ class FamilyView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (url_for("family.index_view", search=model.family.internal_id), model.family)
             )
             if model.family
-            else u""
+            else ""
         )
 
 
@@ -247,7 +247,7 @@ class InvoiceView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (
                     url_for("invoice.index_view", search=model.invoice.id),
                     model.invoice.invoiced_at.date()
@@ -256,7 +256,7 @@ class InvoiceView(BaseView):
                 )
             )
             if model.invoice
-            else u""
+            else ""
         )
 
 
@@ -331,11 +331,11 @@ class SampleView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
             )
             if model.sample
-            else u""
+            else ""
         )
 
 

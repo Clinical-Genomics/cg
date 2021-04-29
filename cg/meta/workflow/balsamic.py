@@ -433,7 +433,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return formatted_options
 
     def config_case(self, case_id: str, panel_bed: str, dry_run: bool = False) -> None:
-        """Create config file for BALSAMIC analysis """
+        """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(case_id=case_id, panel_bed=panel_bed)
         command = ["config", "case"]
         options = self.__build_command_str(

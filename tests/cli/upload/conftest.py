@@ -54,7 +54,7 @@ def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestam
 def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
 ) -> dict:
-    """ Returns a dictionary in hk format with files used in upload gt process"""
+    """Returns a dictionary in hk format with files used in upload gt process"""
     return {
         "name": case_id,
         "created": datetime.now(),
@@ -230,12 +230,12 @@ class MockLims:
 
     @staticmethod
     def lims_samples():
-        """ Return LIMS-like case samples """
+        """Return LIMS-like case samples"""
         lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
         return lims_family["samples"]
 
     def sample(self, sample_id):
-        """ Returns a lims sample matching the provided sample_id """
+        """Returns a lims sample matching the provided sample_id"""
         for sample in self.lims_samples():
             if sample["id"] == sample_id:
                 return sample

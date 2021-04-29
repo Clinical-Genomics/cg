@@ -6,7 +6,6 @@ from typing import Optional, TextIO
 
 import housekeeper
 import requests
-import ruamel.yaml
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -32,7 +31,6 @@ class ReportAPI:
         analysis_api: AnalysisAPI,
         scout_api: ScoutAPI,
         logger=logging.getLogger(__name__),
-        yaml_loader=ruamel.yaml,
         path_tool=Path,
     ):
 
@@ -41,7 +39,6 @@ class ReportAPI:
         self.chanjo = chanjo_api
         self.analysis = analysis_api
         self.log = logger
-        self.yaml_loader = yaml_loader
         self.path_tool = path_tool
         self.scout = scout_api
         self.report_validator = ReportValidator(store)

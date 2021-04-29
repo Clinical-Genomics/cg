@@ -42,7 +42,7 @@ class MockFailedProcess:
 
     @property
     def returncode(self):
-        """ Mock returncode that is not 0"""
+        """Mock returncode that is not 0"""
         return 1
 
 

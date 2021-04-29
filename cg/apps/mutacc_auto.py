@@ -38,7 +38,7 @@ class MutaccAutoAPI:
         extract_call = copy.deepcopy(self.base_call)
 
         def json_default_decoder(obj):
-            """ decode to str if object is not serializable"""
+            """decode to str if object is not serializable"""
             return str(obj)
 
         extract_call.extend(
