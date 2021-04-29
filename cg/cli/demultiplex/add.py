@@ -63,7 +63,7 @@ def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[st
         LOG.warning("Could not find any samples for flowcell %s, project %s", flowcell_id, project)
         return
     print_lanes: List[str] = ",".join(str(lane) for lane in stats_samples[0].lanes)
-    for stats_sample in stats_samples:
+    for stats_sample in sorted(stats_samples, key=lambda x: x.sample_name):
         click.echo(
             "\t".join(
                 str(s)

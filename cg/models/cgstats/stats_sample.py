@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, validator
 class Unaligned(BaseModel):
     lane: int
     read_count: int = Field(..., alias="readcounts")
-    yield_mb: float
+    yield_mb: int
     passed_filter_pct: float
 
     q30_bases_pct: float
