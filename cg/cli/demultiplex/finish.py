@@ -36,9 +36,6 @@ def finish_flowcell(context: CGConfig, flowcell_name: str, dry_run: bool):
     demux_results: DemuxResults = DemuxResults(
         demux_dir=demultiplex_api.out_dir / flowcell_name, flowcell=flowcell
     )
-    print(flowcell)
-    print(demux_results)
-    return
 
     if not demultiplex_api.is_demultiplexing_completed(flowcell=flowcell):
         LOG.warning("Demultiplex is not ready!")
@@ -46,4 +43,4 @@ def finish_flowcell(context: CGConfig, flowcell_name: str, dry_run: bool):
     unaligned_dir: Path = demultiplex_api.unaligned_dir_path(flowcell=flowcell)
     demux_post_processing_api = DemuxPostProcessingAPI()
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    demux_post_processing_api.rename_files(unaligned_dir=unaligned_dir, flowcell=flowcell)
+    demux_post_processing_api.rename_files(demux_results=demux_results)

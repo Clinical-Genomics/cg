@@ -7,6 +7,7 @@ from cg.apps.cgstats.crud.create import create_novaseq_flowcell
 from cg.apps.cgstats.crud.find import project_sample_stats
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.constants.cgstats import STATS_HEADER
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
@@ -44,18 +45,8 @@ def select_project_cmd(context: CGConfig, flowcell_id: str, project: str):
     query: alchy.Query = project_sample_stats(
         manager=stats_api, flowcell=flowcell_id, project_name=project
     )
-    stats_header = [
-        "sample",
-        "Flowcell",
-        "Lanes",
-        "readcounts/lane",
-        "sum_readcounts",
-        "yieldMB/lane",
-        "sum_yield",
-        "%Q30",
-        "MeanQscore",
-    ]
-    click.echo("\t".join(stats_header))
+
+    click.echo("\t".join(STATS_HEADER))
     for line in query:
         click.echo(
             "\t".join(
