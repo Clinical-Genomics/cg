@@ -19,8 +19,12 @@ def test_select_command(
     demultiplex_context.cg_stats_api_ = populated_stats_api
     # GIVEN a stats api with some information about a flowcell
     flowcell_id: str = flowcell_object.flowcell_id
+    full_flowcell_name: str = flowcell_object.flowcell_full_name
     assert find.get_flowcell_id(flowcell_id)
-    demux_results = DemuxResults(demux_dir=demux_results_finished_dir, flowcell=flowcell_object)
+    demux_results = DemuxResults(
+        demux_dir=demux_results_finished_dir / full_flowcell_name, flowcell=flowcell_object
+    )
+
     # GIVEN a project id
     project_id: str = ""
     for project in demux_results.projects:
