@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from cg.apps.cgstats.stats import StatsAPI
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -14,8 +15,9 @@ def test_rename_demux_result(
 ):
 
     # GIVEN that this is the location of the demultiplex api
+    stats_api: StatsAPI = demultiplex_context.cg_stats_api
     demultiplex_context.demultiplex_api_.out_dir = demultiplexed_flowcell_working_directory
-    post_demux_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI()
+    post_demux_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(stats_api=stats_api)
     demux_dir: Path = demultiplexed_flowcell_working_directory / flowcell_object.flowcell_full_name
     demux_results: DemuxResults = DemuxResults(demux_dir=demux_dir, flowcell=flowcell_object)
     # GIVEN that there are no projects with the correct file name
