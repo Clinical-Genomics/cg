@@ -23,7 +23,7 @@ def test_cli_upload_vogue_reagent_labes(upload_context: CGConfig, cli_runner: Cl
 
 
 def test_cli_upload_vogue_reagent_labes_no_days(upload_context: CGConfig, cli_runner: CliRunner):
-    """"""
+    """ """
 
     # GIVEN a vogue api
 

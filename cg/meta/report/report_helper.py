@@ -3,7 +3,7 @@ from cg.store import models
 
 
 class ReportHelper:
-    """Class that fetches and calculates data from status database """
+    """Class that fetches and calculates data from status database"""
 
     @staticmethod
     def get_report_version(analysis: models.Analysis) -> int:

@@ -11,7 +11,7 @@ def dummy_sample_name(sample_name: str) -> str:
 
 
 def dummy_sample(flowcell: str, dummy_index: str, lane: int, name: str) -> LimsFlowcellSample:
-    """ Constructs and returns a dummy sample in novaseq sample sheet format"""
+    """Constructs and returns a dummy sample in novaseq sample sheet format"""
     return LimsFlowcellSample(
         flowcell_id=flowcell,
         lane=lane,
