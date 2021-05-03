@@ -27,6 +27,7 @@ def demultiplex_all(
         flowcells_directory: Path = Path(context.demultiplex.run_dir)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
+    LOG.info("Search for flowcells ready to demultiplex in %s", flowcells_directory)
     for sub_dir in flowcells_directory.iterdir():
         if not sub_dir.is_dir():
             continue

@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 from cg.apps.cgstats.crud.find import get_flowcell_id
@@ -14,9 +13,7 @@ def test_add_flowcell_cmd(
     demultiplex_context: CGConfig,
     demultiplexed_flowcell_finished_working_directory: Path,
     demultiplex_ready_flowcell: Path,
-    caplog,
 ):
-    caplog.set_level(logging.DEBUG)
     # GIVEN a cgstats api and a demultiplex api
     # GIVEN that there is a flowcell in the run dir
     assert demultiplex_ready_flowcell.exists()
