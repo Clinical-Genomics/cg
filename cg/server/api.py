@@ -54,7 +54,7 @@ def before_request():
         except ValueError:
             return abort(make_response(jsonify(message="outdated login certificate"), 403))
         user_obj = db.user(user_data["email"])
-        if user_obj is None:
+        if user_obj is None or not user_obj.order_portal_login:
             message = f"{user_data['email']} doesn't have access"
             return abort(make_response(jsonify(message=message), 403))
         g.current_user = user_obj
