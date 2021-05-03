@@ -13,9 +13,23 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.4.1]
+## [21.4.4]
 ### Fixed
 - By default fetch related flowcell information using `cg get sample <sample_id>`
+
+## [21.4.3]
+### Fixed
+- Display invoice contact on invoice
+
+## [21.4.2]
+### Fixed
+- Remove default option for mip-dna priority
+
+## [21.4.1]
+### Changed
+- Change how samples are fetched for cgstats select command
+### Fixed
+- Bug when fetching info with `cg demultiplex select`-command
 
 ## [21.4.0]
 ### Added

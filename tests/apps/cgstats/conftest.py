@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
 from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
@@ -22,6 +23,12 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
     _store.create_all()
     yield _store
     _store.drop_all()
+
+
+@pytest.fixture(name="populated_stats_api")
+def fixture_populated_stats_api(stats_api: StatsAPI, demux_results: DemuxResults) -> StatsAPI:
+    create.create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
+    return stats_api
 
 
 @pytest.fixture(name="demultiplexing_stats_path")
