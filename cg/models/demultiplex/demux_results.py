@@ -24,6 +24,7 @@ class DemuxResults:
     """Class to gather information from a demultiplex result"""
 
     def __init__(self, demux_dir: Path, flowcell: Flowcell):
+        LOG.info("Instantiating DemuxResults with path %s", demux_dir)
         self.demux_dir: Path = demux_dir
         self.flowcell: Flowcell = flowcell
 
@@ -108,7 +109,12 @@ class DemuxResults:
             yield sub_dir
 
     def get_logfile_parameters(self) -> LogfileParameters:
-        with open(self.log_path, "r") as logfile:
+        log_path: Path = self.log_path
+        LOG.debug("Parse log file %s", log_path)
+        if not log_path.exists():
+            LOG.warning("Could not find log file %s", log_path)
+            raise FileNotFoundError
+        with open(log_path, "r") as logfile:
             for line in logfile.readlines():
                 # Fetch the line where the call that was made is
                 if "bcl2fastq" in line and "singularity" in line:

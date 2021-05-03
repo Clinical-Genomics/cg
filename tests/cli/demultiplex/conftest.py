@@ -1,3 +1,4 @@
+import logging
 import shutil
 from pathlib import Path
 
@@ -19,6 +20,8 @@ from tests.apps.cgstats.conftest import (
 from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
     fixture_demultiplex_fixtures,
+    fixture_demux_run_dir,
+    fixture_flowcell_full_name,
     fixture_flowcell_name,
     fixture_lims_novaseq_samples,
     fixture_lims_novaseq_samples_file,
@@ -27,16 +30,7 @@ from tests.apps.demultiplex.conftest import (
     fixture_raw_samples_dir,
 )
 
-
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
-    return "201203_A00689_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(name="demux_run_dir")
-def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return demultiplex_fixtures / "flowcell_runs"
+LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="demux_results_finished_dir")
@@ -81,13 +75,26 @@ def fixture_demultiplexed_flowcells_working_directory(project_dir: Path):
 
 @pytest.fixture(name="demultiplexed_flowcell_working_directory")
 def fixture_demultiplexed_flowcell_working_directory(
-    demux_results_not_finished_dir: Path, demultiplexed_flowcells_working_directory: Path
+    demux_results_not_finished_dir: Path,
+    demultiplexed_flowcells_working_directory: Path,
+    flowcell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location"""
-    source: Path = demux_results_not_finished_dir
-    destination: Path = (
-        demultiplexed_flowcells_working_directory / demux_results_not_finished_dir.name
-    )
+    source: Path = demux_results_not_finished_dir / flowcell_full_name
+    destination: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
+    shutil.copytree(src=source, dst=destination)
+    return destination
+
+
+@pytest.fixture(name="demultiplexed_flowcell_finished_working_directory")
+def fixture_demultiplexed_flowcell_finished_working_directory(
+    demux_results_finished_dir: Path,
+    demultiplexed_flowcells_working_directory: Path,
+    flowcell_full_name: str,
+) -> Path:
+    """Copy the content of a demultiplexed but not finished directory to a temporary location"""
+    source: Path = demux_results_finished_dir / flowcell_full_name
+    destination: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
     shutil.copytree(src=source, dst=destination)
     return destination
 
@@ -119,6 +126,10 @@ def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq
     existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir)
     working_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_working_directory)
     shutil.copy(str(existing_flowcell.sample_sheet_path), str(working_flowcell.sample_sheet_path))
+    shutil.copy(
+        str(DemultiplexingAPI.get_logfile(existing_flowcell)),
+        str(DemultiplexingAPI.get_logfile(working_flowcell)),
+    )
     working_flowcell.copy_complete_path.touch()
     working_flowcell.rta_complete_path.touch()
     return flowcell_working_directory
