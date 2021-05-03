@@ -10,11 +10,11 @@ from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from click.testing import CliRunner
 from tests.apps.cgstats.conftest import (
-    fixture_populated_stats_api,
-    fixture_stats_api,
-    fixture_demux_results,
     fixture_demultiplexed_flowcell,
     fixture_demultiplexed_runs,
+    fixture_demux_results,
+    fixture_populated_stats_api,
+    fixture_stats_api,
 )
 from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
@@ -63,24 +63,44 @@ def fixture_novaseq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "SampleSheetS2.csv"
 
 
+@pytest.fixture(name="flowcell_runs_working_directory")
+def fixture_flowcell_runs_working_directory(project_dir: Path):
+    """Return the path to a working directory with flowcells ready for demux"""
+    working_dir = project_dir / "flowcell_runs"
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
+@pytest.fixture(name="demultiplexed_flowcells_working_directory")
+def fixture_demultiplexed_flowcells_working_directory(project_dir: Path):
+    """Return the path to a working directory with flowcells that have been demultiplexed"""
+    working_dir = project_dir / "demultiplexed-runs"
+    working_dir.mkdir(parents=True)
+    return working_dir
+
+
 @pytest.fixture(name="demultiplexed_flowcell_working_directory")
 def fixture_demultiplexed_flowcell_working_directory(
-    demux_results_not_finished_dir: Path, project_dir: Path
+    demux_results_not_finished_dir: Path, demultiplexed_flowcells_working_directory: Path
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location"""
     source: Path = demux_results_not_finished_dir
-    destination: Path = project_dir / demux_results_not_finished_dir.name
+    destination: Path = (
+        demultiplexed_flowcells_working_directory / demux_results_not_finished_dir.name
+    )
     shutil.copytree(src=source, dst=destination)
     return destination
 
 
 @pytest.fixture(name="flowcell_working_directory")
-def fixture_flowcell_working_directory(novaseq_dir: Path, project_dir: Path) -> Path:
+def fixture_flowcell_working_directory(
+    novaseq_dir: Path, flowcell_runs_working_directory: Path
+) -> Path:
     """Return the path to a working directory that will be deleted after test is run
 
     This is a path to a flowcell directory with the run parameters present
     """
-    working_dir: Path = project_dir / novaseq_dir.name
+    working_dir: Path = flowcell_runs_working_directory / novaseq_dir.name
     working_dir.mkdir(parents=True)
     existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir)
     working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
@@ -111,10 +131,14 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
 
 
 @pytest.fixture(name="demultiplex_configs")
-def fixture_demultiplex_configs(project_dir: Path, demultiplex_fixtures: Path) -> dict:
-    out_dir: Path = project_dir / "demultiplexed-runs"
-    run_dir: Path = demultiplex_fixtures / "flowcell_runs"
-    out_dir.mkdir(parents=True)
+def fixture_demultiplex_configs(
+    flowcell_runs_working_directory: Path,
+    demultiplexed_flowcells_working_directory: Path,
+    demultiplex_fixtures: Path,
+) -> dict:
+    out_dir: Path = demultiplexed_flowcells_working_directory
+    run_dir: Path = flowcell_runs_working_directory
+    out_dir.mkdir(parents=True, exist_ok=True)
     return {
         "demultiplex": {
             "out_dir": str(out_dir),

@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(name="all")
-@click.argument("flowcells-directory", type=click.Path(exists=True, file_okay=False))
+@click.option("--flowcells-directory", type=click.Path(exists=True, file_okay=False))
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def demultiplex_all(
@@ -20,6 +20,7 @@ def demultiplex_all(
     dry_run: bool,
 ):
     """Demultiplex all flowcells that are ready under the flowcells_directory"""
+    LOG.info("Running cg demultiplex all")
     if flowcells_directory:
         flowcells_directory: Path = Path(str(flowcells_directory))
     else:

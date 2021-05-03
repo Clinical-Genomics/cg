@@ -1,16 +1,18 @@
+"""Commands to mimic the behaviour from cgstats.
+
+This is a way to interact with cgstats manually. In automated production these commands will not be run.
+"""
 import logging
 from pathlib import Path
 from typing import List, Optional
 
 import click
 from cg.apps.cgstats.crud.create import create_novaseq_flowcell
-from cg.apps.cgstats.crud.find import project_sample_stats
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
-from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 
