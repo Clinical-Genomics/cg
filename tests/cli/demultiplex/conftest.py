@@ -66,7 +66,7 @@ def fixture_flowcell_runs_working_directory(project_dir: Path):
 
 
 @pytest.fixture(name="demultiplexed_flowcells_working_directory")
-def fixture_demultiplexed_flowcells_working_directory(project_dir: Path):
+def fixture_demultiplexed_flowcells_working_directory(project_dir: Path) -> Path:
     """Return the path to a working directory with flowcells that have been demultiplexed"""
     working_dir = project_dir / "demultiplexed-runs"
     working_dir.mkdir(parents=True)
