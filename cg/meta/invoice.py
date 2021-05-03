@@ -36,7 +36,7 @@ class InvoiceAPI:
         customer = self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
 
         contact = {
-            "name": customer.name,
+            "name": customer.invoice_contact_name,
             "email": customer.invoice_contact_email,
             "customer_name": customer.name,
             "reference": customer.invoice_reference,

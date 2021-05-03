@@ -13,8 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.4.2]
+## [NG.NG.NG]
+### Fixed
+- Display invoice contact on invoice
 
+## [21.4.2]
 ### Fixed
 - Remove default option for mip-dna priority
 
