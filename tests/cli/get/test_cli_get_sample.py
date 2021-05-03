@@ -8,7 +8,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_sample_bad_sample(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to get a sample using a non-existing sample-id """
+    """Test to get a sample using a non-existing sample-id"""
     # GIVEN an empty database
 
     # WHEN getting a sample

@@ -1,10 +1,12 @@
 """API to run Vogue"""
 
+import datetime as dt
 import json
+from typing import Optional
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
-from cg.store import Store
+from cg.store import Store, models
 
 
 class UploadVogueAPI:
@@ -52,3 +54,11 @@ class UploadVogueAPI:
         """Running vogue load bioinfo sample."""
 
         self.vogue_api.load_bioinfo_sample(load_bioinfo_inputs)
+
+    @staticmethod
+    def update_analysis_uploaded_to_vogue_date(
+        analysis: models.Analysis,
+        vogue_upload_date: Optional[dt.datetime] = dt.datetime.now(),
+    ) -> models.Analysis:
+        analysis.uploaded_to_vogue_at = vogue_upload_date
+        return analysis

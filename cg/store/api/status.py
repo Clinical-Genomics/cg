@@ -67,7 +67,7 @@ class StatusHandler(BaseHandler):
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
-        families_query = (
+        families_query = list(
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
             .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
@@ -76,24 +76,30 @@ class StatusHandler(BaseHandler):
                 or_(
                     models.Family.action == "analyze",
                     and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
+                    and_(
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at < models.Sample.sequenced_at,
+                    ),
                 )
             )
             .order_by(models.Family.priority.desc(), models.Family.ordered_at)
         )
-
-        families = [
+        families_query = [
             case_obj
             for case_obj in families_query
-            if self._all_samples_have_sequence_data(case_obj.links)
+            if case_obj.latest_sequenced
+            and (
+                case_obj.action == "analyze"
+                or not case_obj.latest_analyzed
+                or case_obj.latest_analyzed < case_obj.latest_sequenced
+            )
         ]
 
         if threshold:
-            families = [
-                case_obj
-                for case_obj in families
-                if self.all_samples_have_enough_reads(case_obj.links)
+            families_query = [
+                case_obj for case_obj in families_query if case_obj.all_samples_pass_qc
             ]
-        return families[:limit]
+        return families_query[:limit]
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
         """Returns a list of cases that may be available to store in Housekeeper"""
@@ -536,40 +542,6 @@ class StatusHandler(BaseHandler):
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced in-house."""
         return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
-
-    def all_samples_have_enough_reads(self, links: List[models.FamilySample]) -> bool:
-
-        samples_have_enough_reads = []
-        for link in links:
-            target_reads = (
-                self.Application.query.filter_by(
-                    id=self.ApplicationVersion.query.filter_by(
-                        id=link.sample.application_version_id
-                    )
-                    .first()
-                    .application_id
-                )
-                .first()
-                .target_reads
-            )
-            threshold = (
-                self.Application.query.filter_by(
-                    id=self.ApplicationVersion.query.filter_by(
-                        id=link.sample.application_version_id
-                    )
-                    .first()
-                    .application_id
-                )
-                .first()
-                .percent_reads_guaranteed
-            ) / 100
-
-            if link.sample.reads > target_reads * threshold:
-                samples_have_enough_reads.append(True)
-            else:
-                samples_have_enough_reads.append(False)
-
-        return all(samples_have_enough_reads)
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""

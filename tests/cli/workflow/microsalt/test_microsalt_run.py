@@ -21,7 +21,7 @@ def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig):
 
 
 def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, microbial_ticket, caplog):
-    """Test command dry """
+    """Test command dry"""
 
     # GIVEN
     caplog.set_level(logging.INFO)

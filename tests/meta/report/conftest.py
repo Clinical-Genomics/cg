@@ -3,10 +3,9 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytest
-from tests.mocks.limsmock import MockLimsAPI
-
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
+from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
@@ -106,18 +105,6 @@ class MockLogger:
         return self.warnings
 
 
-class MockYamlLoader:
-    def __init__(self):
-        self.open_file = None
-
-    def safe_load(self, open_file: str):
-        self.open_file = open_file
-        return "safely_loaded_file"
-
-    def get_open_file(self):
-        return self.open_file
-
-
 class MockDB(Store):
     family_samples_returns_no_reads = False
     samples_returns_no_capture_kit = False
@@ -171,19 +158,16 @@ def report_api(report_store, lims_samples):
     analysis = MockAnalysis()
     scout = MockScout()
     logger = MockLogger()
-    yaml_loader = MockYamlLoader()
     path_tool = MockPath()
-    _report_api = ReportAPI(
+    return ReportAPI(
         lims_api=lims,
         store=db,
         chanjo_api=chanjo,
         analysis_api=analysis,
         scout_api=scout,
         logger=logger,
-        yaml_loader=yaml_loader,
         path_tool=path_tool,
     )
-    return _report_api
 
 
 @pytest.fixture(scope="function")

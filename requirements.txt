@@ -31,12 +31,11 @@ pydantic
 email-validator
 pyschemes
 python-dateutil
-ruamel.yaml
+pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
 tabulate
 typing_extensions
 
 # apps
-cgstats>=1.1.2
 genologics
 housekeeper>=2.5

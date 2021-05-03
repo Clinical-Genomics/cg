@@ -39,8 +39,14 @@ def fixture_novaseq_dir(demultiplex_fixtures: Path) -> Path:
 
 @pytest.fixture(name="hiseq_dir")
 def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the hiseq demultiplex fixtures"""
+    """Return the path to the novaseq demultiplex fixtures"""
     return demultiplex_fixtures / "hiseq_run"
+
+
+@pytest.fixture(name="project_log")
+def fixture_project_log(novaseq_dir: Path) -> Path:
+    """Return the path to a project log"""
+    return novaseq_dir / "projectlog.20210403115002.log"
 
 
 @pytest.fixture(name="unknown_run_parameters")

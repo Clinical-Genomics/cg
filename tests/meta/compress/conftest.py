@@ -82,7 +82,7 @@ class CompressionData:
 
     @staticmethod
     def make_old(file_path):
-        """"Convert the modifying date so that the file looks old"""
+        """ "Convert the modifying date so that the file looks old"""
         # Convert the date to a float
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
