@@ -147,11 +147,10 @@ class CustomerView(BaseView):
     """Admin view for Model.Customer"""
 
     column_editable_list = [
+        "name",
         "scout_access",
         "loqus_upload",
         "return_samples",
-        "primary_contact",
-        "delivery_contact",
         "priority",
         "customer_group",
         "comment",
@@ -160,8 +159,8 @@ class CustomerView(BaseView):
         "internal_id",
         "name",
         "priority",
-        "primary_contact",
-        "delivery_contact",
+        "primary_contact_email",
+        "delivery_contact_email",
         "scout_access",
         "return_samples",
         "project_account_KI",
@@ -372,10 +371,9 @@ class UserView(BaseView):
     """Admin view for Model.User"""
 
     column_default_sort = "name"
-    column_editable_list = ["order_portal_login"]
-    column_filters = ["is_admin", "order_portal_login", "customers"]
+    column_filters = ["customers"]
     column_hide_backrefs = False
-    column_list = ("name", "email", "is_admin", "order_portal_login", "customers")
+    column_list = ("name", "is_admin", "email", "customers")
     column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
