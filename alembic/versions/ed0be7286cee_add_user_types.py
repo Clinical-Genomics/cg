@@ -21,8 +21,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 # revision identifiers, used by Alembic.
-revision = 'ed0be7286cee'
-down_revision = 'ef472ce31931'
+revision = "ed0be7286cee"
+down_revision = "ef472ce31931"
 branch_labels = None
 depends_on = None
 
