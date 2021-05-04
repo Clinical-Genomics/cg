@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [21.5.1]
+### Fixed
+- By default fetch related flowcell information using `cg get sample <sample_id>`
+
 ## [21.5.0]
 ### Added
 - User field for allowing order portal login
