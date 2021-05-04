@@ -42,14 +42,14 @@ def validate_sample_sheet(sheet: click.Path):
 @click.argument("flowcell-name")
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def create_sheet(context: CGConfig, flowcell: str, dry_run: bool):
+def create_sheet(context: CGConfig, flowcell_name: str, dry_run: bool):
     """Command to create a sample sheet
 
     Search the flowcell in the directory specified in config
     """
-    LOG.info("Creating sample sheet for flowcell %s", flowcell)
+    LOG.info("Creating sample sheet for flowcell %s", flowcell_name)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flowcell_path: Path = demultiplex_api.run_dir / flowcell
+    flowcell_path: Path = demultiplex_api.run_dir / flowcell_name
     if not flowcell_path.exists():
         LOG.warning("Could not find flowcell %s", flowcell_path)
         raise click.Abort
