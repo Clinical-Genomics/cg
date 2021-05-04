@@ -16,6 +16,12 @@ Try to use the following format:
 ## [NG.NG.NG]
 ### Added
 - User field for allowing order portal login
+### Changed 
+- Delivery/Invoicing/Primary Contacts are now relations from Customer to User in admin
+
+## [21.4.4]
+### Fixed
+- Propagate all samples to microsalt, even those without reads
 
 ## [21.4.3]
 ### Fixed
