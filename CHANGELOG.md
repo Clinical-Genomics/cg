@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [21.4.4]
+### Fixed
+- Propagate all samples to microsalt, even those without reads
+
 ## [21.4.3]
 ### Fixed
 - Display invoice contact on invoice
