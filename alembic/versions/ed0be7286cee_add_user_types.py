@@ -34,6 +34,9 @@ class Customer(Base):
     delivery_contact_email = Column(types.String(128))
     invoice_contact_email = Column(types.String(128))
     primary_contact_email = Column(types.String(128))
+    delivery_contact_name = Column(types.String(128))
+    invoice_contact_name = Column(types.String(128))
+    primary_contact_name = Column(types.String(128))
 
     # post-migration fields
     delivery_contact_id = Column(ForeignKey("user.id"))
@@ -48,6 +51,7 @@ class User(Base):
     __tablename__ = "user"
     id = Column(types.Integer, primary_key=True)
     email = Column(types.String(128), unique=True, nullable=False)
+    name = Column(types.String(128))
 
     # post-migration fields
     order_portal_login = Column(types.Boolean, default=False)
@@ -76,10 +80,8 @@ def upgrade():
     # replace email addresses on customers with connection between customer and user using users email
     for customer in session.query(Customer):
 
-        # delivery contact
         if customer.delivery_contact_email:
 
-            # get user with that email
             user = session.query(User).filter(User.email == customer.delivery_contact_email).first()
             if user:
                 customer.delivery_contact_id = user.id
@@ -92,10 +94,8 @@ def upgrade():
                     f"WARNING: could not find any user with email {customer.delivery_contact_email} to connect customer {customer.id} as delivery_contact"
                 )
 
-        # invoice contact
         if customer.invoice_contact_email:
 
-            # get user with that email
             user = session.query(User).filter(User.email == customer.invoice_contact_email).first()
             if user:
                 customer.invoice_contact_id = user.id
@@ -108,10 +108,8 @@ def upgrade():
                     f"WARNING: could not find any user with email {customer.invoice_contact_email} to connect customer {customer.id} as invoice_contact"
                 )
 
-        # primary contact
         if customer.primary_contact_email:
 
-            # get user with that email
             user = session.query(User).filter(User.email == customer.primary_contact_email).first()
             if user:
                 customer.primary_contact_id = user.id
@@ -169,6 +167,9 @@ def downgrade():
     op.add_column("customer", Column("delivery_contact_email", String(128), nullable=True))
     op.add_column("customer", Column("invoice_contact_email", String(128), nullable=True))
     op.add_column("customer", Column("primary_contact_email", String(128), nullable=True))
+    op.add_column("customer", Column("delivery_contact_name", String(128), nullable=True))
+    op.add_column("customer", Column("invoice_contact_name", String(128), nullable=True))
+    op.add_column("customer", Column("primary_contact_name", String(128), nullable=True))
 
     bind = op.get_bind()
     session = orm.Session(bind=bind)
