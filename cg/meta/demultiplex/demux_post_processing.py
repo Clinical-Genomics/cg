@@ -94,3 +94,15 @@ class DemuxPostProcessingAPI:
             )
             report_path: Path = demux_results.demux_dir / f"stats-{project_name}-{flowcell_id}.txt"
             self.write_report(report_path=report_path, report_data=report_data)
+
+    def post_process_flowcell(self, demux_results: DemuxResults) -> None:
+        """Run all the necessary steps for post processing a demultiplexed flowcell
+
+        This will
+            1. rename all the necessary files and folders
+            2. add the demux results to cgstats
+            3. produce reports for every project
+        """
+        self.rename_files(demux_results=demux_results)
+        self.add_to_cgstats(demux_results=demux_results)
+        self.create_cgstats_reports(demux_results=demux_results)

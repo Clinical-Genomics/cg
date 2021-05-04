@@ -108,6 +108,13 @@ class DemuxResults:
                 # We now know that the rest of the directories are project directories
             yield sub_dir
 
+    def needs_post_processing(self) -> bool:
+        """Assert if the demultiplexed flowcell needs to be post processed
+
+        Check if there are any raw projects, in that case it will need post processing
+        """
+        return bool(len(list(self.raw_projects)))
+
     def get_logfile_parameters(self) -> LogfileParameters:
         log_path: Path = self.log_path
         LOG.debug("Parse log file %s", log_path)
