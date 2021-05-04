@@ -11,9 +11,6 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     orm,
-    Integer,
-    ForeignKeyConstraint,
-    UniqueConstraint,
     String,
 )
 from sqlalchemy.dialects import mysql
