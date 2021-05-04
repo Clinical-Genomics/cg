@@ -29,7 +29,7 @@ def test_contact_storing(store: Store, contact_type, helpers):
     store.add_commit(new_customer)
 
     # THEN contact should be stored on the customer
-    assert getattr(store.customer(internal_id=internal_id), contact_field) == new_customer
+    assert getattr(store.customer(internal_id=internal_id), contact_field) == new_user
 
 
 @pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
