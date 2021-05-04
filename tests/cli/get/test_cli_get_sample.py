@@ -194,17 +194,17 @@ def test_get_sample_families_with_family(
         assert link.family.internal_id in result.output
 
 
-def test_get_sample_flowcells_without_flowcell(
+def test_hide_sample_flowcells_without_flowcell(
     cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
-    """Test that we can query samples for flowcells even when there are none"""
-    # GIVEN a database with a sample without related flowcells
+    """Test that we can query samples and hide flowcell even when there are none"""
+    # GIVEN a database with a sample without related flowcell
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
     assert not disk_store.Flowcell.query.first()
 
     # WHEN getting a sample with the --flowcells flag
-    result = cli_runner.invoke(get, ["sample", sample_id, "--flowcells"], obj=base_context)
+    result = cli_runner.invoke(get, ["sample", sample_id, "--hide-flowcell"], obj=base_context)
 
     # THEN everything is fine
     assert result.exit_code == 0
@@ -213,7 +213,7 @@ def test_get_sample_flowcells_without_flowcell(
 def test_get_sample_flowcells_with_flowcell(
     cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
-    """Test that we can query samples for flowcells and that the flowcell name is in the output"""
+    """Test that we can query samples and hide flowcell, ensuring that no flowcell name is in the output"""
     # GIVEN a database with a sample and a related flowcell
     flowcell = helpers.add_flowcell(disk_store)
     sample = helpers.add_sample(disk_store, flowcell=flowcell)
@@ -221,9 +221,9 @@ def test_get_sample_flowcells_with_flowcell(
     sample_id = sample.internal_id
 
     # WHEN getting a sample with the --flowcells flag
-    result = cli_runner.invoke(get, ["sample", sample_id, "--flowcells"], obj=base_context)
+    result = cli_runner.invoke(get, ["sample", sample_id, "--hide-flowcell"], obj=base_context)
 
     # THEN the related flowcell should be listed in the output
     assert result.exit_code == 0
     for flowcell in disk_store.Sample.query.first().flowcells:
-        assert flowcell.name in result.output
+        assert flowcell.name not in result.output
