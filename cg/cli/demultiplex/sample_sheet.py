@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 import click
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample, flowcell_samples
 from cg.models.cg_config import CGConfig
@@ -38,16 +39,21 @@ def validate_sample_sheet(sheet: click.Path):
 
 
 @sample_sheet_commands.command(name="create")
-@click.argument("flowcell", type=click.Path(exists=True, file_okay=False))
+@click.argument("flowcell-name")
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def create_sheet(context: CGConfig, flowcell: click.Path, dry_run: bool):
+def create_sheet(context: CGConfig, flowcell: str, dry_run: bool):
     """Command to create a sample sheet
 
-    Search the flowcell directory for run parameters and create a sample sheet based on the information
+    Search the flowcell in the directory specified in config
     """
     LOG.info("Creating sample sheet for flowcell %s", flowcell)
-    flowcell_object = Flowcell(flowcell_path=Path(str(flowcell)))
+    demultiplex_api: DemultiplexingAPI = context.demultiplex_api
+    flowcell_path: Path = demultiplex_api.run_dir / flowcell
+    if not flowcell_path.exists():
+        LOG.warning("Could not find flowcell %s", flowcell_path)
+        raise click.Abort
+    flowcell_object = Flowcell(flowcell_path=flowcell_path)
     lims_samples: List[LimsFlowcellSample] = list(
         flowcell_samples(lims=context.lims_api, flowcell_id=flowcell_object.flowcell_id)
     )

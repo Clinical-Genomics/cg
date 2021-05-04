@@ -48,23 +48,17 @@ def demultiplex_all(
 
 @click.command(name="flowcell")
 @click.argument("flowcell-id")
-@click.option("--out-directory")
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def demultiplex_flowcell(
     context: CGConfig,
     flowcell_id: str,
-    out_directory: Optional[str],
     dry_run: bool,
 ):
     """Demultiplex a flowcell on slurm using CG"""
     LOG.info("Running cg demultiplex flowcell")
     flowcell_directory: Path = Path(context.demultiplex.run_dir) / flowcell_id
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    if out_directory:
-        out_directory: Path = Path(out_directory)
-        LOG.info("Set out_dir to %s", out_directory)
-        demultiplex_api.out_dir = out_directory
     demultiplex_api.set_dry_run(dry_run=dry_run)
     flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
 
