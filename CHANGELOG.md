@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.5.0]
+### Added
+- User field for allowing order portal login
+### Changed 
+- Delivery/Invoicing/Primary Contacts are now relations from Customer to User in admin
 
 ## [21.4.4]
 ### Fixed
