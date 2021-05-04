@@ -46,7 +46,7 @@ class DeliverAPI:
         self.ticket_id: str = ""
         self.dry_run = False
         self.delivery_type: str = delivery_type
-        self.skip_missing_bundle = False
+        self.skip_missing_bundle = self.delivery_type in constants.SKIP_MISSING
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run"""
@@ -60,8 +60,6 @@ class DeliverAPI:
         """
         case_id: str = case_obj.internal_id
         case_name: str = case_obj.name
-        if self.delivery_type in constants.SKIP_MISSING:
-            self.skip_missing_bundle = True
         LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
         if not last_version and not self.case_tags:
