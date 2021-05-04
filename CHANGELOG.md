@@ -13,10 +13,6 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.4.4]
-### Fixed
-- By default fetch related flowcell information using `cg get sample <sample_id>`
-
 ## [21.4.3]
 ### Fixed
 - Display invoice contact on invoice
