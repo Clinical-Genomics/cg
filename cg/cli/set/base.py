@@ -266,7 +266,6 @@ def sample(
         if not (yes or click.confirm(CONFIRM)):
             continue
 
-
         setattr(sample_obj, new_key, new_value)
         _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
         status_db.commit()
