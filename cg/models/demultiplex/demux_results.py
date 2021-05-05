@@ -2,7 +2,7 @@ import datetime
 import logging
 import socket
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
@@ -121,6 +121,10 @@ class DemuxResults:
         if not log_path.exists():
             LOG.warning("Could not find log file %s", log_path)
             raise FileNotFoundError
+        program: Optional[str] = None
+        time: Optional[datetime.datetime] = None
+        command_line: Optional[str] = None
+        id_string: Optional[str] = None
         with open(log_path, "r") as logfile:
             for line in logfile.readlines():
                 # Fetch the line where the call that was made is
@@ -128,9 +132,11 @@ class DemuxResults:
                     line = line.strip()
                     split_line = line.split(" ")
                     command_line: str = " ".join(split_line[1:])
-                    # Time is in format 20210403115107, YYYYMMDDHHMMSS
+                    # Time is in format 2021-04-03-11:51:07, YYYY-MM-DD-HH-MM-SS
                     raw_time: str = split_line[0].strip("[]")  # remove the brackets around the date
-                    time: datetime.datetime = datetime.datetime.strptime(raw_time, "%Y%m%d%H%M%S")
+                    time: datetime.datetime = datetime.datetime.strptime(
+                        raw_time, "%Y-%m-%dT%H:%M:%S"
+                    )
                     program = split_line[6]  # get the executed program
 
                 if "bcl2fastq v" in line:
