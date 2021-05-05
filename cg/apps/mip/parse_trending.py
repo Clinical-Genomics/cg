@@ -40,7 +40,7 @@ def _add_rank_model_version(outdata: dict, sampleinfo_data: dict) -> None:
 
 
 def _qc_sample_info(outdata: dict, sampleinfo_raw: dict) -> None:
-    sampleinfo_data = _parse_qc_sample_info_file(sampleinfo_raw)
+    sampleinfo_data = parse_sampleinfo.parse_qc_sample_info_file(sampleinfo_raw)
     _add_mip_version(outdata, sampleinfo_data)
     _add_genome_build(outdata, sampleinfo_data)
     _add_rank_model_version(outdata, sampleinfo_data)
@@ -64,10 +64,6 @@ def _add_genome_build(outdata: dict, sampleinfo_data: dict) -> None:
 
 def _add_mip_version(outdata: dict, sampleinfo_data: dict) -> None:
     outdata["mip_version"] = sampleinfo_data["version"]
-
-
-def _parse_qc_sample_info_file(sampleinfo_raw: dict) -> dict:
-    return parse_sampleinfo.parse_sampleinfo(sampleinfo_raw)
 
 
 def _add_sample_level_info_from_qc_metric_file(outdata: dict, qcmetrics_data: dict) -> None:

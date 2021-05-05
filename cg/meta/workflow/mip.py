@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 import yaml
-from cg.apps.mip import parse_trending
+from cg.apps.mip import parse_trending, parse_sampleinfo
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.exc import CgError
@@ -282,3 +282,32 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def config_sample(self, link_obj: models.FamilySample, panel_bed: str) -> dict:
         raise NotImplementedError
+
+    def get_deliverables_file_path(self, case_id: str) -> Path:
+        """
+        Location in working directory where deliverables file will be stored upon completion of analysis.
+        Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
+        """
+        return Path(self.get_case_path(case_id), "analysis", f"{case_id}_deliverables.yaml")
+
+    def get_sampleinfo_path(self, case_id: str) -> Path:
+        """Get the sample info path for an analysis."""
+        return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
+
+    def is_analysis_finished(self, case_id: str):
+        """Return True if analysis is finished"""
+        sampleinfo_raw = yaml.safe_load(Path(self.get_sampleinfo_path(case_id)).open())
+        sampleinfo = parse_sampleinfo.parse_qc_sample_info_file(sampleinfo_raw)
+        if parse_sampleinfo.get_is_finished(sampleinfo):
+            return True
+        return False
+
+    def get_cases_to_store(self) -> List[models.Family]:
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper"""
+
+        return [
+            case_object
+            for case_object in self.get_running_cases()
+            if self.is_analysis_finished(case_id=case_object.internal_id)
+        ]

@@ -164,3 +164,14 @@ def get_sampleinfo(analysis_obj: TrailblazerAnalysis) -> str:
         raw_data = yaml.full_load(config_handle)
     data = parse_config(raw_data)
     return data["sampleinfo_path"]
+
+
+def get_is_finished(sampleinfo: dict) -> bool:
+    """Return true if analysis is finished"""
+    if "is_finished" in sampleinfo:
+        return True
+    return False
+
+
+def parse_qc_sample_info_file(sampleinfo_raw: dict) -> dict:
+    return parse_sampleinfo(sampleinfo_raw)
