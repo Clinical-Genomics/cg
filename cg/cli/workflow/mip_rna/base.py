@@ -3,7 +3,7 @@
 import logging
 
 import click
-from cg.cli.workflow.commands import link, resolve_compression
+from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
 from cg.cli.workflow.mip.store import store as store_cmd
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
@@ -30,4 +30,6 @@ mip_rna.add_command(resolve_compression)
 mip_rna.add_command(run)
 mip_rna.add_command(start)
 mip_rna.add_command(start_available)
+mip_rna.add_command(store)
+mip_rna.add_command(store_available)
 mip_rna.add_command(store_cmd)
