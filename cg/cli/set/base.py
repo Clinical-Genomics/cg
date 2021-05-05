@@ -239,7 +239,7 @@ def sample(
             continue
 
         new_key: str = key
-        if new_value in ["False", "True", "0", "1"]:
+        if value in ["False", "True", "0", "1"]:
             new_value: bool = value
         else:
             new_value: str = value
@@ -265,6 +265,7 @@ def sample(
 
         if not (yes or click.confirm(CONFIRM)):
             continue
+
 
         setattr(sample_obj, new_key, new_value)
         _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
