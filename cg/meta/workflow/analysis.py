@@ -378,6 +378,7 @@ class AnalysisAPI(MetaAPI):
             raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
+            self.set_statusdb_action(case_id=case_id, action="analyze")
             raise DecompressionNeededError("Workflow interrupted: decompression is running")
 
         LOG.info("Linking fastq files in housekeeper for case %s", case_id)
