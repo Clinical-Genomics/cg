@@ -102,17 +102,6 @@ class AnalysisAPI(MetaAPI):
             return "high"
         return "normal"
 
-    @staticmethod
-    def check_sample_read_count_above_threshold(sample_obj: models.Sample) -> bool:
-        """Check if read count passes threshold for reads guaranteed specified for its application tag"""
-        return bool(
-            sample_obj.reads
-            and sample_obj.reads
-            >= sample_obj.application_version.application.percent_reads_guaranteed
-            * sample_obj.application_version.application.target_reads
-            / 100
-        )
-
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory"""
         raise NotImplementedError
@@ -291,6 +280,7 @@ class AnalysisAPI(MetaAPI):
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 read=fastq_data["read"],
+                undetermined=fastq_data["undetermined"],
                 meta=self.get_additional_naming_metadata(sample_obj),
             )
             destination_path: Path = fastq_dir / fastq_name

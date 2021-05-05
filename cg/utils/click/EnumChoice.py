@@ -8,7 +8,7 @@ import click
 
 
 class EnumChoice(click.Choice):
-    """ class to use when the click option is an Enum """
+    """class to use when the click option is an Enum"""
 
     def __init__(self, enum, case_sensitive=False, use_value=True):
         if isinstance(enum, tuple):

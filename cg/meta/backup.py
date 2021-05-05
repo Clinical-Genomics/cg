@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BackupApi:
-    """ Class for retrieving FCs from backup """
+    """Class for retrieving FCs from backup"""
 
     def __init__(self, status: Store, pdc_api: PdcApi, max_flowcells_on_disk: int, root_dir: dict):
         self.status: Store = status

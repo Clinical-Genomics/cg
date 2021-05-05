@@ -1,11 +1,9 @@
 import copy
 import datetime as dt
 from pathlib import Path
-from typing import List
 
 import pytest
-from ruamel.yaml import YAML
-
+import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -59,14 +57,12 @@ def fixture_mip_deliverables(
 ) -> dict:
     """Create deliverables for mip store testing"""
 
-    yaml = YAML()
-
     # Create a dict of paths to the deliverables to be used in later stages
     deliverables_paths = {}
 
     # Load general deliverables file
     with open(mip_deliverables_file, "r") as mip_dna_deliverables:
-        mip_deliverables = yaml.load(mip_dna_deliverables)
+        mip_deliverables = yaml.full_load(mip_dna_deliverables)
 
     for case, value in mip_case_ids.items():
         if value["textbook"]:
@@ -96,9 +92,6 @@ def fixture_mip_deliverables(
 @pytest.fixture(name="mip_qc_sample_info")
 def fixture_mip_qc_sample_info(mip_case_ids: dict, mip_case_dirs: dict) -> dict:
     """Create qc sample info files for cases"""
-
-    yaml = YAML()
-
     # Store paths in a list to be used in other stages
 
     qc_sample_info = {}
@@ -125,9 +118,6 @@ def fixture_mip_configs(
     mip_case_ids: dict, mip_case_dirs: dict, mip_deliverables: dict, mip_qc_sample_info: dict
 ) -> dict:
     """Create config files for mip case"""
-
-    yaml = YAML()
-
     # Storing paths in a list to be returned and used in later stages.
 
     config_dict = {}

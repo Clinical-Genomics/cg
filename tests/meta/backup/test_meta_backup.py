@@ -11,7 +11,7 @@ from cg.meta.backup import BackupApi
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_maximum_flowcells_ondisk_reached(mock_store, mock_pdc):
-    """ tests maximum_flowcells_ondisk method of the backup api """
+    """tests maximum_flowcells_ondisk method of the backup api"""
     # GIVEN a flowcell needs to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -27,7 +27,7 @@ def test_maximum_flowcells_ondisk_reached(mock_store, mock_pdc):
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_maximum_flowcells_ondisk_not_reached(mock_store, mock_pdc):
-    """ tests maximum_flowcells_ondisk method of the backup api """
+    """tests maximum_flowcells_ondisk method of the backup api"""
     # GIVEN a flowcell needs to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -43,7 +43,7 @@ def test_maximum_flowcells_ondisk_not_reached(mock_store, mock_pdc):
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_maximum_processing_queue_full(mock_store, mock_pdc):
-    """ tests check_processing method of the backup api """
+    """tests check_processing method of the backup api"""
     # GIVEN a flowcell needs to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -59,7 +59,7 @@ def test_maximum_processing_queue_full(mock_store, mock_pdc):
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
-    """ tests check_processing method of the backup api """
+    """tests check_processing method of the backup api"""
     # GIVEN a flowcell needs to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -76,7 +76,7 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_pop_flowcell_next_requested(mock_store, mock_pdc, mock_flowcell):
-    """ tests pop_flowcell method of the backup api """
+    """tests pop_flowcell method of the backup api"""
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -96,7 +96,7 @@ def test_pop_flowcell_next_requested(mock_store, mock_pdc, mock_flowcell):
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
-    """ tests pop_flowcell method of the backup api """
+    """tests pop_flowcell method of the backup api"""
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -115,7 +115,7 @@ def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
 @mock.patch("cg.apps.pdc")
 @mock.patch("cg.store")
 def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc):
-    """ tests pop_flowcell method of the backup api """
+    """tests pop_flowcell method of the backup api"""
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
     backup_api = BackupApi(
         mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
@@ -137,7 +137,7 @@ def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc):
 def test_fetch_flowcell_processing_queue_full(
     mock_store, mock_pdc, mock_flowcell, mock_check_processing, caplog
 ):
-    """ tests the fetch_flowcell method of the backup API """
+    """tests the fetch_flowcell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
@@ -169,7 +169,7 @@ def test_fetch_flowcell_max_flowcells_ondisk(
     mock_maximum_flowcells_ondisk,
     caplog,
 ):
-    """ tests the fetch_flowcell method of the backup API """
+    """tests the fetch_flowcell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
@@ -204,7 +204,7 @@ def test_fetch_flowcell_no_flowcells_requested(
     mock_pop_flowcell,
     caplog,
 ):
-    """ tests the fetch_flowcell method of the backup API """
+    """tests the fetch_flowcell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
@@ -242,7 +242,7 @@ def test_fetch_flowcell_retrieve_next_flowcell(
     mock_pop_flowcell,
     caplog,
 ):
-    """ tests the fetch_flowcell method of the backup API """
+    """tests the fetch_flowcell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
@@ -291,7 +291,7 @@ def test_fetch_flowcell_retrieve_specified_flowcell(
     mock_maximum_flowcells_ondisk,
     caplog,
 ):
-    """ tests the fetch_flowcell method of the backup API """
+    """tests the fetch_flowcell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
@@ -331,7 +331,7 @@ def test_fetch_flowcell_pdc_retrieval_failed(
     mock_maximum_flowcells_ondisk,
     caplog,
 ):
-    """ tests the fetch_flowcell method of the backup API """
+    """tests the fetch_flowcell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 

@@ -42,7 +42,7 @@ def fastq_cmd(
     days_back: int,
     dry_run: bool,
 ):
-    """ Find cases with FASTQ files and compress into SPRING """
+    """Find cases with FASTQ files and compress into SPRING"""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db

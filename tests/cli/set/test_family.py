@@ -25,7 +25,7 @@ def test_set_family_without_options(
 
 
 def test_set_family_bad_family(cli_runner, base_context):
-    """Test to set a case using a non-existing case """
+    """Test to set a case using a non-existing case"""
     # GIVEN an empty database
 
     # WHEN setting a case

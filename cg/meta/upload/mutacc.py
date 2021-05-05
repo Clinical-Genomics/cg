@@ -133,7 +133,7 @@ def remap(input_dict: dict, mapper_list: tuple) -> dict:
 
 
 def resolve_sex(scout_sex: str) -> str:
-    """ Convert scout sex value to mutacc valid value"""
+    """Convert scout sex value to mutacc valid value"""
     if scout_sex == "1":
         mutacc_sex = "male"
     elif scout_sex == "2":
@@ -144,7 +144,7 @@ def resolve_sex(scout_sex: str) -> str:
 
 
 def resolve_parent(scout_parent: str) -> str:
-    """ Convert parent (father/mother) value to mutacc """
+    """Convert parent (father/mother) value to mutacc"""
     if scout_parent == "":
         mutacc_parent = "0"
     else:
@@ -153,7 +153,7 @@ def resolve_parent(scout_parent: str) -> str:
 
 
 def resolve_phenotype(scout_phenotype: int) -> str:
-    """ Convert scout phenotype to mutacc phenotype"""
+    """Convert scout phenotype to mutacc phenotype"""
     mutacc_phenotype = "unknown"
     if scout_phenotype == 1:
         mutacc_phenotype = "unaffected"

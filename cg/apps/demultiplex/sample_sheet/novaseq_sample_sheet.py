@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 
 class SampleSheetCreator:
-    """ Create a raw sample sheet for Novaseq flowcells """
+    """Create a raw sample sheet for Novaseq flowcells"""
 
     HEADER_TO_LIMS_KEY = {
         "FCID": "flowcell_id",
@@ -59,7 +59,7 @@ class SampleSheetCreator:
 
     @staticmethod
     def get_project_name(project: str) -> str:
-        """ Only keeps the first part of the project name """
+        """Only keeps the first part of the project name"""
         return project.split()[0]
 
     def add_dummy_samples(self) -> None:
@@ -86,7 +86,7 @@ class SampleSheetCreator:
                 self.lims_samples.append(dummy_sample_obj)
 
     def remove_unwanted_samples(self) -> None:
-        """ Filter out samples with indexes of unwanted length and single indexes """
+        """Filter out samples with indexes of unwanted length and single indexes"""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: LimsFlowcellSample
@@ -123,7 +123,7 @@ class SampleSheetCreator:
         return "\n".join(sample_sheet)
 
     def construct_sample_sheet(self) -> str:
-        """ Construct the sample sheet """
+        """Construct the sample sheet"""
         LOG.info("Constructing sample sheet for %s", self.flowcell_id)
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.run_type == "wgs":
