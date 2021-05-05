@@ -117,7 +117,7 @@ class DemuxResults:
 
     def get_logfile_parameters(self) -> LogfileParameters:
         log_path: Path = self.log_path
-        LOG.debug("Parse log file %s", log_path)
+        LOG.info("Parse log file %s", log_path)
         if not log_path.exists():
             LOG.warning("Could not find log file %s", log_path)
             raise FileNotFoundError
