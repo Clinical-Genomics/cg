@@ -239,7 +239,10 @@ def sample(
             continue
 
         new_key: str = key
-        new_value: str = value
+        if new_value in ["False", "True", "0", "1"]:
+            new_value: bool = value
+        else:
+            new_value: str = value
 
         if key in ["customer", "application_version", "priority"]:
             if key == "priority":
