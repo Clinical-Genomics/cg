@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Fixed
+- Don´t allow reuse of case name for one customer
 
 ## [21.5.1]
 ### Fixed
