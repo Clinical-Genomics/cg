@@ -9,9 +9,8 @@ Please add a new candidate release at the top after changing the latest one. Fee
 Try to use the following format:
 
 ## [x.x.x]
-### Added
-- gisaid uppload support via cli
-- gisaid API
+### Fixed
+- gisaid get region and lab from sample udfs
 
 ### Changed
 ### Fixed
