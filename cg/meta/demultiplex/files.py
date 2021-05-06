@@ -11,6 +11,9 @@ def rename_index_dir(unaligned_dir: Path, dry_run: bool = False) -> None:
             continue
         if sub_dir.name != "indexcheck":
             continue
+        if sub_dir.name.startswith("Project_"):
+            LOG.debug("%s is already renamed", sub_dir)
+            continue
         index_directory: Path = unaligned_dir / "_".join(["Project", sub_dir.name])
         LOG.info("Move index directory %s", sub_dir)
         if not dry_run:
@@ -25,6 +28,9 @@ def rename_project_directory(
     unaligned_directory: Path = project_directory.parent
     LOG.info("Rename all sample directories in %s", unaligned_directory)
     for sample_dir in project_directory.iterdir():
+        if sample_dir.name.startswith("Sample"):
+            LOG.debug("%s is already renamed", sample_dir)
+            continue
         rename_sample_directory(
             sample_directory=sample_dir, flowcell_id=flowcell_id, dry_run=dry_run
         )

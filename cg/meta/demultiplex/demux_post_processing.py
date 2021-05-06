@@ -103,6 +103,9 @@ class DemuxPostProcessingAPI:
             2. add the demux results to cgstats
             3. produce reports for every project
         """
-        self.rename_files(demux_results=demux_results)
+        if demux_results.files_renamed():
+            LOG.info("Files have already been renamed")
+        else:
+            self.rename_files(demux_results=demux_results)
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)

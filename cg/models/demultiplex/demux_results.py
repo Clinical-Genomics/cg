@@ -108,8 +108,8 @@ class DemuxResults:
                 # We now know that the rest of the directories are project directories
             yield sub_dir
 
-    def needs_post_processing(self) -> bool:
-        """Assert if the demultiplexed flowcell needs to be post processed
+    def files_renamed(self) -> bool:
+        """Assert if the files have been renamed
 
         Check if there are any raw projects, in that case it will need post processing
         """
@@ -134,9 +134,14 @@ class DemuxResults:
                     command_line: str = " ".join(split_line[1:])
                     # Time is in format 2021-04-03-11:51:07, YYYY-MM-DD-HH-MM-SS
                     raw_time: str = split_line[0].strip("[]")  # remove the brackets around the date
-                    time: datetime.datetime = datetime.datetime.strptime(
-                        raw_time, "%Y-%m-%dT%H:%M:%S"
-                    )
+                    try:
+                        time: datetime.datetime = datetime.datetime.strptime(
+                            raw_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+                    except ValueError:
+                        time: datetime.datetime = datetime.datetime.strptime(
+                            raw_time, "%Y%m%d%H%M%S"
+                        )
                     program = split_line[6]  # get the executed program
 
                 if "bcl2fastq v" in line:

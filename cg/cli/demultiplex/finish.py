@@ -68,7 +68,5 @@ def finish_flowcell(context: CGConfig, flowcell_name: str, dry_run: bool):
         LOG.warning("Demultiplex is not ready!")
         raise click.Abort
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    if not demux_results.needs_post_processing():
-        LOG.info("Flowcell %s has already been post processed", flowcell_name)
-        return
+
     demux_post_processing_api.post_process_flowcell(demux_results=demux_results)
