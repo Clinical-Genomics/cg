@@ -124,14 +124,12 @@ def test_set_boolean_sample(
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
         sample,
-        [sample_obj.internal_id, "-kv", "no_invoice", new_value, "-y"],
+        [sample_obj.internal_id, "-kv", "no_invoice", new_value, "-y", "--skip-lims"],
         obj=base_context,
-        catch_exceptions=False,
     )
 
-    # THEN then it should have new_value as attribute key on the sample and in LIMS
+    # THEN then it should have new_value as attribute key on the sample
     assert result.exit_code == SUCCESS
-    assert isinstance(getattr(sample_obj, "no_invoice"), bool)
     assert getattr(sample_obj, "no_invoice") == value
 
 
