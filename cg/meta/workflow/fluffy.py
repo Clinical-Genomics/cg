@@ -114,7 +114,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
         sample_obj: models.Sample = self.status_db.sample(sample_id)
-        sequenced_at = sample_obj.sequenced_at
+        sequenced_at: dt.datetime = sample_obj.sequenced_at
         if sequenced_at:
             return sequenced_at.date()
 
