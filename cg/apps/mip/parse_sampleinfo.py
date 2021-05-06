@@ -11,7 +11,7 @@ class MipBaseConfig(BaseModel):
     analysis_type: Dict[str, str]
     case_id: str = None
     config_file_analysis: str
-    email: str = None
+    email: str
     family_id: str = None
     dry_run_all: bool
     log_file: str
@@ -20,16 +20,16 @@ class MipBaseConfig(BaseModel):
     sample_info_file: str
 
 
-def get_sample_data_from_config(config: dict) -> List[dict]:
+def get_sample_data_from_config(config: MipBaseConfig) -> List[dict]:
     """Get sample data from config"""
     samples = []
-    for sample_id, analysis_type in config["analysis_type"].items():
+    for sample_id, analysis_type in config.analysis_type.items():
         samples.append({"id": sample_id, "type": analysis_type})
     return samples
 
 
 def parse_config(data: dict) -> dict:
-    """Parse MIP config file
+    """Validate and parse MIP config file
 
     Args:
         data (dict): raw YAML input from MIP analysis config file
@@ -37,17 +37,17 @@ def parse_config(data: dict) -> dict:
     Returns:
         dict: parsed data
     """
-    parse_obj_as(MipBaseConfig, data)
+    mip_config = parse_obj_as(MipBaseConfig, data)
     return {
-        "email": data.get("email"),
-        "case": data.get("case_id") or data.get("family_id"),
-        "samples": get_sample_data_from_config(config=data),
-        "config_path": data.get("config_file_analysis"),
-        "is_dryrun": "dry_run_all" in data,
-        "log_path": data.get("log_file"),
-        "out_dir": data.get("outdata_dir"),
-        "priority": data.get("slurm_quality_of_service"),
-        "sampleinfo_path": data.get("sample_info_file"),
+        "email": mip_config.email,
+        "case": mip_config.case_id or mip_config.family_id,
+        "samples": get_sample_data_from_config(config=mip_config),
+        "config_path": mip_config.config_file_analysis,
+        "is_dryrun": mip_config.dry_run_all,
+        "log_path": mip_config.log_file,
+        "out_dir": mip_config.outdata_dir,
+        "priority": mip_config.slurm_quality_of_service,
+        "sampleinfo_path": mip_config.sample_info_file,
     }
 
 

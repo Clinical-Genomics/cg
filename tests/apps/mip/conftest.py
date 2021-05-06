@@ -238,16 +238,32 @@ def invalid_config_unknown_field_analysis_type():
 
 @pytest.fixture(scope="function")
 def config_data_dna_raw():
-    """config data fixture for dna analyses"""
+    """Raw config data fixture for dna analyses"""
     return {
-        "analysis_type": {"wgs": "sample_id"},
+        "analysis_type": {"sample_id": "wgs"},
         "case_id": "case_id",
         "config_file_analysis": "a_config_path",
-        "email": None,
+        "email": "someone@somewhere.com",
         "family_id": None,
         "dry_run_all": False,
         "log_file": "a_log_path",
         "outdata_dir": "tests/fixtures/apps/mip/dna/store",
         "slurm_quality_of_service": "low",
         "sample_info_file": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+    }
+
+
+@pytest.fixture(scope="function")
+def config_data_dna():
+    """config data fixture for dna analyses"""
+    return {
+        "email": "someone@somewhere.com",
+        "case": "case_id",
+        "config_path": "a_config_path",
+        "samples": [{"id": "sample_id", "type": "wgs"}],
+        "is_dryrun": False,
+        "log_path": "a_log_path",
+        "out_dir": "tests/fixtures/apps/mip/dna/store",
+        "priority": "low",
+        "sampleinfo_path": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
     }
