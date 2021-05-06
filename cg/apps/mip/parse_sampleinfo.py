@@ -168,7 +168,7 @@ def get_sampleinfo(analysis_obj: TrailblazerAnalysis) -> str:
 
 def get_is_finished(sampleinfo: dict) -> bool:
     """Return true if analysis is finished"""
-    if "is_finished" in sampleinfo:
+    if sampleinfo["is_finished"]:
         return True
     return False
 
