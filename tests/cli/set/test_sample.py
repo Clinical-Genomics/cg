@@ -119,7 +119,7 @@ def test_set_boolean_sample(
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
-    value: bool = new_value == "true"
+    value: bool = new_value.lower() == "true"
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
