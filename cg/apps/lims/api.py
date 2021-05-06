@@ -47,8 +47,6 @@ class LimsAPI(Lims, OrderHandler):
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
         lims_sample = Sample(self, id=lims_id)
-        print(lims_sample)
-        print(lims_sample.udf.items())
         return self._export_sample(lims_sample)
 
     def samples_in_pools(self, pool_name, projectname):
