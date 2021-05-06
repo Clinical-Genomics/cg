@@ -103,18 +103,18 @@ class GisaidAPI:
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         gisaid_samples = []
         for sample in samples:
-            print(sample.internal_id)
             lims_sample = self.lims_api.sample(lims_id=sample.internal_id)
-            print(lims_sample)
             gisaid_sample = GisaidSample(
                 family_id=family_id,
                 cg_lims_id=sample.internal_id,
                 covv_subm_sample_id=sample.name,
                 submitter=self.gisaid_submitter,
                 fn=f"{family_id}.fasta",
-                covv_collection_date="2020-11-22",  # self.lims_api.sample[].collection_date
-                region="Stockholm",  # sample.originating_lab,
-                lab="LaboratorieMedicinskt Centrum Gotland",  # sample.originating_lab,
+                covv_collection_date=lims_sample.udf.get("Collection Date"),
+                region=lims_sample.udf.get("Region"),
+                region_code=lims_sample.udf.get("Region Code"),
+                covv_orig_lab=lims_sample.udf.get("Original Lab"),
+                covv_orig_lab_addr=lims_sample.udf.get("Original Lab Address"),
             )
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
