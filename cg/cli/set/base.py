@@ -239,8 +239,8 @@ def sample(
             continue
 
         new_key: str = key
-        if value in ["False", "True", "0", "1"]:
-            new_value: bool = value
+        if not isinstance(value, int) and value.lower() in ["false", "true"]:
+            new_value: bool = bool(value)
         else:
             new_value: str = value
 
