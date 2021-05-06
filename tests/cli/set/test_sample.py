@@ -130,7 +130,7 @@ def test_set_boolean_sample(
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
-    assert type(getattr(sample_obj, "no_invoice")) is bool
+    assert isinstance(getattr(sample_obj, "no_invoice"), bool)
 
 
 def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
