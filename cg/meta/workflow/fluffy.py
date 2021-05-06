@@ -81,7 +81,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
 
     def get_analysis_finish_path(self, case_id: str) -> Path:
-        return Path(self.get_output_path(case_id), "analysis_finished")
+        return Path(self.get_output_path(case_id), "COMPLETE")
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
