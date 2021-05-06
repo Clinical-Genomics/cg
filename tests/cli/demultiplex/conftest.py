@@ -118,7 +118,7 @@ def fixture_flowcell_working_directory(
 
 
 @pytest.fixture(name="flowcell_working_directory_no_run_parameters")
-def fixture_flowcell_working_directory(
+def fixture_flowcell_working_directory_no_run_parameters(
     novaseq_dir: Path, flowcell_runs_working_directory: Path
 ) -> Path:
     """This is a path to a flowcell directory with the run parameters missing"""
