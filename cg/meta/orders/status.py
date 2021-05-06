@@ -163,7 +163,9 @@ class StatusHandler:
                 if synopsis
             }
 
-            case_internal_id: str = cls.get_single_value(case_name, case_samples, "case_internal_id")
+            case_internal_id: str = cls.get_single_value(
+                case_name, case_samples, "case_internal_id"
+            )
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
@@ -229,7 +231,9 @@ class StatusHandler:
                 case_obj.panels = case["panels"]
             else:
                 if self.status.find_family(customer_obj, case["name"]):
-                    raise OrderError(f"Case name {case['name']} already used for customer {customer}")
+                    raise OrderError(
+                        f"Case name {case['name']} already used for customer {customer}"
+                    )
                 case_obj = self.status.add_case(
                     cohorts=case["cohorts"],
                     data_analysis=Pipeline(case["data_analysis"]),
