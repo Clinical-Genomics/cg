@@ -239,7 +239,7 @@ def sample(
             continue
 
         new_key: str = key
-        if not isinstance(value, int) and value.lower() in ["false", "true"]:
+        if isinstance(getattr(sample_obj, key), bool):
             new_value: bool = bool(value.lower() == "true")
         else:
             new_value: str = value

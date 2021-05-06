@@ -112,7 +112,7 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
-@pytest.mark.parametrize("new_value", ["false", "true"])
+@pytest.mark.parametrize("new_value", ["false", "true", "True", "False"])
 def test_set_boolean_sample(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, new_value, helpers
 ):
