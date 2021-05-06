@@ -240,7 +240,7 @@ def sample(
 
         new_key: str = key
         if not isinstance(value, int) and value.lower() in ["false", "true"]:
-            new_value: bool = bool(value)
+            new_value: bool = bool(value.lower() == "true")
         else:
             new_value: str = value
 

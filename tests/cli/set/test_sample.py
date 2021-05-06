@@ -119,6 +119,7 @@ def test_set_boolean_sample(
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
+    value: bool = new_value == "true"
 
     # WHEN setting key on sample to new_value
     result = cli_runner.invoke(
@@ -131,6 +132,7 @@ def test_set_boolean_sample(
     # THEN then it should have new_value as attribute key on the sample and in LIMS
     assert result.exit_code == SUCCESS
     assert isinstance(getattr(sample_obj, "no_invoice"), bool)
+    assert getattr(sample_obj, "no_invoice") == value
 
 
 def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
