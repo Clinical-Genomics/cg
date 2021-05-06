@@ -234,3 +234,20 @@ def invalid_config_unknown_field_analysis_type():
         capture_kit="agilent_sureselect_cre.v1",
     )
     return dict(case="a_case", default_gene_panels=["a_panel"], samples=[sample])
+
+
+@pytest.fixture(scope="function")
+def config_data_dna_raw():
+    """config data fixture for dna analyses"""
+    return {
+        "analysis_type": {"wgs": "sample_id"},
+        "case_id": "case_id",
+        "config_file_analysis": "a_config_path",
+        "email": None,
+        "family_id": None,
+        "dry_run_all": False,
+        "log_file": "a_log_path",
+        "outdata_dir": "tests/fixtures/apps/mip/dna/store",
+        "slurm_quality_of_service": "low",
+        "sample_info_file": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+    }

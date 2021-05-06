@@ -1,7 +1,23 @@
-from typing import List
+from typing import Dict, List
 
+from pydantic import BaseModel, parse_obj_as
 import yaml
 from cg.apps.tb.models import TrailblazerAnalysis
+
+
+class MipBaseConfig(BaseModel):
+    """This model is used when validating mip analysis config"""
+
+    analysis_type: Dict[str, str]
+    case_id: str = None
+    config_file_analysis: str
+    email: str = None
+    family_id: str = None
+    dry_run_all: bool
+    log_file: str
+    outdata_dir: str
+    slurm_quality_of_service: str
+    sample_info_file: str
 
 
 def get_sample_data_from_config(config: dict) -> List[dict]:
@@ -21,6 +37,7 @@ def parse_config(data: dict) -> dict:
     Returns:
         dict: parsed data
     """
+    parse_obj_as(MipBaseConfig, data)
     return {
         "email": data.get("email"),
         "case": data.get("case_id") or data.get("family_id"),

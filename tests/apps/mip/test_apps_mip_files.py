@@ -2,7 +2,20 @@
 
 from snapshottest import Snapshot
 
-from cg.apps.mip import parse_sampleinfo
+from cg.apps.mip.parse_sampleinfo import MipBaseConfig, parse_sampleinfo_rna
+
+
+def test_parse_config(config_data_dna_raw: dict):
+    """
+    tests the function parse_config against a snapshot
+    """
+    # GIVEN a dictionary with the basic configs
+
+    # WHEN instantiating a MipBaseConfig object
+    config_object = MipBaseConfig(**config_data_dna_raw)
+
+    # THEN assert that it was successfully created
+    assert isinstance(config_object, MipBaseConfig)
 
 
 def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dict):
@@ -19,7 +32,7 @@ def test_parse_sampleinfo_rna_result_contents(snapshot: Snapshot, files_raw: dic
     sampleinfo_raw = files_raw["rna_sampleinfo"]
 
     # WHEN parsing the file
-    sampleinfo_data = parse_sampleinfo.parse_sampleinfo_rna(sampleinfo_raw)
+    sampleinfo_data = parse_sampleinfo_rna(sampleinfo_raw)
 
     # THEN the result should contains the data as specified by the MIP team
     snapshot.assert_match(sampleinfo_data)
