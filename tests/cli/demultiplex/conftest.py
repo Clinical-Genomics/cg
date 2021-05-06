@@ -117,6 +117,17 @@ def fixture_flowcell_working_directory(
     return working_dir
 
 
+@pytest.fixture(name="flowcell_working_directory_no_run_parameters")
+def fixture_flowcell_working_directory(
+    novaseq_dir: Path, flowcell_runs_working_directory: Path
+) -> Path:
+    """This is a path to a flowcell directory with the run parameters missing"""
+    working_dir: Path = flowcell_runs_working_directory / novaseq_dir.name
+    working_dir.mkdir(parents=True)
+
+    return working_dir
+
+
 @pytest.fixture(name="demultiplex_ready_flowcell")
 def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq_dir: Path) -> Path:
     """Return the path to a working directory that is ready for demultiplexing
