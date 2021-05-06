@@ -1,4 +1,6 @@
 """Fixtures for testing mip app"""
+
+import datetime
 import string
 from typing import List
 
@@ -266,4 +268,39 @@ def config_data_dna():
         "out_dir": "tests/fixtures/apps/mip/dna/store",
         "priority": "low",
         "sampleinfo_path": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+    }
+
+
+@pytest.fixture(scope="function")
+def sampleinfo_data_raw():
+    """Raw sampleinfo data fixture"""
+    return {
+        "analysisrunstatus": "finished",
+        "analysis_date": "a_date",
+        "case_id": "a_case_id",
+        "family_id": None,
+        "human_genome_build": {"version": 37, "source": "grch"},
+        "mip_version": "v9.0.0",
+        "recipe": {
+            "genmod": {
+                "rank_model": {"version": "v1.0"},
+            },
+            "sv_genmod": {
+                "sv_rank_model": {"version": "v1.2.0"},
+            },
+        },
+    }
+
+
+@pytest.fixture(scope="function")
+def sampleinfo_data():
+    """sampleinfo dict fixture"""
+    return {
+        "is_finished": True,
+        "date": "a_date",
+        "case": "a_case_id",
+        "genome_build": "grch37",
+        "rank_model_version": "v1.0",
+        "sv_rank_model_version": "v1.2.0",
+        "version": "v9.0.0",
     }
