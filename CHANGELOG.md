@@ -14,6 +14,11 @@ Try to use the following format:
 ### Fixed
 
 
+## [21.5.2]
+### Fixed
+- Fixed content of fluffy samplesheet according to customer specification
+
+
 ## [21.5.1]
 ### Fixed
 - By default fetch related flowcell information using `cg get sample <sample_id>`
