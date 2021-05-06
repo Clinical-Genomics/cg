@@ -113,7 +113,9 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
 
 
 @pytest.mark.parametrize("new_value", ["false", "true"])
-def test_set_boolean_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, new_value, helpers):
+def test_set_boolean_sample(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, new_value, helpers
+):
     # GIVEN a database with a sample
 
     sample_obj = helpers.add_sample(base_store, gender="female")
