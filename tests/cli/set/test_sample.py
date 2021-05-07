@@ -128,7 +128,7 @@ def test_set_boolean_sample(
         obj=base_context,
     )
 
-    # THEN then it should have new_value as attribute key on the sample and in LIMS
+    # THEN then it should have new_value as attribute key on the sample
     assert result.exit_code == SUCCESS
     assert getattr(sample_obj, "no_invoice") == value
 
