@@ -98,16 +98,5 @@ def get_sampleinfo(analysis_obj: TrailblazerAnalysis) -> str:
     """Get the sample info path for an analysis."""
     with open(analysis_obj.config_path, "r") as config_handle:
         raw_data = yaml.full_load(config_handle)
-    data = parse_config(raw_data)
-    return data["sampleinfo_path"]
-
-
-def get_is_finished(sampleinfo: dict) -> bool:
-    """Return true if analysis is finished"""
-    if sampleinfo["is_finished"]:
-        return True
-    return False
-
-
-def parse_qc_sample_info_file(sampleinfo_raw: dict) -> dict:
-    return parse_sampleinfo(sampleinfo_raw)
+    mip_config: MipBaseConfig = parse_config(raw_data)
+    return mip_config.sample_info_path

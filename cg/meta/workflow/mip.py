@@ -10,6 +10,7 @@ from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_sample_info import MipBaseSampleinfo
 from cg.store import models
 
 CLI_OPTIONS = {
@@ -297,8 +298,8 @@ class MipAnalysisAPI(AnalysisAPI):
     def is_analysis_finished(self, case_id: str):
         """Return True if analysis is finished"""
         sampleinfo_raw = yaml.safe_load(Path(self.get_sampleinfo_path(case_id)).open())
-        sampleinfo = parse_sampleinfo.parse_qc_sample_info_file(sampleinfo_raw)
-        if parse_sampleinfo.get_is_finished(sampleinfo):
+        sample_info: MipBaseSampleinfo = parse_sampleinfo(sampleinfo_raw)
+        if sample_info.is_finished:
             return True
         return False
 
