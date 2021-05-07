@@ -4,8 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from cg.apps.mip.parse_sampleinfo import parse_sampleinfo
-from cg.models.mip.mip_sample_info import MipBaseSampleinfo
+from cg.models.mip.mip_sample_info import MipBaseSampleinfo, parse_sampleinfo
 
 
 def test_instantiate_mip_sampleinfo(sample_info_dna_raw: dict):

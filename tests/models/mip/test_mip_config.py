@@ -4,8 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from cg.apps.mip.parse_sampleinfo import parse_config
-from cg.models.mip.mip_config import MipBaseConfig
+from cg.models.mip.mip_config import MipBaseConfig, parse_config
 
 
 def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):

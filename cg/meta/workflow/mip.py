@@ -1,16 +1,17 @@
 import logging
+import yaml
+
 from pathlib import Path
 from typing import Any, List, Optional
 
-import yaml
-from cg.apps.mip import parse_trending, parse_sampleinfo
+from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
-from cg.models.mip.mip_sample_info import MipBaseSampleinfo
+from cg.models.mip.mip_sample_info import MipBaseSampleinfo, parse_sampleinfo
 from cg.store import models
 
 CLI_OPTIONS = {

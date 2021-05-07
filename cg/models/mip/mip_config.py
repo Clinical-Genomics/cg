@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, EmailStr, Field, validator
 from typing import List
-
 from typing_extensions import Literal
 
 
@@ -30,13 +29,18 @@ class MipBaseConfig(BaseModel):
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict):
         """Set case_id. Family_id is used for older versions of MIP analysis"""
-        return value or values["family_id_"]
+        return value or values.get("family_id_")
 
     @validator("samples", always=True, pre=True)
     def set_samples(cls, _, values: dict):
         """Set samples analysis type"""
-        raw_samples: dict = values["analysis_type_"]
+        raw_samples: dict = values.get("analysis_type_")
         return [
             AnalysisType(sample_id=sample_id, analysis_type=analysis_type)
             for sample_id, analysis_type in raw_samples.items()
         ]
+
+
+def parse_config(data: dict) -> MipBaseConfig:
+    """Validate and parse MIP config file"""
+    return MipBaseConfig(**data)

@@ -1,8 +1,8 @@
 """Model MIP sample info"""
 
-from pydantic import BaseModel, Field, validator
-
 import datetime
+
+from pydantic import BaseModel, Field, validator
 
 
 class MipBaseSampleinfo(BaseModel):
@@ -24,20 +24,20 @@ class MipBaseSampleinfo(BaseModel):
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict):
         """Set case_id. Family_id is used for older versions of MIP analysis"""
-        return value or values["family_id_"]
+        return value or values.get("family_id_")
 
     @validator("genome_build", always=True, pre=True)
     def set_genome_build(cls, _, values: dict):
         """Set genome_build by combining source i.e. "hg"|"grch" and version"""
-        raw_genome_build: dict = values["human_genome_build_"]
-        source = raw_genome_build["source"]
-        version = raw_genome_build["version"]
+        raw_genome_build: dict = values.get("human_genome_build_")
+        source = raw_genome_build.get("source")
+        version = raw_genome_build.get("version")
         return f"{source}{version}"
 
     @validator("is_finished", always=True)
     def set_is_finished(cls, _, values: dict):
         """Set is_finished from analysisrunstatus_"""
-        return values["analysis_run_status_"] == "finished"
+        return values.get("analysis_run_status_") == "finished"
 
     @validator("rank_model_version", pre=True)
     def set_rank_model_version(cls, _, values: dict) -> str:
@@ -54,3 +54,8 @@ class MipBaseSampleinfo(BaseModel):
             return values["recipe_"]["sv_genmod"]["sv_rank_model"]["version"]
         else:
             return values["program_"]["sv_genmod"]["sv_rank_model"]["version"]
+
+
+def parse_sampleinfo(data: dict) -> MipBaseSampleinfo:
+    """Parse MIP sample info file"""
+    return MipBaseSampleinfo(**data)
