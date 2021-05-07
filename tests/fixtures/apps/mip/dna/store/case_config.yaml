@@ -60,7 +60,7 @@ cadd_column_names:
   - '-'
   - CADD
 cadd_vcf_header_file: /path/to/rare-disease/references/references_8.0/cadd_to_vcf_header_-1.0-.txt
-case_id: yellowhog
+case_id: yellowhogS
 chanjo_sexcheck: 2
 chanjo_sexcheck_log_level: DEBUG
 chromograph_ar: 2
