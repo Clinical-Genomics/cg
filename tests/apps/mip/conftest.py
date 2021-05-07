@@ -1,10 +1,9 @@
 """Fixtures for testing mip app"""
 
-import datetime
-import string
-from typing import List
-
 import pytest
+import string
+
+from typing import List
 
 
 @pytest.fixture
@@ -236,71 +235,3 @@ def invalid_config_unknown_field_analysis_type():
         capture_kit="agilent_sureselect_cre.v1",
     )
     return dict(case="a_case", default_gene_panels=["a_panel"], samples=[sample])
-
-
-@pytest.fixture(scope="function")
-def config_data_dna_raw():
-    """Raw config data fixture for dna analyses"""
-    return {
-        "analysis_type": {"sample_id": "wgs"},
-        "case_id": "case_id",
-        "config_file_analysis": "a_config_path",
-        "email": "someone@somewhere.com",
-        "family_id": None,
-        "dry_run_all": False,
-        "log_file": "a_log_path",
-        "outdata_dir": "tests/fixtures/apps/mip/dna/store",
-        "slurm_quality_of_service": "low",
-        "sample_info_file": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
-    }
-
-
-@pytest.fixture(scope="function")
-def config_data_dna():
-    """config data fixture for dna analyses"""
-    return {
-        "email": "someone@somewhere.com",
-        "case": "case_id",
-        "config_path": "a_config_path",
-        "samples": [{"id": "sample_id", "type": "wgs"}],
-        "is_dryrun": False,
-        "log_path": "a_log_path",
-        "out_dir": "tests/fixtures/apps/mip/dna/store",
-        "priority": "low",
-        "sampleinfo_path": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
-    }
-
-
-@pytest.fixture(scope="function")
-def sampleinfo_data_raw():
-    """Raw sampleinfo data fixture"""
-    return {
-        "analysisrunstatus": "finished",
-        "analysis_date": "a_date",
-        "case_id": "a_case_id",
-        "family_id": None,
-        "human_genome_build": {"version": 37, "source": "grch"},
-        "mip_version": "v9.0.0",
-        "recipe": {
-            "genmod": {
-                "rank_model": {"version": "v1.0"},
-            },
-            "sv_genmod": {
-                "sv_rank_model": {"version": "v1.2.0"},
-            },
-        },
-    }
-
-
-@pytest.fixture(scope="function")
-def sampleinfo_data():
-    """sampleinfo dict fixture"""
-    return {
-        "is_finished": True,
-        "date": "a_date",
-        "case": "a_case_id",
-        "genome_build": "grch37",
-        "rank_model_version": "v1.0",
-        "sv_rank_model_version": "v1.2.0",
-        "version": "v9.0.0",
-    }

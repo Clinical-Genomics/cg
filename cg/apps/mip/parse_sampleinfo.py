@@ -1,47 +1,13 @@
-from typing import Dict, List, Literal
+"""MIP sample info file"""
 
-from pydantic import BaseModel, EmailStr, parse_obj_as
 import yaml
+
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.models.mip.mip_config import MipBaseConfig
+from cg.models.mip.mip_sample_info import MipBaseSampleinfo
 
 
-class MipBaseConfig(BaseModel):
-    """This model is used when validating the mip analysis config"""
-
-    analysis_type: Dict[str, str]
-    case_id: str = None
-    config_file_analysis: str
-    email: EmailStr
-    family_id: str = None
-    dry_run_all: bool
-    log_file: str
-    outdata_dir: str
-    slurm_quality_of_service: Literal["low", "normal", "high"]
-    sample_info_file: str
-
-
-class MipBaseSampleinfo(BaseModel):
-    """This model is used when validating the mip samplinfo file"""
-
-    analysisrunstatus: str
-    analysis_date: str
-    case_id: str
-    family_id: str = None
-    human_genome_build: dict
-    mip_version: str
-    program: dict = None
-    recipe: dict = None
-
-
-def get_sample_data_from_config(config: MipBaseConfig) -> List[dict]:
-    """Get sample data from config"""
-    samples = []
-    for sample_id, analysis_type in config.analysis_type.items():
-        samples.append({"id": sample_id, "type": analysis_type})
-    return samples
-
-
-def parse_config(data: dict) -> dict:
+def parse_config(data: dict) -> MipBaseConfig:
     """Validate and parse MIP config file
 
     Args:
@@ -50,36 +16,10 @@ def parse_config(data: dict) -> dict:
     Returns:
         dict: parsed data
     """
-    mip_config = parse_obj_as(MipBaseConfig, data)
-    return {
-        "email": mip_config.email,
-        "case": mip_config.case_id or mip_config.family_id,
-        "samples": get_sample_data_from_config(config=mip_config),
-        "config_path": mip_config.config_file_analysis,
-        "is_dryrun": mip_config.dry_run_all,
-        "log_path": mip_config.log_file,
-        "out_dir": mip_config.outdata_dir,
-        "priority": mip_config.slurm_quality_of_service,
-        "sampleinfo_path": mip_config.sample_info_file,
-    }
+    return MipBaseConfig(**data)
 
 
-def get_rank_model_version(sample_info: MipBaseSampleinfo, rank_model_type: str, step: str) -> str:
-    """Get rank model version"""
-    if sample_info.recipe:
-        return sample_info.recipe[step][rank_model_type]["version"]
-    if sample_info.program:
-        return sample_info.program[step][rank_model_type]["version"]
-
-
-def get_genome_build(sample_info: MipBaseSampleinfo) -> str:
-    """Get genome build"""
-    version = sample_info.human_genome_build["version"]
-    source = sample_info.human_genome_build["source"]
-    return f"{source}{version}"
-
-
-def parse_sampleinfo(data: dict) -> dict:
+def parse_sampleinfo(data: dict) -> MipBaseSampleinfo:
     """Parse MIP sample info file.
 
     Args:
@@ -88,22 +28,7 @@ def parse_sampleinfo(data: dict) -> dict:
     Returns:
         dict: parsed data
     """
-    mip_sampleinfo = parse_obj_as(MipBaseSampleinfo, data)
-    outdata = {
-        "date": mip_sampleinfo.analysis_date,
-        "genome_build": get_genome_build(sample_info=mip_sampleinfo),
-        "case": mip_sampleinfo.case_id or mip_sampleinfo.family_id,
-        "is_finished": mip_sampleinfo.analysisrunstatus == "finished",
-        "rank_model_version": get_rank_model_version(
-            sample_info=mip_sampleinfo, rank_model_type="rank_model", step="genmod"
-        ),
-        "sv_rank_model_version": get_rank_model_version(
-            sample_info=mip_sampleinfo, rank_model_type="sv_rank_model", step="sv_genmod"
-        ),
-        "version": mip_sampleinfo.mip_version,
-    }
-
-    return outdata
+    return MipBaseSampleinfo(**data)
 
 
 def parse_sampleinfo_rna(data: dict) -> dict:
