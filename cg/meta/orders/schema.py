@@ -359,7 +359,6 @@ SARSCOV2_SAMPLE = {
     "require_qcok": bool,
     "selection_criteria": str,
     "volume": str,
-
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
