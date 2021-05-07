@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.5.2]
+## [21.5.4]
 ### Fixed
 - If a boolean value is passed to `cg set sample -kv <key> <value>` a boolean is passed to the db
 
