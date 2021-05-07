@@ -15,7 +15,7 @@ Try to use the following format:
 
 ## [NG.NG.NG]
 ### Fixed
-- Don´t allow reuse of case name for one customer
+- Block orders unintentionally reusing case names 
 
 ## [21.5.3]
 ### Fixed
@@ -24,7 +24,6 @@ Try to use the following format:
 ## [21.5.2]
 ### Fixed
 - Fixed content of fluffy samplesheet according to customer specification
-
 
 ## [21.5.1]
 ### Fixed

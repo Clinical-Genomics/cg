@@ -232,7 +232,7 @@ class StatusHandler:
             else:
                 if self.status.find_family(customer_obj, case["name"]):
                     raise OrderError(
-                        f"Case name {case['name']} already used for customer {customer}"
+                        f"Case name {case['name']} already in use for customer {customer}"
                     )
                 case_obj = self.status.add_case(
                     cohorts=case["cohorts"],
