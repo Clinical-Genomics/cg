@@ -4,22 +4,28 @@ from typing import Iterable, List, Optional
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.meta.demultiplex import files
+from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
+from cg.models.demultiplex.flowcell import Flowcell
 
 LOG = logging.getLogger(__name__)
 
 
 class DemuxPostProcessingAPI:
-    def __init__(self, stats_api: StatsAPI):
-        self.stats_api: StatsAPI = stats_api
+    def __init__(self, config: CGConfig):
+        self.stats_api: StatsAPI = config.cg_stats_api
+        self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool) -> None:
         LOG.debug("Set dry run to %s", dry_run)
         self.dry_run = dry_run
+        if dry_run:
+            self.demux_api.set_dry_run(dry_run=dry_run)
 
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready"""
@@ -109,3 +115,23 @@ class DemuxPostProcessingAPI:
             self.rename_files(demux_results=demux_results)
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)
+
+    def finish_flowcell(self, flowcell_name: str):
+        """Go through the post processing steps for a flowcell"""
+        LOG.info("Check demuxed flowcell %s", flowcell_name)
+        flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
+        if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
+            LOG.warning("Demultiplex is not ready for %s", flowcell_name)
+            return
+        demux_results: DemuxResults = DemuxResults(
+            demux_dir=self.demux_api.out_dir / flowcell_name, flowcell=flowcell
+        )
+        self.post_process_flowcell(demux_results=demux_results)
+
+    def finish_all_flowcells(self):
+        """Loop over all flowcells and post process those that need it"""
+        demuxed_flowcells_dir: Path = self.demux_api.out_dir
+        for flowcell_dir in demuxed_flowcells_dir.iterdir():
+            if not flowcell_dir.is_dir():
+                continue
+            self.finish_flowcell(flowcell_name=flowcell_dir.name)
