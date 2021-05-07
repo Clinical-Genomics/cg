@@ -11,9 +11,6 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     orm,
-    Integer,
-    ForeignKeyConstraint,
-    UniqueConstraint,
     String,
 )
 from sqlalchemy.dialects import mysql
@@ -128,7 +125,7 @@ def downgrade():
                 count += 1
             else:
                 print(
-                    f"WARNING: could not connect find any user with email {customer.delivery_contact_email} to customer {user.customer.id} as delivery_contact"
+                    f"WARNING: could not connect find any user with email {customer.delivery_contact_email} to customer {customer.id} as delivery_contact"
                 )
 
         # invoice contact
@@ -144,7 +141,7 @@ def downgrade():
                 count += 1
             else:
                 print(
-                    f"WARNING: could not connect find any user with email {customer.invoice_contact_email} to customer {user.customer.id} as invoice_contact"
+                    f"WARNING: could not connect find any user with email {customer.invoice_contact_email} to customer {customer.id} as invoice_contact"
                 )
 
         # primary contact
@@ -160,7 +157,7 @@ def downgrade():
                 count += 1
             else:
                 print(
-                    f"WARNING: could not connect find any user with email {customer.primary_contact_email} to customer {user.customer.id} as primary_contact"
+                    f"WARNING: could not connect find any user with email {customer.primary_contact_email} to customer {customer.id} as primary_contact"
                 )
 
     session.commit()

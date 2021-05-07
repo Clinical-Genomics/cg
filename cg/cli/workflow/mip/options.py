@@ -4,7 +4,6 @@ EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", typ
 PRIORITY_OPTION = click.option(
     "-p",
     "--priority",
-    default="normal",
     type=click.Choice(["low", "normal", "high"]),
 )
 START_WITH_PROGRAM = click.option(
