@@ -127,8 +127,11 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
     assert first_sample["udfs"]["volume"] == "1"
     assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
-    assert first_sample["udfs"]["region_code"] == "01 Region Stockholm"
-    assert first_sample["udfs"]["lab_code"] == "SE110 Växjö"
+    assert first_sample["udfs"]["region"] == "Stockholm"
+    assert first_sample["udfs"]["region_code"] == "01"
+    assert first_sample["udfs"]["original_lab"] == "Karolinska University Hospital Solna"
+    assert first_sample["udfs"]["original_lab_address"] == "171 76 Stockholm"
+    assert first_sample["udfs"]["collection_date"] == "2021-05-05"
     assert first_sample["udfs"]["selection_criteria"] == "1. Allmän övervakning"
 
 

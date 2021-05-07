@@ -126,18 +126,21 @@ class StatusHandler:
             "samples": [
                 {
                     "application": sample_data["application"],
+                    "collection_date": sample_data.get("collection_date"),
                     "comment": sample_data.get("comment"),
                     "data_delivery": sample_data.get("data_delivery"),
                     "internal_id": sample_data.get("internal_id"),
                     "name": sample_data["name"],
                     "organism_id": sample_data["organism"],
+                    "original_lab": sample_data.get("original_lab"),
+                    "original_lab_address": sample_data.get("original_lab_address"),
+                    "pre_processing_method": sample_data.get("pre_processing_method"),
                     "priority": sample_data["priority"],
                     "reference_genome": sample_data["reference_genome"],
-                    "volume": sample_data.get("volume"),
-                    "pre_processing_method": sample_data.get("pre_processing_method"),
+                    "region": sample_data.get("region"),
                     "region_code": sample_data.get("region_code"),
-                    "lab_code": sample_data.get("lab_code"),
                     "selection_criteria": sample_data.get("selection_criteria"),
+                    "volume": sample_data.get("volume"),
                 }
                 for sample_data in data["samples"]
             ],

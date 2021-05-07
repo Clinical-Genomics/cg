@@ -112,9 +112,12 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     assert sample_data["comment"] == "plate comment"
     assert sample_data["volume"] == "1"
     assert sample_data["pre_processing_method"] == "COVIDSeq"
-    assert sample_data["region_code"] == "01 Region Stockholm"
-    assert sample_data["lab_code"] == "SE110 Växjö"
+    assert sample_data["region"] == "Stockholm"
+    assert sample_data["region_code"] == "01"
+    assert sample_data["original_lab"] == "Karolinska University Hospital Solna"
+    assert sample_data["original_lab_address"] == "171 76 Stockholm"
     assert sample_data["selection_criteria"] == "1. Allmän övervakning"
+    assert sample_data["collection_date"] == "2021-05-05"
 
 
 def test_families_to_status(mip_order_to_submit):
