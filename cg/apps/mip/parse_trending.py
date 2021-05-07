@@ -1,5 +1,5 @@
-from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
-from cg.apps.mip.parse_sampleinfo import parse_config
+from cg.apps.mip import parse_qcmetrics
+from cg.apps.mip.parse_sampleinfo import parse_config, parse_sampleinfo
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_sample_info import MipBaseSampleinfo
 

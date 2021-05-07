@@ -11,7 +11,6 @@ from cg.cli.workflow.commands import (
     store_available,
 )
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
-from cg.cli.workflow.mip.store import store as store_cmd
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 LOG = logging.getLogger(__name__)
@@ -40,4 +39,3 @@ mip_dna.add_command(start)
 mip_dna.add_command(start_available)
 mip_dna.add_command(store)
 mip_dna.add_command(store_available)
-mip_dna.add_command(store_cmd)

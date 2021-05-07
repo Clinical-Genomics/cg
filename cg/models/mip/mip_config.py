@@ -1,7 +1,9 @@
 """Model MIP config"""
 
 from pydantic import BaseModel, EmailStr, Field, validator
-from typing import List, Literal
+from typing import List
+
+from typing_extensions import Literal
 
 
 class AnalysisType(BaseModel):
@@ -16,6 +18,7 @@ class MipBaseConfig(BaseModel):
     family_id_: str = Field(None, alias="family_id")
     case_id: str = None
     config_path: str = Field(..., alias="config_file_analysis")
+    store_file: str = None
     email: EmailStr
     is_dry_run: bool = Field(False, alias="dry_run_all")
     log_path: str = Field(..., alias="log_file")
