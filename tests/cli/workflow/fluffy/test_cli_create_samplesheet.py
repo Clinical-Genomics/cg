@@ -3,6 +3,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
+import datetime as dt
 
 
 def test_create_samplesheet_dry(
@@ -74,6 +75,14 @@ def test_create_samplesheet_success(
     # GIVEN every sample in SampleSheet has been given a name in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
+
+    # GIVEN every sample in SampleSheet has valid order field in StatusDB
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_starlims_id")
+    FluffyAnalysisAPI.get_sample_starlims_id.return_value = 12345678
+
+    # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
+    FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 
     # WHEN running command to create samplesheet
     result = cli_runner.invoke(create_samplesheet, [fluffy_case_id_existing], obj=fluffy_context)
