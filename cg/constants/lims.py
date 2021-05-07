@@ -14,6 +14,7 @@ PROP2UDF = {
     "formalin_fixation_time": "Formalin Fixation Time",
     "index": "Index type",
     "index_number": "Index number",
+    "lab_code": "Lab Code",
     "organism": "Strain",
     "organism_other": "Other species",
     "original_lab": "Original Lab",

@@ -23,6 +23,7 @@ class Udf(BaseModel):
     formalin_fixation_time: Optional[str]
     index: Optional[str]
     index_number: Optional[str]
+    lab_code: Optional[str]
     organism: Optional[str]
     organism_other: Optional[str]
     original_lab: Optional[str]

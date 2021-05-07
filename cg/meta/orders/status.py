@@ -130,6 +130,7 @@ class StatusHandler:
                     "comment": sample_data.get("comment"),
                     "data_delivery": sample_data.get("data_delivery"),
                     "internal_id": sample_data.get("internal_id"),
+                    "lab_code": sample_data.get("lab_code"),
                     "name": sample_data["name"],
                     "organism_id": sample_data["organism"],
                     "original_lab": sample_data.get("original_lab"),

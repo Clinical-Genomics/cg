@@ -347,6 +347,7 @@ SARSCOV2_SAMPLE = {
     "data_delivery": str,
     "elution_buffer": str,
     "extraction_method": str,
+    "lab_code": str,
     "name": validators.RegexValidator(NAME_PATTERN),
     "organism": str,
     "original_lab": str,
