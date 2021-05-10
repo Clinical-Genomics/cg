@@ -11,6 +11,7 @@ from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_config import parse_config, MipBaseConfig
 from cg.models.mip.mip_sample_info import MipBaseSampleinfo, parse_sampleinfo
 from cg.store import models
 
@@ -290,16 +291,16 @@ class MipAnalysisAPI(AnalysisAPI):
         Location in working directory where deliverables file will be stored upon completion of analysis.
         Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
         """
-        return Path(self.get_case_path(case_id), "analysis", f"{case_id}_deliverables.yaml")
-
-    def get_sampleinfo_path(self, case_id: str) -> Path:
-        """Get the sample info path for an analysis."""
-        return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
+        mip_config_raw = yaml.safe_load(Path(self.get_case_config_path(case_id)).open())
+        mip_config: MipBaseConfig = parse_config(mip_config_raw)
+        return Path(mip_config.deliverables_file_path)
 
     def is_analysis_finished(self, case_id: str):
         """Return True if analysis is finished"""
-        sampleinfo_raw = yaml.safe_load(Path(self.get_sampleinfo_path(case_id)).open())
-        sample_info: MipBaseSampleinfo = parse_sampleinfo(sampleinfo_raw)
+        mip_config_raw = yaml.safe_load(Path(self.get_case_config_path(case_id)).open())
+        mip_config: MipBaseConfig = parse_config(mip_config_raw)
+        sample_info_raw = yaml.safe_load(Path(mip_config.sample_info_path).open())
+        sample_info: MipBaseSampleinfo = parse_sampleinfo(sample_info_raw)
         if sample_info.is_finished:
             return True
         return False
