@@ -155,6 +155,7 @@ class StatusHandler:
         cases = cls.group_cases(data["samples"])
 
         for case_name, case_samples in cases.items():
+
             cohorts: Set[str] = {
                 cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
             }
@@ -166,6 +167,9 @@ class StatusHandler:
                 if synopsis
             }
 
+            case_internal_id: str = cls.get_single_value(
+                case_name, case_samples, "case_internal_id"
+            )
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
@@ -180,6 +184,7 @@ class StatusHandler:
                 "data_analysis": data_analysis,
                 "data_delivery": data_delivery,
                 "name": case_name,
+                "internal_id": case_internal_id,
                 "priority": priority,
                 "panels": list(panels),
                 "samples": [
@@ -222,13 +227,17 @@ class StatusHandler:
 
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
+            raise OrderError(f"Unknown customer: {customer}")
         new_families = []
         for case in cases:
-            case_obj = self.status.find_family(customer_obj, case["name"])
+            case_obj = self.status.family(case["internal_id"])
             if case_obj:
                 case_obj.panels = case["panels"]
             else:
+                if self.status.find_family(customer_obj, case["name"]):
+                    raise OrderError(
+                        f"Case name {case['name']} already in use for customer {customer}"
+                    )
                 case_obj = self.status.add_case(
                     cohorts=case["cohorts"],
                     data_analysis=Pipeline(case["data_analysis"]),

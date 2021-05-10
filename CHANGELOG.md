@@ -17,6 +17,14 @@ Try to use the following format:
 ### Added
 - Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
 
+## [21.5.5]
+### Fixed
+- Fix tag to deliver correct mutant result files to KS inbox
+
+## [21.5.4]
+### Fixed
+- Block orders unintentionally reusing case names 
+
 ## [21.5.3]
 ### Fixed
 - Set correct fluffy analysis finish path
@@ -24,7 +32,6 @@ Try to use the following format:
 ## [21.5.2]
 ### Fixed
 - Fixed content of fluffy samplesheet according to customer specification
-
 
 ## [21.5.1]
 ### Fixed

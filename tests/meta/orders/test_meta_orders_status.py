@@ -693,7 +693,7 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
     assert base_store.sample(internal_id)
 
     # WHEN storing a new case with one sample from the trio
-    for family in mip_status_data["families"]:
+    for family_idx, family in enumerate(mip_status_data["families"]):
         for sample_idx, sample in enumerate(family["samples"]):
             if sample["name"] == name:
                 sample["internal_id"] = internal_id
@@ -703,7 +703,10 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
 
         family["samples"] = list(filter(None, family["samples"]))
 
-    print(mip_status_data)
+        if not family["samples"]:
+            mip_status_data["families"][family_idx] = {}
+
+    mip_status_data["families"] = list(filter(None, mip_status_data["families"]))
 
     new_families = orders_api.store_cases(
         customer=mip_status_data["customer"],
