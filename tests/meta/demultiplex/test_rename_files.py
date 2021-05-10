@@ -15,9 +15,8 @@ def test_rename_demux_result(
 ):
 
     # GIVEN that this is the location of the demultiplex api
-    stats_api: StatsAPI = demultiplex_context.cg_stats_api
     demultiplex_context.demultiplex_api_.out_dir = demultiplexed_flowcell_working_directory
-    post_demux_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(stats_api=stats_api)
+    post_demux_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=demultiplex_context)
     demux_dir: Path = demultiplexed_flowcell_working_directory
     demux_results: DemuxResults = DemuxResults(demux_dir=demux_dir, flowcell=flowcell_object)
     # GIVEN that there are no projects with the correct file name

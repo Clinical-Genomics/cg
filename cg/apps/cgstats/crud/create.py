@@ -3,11 +3,11 @@ from typing import Dict, Iterable, Optional
 
 import sqlalchemy
 from cg.apps.cgstats.crud import find
+from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-from cg.apps.cgstats.db import models as stats_models
 
 LOG = logging.getLogger(__name__)
 
@@ -158,6 +158,9 @@ def create_samples(
         )
         lane: int = sample.lane
         sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
+        if sample.project == "indexcheck":
+            LOG.debug("Skip adding indexcheck sample to database")
+            continue
         project_id: int = project_name_to_id[sample.project]
         if not sample_id:
             sample_object: stats_models.Sample = create_sample(
