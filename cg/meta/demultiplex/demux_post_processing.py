@@ -29,6 +29,7 @@ class DemuxPostProcessingAPI:
 
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready"""
+        LOG.info("Renaming files for flowcell %s", demux_results.flowcell.flowcell_full_name)
         flowcell_id: str = demux_results.flowcell.flowcell_id
         for project_dir in demux_results.raw_projects:
             if "index" in project_dir.name:
@@ -80,9 +81,11 @@ class DemuxPostProcessingAPI:
 
     def get_report_data(self, flowcell_id: str, project_name: Optional[str] = None) -> List[str]:
         """Fetch the lines that are used to make a report from a flowcell"""
+        LOG.info("Fetch report data for flowcell: %s project: %s", flowcell_id, project_name)
         project_samples: List[StatsSample] = self.fetch_report_samples(
             flowcell_id=flowcell_id, project_name=project_name
         )
+
         return [
             sample_line
             for sample_line in self.get_report_lines(
