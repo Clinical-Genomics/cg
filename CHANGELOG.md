@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.5.4]
+### Fixed
+- Block orders unintentionally reusing case names 
 
 ## [21.5.3]
 ### Fixed
@@ -21,7 +24,6 @@ Try to use the following format:
 ## [21.5.2]
 ### Fixed
 - Fixed content of fluffy samplesheet according to customer specification
-
 
 ## [21.5.1]
 ### Fixed
