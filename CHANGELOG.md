@@ -14,6 +14,10 @@ Try to use the following format:
 ### Fixed
 
 
+## [21.5.6]
+### Fixed
+- Use only the first item from region and lab code values in mutant workflow.
+
 ## [21.5.5]
 ### Fixed
 - Fix tag to deliver correct mutant result files to KS inbox
