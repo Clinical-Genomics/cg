@@ -121,7 +121,7 @@ class DemuxResults:
         if not log_path.exists():
             LOG.warning("Could not find log file %s", log_path)
             raise FileNotFoundError
-        program: Optional[str] = None
+        program: str = ""
         time: Optional[datetime.datetime] = None
         command_line: Optional[str] = None
         id_string: Optional[str] = None

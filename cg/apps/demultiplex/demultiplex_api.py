@@ -197,6 +197,3 @@ class DemultiplexingAPI:
         )
         LOG.info("Demultiplexing running as job %s", sbatch_number)
         return sbatch_number
-
-    def finish_demultiplexing(self):
-        """Finish up after demultiplexing"""
