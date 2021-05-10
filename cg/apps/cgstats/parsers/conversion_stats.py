@@ -81,6 +81,7 @@ class ConversionStats:
     def parse_file(self):
         event: str
         node: Element
+        LOG.info("Parsing demux conversion stats file %s", self.conversion_stats_path)
         for (event, node) in iterparse(str(self.conversion_stats_path), ["start", "end"]):
             # Only search nodes when correct
             # print("Path", self.current_path, self._current_barcode)

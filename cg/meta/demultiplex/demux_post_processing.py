@@ -44,7 +44,16 @@ class DemuxPostProcessingAPI:
 
     @staticmethod
     def fetch_report_samples(flowcell_id: str, project_name: str) -> List[StatsSample]:
-        return find.project_sample_stats(flowcell=flowcell_id, project_name=project_name)
+        samples: List[StatsSample] = find.project_sample_stats(
+            flowcell=flowcell_id, project_name=project_name
+        )
+        LOG.info(
+            "Found samples: %s for flowcell: %s, project: %s",
+            ",".join(sample.sample_name for sample in samples),
+            flowcell_id,
+            project_name,
+        )
+        return samples
 
     @staticmethod
     def sample_to_report_line(stats_sample: StatsSample, flowcell_id: str) -> str:
