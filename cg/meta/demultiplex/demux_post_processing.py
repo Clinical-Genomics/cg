@@ -128,8 +128,11 @@ class DemuxPostProcessingAPI:
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)
 
-    def finish_flowcell(self, flowcell_name: str) -> None:
-        """Go through the post processing steps for a flowcell"""
+    def finish_flowcell(self, flowcell_name: str, force: bool = False) -> None:
+        """Go through the post processing steps for a flowcell
+
+        Force is used to finish a flowcell even if the files are renamed already
+        """
         LOG.info("Check demuxed flowcell %s", flowcell_name)
         flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
         if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
@@ -138,6 +141,11 @@ class DemuxPostProcessingAPI:
         demux_results: DemuxResults = DemuxResults(
             demux_dir=self.demux_api.out_dir / flowcell_name, flowcell=flowcell
         )
+        if demux_results.files_renamed():
+            LOG.warning("Flowcell is already finished!")
+            if not force:
+                return
+            LOG.info("Post processing flowcell anyway")
         self.post_process_flowcell(demux_results=demux_results)
 
     def finish_all_flowcells(self) -> None:
