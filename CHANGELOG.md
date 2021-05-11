@@ -17,6 +17,10 @@ Try to use the following format:
 ### Added
 - Functionality to do demultiplexing post processing from CG
 
+## [21.5.7]
+### Fixed
+- Set status to analyze when resolving decompression
+
 ## [21.5.6]
 ### Fixed
 - Use only the first item from region and lab code values in mutant workflow.
