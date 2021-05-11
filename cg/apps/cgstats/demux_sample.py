@@ -1,11 +1,14 @@
 """Get samples with information from demultiplexing"""
+import logging
 from pathlib import Path
 from typing import Dict
 
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
+
+LOG = logging.getLogger(__name__)
 
 
 class DemuxSample(BaseModel):
@@ -144,6 +147,7 @@ def get_demux_samples(
     conversion_stats_path: Path, demux_stats_path: Path, sample_sheet: SampleSheet
 ) -> Dict[int, Dict[str, DemuxSample]]:
     """Gather information from demultiplexing results and create samples with the correct information"""
+    LOG.info("Gather post demux statistics for demuxed samples")
     demux_samples: Dict[int, Dict[str, DemuxSample]] = {}
     demux_stats: DemuxStats = DemuxStats(demux_stats_path=demux_stats_path)
     conversion_stats: ConversionStats = ConversionStats(conversion_stats_path=conversion_stats_path)

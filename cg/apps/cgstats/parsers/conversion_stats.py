@@ -78,9 +78,11 @@ class ConversionStats:
             current_tag = "_".join(["Read", read_number])
         return current_tag
 
-    def parse_file(self):
+    def parse_file(self) -> None:
+        """Parse a file with demux conversion stats information"""
         event: str
         node: Element
+        LOG.info("Parsing demux conversion stats file %s", self.conversion_stats_path)
         for (event, node) in iterparse(str(self.conversion_stats_path), ["start", "end"]):
             # Only search nodes when correct
             # print("Path", self.current_path, self._current_barcode)
@@ -201,7 +203,7 @@ class ConversionStats:
             return
         self._results.pass_filter_quality_score_sum += quality_score
 
-    def process_tile_info(self, node: Element, current_tag: str):
+    def process_tile_info(self, node: Element, current_tag: str) -> None:
         # These closing tags have no information to add
         if current_tag == "ClusterCount":
             self.update_cluster_count(cluster_count=int(node.text))
@@ -212,7 +214,7 @@ class ConversionStats:
         elif current_tag == "QualityScoreSum":
             self.update_quality_score_sum(quality_score=int(node.text))
 
-    def set_current_lane(self, lane_nr: int):
+    def set_current_lane(self, lane_nr: int) -> None:
         LOG.debug("Set current lane to %s", lane_nr)
         self._current_lane = lane_nr
         self.lanes.add(lane_nr)
