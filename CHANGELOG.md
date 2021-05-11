@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.6.3]
+### Fixed
+- Fix so that delivery will not break if fastq bundle is missing when delivering results with ticket id
+
 ## [21.6.2]
 ### Fixed
 - Fix bug in sqlalchemy models
