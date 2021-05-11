@@ -15,7 +15,8 @@ Try to use the following format:
 
 ## [21.6.1]
 ### Fixed
-- Fix bug in mip and balmsamic crontab
+- Fix bug in mip and balsamic crontab
+
 
 ## [21.6.0]
 ### Added
