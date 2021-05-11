@@ -14,7 +14,7 @@ class MipBaseSampleinfo(BaseModel):
     case_id: str = None
     human_genome_build_: dict = Field(..., alias="human_genome_build")
     genome_build: str = None
-    is_finished: bool = None
+    is_finished: bool = False
     program_: dict = None
     rank_model_version: str = None
     recipe_: dict = None
