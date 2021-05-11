@@ -13,9 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.5.8]
+## [21.6.1]
 ### Fixed
 - Fix bug in mip and balmsamic crontab
+
+## [21.6.0]
+### Added
+- Functionality to do demultiplexing post processing from CG
 
 ## [21.5.7]
 ### Fixed
