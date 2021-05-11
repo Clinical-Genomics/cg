@@ -3,11 +3,11 @@ from typing import Dict, Iterable, Optional
 
 import sqlalchemy
 from cg.apps.cgstats.crud import find
+from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-from cg.apps.cgstats.db import models as stats_models
 
 LOG = logging.getLogger(__name__)
 
@@ -60,6 +60,7 @@ def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> stats_mod
 
     manager.add(flowcell)
     manager.flush()
+    LOG.info("Creating new flowcell object %s", flowcell)
     return flowcell
 
 
@@ -72,6 +73,7 @@ def create_demux(manager: StatsAPI, flowcell_id: int, datasource_id: int) -> sta
 
     manager.add(demux)
     manager.flush()
+    LOG.info("Creating new demux object %s", demux)
     return demux
 
 
@@ -81,6 +83,7 @@ def create_project(manager: StatsAPI, project_name: str) -> stats_models.Project
     project.time = sqlalchemy.func.now()
     manager.add(project)
     manager.flush()
+    LOG.info("Creating new project object %s", project)
     return project
 
 
@@ -107,7 +110,7 @@ def create_unaligned(
     unaligned.demux_id = demux_id
     unaligned.lane = demux_sample.lane
     unaligned.yield_mb = round(int(demux_sample.pass_filter_yield) / 1000000, 2)
-    unaligned.passed_filter_pct = demux_sample.pass_filter_yield
+    unaligned.passed_filter_pct = demux_sample.pass_filter_yield_pc
     unaligned.readcounts = demux_sample.pass_filter_clusters * 2
     unaligned.raw_clusters_per_lane_pct = demux_sample.raw_clusters_pc
     unaligned.perfect_indexreads_pct = (
@@ -133,6 +136,8 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
                 manager=manager, project_name=project_name
             )
             project_id: int = project_object.project_id
+        else:
+            LOG.info("Project %s already exists", project_name)
         project_name_to_id[project_name] = project_id
     return project_name_to_id
 
@@ -143,6 +148,7 @@ def create_samples(
     project_name_to_id: Dict[str, int],
     demux_id: int,
 ) -> None:
+    LOG.info("Creating samples for flowcell %s", demux_results.flowcell.flowcell_full_name)
     sample_sheet: SampleSheet = demux_results.flowcell.get_sample_sheet()
     demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(
         conversion_stats_path=demux_results.conversion_stats_path,
@@ -158,6 +164,9 @@ def create_samples(
         )
         lane: int = sample.lane
         sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
+        if sample.project == "indexcheck":
+            LOG.debug("Skip adding indexcheck sample to database")
+            continue
         project_id: int = project_name_to_id[sample.project]
         if not sample_id:
             sample_object: stats_models.Sample = create_sample(
@@ -177,6 +186,7 @@ def create_samples(
 
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
+    LOG.info("Adding flowcell information to cgstats")
     support_parameters_id: Optional[int] = find.get_support_parameters_id(
         demux_results=demux_results
     )
@@ -185,6 +195,8 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             manager=manager, demux_results=demux_results
         )
         support_parameters_id: int = support_parameters.supportparams_id
+    else:
+        LOG.info("Support parameters already exists")
     datasource_id: Optional[int] = find.get_datasource_id(demux_results=demux_results)
     if not datasource_id:
         datasource_object: stats_models.Datasource = create_datasource(
@@ -193,6 +205,8 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             support_parameters_id=support_parameters_id,
         )
         datasource_id: int = datasource_object.datasource_id
+    else:
+        LOG.info("Data source already exists")
     flowcell_id: Optional[int] = find.get_flowcell_id(
         flowcell_name=demux_results.flowcell.flowcell_id
     )
@@ -201,6 +215,8 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             manager=manager, demux_results=demux_results
         )
         flowcell_id: int = flowcell.flowcell_id
+    else:
+        LOG.info("Flowcell already exists")
 
     demux_id: Optional[int] = find.get_demux_id(flowcell_object_id=flowcell_id)
     if not demux_id:
@@ -208,6 +224,8 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             manager=manager, flowcell_id=flowcell_id, datasource_id=datasource_id
         )
         demux_id: int = demux_object.demux_id
+    else:
+        LOG.info("Demux object already exists")
 
     project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
     create_samples(
@@ -216,3 +234,4 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         project_name_to_id=project_name_to_id,
         demux_id=demux_id,
     )
+    manager.commit()

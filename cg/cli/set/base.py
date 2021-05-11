@@ -239,7 +239,10 @@ def sample(
             continue
 
         new_key: str = key
-        new_value: str = value
+        if isinstance(getattr(sample_obj, key), bool):
+            new_value: bool = bool(value.lower() == "true")
+        else:
+            new_value: str = value
 
         if key in ["customer", "application_version", "priority"]:
             if key == "priority":
