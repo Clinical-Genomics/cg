@@ -81,7 +81,7 @@ class DemuxPostProcessingAPI:
             )
 
     @staticmethod
-    def write_report(report_path: Path, report_data: List[str]):
+    def write_report(report_path: Path, report_data: List[str]) -> None:
         LOG.info("Write demux report to %s", report_path)
         with report_path.open("w") as report_file:
             report_file.write("\t".join(STATS_HEADER) + "\n")
@@ -128,7 +128,7 @@ class DemuxPostProcessingAPI:
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)
 
-    def finish_flowcell(self, flowcell_name: str):
+    def finish_flowcell(self, flowcell_name: str) -> None:
         """Go through the post processing steps for a flowcell"""
         LOG.info("Check demuxed flowcell %s", flowcell_name)
         flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
@@ -140,7 +140,7 @@ class DemuxPostProcessingAPI:
         )
         self.post_process_flowcell(demux_results=demux_results)
 
-    def finish_all_flowcells(self):
+    def finish_all_flowcells(self) -> None:
         """Loop over all flowcells and post process those that need it"""
         demuxed_flowcells_dir: Path = self.demux_api.out_dir
         for flowcell_dir in demuxed_flowcells_dir.iterdir():

@@ -36,7 +36,8 @@ class DemuxStats:
         self.barcode_to_lanes = {}
         self.parse_file()
 
-    def create_entry(self):
+    def create_entry(self) -> None:
+        """Create a entry of SampleBarcodeStats and add it in a structured way"""
         entry: SampleBarcodeStats = SampleBarcodeStats(
             barcode_count=self._current_barcode_count,
             perfect_barcode_count=self._current_perfect_barcode_count,
@@ -50,7 +51,8 @@ class DemuxStats:
             self.barcode_to_lanes[self._current_barcode] = {}
         self.barcode_to_lanes[self._current_barcode][self._current_lane] = entry
 
-    def parse_file(self):
+    def parse_file(self) -> None:
+        """Parse a XML file with demux statistics"""
         LOG.info("Parsing demux stats file %s", self.demux_stats_path)
         for (event, node) in iterparse(str(self.demux_stats_path), ["start", "end"]):
             if event == "start":
@@ -61,6 +63,7 @@ class DemuxStats:
             node.clear()
 
     def evaluate_start_event(self, node: Element) -> None:
+        """Check what type a start event is and take the relevant action depending on type"""
         if node.tag == "Flowcell":
             self.set_flowcell_id(node)
         elif node.tag == "Project":
@@ -82,6 +85,7 @@ class DemuxStats:
             self.set_current_lane(node)
 
     def evaluate_end_event(self, node: Element) -> None:
+        """Check what type a end event is and take the relevant action depending on type"""
         # These needs to operate on end tags to ensure value exists
         if node.tag == "BarcodeCount":
             self._current_barcode_count = int(node.text)
