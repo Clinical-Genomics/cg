@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.6.1]
+### Fixed
+- Fix bug in mip and balsamic crontab
+
+
 ## [21.6.0]
 ### Added
 - Functionality to do demultiplexing post processing from CG
