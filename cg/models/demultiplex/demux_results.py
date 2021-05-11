@@ -2,7 +2,7 @@ import datetime
 import logging
 import socket
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
@@ -24,6 +24,7 @@ class DemuxResults:
     """Class to gather information from a demultiplex result"""
 
     def __init__(self, demux_dir: Path, flowcell: Flowcell):
+        LOG.info("Instantiating DemuxResults with path %s", demux_dir)
         self.demux_dir: Path = demux_dir
         self.flowcell: Flowcell = flowcell
 
@@ -79,17 +80,68 @@ class DemuxResults:
                 LOG.debug("Found project %s", project_name)
                 yield project_name
 
+    @property
+    def raw_index_dir(self) -> Path:
+        """Return the path to a index dir that is not given the 'Project_'-prefix"""
+        return self.results_dir / "indexcheck"
+
+    @property
+    def raw_projects(self) -> Iterable[Path]:
+        """Return the raw project names created after demultiplexing
+
+        These are either 'indexcheck' or a number
+        """
+        for sub_dir in self.results_dir.iterdir():
+            if not sub_dir.is_dir():
+                LOG.debug("Skipping %s since it is not a directory", sub_dir)
+                continue
+            dir_name: str = sub_dir.name
+            if dir_name in ["Stats", "Reports"]:
+                LOG.debug("Skipping %s dir %s", dir_name, sub_dir)
+                continue
+            if dir_name.startswith("Project_"):
+                LOG.debug("Skipping already renamed project dir %s", sub_dir)
+                continue
+            if "index" in dir_name:
+                LOG.debug("Skipping 'indexcheck' dir %s", sub_dir)
+                continue
+                # We now know that the rest of the directories are project directories
+            yield sub_dir
+
+    def files_renamed(self) -> bool:
+        """Assert if the files have been renamed
+
+        Check if there are any raw projects, in that case it will need post processing
+        """
+        return bool(len(list(self.raw_projects)))
+
     def get_logfile_parameters(self) -> LogfileParameters:
-        with open(self.log_path, "r") as logfile:
+        log_path: Path = self.log_path
+        LOG.info("Parse log file %s", log_path)
+        if not log_path.exists():
+            LOG.warning("Could not find log file %s", log_path)
+            raise FileNotFoundError
+        program: str = ""
+        time: Optional[datetime.datetime] = None
+        command_line: Optional[str] = None
+        id_string: Optional[str] = None
+        with open(log_path, "r") as logfile:
             for line in logfile.readlines():
                 # Fetch the line where the call that was made is
                 if "bcl2fastq" in line and "singularity" in line:
                     line = line.strip()
                     split_line = line.split(" ")
                     command_line: str = " ".join(split_line[1:])
-                    # Time is in format 20210403115107, YYYYMMDDHHMMSS
+                    # Time is in format 2021-04-03-11:51:07, YYYY-MM-DD-HH-MM-SS
                     raw_time: str = split_line[0].strip("[]")  # remove the brackets around the date
-                    time: datetime.datetime = datetime.datetime.strptime(raw_time, "%Y%m%d%H%M%S")
+                    try:
+                        time: datetime.datetime = datetime.datetime.strptime(
+                            raw_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+                    except ValueError:
+                        time: datetime.datetime = datetime.datetime.strptime(
+                            raw_time, "%Y%m%d%H%M%S"
+                        )
                     program = split_line[6]  # get the executed program
 
                 if "bcl2fastq v" in line:
@@ -99,3 +151,6 @@ class DemuxResults:
         return LogfileParameters(
             id_string=id_string, program=program, command_line=command_line, time=time
         )
+
+    def __str__(self):
+        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=Flowcell(flowcell_path={self.flowcell.path})"
