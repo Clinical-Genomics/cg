@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.5.8]
+### Fixed
+- Fix bug in mip and balmsamic crontab
+
 ## [21.5.7]
 ### Fixed
 - Set status to analyze when resolving decompression
