@@ -5,6 +5,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
+import datetime as dt
 
 
 def test_start_available_dry(
@@ -50,17 +51,25 @@ def test_start_available(
     mocker.patch.object(FluffyAnalysisAPI, "run_fluffy")
     FluffyAnalysisAPI.run_fluffy.return_value = None
 
-    # GIVEN samplesheet exists in Housekeeper
+    # GIVEN an existing samplesheet in Housekeeper
     mocker.patch.object(FluffyAnalysisAPI, "get_samplesheet_housekeeper_path")
     FluffyAnalysisAPI.get_samplesheet_housekeeper_path.return_value = samplesheet_fixture_path
 
-    # GIVEN concentrations on samples are set in LIMS
+    # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
-    FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "10"
+    FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
 
-    # GIVEN samples in samplesheet have corresponding StatusDB entries with customer-set sample name
+    # GIVEN every sample in SampleSheet has been given a name in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
     FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
+
+    # GIVEN every sample in SampleSheet has valid order field in StatusDB
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_starlims_id")
+    FluffyAnalysisAPI.get_sample_starlims_id.return_value = 12345678
+
+    # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
+    FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 
     # WHEN running command
     result = cli_runner.invoke(start_available, [], obj=fluffy_context)

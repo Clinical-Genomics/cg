@@ -13,8 +13,46 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.4.2]
 
+## [21.5.6]
+### Fixed
+- Use only the first item from region and lab code values in mutant workflow.
+
+## [21.5.5]
+### Fixed
+- Fix tag to deliver correct mutant result files to KS inbox
+
+## [21.5.4]
+### Fixed
+- Block orders unintentionally reusing case names 
+
+## [21.5.3]
+### Fixed
+- Set correct fluffy analysis finish path
+
+## [21.5.2]
+### Fixed
+- Fixed content of fluffy samplesheet according to customer specification
+
+## [21.5.1]
+### Fixed
+- By default fetch related flowcell information using `cg get sample <sample_id>`
+
+## [21.5.0]
+### Added
+- User field for allowing order portal login
+### Changed 
+- Delivery/Invoicing/Primary Contacts are now relations from Customer to User in admin
+
+## [21.4.4]
+### Fixed
+- Propagate all samples to microsalt, even those without reads
+
+## [21.4.3]
+### Fixed
+- Display invoice contact on invoice
+
+## [21.4.2]
 ### Fixed
 - Remove default option for mip-dna priority
 
