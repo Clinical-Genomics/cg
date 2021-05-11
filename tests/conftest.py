@@ -1002,26 +1002,6 @@ def sample_store(base_store) -> Store:
     return base_store
 
 
-# @pytest.fixture(scope="function")
-# def disk_store(cli_runner, invoke_cli) -> Store:
-#     """Store on disk"""
-#     database = "./test_db.sqlite3"
-#     database_path = Path(database)
-#     with cli_runner.isolated_filesystem():
-#         assert database_path.exists() is False
-#
-#         database_uri = f"sqlite:///{database}"
-#         # WHEN calling "init"
-#         result = invoke_cli(["--database", database_uri, "init"])
-#
-#         # THEN it should setup the database with some tables
-#         assert result.exit_code == 0
-#         assert database_path.exists()
-#         assert len(Store(database_uri).engine.table_names()) > 0
-#
-#         yield Store(database_uri)
-
-
 @pytest.fixture(scope="function", name="trailblazer_api")
 def fixture_trailblazer_api() -> MockTB:
     return MockTB()

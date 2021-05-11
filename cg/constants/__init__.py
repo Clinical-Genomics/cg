@@ -27,4 +27,4 @@ from .priority import PRIORITY_MAP, PRIORITY_OPTIONS, REV_PRIORITY_MAP
 from .process import EXIT_FAIL, EXIT_SUCCESS, RETURN_SUCCESS
 from .sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from .symbols import NO_PARENT, SINGLE_QUOTE, SPACE
-from .tags import HK_FASTQ_TAGS, HK_TAGS, MICROSALT_TAGS
+from .tags import HK_FASTQ_TAGS

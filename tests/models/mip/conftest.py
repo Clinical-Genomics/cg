@@ -13,7 +13,7 @@ def fixture_mip_case_config_dna(fixtures_dir) -> Path:
 
 
 @pytest.fixture(name="mip_analysis_config_dna_raw")
-def fixture_mip_analysis_config_dna_raw():
+def fixture_mip_analysis_config_dna_raw() -> dict:
     """Raw MIP DNA analysis config"""
     return {
         "analysis_type": {"sample_id": "wgs"},
@@ -42,7 +42,7 @@ def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
 
 
 @pytest.fixture(name="sample_info_dna_raw")
-def fixture_sample_info_dna_raw():
+def fixture_sample_info_dna_raw() -> dict:
     """Raw sample_info fixture"""
     return {
         "analysisrunstatus": "finished",
