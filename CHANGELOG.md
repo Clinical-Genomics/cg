@@ -13,6 +13,23 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.6.2]
+### Fixed
+- Fix bug in sqlalchemy models
+
+
+## [21.6.2]
+### Fixed
+- If a boolean value is passed to `cg set sample -kv <key> <value>` a boolean is passed to the db
+
+## [21.6.1]
+### Fixed
+- Fix bug in mip and balsamic crontab
+
+## [21.6.0]
+### Added
+- Functionality to do demultiplexing post processing from CG
+
 ## [21.5.7]
 ### Fixed
 - Set status to analyze when resolving decompression
