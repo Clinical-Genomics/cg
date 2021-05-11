@@ -29,7 +29,6 @@ class Demux(Model):
         viewonly=True,
         cascade="all",
         backref=orm.backref("demuxes"),
-        sync_backref=False,
     )
 
     @staticmethod

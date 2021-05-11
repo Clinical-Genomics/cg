@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.6.2]
+### Fixed
+- Fix bug in sqlalchemy models
+
 
 ## [21.6.2]
 ### Fixed
