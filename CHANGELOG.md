@@ -13,6 +13,66 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.5.7]
+### Fixed
+- Set status to analyze when resolving decompression
+
+## [21.5.6]
+### Fixed
+- Use only the first item from region and lab code values in mutant workflow.
+
+## [21.5.5]
+### Fixed
+- Fix tag to deliver correct mutant result files to KS inbox
+
+## [21.5.4]
+### Fixed
+- Block orders unintentionally reusing case names 
+
+## [21.5.3]
+### Fixed
+- Set correct fluffy analysis finish path
+
+## [21.5.2]
+### Fixed
+- Fixed content of fluffy samplesheet according to customer specification
+
+## [21.5.1]
+### Fixed
+- By default fetch related flowcell information using `cg get sample <sample_id>`
+
+## [21.5.0]
+### Added
+- User field for allowing order portal login
+### Changed 
+- Delivery/Invoicing/Primary Contacts are now relations from Customer to User in admin
+
+## [21.4.4]
+### Fixed
+- Propagate all samples to microsalt, even those without reads
+
+## [21.4.3]
+### Fixed
+- Display invoice contact on invoice
+
+## [21.4.2]
+### Fixed
+- Remove default option for mip-dna priority
+
+## [21.4.1]
+### Changed
+- Change how samples are fetched for cgstats select command
+### Fixed
+- Bug when fetching info with `cg demultiplex select`-command
+
+## [21.4.0]
+### Added
+- A column in customer-group admin view in to show customers in the group
+
+## [21.3.1]
+### Fixed
+- PDC backup destination server for 2500 flowcells
+
 ## [21.3.0]
 ### Changed
 - Remove dependency `cgstats` from requirements.txt and move used functionality into CG
@@ -20,6 +80,12 @@ Try to use the following format:
 ## [21.2.0]
 ### Added
 - Functionality for the cgstats api in CG
+
+## [21.1.0]
+### Added
+Select analyses to be uploaded to vogue based on analysis completed date (before or after a date, of between two dates)
+Add uploaded to vogue date to analysis table
+Only select potential analyses to upload that have not been uploaded
 
 ## [21.0.0]
 

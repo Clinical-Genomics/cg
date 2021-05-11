@@ -122,10 +122,10 @@ class MutantAnalysisAPI(AnalysisAPI):
         sample_name = sample_obj.name
         region_code = self.lims_api.get_sample_attribute(
             lims_id=sample_obj.internal_id, key="region_code"
-        ).replace(" ", "_")
+        ).split(" ")[0]
         lab_code = self.lims_api.get_sample_attribute(
             lims_id=sample_obj.internal_id, key="lab_code"
-        ).replace(" ", "_")
+        ).split(" ")[0]
 
         return f"{region_code}_{lab_code}_{sample_name}"
 

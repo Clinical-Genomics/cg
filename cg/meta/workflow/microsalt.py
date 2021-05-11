@@ -172,6 +172,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             "date_libprep": str(sample_obj.prepared_at or datetime.min),
             "method_libprep": method_library_prep or "Not in LIMS",
             "method_sequencing": method_sequencing or "Not in LIMS",
+            "sequencing_qc_passed": sample_obj.sequencing_qc,
         }
 
     def get_project(self, sample_id: str) -> str:
