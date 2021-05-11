@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Stats>
+  <Flowcell flowcell-id="HN3FKDSXY">
+	<Project name="150392">
+	  <Sample name="AL-P-00425491-N-03103120-KH20210330-PN20210331">
+	    <Barcode name="CTATAGCGAG+AGTCGACTAG">
+	      <Lane number="1">
+	        <BarcodeCount>949781</BarcodeCount>
+	        <PerfectBarcodeCount>930520</PerfectBarcodeCount>
+	        <OneMismatchBarcodeCount>19261</OneMismatchBarcodeCount>
+	      </Lane>
+	      <Lane number="2">
+	        <BarcodeCount>960781</BarcodeCount>
+	        <PerfectBarcodeCount>942698</PerfectBarcodeCount>
+	        <OneMismatchBarcodeCount>18083</OneMismatchBarcodeCount>
+	      </Lane>
+	    </Barcode>
+	    <Barcode name="all">
+	      <Lane number="1">
+	        <BarcodeCount>949781</BarcodeCount>
+	        <PerfectBarcodeCount>930520</PerfectBarcodeCount>
+	        <OneMismatchBarcodeCount>19261</OneMismatchBarcodeCount>
+	      </Lane>
+	      <Lane number="2">
+	        <BarcodeCount>960781</BarcodeCount>
+	        <PerfectBarcodeCount>942698</PerfectBarcodeCount>
+	        <OneMismatchBarcodeCount>18083</OneMismatchBarcodeCount>
+	      </Lane>
+	    </Barcode>
+	  </Sample>    
+    </Project>
+  </Flowcell>
+</Stats>

@@ -22,6 +22,7 @@ class StatsAPI(alchy.Manager):
     Flowcell = models.Flowcell
 
     def __init__(self, config: dict):
+        LOG.info("Instantiating cgstats api")
         alchy_config = dict(SQLALCHEMY_DATABASE_URI=config["cgstats"]["database"])
         super(StatsAPI, self).__init__(config=alchy_config, Model=models.Model)
         self.root_dir = Path(config["cgstats"]["root"])

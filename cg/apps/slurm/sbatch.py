@@ -13,8 +13,8 @@ SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 set -eu -o pipefail
 
 log() {{
-    NOW=$(date +"%Y%m%d%H%M%S")
-    echo "[${{NOW}}] $*"
+    NOW=$(date +"%Y-%m-%dT%H:%M:%S")
+    echo "[${{NOW}}] $*" 1>&2;
 }}
 
 log "Running on: $(hostname)"

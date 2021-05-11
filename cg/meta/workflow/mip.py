@@ -238,7 +238,7 @@ class MipAnalysisAPI(AnalysisAPI):
         )
         cases_to_analyze = []
         for case_obj in cases_query:
-            if not case_obj.latest_analyzed:
+            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
                 cases_to_analyze.append(case_obj)
             elif (
                 self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
