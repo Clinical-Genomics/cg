@@ -107,11 +107,9 @@ def fixture_dna_mip_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     mip_case_ids: dict,
-    housekeeper_api: HousekeeperAPI,
     real_housekeeper_api: HousekeeperAPI,
 ) -> CGConfig:
     _store = cg_context.status_db
-    real_housekeeper_api: HousekeeperAPI
     cg_context.housekeeper_api_ = real_housekeeper_api
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
