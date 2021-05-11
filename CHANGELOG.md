@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.5.7]
+### Fixed
+- Set status to analyze when resolving decompression
 
 ## [21.5.6]
 ### Fixed

@@ -146,6 +146,7 @@ def test_spring_decompression_needed_and_cant_start(
     # THEN it should be announced that spring decompression is needed but fail to start
     assert f"Decompression can not be started for" in caplog.text
 
+
 def test_decompression_cant_start_and_is_running(
     mocker, cli_runner, caplog, dna_mip_context, case_id
 ):

@@ -353,7 +353,9 @@ class AnalysisAPI(MetaAPI):
                         case_id,
                     )
             else:
-                is_decompression_running = self.prepare_fastq_api.is_spring_decompression_running(case_id)
+                is_decompression_running = self.prepare_fastq_api.is_spring_decompression_running(
+                    case_id
+                )
                 if is_decompression_running:
                     LOG.info(
                         "Decompression is running for %s, analysis will be started when decompression is done",
