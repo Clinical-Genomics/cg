@@ -46,7 +46,6 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
 def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[str]):
     """Select a flowcell to fetch statistics from"""
     # Need to instantiate API
-    stats_api: StatsAPI = context.cg_stats_api
     post_processing_api = DemuxPostProcessingAPI(config=context)
     report_content: List[str] = post_processing_api.get_report_data(
         flowcell_id=flowcell_id, project_name=project

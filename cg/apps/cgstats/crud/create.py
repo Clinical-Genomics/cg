@@ -234,3 +234,4 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         project_name_to_id=project_name_to_id,
         demux_id=demux_id,
     )
+    manager.commit()
