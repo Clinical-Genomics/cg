@@ -13,14 +13,23 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.6.3]
+## [21.6.6]
+### Changed
+- Check that logfile exists before doing demux post-processing
+
+## [21.6.5]
+### Changed
+- Check if Unaligned dir exists before doing demux post-processing
+### Fixed
+- Fix bugs in create sample sheet all command
+
+## [21.6.4]
 ### Fixed
 - Fix so that delivery will not break if fastq bundle is missing when delivering results with ticket id
 
-## [21.6.2]
+## [21.6.3]
 ### Fixed
 - Fix bug in sqlalchemy models
-
 
 ## [21.6.2]
 ### Fixed

@@ -141,6 +141,10 @@ class DemuxPostProcessingAPI:
         demux_results: DemuxResults = DemuxResults(
             demux_dir=self.demux_api.out_dir / flowcell_name, flowcell=flowcell
         )
+        if not demux_results.results_dir.exists():
+            LOG.warning("Could not find results directory %s", demux_results.results_dir)
+            LOG.info("Can not finish flowcell %s", flowcell_name)
+            return
         if demux_results.files_renamed():
             LOG.warning("Flowcell is already finished!")
             if not force:
