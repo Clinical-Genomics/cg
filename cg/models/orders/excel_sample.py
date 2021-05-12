@@ -1,5 +1,7 @@
+import datetime
 from typing import List, Optional
 
+import dateutil.parser
 from pydantic import Field, validator
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
@@ -129,3 +131,9 @@ class ExcelSample(OrderSample):
         if value == "förtur":
             return "priority"
         return value
+
+    @validator("collection_date")
+    def convert_to_date(cls, value: Optional[str]) -> Optional[str]:
+        if not value:
+            return None
+        return str(dateutil.parser.parse(value).date())
