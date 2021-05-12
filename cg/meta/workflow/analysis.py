@@ -214,6 +214,8 @@ class AnalysisAPI(MetaAPI):
         """
         try:
             self.process.run_command(["--version"])
+            if not self.process.stdout:
+                self.process.run_command([case_id, "--version"])
             return list(self.process.stdout_lines())[0].split()[-1]
         except (Exception, CalledProcessError):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
