@@ -13,9 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.6.6]
+### Changed
+- Check that logfile exists before doing demux post-processing
+
 ## [21.6.5]
 ### Changed
-- Check if Unaligned dir exists before doing demux post processing
+- Check if Unaligned dir exists before doing demux post-processing
 ### Fixed
 - Fix bugs in create sample sheet all command
 
