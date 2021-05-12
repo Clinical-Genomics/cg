@@ -1,7 +1,4 @@
-import datetime
 from typing import List, Optional
-
-import dateutil.parser
 from pydantic import Field, validator
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
@@ -140,4 +137,4 @@ class ExcelSample(OrderSample):
     def convert_to_date(cls, value: Optional[str]) -> Optional[str]:
         if not value:
             return None
-        return str(dateutil.parser.parse(value).date())
+        return value[0:10]
