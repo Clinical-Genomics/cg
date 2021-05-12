@@ -17,6 +17,44 @@ Try to use the following format:
 ### Added
 - Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
 
+## [21.6.6]
+### Changed
+- Check that logfile exists before doing demux post-processing
+
+## [21.6.5]
+### Changed
+- Check if Unaligned dir exists before doing demux post-processing
+### Fixed
+- Fix bugs in create sample sheet all command
+
+## [21.6.4]
+### Fixed
+- Fix so that delivery will not break if fastq bundle is missing when delivering results with ticket id
+
+## [21.6.3]
+### Fixed
+- Fix bug in sqlalchemy models
+
+## [21.6.2]
+### Fixed
+- If a boolean value is passed to `cg set sample -kv <key> <value>` a boolean is passed to the db
+
+## [21.6.1]
+### Fixed
+- Fix bug in mip and balsamic crontab
+
+## [21.6.0]
+### Added
+- Functionality to do demultiplexing post processing from CG
+
+## [21.5.7]
+### Fixed
+- Set status to analyze when resolving decompression
+
+## [21.5.6]
+### Fixed
+- Use only the first item from region and lab code values in mutant workflow.
+
 ## [21.5.5]
 ### Fixed
 - Fix tag to deliver correct mutant result files to KS inbox
