@@ -1,6 +1,6 @@
 from cg.apps.mip import parse_qcmetrics
 from cg.models.mip.mip_config import MipBaseConfig, parse_config
-from cg.models.mip.mip_sample_info import MipBaseSampleinfo, parse_sampleinfo
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
 
 
 def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
@@ -37,9 +37,9 @@ def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw
 
 
 def _qc_sample_info(outdata: dict, sampleinfo_raw: dict) -> None:
-    sample_info: MipBaseSampleinfo = parse_sampleinfo(sampleinfo_raw)
+    sample_info: MipBaseSampleInfo = parse_sample_info(sampleinfo_raw)
     outdata["genome_build"] = sample_info.genome_build
-    outdata["mip_version"] = sample_info.version
+    outdata["mip_version"] = sample_info.mip_version
     outdata["rank_model_version"] = sample_info.rank_model_version
     outdata["sv_rank_model_version"] = sample_info.sv_rank_model_version
 

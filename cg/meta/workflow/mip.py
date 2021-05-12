@@ -11,7 +11,7 @@ from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
-from cg.models.mip.mip_sample_info import MipBaseSampleinfo, parse_sampleinfo
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
 from cg.store import models
 
 CLI_OPTIONS = {
@@ -70,7 +70,7 @@ class MipAnalysisAPI(AnalysisAPI):
         return Path(self.root, case_id, "analysis", f"{case_id}_deliverables.yaml")
 
     def get_sample_info_path(self, case_id: str) -> Path:
-        """Get sample info path"""
+        """Get case analysis sample info path"""
         return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
     def resolve_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
@@ -297,15 +297,16 @@ class MipAnalysisAPI(AnalysisAPI):
         raise NotImplementedError
 
     def get_pipeline_version(self, case_id: str) -> str:
+        """Get MIP version from sample info file"""
         LOG.debug("Fetch pipeline version")
         sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
-        sample_info: MipBaseSampleinfo = parse_sampleinfo(sample_info_raw)
-        return sample_info.version
+        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
+        return sample_info.mip_version
 
     def is_analysis_finished(self, sample_info_path: Path) -> bool:
         """Return True if analysis is finished"""
         sample_info_raw = yaml.safe_load(sample_info_path.open())
-        sample_info: MipBaseSampleinfo = parse_sampleinfo(sample_info_raw)
+        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
         return sample_info.is_finished
 
     def get_cases_to_store(self) -> List[models.Family]:

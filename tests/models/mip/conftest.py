@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.models.mip.mip_config import MipBaseConfig
-from cg.models.mip.mip_sample_info import MipBaseSampleinfo
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
 @pytest.fixture(name="mip_case_config_dna")
@@ -57,5 +57,5 @@ def fixture_sample_info_dna_raw() -> dict:
 
 
 @pytest.fixture(name="sample_info_dna")
-def fixture_sample_info_dna(sample_info_dna_raw: dict) -> MipBaseSampleinfo:
-    return MipBaseSampleinfo(**sample_info_dna_raw)
+def fixture_sample_info_dna(sample_info_dna_raw: dict) -> MipBaseSampleInfo:
+    return MipBaseSampleInfo(**sample_info_dna_raw)

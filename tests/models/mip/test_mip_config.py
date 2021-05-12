@@ -39,7 +39,7 @@ def test_mip_config(mip_case_config_dna: Path):
     with open(mip_case_config_dna, "r") as config_handle:
         raw_config = yaml.full_load(config_handle)
 
-    # WHEN instantiating a MipBaseSampleinfo object
+    # WHEN instantiating a MipBaseSampleInfo object
     config_object = MipBaseConfig(**raw_config)
 
     # THEN assert that it was successfully created
@@ -50,7 +50,7 @@ def test_mip_config_case_id(mip_analysis_config_dna_raw: dict):
     """Test case_id validator"""
     # GIVEN a MIP config
 
-    # WHEN instantiating a MipBaseSampleinfo object
+    # WHEN instantiating a MipBaseSampleInfo object
     config_object = MipBaseConfig(**mip_analysis_config_dna_raw)
 
     # THEN assert that case_id was set
@@ -62,7 +62,7 @@ def test_mip_config_case_id_with_family_id(mip_analysis_config_dna_raw: dict):
     # GIVEN a MIP config missing a case_id but with family_id
     mip_analysis_config_dna_raw.pop("case_id")
 
-    # WHEN instantiating a MipBaseSampleinfo object
+    # WHEN instantiating a MipBaseSampleInfo object
     config_object = MipBaseConfig(**mip_analysis_config_dna_raw)
 
     # THEN assert that case_id was set
@@ -73,7 +73,7 @@ def test_mip_config_case_id(mip_analysis_config_dna_raw: dict):
     """Test case_id validator"""
     # GIVEN a MIP config
 
-    # WHEN instantiating a MipBaseSampleinfo object
+    # WHEN instantiating a MipBaseSampleInfo object
     config_object = MipBaseConfig(**mip_analysis_config_dna_raw)
 
     # THEN assert that samples was set

@@ -27,12 +27,12 @@ class MipBaseConfig(BaseModel):
     sample_info_path: str = Field(..., alias="sample_info_file")
 
     @validator("case_id", always=True, pre=True)
-    def set_case_id(cls, value, values: dict):
+    def set_case_id(cls, value, values: dict) -> str:
         """Set case_id. Family_id is used for older versions of MIP analysis"""
         return value or values.get("family_id_")
 
     @validator("samples", always=True, pre=True)
-    def set_samples(cls, _, values: dict):
+    def set_samples(cls, _, values: dict) -> List[AnalysisType]:
         """Set samples analysis type"""
         raw_samples: dict = values.get("analysis_type_")
         return [
