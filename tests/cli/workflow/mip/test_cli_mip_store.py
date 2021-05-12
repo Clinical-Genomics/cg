@@ -34,6 +34,7 @@ def test_cli_store(
     mip_hermes_dna_deliverables_response_data,
     dna_mip_context: CGConfig,
     timestamp_yesterday,
+    case_qc_sample_info_path,
     caplog,
     mocker,
 ):
@@ -57,6 +58,10 @@ def test_cli_store(
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
     HermesApi.create_housekeeper_bundle.return_value = mip_hermes_dna_deliverables_response_data
+
+    # GIVEN sample_info were generated and could be found
+    mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")
+    MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
 
     # WHEN running command
     result = cli_runner.invoke(store, [mip_case_id], obj=dna_mip_context)
@@ -124,6 +129,7 @@ def test_cli_store_available_case_is_running(
     mip_hermes_dna_deliverables_response_data,
     dna_mip_context: CGConfig,
     timestamp_yesterday,
+    case_qc_sample_info_path,
     caplog,
     mocker,
 ):
@@ -150,6 +156,10 @@ def test_cli_store_available_case_is_running(
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
     HermesApi.create_housekeeper_bundle.return_value = mip_hermes_dna_deliverables_response_data
+
+    # GIVEN sample_info were generated and could be found
+    mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")
+    MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
 
     # GIVEN a finished case analysis
     mocker.patch.object(MipDNAAnalysisAPI, "is_analysis_finished")

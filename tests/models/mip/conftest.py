@@ -35,12 +35,6 @@ def fixture_mip_analysis_config_dna(mip_analysis_config_dna_raw: dict) -> MipBas
     return MipBaseConfig(**mip_analysis_config_dna_raw)
 
 
-@pytest.fixture(name="case_qc_sample_info_path")
-def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
-    """Return path to case_qc_sample_info.yaml"""
-    return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
-
-
 @pytest.fixture(name="sample_info_dna_raw")
 def fixture_sample_info_dna_raw() -> dict:
     """Raw sample_info fixture"""

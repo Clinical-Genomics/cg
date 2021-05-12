@@ -301,6 +301,12 @@ def fixture_orderform(fixtures_dir: Path) -> Path:
     return fixtures_dir / "orderforms"
 
 
+@pytest.fixture(name="case_qc_sample_info_path")
+def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
+    """Return path to case_qc_sample_info.yaml"""
+    return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""

@@ -296,6 +296,12 @@ class MipAnalysisAPI(AnalysisAPI):
     def config_sample(self, link_obj: models.FamilySample, panel_bed: str) -> dict:
         raise NotImplementedError
 
+    def get_pipeline_version(self, case_id: str) -> str:
+        LOG.debug("Fetch pipeline version")
+        sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
+        sample_info: MipBaseSampleinfo = parse_sampleinfo(sample_info_raw)
+        return sample_info.version
+
     def is_analysis_finished(self, sample_info_path: Path) -> bool:
         """Return True if analysis is finished"""
         sample_info_raw = yaml.safe_load(sample_info_path.open())
