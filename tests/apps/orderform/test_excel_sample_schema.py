@@ -71,7 +71,7 @@ def test_excel_datetime_to_date_conversion(minimal_excel_sample: dict):
     excel_sample: ExcelSample = ExcelSample(**minimal_excel_sample)
 
     # THEN the collection_date should only contain the date
-    str(excel_sample.collection_date) == "2021-05-05"
+    assert str(excel_sample.collection_date) == "2021-05-05"
 
 
 def test_excel_with_panels(minimal_excel_sample: dict):
