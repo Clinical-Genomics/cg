@@ -77,7 +77,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
 
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data["samples"][0]
-    assert sample_data.get("priority") in "research"
+    assert sample_data["priority"] == "research"
     assert sample_data["name"] == "all-fields"
     assert sample_data.get("internal_id") is None
     assert sample_data["organism_id"] == "M.upium"
@@ -104,7 +104,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data["samples"][0]
     assert sample_data.get("internal_id") is None
-    assert sample_data.get("priority") in "research"
+    assert sample_data["priority"] == "research"
     assert sample_data["application"] == "VWGDPTR001"
     assert sample_data["collection_date"] == "2021-05-05"
     assert sample_data["comment"] == "plate comment"
