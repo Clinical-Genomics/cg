@@ -125,10 +125,14 @@ class ExcelSample(OrderSample):
             return "analysis-bam"
         return value
 
-    @validator("priority", "status")
+    @validator("status", "priority")
     def convert_to_lower(cls, value: Optional[str]):
         value = value.lower()
-        if value == "förtur":
+        return value
+
+    @validator("priority")
+    def convert_to_priority(cls, value: Optional[str]):
+        if value.lower() == "förtur":
             return "priority"
         return value
 
