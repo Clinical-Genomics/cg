@@ -16,6 +16,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
+from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -1202,7 +1203,7 @@ def fixture_context_config(
             "slurm": {
                 "mail_user": "test.email@scilifelab.se",
                 "account": "development",
-                "qos": "low",
+                "qos": SlurmQos.LOW,
             },
         },
         "microsalt": {

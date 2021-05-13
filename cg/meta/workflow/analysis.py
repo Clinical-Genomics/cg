@@ -7,11 +7,12 @@ from typing import List, Optional, Tuple
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants.priority import SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import models
 from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
@@ -97,10 +98,10 @@ class AnalysisAPI(MetaAPI):
         """Fetch priority for case id"""
         case_obj: models.Family = self.status_db.family(case_id)
         if not case_obj.priority or case_obj.priority == 0:
-            return "low"
+            return SlurmQos.LOW
         if case_obj.priority > 1:
-            return "high"
-        return "normal"
+            return SlurmQos.HIGH
+        return SlurmQos.NORMAL
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory"""

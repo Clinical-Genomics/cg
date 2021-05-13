@@ -16,6 +16,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
+from cg.constants.priority import SlurmQos
 from cg.store import Store
 from pydantic import BaseModel, EmailStr, Field
 from typing_extensions import Literal
@@ -37,7 +38,7 @@ class SlurmConfig(BaseModel):
     account: str
     mail_user: EmailStr
     conda_env: Optional[str]
-    qos: Literal["low", "normal", "high"] = "low"
+    qos: Literal[SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH] = SlurmQos.LOW
 
 
 class HousekeeperConfig(BaseModel):
