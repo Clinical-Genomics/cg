@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.6.7]
+### Changed
+- Validate that flowcell name is correct when demultiplexing
+
 ## [21.6.6]
 ### Changed
 - Check that logfile exists before doing demux post-processing
