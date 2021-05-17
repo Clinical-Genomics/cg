@@ -7,6 +7,7 @@ from typing import Any, List, Optional
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
+from cg.constants.tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
@@ -195,9 +196,13 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
 
-        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag="mip-config")
-        qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag="qcmetrics")
-        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag="sampleinfo")
+        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
+        qcmetrics_raw = self._get_latest_raw_file(
+            family_id=family_id, tag=HkMipAnalysisTag.QC_METRICS
+        )
+        sampleinfo_raw = self._get_latest_raw_file(
+            family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
+        )
         trending = dict()
         if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
             try:

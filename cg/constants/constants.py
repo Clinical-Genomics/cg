@@ -1,5 +1,5 @@
 """Constants for cg"""
-from cgmodels.cg.constants import Pipeline, StrEnum
+from cgmodels.cg.constants import StrEnum
 
 CONTAINER_OPTIONS = ("Tube", "96 well plate")
 
