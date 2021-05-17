@@ -94,9 +94,7 @@ class DeliverAPI:
             sample_id: str = link_obj.sample.internal_id
             sample_name: str = link_obj.sample.name
             LOG.debug("Fetch last version for sample bundle %s", sample_id)
-            if self.delivery_type == "sarscov2":
-                last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
-            else:
+            if self.delivery_type == "fastq":
                 last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
             if not last_version and self.skip_missing_bundle:
                 LOG.info("Could not find any version for {}".format(sample_id))
