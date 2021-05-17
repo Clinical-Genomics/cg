@@ -37,7 +37,7 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
         raise click.Abort
     try:
         flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
-    except FlowcellError as exc:
+    except FlowcellError:
         raise click.Abort
     demux_results: DemuxResults = DemuxResults(demux_dir=demux_results_path, flowcell=flowcell)
     create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)

@@ -35,7 +35,7 @@ def demultiplex_all(
         LOG.info("Found directory %s", sub_dir)
         try:
             flowcell_obj = Flowcell(flowcell_path=sub_dir)
-        except FlowcellError as err:
+        except FlowcellError:
             continue
         if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
             continue
