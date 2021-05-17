@@ -49,12 +49,10 @@ class GisaidAPI:
         fasta_file: str = self.housekeeper_api.files(
             version=hk_version.id, tags=["consensus"]
         ).first()
-
         gisaid_delivery_fasta = []
         with open(fasta_file.full_path) as handle:
             fasta_lines = handle.readlines()
             for line in fasta_lines:
-                    continue
                 if line[0] == ">":
                     gisaid_delivery_fasta.append(
                         self.get_new_header(old_header=line, samples=gsaid_samples)
