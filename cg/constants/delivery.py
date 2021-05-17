@@ -11,7 +11,6 @@ ONLY_ONE_CASE_PER_TICKET = [
 SKIP_MISSING = [
     "fastq",
     "microsalt",
-    "sarscov2",
 ]
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
