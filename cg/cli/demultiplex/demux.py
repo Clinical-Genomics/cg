@@ -4,6 +4,7 @@ from typing import Optional
 
 import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.exc import FlowcellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 
@@ -32,7 +33,10 @@ def demultiplex_all(
         if not sub_dir.is_dir():
             continue
         LOG.info("Found directory %s", sub_dir)
-        flowcell_obj = Flowcell(flowcell_path=sub_dir)
+        try:
+            flowcell_obj = Flowcell(flowcell_path=sub_dir)
+        except FlowcellError as err:
+            continue
         if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
             continue
 
@@ -60,7 +64,10 @@ def demultiplex_flowcell(
     flowcell_directory: Path = Path(context.demultiplex.run_dir) / flowcell_id
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
-    flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
+    try:
+        flowcell_obj = Flowcell(flowcell_path=flowcell_directory)
+    except FlowcellError:
+        raise click.Abort
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
         LOG.warning("Can not start demultiplexing!")

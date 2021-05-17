@@ -19,7 +19,6 @@ class Flowcell:
     def __init__(self, flowcell_path: Path):
         LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
-        LOG.debug("Set flowcell id to %s", self.flowcell_id)
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_name: str = ""
@@ -45,6 +44,7 @@ class Flowcell:
         self.machine_name = split_name[1]
         base_name: str = split_name[-1]
         self.base_name = base_name
+        LOG.debug("Set flowcell id to %s", self.flowcell_id)
         self.flowcell_id = base_name[1:]
         self.flowcell_position = base_name[0]
 
