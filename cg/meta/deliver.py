@@ -96,10 +96,10 @@ class DeliverAPI:
             LOG.debug("Fetch last version for sample bundle %s", sample_id)
             if self.delivery_type == "fastq":
                 last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
-            if not last_version and self.skip_missing_bundle:
-                LOG.info("Could not find any version for {}".format(sample_id))
-                continue
-            elif not last_version:
+            if not last_version:
+                if self.skip_missing_bundle:
+                    LOG.info("Could not find any version for {}".format(sample_id))
+                    continue
                 raise SyntaxError("Could not find any version for {}".format(sample_id))
             self.deliver_sample_files(
                 case_id=case_id,
