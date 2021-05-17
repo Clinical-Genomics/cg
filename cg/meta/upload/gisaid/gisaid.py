@@ -35,35 +35,44 @@ class GisaidAPI:
 
         with open(fastq_path) as handle:
             fasta_lines = handle.readlines()
+            print(fasta_lines)
             try:
                 return fasta_lines[1].rstrip("\n")
             except:
                 raise FastaSequenceMissingError
 
-    def get_gisaid_fasta_objects(self, gsaid_samples: List[GisaidSample]) -> List[FastaFile]:
+    def get_gisaid_fasta_objects(
+        self, gsaid_samples: List[GisaidSample], family_id: str
+    ) -> List[FastaFile]:
         """Fetch a fasta files form house keeper for batch upload to gisaid"""
 
         fasta_objects = []
+
+        hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
+        if not hk_version:
+            LOG.info("Family ID: %s not found in hose keeper", family_id)
+            raise HousekeeperVersionMissingError
+        fasta_file: str = self.housekeeper_api.files(
+            version=hk_version.id, tags=["consensus"]
+        ).first()
+        print(type(fasta_file))
+        fasta_sequence: str = self.get_fasta_sequence(fastq_path=fasta_file.full_path)
         for sample in gsaid_samples:
-            hk_version: hk_models.Version = self.housekeeper_api.last_version(
-                bundle=sample.family_id
-            )
-            if not hk_version:
-                LOG.info("Family ID: %s not found in hose keeper", sample.family_id)
-                raise HousekeeperVersionMissingError
-            fasta_file: str = self.housekeeper_api.files(
-                version=hk_version.id, tags=["consensus", sample.cg_lims_id]
-            ).first()
-            fasta_sequence: str = self.get_fasta_sequence(fastq_path=fasta_file.full_path)
+            sample_id = sample.covv_subm_sample_id
+
             fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
             fasta_objects.append(fasta_obj)
         return fasta_objects
 
-    def build_gisaid_fasta(self, gsaid_samples: List[GisaidSample], file_name: str) -> Path:
+    def build_gisaid_fasta(
+        self, gsaid_samples: List[GisaidSample], file_name: str, family_id: str
+    ) -> Path:
         """Concatenates a list of consensus fastq objects"""
 
         file: Path = Path(file_name)
-        fasta_objects: List[FastaFile] = self.get_gisaid_fasta_objects(gsaid_samples=gsaid_samples)
+        fasta_objects: List[FastaFile] = self.get_gisaid_fasta_objects(
+            gsaid_samples=gsaid_samples, family_id=family_id
+        )
         with open(file, "w") as write_file_obj:
             for fasta_object in fasta_objects:
                 write_file_obj.write(f">{fasta_object.header}\n")
