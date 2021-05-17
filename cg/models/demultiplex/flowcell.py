@@ -22,6 +22,7 @@ class Flowcell:
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_name: str = ""
+        self.machine_number: int = 0
         # Base name is flowcell-id + flowcell position
         self.base_name: str = ""
         self.flowcell_id: str = ""
@@ -42,6 +43,7 @@ class Flowcell:
             raise FlowcellError(message)
         self.run_date = datetime.datetime.strptime(split_name[0], "%y%m%d")
         self.machine_name = split_name[1]
+        self.machine_number = int(split_name[2])
         base_name: str = split_name[-1]
         self.base_name = base_name
         LOG.debug("Set flowcell id to %s", self.flowcell_id)
