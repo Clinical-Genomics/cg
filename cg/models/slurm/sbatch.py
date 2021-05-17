@@ -15,6 +15,6 @@ class Sbatch(BaseModel):
     email: str
     hours: int
     minutes: str = "00"
-    priority: Literal[SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH] = SlurmQos.LOW
+    priority: SlurmQos = SlurmQos.LOW
     commands: str
     error: Optional[str]

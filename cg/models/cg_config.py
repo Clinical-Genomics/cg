@@ -38,7 +38,7 @@ class SlurmConfig(BaseModel):
     account: str
     mail_user: EmailStr
     conda_env: Optional[str]
-    qos: Literal[SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH] = SlurmQos.LOW
+    qos: SlurmQos = SlurmQos.LOW
 
 
 class HousekeeperConfig(BaseModel):
