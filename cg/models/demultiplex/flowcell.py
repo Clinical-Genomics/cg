@@ -33,7 +33,7 @@ class Flowcell:
         """Parse relevant information from flowcell name
 
         This will assume that the flowcell naming convention is used. If not we skip the flowcell.
-        Convention is: <date>_<machine>_<some_numbers>_<A|B><flowcell_id>
+        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
         Example: 201203_A00689_0200_AHVKJCDRXX
         """
         split_name: List[str] = self.path.name.split("_")
