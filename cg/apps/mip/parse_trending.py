@@ -52,7 +52,8 @@ def _qc_metrics(outdata: dict, qcmetrics_raw: dict) -> None:
 def _config(mip_config_raw: dict, outdata: dict) -> None:
     mip_config: MipBaseConfig = parse_config(mip_config_raw)
     outdata["case"] = mip_config.case_id
-    [outdata["sample_ids"].append(sample_data["sample_id"]) for sample_data in mip_config.samples]
+    for sample_data in mip_config.samples:
+        outdata["sample_ids"].append(sample_data.sample_id)
 
 
 def _add_sample_level_info_from_qc_metric_file(outdata: dict, qcmetrics_data: dict) -> None:
