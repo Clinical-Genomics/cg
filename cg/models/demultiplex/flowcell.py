@@ -1,7 +1,9 @@
+import datetime
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
+from cg.exc import FlowcellError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
@@ -17,25 +19,40 @@ class Flowcell:
     def __init__(self, flowcell_path: Path):
         LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
-        LOG.debug("Set flowcell id to %s", self.flowcell_id)
         self._run_parameters: Optional[RunParameters] = None
+        self.run_date: datetime.datetime = datetime.datetime.now()
+        self.machine_name: str = ""
+        self.machine_number: int = 0
+        # Base name is flowcell-id + flowcell position
+        self.base_name: str = ""
+        self.flowcell_id: str = ""
+        self.flowcell_position: Literal["A", "B"] = "A"
+        self.parse_flowcell_name()
+
+    def parse_flowcell_name(self):
+        """Parse relevant information from flowcell name
+
+        This will assume that the flowcell naming convention is used. If not we skip the flowcell.
+        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
+        Example: 201203_A00689_0200_AHVKJCDRXX
+        """
+        split_name: List[str] = self.path.name.split("_")
+        if len(split_name) != 4:
+            message = f"Flowcell {self.path.name} does not follow the flowcell naming convention"
+            LOG.warning(message)
+            raise FlowcellError(message)
+        self.run_date = datetime.datetime.strptime(split_name[0], "%y%m%d")
+        self.machine_name = split_name[1]
+        self.machine_number = int(split_name[2])
+        base_name: str = split_name[-1]
+        self.base_name = base_name
+        LOG.debug("Set flowcell id to %s", self.flowcell_id)
+        self.flowcell_id = base_name[1:]
+        self.flowcell_position = base_name[0]
 
     @property
     def flowcell_full_name(self) -> str:
         return self.path.name
-
-    @property
-    def base_name(self) -> str:
-        return self.path.name.split("_")[-1]
-
-    @property
-    def flowcell_id(self) -> str:
-        return self.base_name[1:]
-
-    @property
-    def flowcell_position(self) -> Literal["A", "B"]:
-        """get the flowcell position: A|B"""
-        return self.base_name[0]
 
     @property
     def sample_sheet_path(self) -> Path:

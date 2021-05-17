@@ -6,6 +6,7 @@ from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.exc import FlowcellError
 from cg.meta.demultiplex import files
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -134,7 +135,10 @@ class DemuxPostProcessingAPI:
         Force is used to finish a flowcell even if the files are renamed already
         """
         LOG.info("Check demuxed flowcell %s", flowcell_name)
-        flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
+        try:
+            flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
+        except FlowcellError:
+            return
         if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
             LOG.warning("Demultiplex is not ready for %s", flowcell_name)
             return
