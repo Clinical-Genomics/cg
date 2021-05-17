@@ -11,6 +11,7 @@ ONLY_ONE_CASE_PER_TICKET = [
 SKIP_MISSING = [
     "fastq",
     "microsalt",
+    "sarscov2",
 ]
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
@@ -110,6 +111,7 @@ FASTQ_ANALYSIS_SAMPLE_TAGS = [
 SARSCOV2_ANALYSIS_CASE_TAGS = [
     {"pangolin"},
     {"ks-delivery"},
+    {"fastq"},
 ]
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
