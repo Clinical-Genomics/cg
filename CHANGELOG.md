@@ -13,9 +13,16 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [21.6.7]
+
+## [21.6.8]
 ### Changed
 - Validate that flowcell name is correct when demultiplexing
+
+
+## [21.6.7]
+### Fixed
+- Fixed linking sample files from case bundle
+
 
 ## [21.6.6]
 ### Changed
