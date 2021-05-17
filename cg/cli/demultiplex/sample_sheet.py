@@ -6,6 +6,7 @@ import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample, flowcell_samples
+from cg.exc import FlowcellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
@@ -53,7 +54,10 @@ def create_sheet(context: CGConfig, flowcell_name: str, dry_run: bool):
     if not flowcell_path.exists():
         LOG.warning("Could not find flowcell %s", flowcell_path)
         raise click.Abort
-    flowcell_object = Flowcell(flowcell_path=flowcell_path)
+    try:
+        flowcell_object = Flowcell(flowcell_path=flowcell_path)
+    except FlowcellError:
+        raise click.Abort
     lims_samples: List[LimsFlowcellSample] = list(
         flowcell_samples(lims=context.lims_api, flowcell_id=flowcell_object.flowcell_id)
     )
@@ -88,7 +92,10 @@ def create_all_sheets(context: CGConfig, dry_run: bool):
         if not sub_dir.is_dir():
             continue
         LOG.info("Found directory %s", sub_dir)
-        flowcell_object = Flowcell(flowcell_path=sub_dir)
+        try:
+            flowcell_object = Flowcell(flowcell_path=sub_dir)
+        except FlowcellError:
+            continue
         if flowcell_object.sample_sheet_exists():
             LOG.info("Sample sheet already exists")
             continue
