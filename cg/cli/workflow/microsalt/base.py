@@ -98,11 +98,7 @@ def config_case(
         LOG.error("No sample found for that ticket/sample_id")
         raise click.Abort
 
-    parameters: List[dict] = [
-        analysis_api.get_parameters(sample_obj)
-        for sample_obj in sample_objs
-        if sample_obj.sequencing_qc
-    ]
+    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
