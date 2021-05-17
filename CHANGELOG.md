@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [21.6.7]
+### Fixed
+- Fixed linking sample files from case bundle
+
 ## [21.6.6]
 ### Changed
 - Check that logfile exists before doing demux post-processing
