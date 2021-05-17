@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, validator
+from datetime import date
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 
@@ -15,6 +16,9 @@ class UpploadFiles(BaseModel):
     fasta_file: Path
 
 
+#    class Config:
+
+
 class GisaidSample(BaseModel):
     family_id: str
     cg_lims_id: str
@@ -22,7 +26,7 @@ class GisaidSample(BaseModel):
     region: str
     region_code: str
     fn: str
-    covv_collection_date: str
+    covv_collection_date: date
     covv_subm_sample_id: str
     covv_virus_name: Optional[str]
     covv_orig_lab: Optional[str]

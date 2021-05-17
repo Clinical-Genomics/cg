@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -30,23 +30,17 @@ class GisaidAPI:
         self.gisaid_binary: str = config.gisaid.binary_path
         self.process = Process(binary=self.gisaid_binary)
 
-    def get_fasta_sequence(self, fastq_path: str) -> str:
-        """Get header from fasta file. Assuming un zipped file"""
+    def get_new_header(self, samples: List[GisaidSample], old_header: str) -> str:
+        for sample in samples:
+            sample_id = sample.covv_subm_sample_id
+            if old_header.find(sample_id) != -1:
+                return f">{sample.covv_virus_name}\n"
+        raise FastaSequenceMissingError
 
-        with open(fastq_path) as handle:
-            fasta_lines = handle.readlines()
-            print(fasta_lines)
-            try:
-                return fasta_lines[1].rstrip("\n")
-            except:
-                raise FastaSequenceMissingError
-
-    def get_gisaid_fasta_objects(
+    def get_gisaid_fasta(
         self, gsaid_samples: List[GisaidSample], family_id: str
     ) -> List[FastaFile]:
         """Fetch a fasta files form house keeper for batch upload to gisaid"""
-
-        fasta_objects = []
 
         hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
         if not hk_version:
@@ -55,14 +49,20 @@ class GisaidAPI:
         fasta_file: str = self.housekeeper_api.files(
             version=hk_version.id, tags=["consensus"]
         ).first()
-        print(type(fasta_file))
-        fasta_sequence: str = self.get_fasta_sequence(fastq_path=fasta_file.full_path)
-        for sample in gsaid_samples:
-            sample_id = sample.covv_subm_sample_id
 
-            fasta_obj = FastaFile(header=sample.covv_virus_name, sequence=fasta_sequence)
-            fasta_objects.append(fasta_obj)
-        return fasta_objects
+        gisaid_delivery_fasta = []
+        with open(fasta_file.full_path) as handle:
+            fasta_lines = handle.readlines()
+            for line in fasta_lines:
+                    continue
+                if line[0] == ">":
+                    gisaid_delivery_fasta.append(
+                        self.get_new_header(old_header=line, samples=gsaid_samples)
+                    )
+                else:
+                    gisaid_delivery_fasta.append(line)
+
+        return gisaid_delivery_fasta
 
     def build_gisaid_fasta(
         self, gsaid_samples: List[GisaidSample], file_name: str, family_id: str
@@ -70,13 +70,11 @@ class GisaidAPI:
         """Concatenates a list of consensus fastq objects"""
 
         file: Path = Path(file_name)
-        fasta_objects: List[FastaFile] = self.get_gisaid_fasta_objects(
+        fasta_lines: List[str] = self.get_gisaid_fasta(
             gsaid_samples=gsaid_samples, family_id=family_id
         )
         with open(file, "w") as write_file_obj:
-            for fasta_object in fasta_objects:
-                write_file_obj.write(f">{fasta_object.header}\n")
-                write_file_obj.write(f"{fasta_object.sequence}\n")
+            write_file_obj.writelines(fasta_lines)
         return file
 
     def get_sample_row(self, gisaid_sample: GisaidSample) -> List[str]:
@@ -112,18 +110,26 @@ class GisaidAPI:
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         gisaid_samples = []
         for sample in samples:
-            lims_sample = self.lims_api.sample(lims_id=sample.internal_id)
+            sample_id = sample.internal_id
             gisaid_sample = GisaidSample(
                 family_id=family_id,
-                cg_lims_id=sample.internal_id,
+                cg_lims_id=sample_id,
                 covv_subm_sample_id=sample.name,
                 submitter=self.gisaid_submitter,
                 fn=f"{family_id}.fasta",
-                covv_collection_date=lims_sample.udf.get("Collection Date"),
-                region=lims_sample.udf.get("Region"),
-                region_code=lims_sample.udf.get("Region Code"),
-                covv_orig_lab=lims_sample.udf.get("Original Lab"),
-                covv_orig_lab_addr=lims_sample.udf.get("Original Lab Address"),
+                covv_collection_date=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="collection_date"
+                ),
+                region=self.lims_api.get_sample_attribute(lims_id=sample_id, key="region"),
+                region_code=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="region_code"
+                ),
+                covv_orig_lab=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="original_lab"
+                ),
+                covv_orig_lab_addr=self.lims_api.get_sample_attribute(
+                    lims_id=sample_id, key="original_lab_address"
+                ),
             )
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
