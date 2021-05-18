@@ -240,3 +240,16 @@ class ConversionStats:
 
     def __repr__(self):
         return f"ConversionStats(flowcell_id={self.flowcell_id},projects={self.projects},lanes={self.lanes}"
+
+
+if __name__ == "__main__":
+    import sys
+    from pprint import pprint as pp
+
+    infile = Path(sys.argv[1])
+    conversion = ConversionStats(conversion_stats_path=infile)
+    for lane in conversion.lanes_to_barcode:
+        print(f"lane {lane}")
+        for barcode in conversion.lanes_to_barcode[lane]:
+            print(barcode)
+            pp(conversion.lanes_to_barcode[lane][barcode].dict())
