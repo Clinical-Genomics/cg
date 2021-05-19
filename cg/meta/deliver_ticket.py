@@ -39,15 +39,15 @@ class DeliverTicketAPI(MetaAPI):
         return customer_inbox
 
     def check_if_upload_is_needed(self, ticket_id: int) -> bool:
-        do_path_exist = False
+        is_upload_needed = True
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
         LOG.info("Checking if path exist: %s", customer_inbox)
         if os.path.exists(customer_inbox):
             LOG.info("Could find path: %s", customer_inbox)
-            do_path_exist = True
+            is_upload_needed = False
         else:
             LOG.info("Could not find path: %s", customer_inbox)
-        return do_path_exist
+        return is_upload_needed
 
     def generate_date_tag(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
