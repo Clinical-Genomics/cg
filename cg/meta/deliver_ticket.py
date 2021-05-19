@@ -40,6 +40,8 @@ class DeliverTicketAPI(MetaAPI):
 
     def check_if_upload_is_needed(self, ticket_id: int) -> bool:
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
+        print("CUSTOMER INBOX: ")
+        print(customer_inbox)
         return os.path.exists(customer_inbox)
 
     def generate_date_tag(self, ticket_id: int) -> str:
