@@ -14,6 +14,10 @@ Try to use the following format:
 ### Fixed
 
 
+## [21.6.9]
+### Changed
+- Check if versions are larger than known version when determining reverse complement in demultiplexing
+
 ## [21.6.8]
 ### Changed
 - Validate that flowcell name is correct when demultiplexing
