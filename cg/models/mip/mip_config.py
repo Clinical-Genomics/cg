@@ -13,9 +13,10 @@ class AnalysisType(BaseModel):
 class MipBaseConfig(BaseModel):
     """This model is used when validating the mip analysis config"""
 
-    analysis_type_: dict = Field(..., alias="analysis_type")
     family_id_: str = Field(None, alias="family_id")
     case_id: str = None
+    analysis_type_: dict = Field(..., alias="analysis_type")
+    samples: List[AnalysisType] = None
     config_path: str = Field(..., alias="config_file_analysis")
     deliverables_file_path: str = Field(..., alias="store_file")
     email: EmailStr
@@ -23,7 +24,6 @@ class MipBaseConfig(BaseModel):
     log_path: str = Field(..., alias="log_file")
     out_dir: str = Field(..., alias="outdata_dir")
     priority: Literal["low", "normal", "high"] = Field(..., alias="slurm_quality_of_service")
-    samples: List[AnalysisType] = None
     sample_info_path: str = Field(..., alias="sample_info_file")
 
     @validator("case_id", always=True, pre=True)

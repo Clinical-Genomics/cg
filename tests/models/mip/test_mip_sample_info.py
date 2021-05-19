@@ -107,7 +107,7 @@ def test_mip_sampleinfo_rank_model_version(sample_info_dna_raw: dict):
     sample_info_object = MipBaseSampleInfo(**sample_info_dna_raw)
 
     # THEN assert that rank_model_version was set
-    assert not sample_info_object.rank_model_version == "v1.0"
+    assert sample_info_object.rank_model_version == "v1.0"
 
 
 def test_mip_sampleinfo_sv_rank_model_version(sample_info_dna_raw: dict):
@@ -118,4 +118,4 @@ def test_mip_sampleinfo_sv_rank_model_version(sample_info_dna_raw: dict):
     sample_info_object = MipBaseSampleInfo(**sample_info_dna_raw)
 
     # THEN assert that rank_model_version was set
-    assert not sample_info_object.sv_rank_model_version == "v1.2.0"
+    assert sample_info_object.sv_rank_model_version == "v1.2.0"
