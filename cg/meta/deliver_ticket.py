@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 from typing import List
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
@@ -15,12 +16,14 @@ from cg.store import Store
 
 
 LOG = logging.getLogger(__name__)
+PREFIX_TO_CONCATENATE = ["MWG", "MWL", "MWM", "MWR", "MWX"]
 
 
 class DeliverTicketAPI(MetaAPI):
-    def __init__(self, config: CGConfig, store: Store):
+    def __init__(self, config: CGConfig, store: Store, hk_api: HousekeeperAPI):
         super().__init__(config)
         self.delivery_path: str = config.delivery_path
+        self.hk_api = hk_api
         self.store = store
 
     def get_inbox_path(self, ticket_id: int) -> str:
@@ -42,7 +45,7 @@ class DeliverTicketAPI(MetaAPI):
     def generate_date_tag(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         date = str(cases[0].ordered_at)
-        split_date = date.split(' ')
+        split_date = date.split(" ")
         return split_date[0]
 
     def concatenate(self, ticket_id: int) -> None:
@@ -100,3 +103,13 @@ class DeliverTicketAPI(MetaAPI):
                             )
                 else:
                     LOG.warning("WARNING data lost in concatenation")
+
+    def check_is_concatenation_is_needed(self, ticket_id: int) -> bool:
+        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        case_id = cases[0].internal_id
+        version_obj = self.hk_api.last_version(case_id)
+        app_tag = version_obj.application.tag
+        for prefix in PREFIX_TO_CONCATENATE:
+            if app_tag.startswith(prefix):
+                return True
+        return False

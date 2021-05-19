@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
@@ -96,7 +97,8 @@ def concatenate(context: CGConfig, ticket_id: int):
     will be concatenated into one forward and one reverse fastq file.
     """
     status_db: Store = context.status_db
-    deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db)
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db, hk_api=housekeeper_api)
     deliver_ticket_api.concatenate(ticket_id=ticket_id)
 
 
@@ -122,7 +124,8 @@ def deliver_ticket(
     from customer inbox hasta to the customer inbox on caesar.
     """
     status_db: Store = context.status_db
-    deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db)
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db, hk_api=housekeeper_api)
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=ticket_id)
     if is_upload_needed:
         LOG.info("Delivering files to customer inbox on hasta")
@@ -132,6 +135,11 @@ def deliver_ticket(
     else:
         LOG.info("Files already delivered to customer inbox on hasta")
         return
-    if delivery_type == "microsalt":
+    is_concatenation_needed = deliver_ticket_api.check_is_concatenation_is_needed(
+        ticket_id=ticket_id
+    )
+    if is_concatenation_needed and delivery_type == "fastq" and not dry_run:
         concatenate(ticket_id=ticket_id)
+    if is_concatenation_needed and delivery_type == "fastq" and dry_run:
+        LOG.info("Concatenation is needed, but will be skipped since this is a dry-run")
     rsync(context=context, ticket_id=ticket_id, dry_run=dry_run)
