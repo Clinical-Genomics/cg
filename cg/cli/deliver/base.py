@@ -6,6 +6,7 @@ from typing import List, Optional
 import click
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -97,56 +98,27 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 )
 @click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
 @click.option("--dry-run", is_flag=True)
-@click.option("--cron", is_flag=True)
 @click.pass_obj
 def deliver_ticket(
     context: CGConfig,
     ticket_id: int,
     delivery_type: str,
     dry_run: bool,
-    cron: bool,
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
     from customer inbox hasta to the customer inbox on caesar.
     """
-    is_upload_needed = check_if_upload_is_needed()
+    deliver_ticket_api = DeliverTicketAPI(config=context)
+    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=ticket_id)
     if is_upload_needed:
+        LOG.info("Delivering files to customer inbox on hasta")
         deliver_analysis(
             context=context, ticket_id=ticket_id, delivery_type=delivery_type, dry_run=dry_run
         )
     else:
+        LOG.info("Files already delivered to customer inbox on hasta")
         return
-    is_concatenation_needed = check_if_concatenation_is_needed()
-    if is_concatenation_needed:
-        run_mutant_toolbox_concatenate()
-    update_uploaded_started_at()
+    if delivery_type == "microsalt":
+        deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
     rsync(context=context, ticket_id=ticket_id, dry_run=dry_run)
-    update_uploaded_at()
-
-
-
-    is_uploaded = check_if_uploaded()
-    if is_uploaded and cron:
-        LOG.debug("The folder is already uploaded")
-        return
-    if is_uploaded:
-        customer_inbox = get_customer_inbox()
-        LOG.info("Folder: %s already exist", customer_inbox)
-        if input("This has already been uploaded, do you want to remove the folder from customer inbox and re-upload? ") != 'y':
-            break
-
-    remove_customer_inbox()
-
-
-
-# Check if uploaded, stop if it is
-# Check if inbox is there, and if so delete it
-# run deliver_analysis()
-# find what app-tag it is
-# find what ordered at date it is
-# run mutant tool box concatenate
-# Update uploaded started at
-# run cg rsync
-# update uploaded at
-
