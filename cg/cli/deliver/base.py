@@ -134,5 +134,5 @@ def deliver_ticket(
         LOG.info("Files already delivered to customer inbox on hasta")
         return
     if delivery_type == "microsalt":
-        concatenate(ticket_id=ticket_id, dry_run=dry_run)
+        concatenate(ticket_id=ticket_id)
     rsync(context=context, ticket_id=ticket_id, dry_run=dry_run)
