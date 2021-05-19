@@ -90,7 +90,6 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 
 @deliver.command(name="concatenate")
 @click.argument("ticket_id", type=int, required=True)
-@click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def concatenate(context: CGConfig, ticket_id: int):
     """The fastq files in the folder generated using "cg deliver analysis"
