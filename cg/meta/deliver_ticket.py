@@ -1,6 +1,7 @@
 """Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
 import logging
 import os
+import pathlib
 import re
 import subprocess
 from pathlib import Path
@@ -40,9 +41,8 @@ class DeliverTicketAPI(MetaAPI):
 
     def check_if_upload_is_needed(self, ticket_id: int) -> bool:
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
-        print("CUSTOMER INBOX: ")
-        print(customer_inbox)
-        return os.path.exists(customer_inbox)
+        LOG.debug("Customer inbox: %s", customer_inbox)
+        return pathlib.Path.exists(Path(customer_inbox))
 
     def generate_date_tag(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
@@ -55,7 +55,7 @@ class DeliverTicketAPI(MetaAPI):
         for dir_name in os.listdir(customer_inbox):
             dir_path = os.path.join(customer_inbox, dir_name)
             if len(os.listdir(dir_path)) == 0:
-                LOG.info("Empty folder found: %s" % (dir_path))
+                LOG.info("Empty folder found: %s", dir_path)
                 continue
             if not os.path.isdir(dir_path):
                 continue
