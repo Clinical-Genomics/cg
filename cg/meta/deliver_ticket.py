@@ -1,7 +1,6 @@
 """Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
 import logging
 import os
-import pathlib
 import re
 import subprocess
 from pathlib import Path
@@ -40,9 +39,15 @@ class DeliverTicketAPI(MetaAPI):
         return customer_inbox
 
     def check_if_upload_is_needed(self, ticket_id: int) -> bool:
+        do_path_exist = False
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
-        LOG.debug("Customer inbox: %s", customer_inbox)
-        return pathlib.Path.exists(Path(customer_inbox))
+        LOG.info("Checking if path exist: %s", customer_inbox)
+        if os.path.exists(customer_inbox):
+            LOG.info("Could find path: %s", customer_inbox)
+            do_path_exist = True
+        else:
+            LOG.info("Could not find path: %s", customer_inbox)
+        return do_path_exist
 
     def generate_date_tag(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
