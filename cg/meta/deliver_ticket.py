@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+import shutil
 from typing import List
 
 from cg.exc import CgError
@@ -11,7 +12,6 @@ from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.store import Store
-from cg.utils import Process
 
 
 LOG = logging.getLogger(__name__)
@@ -22,13 +22,6 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: str = config.delivery_path
         self.store = store
-        self._process = None
-
-    @property
-    def process(self):
-        if not self._process:
-            self._process = Process("cat")
-        return self._process
 
     def get_inbox_path(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
@@ -46,12 +39,13 @@ class DeliverTicketAPI(MetaAPI):
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
         return os.path.exists(customer_inbox)
 
-    def generate_date_tag(self, ticket_id: int) -> int:
+    def generate_date_tag(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         date = cases[0].ordered_at
-        return date
+        split_date = date.split(" ")
+        return split_date[0]
 
-    def concatenate(self, ticket_id: int, dry_run: bool) -> None:
+    def concatenate(self, ticket_id: int) -> None:
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
         for dir_name in os.listdir(customer_inbox):
             dir_path = os.path.join(customer_inbox, dir_name)
@@ -71,18 +65,12 @@ class DeliverTicketAPI(MetaAPI):
                         same_direction.append(os.path.abspath(abs_path_file))
                         total_size = total_size + Path(abs_path_file).stat().st_size
                 same_direction.sort()
-                input_files = ""
-                for i in range(len(same_direction)):
-                    if input_files == "":
-                        input_files = same_direction[i]
-                    else:
-                        input_files = input_files + " " + same_direction[i]
                 date = self.generate_date_tag(ticket_id=ticket_id)
                 if date:
                     output = (
                         dir_path
                         + "/"
-                        + str(date)
+                        + date
                         + "_"
                         + dir_name
                         + "_"
@@ -91,8 +79,10 @@ class DeliverTicketAPI(MetaAPI):
                     )
                 else:
                     output = dir_path + "/" + dir_name + "_" + str(read_direction) + ".fastq.gz"
-                parameters: List[str] = [input_files, ">", output]
-                self.process.run_command(parameters=parameters, dry_run=dry_run)
+                with open(output, "wb") as write_file_obj:
+                    for file in same_direction:
+                        with open(file, "rb") as file_descriptor:
+                            shutil.copyfileobj(file_descriptor, write_file_obj)
                 concatenated_size = Path(output).stat().st_size
                 if total_size == concatenated_size:
                     LOG.info(

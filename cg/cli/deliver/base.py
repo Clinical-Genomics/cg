@@ -92,13 +92,13 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 @click.argument("ticket_id", type=int, required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def concatenate(context: CGConfig, ticket_id: int, dry_run: bool):
+def concatenate(context: CGConfig, ticket_id: int):
     """The fastq files in the folder generated using "cg deliver analysis"
     will be concatenated into one forward and one reverse fastq file.
     """
     status_db: Store = context.status_db
     deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db)
-    deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
+    deliver_ticket_api.concatenate(ticket_id=ticket_id)
 
 
 @deliver.command(name="ticket")
