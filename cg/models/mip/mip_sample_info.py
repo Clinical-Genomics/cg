@@ -43,17 +43,21 @@ class MipBaseSampleInfo(BaseModel):
     def set_rank_model_version(cls, _, values: dict) -> str:
         """Set rank_model_version from genmod snv/indel analysis"""
         if "recipe_" in values:
-            return values["recipe_"]["genmod"]["rank_model"]["version"]
+            if "genmod" in values["recipe_"]:
+                return values["recipe_"]["genmod"]["rank_model"]["version"]
         else:
-            return values["program_"]["genmod"]["rank_model"]["version"]
+            if "genmod" in values["program_"]:
+                return values["program_"]["genmod"]["rank_model"]["version"]
 
     @validator("sv_rank_model_version", always=True)
     def set_sv_rank_model_version(cls, _, values: dict) -> str:
         """Set rank_model_version from genmod SV analysis"""
         if "recipe_" in values:
-            return values["recipe_"]["sv_genmod"]["sv_rank_model"]["version"]
+            if "genmod" in values["recipe_"]:
+                return values["recipe_"]["sv_genmod"]["sv_rank_model"]["version"]
         else:
-            return values["program_"]["sv_genmod"]["sv_rank_model"]["version"]
+            if "genmod" in values["program_"]:
+                return values["program_"]["sv_genmod"]["sv_rank_model"]["version"]
 
 
 def parse_sample_info(data: dict) -> MipBaseSampleInfo:
