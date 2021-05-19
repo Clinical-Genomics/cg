@@ -41,7 +41,7 @@ class DeliverTicketAPI(MetaAPI):
 
     def generate_date_tag(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        date = cases[0].ordered_at
+        date = str(cases[0].ordered_at)
         split_date = date.split(' ')
         return split_date[0]
 
