@@ -11,8 +11,8 @@ Try to use the following format:
 ## [x.x.x]
 ### Fixed
 - gisaid get region and lab from sample udfs
-- adjusting for new fasta consensus file in housekeeper
-- removing failing tests 
+- gisaid adjusting for new fasta consensus file in housekeeper
+- gisaid removing failing tests 
 
 ### Changed
 ### Fixed
