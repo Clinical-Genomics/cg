@@ -11,6 +11,7 @@ from cg.apps.cgstats.crud.create import create_novaseq_flowcell
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.exc import FlowcellError
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -34,7 +35,10 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
     if not demux_results_path.exists():
         LOG.warning("Could not find demultiplex result path %s", demux_results_path)
         raise click.Abort
-    flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
+    try:
+        flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
+    except FlowcellError:
+        raise click.Abort
     demux_results: DemuxResults = DemuxResults(demux_dir=demux_results_path, flowcell=flowcell)
     create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
 
