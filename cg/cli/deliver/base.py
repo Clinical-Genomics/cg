@@ -88,6 +88,19 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     rsync_api.run_rsync_command(ticket_id=ticket_id, dry_run=dry_run)
 
 
+@deliver.command(name="concatenate")
+@click.argument("ticket_id", type=int, required=True)
+@click.option("--dry-run", is_flag=True)
+@click.pass_obj
+def concatenate(context: CGConfig, ticket_id: int, dry_run: bool):
+    """The fastq files in the folder generated using "cg deliver analysis"
+    will be concatenated into one forward and one reverse fastq file.
+    """
+    status_db: Store = context.status_db
+    deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db)
+    deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
+
+
 @deliver.command(name="ticket")
 @click.option(
     "-t",
@@ -109,7 +122,8 @@ def deliver_ticket(
     concatenate fastq files if needed and finally send the folder
     from customer inbox hasta to the customer inbox on caesar.
     """
-    deliver_ticket_api = DeliverTicketAPI(config=context)
+    status_db: Store = context.status_db
+    deliver_ticket_api = DeliverTicketAPI(config=context, store=status_db)
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=ticket_id)
     if is_upload_needed:
         LOG.info("Delivering files to customer inbox on hasta")
@@ -120,5 +134,5 @@ def deliver_ticket(
         LOG.info("Files already delivered to customer inbox on hasta")
         return
     if delivery_type == "microsalt":
-        deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
+        concatenate(ticket_id=ticket_id, dry_run=dry_run)
     rsync(context=context, ticket_id=ticket_id, dry_run=dry_run)
