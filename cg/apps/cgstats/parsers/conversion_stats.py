@@ -24,7 +24,7 @@ lane level, just like we do in the demux stats.
 import copy
 import logging
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 from xml.etree.ElementTree import Element, iterparse
 
 from pydantic import BaseModel
@@ -46,6 +46,13 @@ class SampleConversionResults(BaseModel):
     pass_filter_read2_q30: int = 0
     pass_filter_quality_score_sum: int = 0
     pass_filter_quality_score: float = 0
+    barcode: str = ""
+    sample_id: str = ""
+
+
+class UnknownBarcode(BaseModel):
+    barcode: str
+    read_count: int
 
 
 class ConversionStats:
@@ -56,6 +63,7 @@ class ConversionStats:
         self._results: SampleConversionResults = SampleConversionResults()
         self._skip_entry: bool = False
         self._current_lane: int = 0
+        self.unknown_barcodes_entry: bool = False
         # Keep track where we are in the xml file
         self.current_path: List[str] = []
         self.flowcell_id = ""
@@ -64,8 +72,11 @@ class ConversionStats:
         self.barcodes: Set[str] = set()
         self.barcode_to_sample: Dict[str, str] = {}
         self.lanes: Set[int] = set()
-        self.lanes_to_barcode = {}
-        self.barcode_to_lanes = {}
+        self.unknown_barcodes: List[UnknownBarcode] = []
+        # Mapping from lane to barcodes and the results
+        self.lanes_to_barcode: Dict[int : Dict[str, SampleConversionResults]] = {}
+        self.barcode_to_lanes: Dict[str, Dict[int, SampleConversionResults]] = {}
+        self.lanes_to_unknown_barcode: Dict[int, List[UnknownBarcode]] = {}
         # This is just a summary of all raw clusters per lane
         self.raw_clusters_per_lane: Dict[int, int] = {}
         self.parse_file()
@@ -123,6 +134,8 @@ class ConversionStats:
         self.update_summaries(entry)
         self.update_quality_score(entry)
         self.update_lane_clusters(entry)
+        entry.barcode = self._current_barcode
+        entry.sample_id = self._current_sample
         if self._current_lane not in self.lanes_to_barcode:
             self.lanes_to_barcode[self._current_lane] = {}
         self.lanes_to_barcode[self._current_lane][self._current_barcode] = entry
@@ -132,6 +145,12 @@ class ConversionStats:
         LOG.debug("Adding entry %s for barcode %s", entry, self._current_barcode)
         LOG.debug("Reset conversion results")
         self._results = SampleConversionResults()
+
+    def create_unknown_barcodes_entry(self) -> None:
+        lane_results: List[UnknownBarcode] = copy.deepcopy(self.unknown_barcodes)
+        self.lanes_to_unknown_barcode[self._current_lane] = lane_results
+        self.unknown_barcodes = []
+        self.unknown_barcodes_entry = False
 
     def evaluate_start_event(self, node: Element, current_tag: str) -> None:
         # print("Start!", current_tag, node, node.attrib, node.text)
@@ -150,28 +169,38 @@ class ConversionStats:
             self._skip_entry = False
             self.set_current_sample(sample_name=sample_name)
         elif current_tag == "Barcode":
-            barcode: str = node.attrib.get("name")
-            if not barcode:
+            if self.unknown_barcodes_entry:
+                unknown_barcode = UnknownBarcode(
+                    barcode=node.attrib.get("sequence"), read_count=int(node.attrib.get("count"))
+                )
+                self.unknown_barcodes.append(unknown_barcode)
+                return
+            barcode_sequence: Optional[str] = node.attrib.get("name")
+            if not barcode_sequence:
                 self._skip_entry = True
                 return
-            if barcode.lower() == "all":
+            if barcode_sequence.lower() == "all":
                 self._skip_entry = True
                 return
+
             self._skip_entry = False
-            self.set_current_barcode(barcode=barcode)
+            self.set_current_barcode(barcode=barcode_sequence)
         elif current_tag == "Project":
             self.set_project(project_name=node.attrib["name"])
         elif current_tag == "Flowcell":
             self.set_flowcell_id(node.attrib["flowcell-id"])
         elif current_tag == "TopUnknownBarcodes":
-            self._skip_entry = True
+            self.unknown_barcodes_entry = True
 
     def evaluate_end_event(self, node: Element, current_tag: str) -> None:
         # We will add the information for each tile
         if "Tile" in self.current_path:
             self.process_tile_info(node=node, current_tag=current_tag)
         if node.tag == "Lane":
-            self.create_entry()
+            if self.unknown_barcodes_entry:
+                self.create_unknown_barcodes_entry()
+            else:
+                self.create_entry()
 
     def update_cluster_count(self, cluster_count: int) -> None:
         if "Raw" in self.current_path:
@@ -204,7 +233,6 @@ class ConversionStats:
         self._results.pass_filter_quality_score_sum += quality_score
 
     def process_tile_info(self, node: Element, current_tag: str) -> None:
-        # These closing tags have no information to add
         if current_tag == "ClusterCount":
             self.update_cluster_count(cluster_count=int(node.text))
         elif current_tag == "Yield":
@@ -248,8 +276,4 @@ if __name__ == "__main__":
 
     infile = Path(sys.argv[1])
     conversion = ConversionStats(conversion_stats_path=infile)
-    for lane in conversion.lanes_to_barcode:
-        print(f"lane {lane}")
-        for barcode in conversion.lanes_to_barcode[lane]:
-            print(barcode)
-            pp(conversion.lanes_to_barcode[lane][barcode].dict())
+    print(conversion.lanes_to_unknown_barcode)
