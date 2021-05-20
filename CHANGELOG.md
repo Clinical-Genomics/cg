@@ -13,12 +13,16 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-
-## [x.x.x]
+## [21.7.2]
 ### Added
 - Added two more cases to BALSAMIC's validation
 ### Changed
 - dividided VALIDATION_CASES into their own workflow lists to find them easier 
+
+## [21.7.1]
+### Fixed
+- Fixed bug when checking if flowcell projects has been renamed
+
 
 ## [21.7.0]
 ### Added
