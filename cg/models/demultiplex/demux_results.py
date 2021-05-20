@@ -111,9 +111,9 @@ class DemuxResults:
     def files_renamed(self) -> bool:
         """Assert if the files have been renamed
 
-        Check if there are any raw projects, in that case it will need post processing
+        Check if the project files have been renamed, in that case it will not need post processing
         """
-        return bool(len(list(self.raw_projects)))
+        return bool(len(list(self.projects)))
 
     def get_logfile_parameters(self) -> LogfileParameters:
         log_path: Path = self.log_path
