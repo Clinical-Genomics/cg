@@ -123,7 +123,10 @@ class DemuxPostProcessingAPI:
             demux_results.sample_sheet_path,
             demux_results.demux_sample_sheet_path,
         )
-        shutil.copy(demux_results.sample_sheet_path, demux_results.demux_sample_sheet_path)
+        shutil.copy(
+            demux_results.sample_sheet_path.as_posix(),
+            demux_results.demux_sample_sheet_path.as_posix(),
+        )
 
     @staticmethod
     def create_copy_complete_file(demux_results: DemuxResults) -> None:
