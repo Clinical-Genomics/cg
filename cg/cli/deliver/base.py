@@ -130,7 +130,7 @@ def deliver_ticket(
     if is_upload_needed:
         LOG.info("Delivering files to customer inbox on hasta")
         deliver_analysis(
-            ticket_id=ticket_id, delivery_type=delivery_type, dry_run=dry_run
+            context, ticket_id=ticket_id, delivery_type=delivery_type, dry_run=dry_run
         )
     else:
         LOG.info("Files already delivered to customer inbox on hasta")
