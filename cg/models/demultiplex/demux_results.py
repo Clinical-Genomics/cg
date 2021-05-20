@@ -4,6 +4,7 @@ import socket
 from pathlib import Path
 from typing import Iterable, Optional
 
+from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from pydantic import BaseModel
@@ -27,6 +28,7 @@ class DemuxResults:
         LOG.info("Instantiating DemuxResults with path %s", demux_dir)
         self.demux_dir: Path = demux_dir
         self.flowcell: Flowcell = flowcell
+        self._conversion_stats: Optional[ConversionStats] = None
 
     @property
     def run_name(self) -> str:
@@ -47,6 +49,13 @@ class DemuxResults:
         return socket.gethostname()
 
     @property
+    def conversion_stats(self) -> ConversionStats:
+        if self._conversion_stats:
+            return self._conversion_stats
+        self._conversion_stats = ConversionStats(self.conversion_stats_path)
+        return self._conversion_stats
+
+    @property
     def conversion_stats_path(self) -> Path:
         return self.results_dir / "Stats" / "ConversionStats.xml"
 
@@ -65,6 +74,11 @@ class DemuxResults:
     @property
     def sample_sheet_path(self) -> Path:
         return self.flowcell.sample_sheet_path
+
+    @property
+    def barcode_report(self) -> Path:
+        """Return the path to the report with samples with low cluster count"""
+        return self.demux_dir / "lane_barcode_summary.csv"
 
     @property
     def projects(self) -> Iterable[str]:

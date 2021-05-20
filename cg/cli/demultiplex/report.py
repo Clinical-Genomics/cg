@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 @click.argument("flowcell-name")
 @click.pass_obj
 def create_report_cmd(context: CGConfig, flowcell_name: str):
+    """Generate a demux report and print to stdout"""
     LOG.info("Check demuxed flowcell %s", flowcell_name)
     demux_api: DemultiplexingAPI = context.demultiplex_api
     try:

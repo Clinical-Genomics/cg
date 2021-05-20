@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from typing import List
 
 from cg.apps.cgstats.parsers.conversion_stats import (
@@ -12,6 +11,7 @@ from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 MIN_CLUSTER_COUNT = 1000000
+DEMUX_REPORT_HEADER: List[str] = ["barcode", "sample", "type", "lane", "read_count"]
 
 
 class SampleData(BaseModel):
@@ -74,8 +74,7 @@ def get_demux_report_data(
 
 def create_demux_report(conversion_stats: ConversionStats, skip_empty: bool = False) -> List[str]:
     """Find the barcodes from each lane with low number of reads and create a report"""
-    header: List[str] = ["barcode", "sample", "type", "lane", "read_count"]
-    report_content: List[str] = ["\t".join(header)]
+    report_content: List[str] = ["\t".join(DEMUX_REPORT_HEADER)]
     report_data = get_demux_report_data(conversion_stats=conversion_stats, skip_empty=skip_empty)
     for sample_data in report_data:
         report_content.append(
