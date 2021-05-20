@@ -1,7 +1,10 @@
 """NIPT ftp upload API"""
+import datetime as dt
 import logging
 from pathlib import Path
 from typing import Optional
+
+from alchy import QueryModel
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
@@ -58,14 +61,13 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self):
+    def get_all_upload_analyses(self) -> QueryModel:
         """Gets all nipt analyses that are ready to be uploaded"""
-
-        latest_nipt__analyses = self.status_db.latest_analyses().filter(
+        latest_nipt_analyses = self.status_db.latest_analyses().filter(
             models.Analysis.pipeline == Pipeline.FLUFFY
         )
 
-        return latest_nipt__analyses.filter(models.Analysis.uploaded_at.is_(None))
+        return latest_nipt_analyses.filter(models.Analysis.uploaded_at.is_(None))
 
     def upload(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
@@ -82,3 +84,20 @@ class NiptUploadAPI:
             LOG.info(f"NIPT Upload stderr:\n{self.process.stderr}")
         if self.process.stdout:
             LOG.info(f"NIPT Upload stdout:\n{self.process.stdout}")
+
+    def update_analysis_uploaded_at_date(self, case_id: str) -> models.Analysis:
+        """Updates analysis_uploaded_at for the uploaded analysis"""
+        case_obj = self.status_db.family(case_id)
+        analysis_obj = case_obj.analyses[0]
+        analysis_obj.uploaded_at = dt.datetime.now()
+
+        return analysis_obj
+
+    def update_analysis_upload_started_date(self, case_id: str) -> models.Analysis:
+        """Updates analysis_upload_started_at for the uploaded analysis"""
+
+        case_obj = self.status_db.family(case_id)
+        analysis_obj = case_obj.analyses[0]
+        analysis_obj.upload_started_at = dt.datetime.now()
+
+        return analysis_obj
