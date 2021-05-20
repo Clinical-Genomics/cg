@@ -162,6 +162,10 @@ class ConversionStats:
             self.set_current_lane(lane_nr=int(node.attrib["number"]))
         elif current_tag == "Sample":
             sample_name: str = node.attrib["name"]
+            if "indexcheck" in sample_name:
+                self._skip_entry = True
+                LOG.debug("Skip indexcheck sample %s" % sample_name)
+                return
             if sample_name.lower() in ["all", "undetermined"]:
                 self._skip_entry = True
                 LOG.debug("Skip sample %s" % sample_name)
