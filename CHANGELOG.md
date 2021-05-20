@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.8.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
 ## [21.7.2]
 ### Added
 - Copy sample sheet to demuxed flowcell dir
@@ -25,12 +31,6 @@ Try to use the following format:
 ## [21.7.0]
 ### Added
 - Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
-
-## [21.7.0]
-### Added
-- Command `cg demultplex report` to generate barcode report for demuxed flowcells
-### Changed
-- Automatically generate barcode report when post processing demultiplexed flowcell
 
 ## [21.6.9]
 ### Changed
