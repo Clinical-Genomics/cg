@@ -133,7 +133,7 @@ def deliver_ticket(
     else:
         LOG.info("Files already delivered to customer inbox on hasta")
         return
-    is_concatenation_needed = deliver_ticket_api.check_is_concatenation_is_needed(
+    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(
         ticket_id=ticket_id
     )
     if is_concatenation_needed and delivery_type == "fastq" and not dry_run:

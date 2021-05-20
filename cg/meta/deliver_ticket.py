@@ -22,8 +22,12 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: str = config.delivery_path
 
-    def get_inbox_path(self, ticket_id: int) -> str:
+    def get_all_cases_from_ticket(self, ticket_id: int) -> list:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        return cases
+
+    def get_inbox_path(self, ticket_id: int) -> str:
+        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
             LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
             raise CgError()
@@ -46,7 +50,7 @@ class DeliverTicketAPI(MetaAPI):
         return is_upload_needed
 
     def generate_date_tag(self, ticket_id: int) -> str:
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         date = str(cases[0].ordered_at)
         split_date = date.split(" ")
         return split_date[0]
@@ -107,12 +111,16 @@ class DeliverTicketAPI(MetaAPI):
                 else:
                     LOG.warning("WARNING data lost in concatenation")
 
-    def check_is_concatenation_is_needed(self, ticket_id: int) -> bool:
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+    def get_app_tag(self, samples: list) -> str:
+        app_tag = samples[0].application_version.application.tag
+        return app_tag
+
+    def check_if_concatenation_is_needed(self, ticket_id: int) -> bool:
+        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         case_id = cases[0].internal_id
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
-        app_tag = samples[0].application_version.application.tag
+        app_tag = self.get_app_tag(samples=samples)
         for prefix in PREFIX_TO_CONCATENATE:
             if app_tag.startswith(prefix):
                 LOG.info(
