@@ -15,7 +15,7 @@ def rename_index_dir(unaligned_dir: Path, dry_run: bool = False) -> None:
             LOG.debug("%s is already renamed", sub_dir)
             continue
         index_directory: Path = unaligned_dir / "_".join(["Project", sub_dir.name])
-        LOG.info("Move index directory %s", sub_dir)
+        LOG.debug("Move index directory %s", sub_dir)
         if not dry_run:
             LOG.debug("Move directory to %s", index_directory)
             sub_dir.rename(index_directory)
