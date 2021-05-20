@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import click
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
@@ -25,6 +26,10 @@ def create_report_cmd(context: CGConfig, flowcell_name: str):
     demux_results: DemuxResults = DemuxResults(
         demux_dir=demux_api.out_dir / flowcell_name, flowcell=flowcell
     )
+    conversion_stats: Path = demux_results.conversion_stats_path
+    if not conversion_stats.exists():
+        LOG.warning("Could not find conversion stats file %s", conversion_stats)
+        raise click.Abort
     report = create_demux_report(
         conversion_stats=ConversionStats(demux_results.conversion_stats_path)
     )

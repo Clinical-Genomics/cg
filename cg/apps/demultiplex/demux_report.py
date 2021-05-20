@@ -8,6 +8,7 @@ from cg.apps.cgstats.parsers.conversion_stats import (
     UnknownBarcode,
 )
 from pydantic import BaseModel
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 MIN_CLUSTER_COUNT = 1000000
@@ -18,6 +19,7 @@ class SampleData(BaseModel):
     barcode: str
     lane: int
     sample: str = "Unknown"
+    type: Literal["sample", "unknown-barcode"] = "sample"
 
 
 def get_low_count_samples(samples: List[SampleConversionResults], lane: int) -> List[SampleData]:
@@ -39,7 +41,12 @@ def get_low_count_samples(samples: List[SampleConversionResults], lane: int) -> 
 
 def get_unknown_barcodes(unknown_barcodes: List[UnknownBarcode], lane: int) -> List[SampleData]:
     return [
-        SampleData(read_count=unknown.read_count, barcode=unknown.barcode, lane=lane)
+        SampleData(
+            read_count=unknown.read_count,
+            barcode=unknown.barcode,
+            lane=lane,
+            type="unknown-barcode",
+        )
         for unknown in unknown_barcodes
     ]
 
@@ -67,7 +74,7 @@ def get_demux_report_data(
 
 def create_demux_report(conversion_stats: ConversionStats, skip_empty: bool = False) -> List[str]:
     """Find the barcodes from each lane with low number of reads and create a report"""
-    header: List[str] = ["barcode", "sample", "lane", "read_count"]
+    header: List[str] = ["barcode", "sample", "type", "lane", "read_count"]
     report_content: List[str] = ["\t".join(header)]
     report_data = get_demux_report_data(conversion_stats=conversion_stats, skip_empty=skip_empty)
     for sample_data in report_data:
@@ -76,6 +83,7 @@ def create_demux_report(conversion_stats: ConversionStats, skip_empty: bool = Fa
                 [
                     sample_data.barcode,
                     sample_data.sample,
+                    sample_data.type,
                     str(sample_data.lane),
                     str(sample_data.read_count),
                 ]
