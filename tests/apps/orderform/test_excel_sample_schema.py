@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from pydantic import ValidationError
 
@@ -54,6 +56,22 @@ def test_excel_unknown_source_type(minimal_excel_sample: dict):
     with pytest.raises(ValidationError):
         # THEN assert that a validation error is raised since source does not exist
         excel_sample: ExcelSample = ExcelSample(**minimal_excel_sample)
+
+
+def test_excel_datetime_to_date_conversion(minimal_excel_sample: dict):
+    """Test instantiate a sample with a datetime collection date
+
+    Datetime string should be converted to date
+    """
+    # GIVEN some sample with a collection date as a datetime-string
+    collection_date = "2021-05-05 00:00:00"
+    minimal_excel_sample["UDF/Collection Date"] = collection_date
+
+    # WHEN creating a excel sample
+    excel_sample: ExcelSample = ExcelSample(**minimal_excel_sample)
+
+    # THEN the collection_date should only contain the date
+    assert str(excel_sample.collection_date) == "2021-05-05"
 
 
 def test_excel_with_panels(minimal_excel_sample: dict):

@@ -13,6 +13,13 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.7.1]
+### Fixed
+- Fixed bug when checking if flowcell projects has been renamed
+
+## [21.7.0]
+### Added
+- Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
 
 ## [21.7.0]
 ### Added
@@ -28,11 +35,9 @@ Try to use the following format:
 ### Changed
 - Validate that flowcell name is correct when demultiplexing
 
-
 ## [21.6.7]
 ### Fixed
 - Fixed linking sample files from case bundle
-
 
 ## [21.6.6]
 ### Changed
