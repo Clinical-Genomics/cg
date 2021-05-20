@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [x.x.x]
+### Changed
+- dividided VALIDATION_CASES into their own workflow lists to find them easier 
+
 ## [21.7.0]
 ### Added
 - Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
