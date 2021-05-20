@@ -115,7 +115,13 @@ class DeliverTicketAPI(MetaAPI):
         app_tag = samples[0].application_version.application.tag
         for prefix in PREFIX_TO_CONCATENATE:
             if app_tag.startswith(prefix):
-                LOG.info("Identified %s as application tag, i.e. the fastqs should be concatenated", app_tag)
+                LOG.info(
+                    "Identified %s as application tag, i.e. the fastqs should be concatenated",
+                    app_tag,
+                )
                 return True
-        LOG.info("The following application tag was identified: %s, concatenation will be skipped", app_tag)
+        LOG.info(
+            "The following application tag was identified: %s, concatenation will be skipped",
+            app_tag,
+        )
         return False

@@ -137,11 +137,7 @@ def deliver_ticket(
         ticket_id=ticket_id
     )
     if is_concatenation_needed and delivery_type == "fastq" and not dry_run:
-        context.invoke(
-            concatenate, ticket_id=ticket_id
-        )
+        context.invoke(concatenate, ticket_id=ticket_id)
     if is_concatenation_needed and delivery_type == "fastq" and dry_run:
         LOG.info("Concatenation is needed, but will be skipped since this is a dry-run")
-    context.invoke(
-        rsync, ticket_id=ticket_id, dry_run=dry_run
-    )
+    context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)
