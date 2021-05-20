@@ -15,6 +15,8 @@ Try to use the following format:
 
 
 ## [x.x.x]
+### Added
+- Added two more cases to BALSAMIC's validation
 ### Changed
 - dividided VALIDATION_CASES into their own workflow lists to find them easier 
 
