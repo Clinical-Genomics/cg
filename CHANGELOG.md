@@ -14,6 +14,12 @@ Try to use the following format:
 ### Fixed
 
 
+## [21.7.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
 ## [21.6.9]
 ### Changed
 - Check if versions are larger than known version when determining reverse complement in demultiplexing
