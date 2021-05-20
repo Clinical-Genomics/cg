@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.8.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
 ## [21.7.2]
 ### Added
 - Copy sample sheet to demuxed flowcell dir
