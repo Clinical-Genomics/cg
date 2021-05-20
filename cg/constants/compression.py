@@ -28,12 +28,12 @@ PROBLEMATIC_CASES = [
 
 # List of cases used for validation that we should skip
 BALSAMIC_VALIDATION_CASES = [
-    "bosssponge", # BALSAMIC validation case tumor-only panel
-    "civilsole", # BALSAMIC validation case tumor-only wgs
-    "fleetjay", # BALSAMIC validation case tumor-normal wgs
-    "moralgoat", # BALSAMIC validation case tumor-normal wgs
-    "sweetelf", # BALSAMIC positive control tumor-only panel 
-    "unitedbeagle", # BALSAMIC validation case tumor-normal panel
+    "bosssponge",  # BALSAMIC validation case tumor-only panel
+    "civilsole",  # BALSAMIC validation case tumor-only wgs
+    "fleetjay",  # BALSAMIC validation case tumor-normal wgs
+    "moralgoat",  # BALSAMIC validation case tumor-normal wgs
+    "sweetelf",  # BALSAMIC positive control tumor-only panel
+    "unitedbeagle",  # BALSAMIC validation case tumor-normal panel
 ]
 
 MIP_VALIDATION_CASES = [
@@ -95,4 +95,6 @@ OTHER_VALIDATION_CASES = [
     "strongman",
 ]
 
-CASES_TO_IGNORE = PROBLEMATIC_CASES + OTHER_VALIDATION_CASES + BALSAMIC_VALIDATION_CASES + MIP_VALIDATION_CASES
+CASES_TO_IGNORE = (
+    PROBLEMATIC_CASES + OTHER_VALIDATION_CASES + BALSAMIC_VALIDATION_CASES + MIP_VALIDATION_CASES
+)
