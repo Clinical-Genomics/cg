@@ -147,7 +147,7 @@ class ConversionStats:
         self._results = SampleConversionResults()
 
     def create_unknown_barcodes_entry(self) -> None:
-        LOG.info("Creating unknown barcode entry for lane %s", self._current_lane)
+        LOG.debug("Creating unknown barcode entry for lane %s", self._current_lane)
         lane_results: List[UnknownBarcode] = copy.deepcopy(self.unknown_barcodes)
         self.lanes_to_unknown_barcode[self._current_lane] = lane_results
         self.unknown_barcodes = []
@@ -177,7 +177,7 @@ class ConversionStats:
                 unknown_barcode = UnknownBarcode(
                     barcode=node.attrib.get("sequence"), read_count=int(node.attrib.get("count"))
                 )
-                LOG.info("Creating unknown barcodes entry for %s", unknown_barcode.barcode)
+                LOG.debug("Creating unknown barcodes entry for %s", unknown_barcode.barcode)
                 self.unknown_barcodes.append(unknown_barcode)
                 return
             barcode_sequence: Optional[str] = node.attrib.get("name")
@@ -195,7 +195,7 @@ class ConversionStats:
         elif current_tag == "Flowcell":
             self.set_flowcell_id(node.attrib["flowcell-id"])
         elif current_tag == "TopUnknownBarcodes":
-            LOG.info("Set unknown barcodes entry to true")
+            LOG.debug("Set unknown barcodes entry to true")
             self._skip_entry = False
             self.unknown_barcodes_entry = True
 
@@ -204,13 +204,10 @@ class ConversionStats:
         if "Tile" in self.current_path:
             self.process_tile_info(node=node, current_tag=current_tag)
         elif current_tag == "Lane":
-            LOG.info("End Lane event")
             if self.unknown_barcodes_entry:
                 self.create_unknown_barcodes_entry()
             else:
                 self.create_entry()
-        else:
-            LOG.info("Unknown end event %s", current_tag)
 
     def update_cluster_count(self, cluster_count: int) -> None:
         if "Raw" in self.current_path:
