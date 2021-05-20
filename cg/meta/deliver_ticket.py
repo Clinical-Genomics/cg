@@ -110,8 +110,9 @@ class DeliverTicketAPI(MetaAPI):
     def check_is_concatenation_is_needed(self, ticket_id: int) -> bool:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         case_id = cases[0].internal_id
-        version_obj = self.housekeeper_api.last_version(case_id)
-        app_tag = version_obj.application.tag
+        case_obj = self.status_db.family(case_id)
+        samples: List[models.Sample] = [link.sample for link in case_obj.links]
+        app_tag = samples[0].application_version.application.tag
         for prefix in PREFIX_TO_CONCATENATE:
             if app_tag.startswith(prefix):
                 LOG.info("Identified %s as application tag, i.e. the fastqs should be concatenated", app_tag)
