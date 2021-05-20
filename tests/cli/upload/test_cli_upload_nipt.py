@@ -9,7 +9,7 @@ from cg.models.cg_config import CGConfig
 
 
 def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog):
-    """ Tests CLI command to upload a single case"""
+    """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
     # GIVEN a specified NIPT case
@@ -25,7 +25,7 @@ def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplo
 
 
 def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog):
-    """ Tests CLI command to upload a single case"""
+    """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
     # GIVEN a specified NIPT case
@@ -40,7 +40,7 @@ def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, c
 
 
 def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog):
-    """ Tests CLI command to upload a single case"""
+    """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
     # GIVEN adding all available NIPT case results
@@ -54,7 +54,7 @@ def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog
 
 
 def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog):
-    """ Tests CLI command to upload a single case"""
+    """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
     # GIVEN adding all available NIPT case results
