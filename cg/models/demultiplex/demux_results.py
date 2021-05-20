@@ -73,12 +73,23 @@ class DemuxResults:
 
     @property
     def sample_sheet_path(self) -> Path:
+        """Return the path to where the original sample sheet is"""
         return self.flowcell.sample_sheet_path
 
     @property
     def barcode_report(self) -> Path:
         """Return the path to the report with samples with low cluster count"""
         return self.demux_dir / "lane_barcode_summary.csv"
+
+    @property
+    def demux_sample_sheet_path(self) -> Path:
+        """Return the path to sample sheet in demuxed flowcell dir"""
+        return self.results_dir / self.flowcell.sample_sheet_path.name
+
+    @property
+    def copy_complete_path(self) -> Path:
+        """Return the path to a file named copycomplete.txt used as flag that post processing is ready"""
+        return self.demux_dir / "copycomplete.txt"
 
     @property
     def projects(self) -> Iterable[str]:
