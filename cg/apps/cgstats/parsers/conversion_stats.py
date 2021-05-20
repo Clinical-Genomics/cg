@@ -202,11 +202,14 @@ class ConversionStats:
         # We will add the information for each tile
         if "Tile" in self.current_path:
             self.process_tile_info(node=node, current_tag=current_tag)
-        if node.tag == "Lane":
+        elif current_tag == "Lane":
+            LOG.info("End Lane event")
             if self.unknown_barcodes_entry:
                 self.create_unknown_barcodes_entry()
             else:
                 self.create_entry()
+        else:
+            LOG.info("Unknown end event %s", current_tag)
 
     def update_cluster_count(self, cluster_count: int) -> None:
         if "Raw" in self.current_path:
