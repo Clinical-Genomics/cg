@@ -74,7 +74,7 @@ class ConversionStats:
         self.lanes: Set[int] = set()
         self.unknown_barcodes: List[UnknownBarcode] = []
         # Mapping from lane to barcodes and the results
-        self.lanes_to_barcode: Dict[int : Dict[str, SampleConversionResults]] = {}
+        self.lanes_to_barcode: Dict[int, Dict[str, SampleConversionResults]] = {}
         self.barcode_to_lanes: Dict[str, Dict[int, SampleConversionResults]] = {}
         self.lanes_to_unknown_barcode: Dict[int, List[UnknownBarcode]] = {}
         # This is just a summary of all raw clusters per lane
@@ -147,6 +147,7 @@ class ConversionStats:
         self._results = SampleConversionResults()
 
     def create_unknown_barcodes_entry(self) -> None:
+        LOG.info("Creating unknown barcode entry for lane %s", self._current_lane)
         lane_results: List[UnknownBarcode] = copy.deepcopy(self.unknown_barcodes)
         self.lanes_to_unknown_barcode[self._current_lane] = lane_results
         self.unknown_barcodes = []
@@ -177,6 +178,7 @@ class ConversionStats:
                 unknown_barcode = UnknownBarcode(
                     barcode=node.attrib.get("sequence"), read_count=int(node.attrib.get("count"))
                 )
+                LOG.info("Creating unknown barcodes entry for %s", unknown_barcode.barcode)
                 self.unknown_barcodes.append(unknown_barcode)
                 return
             barcode_sequence: Optional[str] = node.attrib.get("name")
@@ -194,6 +196,7 @@ class ConversionStats:
         elif current_tag == "Flowcell":
             self.set_flowcell_id(node.attrib["flowcell-id"])
         elif current_tag == "TopUnknownBarcodes":
+            LOG.info("Set unknown barcodes entry to true")
             self.unknown_barcodes_entry = True
 
     def evaluate_end_event(self, node: Element, current_tag: str) -> None:
@@ -272,12 +275,3 @@ class ConversionStats:
 
     def __repr__(self):
         return f"ConversionStats(flowcell_id={self.flowcell_id},projects={self.projects},lanes={self.lanes}"
-
-
-if __name__ == "__main__":
-    import sys
-    from pprint import pprint as pp
-
-    infile = Path(sys.argv[1])
-    conversion = ConversionStats(conversion_stats_path=infile)
-    print(conversion.lanes_to_unknown_barcode)
