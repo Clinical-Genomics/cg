@@ -196,6 +196,7 @@ class ConversionStats:
             self.set_flowcell_id(node.attrib["flowcell-id"])
         elif current_tag == "TopUnknownBarcodes":
             LOG.info("Set unknown barcodes entry to true")
+            self._skip_entry = False
             self.unknown_barcodes_entry = True
 
     def evaluate_end_event(self, node: Element, current_tag: str) -> None:
