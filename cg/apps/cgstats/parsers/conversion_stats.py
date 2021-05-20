@@ -157,7 +157,6 @@ class ConversionStats:
         # print("Start!", current_tag, node, node.attrib, node.text)
 
         LOG.debug("Add start event %s to current path", current_tag)
-
         self.current_path.append(current_tag)
         if current_tag == "Lane":
             self.set_current_lane(lane_nr=int(node.attrib["number"]))
