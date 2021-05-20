@@ -64,7 +64,13 @@ class DemuxResults:
 
     @property
     def sample_sheet_path(self) -> Path:
+        """Return the path to where the original sample sheet is"""
         return self.flowcell.sample_sheet_path
+
+    @property
+    def demux_sample_sheet_path(self) -> Path:
+        """Return the path to sample sheet in demuxed flowcell dir"""
+        return self.results_dir / self.flowcell.sample_sheet_path.name
 
     @property
     def projects(self) -> Iterable[str]:

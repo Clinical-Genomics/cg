@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Iterable, List, Optional
 
@@ -113,6 +114,15 @@ class DemuxPostProcessingAPI:
             )
             report_path: Path = demux_results.demux_dir / f"stats-{project_name}-{flowcell_id}.txt"
             self.write_report(report_path=report_path, report_data=report_data)
+
+    def copy_sample_sheet(self, demux_results: DemuxResults) -> None:
+        """Copy the sample sheet from run dir to demux dir"""
+        LOG.info(
+            "Copy sample sheet (%s) from flowcell to demuxed result dir (%s)",
+            demux_results.sample_sheet_path,
+            demux_results.demux_sample_sheet_path,
+        )
+        shutil.copy(demux_results.sample_sheet_path, demux_results.demux_sample_sheet_path)
 
     def post_process_flowcell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post processing a demultiplexed flowcell
