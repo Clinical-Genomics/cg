@@ -13,6 +13,11 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.7.2]
+### Added
+- Copy sample sheet to demuxed flowcell dir
+- Create `copycomplete.txt` after demux post-processing is done
+
 ## [21.7.1]
 ### Fixed
 - Fixed bug when checking if flowcell projects has been renamed
