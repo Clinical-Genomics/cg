@@ -13,7 +13,7 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
-## [NG.NG.NG]
+## [21.7.0]
 ### Added
 - Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
 
