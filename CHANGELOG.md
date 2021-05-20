@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [NG.NG.NG]
+### Added
+- Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
 
 ## [21.6.9]
 ### Changed
@@ -22,11 +25,9 @@ Try to use the following format:
 ### Changed
 - Validate that flowcell name is correct when demultiplexing
 
-
 ## [21.6.7]
 ### Fixed
 - Fixed linking sample files from case bundle
-
 
 ## [21.6.6]
 ### Changed
