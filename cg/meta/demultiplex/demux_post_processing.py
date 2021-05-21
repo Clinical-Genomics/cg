@@ -119,7 +119,10 @@ class DemuxPostProcessingAPI:
     @staticmethod
     def create_barcode_summary_report(demux_results: DemuxResults) -> None:
         report_content = create_demux_report(conversion_stats=demux_results.conversion_stats)
-        report_path: Path = demux_results.conversion_stats_path
+        report_path: Path = demux_results.barcode_report
+        if report_path.exists():
+            LOG.warning("Report path already exists!")
+            return
         LOG.info("Write demux report to %s", report_path)
         with report_path.open("w") as report_file:
             report_file.write("\n".join(report_content))

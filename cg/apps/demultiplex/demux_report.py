@@ -69,8 +69,6 @@ def get_demux_report_data(
             report_data.extend(lane_samples)
     if skip_empty and not report_data:
         return report_data
-    LOG.warning("Unknown barcodes!")
-    LOG.warning("%s", conversion_stats.lanes_to_unknown_barcode)
     for lane, barcode_data in conversion_stats.lanes_to_unknown_barcode.items():
         report_data.extend(get_unknown_barcodes(unknown_barcodes=barcode_data, lane=lane))
     return report_data
