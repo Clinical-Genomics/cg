@@ -204,6 +204,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "--out",
             self.get_output_path(case_id=case_id).as_posix(),
             "analyse",
+            "--batch-ref",
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
