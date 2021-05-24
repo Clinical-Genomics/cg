@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 from alchy import QueryModel
 
@@ -12,13 +12,13 @@ from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils import Process
-from housekeeper.store import Store
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
 
 class NiptUploadAPI:
-    """API for NIPT upload via ftp"""
+    """API for uploading the Fluffy analysis result file to the Klinisk Genetik ftp server"""
 
     RESULT_FILE_TAGS = ["nipt", "metrics"]
 
@@ -44,7 +44,9 @@ class NiptUploadAPI:
         if not tags:
             tags = self.RESULT_FILE_TAGS
 
-        hk_all_results_files = self.housekeeper_api.get_files(bundle=case_id, tags=tags)
+        hk_all_results_files: Iterable[hk_models.File] = self.housekeeper_api.get_files(
+            bundle=case_id, tags=tags
+        )
 
         if not list(hk_all_results_files):
             raise HousekeeperFileMissingError(
@@ -56,14 +58,14 @@ class NiptUploadAPI:
     def get_results_file_path(self, hk_results_file) -> Path:
         """Get the full path to the results file on Hasta"""
 
-        results_file = self.root_dir / Path(hk_results_file)
+        results_file: Path = self.root_dir / hk_results_file
 
         if not results_file.exists():
             raise FileNotFoundError(f"Results file {results_file} not found on hasta!")
 
         return results_file
 
-    def get_all_upload_analyses(self) -> QueryModel:
+    def get_all_upload_analyses(self) -> Iterable[models.Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
         latest_nipt_analyses = self.status_db.latest_analyses().filter(
             models.Analysis.pipeline == Pipeline.FLUFFY
@@ -71,7 +73,7 @@ class NiptUploadAPI:
 
         return latest_nipt_analyses.filter(models.Analysis.uploaded_at.is_(None))
 
-    def upload(self, results_file: Path) -> None:
+    def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
 
         parameters: list = [

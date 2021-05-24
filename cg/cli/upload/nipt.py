@@ -36,7 +36,7 @@ def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
         LOG.info(f"Results file found: {results_file}")
         LOG.info(f"Starting upload!")
         nipt_upload_api.update_analysis_upload_started_date(case_id)
-        nipt_upload_api.upload(results_file)
+        nipt_upload_api.upload_to_ftp_server(results_file)
         LOG.info(f"Upload finished!")
         nipt_upload_api.update_analysis_uploaded_at_date(case_id)
         if not dry_run:
