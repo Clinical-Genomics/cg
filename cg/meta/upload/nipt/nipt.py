@@ -42,7 +42,7 @@ class NiptUploadAPI:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
-            tags = self.RESULT_FILE_TAGS
+            tags: List[str] = self.RESULT_FILE_TAGS
 
         hk_all_results_files: Iterable[hk_models.File] = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags
@@ -55,7 +55,7 @@ class NiptUploadAPI:
 
         return hk_all_results_files.first().path
 
-    def get_results_file_path(self, hk_results_file) -> Path:
+    def get_results_file_path(self, hk_results_file: str) -> Path:
         """Get the full path to the results file on Hasta"""
 
         results_file: Path = self.root_dir / hk_results_file
@@ -91,8 +91,8 @@ class NiptUploadAPI:
 
     def update_analysis_uploaded_at_date(self, case_id: str) -> models.Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
-        case_obj = self.status_db.family(case_id)
-        analysis_obj = case_obj.analyses[0]
+        case_obj: models.Family = self.status_db.family(case_id)
+        analysis_obj: models.Analysis = case_obj.analyses[0]
         analysis_obj.uploaded_at = dt.datetime.now()
 
         return analysis_obj
@@ -100,8 +100,8 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> models.Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj = self.status_db.family(case_id)
-        analysis_obj = case_obj.analyses[0]
+        case_obj: models.Family = self.status_db.family(case_id)
+        analysis_obj: models.Analysis = case_obj.analyses[0]
         analysis_obj.upload_started_at = dt.datetime.now()
 
         return analysis_obj
