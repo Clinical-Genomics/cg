@@ -108,7 +108,7 @@ class GisaidAPI:
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         gisaid_samples = []
         for sample in samples:
-            sample_id = sample.internal_id
+            sample_id: str = sample.internal_id
             gisaid_sample = GisaidSample(
                 family_id=family_id,
                 cg_lims_id=sample_id,
