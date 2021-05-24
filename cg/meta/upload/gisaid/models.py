@@ -16,7 +16,6 @@ class UpploadFiles(BaseModel):
     fasta_file: Path
 
 
-#    class Config:
 
 
 class GisaidSample(BaseModel):
