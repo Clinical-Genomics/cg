@@ -8,6 +8,7 @@ from alchy import QueryModel
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils import Process
@@ -43,13 +44,14 @@ class NiptUploadAPI:
         if not tags:
             tags = self.RESULT_FILE_TAGS
 
-        hk_results_file = self.housekeeper_api.get_files(bundle=case_id, tags=tags).first().path
+        hk_all_results_files = self.housekeeper_api.get_files(bundle=case_id, tags=tags)
 
-        if not hk_results_file:
-            raise FileNotFoundError(
-                f"No results file found in Housekeeper for NIPT case {case_id}."
+        if not list(hk_all_results_files):
+            raise HousekeeperFileMissingError(
+                f"No results files found in Housekeeper for NIPT case {case_id}."
             )
-        return hk_results_file
+
+        return hk_all_results_files.first().path
 
     def get_results_file_path(self, hk_results_file) -> Path:
         """Get the full path to the results file on Hasta"""

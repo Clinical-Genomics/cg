@@ -137,6 +137,16 @@ class HousekeeperVersionMissingError(CgError):
     """
 
 
+class HousekeeperFileMissingError(CgError):
+    """
+    Exception raised when a file is missing in Housekeeper.
+    """
+
+    def __init__(self, message, errors=None):
+        self.message = message
+        self.errors = errors
+
+
 class FastaSequenceMissingError(CgError):
     """
     Exception raised when expected sequence in fasta file is missing.
