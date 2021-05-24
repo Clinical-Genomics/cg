@@ -42,7 +42,7 @@ class NiptUploadAPI:
         """Get the result file for a NIPT analysis from Housekeeper"""
 
         if not tags:
-            tags = self.RESULT_FILE_TAGS
+            tags: List[str] = self.RESULT_FILE_TAGS
 
         hk_all_results_files = self.housekeeper_api.get_files(bundle=case_id, tags=tags)
 
