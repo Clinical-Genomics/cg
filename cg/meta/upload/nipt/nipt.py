@@ -56,7 +56,7 @@ class NiptUploadAPI:
     def get_results_file_path(self, hk_results_file: str) -> Path:
         """Get the full path to the results file on Hasta"""
 
-        results_file = self.root_dir / Path(hk_results_file)
+        results_file: Path = self.root_dir / hk_results_file
 
         if not results_file.exists():
             raise FileNotFoundError(f"Results file {results_file} not found on hasta!")
