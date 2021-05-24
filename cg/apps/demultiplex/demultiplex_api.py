@@ -100,6 +100,10 @@ class DemultiplexingAPI:
     def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
         LOG.info("Check if demultiplexing is ready for %s", flowcell.path)
+        logfile: Path = self.get_logfile(flowcell)
+        if not logfile.exists():
+            LOG.warning("Could not find logfile!")
+            return False
         return self.demultiplexing_completed_path(flowcell).exists()
 
     def is_demultiplexing_ongoing(self, flowcell: Flowcell) -> bool:
