@@ -160,6 +160,9 @@ class DemultiplexingAPI:
             return
         demultiplexing_started_path.touch(exist_ok=False)
 
+    def add_to_trailblazer(self):
+        pass
+
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
         self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
