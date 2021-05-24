@@ -13,6 +13,9 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.8.3]
+### Changed
+- Set memory allocation to 95G when demultiplexing on slurm 
 
 ## [21.8.2]
 ### Changed
