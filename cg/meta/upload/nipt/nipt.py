@@ -99,7 +99,7 @@ class NiptUploadAPI:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
         case_obj = self.status_db.family(case_id)
-        analysis_obj = case_obj.analyses[0]
+        analysis_obj: models.Analysis = case_obj.analyses[0]
         analysis_obj.upload_started_at = dt.datetime.now()
 
         return analysis_obj
