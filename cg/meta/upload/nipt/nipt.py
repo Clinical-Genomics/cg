@@ -98,7 +98,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> models.Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj = self.status_db.family(case_id)
+        case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
         analysis_obj.upload_started_at = dt.datetime.now()
 
