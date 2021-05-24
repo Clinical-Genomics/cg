@@ -53,7 +53,7 @@ class NiptUploadAPI:
 
         return hk_all_results_files.first().path
 
-    def get_results_file_path(self, hk_results_file) -> Path:
+    def get_results_file_path(self, hk_results_file: str) -> Path:
         """Get the full path to the results file on Hasta"""
 
         results_file = self.root_dir / Path(hk_results_file)
