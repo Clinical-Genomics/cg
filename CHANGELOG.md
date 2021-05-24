@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.8.1]
+### Changed
+- Changed so that barcode report is written to the correct path
+
 ## [21.8.0]
 ### Added
 - Command `cg demultplex report` to generate barcode report for demuxed flowcells
