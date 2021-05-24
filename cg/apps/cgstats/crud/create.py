@@ -151,7 +151,7 @@ def create_samples(
     LOG.info("Creating samples for flowcell %s", demux_results.flowcell.flowcell_full_name)
     sample_sheet: SampleSheet = demux_results.flowcell.get_sample_sheet()
     demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(
-        conversion_stats_path=demux_results.conversion_stats_path,
+        conversion_stats=demux_results.conversion_stats,
         demux_stats_path=demux_results.demux_stats_path,
         sample_sheet=sample_sheet,
     )
