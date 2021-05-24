@@ -13,6 +13,12 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+
+## [21.8.2]
+### Changed
+- Add batch-ref flag to command string for fluffy analyses
+
+
 ## [21.8.1]
 ### Changed
 - Changed so that barcode report is written to the correct path
