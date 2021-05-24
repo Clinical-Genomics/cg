@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 from typing import Iterable, Optional
 
-from alchy import QueryModel
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError
