@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class MutantSampleConfig(BaseModel):
@@ -19,3 +19,7 @@ class MutantSampleConfig(BaseModel):
     method_sequencing: str
     sequencing_qc_pass: bool
     selection_criteria: str
+
+    @validator("region_code", "lab_code")
+    def sanitize_values(cls, value):
+        return value.split(" ")[0]

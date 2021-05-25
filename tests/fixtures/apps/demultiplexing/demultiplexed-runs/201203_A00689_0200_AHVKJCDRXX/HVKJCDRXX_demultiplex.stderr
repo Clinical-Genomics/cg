@@ -1,0 +1,13 @@
+[20210403115107] On node: compute-0-2.local
+[20210403115107] starting, will use /home/hiseq.clinical/tmp
+[20210403115107] Run directory: /home/proj/production/flowcells/novaseq/runs//210401_A00689_0252_BHN3FKDSXY
+[20210403115107] Demux directory: /home/proj/production/demultiplexed-runs//210401_A00689_0252_BHN3FKDSXY
+[20210403115107] mkdir -p /home/proj/production/flowcells/novaseq/1061820
+[20210403115107] start demultiplexing /home/proj/production/flowcells/novaseq/runs//210401_A00689_0252_BHN3FKDSXY
+[20210403115107] singularity exec --bind /home/proj/production/demultiplexed-runs,/home/proj/production/flowcells/novaseq,/home/proj/production/flowcells/novaseq/1061820:/run/user/2191 /home/proj/production/demux-on-hasta/novaseq/container/bcl2fastq_v2-20-0.sif bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 --runfolder-dir /home/proj/production/flowcells/novaseq/runs//210401_A00689_0252_BHN3FKDSXY --output-dir /home/proj/production/demultiplexed-runs//210401_A00689_0252_BHN3FKDSXY/Unaligned --sample-sheet /home/proj/production/flowcells/novaseq/runs//210401_A00689_0252_BHN3FKDSXY/SampleSheet.csv --barcode-mismatches 1
+BCL to FASTQ file converter
+bcl2fastq v2.20.0.422
+Copyright (c) 2007-2017 Illumina, Inc.
+
+2021-04-03 11:51:08 [15fd880] Command-line invocation: bcl2fastq --loading-threads 3 --processing-threads 15 --writing-threads 3 --runfolder-dir /home/proj/production/flowcells/novaseq/runs//210401_A00689_0252_BHN3FKDSXY --output-dir /home/proj/production/demultiplexed-runs//210401_A00689_0252_BHN3FKDSXY/Unaligned --sample-sheet /home/proj/production/flowcells/novaseq/runs//210401_A00689_0252_BHN3FKDSXY/SampleSheet.csv --barcode-mismatches 1 
+2021-04-03 11:51:08 [15fd880] INFO: Minimum log level: INFO

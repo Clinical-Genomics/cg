@@ -8,6 +8,12 @@ ONLY_ONE_CASE_PER_TICKET = [
     "sarscov2",
 ]
 
+SKIP_MISSING = [
+    "fastq",
+    "microsalt",
+    "sarscov2",
+]
+
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnvkit", "filtered", "sv-vcf"},
     {"cnvkit", "filtered", "sv-vcf-index"},
@@ -104,6 +110,7 @@ FASTQ_ANALYSIS_SAMPLE_TAGS = [
 
 SARSCOV2_ANALYSIS_CASE_TAGS = [
     {"pangolin"},
+    {"ks-delivery"},
 ]
 
 SARSCOV2_ANALYSIS_SAMPLE_TAGS = [

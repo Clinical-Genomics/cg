@@ -6,6 +6,8 @@ import traceback
 from typing import Optional
 
 import click
+
+from cg.cli.upload.nipt import nipt
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError, CgError
 from cg.meta.report.api import ReportAPI
@@ -17,10 +19,10 @@ from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
-from .gisaid import gisaid
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
+from .gisaid import gisaid
 from .mutacc import process_solved, processed_solved
 from .observations import observations
 from .scout import create_scout_load_config, scout, upload_case_to_scout
@@ -167,3 +169,4 @@ upload.add_command(delivery_reports)
 upload.add_command(delivery_report_to_scout)
 upload.add_command(vogue)
 upload.add_command(gisaid)
+upload.add_command(nipt)

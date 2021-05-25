@@ -1,14 +1,19 @@
+"""Commands to mimic the behaviour from cgstats.
+
+This is a way to interact with cgstats manually. In automated production these commands will not be run.
+"""
 import logging
 from pathlib import Path
 from typing import List, Optional
 
 import click
 from cg.apps.cgstats.crud.create import create_novaseq_flowcell
-from cg.apps.cgstats.crud.find import project_sample_stats
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.constants.cgstats import STATS_HEADER
+from cg.exc import FlowcellError
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
-from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 
@@ -30,7 +35,10 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
     if not demux_results_path.exists():
         LOG.warning("Could not find demultiplex result path %s", demux_results_path)
         raise click.Abort
-    flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
+    try:
+        flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
+    except FlowcellError:
+        raise click.Abort
     demux_results: DemuxResults = DemuxResults(demux_dir=demux_results_path, flowcell=flowcell)
     create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
 
@@ -42,43 +50,14 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
 def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[str]):
     """Select a flowcell to fetch statistics from"""
     # Need to instantiate API
-    stats_api: StatsAPI = context.cg_stats_api
-    stats_samples: List[StatsSample] = project_sample_stats(
-        flowcell=flowcell_id, project_name=project
+    post_processing_api = DemuxPostProcessingAPI(config=context)
+    report_content: List[str] = post_processing_api.get_report_data(
+        flowcell_id=flowcell_id, project_name=project
     )
 
-    stats_header = [
-        "sample",
-        "Flowcell",
-        "Lanes",
-        "readcounts/lane",
-        "sum_readcounts",
-        "yieldMB/lane",
-        "sum_yield",
-        "%Q30",
-        "MeanQscore",
-    ]
-    click.echo("\t".join(stats_header))
-    if not stats_samples:
+    click.echo("\t".join(STATS_HEADER))
+    if not report_content:
         LOG.warning("Could not find any samples for flowcell %s, project %s", flowcell_id, project)
         return
-    print_lanes: List[str] = ",".join(str(lane) for lane in stats_samples[0].lanes)
-    for stats_sample in sorted(stats_samples, key=lambda x: x.sample_name):
-        click.echo(
-            "\t".join(
-                str(s)
-                for s in [
-                    stats_sample.sample_name,
-                    flowcell_id,
-                    print_lanes,
-                    ",".join(str(unaligned.read_count) for unaligned in stats_sample.unaligned),
-                    stats_sample.read_count_sum,
-                    ",".join(str(unaligned.yield_mb) for unaligned in stats_sample.unaligned),
-                    stats_sample.sum_yield,
-                    ",".join(str(unaligned.q30_bases_pct) for unaligned in stats_sample.unaligned),
-                    ",".join(
-                        str(unaligned.mean_quality_score) for unaligned in stats_sample.unaligned
-                    ),
-                ]
-            )
-        )
+    for report_line in report_content:
+        click.echo(report_line)

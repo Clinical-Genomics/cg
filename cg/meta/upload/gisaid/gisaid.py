@@ -46,7 +46,7 @@ class GisaidAPI:
 
         hk_version: hk_models.Version = self.housekeeper_api.last_version(bundle=family_id)
         if not hk_version:
-            LOG.info("Family ID: %s not found in hose keeper", family_id)
+            LOG.info("Family ID: %s not found in housekeeper", family_id)
             raise HousekeeperVersionMissingError
         fasta_file: str = self.housekeeper_api.files(
             version=hk_version.id, tags=["consensus"]
@@ -110,7 +110,7 @@ class GisaidAPI:
         samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
         gisaid_samples = []
         for sample in samples:
-            sample_id = sample.internal_id
+            sample_id: str = sample.internal_id
             gisaid_sample = GisaidSample(
                 family_id=family_id,
                 cg_lims_id=sample_id,

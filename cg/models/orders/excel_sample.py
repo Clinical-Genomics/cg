@@ -1,5 +1,4 @@
 from typing import List, Optional
-
 from pydantic import Field, validator
 
 from cg.constants.orderforms import REV_SEX_MAP, SOURCE_TYPES
@@ -10,6 +9,7 @@ class ExcelSample(OrderSample):
     application: str = Field(..., alias="UDF/Sequencing Analysis")
     capture_kit: str = Field(None, alias="UDF/Capture Library version")
     case_id: str = Field(None, alias="UDF/familyID")
+    collection_date: str = Field(None, alias="UDF/Collection Date")
     comment: str = Field(None, alias="UDF/Comment")
     concentration: str = Field(None, alias="UDF/Concentration (nM)")
     concentration_sample: str = Field(None, alias="UDF/Sample Conc.")
@@ -31,6 +31,8 @@ class ExcelSample(OrderSample):
     name: str = Field(..., alias="Sample/Name")
     organism: str = Field(None, alias="UDF/Strain")
     organism_other: str = Field(None, alias="UDF/Other species")
+    original_lab: str = Field(None, alias="UDF/Original Lab")
+    original_lab_address: str = Field(None, alias="UDF/Original Lab Address")
     panels: List[str] = Field(None, alias="UDF/Gene List")
     pool: str = Field(None, alias="UDF/pool name")
     post_formalin_fixation_time: str = Field(None, alias="UDF/Post Formalin Fixation Time")
@@ -39,6 +41,7 @@ class ExcelSample(OrderSample):
     quantity: str = Field(None, alias="UDF/Quantity")
     reagent_label: str = Field(None, alias="Sample/Reagent Label")
     reference_genome: str = Field(None, alias="UDF/Reference Genome Microbial")
+    region: str = Field(None, alias="UDF/Region")
     region_code: str = Field(None, alias="UDF/Region Code")
     require_qcok: bool = Field(None, alias="UDF/Process only if QC OK")
     rml_plate_name: str = Field(None, alias="UDF/RML plate name")
@@ -119,9 +122,19 @@ class ExcelSample(OrderSample):
             return "analysis-bam"
         return value
 
-    @validator("priority", "status")
+    @validator("status", "priority")
     def convert_to_lower(cls, value: Optional[str]):
         value = value.lower()
-        if value == "förtur":
+        return value
+
+    @validator("priority")
+    def convert_to_priority(cls, value: Optional[str]):
+        if value.lower() == "förtur":
             return "priority"
         return value
+
+    @validator("collection_date")
+    def convert_to_date(cls, value: Optional[str]) -> Optional[str]:
+        if not value:
+            return None
+        return value[0:10]

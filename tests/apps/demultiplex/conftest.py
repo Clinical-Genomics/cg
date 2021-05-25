@@ -14,15 +14,26 @@ def fixture_flowcell_name() -> str:
     return "HVKJCDRXX"
 
 
-@pytest.fixture(name="index_obj")
-def fixture_index_obj() -> Index:
-    return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
+@pytest.fixture(name="flowcell_full_name")
+def fixture_flowcell_full_name() -> str:
+    return "201203_A00689_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="demultiplex_fixtures")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixtures"""
     return apps_dir / "demultiplexing"
+
+
+@pytest.fixture(name="demux_run_dir")
+def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flowcells ready for demultiplexing"""
+    return demultiplex_fixtures / "flowcell_runs"
+
+
+@pytest.fixture(name="index_obj")
+def fixture_index_obj() -> Index:
+    return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
 @pytest.fixture(name="raw_samples_dir")
@@ -32,21 +43,15 @@ def fixture_raw_samples_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture(name="novaseq_dir")
-def fixture_novaseq_dir(demultiplex_fixtures: Path) -> Path:
+def fixture_novaseq_dir(demux_run_dir: Path, flowcell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
-    return demultiplex_fixtures / "201203_A00689_0200_AHVKJCDRXX"
+    return demux_run_dir / flowcell_full_name
 
 
 @pytest.fixture(name="hiseq_dir")
 def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return demultiplex_fixtures / "hiseq_run"
-
-
-@pytest.fixture(name="project_log")
-def fixture_project_log(novaseq_dir: Path) -> Path:
-    """Return the path to a project log"""
-    return novaseq_dir / "projectlog.20210403115002.log"
 
 
 @pytest.fixture(name="unknown_run_parameters")
