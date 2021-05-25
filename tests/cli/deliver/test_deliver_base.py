@@ -102,6 +102,3 @@ def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers):
 
     # THEN assert that files are delivered
     assert "Delivering files to customer inbox on hasta" in caplog.text
-
-    # THEN assert that files would have been concatenated if not dry run
-    assert "Concatenation is needed, but will be skipped since this is a dry-run" in caplog.text

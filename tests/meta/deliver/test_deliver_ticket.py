@@ -1,8 +1,9 @@
 """Tests for the deliver ticket command"""
+from pathlib import Path
+
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
-
 from cg.store import Store
 
 
@@ -26,7 +27,7 @@ def test_get_inbox_path(cg_context: CGConfig, helpers, mocker):
     inbox = deliver_ticket_api.get_inbox_path(ticket_id=123456)
 
     # THEN a path is returned for cust000 with the folder 123456 in the inbox
-    assert inbox.endswith("/cust000/inbox/123456/")
+    assert str(inbox).endswith("/cust000/inbox/123456")
 
 
 def test_check_if_upload_is_needed(cg_context: CGConfig, mocker):
@@ -36,8 +37,8 @@ def test_check_if_upload_is_needed(cg_context: CGConfig, mocker):
 
     # GIVEN the customer inbox
     mocker.patch.object(DeliverTicketAPI, "get_inbox_path")
-    DeliverTicketAPI.get_inbox_path.return_value = (
-        "/P47h/tH47/iMp0551bLy/cAn/eX1s7/a9R8wD72Jf0Vw/dD6WfF2Fdb91/"
+    DeliverTicketAPI.get_inbox_path.return_value = Path(
+        "th155h0uLdC3R7aNlyNo7eX157f0RsuReaNdIfiTd03St3n0Mg"
     )
 
     # WHEN running check_if_upload_is_needed
@@ -54,7 +55,7 @@ def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker):
 
     # GIVEN the customer inbox
     mocker.patch.object(DeliverTicketAPI, "get_inbox_path")
-    DeliverTicketAPI.get_inbox_path.return_value = "/"
+    DeliverTicketAPI.get_inbox_path.return_value = Path("/")
 
     # WHEN running check_if_upload_is_needed
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=123456)

@@ -61,7 +61,14 @@ class DeliverTicketAPI(MetaAPI):
     ) -> Path:
         fastq_file_name = str(os.path.basename(dir_name)) + "_" + str(read_direction) + ".fastq.gz"
         if date:
-            fastq_file_name = date + "_" + str(os.path.basename(dir_name)) + "_" + str(read_direction) + ".fastq.gz"
+            fastq_file_name = (
+                date
+                + "_"
+                + str(os.path.basename(dir_name))
+                + "_"
+                + str(read_direction)
+                + ".fastq.gz"
+            )
         output = dir_path / fastq_file_name
         return output
 
@@ -96,9 +103,7 @@ class DeliverTicketAPI(MetaAPI):
                 LOG.info("Removing file: %s" % (file))
                 os.remove(file)
             else:
-                LOG.warning(
-                    "WARNING %s only got 1 inode, file will not be removed" % (file)
-                )
+                LOG.warning("WARNING %s only got 1 inode, file will not be removed" % (file))
 
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
@@ -116,7 +121,9 @@ class DeliverTicketAPI(MetaAPI):
             if not os.path.isdir(dir_path):
                 continue
             for read_direction in [1, 2]:
-                same_direction: list = self.get_current_read_direction(dir_path=dir_path, read_direction=read_direction)
+                same_direction: list = self.get_current_read_direction(
+                    dir_path=dir_path, read_direction=read_direction
+                )
                 total_size: int = self.get_total_size(files=same_direction)
                 date: str = self.generate_date_tag(ticket_id=ticket_id)
                 output: Path = self.generate_output_filename(
