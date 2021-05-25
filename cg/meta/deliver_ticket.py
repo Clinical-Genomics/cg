@@ -59,9 +59,9 @@ class DeliverTicketAPI(MetaAPI):
     def generate_output_filename(
         self, dir_path: Path, date: str, dir_name: Path, read_direction: int
     ) -> Path:
-        fastq_file_name = str(dir_name) + "_" + str(read_direction) + ".fastq.gz"
+        fastq_file_name = str(os.path.basename(dir_name)) + "_" + str(read_direction) + ".fastq.gz"
         if date:
-            fastq_file_name = date + "_" + str(dir_name) + "_" + str(read_direction) + ".fastq.gz"
+            fastq_file_name = date + "_" + str(os.path.basename(dir_name)) + "_" + str(read_direction) + ".fastq.gz"
         output = dir_path / fastq_file_name
         return output
 
