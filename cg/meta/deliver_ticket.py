@@ -82,6 +82,24 @@ class DeliverTicketAPI(MetaAPI):
             total_size = total_size + Path(file).stat().st_size
         return total_size
 
+    def concatenate_same_read_direction(self, reads: list, output: Path) -> None:
+        with open(output, "wb") as write_file_obj:
+            for file in reads:
+                with open(file, "rb") as file_descriptor:
+                    shutil.copyfileobj(file_descriptor, write_file_obj)
+
+    def remove_files_with_less_than_one_inode(self, reads: list) -> None:
+        for file in reads:
+            inode_check_cmd = "stat -c %h " + file
+            n_inodes = subprocess.getoutput(inode_check_cmd)
+            if int(n_inodes) > 1:
+                LOG.info("Removing file: %s" % (file))
+                os.remove(file)
+            else:
+                LOG.warning(
+                    "WARNING %s only got 1 inode, file will not be removed" % (file)
+                )
+
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
         if not customer_inbox.exists() and dry_run:
@@ -110,28 +128,18 @@ class DeliverTicketAPI(MetaAPI):
                             "Dry run activated, %s will not be appended to %s" % (file, output)
                         )
                 else:
-                    with open(output, "wb") as write_file_obj:
-                        for file in same_direction:
-                            with open(file, "rb") as file_descriptor:
-                                shutil.copyfileobj(file_descriptor, write_file_obj)
+                    LOG.info("Concatenating sample: %s", str(os.path.basename(dir_name)))
+                    self.concatenate_same_read_direction(reads=same_direction, output=output)
                 if not dry_run:
                     concatenated_size = Path(output).stat().st_size
                     if total_size == concatenated_size:
                         LOG.info(
                             "QC PASSED: Total size for files used in concatenation match the size of the concatenated file"
                         )
-                        for file in same_direction:
-                            inode_check_cmd = "stat -c %h " + file
-                            n_inodes = subprocess.getoutput(inode_check_cmd)
-                            if int(n_inodes) > 1:
-                                LOG.info("Removing file: %s" % (file))
-                                os.remove(file)
-                            else:
-                                LOG.warning(
-                                    "WARNING %s only got 1 inode, file will not be removed" % (file)
-                                )
+                        self.remove_files_with_less_than_one_inode(reads=same_direction)
                     else:
                         LOG.warning("WARNING data lost in concatenation")
+                        raise CgError()
 
     def get_app_tag(self, samples: list) -> str:
         app_tag = samples[0].application_version.application.tag
