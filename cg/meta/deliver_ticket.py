@@ -22,20 +22,18 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: str = config.delivery_path
 
-    def get_all_cases_from_ticket(self, ticket_id: int) -> list:
+    def get_all_cases_from_ticket(self, ticket_id: int) -> List[models.Family]:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         return cases
 
-    def get_inbox_path(self, ticket_id: int) -> str:
-        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+    def get_inbox_path(self, ticket_id: int) -> Path:
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
-            LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
+            LOG.warning("The customer id was not identified since no cases for ticket_id %s was found", ticket_id)
             raise CgError()
 
         customer_id: str = cases[0].customer.internal_id
-        customer_inbox: str = (
-            Path(self.delivery_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
-        )
+        customer_inbox = Path(self.delivery_path, customer_id, "inbox", str(ticket_id))
         return customer_inbox
 
     def check_if_upload_is_needed(self, ticket_id: int) -> bool:
