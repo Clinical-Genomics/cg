@@ -78,7 +78,7 @@ class NiptUploadAPI:
         parameters: list = [
             f"sftp://{self.sftp_user}:{self.sftp_password}@{self.sftp_host}",
             "-e",
-            f'"cd SciLife_Till_StarLims; put {results_file}; bye"',
+            f"cd SciLife_Till_StarLims; put {results_file}; bye",
         ]
 
         self.process.run_command(parameters=parameters, dry_run=self.dry_run)
