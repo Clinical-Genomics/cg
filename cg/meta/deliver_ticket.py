@@ -65,6 +65,23 @@ class DeliverTicketAPI(MetaAPI):
         output = dir_path / fastq_file_name
         return output
 
+    def get_current_read_direction(self, dir_path: Path, read_direction: int) -> list:
+        same_direction = []
+        for file in os.listdir(dir_path):
+            abs_path_file = dir_path / file
+            direction_string = ".+_R" + str(read_direction) + "_[0-9]+.fastq.gz"
+            direction_pattern = re.compile(direction_string)
+            if direction_pattern.match(str(abs_path_file)):
+                same_direction.append(os.path.abspath(abs_path_file))
+        same_direction.sort()
+        return same_direction
+
+    def get_total_size(self, files: list) -> int:
+        total_size = 0
+        for file in files:
+            total_size = total_size + Path(file).stat().st_size
+        return total_size
+
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
         if not customer_inbox.exists() and dry_run:
@@ -81,16 +98,8 @@ class DeliverTicketAPI(MetaAPI):
             if not os.path.isdir(dir_path):
                 continue
             for read_direction in [1, 2]:
-                same_direction = []
-                total_size = 0
-                for file in os.listdir(dir_path):
-                    abs_path_file = dir_path / file
-                    direction_string = ".+_R" + str(read_direction) + "_[0-9]+.fastq.gz"
-                    direction_pattern = re.compile(direction_string)
-                    if direction_pattern.match(str(abs_path_file)):
-                        same_direction.append(os.path.abspath(abs_path_file))
-                        total_size = total_size + Path(abs_path_file).stat().st_size
-                same_direction.sort()
+                same_direction: list = self.get_current_read_direction(dir_path=dir_path, read_direction=read_direction)
+                total_size: int = self.get_total_size(files=same_direction)
                 date: str = self.generate_date_tag(ticket_id=ticket_id)
                 output: Path = self.generate_output_filename(
                     dir_path=dir_path, date=date, dir_name=dir_name, read_direction=read_direction
