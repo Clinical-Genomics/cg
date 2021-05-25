@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Iterable, List, Optional
 
+import paramiko
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError
@@ -24,6 +25,8 @@ class NiptUploadAPI:
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
+        self.port = config.fluffy.sftp.port
+        self.remote_path = config.fluffy.sftp.remotepath
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
@@ -74,19 +77,18 @@ class NiptUploadAPI:
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
-
-        parameters: list = [
-            f"sftp://{self.sftp_user}:{self.sftp_password}@{self.sftp_host}",
-            "-e",
-            f"cd SciLife_Till_StarLims; put {results_file}; bye",
-        ]
-
-        self.process.run_command(parameters=parameters, dry_run=self.dry_run)
-
-        if self.process.stderr:
-            LOG.info(f"NIPT Upload stderr:\n{self.process.stderr}")
-        if self.process.stdout:
-            LOG.info(f"NIPT Upload stdout:\n{self.process.stdout}")
+        LOG.info("Instantiating paramiko transport")
+        transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.port))
+        LOG.info(f"Connecting to SFTP server {self.sftp_host}")
+        transport.connect(username=self.sftp_user, password=self.sftp_password)
+        sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
+        LOG.info(f"Uploading file {str(results_file)} to remote path {self.remote_path}")
+        sftp.put(localpath=str(results_file), remotepath=self.remote_path)
+        LOG.info(f"Closing connection to SFTP server {self.sftp_host}")
+        sftp.close()
+        LOG.info("Closing transport")
+        transport.close()
+        LOG.info("")
 
     def update_analysis_uploaded_at_date(self, case_id: str) -> models.Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
