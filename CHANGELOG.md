@@ -8,9 +8,13 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+## [21.9.3]
+### Fixed
+- bugfix
+
 ## [21.9.2]
 ### Fixed
-- bugfix - deleting acidentaly inserted authentication section
+- gisaid -fixing bug accidentally inserted in the previous pr.
 
 ## [21.9.1]
 ### Fixed
