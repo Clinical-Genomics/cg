@@ -8,7 +8,11 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [x.x.x]
+## [21.9.2]
+### Fixed
+- bugfix - deleting acidentaly inserted authentication section
+
+## [21.9.1]
 ### Fixed
 - gisaid get region and lab from sample udfs
 - gisaid adjusting for new fasta consensus file in housekeeper
