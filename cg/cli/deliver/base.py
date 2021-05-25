@@ -91,14 +91,15 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 
 @deliver.command(name="concatenate")
 @click.argument("ticket_id", type=int, required=True)
+@click.option("--dry-run", is_flag=True)
 @click.pass_context
-def concatenate(context: click.Context, ticket_id: int):
+def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
     """The fastq files in the folder generated using "cg deliver analysis"
     will be concatenated into one forward and one reverse fastq file.
     """
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-    deliver_ticket_api.concatenate(ticket_id=ticket_id)
+    deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
 
 
 @deliver.command(name="ticket")
@@ -136,8 +137,6 @@ def deliver_ticket(
     is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(
         ticket_id=ticket_id
     )
-    if is_concatenation_needed and delivery_type == "fastq" and not dry_run:
-        context.invoke(concatenate, ticket_id=ticket_id)
-    if is_concatenation_needed and delivery_type == "fastq" and dry_run:
-        LOG.info("Concatenation is needed, but will be skipped since this is a dry-run")
+    if is_concatenation_needed and delivery_type == "fastq":
+        context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
     context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)

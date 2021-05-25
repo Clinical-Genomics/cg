@@ -55,7 +55,7 @@ class DeliverTicketAPI(MetaAPI):
         split_date = date.split(" ")
         return split_date[0]
 
-    def concatenate(self, ticket_id: int) -> None:
+    def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
         for dir_name in os.listdir(customer_inbox):
             dir_path = os.path.join(customer_inbox, dir_name)
@@ -89,10 +89,17 @@ class DeliverTicketAPI(MetaAPI):
                     )
                 else:
                     output = dir_path + "/" + dir_name + "_" + str(read_direction) + ".fastq.gz"
-                with open(output, "wb") as write_file_obj:
+                if dry_run:
                     for file in same_direction:
-                        with open(file, "rb") as file_descriptor:
-                            shutil.copyfileobj(file_descriptor, write_file_obj)
+                        LOG.info(
+                            "Dry run activated, %s will not be appended to %s" % (file, output)
+                        )
+                        continue
+                else:
+                    with open(output, "wb") as write_file_obj:
+                        for file in same_direction:
+                            with open(file, "rb") as file_descriptor:
+                                shutil.copyfileobj(file_descriptor, write_file_obj)
                 concatenated_size = Path(output).stat().st_size
                 if total_size == concatenated_size:
                     LOG.info(
