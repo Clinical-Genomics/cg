@@ -69,9 +69,14 @@ class DeliverTicketAPI(MetaAPI):
             output = dir_path + "/" + dir_name + "_" + str(read_direction) + ".fastq.gz"
         return output
 
-
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
+        if not os.path.exists(customer_inbox) and dry_run:
+            LOG.info("Dry run, nothing will be concatenated in: %s", customer_inbox)
+            return
+        if not os.path.exists(customer_inbox):
+            LOG.info("Nothing to concatenate in: %s", customer_inbox)
+            return
         for dir_name in os.listdir(customer_inbox):
             dir_path = os.path.join(customer_inbox, dir_name)
             if len(os.listdir(dir_path)) == 0:
