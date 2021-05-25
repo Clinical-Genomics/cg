@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
