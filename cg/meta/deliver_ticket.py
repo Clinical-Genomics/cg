@@ -55,6 +55,23 @@ class DeliverTicketAPI(MetaAPI):
         split_date = date.split(" ")
         return split_date[0]
 
+    def generate_output_filename(self, dir_path: str, date: str, dir_name: str, read_direction: int) -> str:
+        if date:
+            output = (
+                    dir_path
+                    + "/"
+                    + date
+                    + "_"
+                    + dir_name
+                    + "_"
+                    + str(read_direction)
+                    + ".fastq.gz"
+            )
+        else:
+            output = dir_path + "/" + dir_name + "_" + str(read_direction) + ".fastq.gz"
+        return output
+
+
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
         for dir_name in os.listdir(customer_inbox):
@@ -76,47 +93,35 @@ class DeliverTicketAPI(MetaAPI):
                         total_size = total_size + Path(abs_path_file).stat().st_size
                 same_direction.sort()
                 date = self.generate_date_tag(ticket_id=ticket_id)
-                if date:
-                    output = (
-                        dir_path
-                        + "/"
-                        + date
-                        + "_"
-                        + dir_name
-                        + "_"
-                        + str(read_direction)
-                        + ".fastq.gz"
-                    )
-                else:
-                    output = dir_path + "/" + dir_name + "_" + str(read_direction) + ".fastq.gz"
+                output = self.generate_output_filename(dir_path=dir_path, date=date, dir_name=dir_name, read_direction=read_direction)
                 if dry_run:
                     for file in same_direction:
                         LOG.info(
                             "Dry run activated, %s will not be appended to %s" % (file, output)
                         )
-                        continue
                 else:
                     with open(output, "wb") as write_file_obj:
                         for file in same_direction:
                             with open(file, "rb") as file_descriptor:
                                 shutil.copyfileobj(file_descriptor, write_file_obj)
-                concatenated_size = Path(output).stat().st_size
-                if total_size == concatenated_size:
-                    LOG.info(
-                        "QC PASSED: Total size for files used in concatenation match the size of the concatenated file"
-                    )
-                    for file in same_direction:
-                        inode_check_cmd = "stat -c %h " + file
-                        n_inodes = subprocess.getoutput(inode_check_cmd)
-                        if int(n_inodes) > 1:
-                            LOG.info("Removing file: %s" % (file))
-                            os.remove(file)
-                        else:
-                            LOG.warning(
-                                "WARNING %s only got 1 inode, file will not be removed" % (file)
-                            )
-                else:
-                    LOG.warning("WARNING data lost in concatenation")
+                if not dry_run:
+                    concatenated_size = Path(output).stat().st_size
+                    if total_size == concatenated_size:
+                        LOG.info(
+                            "QC PASSED: Total size for files used in concatenation match the size of the concatenated file"
+                        )
+                        for file in same_direction:
+                            inode_check_cmd = "stat -c %h " + file
+                            n_inodes = subprocess.getoutput(inode_check_cmd)
+                            if int(n_inodes) > 1:
+                                LOG.info("Removing file: %s" % (file))
+                                os.remove(file)
+                            else:
+                                LOG.warning(
+                                    "WARNING %s only got 1 inode, file will not be removed" % (file)
+                                )
+                    else:
+                        LOG.warning("WARNING data lost in concatenation")
 
     def get_app_tag(self, samples: list) -> str:
         app_tag = samples[0].application_version.application.tag
