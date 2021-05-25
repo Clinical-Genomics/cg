@@ -65,6 +65,7 @@ class NiptUploadAPI:
 
     def get_all_upload_analyses(self) -> Iterable[models.Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
+
         latest_nipt_analyses = self.status_db.latest_analyses().filter(
             models.Analysis.pipeline == Pipeline.FLUFFY
         )
@@ -75,7 +76,7 @@ class NiptUploadAPI:
         """Upload the result file to the ftp server"""
 
         parameters: list = [
-            f"sftp://{self.sftp_user}:{self.sftp_password}" f"@{self.sftp_host}",
+            f"sftp://{self.sftp_user}:{self.sftp_password}@{self.sftp_host}",
             "-e",
             f'"cd SciLife_Till_StarLims; put {results_file}; bye"',
         ]
@@ -89,6 +90,7 @@ class NiptUploadAPI:
 
     def update_analysis_uploaded_at_date(self, case_id: str) -> models.Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
+
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
         analysis_obj.uploaded_at = dt.datetime.now()
