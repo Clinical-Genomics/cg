@@ -13,6 +13,10 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.9.0]
+### Added
+- Add Fluffy analysis results -> ftp upload functionality for cust002
+
 ## [21.8.3]
 ### Changed
 - Set memory allocation to 95G when demultiplexing on slurm 
