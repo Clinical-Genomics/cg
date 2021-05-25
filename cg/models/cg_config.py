@@ -126,8 +126,6 @@ class MicrosaltConfig(BaseModel):
 
 class GisaidConfig(CommonAppConfig):
     submitter: str
-    password: str
-    cid: str
 
 
 class ShippingConfig(CommonAppConfig):
