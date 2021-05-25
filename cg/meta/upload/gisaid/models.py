@@ -16,9 +16,6 @@ class UpploadFiles(BaseModel):
     fasta_file: Path
 
 
-#    class Config:
-
-
 class GisaidSample(BaseModel):
     family_id: str
     cg_lims_id: str
