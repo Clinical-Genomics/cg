@@ -29,7 +29,10 @@ class DeliverTicketAPI(MetaAPI):
     def get_inbox_path(self, ticket_id: int) -> Path:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
-            LOG.warning("The customer id was not identified since no cases for ticket_id %s was found", ticket_id)
+            LOG.warning(
+                "The customer id was not identified since no cases for ticket_id %s was found",
+                ticket_id,
+            )
             raise CgError()
 
         customer_id: str = cases[0].customer.internal_id
@@ -38,9 +41,9 @@ class DeliverTicketAPI(MetaAPI):
 
     def check_if_upload_is_needed(self, ticket_id: int) -> bool:
         is_upload_needed = True
-        customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
+        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
         LOG.info("Checking if path exist: %s", customer_inbox)
-        if os.path.exists(customer_inbox):
+        if customer_inbox.exists():
             LOG.info("Could find path: %s", customer_inbox)
             is_upload_needed = False
         else:
@@ -48,37 +51,30 @@ class DeliverTicketAPI(MetaAPI):
         return is_upload_needed
 
     def generate_date_tag(self, ticket_id: int) -> str:
-        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         date = str(cases[0].ordered_at)
         split_date = date.split(" ")
         return split_date[0]
 
-    def generate_output_filename(self, dir_path: str, date: str, dir_name: str, read_direction: int) -> str:
+    def generate_output_filename(
+        self, dir_path: Path, date: str, dir_name: Path, read_direction: int
+    ) -> Path:
+        fastq_file_name = str(dir_name) + "_" + str(read_direction) + ".fastq.gz"
         if date:
-            output = (
-                    dir_path
-                    + "/"
-                    + date
-                    + "_"
-                    + dir_name
-                    + "_"
-                    + str(read_direction)
-                    + ".fastq.gz"
-            )
-        else:
-            output = dir_path + "/" + dir_name + "_" + str(read_direction) + ".fastq.gz"
+            fastq_file_name = date + "_" + str(dir_name) + "_" + str(read_direction) + ".fastq.gz"
+        output = dir_path / fastq_file_name
         return output
 
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
-        customer_inbox = self.get_inbox_path(ticket_id=ticket_id)
-        if not os.path.exists(customer_inbox) and dry_run:
+        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
+        if not customer_inbox.exists() and dry_run:
             LOG.info("Dry run, nothing will be concatenated in: %s", customer_inbox)
             return
-        if not os.path.exists(customer_inbox):
-            LOG.info("Nothing to concatenate in: %s", customer_inbox)
+        if not customer_inbox.exists():
+            LOG.info("The path %s do not exist, nothing will be concatenated", customer_inbox)
             return
-        for dir_name in os.listdir(customer_inbox):
-            dir_path = os.path.join(customer_inbox, dir_name)
+        for dir_name in customer_inbox.iterdir():
+            dir_path = customer_inbox / dir_name
             if len(os.listdir(dir_path)) == 0:
                 LOG.info("Empty folder found: %s", dir_path)
                 continue
@@ -88,15 +84,17 @@ class DeliverTicketAPI(MetaAPI):
                 same_direction = []
                 total_size = 0
                 for file in os.listdir(dir_path):
-                    abs_path_file = os.path.join(dir_path, file)
+                    abs_path_file = dir_path / file
                     direction_string = ".+_R" + str(read_direction) + "_[0-9]+.fastq.gz"
                     direction_pattern = re.compile(direction_string)
-                    if direction_pattern.match(abs_path_file):
+                    if direction_pattern.match(str(abs_path_file)):
                         same_direction.append(os.path.abspath(abs_path_file))
                         total_size = total_size + Path(abs_path_file).stat().st_size
                 same_direction.sort()
-                date = self.generate_date_tag(ticket_id=ticket_id)
-                output = self.generate_output_filename(dir_path=dir_path, date=date, dir_name=dir_name, read_direction=read_direction)
+                date: str = self.generate_date_tag(ticket_id=ticket_id)
+                output: Path = self.generate_output_filename(
+                    dir_path=dir_path, date=date, dir_name=dir_name, read_direction=read_direction
+                )
                 if dry_run:
                     for file in same_direction:
                         LOG.info(
@@ -131,7 +129,7 @@ class DeliverTicketAPI(MetaAPI):
         return app_tag
 
     def check_if_concatenation_is_needed(self, ticket_id: int) -> bool:
-        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         case_id = cases[0].internal_id
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
