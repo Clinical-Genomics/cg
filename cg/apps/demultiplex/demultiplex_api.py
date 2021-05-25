@@ -89,12 +89,21 @@ class DemultiplexingAPI:
         """Create the path to where the demuliplexed result should be produced"""
         return self.out_dir / flowcell.path.name
 
+    def unaligned_dir_path(self, flowcell: Flowcell) -> Path:
+        """Create the path to where the demuliplexed result should be produced"""
+        return self.flowcell_out_dir_path(flowcell) / "Unaligned"
+
     def demultiplexing_completed_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
         return self.flowcell_out_dir_path(flowcell) / "demuxcomplete.txt"
 
     def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
+        LOG.info("Check if demultiplexing is ready for %s", flowcell.path)
+        logfile: Path = self.get_logfile(flowcell)
+        if not logfile.exists():
+            LOG.warning("Could not find logfile!")
+            return False
         return self.demultiplexing_completed_path(flowcell).exists()
 
     def is_demultiplexing_ongoing(self, flowcell: Flowcell) -> bool:
@@ -155,7 +164,7 @@ class DemultiplexingAPI:
         """Start demultiplexing for a flowcell"""
         self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
         demux_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
-        unaligned_dir: Path = demux_dir / "Unaligned"
+        unaligned_dir: Path = self.unaligned_dir_path(flowcell=flowcell)
         LOG.info("Demultiplexing to %s", unaligned_dir)
         if not self.dry_run:
             LOG.info("Creating demux dir %s", unaligned_dir)
@@ -178,7 +187,7 @@ class DemultiplexingAPI:
                 job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
                 number_tasks=18,
-                memory=50,
+                memory=95,
                 log_dir=log_path.parent.as_posix(),
                 email=self.mail,
                 hours=36,

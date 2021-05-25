@@ -1,10 +1,9 @@
 """Tests for running the demultiplex flowcell command"""
 import logging
 from pathlib import Path
-from typing import Dict
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.demux import demultiplex_flowcell
+from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flowcell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from click import testing
@@ -70,6 +69,32 @@ def test_demultiplex_flowcell(
     assert unaligned_dir.exists()
     # THEN assert that the sbatch script was created
     assert demux_api.demultiplex_sbatch_path(flowcell).exists()
+
+
+def test_demultiplex_all(
+    cli_runner: testing.CliRunner,
+    demultiplex_context: CGConfig,
+    demultiplex_ready_flowcell: Path,
+    caplog,
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
+    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    flowcell_object: Flowcell = Flowcell(flowcell_path=demultiplex_ready_flowcell)
+
+    assert demux_api.run_dir == demultiplex_ready_flowcell.parent
+
+    # WHEN running the demultiplex all command
+    result: testing.Result = cli_runner.invoke(
+        demultiplex_all, ["--dry-run"], obj=demultiplex_context
+    )
+
+    # THEN assert it exits without problems
+    assert result.exit_code == 0
+    # THEN assert it found the directory
+    assert "Found directory" in caplog.text
+    # THEN assert it found a flowcell that is ready for demultiplexing
+    assert f"Flowcell {flowcell_object.flowcell_id} is ready for demultiplexing" in caplog.text
 
 
 def test_start_demultiplexing_when_already_completed(

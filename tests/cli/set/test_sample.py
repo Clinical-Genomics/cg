@@ -112,6 +112,27 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
+@pytest.mark.parametrize("new_value", ["false", "true", "True", "False"])
+def test_set_boolean_sample(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, new_value, helpers
+):
+    # GIVEN a database with a sample
+
+    sample_obj = helpers.add_sample(base_store, gender="female")
+    value: bool = new_value.lower() == "true"
+
+    # WHEN setting key on sample to new_value
+    result = cli_runner.invoke(
+        sample,
+        [sample_obj.internal_id, "-kv", "no_invoice", new_value, "-y", "--skip-lims"],
+        obj=base_context,
+    )
+
+    # THEN then it should have new_value as attribute key on the sample
+    assert result.exit_code == SUCCESS
+    assert getattr(sample_obj, "no_invoice") == value
+
+
 def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample
 

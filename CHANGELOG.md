@@ -17,6 +17,99 @@ Try to use the following format:
 ### Changed
 ### Fixed
 
+## [21.9.0]
+### Added
+- Add Fluffy analysis results -> ftp upload functionality for cust002
+
+## [21.8.3]
+### Changed
+- Set memory allocation to 95G when demultiplexing on slurm 
+
+## [21.8.2]
+### Changed
+- Add batch-ref flag to command string for fluffy analyses
+
+
+## [21.8.1]
+### Changed
+- Changed so that barcode report is written to the correct path
+
+## [21.8.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
+## [21.7.2]
+### Added
+- Copy sample sheet to demuxed flowcell dir
+- Create `copycomplete.txt` after demux post-processing is done
+
+## [21.7.1]
+### Fixed
+- Fixed bug when checking if flowcell projects has been renamed
+
+## [21.7.0]
+### Added
+- Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
+
+## [21.6.9]
+### Changed
+- Check if versions are larger than known version when determining reverse complement in demultiplexing
+
+## [21.6.8]
+### Changed
+- Validate that flowcell name is correct when demultiplexing
+
+## [21.6.7]
+### Fixed
+- Fixed linking sample files from case bundle
+
+## [21.6.6]
+### Changed
+- Check that logfile exists before doing demux post-processing
+
+## [21.6.5]
+### Changed
+- Check if Unaligned dir exists before doing demux post-processing
+### Fixed
+- Fix bugs in create sample sheet all command
+
+## [21.6.4]
+### Fixed
+- Fix so that delivery will not break if fastq bundle is missing when delivering results with ticket id
+
+## [21.6.3]
+### Fixed
+- Fix bug in sqlalchemy models
+
+## [21.6.2]
+### Fixed
+- If a boolean value is passed to `cg set sample -kv <key> <value>` a boolean is passed to the db
+
+## [21.6.1]
+### Fixed
+- Fix bug in mip and balsamic crontab
+
+## [21.6.0]
+### Added
+- Functionality to do demultiplexing post processing from CG
+
+## [21.5.7]
+### Fixed
+- Set status to analyze when resolving decompression
+
+## [21.5.6]
+### Fixed
+- Use only the first item from region and lab code values in mutant workflow.
+
+## [21.5.5]
+### Fixed
+- Fix tag to deliver correct mutant result files to KS inbox
+
+## [21.5.4]
+### Fixed
+- Block orders unintentionally reusing case names 
 
 ## [21.5.3]
 ### Fixed
@@ -25,7 +118,6 @@ Try to use the following format:
 ## [21.5.2]
 ### Fixed
 - Fixed content of fluffy samplesheet according to customer specification
-
 
 ## [21.5.1]
 ### Fixed
