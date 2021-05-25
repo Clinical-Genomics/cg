@@ -83,7 +83,7 @@ class NiptUploadAPI:
         transport.connect(username=self.sftp_user, password=self.sftp_password)
         sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
         LOG.info(f"Uploading file {str(results_file)} to remote path {self.remote_path}")
-        sftp.put(localpath=str(results_file), remotepath=self.remote_path)
+        sftp.put(localpath=str(results_file), remotepath=self.remote_path + str(results_file))
         LOG.info(f"Closing connection to SFTP server {self.sftp_host}")
         sftp.close()
         LOG.info("Closing transport")
