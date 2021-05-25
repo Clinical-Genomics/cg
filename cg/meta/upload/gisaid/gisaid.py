@@ -26,8 +26,6 @@ class GisaidAPI:
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api
         self.status_db: Store = config.status_db
-        self.cid: str = config.gisaid.cid
-        self.password: str = config.gisaid.password
         self.gisaid_submitter: str = config.gisaid.submitter
         self.gisaid_binary: str = config.gisaid.binary_path
         self.process = Process(binary=self.gisaid_binary)
@@ -151,12 +149,6 @@ class GisaidAPI:
             LOG.info(f"gisaid stderr:\n{self.process.stderr}")
         if self.process.stdout:
             LOG.info(f"gisaid stdout:\n{self.process.stdout}")
-
-    def auth(self):
-        load_call: list = ["CoV", "authenticate", "--cid", self.cid]
-        self.process.run_command(parameters=load_call)
-        self.process.run_command(parameters=[self.gisaid_submitter])
-        self.process.run_command(parameters=[self.password])
 
     def __str__(self):
         return f"GisaidAPI(dry_run: {self.dry_run})"
