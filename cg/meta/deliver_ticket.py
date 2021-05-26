@@ -47,7 +47,7 @@ class DeliverTicketAPI(MetaAPI):
 
     def generate_date_tag(self, ticket_id: int) -> datetime.datetime:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
-        date: datetime.datetime = datetime.datetime(cases[0].ordered_at)
+        date: datetime.datetime = cases[0].ordered_at
         return date
 
     def generate_output_filename(
@@ -55,7 +55,7 @@ class DeliverTicketAPI(MetaAPI):
     ) -> Path:
         base_name = Path("_".join([dir_name.name, str(read_direction)]))
         if date:
-            base_name = Path("_".join([str(date), base_name]))
+            base_name = Path("_".join([str(date.strftime("%y%m%d")), base_name]))
         fastq_file_name = base_name.with_suffix(".fastq.gz")
         output: Path = dir_name / fastq_file_name
         return output
