@@ -46,9 +46,6 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> Query:
         """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
         Optionally fetch those cases finished before and/or after a specified date"""
-        # records = self.Family.query.join(models.Family.analyses).filter(
-        #     models.Analysis.uploaded_to_vogue_at.is_(None)
-        # )
         records = self.latest_analyses().filter(models.Analysis.uploaded_to_vogue_at.is_(None))
 
         if completed_after:
