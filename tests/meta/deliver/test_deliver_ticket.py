@@ -45,7 +45,7 @@ def test_check_if_upload_is_needed(cg_context: CGConfig, mocker):
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=123456)
 
     # THEN it turns out that upload is needed
-    assert is_upload_needed == True
+    assert is_upload_needed is True
 
 
 def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker):
@@ -61,7 +61,7 @@ def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker):
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=123456)
 
     # THEN it turns out that upload is not needed
-    assert is_upload_needed == False
+    assert is_upload_needed is False
 
 
 def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_today):
@@ -130,7 +130,7 @@ def test_check_if_concatenation_is_needed(
     )
 
     # THEN concatenation is not needed
-    assert is_concatenation_needed == False
+    assert is_concatenation_needed is False
 
 
 def test_check_if_concatenation_is_needed_part_deux(
@@ -156,4 +156,4 @@ def test_check_if_concatenation_is_needed_part_deux(
     )
 
     # THEN concatenation is needed
-    assert is_concatenation_needed == True
+    assert is_concatenation_needed is True
