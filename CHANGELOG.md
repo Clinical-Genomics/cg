@@ -8,8 +8,24 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [x.x.x]
+## [21.10.0]
 ### Added
+- Support for showing demultiplexing in CiGRID
+
+## [21.9.3]
+### Fixed
+- bugfix
+
+## [21.9.2]
+### Fixed
+- gisaid -fixing bug accidentally inserted in the previous pr.
+
+## [21.9.1]
+### Fixed
+- gisaid get region and lab from sample udfs
+- gisaid adjusting for new fasta consensus file in housekeeper
+- gisaid removing failing tests 
+
 ### Changed
 ### Fixed
 
