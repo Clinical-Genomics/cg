@@ -47,7 +47,7 @@ class DeliverTicketAPI(MetaAPI):
 
     def generate_date_tag(self, ticket_id: int) -> datetime.datetime:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
-        date: datetime.datetime = datetime.datetime.strptime(str(cases[0].ordered_at), "%y%m%d")
+        date: datetime.datetime = datetime.datetime(cases[0].ordered_at)
         return date
 
     def generate_output_filename(
