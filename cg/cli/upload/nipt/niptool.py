@@ -26,14 +26,7 @@ def batch(context: CGConfig, case_id: str, dry_run: bool):
 
     nipt_upload_api = NiptUploadAPI(context)
 
-    nipt_upload_api.upload_to_niptool_database(
-        results_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/summary.csv",
-        multiqc_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/multiqc_report.html",
-        segmental_calls_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/22c-2021-00355-05.WCXpredict_aberrations.filt.bed",
-    )
-
-
-"""   try:
+    try:
         hk_results_file: str = nipt_upload_api.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "metrics"]
         )
@@ -57,4 +50,9 @@ def batch(context: CGConfig, case_id: str, dry_run: bool):
 
     except Exception as error:
         LOG.error(f"{error}")
-"""
+
+    """nipt_upload_api.upload_to_niptool_database(
+        results_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/summary.csv",
+        multiqc_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/multiqc_report.html",
+        segmental_calls_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/22c-2021-00355-05.WCXpredict_aberrations.filt.bed",
+    )"""

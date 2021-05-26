@@ -1,1 +1,0 @@
-from .nipt import NiptUploadAPI
