@@ -189,8 +189,8 @@ class CGConfig(BaseModel):
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
-    fluffy: FluffyConfig = None
     niptool_internal: NIPToolConfig = None
+    fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")

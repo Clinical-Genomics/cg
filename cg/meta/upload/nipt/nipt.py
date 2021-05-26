@@ -22,6 +22,7 @@ class NiptUploadAPI:
     RESULT_FILE_TAGS = ["nipt", "metrics"]
 
     def __init__(self, config: CGConfig):
+        print(dir(config))
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
