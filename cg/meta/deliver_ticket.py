@@ -73,7 +73,7 @@ class DeliverTicketAPI(MetaAPI):
     def get_total_size(self, files: list) -> int:
         total_size = 0
         for file in files:
-            total_size = total_size + file.stat().st_size
+            total_size = total_size + Path(file).stat().st_size
         return total_size
 
     def concatenate_same_read_direction(self, reads: list, output: Path) -> None:
