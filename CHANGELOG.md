@@ -8,6 +8,10 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+## [21.10.0]
+### Added
+- Support for showing demultiplexing in CiGRID
+
 ## [21.9.3]
 ### Fixed
 - bugfix
