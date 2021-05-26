@@ -4,14 +4,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
-from cgmodels.cg.constants import Pipeline
-
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch
+from cgmodels.cg.constants import Pipeline
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
@@ -183,6 +182,8 @@ class DemultiplexingAPI:
 
     def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flowcell: Flowcell):
         """Add demultiplexing entry to trailblazer"""
+        if self.dry_run:
+            return
         self.write_trailblazer_config(
             content=self.get_trailblazer_config(slurm_job_id=slurm_job_id),
             file_path=flowcell.trailblazer_config_path,
