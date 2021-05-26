@@ -87,7 +87,7 @@ class DeliverTicketAPI(MetaAPI):
             n_inodes: int = os.stat(file).st_nlink
             if int(n_inodes) > 1:
                 LOG.info("Removing file: %s", file)
-                file.unlink()
+                Path(file).unlink()
             else:
                 LOG.warning("WARNING %s only got 1 inode, file will not be removed", file)
 
