@@ -2,10 +2,10 @@
     Module for mutacc-auto API
 """
 
-import logging
-import subprocess
 import copy
 import json
+import logging
+import subprocess
 
 LOG = logging.getLogger(__name__)
 
@@ -18,9 +18,9 @@ class MutaccAutoAPI:
 
     def __init__(self, config: dict):
 
-        self.mutacc_auto_config = config["mutacc-auto"]["config_path"]
-        self.mutacc_auto_binary = config["mutacc-auto"]["binary_path"]
-        self.mutacc_padding = config["mutacc-auto"]["padding"]
+        self.mutacc_auto_config = config["mutacc_auto"]["config_path"]
+        self.mutacc_auto_binary = config["mutacc_auto"]["binary_path"]
+        self.mutacc_padding = config["mutacc_auto"]["padding"]
         self.base_call = [self.mutacc_auto_binary, "--config-file", self.mutacc_auto_config]
 
     def extract_reads(self, case: dict, variants: dict):
@@ -38,7 +38,7 @@ class MutaccAutoAPI:
         extract_call = copy.deepcopy(self.base_call)
 
         def json_default_decoder(obj):
-            """ decode to str if object is not serializable"""
+            """decode to str if object is not serializable"""
             return str(obj)
 
         extract_call.extend(

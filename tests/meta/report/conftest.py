@@ -1,56 +1,29 @@
 import json
 from datetime import datetime, timedelta
+from typing import List
 
 import pytest
-
-from cg.apps.lims import LimsAPI
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
+from tests.mocks.limsmock import MockLimsAPI
 
 
 @pytest.fixture
-def lims_family():
+def lims_family() -> dict:
     return json.load(open("tests/fixtures/report/lims_family.json"))
 
 
 @pytest.fixture
-def lims_samples(lims_family):
+def lims_samples(lims_family: dict) -> List[dict]:
     return lims_family["samples"]
 
 
 @pytest.fixture
-def report_samples(lims_family):
+def report_samples(lims_family: List[dict]):
     for sample in lims_family["samples"]:
         sample["internal_id"] = sample["id"]
 
     return lims_family["samples"]
-
-
-class MockLims(LimsAPI):
-    def __init__(self, samples):
-        self._samples = samples
-
-    def get_prep_method(self, lims_id: str) -> str:
-        return (
-            "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free "
-            ""
-            "DNA)"
-        )
-
-    def get_sequencing_method(self, lims_id: str) -> str:
-        return "CG002 - Cluster Generation (HiSeq X)"
-
-    def get_delivery_method(self, lims_id: str) -> str:
-        return "CG002 - Delivery"
-
-    def sample(self, lims_id: str):
-        """Fetch information about a sample."""
-
-        for sample in self._samples:
-            if sample.get("id") == lims_id:
-                return sample
-
-        return None
 
 
 class MockFile:
@@ -96,7 +69,7 @@ class MockPath:
 
 
 class MockAnalysis:
-    def panel(self, family_obj) -> [str]:
+    def panel(self, case_obj) -> [str]:
         """Create the aggregated panel file."""
         return [""]
 
@@ -130,18 +103,6 @@ class MockLogger:
 
     def get_warnings(self) -> list:
         return self.warnings
-
-
-class MockYamlLoader:
-    def __init__(self):
-        self.open_file = None
-
-    def safe_load(self, open_file: str):
-        self.open_file = open_file
-        return "safely_loaded_file"
-
-    def get_open_file(self):
-        return self.open_file
 
 
 class MockDB(Store):
@@ -192,29 +153,27 @@ class MockScout:
 @pytest.fixture(scope="function")
 def report_api(report_store, lims_samples):
     db = MockDB(report_store)
-    lims = MockLims(lims_samples)
+    lims = MockLimsAPI(samples=lims_samples)
     chanjo = MockChanjo()
     analysis = MockAnalysis()
     scout = MockScout()
     logger = MockLogger()
-    yaml_loader = MockYamlLoader()
     path_tool = MockPath()
-    _report_api = ReportAPI(
+    return ReportAPI(
         lims_api=lims,
         store=db,
         chanjo_api=chanjo,
         analysis_api=analysis,
         scout_api=scout,
         logger=logger,
-        yaml_loader=yaml_loader,
         path_tool=path_tool,
     )
-    return _report_api
 
 
 @pytest.fixture(scope="function")
 def report_store(analysis_store, helpers):
     family = analysis_store.families()[0]
-    helpers.add_analysis(analysis_store, family)
-    helpers.add_analysis(analysis_store, family)
+    yesterday = datetime.now() - timedelta(days=1)
+    helpers.add_analysis(analysis_store, family, started_at=yesterday)
+    helpers.add_analysis(analysis_store, family, started_at=datetime.now())
     return analysis_store

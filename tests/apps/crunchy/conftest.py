@@ -6,43 +6,16 @@ from pathlib import Path
 from typing import List
 
 import pytest
-
-from cg.apps.crunchy.models import CrunchyFileSchema
 from cg.models import CompressionData
+from cg.utils import Process
+from cgmodels.crunchy.metadata import CrunchyMetadata
+from tests.mocks.process_mock import ProcessMock
 
 LOG = logging.getLogger(__name__)
 
 
-class MockProcess:
-    """Mock a process"""
-
-    def __init__(self, process_name: str):
-        """Inititalise mock"""
-        self.stderr = ""
-        self.stdout = ""
-        self.base_call = [process_name]
-        self.process_name = process_name
-
-    def run_command(self, parameters: List):
-        """Mock the run process method"""
-        command = copy.deepcopy(self.base_call)
-        if parameters:
-            command.extend(parameters)
-
-        LOG.info("Running command %s", " ".join(command))
-
-
-# File fixtures
-
-
-@pytest.fixture(scope="function", name="file_schema")
-def fixture_file_schema():
-    """Return a instance of the file schema that describes content of SPRING metadata"""
-    return CrunchyFileSchema()
-
-
 @pytest.fixture(name="real_spring_metadata_path")
-def fixture_real_spring_metadata_path(fixtures_dir):
+def fixture_real_spring_metadata_path(fixtures_dir) -> Path:
     """Return the path to a SPRING metadata file"""
     return fixtures_dir / "apps" / "crunchy" / "spring_metadata.json"
 
@@ -53,7 +26,7 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
     first_read = compression_object.fastq_first
     second_read = compression_object.fastq_second
     spring_path = compression_object.spring_path
-    metadata = [
+    return [
         {
             "path": str(first_read),
             "file": "first_read",
@@ -68,7 +41,12 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
         },
         {"path": str(spring_path), "file": "spring"},
     ]
-    return metadata
+
+
+@pytest.fixture(name="crunchy_metadata_object")
+def fixture_crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
+    """Return the parsed metadata"""
+    return CrunchyMetadata(files=spring_metadata)
 
 
 @pytest.fixture(scope="function", name="spring_metadata_file")
@@ -85,9 +63,11 @@ def fixture_spring_metadata_file(
 
 
 @pytest.fixture(scope="function", name="sbatch_process")
-def fixture_sbatch_process():
+def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object"""
-    return MockProcess("sbatch")
+    slurm_process = ProcessMock(binary="sbatch")
+    slurm_process.set_stdout(text=str(sbatch_job_number))
+    return slurm_process
 
 
 @pytest.fixture(scope="function", name="fastq_first_file")

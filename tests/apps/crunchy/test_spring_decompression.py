@@ -2,6 +2,7 @@
 import json
 import logging
 
+import pytest
 from cg.apps.crunchy import CrunchyAPI
 
 
@@ -53,6 +54,11 @@ def test_is_spring_decompression_done_missing_fastq_files(
     # GIVEN a crunchy-api
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     # GIVEN that the FASTQ paths does not exist
+    compression_object.fastq_first.unlink()
+    compression_object.fastq_second.unlink()
+    assert not compression_object.fastq_first.exists()
+    assert not compression_object.fastq_second.exists()
+
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
 
@@ -134,12 +140,11 @@ def test_is_spring_decompression_done_empty_metadata_file(
     compression_object.spring_metadata_path.touch()
 
     # WHEN checking if SPRING decompression is done
-    result = crunchy_api.is_spring_decompression_done(compression_object)
-
-    # THEN result should be False since the metadata file has no content
-    assert result is False
-    # THEN assert that it was communicated that the content is malformed
-    assert "Malformed metadata content" in caplog.text
+    with pytest.raises(SyntaxError):
+        # THEN assert that an exception should be raised since the file is malformed
+        crunchy_api.is_spring_decompression_done(compression_object)
+        # THEN assert that it was communicated that the content is malformed
+        assert "Malformed metadata content" in caplog.text
 
 
 def test_is_spring_decompression_possible(
@@ -209,6 +214,11 @@ def test_is_spring_decompression_possible(
     crunchy_api = CrunchyAPI(crunchy_config_dict)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
+    # GIVEN that the FASTQ files does not exist
+    compression_object.fastq_first.unlink()
+    compression_object.fastq_second.unlink()
+    assert not compression_object.fastq_first.exists()
+    assert not compression_object.fastq_second.exists()
 
     # WHEN checking if SPRING decompression is done
     result = crunchy_api.is_spring_decompression_possible(compression_object)

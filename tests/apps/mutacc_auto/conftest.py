@@ -3,11 +3,10 @@
 """
 
 import pytest
-
 from cg.apps.mutacc_auto import MutaccAutoAPI
 
 CONFIG = {
-    "mutacc-auto": {
+    "mutacc_auto": {
         "config_path": "mutacc-auto_config",
         "binary_path": "mutacc-auto",
         "padding": 111,
@@ -43,7 +42,7 @@ class MockFailedProcess:
 
     @property
     def returncode(self):
-        """ Mock returncode that is not 0"""
+        """Mock returncode that is not 0"""
         return 1
 
 

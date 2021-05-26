@@ -2,10 +2,12 @@
     conftest for genotype API
 """
 
+import datetime as dt
+
 import pytest
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
-
 
 GTCONFIG = {
     "genotype": {
@@ -19,6 +21,8 @@ VOGUECONFIG = {"vogue": {"binary_path": "/path/to/vogue_path", "config_path": "v
 GENOTYPE_RETURN_SAMPLE = b'{"ACC5346A3": {"status":"pass"}, "SIB903A19": {"status":"pass"}}'
 
 GENOTYPE_RETURN_SAMPLE_ANALYSIS = b'{"ACC5346A3": {"snp": {}}, "SIB903A19": {"snp": {}}}'
+
+UPLOADED_TO_VOGUE_DATE = dt.datetime(2021, 3, 1)
 
 
 @pytest.fixture(scope="function")
@@ -107,3 +111,11 @@ def store():
 
     _store = MockStore()
     return _store
+
+
+@pytest.fixture
+def uploaded_to_vogue_date():
+    """
+    date fixture for testing update_analysis_uploaded_to_vogue_date
+    """
+    return UPLOADED_TO_VOGUE_DATE

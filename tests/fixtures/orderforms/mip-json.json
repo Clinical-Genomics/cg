@@ -1,0 +1,241 @@
+{
+  "name": "Testorder",
+  "customer": "Cust000",
+  "comment": "",
+  "samples": [
+    {
+      "name": "2020-12345-67",
+      "father": "",
+      "mother": "",
+      "sex": "male",
+      "age_at_sampling": "46.14648",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "other",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-12345-67",
+      "well_position": "",
+      "family_name": "F0034567",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "Data finns F0034567-8 2020-45678",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    },
+    {
+      "name": "2020-56789-10",
+      "father": "",
+      "mother": "",
+      "sex": "female",
+      "age_at_sampling": "67.89101",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "blood",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-56789-10",
+      "well_position": "",
+      "family_name": "F0067891",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "Data finns F0067891-0 2020-78910",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    },
+    {
+      "name": "2020-89101-11",
+      "father": "",
+      "mother": "",
+      "sex": "female",
+      "age_at_sampling": "9.10111",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "blood",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-89101-11",
+      "well_position": "",
+      "family_name": "F0010111",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "Data finns F0010111-2 2020-11121",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    },
+    {
+      "name": "2020-12131-41",
+      "father": "",
+      "mother": "",
+      "sex": "male",
+      "age_at_sampling": "1.31415",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "other",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-12131-41",
+      "well_position": "",
+      "family_name": "F0014151",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "Data finns F0014151-6 2020-15161",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    },
+    {
+      "name": "2020-16171-81",
+      "father": "",
+      "mother": "",
+      "sex": "female",
+      "age_at_sampling": "17.18192",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "blood",
+      "status": "affected",
+      "container":"96 well plate",
+      "container_name": "2020-16171-81",
+      "well_position":"A1",
+      "family_name": "F0018192",
+      "panels": [
+        "CTD"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "F0018192-0 Data finns 2019-19202 duo med bror ",
+      "synopsis":["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "phenotype_terms":["HP:0012747","HP:0025049"],
+      "cohorts":["Other"]
+    },
+    {
+      "name": "2020-20212-22",
+      "father": "",
+      "mother": "",
+      "sex": "male",
+      "age_at_sampling": "21.22232",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "blood",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-20212-23",
+      "well_position": "",
+      "family_name": "F0018192",
+      "panels": [
+        "CTD"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "F0018192-0 Data finns 2018-19202 duo med syster",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    },
+    {
+      "name": "2020-20212-22",
+      "father": "",
+      "mother": "",
+      "sex": "male",
+      "age_at_sampling": "2.12223",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "other",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-20212-22",
+      "well_position": "",
+      "family_name": "F0022232",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "require_qcok": false,
+      "priority": "Priority",
+      "comment": "Data finns 23242-I-5A",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    },
+    {
+      "name": "2020-24252-62",
+      "father": "",
+      "mother": "",
+      "sex": "male",
+      "age_at_sampling": "2.52627",
+      "quantity": "200",
+      "application": "WGSPCFC030",
+      "source": "other",
+      "status": "affected",
+      "container": "Tube",
+      "container_name": "2020-24252-62",
+      "well_position": "",
+      "family_name": "F0002627",
+      "panels": [
+        "OMIM-AUTO"
+      ],
+      "require_qcok": false,
+      "priority": "Standard",
+      "comment": "Data trio finns F0002627-2 272-8-2A",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    }
+  ]
+}

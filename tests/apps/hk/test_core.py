@@ -3,7 +3,7 @@
 import pytest
 from sqlalchemy.exc import OperationalError
 
-from cg.apps.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 
 
 def test_non_initialised_db(hk_config):

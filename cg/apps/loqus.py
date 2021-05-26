@@ -27,8 +27,8 @@ class LoqusdbAPI:
         self.loqusdb_binary = config["loqusdb"]["binary_path"]
 
         if self.analysis_type == "wes":
-            self.loqusdb_config = config["loqusdb-wes"]["config_path"]
-            self.loqusdb_binary = config["loqusdb-wes"]["binary_path"]
+            self.loqusdb_config = config["loqusdb_wes"]["config_path"]
+            self.loqusdb_binary = config["loqusdb_wes"]["binary_path"]
 
         self.process = Process(self.loqusdb_binary, self.loqusdb_config)
 

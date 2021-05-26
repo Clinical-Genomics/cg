@@ -1,13 +1,18 @@
 """Code to handle files regarding compression and decompression"""
 
+import datetime
 import logging
 from pathlib import Path
 from typing import Dict, List
 
-from housekeeper.store import models as hk_models
-
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, HK_FASTQ_TAGS
+from cg.constants import HK_FASTQ_TAGS
+from cg.constants.compression import (
+    FASTQ_DATETIME_DELTA,
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+)
 from cg.models import CompressionData
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -129,6 +134,7 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
         - Do we have permissions?
         - Is the file actually a symlink?
         - Is the file hardlinked?
+        - Is the file older than the specified time delta?
     """
     if not (
         compression_obj.is_absolute(compression_obj.fastq_first)
@@ -152,6 +158,14 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
         compression_obj.fastq_second
     ):
         LOG.info("Run %s has symbolic link, skipping run", compression_obj.run_name)
+        return False
+
+    date_changed = compression_obj.get_change_date(compression_obj.fastq_first)
+    today = datetime.datetime.now()
+
+    # Check if date is older than FASTQ_DELTA
+    if date_changed > today - FASTQ_DATETIME_DELTA:
+        LOG.info("FASTQ files are not old enough")
         return False
 
     return True

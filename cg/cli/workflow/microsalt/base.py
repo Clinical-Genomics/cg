@@ -1,165 +1,296 @@
-"""Add CLI support to start microsalt"""
+"""CLI support to start microsalt"""
 
+import datetime as dt
 import json
 import logging
 from pathlib import Path
-import subprocess
+from typing import Any, List, Optional
 
 import click
-
-from cg.apps import hk, lims
-from cg.apps.usalt.fastq import FastqHandler
-from cg.cli.workflow.microsalt.store import store as store_cmd
-from cg.cli.workflow.microsalt.deliver import (
-    deliver as deliver_cmd,
-    PROJECT_TAGS,
-    SAMPLE_TAGS,
-)
-from cg.meta.microsalt.lims import LimsMicrosaltAPI
-from cg.meta.workflow.microsalt import AnalysisAPI
-from cg.meta.deliver import DeliverAPI
-from cg.store import Store
+from cg.cli.workflow.commands import resolve_compression, store, store_available
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.exc import CgError
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store import models
+from housekeeper.store.models import File
 
 LOG = logging.getLogger(__name__)
 
+OPTION_DRY_RUN = click.option(
+    "-d",
+    "--dry-run",
+    help="Print command to console without executing",
+    is_flag=True,
+)
+OPTION_SAMPLE = click.option(
+    "-s",
+    "--sample",
+    help="Start workflow by providing a sample_id (By default case_id will be used)",
+    is_flag=True,
+)
+OPTION_TICKET = click.option(
+    "-t",
+    "--ticket",
+    help="Start workflow by providing a ticket_id (By default case_id will be used)",
+    is_flag=True,
+)
+ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=click.STRING)
 
-@click.group("microsalt", invoke_without_command=True)
-@click.option("-o", "--order", "order_id", help="include all microbial samples for an order")
+
+@click.group(invoke_without_command=True)
 @click.pass_context
-def microsalt(context: click.Context, order_id):
+def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
-    context.obj["db"] = Store(context.obj["database"])
-    hk_api = hk.HousekeeperAPI(context.obj)
-    lims_api = lims.LimsAPI(context.obj)
-    deliver = DeliverAPI(
-        context.obj,
-        hk_api=hk_api,
-        lims_api=lims_api,
-        case_tags=PROJECT_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
-    context.obj["api"] = AnalysisAPI(db=context.obj["db"], hk_api=hk_api, lims_api=lims_api)
-    context.obj["lims_microsalt_api"] = LimsMicrosaltAPI(lims=lims_api)
-
     if context.invoked_subcommand is None:
-        if order_id is None:
-            LOG.error("Please provide an order")
-            context.abort()
-        else:
-            # execute the analysis!
-            context.invoke(config_case, order_id=order_id)
-            context.invoke(link, order_id=order_id)
-            context.invoke(run, order_id=order_id)
+        click.echo(context.get_help())
+        return None
+    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
+        config=context.obj,
+    )
+
+
+microsalt.add_command(store)
+microsalt.add_command(store_available)
+microsalt.add_command(resolve_compression)
 
 
 @microsalt.command()
-@click.option("-o", "--order", "order_id", help="link all microbial samples for an order")
-@click.argument("sample_id", required=False)
-@click.pass_context
-def link(context: click.Context, order_id: str, sample_id: str):
-    """Link microbial FASTQ files for a SAMPLE_ID"""
-    sample_objs = None
-
-    if order_id and (sample_id is None):
-        # link all samples in a case
-        sample_objs = context.obj["db"].microbial_order(order_id).microbial_samples
-    elif sample_id and (order_id is None):
-        # link sample in all its families
-        sample_objs = [context.obj["db"].microbial_sample(sample_id)]
-    elif sample_id and order_id:
-        # link only one sample in a case
-        sample_objs = [context.obj["db"].microbial_sample(sample_id)]
-
-    if not sample_objs:
-        LOG.error("provide order and/or sample")
-        context.abort()
-
-    for sample_obj in sample_objs:
-        LOG.info("%s: link FASTQ files", sample_obj.internal_id)
-        context.obj["api"].link_sample(
-            FastqHandler(context.obj),
-            case=sample_obj.microbial_order.internal_id,
-            sample=sample_obj.internal_id,
-        )
+@OPTION_TICKET
+@OPTION_SAMPLE
+@OPTION_DRY_RUN
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_obj
+def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run: bool) -> None:
+    """Link microbial FASTQ files to dedicated analysis folder for a given case, ticket or sample"""
+    if dry_run:
+        return
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
+    case_id, sample_id = analysis_api.resolve_case_sample_id(
+        sample=sample, ticket=ticket, unique_id=unique_id
+    )
+    analysis_api.link_fastq_files(
+        case_id=case_id,
+        sample_id=sample_id,
+    )
 
 
 @microsalt.command("config-case")
-@click.option("-d", "--dry", is_flag=True, help="print config-case to console")
-@click.option(
-    "-o",
-    "--order",
-    "order_id",
-    help="create config-case all microbial samples for an order",
-)
-@click.argument("sample_id", required=False)
-@click.pass_context
-def config_case(context: click.Context, dry, order_id: str, sample_id: str):
-    """ Create a config file on case level for microSALT """
-    if order_id and (sample_id is None):
-        microbial_order_obj = context.obj["db"].microbial_order(order_id)
-        if not microbial_order_obj:
-            LOG.error("Order %s not found", order_id)
-            context.abort()
-        sample_objs = microbial_order_obj.microbial_samples
-    elif sample_id and (order_id is None):
-        sample_obj = context.obj["db"].microbial_sample(sample_id)
-        if not sample_obj:
-            LOG.error("Sample %s not found", sample_id)
-            context.abort()
-        sample_objs = [context.obj["db"].microbial_sample(sample_id)]
-    elif sample_id and order_id:
-        microbial_order_obj = context.obj["db"].microbial_order(order_id)
-        if not microbial_order_obj:
-            LOG.error("Samples %s not found in %s ", sample_id, order_id)
-            context.abort()
-        sample_objs = [
-            sample_obj
-            for sample_obj in microbial_order_obj.microbial_samples
-            if sample_obj.internal_id == sample_id
-        ]
-    else:
-        LOG.error("provide order and/or sample")
-        context.abort()
+@OPTION_DRY_RUN
+@OPTION_TICKET
+@OPTION_SAMPLE
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_obj
+def config_case(
+    context: CGConfig, dry_run: bool, ticket: bool, sample: bool, unique_id: str
+) -> None:
+    """Create a config file for a case or a sample analysis in microSALT"""
 
-    parameters = [
-        context.obj["lims_microsalt_api"].get_parameters(sample_obj) for sample_obj in sample_objs
-    ]
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
+    case_id, sample_id = analysis_api.resolve_case_sample_id(
+        sample=sample, ticket=ticket, unique_id=unique_id
+    )
+    sample_objs: List[models.Sample] = analysis_api.get_samples(
+        case_id=case_id, sample_id=sample_id
+    )
 
-    filename = order_id if order_id else sample_id
-    outfilename = Path(context.obj["usalt"]["queries_path"]) / filename
-    outfilename = outfilename.with_suffix(".json")
-    if dry:
-        print(json.dumps(parameters, indent=4, sort_keys=True))
-    else:
-        with open(outfilename, "w") as outfile:
-            json.dump(parameters, outfile, indent=4, sort_keys=True)
+    if not sample_objs:
+        LOG.error("No sample found for that ticket/sample_id")
+        raise click.Abort
+
+    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
+    filename: str = sample_id or case_id
+    config_case_path: Path = analysis_api.get_config_path(filename=filename)
+    if dry_run:
+        click.echo(json.dumps(parameters, indent=4, sort_keys=True))
+        return
+    with open(config_case_path, "w") as outfile:
+        json.dump(parameters, outfile, indent=4, sort_keys=True)
+    LOG.info("Saved config %s", config_case_path)
 
 
 @microsalt.command()
-@click.option("-d", "--dry", is_flag=True, help="print command to console")
-@click.option("-c", "--config-case", required=False, help="optionally change the config-case")
-@click.argument("order_id")
-@click.pass_context
-def run(context, dry, config_case, order_id):
-    """ Start microSALT with an order_id """
-    microsalt_command = context.obj["usalt"]["binary_path"]
-    command = [microsalt_command]
+@OPTION_DRY_RUN
+@OPTION_TICKET
+@OPTION_SAMPLE
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.option(
+    "-c",
+    "--config-case",
+    "config_case_path",
+    required=False,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
+    help="optionally change the config-case",
+)
+@click.pass_obj
+def run(
+    context: CGConfig,
+    dry_run: bool,
+    config_case_path: click.Path,
+    ticket: bool,
+    sample: bool,
+    unique_id: Any,
+) -> None:
+    """Start microSALT workflow by providing case, ticket or sample id"""
 
-    config_case_path = config_case
-    if not config_case:
-        queries_path = Path(context.obj["usalt"]["queries_path"])
-        config_case_path = queries_path / order_id
-        config_case_path = config_case_path.with_suffix(".json")
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
+    case_id, sample_id = analysis_api.resolve_case_sample_id(
+        sample=sample, ticket=ticket, unique_id=unique_id
+    )
+    fastq_path: Path = analysis_api.get_case_fastq_path(case_id=case_id)
+    if not config_case_path:
+        filename = sample_id or case_id
+        config_case_path: Path = analysis_api.get_config_path(filename=filename)
 
-    command.extend(["--parameters", str(config_case_path)])
-    if dry:
-        print(" ".join(command))
+    if not sample_id:
+        analyse_command = [
+            "analyse",
+            config_case_path.absolute().as_posix(),
+            "--input",
+            fastq_path.absolute().as_posix(),
+        ]
     else:
-        LOG.info("Starting microSALT! '%s'", " ".join(command))
-        subprocess.run(command, shell=True, check=True)
+        analyse_command = [
+            "analyse",
+            config_case_path.absolute().as_posix(),
+            "--input",
+            Path(fastq_path, sample_id).absolute().as_posix(),
+        ]
+
+    if sample_id or dry_run:
+        analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
+        return
+    try:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+    except Exception as e:
+        LOG.warning(
+            "Trailblazer warning: Could not track analysis progress for case %s! %s",
+            case_id,
+            e.__class__.__name__,
+        )
+    try:
+        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
+    except:
+        LOG.error("Failed to run analysis!")
+        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        raise
 
 
-microsalt.add_command(config_case)
-microsalt.add_command(deliver_cmd)
-microsalt.add_command(run)
-microsalt.add_command(store_cmd)
+@microsalt.command()
+@ARGUMENT_UNIQUE_IDENTIFIER
+@OPTION_DRY_RUN
+@OPTION_TICKET
+@OPTION_SAMPLE
+@click.pass_context
+def start(
+    context: click.Context, ticket: bool, sample: bool, unique_id: str, dry_run: bool
+) -> None:
+    """Start whole microSALT workflow by providing case, ticket or sample id"""
+    LOG.info("Starting Microsalt workflow for %s", unique_id)
+
+    context.invoke(link, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
+    context.invoke(config_case, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
+    context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
+
+
+@microsalt.command("start-available")
+@OPTION_DRY_RUN
+@click.pass_context
+def start_available(context: click.Context, dry_run: bool = False):
+    """Start full analysis workflow for all cases ready for analysis"""
+
+    analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+
+    exit_code: int = EXIT_SUCCESS
+    for case_obj in analysis_api.get_cases_to_analyze():
+        try:
+            context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
+        except CgError as error:
+            LOG.error(error.message)
+            exit_code = EXIT_FAIL
+        except Exception as e:
+            LOG.error(f"Unspecified error occurred: %s", e)
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
+
+
+@microsalt.command("upload-analysis-vogue")
+@OPTION_DRY_RUN
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_obj
+def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> None:
+    """Upload the trending report for latest analysis of given case_id to Vogue"""
+
+    analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
+    case_obj = analysis_api.status_db.family(unique_id)
+    if not case_obj or not case_obj.analyses:
+        LOG.error("No analysis available for %s", unique_id)
+        raise click.Abort
+
+    samples_string = ",".join(str(link_obj.sample.internal_id) for link_obj in case_obj.links)
+    microsalt_version: str = analysis_api.get_pipeline_version(case_id=case_obj.internal_id)
+
+    if dry_run:
+        LOG.info(
+            "Would have loaded case %s, with samples %s, analyzed with pipeline version %s",
+            unique_id,
+            samples_string,
+            microsalt_version,
+        )
+        return
+
+    analysis_result_file: Optional[File] = analysis_api.housekeeper_api.get_files(
+        bundle=unique_id, tags=["vogue"]
+    ).first()
+    if not analysis_result_file:
+        LOG.error("Vogue upload file not found in Housekeeper for case %s", unique_id)
+        raise click.Abort
+
+    vogue_load_args = {
+        "samples": samples_string,
+        "analysis_result_file": analysis_result_file.full_path,
+        "analysis_case_name": unique_id,
+        "analysis_type": "microsalt",
+        "analysis_workflow_name": "microsalt",
+        "analysis_workflow_version": microsalt_version,
+        "case_analysis_type": "microsalt",
+    }
+    analysis_api.vogue_api.load_bioinfo_raw(load_bioinfo_inputs=vogue_load_args)
+    analysis_api.vogue_api.load_bioinfo_process(
+        load_bioinfo_inputs=vogue_load_args, cleanup_flag=False
+    )
+    analysis_api.vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
+    case_obj.analyses[0].uploaded_at = dt.datetime.now()
+    analysis_api.status_db.commit()
+    LOG.info("Successfully uploaded latest analysis data for case %s to Vogue!", unique_id)
+
+
+@microsalt.command("upload-latest-analyses-vogue")
+@OPTION_DRY_RUN
+@click.pass_context
+def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
+    """Upload the trending reports for all un-uploaded latest analyses to Vogue"""
+
+    EXIT_CODE: int = EXIT_SUCCESS
+    analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    latest_analyses = list(
+        analysis_api.status_db.latest_analyses()
+        .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
+        .filter(models.Analysis.uploaded_at.is_(None))
+    )
+    for analysis in latest_analyses:
+        unique_id: str = analysis.family.internal_id
+        try:
+            context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
+        except Exception as e:
+            LOG.error(
+                "Could not upload data for %s to vogue, exception %s",
+                unique_id,
+                e.__class__.__name__,
+            )
+            EXIT_CODE: int = EXIT_FAIL
+
+    if EXIT_CODE:
+        raise click.Abort

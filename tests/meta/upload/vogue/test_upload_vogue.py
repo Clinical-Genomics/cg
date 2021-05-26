@@ -2,6 +2,8 @@
 
 import json
 
+import mock
+
 from cg.meta.upload.vogue import UploadVogueAPI
 
 
@@ -44,3 +46,50 @@ def test_load_apptags(vogue_api, genotype_api, store, mocker):
 
     # THEN load_apptags is called with the apptags inside upload_vogue_api
     vogue_api.load_apptags.assert_called_with(apptags)
+
+
+@mock.patch("cg.store.Store")
+@mock.patch("cg.apps.vogue.VogueAPI")
+@mock.patch("cg.apps.gt.GenotypeAPI")
+@mock.patch("cg.store.models.Analysis")
+def test_update_analysis_uploaded_to_vogue_date_given_date(
+    mock_analysis, mock_genotype_api, mock_vogue_api, mock_store, uploaded_to_vogue_date
+):
+    """tests updating the uploaded_to_vogue_at field of a record in the analysis table"""
+
+    # GIVEN an analysis object with no uploaded_to_vogue date
+
+    # WHEN setting the uploaded to vogue date to a specific date
+    result = UploadVogueAPI(
+        genotype_api=mock_genotype_api, vogue_api=mock_vogue_api, store=mock_store
+    ).update_analysis_uploaded_to_vogue_date(mock_analysis, uploaded_to_vogue_date)
+
+    # THEN the analysis object should have a vogue_uploaded_date set to vogue_upload_date
+    assert result.uploaded_to_vogue_at == uploaded_to_vogue_date
+
+
+@mock.patch("cg.store.Store")
+@mock.patch("cg.apps.vogue.VogueAPI")
+@mock.patch("cg.apps.gt.GenotypeAPI")
+@mock.patch("cg.store.models.Analysis")
+def test_update_analysis_uploaded_to_vogue_date_now(
+    mock_analysis, mock_genotype_api, mock_vogue_api, mock_store, timestamp_today
+):
+    """tests updating the uploaded_to_vogue field of a record in the analysis table"""
+
+    # GIVEN an analysis object with no uploaded_to_vogue date
+
+    # WHEN setting the uploaded to vogue date without specifying a date
+    with mock.patch.object(
+        UploadVogueAPI.update_analysis_uploaded_to_vogue_date,
+        "__defaults__",
+        (timestamp_today,),
+    ):
+
+        result = UploadVogueAPI(
+            mock_genotype_api, mock_vogue_api, mock_store
+        ).update_analysis_uploaded_to_vogue_date(mock_analysis)
+
+    # THEN the analysis object should have a vogue_uploaded_date set to the default value
+    # dt.datetime.now()
+    assert result.uploaded_to_vogue_at == timestamp_today

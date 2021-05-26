@@ -1,0 +1,41 @@
+{
+    "name": "Fastq order",
+    "customer": "cust002",
+    "comment": "",
+    "samples": [
+        {
+            "name": "prov1",
+            "sex": "male",
+            "application": "WGSPCFC060",
+            "data_analysis": "fastq",
+            "data_delivery": "fastq",
+            "tumour": false,
+            "comment": "",
+            "container": "Tube",
+            "container_name": "prov1",
+            "well_position": "",
+            "source": "blood",
+            "priority": "priority",
+            "require_qcok": true,
+            "volume": "1",
+            "elution_buffer": "Nuclease-free water"
+        },
+        {
+            "name": "prov2",
+            "sex": "male",
+            "application": "WGSPCFC060",
+            "data_analysis": "fastq",
+            "data_delivery": "fastq",
+            "tumour": true,
+            "comment": "",
+            "container": "Tube",
+            "container_name": "prov2",
+            "well_position": "",
+            "source": "cell line",
+            "priority": "priority",
+            "require_qcok": false,
+            "volume": "2",
+            "elution_buffer": "Nuclease-free water"
+        }
+    ]
+}

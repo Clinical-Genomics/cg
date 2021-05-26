@@ -1,13 +1,60 @@
 """Base module for building bioinfo workflow bundles for linking in Housekeeper"""
 import datetime as dt
-
+import logging
 from typing import List
 
-from cg.constants import HK_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS
+from _io import TextIOWrapper
 
-from cg.exc import AnalysisDuplicationError, PipelineUnknownError, MandatoryFilesMissing
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import HK_TAGS, MICROSALT_TAGS, MIP_DNA_TAGS, MIP_RNA_TAGS, Pipeline
+from cg.exc import (
+    AnalysisDuplicationError,
+    BundleAlreadyAddedError,
+    MandatoryFilesMissing,
+    PipelineUnknownError,
+)
+from cg.meta.store import mip as store_mip
+from cg.store import Store, models
+from housekeeper.store import models as hk_models
 
-ANALYSIS_TYPE_TAGS = {"wgs": MIP_DNA_TAGS, "wes": MIP_DNA_TAGS, "wts": MIP_RNA_TAGS}
+ANALYSIS_TYPE_TAGS = {
+    "wgs": MIP_DNA_TAGS,
+    "wes": MIP_DNA_TAGS,
+    "wts": MIP_RNA_TAGS,
+    "microsalt": MICROSALT_TAGS,
+}
+LOG = logging.getLogger(__name__)
+
+
+def gather_files_and_bundle_in_housekeeper(
+    config_stream: TextIOWrapper, hk_api: HousekeeperAPI, status: Store, workflow: Pipeline
+) -> models.Analysis:
+    """Function to gather files and bundle in housekeeper"""
+
+    add_analysis = {
+        Pipeline.MIP_DNA: store_mip.add_mip_analysis,
+    }
+    bundle_data = add_analysis[workflow](config_stream)
+
+    results = hk_api.add_bundle(bundle_data)
+    if results is None:
+        raise BundleAlreadyAddedError("bundle already added")
+
+    bundle_obj, version_obj = results
+
+    case_obj = {
+        Pipeline.MIP_DNA: status.family(bundle_obj.name),
+    }
+
+    status.family(bundle_obj.name).action = None
+    new_analysis = add_new_analysis(bundle_data, case_obj[workflow], status, version_obj)
+    version_date = version_obj.created_at.date()
+
+    LOG.info("new bundle added: %s, version %s", bundle_obj.name, version_date)
+    hk_api.include(version_obj)
+    hk_api.add_commit(bundle_obj, version_obj)
+
+    return new_analysis
 
 
 def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict) -> dict:
@@ -15,21 +62,25 @@ def build_bundle(config_data: dict, analysisinfo_data: dict, deliverables: dict)
 
     analysis_type = config_data["samples"][0]["type"]
 
-    data = {
+    return {
         "name": config_data["case"],
         "created": analysisinfo_data["date"],
         "pipeline_version": analysisinfo_data["version"],
         "files": deliverables_files(deliverables, analysis_type),
     }
-    return data
 
 
-def add_new_analysis(bundle_data, case_obj, status, version_obj):
+def add_new_analysis(
+    bundle_data: dict,
+    case_obj: models.Family,
+    status: Store,
+    version_obj: hk_models.Version,
+) -> models.Analysis:
     """Function to create and return a new analysis database record"""
 
-    pipeline = case_obj.links[0].sample.data_analysis
-
-    if not pipeline:
+    try:
+        pipeline = Pipeline(case_obj.data_analysis)
+    except ValueError:
         raise PipelineUnknownError(f"No pipeline specified in {case_obj}")
 
     if status.analysis(family=case_obj, started_at=version_obj.created_at):
@@ -39,7 +90,7 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
 
     new_analysis = status.add_analysis(
         pipeline=pipeline,
-        version=bundle_data["pipeline_version"],
+        version=bundle_data.get("pipeline_version"),
         started_at=version_obj.created_at,
         completed_at=dt.datetime.now(),
         primary=(len(case_obj.analyses) == 0),
@@ -50,24 +101,32 @@ def add_new_analysis(bundle_data, case_obj, status, version_obj):
 
 def deliverables_files(deliverables: dict, analysis_type: str) -> list:
     """Get all deliverable files from the pipeline"""
-
-    pipeline_tags = HK_TAGS[analysis_type]
-    analysis_type_tags = ANALYSIS_TYPE_TAGS[analysis_type]
-
+    pipeline_tags = HK_TAGS[str(analysis_type)]
+    analysis_type_tags = ANALYSIS_TYPE_TAGS[str(analysis_type)]
     files = parse_files(deliverables, pipeline_tags, analysis_type_tags)
     _check_mandatory_tags(files, analysis_type_tags)
-
     return files
 
 
+def _is_deliverables_tags_missing_in_analysis_tags(
+    analysis_type_tags: dict, deliverables_tag_map: tuple
+) -> bool:
+    """Check if deliverable tags are represented in analysis tags"""
+    return deliverables_tag_map not in analysis_type_tags
+
+
 def parse_files(deliverables: dict, pipeline_tags: list, analysis_type_tags: dict) -> list:
-    """ Get all files and their tags from the deliverables file """
+    """Get all files and their tags from the deliverables file"""
 
     parsed_files = []
     for file_ in deliverables["files"]:
         deliverables_tag_map = (
             (file_["step"],) if file_["tag"] is None else (file_["step"], file_["tag"])
         )
+        if _is_deliverables_tags_missing_in_analysis_tags(
+            analysis_type_tags=analysis_type_tags, deliverables_tag_map=deliverables_tag_map
+        ):
+            continue
         parsed_file = {
             "path": file_["path"],
             "tags": get_tags(file_, pipeline_tags, analysis_type_tags, deliverables_tag_map),
@@ -99,9 +158,11 @@ def get_tags(
 ) -> List[str]:
     """Get all tags for a file"""
 
-    tags = {"id": file["id"]}
-    tags["pipeline"] = pipeline_tags[0]
-    tags["application"] = pipeline_tags[1] if len(pipeline_tags) > 1 else None
+    tags = {
+        "id": str(file["id"]),
+        "pipeline": pipeline_tags[0],
+        "application": pipeline_tags[1] if len(pipeline_tags) > 1 else None,
+    }
 
     return _convert_deliverables_tags_to_hk_tags(
         tags, analysis_type_tags, deliverables_tag_map, is_index

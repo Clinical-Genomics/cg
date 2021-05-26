@@ -4,8 +4,8 @@ from typing import List
 
 import petname
 
-from cg.constants import PRIORITY_MAP
-from cg.store import models, utils
+from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
+from cg.store import models
 from cg.store.api.base import BaseHandler
 
 LOG = logging.getLogger(__name__)
@@ -13,6 +13,12 @@ LOG = logging.getLogger(__name__)
 
 class AddHandler(BaseHandler):
     """Methods related to adding new data to the store."""
+
+    def generate_unique_petname(self) -> str:
+        while True:
+            random_id = petname.Generate(3, separator="")
+            if not self.sample(random_id):
+                return random_id
 
     def add_customer(
         self,
@@ -27,7 +33,7 @@ class AddHandler(BaseHandler):
     ) -> models.Customer:
         """Build a new customer record."""
 
-        new_customer = self.Customer(
+        return self.Customer(
             internal_id=internal_id,
             name=name,
             scout_access=scout_access,
@@ -36,13 +42,11 @@ class AddHandler(BaseHandler):
             invoice_reference=invoice_reference,
             **kwargs,
         )
-        return new_customer
 
     def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
         """Build a new customer group record."""
 
-        new_customer_group = self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
-        return new_customer_group
+        return self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
 
     def add_user(
         self, customer: models.Customer, email: str, name: str, is_admin: bool = False
@@ -50,7 +54,7 @@ class AddHandler(BaseHandler):
         """Build a new user record."""
 
         new_user = self.User(name=name, email=email, is_admin=is_admin)
-        new_user.customer = customer
+        new_user.customers.append(customer)
         return new_user
 
     def add_application(
@@ -59,6 +63,7 @@ class AddHandler(BaseHandler):
         category: str,
         description: str,
         percent_kth: int,
+        percent_reads_guaranteed: int,
         is_accredited: bool = False,
         **kwargs,
     ) -> models.Application:
@@ -70,6 +75,7 @@ class AddHandler(BaseHandler):
             description=description,
             is_accredited=is_accredited,
             percent_kth=percent_kth,
+            percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
         return new_record
@@ -122,10 +128,10 @@ class AddHandler(BaseHandler):
     ) -> models.Sample:
         """Build a new Sample record."""
 
-        internal_id = internal_id or utils.get_unique_id(self.sample)
+        internal_id = internal_id or self.generate_unique_petname()
         priority_human = priority or ("research" if downsampled_to else "standard")
         priority_db = PRIORITY_MAP[priority_human]
-        new_sample = self.Sample(
+        return self.Sample(
             name=name,
             internal_id=internal_id,
             received_at=received,
@@ -139,12 +145,20 @@ class AddHandler(BaseHandler):
             comment=comment,
             **kwargs,
         )
-        return new_sample
 
-    def add_family(self, name: str, panels: List[str], priority: str = "standard") -> models.Family:
+    def add_case(
+        self,
+        data_analysis: Pipeline,
+        data_delivery: DataDelivery,
+        name: str,
+        panels: List[str],
+        cohorts: List[str] = None,
+        priority: str = "standard",
+        synopsis: List[str] = None,
+    ) -> models.Family:
         """Build a new Family record."""
 
-        # generate a unique family id
+        # generate a unique case id
         while True:
             internal_id = petname.Generate(2, separator="")
             if self.family(internal_id) is None:
@@ -153,9 +167,17 @@ class AddHandler(BaseHandler):
                 LOG.debug(f"{internal_id} already used - trying another id")
 
         priority_db = PRIORITY_MAP[priority]
-        new_family = self.Family(internal_id=internal_id, name=name, priority=priority_db)
-        new_family.panels = panels
-        return new_family
+        new_case = self.Family(
+            cohorts=cohorts,
+            data_analysis=str(data_analysis),
+            data_delivery=str(data_delivery),
+            internal_id=internal_id,
+            name=name,
+            panels=panels,
+            priority=priority_db,
+            synopsis=synopsis,
+        )
+        return new_case
 
     def relate_sample(
         self,
@@ -180,16 +202,13 @@ class AddHandler(BaseHandler):
         """Build a new Flowcell record."""
 
         new_record = self.Flowcell(
-            name=name,
-            sequencer_name=sequencer,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
+            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
         )
         return new_record
 
     def add_analysis(
         self,
-        pipeline: str,
+        pipeline: Pipeline,
         version: str = None,
         completed_at: dt.datetime = None,
         primary: bool = False,
@@ -200,7 +219,7 @@ class AddHandler(BaseHandler):
         """Build a new Analysis record."""
 
         new_record = self.Analysis(
-            pipeline=pipeline,
+            pipeline=str(pipeline),
             pipeline_version=version,
             completed_at=completed_at,
             is_primary=primary,
@@ -222,11 +241,7 @@ class AddHandler(BaseHandler):
         """Build a new panel record."""
 
         new_record = self.Panel(
-            name=name,
-            abbrev=abbrev,
-            current_version=version,
-            date=date,
-            gene_count=genes,
+            name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
         )
         new_record.customer = customer
         return new_record
@@ -238,7 +253,6 @@ class AddHandler(BaseHandler):
         order: str,
         ordered: dt.datetime,
         application_version: models.ApplicationVersion,
-        data_analysis: str,
         ticket: int = None,
         comment: str = None,
         received: dt.datetime = None,
@@ -254,7 +268,6 @@ class AddHandler(BaseHandler):
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,
-            data_analysis=data_analysis,
         )
         new_record.customer = customer
         new_record.application_version = application_version
@@ -280,7 +293,7 @@ class AddHandler(BaseHandler):
         self,
         customer: models.Customer,
         samples: List[models.Sample] = None,
-        microbial_samples: List[models.MicrobialSample] = None,
+        microbial_samples: List[models.Sample] = None,
         pools: List[models.Pool] = None,
         comment: str = None,
         discount: int = 0,
@@ -296,61 +309,10 @@ class AddHandler(BaseHandler):
         for sample in samples or []:
             new_invoice.samples.append(sample)
         for microbial_sample in microbial_samples or []:
-            new_invoice.microbial_samples.append(microbial_sample)
+            new_invoice.samples.append(microbial_sample)
         for pool in pools or []:
             new_invoice.pools.append(pool)
         return new_invoice
-
-    def add_microbial_order(
-        self,
-        customer: models.Customer,
-        name: str,
-        ordered: dt.datetime,
-        internal_id: str = None,
-        ticket_number: int = None,
-        comment: str = None,
-    ) -> models.MicrobialOrder:
-        """Build a new Order record."""
-
-        new_order = self.MicrobialOrder(
-            name=name,
-            ordered_at=ordered,
-            internal_id=internal_id,
-            ticket_number=ticket_number,
-            comment=comment,
-        )
-        new_order.customer = customer
-        return new_order
-
-    def add_microbial_sample(
-        self,
-        name: str,
-        organism: models.Organism,
-        internal_id: str,
-        reference_genome: str,
-        application_version: models.ApplicationVersion,
-        priority: str = None,
-        comment: str = None,
-        **kwargs,
-    ) -> models.MicrobialSample:
-        """Build a new MicrobialSample record.
-
-        To commit you also need to assign the sample to an Order.
-        """
-        internal_id = internal_id or utils.get_unique_id(self.sample)
-        priority_human = priority or "standard"
-        priority_db = PRIORITY_MAP[priority_human]
-        new_sample = self.MicrobialSample(
-            name=name,
-            internal_id=internal_id,
-            reference_genome=reference_genome,
-            priority=priority_db,
-            comment=comment,
-            **kwargs,
-        )
-        new_sample.organism = organism
-        new_sample.application_version = application_version
-        return new_sample
 
     def add_organism(
         self,

@@ -1,51 +1,42 @@
-# build
-cython
-
 # database
 Alchy
-SQLAlchemy
+SQLAlchemy<1.4
 
 # cli
 Click<7.0
 
 # server
-Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
 Flask-Admin
 Flask-Alchy
-Flask-SQLAlchemy==2.1
 Flask-CORS
 Flask-Dance
+Flask-SQLAlchemy==2.1
+Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
+blinker
 google-auth
-werkzeug<1.0.0              # due to breaking changes in 1.0.0
+gunicorn
 requests[security]
-requests-oauthlib<1.2.0     # due to scout-browser Flask-OAuthlib
-oauthlib<3.0.0              # due to scout-browser Flask-OAuthlib
 requests_cache
-requests[security]
+werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
-ruamel.yaml
-coloredlogs
-petname
-marshmallow>3               # due to code expects behaviour from >3
-pyschemes
-xlrd
-openpyxl
-tabulate
-lxml
-python-dateutil
-cyvcf2<0.10.0
-pymongo<3.7
+cgmodels>=0.5
 colorclass
+coloredlogs
+email-validator
+lxml
+marshmallow>3               # due to code expects behaviour from >3
+openpyxl
+packaging
+petname
+pydantic
+pyschemes
+python-dateutil
+pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
-cairocffi==0.9.0        # due to strange version number in package
-pysam==0.15.2           # due to inability to rebuild newer pysam version
+tabulate
+typing_extensions
 
 # apps
 genologics
-trailblazer>=6.7.0
-housekeeper>=2.0.0b2
-genotype>=2.2.0
-scout-browser>=4.4.1
-cgstats>=1.1.2
-cgbeacon
+housekeeper>=2.5

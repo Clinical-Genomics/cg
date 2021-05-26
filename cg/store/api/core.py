@@ -1,6 +1,7 @@
 import logging
 
 import alchy
+
 from cg.store import models
 from cg.store.api.findbusinessdata import FindBusinessDataHandler
 from cg.store.api.reset import ResetHandler
@@ -8,7 +9,6 @@ from cg.store.api.reset import ResetHandler
 from .add import AddHandler
 from .findbasicdata import FindBasicDataHandler
 from .status import StatusHandler
-from .trends import TrendsHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -19,7 +19,6 @@ class CoreHandler(
     FindBusinessDataHandler,
     ResetHandler,
     StatusHandler,
-    TrendsHandler,
 ):
     """Aggregating class for the store api handlers"""
 

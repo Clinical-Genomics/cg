@@ -2,6 +2,7 @@
 import copy
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -79,20 +80,32 @@ class CompressionData:
 
         return self.spring_metadata_path
 
+    @staticmethod
+    def make_old(file_path):
+        """ "Convert the modifying date so that the file looks old"""
+        # Convert the date to a float
+        before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
+        # Update the utime so file looks old
+        os.utime(file_path, (before_timestamp, before_timestamp))
+
     @property
-    def fastq_first_file(self):
+    def fastq_first_file(self, old: bool = True):
         """Return the path to an existing spring metadata file"""
         self.fastq_first.touch()
+        if old:
+            CompressionData.make_old(self.fastq_first)
         return self.fastq_first
 
     @property
-    def fastq_second_file(self):
+    def fastq_second_file(self, old: bool = True):
         """Return the path to an existing fastq file"""
         self.fastq_second.touch()
+        if old:
+            CompressionData.make_old(self.fastq_second)
         return self.fastq_second
 
 
-@pytest.yield_fixture(scope="function", name="compression_files")
+@pytest.fixture(scope="function", name="compression_files")
 def fixture_compression_files(compression_object):
     """Return a small class with compression files"""
     return CompressionData(
@@ -104,14 +117,14 @@ def fixture_compression_files(compression_object):
     )
 
 
-@pytest.yield_fixture(scope="function", name="real_crunchy_api")
+@pytest.fixture(scope="function", name="real_crunchy_api")
 def fixture_real_crunchy_api(crunchy_config_dict):
     """crunchy api fixture"""
 
     yield CrunchyAPI(crunchy_config_dict)
 
 
-@pytest.yield_fixture(scope="function", name="compress_api")
+@pytest.fixture(scope="function", name="compress_api")
 def fixture_compress_api(real_crunchy_api, housekeeper_api):
     """compress api fixture"""
     hk_api = housekeeper_api

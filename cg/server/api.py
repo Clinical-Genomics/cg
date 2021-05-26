@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import tempfile
 from functools import wraps
 from pathlib import Path
-import tempfile
+from typing import List, Optional
 
-from cg.constants import METAGENOME_SOURCES, ANALYSIS_SOURCES
-from flask import abort, current_app, Blueprint, jsonify, g, make_response, request
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.exc import DuplicateRecordError, OrderError, OrderFormError
+from cg.meta.orders import OrdersAPI, OrderType
+from cg.models.orders.order import OrderIn
+from cg.store import models
+from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
+from pydantic import ValidationError
 from requests.exceptions import HTTPError
+from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
 
-from cg.exc import DuplicateRecordError, OrderFormError, OrderError
-from cg.apps.lims import parse_orderform, parse_json
-from cg.meta.orders import OrdersAPI, OrderType
+from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from ..apps.orderform.json_orderform_parser import JsonOrderformParser
+from ..models.orders.orderform_schema import Orderform
 from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)
@@ -36,57 +43,48 @@ def before_request():
         return make_response(jsonify(ok=True), 204)
 
     endpoint_func = current_app.view_functions[request.endpoint]
-    if not getattr(endpoint_func, "is_public", None):
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            jwt_token = auth_header.split("Bearer ")[-1]
-        else:
-            return abort(403, "no JWT token found on request")
-        try:
-            user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
-        except ValueError as error:
-            return abort(make_response(jsonify(message="outdated login certificate"), 403))
-        user_obj = db.user(user_data["email"])
-        if user_obj is None:
-            message = f"{user_data['email']} doesn't have access"
-            return abort(make_response(jsonify(message=message), 403))
-        g.current_user = user_obj
+    if getattr(endpoint_func, "is_public", None):
+        return
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return abort(403, "no JWT token found on request")
+
+    jwt_token = auth_header.split("Bearer ")[-1]
+    try:
+        user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
+    except ValueError:
+        return abort(make_response(jsonify(message="outdated login certificate"), 403))
+
+    user_obj = db.user(user_data["email"])
+    if user_obj is None or not user_obj.order_portal_login:
+        message = f"{user_data['email']} doesn't have access"
+        return abort(make_response(jsonify(message=message), 403))
+
+    g.current_user = user_obj
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
-    post_data = request.get_json()
+    post_data: OrderIn = OrderIn.parse_obj(request.get_json())
     LOG.info("processing '%s' order: %s", order_type, post_data)
     try:
-        ticket = {"name": g.current_user.name, "email": g.current_user.email}
-        result = api.submit(OrderType[order_type.upper()], post_data, ticket=ticket)
+        result = api.submit(
+            project=OrderType(order_type),
+            order_in=post_data,
+            user_name=g.current_user.name,
+            user_mail=g.current_user.email,
+        )
     except (DuplicateRecordError, OrderError) as error:
         return abort(make_response(jsonify(message=error.message), 401))
     except HTTPError as error:
-        return abort(make_response(jsonify(message=error.args[0]), 401))
+        return abort(make_response(jsonify(message=str(error)), 401))
 
     return jsonify(
-        project=result["project"],
-        records=[record.to_dict() for record in result["records"]],
+        project=result["project"], records=[record.to_dict() for record in result["records"]]
     )
-
-
-@BLUEPRINT.route("/customers")
-def customers():
-    """Fetch customers."""
-    query = db.Customer.query
-    data = [record.to_dict() for record in query]
-    return jsonify(customers=data)
-
-
-@BLUEPRINT.route("/panels")
-def panels():
-    """Fetch panels."""
-    query = db.Panel.query
-    data = [record.to_dict() for record in query]
-    return jsonify(panels=data)
 
 
 @BLUEPRINT.route("/cases")
@@ -105,56 +103,62 @@ def families():
         records = db.cases_to_mip_analyze()
         count = len(records)
     else:
-        customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        families_q = db.families(
+        customer_objs: Optional[List[models.Customer]] = (
+            None if g.current_user.is_admin else g.current_user.customers
+        )
+        case_query = db.families(
             enquiry=request.args.get("enquiry"),
-            customer=customer_obj,
+            customers=customer_objs,
             action=request.args.get("action"),
         )
-        count = families_q.count()
-        records = families_q.limit(30)
-    data = [family_obj.to_dict(links=True) for family_obj in records]
-    return jsonify(families=data, total=count)
+        count = case_query.count()
+        records = case_query.limit(30)
+
+    cases_data: List[dict] = [case_obj.to_dict(links=True) for case_obj in records]
+    return jsonify(families=cases_data, total=count)
 
 
 @BLUEPRINT.route("/families_in_customer_group")
 def families_in_customer_group():
     """Fetch families in customer_group."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    families_q = db.families_in_customer_group(
-        enquiry=request.args.get("enquiry"), customer=customer_obj
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
+    families_q: Query = db.families_in_customer_group(
+        enquiry=request.args.get("enquiry"), customers=customer_objs
     )
     count = families_q.count()
     records = families_q.limit(30)
-    data = [family_obj.to_dict(links=True) for family_obj in records]
+    data = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=data, total=count)
 
 
 @BLUEPRINT.route("/families/<family_id>")
 def family(family_id):
     """Fetch a family with links."""
-    family_obj = db.family(family_id)
-    if family_obj is None:
+    case_obj = db.family(family_id)
+    if case_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != family_obj.customer):
+    if not g.current_user.is_admin and (case_obj.customer not in g.current_user.customers):
         return abort(401)
 
-    data = family_obj.to_dict(links=True, analyses=True)
+    data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
 
 @BLUEPRINT.route("/families_in_customer_group/<family_id>")
 def family_in_customer_group(family_id):
     """Fetch a family with links."""
-    family_obj = db.family(family_id)
-    if family_obj is None:
+    case_obj = db.family(family_id)
+    if case_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-        g.current_user.customer.customer_group != family_obj.customer.customer_group
+        case_obj.customer.customer_group
+        not in set(customer.customer_group for customer in g.current_user.customers)
     ):
         return abort(401)
 
-    data = family_obj.to_dict(links=True, analyses=True)
+    data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
 
@@ -164,14 +168,16 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(401)
     if request.args.get("status") == "incoming":
-        samples_q = db.samples_to_recieve()
+        samples_q = db.samples_to_receive()
     elif request.args.get("status") == "labprep":
         samples_q = db.samples_to_prepare()
     elif request.args.get("status") == "sequencing":
         samples_q = db.samples_to_sequence()
     else:
-        customer_obj = None if g.current_user.is_admin else g.current_user.customer
-        samples_q = db.samples(enquiry=request.args.get("enquiry"), customer=customer_obj)
+        customer_objs: Optional[models.Customer] = (
+            None if g.current_user.is_admin else g.current_user.customers
+        )
+        samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -180,9 +186,11 @@ def samples():
 @BLUEPRINT.route("/samples_in_customer_group")
 def samples_in_customer_group():
     """Fetch samples in a customer group."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
     samples_q = db.samples_in_customer_group(
-        enquiry=request.args.get("enquiry"), customer=customer_obj
+        enquiry=request.args.get("enquiry"), customers=customer_objs
     )
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
@@ -195,7 +203,7 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != sample_obj.customer):
+    elif not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
@@ -208,65 +216,21 @@ def sample_in_customer_group(sample_id):
     if sample_obj is None:
         return abort(404)
     elif not g.current_user.is_admin and (
-        g.current_user.customer.customer_group != sample_obj.customer.customer_group
+        sample_obj.customer.customer_group
+        not in set(customer.customer_group for customer in g.current_user.customers)
     ):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
 
-@BLUEPRINT.route("/microbial_orders")
-def microbial_orders():
-    """Fetch microbial orders."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    orders_q = db.microbial_orders(enquiry=request.args.get("enquiry"), customer=customer_obj)
-    count = orders_q.count()
-    records = orders_q.limit(30)
-    data = [order_obj.to_dict(samples=True) for order_obj in records]
-    return jsonify(microbial_orders=data, total=count)
-
-
-@BLUEPRINT.route("/microbial_orders/<order_id>")
-def microbial_order(order_id):
-    """Fetch a order with samples."""
-    order_obj = db.microbial_order(order_id)
-    if order_obj is None:
-        return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != order_obj.customer):
-        return abort(401)
-    data = order_obj.to_dict(samples=True)
-    return jsonify(**data)
-
-
-@BLUEPRINT.route("/microbial_samples")
-def microbial_samples():
-    """Fetch microbial samples."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    samples_q = db.microbial_samples(enquiry=request.args.get("enquiry"), customer=customer_obj)
-    limit = int(request.args.get("limit", 50))
-    data = [sample_obj.to_dict(order=True) for sample_obj in samples_q.limit(limit)]
-    return jsonify(samples=data, total=samples_q.count())
-
-
-@BLUEPRINT.route("/microbial_samples/<sample_id>")
-def microbial_sample(sample_id):
-    """Fetch a single sample."""
-    sample_obj = db.microbial_sample(sample_id)
-    if sample_obj is None:
-        return abort(404)
-    elif not g.current_user.is_admin and (
-        g.current_user.customer != sample_obj.microbial_order.customer
-    ):
-        return abort(401)
-    data = sample_obj.to_dict()
-    return jsonify(**data)
-
-
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
-    customer_obj = None if g.current_user.is_admin else g.current_user.customer
-    pools_q = db.pools(customer=customer_obj, enquiry=request.args.get("enquiry"))
+    customer_objs: Optional[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.customers
+    )
+    pools_q = db.pools(customers=customer_objs, enquiry=request.args.get("enquiry"))
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
 
@@ -277,7 +241,7 @@ def pool(pool_id):
     record = db.pool(pool_id)
     if record is None:
         return abort(404)
-    elif not g.current_user.is_admin and (g.current_user.customer != record.customer):
+    elif not g.current_user.is_admin and (record.customer not in g.current_user.customers):
         return abort(401)
     return jsonify(**record.to_dict())
 
@@ -315,11 +279,17 @@ def analyses():
 @BLUEPRINT.route("/options")
 def options():
     """Fetch various options."""
-    customer_objs = (
-        db.Customer.query.all() if g.current_user.is_admin else [g.current_user.customer]
+    customer_objs: Optional[models.Customer] = (
+        db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
     )
+
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
+
+        if not application_obj.versions:
+            LOG.debug("Skipping application %s that doesn't have a price", application)
+            continue
+
         if application_obj.is_external:
             apptag_groups["ext"].append(application_obj.tag)
         else:
@@ -331,10 +301,7 @@ def options():
 
     return jsonify(
         customers=[
-            {
-                "text": f"{customer.name} ({customer.internal_id})",
-                "value": customer.internal_id,
-            }
+            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
             for customer in customer_objs
         ],
         applications=apptag_groups,
@@ -356,6 +323,9 @@ def options():
 @BLUEPRINT.route("/me")
 def me():
     """Fetch information about current user."""
+    if not g.current_user.is_admin and not g.current_user.customers:
+        return abort(401)
+
     return jsonify(user=g.current_user.to_dict())
 
 
@@ -389,26 +359,18 @@ def orderform():
             temp_dir = Path(tempfile.gettempdir())
             saved_path = str(temp_dir / filename)
             input_file.save(saved_path)
-            project_data = parse_orderform(saved_path)
+            order_parser = ExcelOrderformParser()
+            order_parser.parse_orderform(excel_path=saved_path)
         else:
             json_data = json.load(input_file.stream)
-            project_data = parse_json(json_data)
-    except OrderFormError as error:
-        return abort(make_response(jsonify(message=error.message), 400))
+            order_parser = JsonOrderformParser()
+            order_parser.parse_orderform(order_data=json_data)
+    except (OrderFormError, ValidationError) as error:
+        if hasattr(error, "message"):
+            message = error.message
+        else:
+            message = str(error)
+        return abort(make_response(jsonify(message=message), 400))
+    parsed_order: Orderform = order_parser.generate_orderform()
 
-    return jsonify(**project_data)
-
-
-@BLUEPRINT.route("/trends/samples/<year>")
-def trends_samples(year):
-    """Samples per month."""
-
-    return jsonify(
-        received_application=list(db.samples_per_month_application(year)),
-        received=list(db.samples_per_month(year)),
-        turnaround_times=list(db.received_to_delivered(year)),
-        prepp_times=list(db.received_to_prepped(year)),
-        sequence_times=list(db.prepped_to_sequenced(year)),
-        deliver_times=list(db.sequenced_to_delivered(year)),
-        invoice_times=list(db.delivered_to_invoiced(year)),
-    )
+    return jsonify(**parsed_order.dict())

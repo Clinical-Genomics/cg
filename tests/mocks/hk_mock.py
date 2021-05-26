@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -112,7 +112,7 @@ class EnhancedList(list):
         super(EnhancedList, self).__init__()
 
     def first(self):
-        """Mock the first method """
+        """Mock the first method"""
         if len(self) == 0:
             return None
         return self[0]
@@ -167,6 +167,11 @@ class MockHousekeeperAPI:
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
     # Mock specific functions
+    def fetch_file_from_version(self, version_obj, tags):
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[0]
+
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""
         self._missing_tags.add(tag_name)
@@ -204,7 +209,7 @@ class MockHousekeeperAPI:
 
     # Mocked functions from original API
     def add_bundle(self, bundle_data):
-        """ Build a new bundle version of files """
+        """Build a new bundle version of files"""
         bundle_obj = self.new_bundle(name=bundle_data["name"], created_at=bundle_data["created"])
 
         version_obj = self.new_version(
@@ -245,37 +250,34 @@ class MockHousekeeperAPI:
         return tags
 
     def tag(self, name: str):
-        """ Fetch a tag """
+        """Fetch a tag"""
         for tag_obj in self._tags:
             if tag_obj.name == name:
                 return tag_obj
         return None
 
     def bundle(self, name: str) -> MockBundle:
-        """ Fetch a bundle """
-        print("Fetching bundle %s" % name)
+        """Fetch a bundle"""
         if name:
             for bundle_obj in self.bundles():
                 if bundle_obj.name == name:
-                    print("Bundle %s found" % name)
                     return bundle_obj
         return self._bundle_obj
 
     def bundles(self):
-        """ Fetch bundles """
+        """Fetch bundles"""
         return self._bundles
 
     def new_bundle(self, name: str, created_at: datetime.datetime = None):
-        """ Create a new file bundle """
+        """Create a new file bundle"""
         self.update_id_counter()
         bundle_obj = MockBundle(id=self._id_counter, name=name, created_at=created_at)
         self._bundle_obj = bundle_obj
         self._bundles.append(bundle_obj)
-        print("Create new bundle %s (%s)" % (name, bundle_obj.id))
         return bundle_obj
 
     def version(self, *args, **kwargs):
-        """ Fetch a version """
+        """Fetch a version"""
         return self._version_obj
 
     def files(self, *args, **kwargs):
@@ -289,7 +291,7 @@ class MockHousekeeperAPI:
         return self._files
 
     def new_tag(self, name: str, category: str = None):
-        """ Create a new tag """
+        """Create a new tag"""
         self.update_id_counter()
         tag_obj = MockTag(id=self._id_counter, name=name, category=category)
         if not self.tag_exists(name):
@@ -298,20 +300,19 @@ class MockHousekeeperAPI:
         return tag_obj
 
     def add_tag(self, name: str, category: str = None):
-        """ Add a tag to the database """
+        """Add a tag to the database"""
         tag_obj = self.new_tag(name, category)
         if not self.tag_exists(name):
             self._tags.append(tag_obj)
         return tag_obj
 
     def new_version(self, created_at: datetime.datetime, expires_at: datetime.datetime = None):
-        """ Create a new bundle version """
+        """Create a new bundle version"""
         self.update_id_counter()
         created_at = created_at or datetime.datetime.now()
         expires_at = expires_at or datetime.datetime.now()
         version_obj = MockVersion(id=self._id_counter, created_at=created_at, expires_at=expires_at)
         self._version_obj = version_obj
-        print("Create new version with id %s" % version_obj.id)
         return version_obj
 
     def add_version(
@@ -320,7 +321,7 @@ class MockHousekeeperAPI:
         created_at: datetime.datetime = None,
         expires_at: datetime.datetime = None,
     ):
-        """ Create a new bundle version """
+        """Create a new bundle version"""
         if not version_obj:
             version_obj = self.new_version(created_at, expires_at)
         self._version_obj = version_obj
@@ -333,7 +334,7 @@ class MockHousekeeperAPI:
         to_archive: bool = False,
         tags: list = [],
     ):
-        """ Create a new file """
+        """Create a new file"""
         self.update_id_counter()
         mocked_file = MockFile(
             id=self._id_counter,
@@ -348,11 +349,11 @@ class MockHousekeeperAPI:
         return mocked_file
 
     def add_commit(self, *args, **kwargs):
-        """ Wrap method in Housekeeper Store """
+        """Wrap method in Housekeeper Store"""
         return True
 
     def commit(self):
-        """ Wrap method in Housekeeper Store """
+        """Wrap method in Housekeeper Store"""
         return True
 
     def include(self, *args, **kwargs):
@@ -417,7 +418,7 @@ class MockHousekeeperAPI:
 
     @contextmanager
     def session_no_autoflush(self):
-        """ Wrap property in Housekeeper Store """
+        """Wrap property in Housekeeper Store"""
         yield True
 
     def __repr__(self):
@@ -426,13 +427,3 @@ class MockHousekeeperAPI:
 
 if __name__ == "__main__":
     hk_api = MockHousekeeperAPI(config={})
-    my_list = EnhancedList()
-    print(my_list.first())
-    my_list.append(1)
-    print(my_list)
-    print(my_list.first())
-    my_list.append(2)
-    print(my_list)
-    print(my_list.first())
-    print(my_list[0])
-    print(my_list[1])

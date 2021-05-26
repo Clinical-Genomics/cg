@@ -1,10 +1,12 @@
 """API to run Vogue"""
 
+import datetime as dt
 import json
+from typing import Optional
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
-from cg.store import Store
+from cg.store import Store, models
 
 
 class UploadVogueAPI:
@@ -32,9 +34,9 @@ class UploadVogueAPI:
     def load_apptags(self) -> None:
         """Loading application tags from statusdb into the trending database"""
         apptags = self.store.applications()
-        apptags_for_vogue = []
-        for tag in apptags.all():
-            apptags_for_vogue.append({"tag": tag.tag, "prep_category": tag.prep_category})
+        apptags_for_vogue = [
+            {"tag": tag.tag, "prep_category": tag.prep_category} for tag in apptags.all()
+        ]
 
         self.vogue_api.load_apptags(apptags_for_vogue)
 
@@ -52,3 +54,11 @@ class UploadVogueAPI:
         """Running vogue load bioinfo sample."""
 
         self.vogue_api.load_bioinfo_sample(load_bioinfo_inputs)
+
+    @staticmethod
+    def update_analysis_uploaded_to_vogue_date(
+        analysis: models.Analysis,
+        vogue_upload_date: Optional[dt.datetime] = dt.datetime.now(),
+    ) -> models.Analysis:
+        analysis.uploaded_to_vogue_at = vogue_upload_date
+        return analysis

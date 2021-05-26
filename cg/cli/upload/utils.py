@@ -1,10 +1,10 @@
 """Utility functions for the upload cli commands"""
 import logging
-from typing import List
+from typing import List, Optional
 
 import click
-
-from cg.store import models
+from cg.constants import Pipeline
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -18,25 +18,20 @@ class LinkHelper:
         return all(not link.sample.is_tumour for link in links)
 
     @staticmethod
-    def all_samples_data_analysis(links: List[models.FamilySample], data_anlysis) -> bool:
-        """Return True if all samples has the given data_analysis."""
-        return all(link.sample.data_analysis in data_anlysis for link in links)
-
-    @staticmethod
-    def all_samples_list_analyses(links: List[models.FamilySample]) -> list:
-        """Return analysis type for each sample in case"""
+    def get_analysis_type_for_each_link(links: List[models.FamilySample]) -> list:
+        """Return analysis type for each sample given by link list"""
         return [link.sample.application_version.application.analysis_type for link in links]
 
 
-def _suggest_cases_to_upload(context):
+def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = None) -> None:
     LOG.warning("provide a case, suggestions:")
-    records = context.obj["status"].analyses_to_upload()[:50]
-    for family_obj in records:
-        click.echo(family_obj)
+    records = status_db.analyses_to_upload(pipeline=pipeline)[:50]
+    for case_obj in records:
+        click.echo(case_obj)
 
 
-def _suggest_cases_delivery_report(context):
+def suggest_cases_delivery_report(status_db: Store, pipeline: Optional[Pipeline] = None) -> None:
     LOG.error("provide a case, suggestions:")
-    records = context.obj["status"].analyses_to_delivery_report()[:50]
-    for family_obj in records:
-        click.echo(family_obj)
+    records = status_db.analyses_to_delivery_report(pipeline=pipeline)[:50]
+    for case_obj in records:
+        click.echo(case_obj)

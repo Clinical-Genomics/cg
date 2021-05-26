@@ -1,0 +1,73 @@
+{
+  "name": "ctDNA sequencing - order 9",
+  "customer": "cust000",
+  "comment": "order comment",
+  "samples": [
+    {
+      "name": "sample1",
+      "application": "RMLS05R150",
+      "data_analysis": "fluffy",
+      "data_delivery": "nipt-viewer",
+      "comment": "test comment",
+      "volume": "30",
+      "concentration": "5",
+      "concentration_sample": "6",
+      "pool": "pool-1",
+      "index": "IDT DupSeq 10 bp Set B",
+      "index_number": "1",
+      "index_sequence": "A01 - D701-D501 (ATTACTCG-TATAGCCT)",
+      "priority": "research"
+    },
+    {
+      "name": "sample2",
+      "application": "RMLS05R150",
+      "data_analysis": "fluffy",
+      "data_delivery": "nipt-viewer",
+      "comment": "",
+      "volume": "30",
+      "concentration": "5",
+      "concentration_sample": "6",
+      "pool": "pool-1",
+      "rml_plate_name": "",
+      "well_position_rml": "",
+      "index": "IDT DupSeq 10 bp Set B",
+      "index_number": "2",
+      "index_sequence": "B01 - D701-D502 (ATTACTCG-ATAGAGGC)",
+      "priority": "research"
+    },
+    {
+      "name": "sample3",
+      "application": "RMLS05R150",
+      "data_analysis": "fluffy",
+      "data_delivery": "nipt-viewer",
+      "comment": "test comment",
+      "volume": "30",
+      "concentration": "5",
+      "concentration_sample": "6",
+      "pool": "pool-2",
+      "rml_plate_name": "plate1",
+      "well_position_rml": "A:1",
+      "index": "IDT DupSeq 10 bp Set B",
+      "index_number": "3",
+      "index_sequence": "A01 - D701-D501 (ATTACTCG-TATAGCCT)",
+      "priority": "research"
+    },
+    {
+      "name": "sample4",
+      "application": "RMLS05R150",
+      "data_analysis": "fluffy",
+      "data_delivery": "nipt-viewer",
+      "comment": "",
+      "volume": "30",
+      "concentration": "5",
+      "concentration_sample": "6",
+      "pool": "pool-2",
+      "rml_plate_name": "plate1",
+      "well_position_rml": "A:1",
+      "index": "IDT DupSeq 10 bp Set B",
+      "index_number": "4",
+      "index_sequence": "B01 - D701-D502 (ATTACTCG-ATAGAGGC)",
+      "priority": "research"
+    }
+  ]
+}

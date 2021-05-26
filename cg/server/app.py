@@ -1,12 +1,13 @@
 import coloredlogs
-from flask import Flask, redirect, url_for, session
-from flask_admin.base import AdminIndexView
-from flask_dance.contrib.google import make_google_blueprint, google
-from flask_dance.consumer import oauth_authorized
 import requests
+from flask import Flask, redirect, session, url_for
+from flask_admin.base import AdminIndexView
+from flask_dance.consumer import oauth_authorized
+from flask_dance.contrib.google import google, make_google_blueprint
 
 from cg.store import models
-from . import api, ext, admin, invoices
+
+from . import admin, api, ext, invoices
 
 
 def create_app():
@@ -94,8 +95,6 @@ def _register_admin_views():
     ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
     ext.admin.add_view(admin.SampleView(models.Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(models.Pool, ext.db.session))
-    ext.admin.add_view(admin.MicrobialOrderView(models.MicrobialOrder, ext.db.session))
-    ext.admin.add_view(admin.MicrobialSampleView(models.MicrobialSample, ext.db.session))
     ext.admin.add_view(admin.FlowcellView(models.Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
     ext.admin.add_view(admin.DeliveryView(models.Delivery, ext.db.session))

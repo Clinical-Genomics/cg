@@ -1,131 +1,152 @@
 """ Trailblazer API for cg """ ""
 import datetime as dt
+import json
 import logging
-import shutil
-from pathlib import Path
-from typing import List
+from typing import Any, Optional
 
-import click
-import ruamel.yaml
-from trailblazer.mip.start import MipCli
-from trailblazer.store import api, models, Store
-from trailblazer.mip import files, fastq, trending
+import requests
+from google.auth import jwt
+from google.auth.crypt import RSASigner
+
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import Pipeline
+from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
 
 
-class TrailblazerAPI(Store, fastq.FastqHandler):
+class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
-    parse_sampleinfo = staticmethod(files.parse_sampleinfo)
+    __STARTED_STATUSES = ["completed", "failed", "pending", "running", "error"]
+    __ONGOING_STATUSES = ["pending", "running", "error"]
 
     def __init__(self, config: dict):
-        super(TrailblazerAPI, self).__init__(
-            config["trailblazer"]["database"], families_dir=config["trailblazer"]["root"]
+        self.service_account = config["trailblazer"]["service_account"]
+        self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
+        self.host = config["trailblazer"]["host"]
+
+    @property
+    def auth_header(self) -> dict:
+        signer = RSASigner.from_service_account_file(self.service_account_auth_file)
+        payload = {"email": self.service_account}
+        jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
+        return {"Authorization": f"Bearer {jwt_token}"}
+
+    def query_trailblazer(self, command: str, request_body: dict) -> Any:
+        url = self.host + "/" + command
+        LOG.debug(f"REQUEST HEADER {self.auth_header}")
+        LOG.debug(f"POST: URL={url}; JSON={request_body}")
+        response = requests.post(
+            url=url,
+            headers=self.auth_header,
+            json=request_body,
         )
-        self.mip_cli = MipCli(
-            script=config["trailblazer"]["script"],
-            pipeline=config["trailblazer"]["pipeline"],
-            conda_env=config["trailblazer"]["conda_env"],
-        )
-        self.mip_config = config["trailblazer"]["mip_config"]
+        LOG.debug(f"RESPONSE STATUS CODE {response.status_code}")
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(
+                f"Request {command} failed with status code {response.status_code}: {response.text}"
+            )
+        LOG.debug(f"RESPONSE BODY {response.text}")
+        return json.loads(response.text)
 
-    def mark_analyses_deleted(self, case_id: str):
-        """ mark analyses connected to a case as deleted """
-        for old_analysis in self.analyses(family=case_id):
-            old_analysis.is_deleted = True
-        self.commit()
-
-    def add_pending_analysis(self, case_id: str, email: str = None) -> models.Analysis:
-        """ Add analysis as pending"""
-        self.add_pending(case_id, email)
-
-    @staticmethod
-    def get_sampleinfo(analysis: models.Analysis) -> str:
-        """Get the sample info path for an analysis."""
-        raw_data = ruamel.yaml.safe_load(Path(analysis.config_path).open())
-        data = files.parse_config(raw_data)
-        return data["sampleinfo_path"]
-
-    @staticmethod
-    def parse_qcmetrics(data: dict) -> dict:
-        """Call internal Trailblazer MIP API."""
-        return files.parse_qcmetrics(data)
-
-    def is_analysis_ongoing(self, case_id: str) -> bool:
-        """Call internal Trailblazer API"""
-        return self.is_latest_analysis_ongoing(case_id=case_id)
-
-    def is_analysis_failed(self, case_id: str) -> bool:
-        """Call internal Trailblazer API"""
-        return self.is_latest_analysis_failed(case_id=case_id)
-
-    def is_analysis_completed(self, case_id: str) -> bool:
-        """Call internal Trailblazer API"""
-        return self.is_latest_analysis_completed(case_id=case_id)
-
-    def get_analysis_status(self, case_id: str) -> str:
-        """Call internal Trailblazer API"""
-        return self.get_latest_analysis_status(case_id=case_id)
-
-    def has_analysis_started(self, case_id: str) -> bool:
-        """Check if analysis has started"""
-        statuses = ("ongoing", "failed", "completed")
-        get_analysis_status = {
-            "ongoing": self.is_analysis_ongoing,
-            "failed": self.is_analysis_failed,
-            "completed": self.is_analysis_completed,
+    def analyses(
+        self,
+        case_id: str = None,
+        query: str = None,
+        status: str = None,
+        deleted: bool = None,
+        temp: bool = False,
+        before: dt.datetime = None,
+        is_visible: bool = None,
+        family: str = None,
+        data_analysis: Pipeline = None,
+    ) -> list:
+        request_body = {
+            "case_id": case_id,
+            "status": status,
+            "query": query,
+            "deleted": deleted,
+            "temp": temp,
+            "before": str(before) if before else None,
+            "is_visible": is_visible,
+            "family": family,
+            "data_analysis": str(data_analysis).upper() if data_analysis else None,
         }
-        for status in statuses:
-            has_started = get_analysis_status[status](case_id=case_id)
-            if has_started:
-                return has_started
-        return False
+        response = self.query_trailblazer(command="query-analyses", request_body=request_body)
+        if response:
+            if isinstance(response, list):
+                return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+            if isinstance(response, dict):
+                return [TrailblazerAnalysis.parse_obj(response)]
+        return response
 
-    def write_panel(self, case_id: str, content: List[str]):
-        """Write the gene panel to the defined location."""
-        out_dir = Path(self.families_dir) / case_id
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / "gene_panels.bed"
-        with out_path.open("w") as out_handle:
-            for line in content:
-                click.echo(line, file=out_handle)
+    def get_latest_analysis(self, case_id: str) -> Optional[TrailblazerAnalysis]:
+        request_body = {
+            "case_id": case_id,
+        }
+        response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)
 
-    def delete_analysis(
-        self, family: str, date: dt.datetime, yes: bool = False, dry_run: bool = False
-    ):
-        """Delete the analysis output."""
-        if self.analyses(family=family, temp=True).count() > 0:
-            raise ValueError("analysis for family already running")
-        analysis_obj = self.find_analysis(family, date, "completed")
-        assert analysis_obj.is_deleted is False
-        analysis_path = Path(analysis_obj.out_dir).parent
+    def find_analysis(
+        self, case_id: str, started_at: dt.datetime, status: str
+    ) -> Optional[TrailblazerAnalysis]:
+        request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
+        response = self.query_trailblazer(command="find-analysis", request_body=request_body)
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)
 
-        if yes or click.confirm(f"Do you want to remove {analysis_path}?"):
+    def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
+        latest_analysis = self.get_latest_analysis(case_id=case_id)
+        if latest_analysis:
+            return latest_analysis.status
 
-            if not dry_run:
-                shutil.rmtree(analysis_path, ignore_errors=True)
-                analysis_obj.is_deleted = True
-                self.commit()
+    def has_latest_analysis_started(self, case_id: str) -> bool:
+        return self.get_latest_analysis_status(case_id=case_id) in self.__STARTED_STATUSES
 
-    @staticmethod
-    def get_trending(mip_config_raw: str, qcmetrics_raw: str, sampleinfo_raw: dict) -> dict:
-        """Get trending data for a MIP analysis"""
-        return trending.parse_mip_analysis(
-            mip_config_raw=mip_config_raw,
-            qcmetrics_raw=qcmetrics_raw,
-            sampleinfo_raw=sampleinfo_raw,
+    def is_latest_analysis_ongoing(self, case_id: str) -> bool:
+        return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES
+
+    def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
+        """Raises TrailblazerAPIHTTPError"""
+        request_body = {"analysis_id": analysis_id, "force": force}
+        self.query_trailblazer(command="delete-analysis", request_body=request_body)
+
+    def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
+        """Mark all analyses for case deleted without removing analysis files"""
+        request_body = {
+            "case_id": case_id,
+        }
+        response = self.query_trailblazer(
+            command="mark-analyses-deleted", request_body=request_body
         )
+        if response:
+            if isinstance(response, list):
+                return [TrailblazerAnalysis.parse_obj(analysis) for analysis in response]
+            if isinstance(response, dict):
+                return [TrailblazerAnalysis.parse_obj(response)]
 
-    def get_family_root_dir(self, family_id: str):
-        """Get path for a case"""
-        return Path(self.families_dir) / family_id
-
-    def get_latest_logged_analysis(self, case_id: str):
-        """Get the the analysis with the latest logged_at date"""
-        return self.analyses(family=case_id).order_by(models.Analysis.logged_at.desc())
-
-    @staticmethod
-    def get_sampleinfo_date(data: dict) -> str:
-        """Get date from a sampleinfo """
-        return files.get_sampleinfo_date(data)
+    def add_pending_analysis(
+        self,
+        case_id: str,
+        analysis_type: str,
+        config_path: str,
+        out_dir: str,
+        priority: str,
+        email: str = None,
+        data_analysis: Pipeline = None,
+    ) -> TrailblazerAnalysis:
+        request_body = {
+            "case_id": case_id,
+            "email": email,
+            "type": analysis_type,
+            "config_path": config_path,
+            "out_dir": out_dir,
+            "priority": priority,
+            "data_analysis": str(data_analysis).upper(),
+        }
+        LOG.debug("Submitting job to Trailblazer: %s", request_body)
+        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
+        if response:
+            return TrailblazerAnalysis.parse_obj(response)

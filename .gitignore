@@ -20,6 +20,7 @@ lib64/
 parts/
 sdist/
 var/
+venv/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -103,3 +104,6 @@ DEVELOP/
 # Local stuff
 .flake8
 local/
+
+# Secrets
+alembic.ini

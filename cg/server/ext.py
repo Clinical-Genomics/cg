@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.store import models, api
+from cg.store import api, models
 
 
 class CgAlchy(Alchy, api.CoreHandler):

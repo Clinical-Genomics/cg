@@ -1,0 +1,41 @@
+{
+    "name": "External order",
+    "customer": "cust002",
+    "comment": "",
+    "samples": [
+    {
+        "name": "sample1",
+        "application": "EXXCUSR000",
+        "data_analysis": "mip-dna",
+        "data_delivery": "scout",
+        "sex": "male",
+        "status": "affected",
+        "family_name": "fam2",
+        "panels": [
+            "CTD",
+            "CILM"
+        ],
+        "capture_kit": "Agilent Sureselect V5",
+        "source": "blood",
+        "priority": "priority",
+        "comment": "externaly sequenced sample comment"
+    },
+    {
+        "name": "sample2",
+        "application": "WGXCUSC000",
+        "data_delivery": "scout",
+        "data_analysis": "mip-dna",
+        "sex": "female",
+        "status": "unaffected",
+        "family_name": "fam2",
+        "panels": [
+            "CTD",
+            "CILM"
+        ],
+        "source": "blood",
+        "priority": "priority",
+        "capture_kit": "Agilent Sureselect CRE",
+        "comment": "externaly sequenced sample comment"
+    }
+  ]
+}

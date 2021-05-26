@@ -2,6 +2,7 @@
 import os
 
 import pytest
+
 from cg.server.app import create_app
 
 os.environ["CG_SQL_DATABASE_URI"] = "dummy_value"

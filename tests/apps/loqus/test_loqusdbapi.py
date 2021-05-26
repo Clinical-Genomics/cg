@@ -10,7 +10,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.exc import CaseNotFoundError
 
 
-def test_instatiate(loqus_config):
+def test_instantiate(loqus_config: dict):
 
     """Test to instantiate a loqusdb api"""
     # GIVEN a loqusdb api with some configs
@@ -22,12 +22,12 @@ def test_instatiate(loqus_config):
     assert loqusdb.loqusdb_config == loqus_config["loqusdb"]["config_path"]
     assert loqusdb.loqusdb_binary == loqus_config["loqusdb"]["binary_path"]
 
-    # WHEN instatiating with analysis_type argument as 'wes'
+    # WHEN instantiating with analysis_type argument as 'wes'
     loqusdb = LoqusdbAPI(loqus_config, analysis_type="wes")
 
     # THEN assert that the adapter was properly instantiated
-    assert loqusdb.loqusdb_config == loqus_config["loqusdb-wes"]["config_path"]
-    assert loqusdb.loqusdb_binary == loqus_config["loqusdb-wes"]["binary_path"]
+    assert loqusdb.loqusdb_config == loqus_config["loqusdb_wes"]["config_path"]
+    assert loqusdb.loqusdb_binary == loqus_config["loqusdb_wes"]["binary_path"]
 
 
 def test_get_case(loqusdbapi, loqusdb_case_output):
@@ -99,7 +99,7 @@ def test_load(loqusdbapi, loqusdb_output):
 
     """Test to load a case"""
     # GIVEN a loqusdb api and some info about a case
-    family_id = "test"
+    case_id = "test"
     ped_path = "a ped path"
     vcf_path = "a vcf path"
     vcf_sv_path = "a sv_vcf path"
@@ -108,7 +108,7 @@ def test_load(loqusdbapi, loqusdb_output):
     # WHEN uploading a case with 15 variants to loqusdb
     loqusdbapi.process.stderr = loqusdb_output.decode("utf-8")
 
-    data = loqusdbapi.load(family_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
+    data = loqusdbapi.load(case_id, ped_path, vcf_path, vcf_sv_path, gbcf_path)
 
     # THEN assert that the number of variants is 15
 

@@ -1,0 +1,326 @@
+"""Set data in the status database and LIMS"""
+import datetime
+import getpass
+import logging
+from typing import Iterable, List, Optional
+
+import click
+from cg.constants import FLOWCELL_STATUS
+from cg.exc import LimsDataError
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
+
+from .families import families
+from .family import family
+
+CONFIRM = "Continue?"
+HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
+HELP_SKIP_LIMS = "Skip setting value in LIMS"
+HELP_YES = "Answer yes on all confirmations"
+OPTION_LONG_KEY_VALUE = "--key-value"
+OPTION_LONG_SKIP_LIMS = "--skip-lims"
+OPTION_LONG_YES = "--yes"
+OPTION_SHORT_KEY_VALUE = "-kv"
+OPTION_SHORT_YES = "-y"
+NOT_CHANGEABLE_SAMPLE_ATTRIBUTES = [
+    "application_version_id",
+    "customer_id",
+    "deliveries",
+    "flowcells",
+    "id",
+    "internal_id",
+    "invoice",
+    "invoice_id",
+    "is_external",
+    "links",
+    "state",
+    "to_dict",
+]
+
+LOG = logging.getLogger(__name__)
+
+
+@click.group("set")
+def set_cmd():
+    """Update information in the database."""
+    pass
+
+
+@set_cmd.command()
+@click.option(
+    "-id",
+    "--identifier",
+    "identifiers",
+    nargs=2,
+    type=click.Tuple([str, str]),
+    multiple=True,
+    help="Give an identifier on sample and the value to use it with, e.g. -id name Prov52",
+)
+@click.option(
+    "-kv",
+    "--key-value",
+    "kwargs",
+    nargs=2,
+    type=click.Tuple([str, str]),
+    multiple=True,
+    help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
+)
+@click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
+@click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@click.argument("case_id", required=False)
+@click.pass_context
+def samples(
+    context: click.Context,
+    identifiers: click.Tuple([str, str]),
+    kwargs: click.Tuple([str, str]),
+    skip_lims: bool,
+    yes: bool,
+    case_id: str,
+):
+    """Set values on many samples at the same time"""
+    store: Store = context.obj.status_db
+    sample_objs = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
+
+    if not sample_objs:
+        LOG.error("No samples to alter!")
+        context.abort()
+
+    LOG.info("Would alter samples:")
+
+    for sample_obj in sample_objs:
+        LOG.info(f"{sample_obj}")
+
+    if not (yes or click.confirm(CONFIRM)):
+        raise click.Abort
+
+    for sample_obj in sample_objs:
+        context.invoke(
+            sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes, skip_lims=skip_lims
+        )
+
+
+def _get_samples(
+    case_id: str, identifiers: click.Tuple([str, str]), store: Store
+) -> List[models.Sample]:
+    """Get samples that match both case_id and identifiers if given"""
+    samples_by_case_id = None
+    samples_by_id = None
+
+    if case_id:
+        samples_by_case_id = _get_samples_by_case_id(case_id, store)
+
+    if identifiers:
+        samples_by_id = _get_samples_by_identifiers(identifiers, store)
+
+    if case_id and identifiers:
+        sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
+    else:
+        sample_objs = samples_by_case_id or samples_by_id
+
+    return sample_objs
+
+
+def _get_samples_by_identifiers(
+    identifiers: click.Tuple([str, str]), store: Store
+) -> List[models.Sample]:
+    """Get samples matched by given set of identifiers"""
+    identifier_args = {
+        identifier_name: identifier_value for identifier_name, identifier_value in identifiers
+    }
+
+    return list(store.samples_by_ids(**identifier_args))
+
+
+def _get_samples_by_case_id(case_id: str, store: Store) -> List[models.Sample]:
+    """Get samples on a given case-id"""
+    case: models.Family = store.family(internal_id=case_id)
+    return [link.sample for link in case.links] if case else []
+
+
+def is_locked_attribute_on_sample(key: str, skip_attributes: List[str]) -> bool:
+    """Returns true if the attribute is private or in the skip list"""
+    return is_private_attribute(key) or key in skip_attributes
+
+
+def is_private_attribute(key: str) -> bool:
+    """Returns true if key has name indicating it is private"""
+    return key.startswith("_")
+
+
+def list_changeable_sample_attributes(
+    sample_obj: Optional[models.Sample] = None, skip_attributes: List[str] = []
+) -> None:
+    """List changeable attributes on sample and its current value"""
+    sample_attributes: Iterable[str] = models.Sample.__dict__.keys()
+    for attribute in sample_attributes:
+        if is_locked_attribute_on_sample(attribute, skip_attributes):
+            continue
+        message: str = attribute
+        if sample_obj:
+            message += f": {sample_obj.__dict__.get(attribute)}"
+        LOG.info(message)
+
+
+def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
+    """Show help for the set sample command"""
+    LOG.info("sample_id: optional, internal_id of sample to set value on")
+    show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
+    show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
+    show_option_help(
+        short_name=OPTION_SHORT_KEY_VALUE, long_name=OPTION_LONG_KEY_VALUE, help_text=HELP_KEY_VALUE
+    )
+    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
+    LOG.info(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
+    LOG.info(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
+    LOG.info(
+        f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]"
+    )
+
+
+def show_option_help(short_name: str = "", long_name: str = "", help_text: str = "") -> None:
+    """Show help for one option"""
+    help_message = f"Use "
+
+    if short_name:
+        help_message += f"'{short_name}'"
+
+    if short_name and long_name:
+        help_message += " or "
+
+    if long_name:
+        help_message += f"'{long_name}'"
+
+    if help_text:
+        help_message += f": {help_text}"
+
+    LOG.info(help_message)
+
+
+@set_cmd.command()
+@click.argument("sample_id", required=False)
+@click.option(
+    OPTION_SHORT_KEY_VALUE,
+    OPTION_LONG_KEY_VALUE,
+    "kwargs",
+    nargs=2,
+    type=click.Tuple([str, str]),
+    multiple=True,
+    help=HELP_KEY_VALUE,
+)
+@click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
+@click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
+@click.option("--help", is_flag=True)
+@click.pass_obj
+def sample(
+    context: CGConfig,
+    sample_id: Optional[str],
+    kwargs: click.Tuple([str, str]),
+    skip_lims: bool,
+    yes: bool,
+    help: bool,
+):
+    status_db: Store = context.status_db
+    sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
+
+    if help:
+        show_set_sample_help(sample_obj)
+
+    if sample_obj is None:
+        LOG.error(f"Can't find sample {sample_id}")
+        raise click.Abort
+
+    for key, value in kwargs:
+
+        if is_locked_attribute_on_sample(key, NOT_CHANGEABLE_SAMPLE_ATTRIBUTES):
+            LOG.warning(f"{key} is not a changeable attribute on sample")
+            continue
+        if not hasattr(sample_obj, key):
+            LOG.warning(f"{key} is not a property of sample")
+            continue
+
+        new_key: str = key
+        if isinstance(getattr(sample_obj, key), bool):
+            new_value: bool = bool(value.lower() == "true")
+        else:
+            new_value: str = value
+
+        if key in ["customer", "application_version", "priority"]:
+            if key == "priority":
+                if isinstance(value, str) and not value.isdigit():
+                    new_key = "priority_human"
+            elif key == "customer":
+                new_value: models.Customer = status_db.customer(value)
+            elif key == "application_version":
+                new_value: models.ApplicationVersion = status_db.current_application_version(value)
+
+            if not new_value:
+                LOG.error(f"{key} {value} not found, aborting")
+                raise click.Abort
+
+        old_value = getattr(sample_obj, new_key)
+
+        LOG.info(
+            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
+        )
+
+        if not (yes or click.confirm(CONFIRM)):
+            continue
+
+        setattr(sample_obj, new_key, new_value)
+        _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
+        status_db.commit()
+
+    if not skip_lims:
+
+        for key, value in kwargs:
+
+            new_key = "application" if key == "application_version" else key
+            new_value = sample_obj.priority_human if key == "priority" else value
+            LOG.info(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
+
+            if not (yes or click.confirm(CONFIRM)):
+                raise click.Abort
+
+            try:
+                context.lims_api.update_sample(lims_id=sample_id, **{new_key: new_value})
+                LOG.info(f"Set LIMS/{new_key} to {new_value}")
+            except LimsDataError as err:
+                LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}")
+
+
+def _generate_comment(what, old_value, new_value):
+    """Generate a comment that can be used in the comment field to describe updated value"""
+    return f"\n{what} changed from {str(old_value)} to {str(new_value)}."
+
+
+def _update_comment(comment, obj):
+    """Appends the comment on obj including a timestamp"""
+    if comment:
+        timestamp = str(datetime.datetime.now())[:-10]
+        if obj.comment is None:
+            obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}"
+        else:
+            obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}" + "\n" + obj.comment
+
+
+@set_cmd.command()
+@click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
+@click.argument("flowcell_name")
+@click.pass_obj
+def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
+    """Update information about a flowcell"""
+    status_db: Store = context.status_db
+    flowcell_obj: models.Flowcell = status_db.flowcell(flowcell_name)
+
+    if flowcell_obj is None:
+        LOG.warning(f"flowcell not found: {flowcell_name}")
+        raise click.Abort
+    prev_status: str = flowcell_obj.status
+    flowcell_obj.status = status
+
+    status_db.commit()
+    LOG.info(f"{flowcell_name} set: {prev_status} -> {status}")
+
+
+set_cmd.add_command(family)
+set_cmd.add_command(families)

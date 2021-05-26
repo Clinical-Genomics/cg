@@ -1,130 +1,243 @@
-import gzip
+""" API to manage Microsalt Analyses
+    Organism - Fallback based on reference, ‘Other species’ and ‘Comment’. Default to “Unset”.
+    Priority = Default to empty string. Weird response. Typically “standard” or “research”.
+    Reference = Defaults to “None”
+    Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
+    Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
+    datetime.min"""
+
 import logging
+import os
 import re
+from datetime import datetime
 from pathlib import Path
-from typing import List, Any
-from ruamel.yaml import safe_load
+from subprocess import CalledProcessError
+from typing import Any, Dict, List, Optional, Tuple
 
-from requests.exceptions import HTTPError
+import click
+from cg.constants import Pipeline
+from cg.exc import CgDataError
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.models.cg_config import CGConfig
+from cg.store import models
+from cg.utils import Process
 
-from cg.apps import tb, hk, scoutapi, lims
-from cg.apps.pipelines.fastqhandler import BaseFastqHandler
-from cg.store import models, Store
-
-
-class AnalysisAPI:
-    """The pipelines are accessed through Trailblazer but cg provides additional conventions and
-    hooks into the status database that makes managing analyses simpler"""
-
-    def __init__(
-        self,
-        db: Store,
-        hk_api: hk.HousekeeperAPI,
-        lims_api: lims.LimsAPI,
-        yaml_loader=safe_load,
-        path_api=Path,
-        logger=logging.getLogger(__name__),
-    ):
-        self.db = db
-        self.hk = hk_api
-        self.lims = lims_api
-        self.yaml_loader = yaml_loader
-        self.pather = path_api
-        self.LOG = logger
-
-    def check(self, family_obj: models.Family):
-        """Check stuff before starting the analysis."""
-        flowcells = self.db.flowcells(family=family_obj)
-        statuses = []
-        for flowcell_obj in flowcells:
-            self.LOG.debug(f"{flowcell_obj.name}: checking flowcell")
-            statuses.append(flowcell_obj.status)
-            if flowcell_obj.status == "removed":
-                self.LOG.info(f"{flowcell_obj.name}: requesting removed flowcell")
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                self.LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
-        return all(status == "ondisk" for status in statuses)
-
-    @staticmethod
-    def fastq_header(line):
-        """handle illumina's two different header formats
-        @see https://en.wikipedia.org/wiki/FASTQ_format
-
-        @HWUSI-EAS100R:6:73:941:1973#0/1
-
-            HWUSI-EAS100R   the unique instrument name
-            6   flowcell lane
-            73  tile number within the flowcell lane
-            941     'x'-coordinate of the cluster within the tile
-            1973    'y'-coordinate of the cluster within the tile
-            #0  index number for a multiplexed sample (0 for no indexing)
-            /1  the member of a pair, /1 or /2 (paired-end or mate-pair reads only)
-
-        Versions of the Illumina pipeline since 1.4 appear to use #NNNNNN
-        instead of #0 for the multiplex ID, where NNNNNN is the sequence of the
-        multiplex tag.
-
-        With Casava 1.8 the format of the '@' line has changed:
-
-        @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-
-            EAS139  the unique instrument name
-            136     the run id
-            FC706VJ     the flowcell id
-            2   flowcell lane
-            2104    tile number within the flowcell lane
-            15343   'x'-coordinate of the cluster within the tile
-            197393  'y'-coordinate of the cluster within the tile
-            1   the member of a pair, 1 or 2 (paired-end or mate-pair reads only)
-            Y   Y if the read is filtered, N otherwise
-            18  0 when none of the control bits are on, otherwise it is an even number
-            ATCACG  index sequence
+LOG = logging.getLogger(__name__)
 
 
-        TODO: add unit test
+class MicrosaltAnalysisAPI(AnalysisAPI):
+    """API to manage Microsalt Analyses"""
+
+    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MICROSALT):
+
+        super().__init__(pipeline, config)
+        self.root_dir = config.microsalt.root
+        self.queries_path = config.microsalt.queries_path
+
+    @property
+    def threshold_reads(self):
+        return False
+
+    @property
+    def fastq_handler(self):
+        return MicrosaltFastqHandler
+
+    @property
+    def process(self) -> Process:
+        if not self._process:
+            self._process = Process(
+                binary=self.config.microsalt.binary_path,
+                environment=self.config.microsalt.conda_env,
+            )
+        return self._process
+
+    def get_case_fastq_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, "fastq", case_id)
+
+    def get_config_path(self, filename: str) -> Path:
+        return Path(self.queries_path, filename).with_suffix(".json")
+
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        case_obj: models.Family = self.status_db.family(case_id)
+        sample_obj: model.Sample = case_obj.links[0].sample
+        project_id: str = self.get_project(sample_obj.internal_id)
+        return Path(
+            self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
+        )
+
+    def get_deliverables_file_path(self, case_id: str) -> Path:
+        """Returns a path where the microSALT deliverables file for the order_id should be
+        located"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        order_id: str = case_obj.name
+        deliverables_file_path = Path(
+            self.root_dir,
+            "results",
+            "reports",
+            "deliverables",
+            f"{order_id}_deliverables.yaml",
+        )
+        if deliverables_file_path.exists():
+            LOG.info("Found deliverables file %s", deliverables_file_path)
+        return deliverables_file_path
+
+    def get_sample_fastq_destination_dir(
+        self, case_obj: models.Family, sample_obj: models.Sample
+    ) -> Path:
+        return Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_obj.internal_id)
+
+    def link_fastq_files(
+        self, case_id: str, sample_id: Optional[str], dry_run: bool = False
+    ) -> None:
+        case_obj: models.Family = self.status_db.family(case_id)
+        samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        for sample_obj in samples:
+            self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
+
+    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
+        """Returns a list of samples to configure
+        If sample_id is specified, will return a list with only this sample_id.
+        Otherwise, returns all samples in given case"""
+        if sample_id:
+            return [
+                self.status_db.query(models.Sample)
+                .filter(models.Sample.internal_id == sample_id)
+                .first()
+            ]
+
+        case_obj: models.Family = self.status_db.family(case_id)
+        return [link.sample for link in case_obj.links]
+
+    def get_lims_comment(self, sample_id: str) -> str:
+        """Returns the comment associated with a sample stored in lims"""
+        comment: str = self.lims_api.get_sample_comment(sample_id) or ""
+        if re.match(r"\w{4}\d{2,3}", comment):
+            return comment
+
+        return ""
+
+    def get_organism(self, sample_obj: models.Sample) -> str:
+        """Organism
+        - Fallback based on reference, ‘Other species’ and ‘Comment’.
+        Default to "Unset"."""
+
+        if not sample_obj.organism:
+            raise CgDataError(f"Organism missing on Sample")
+
+        organism: str = sample_obj.organism.internal_id.strip()
+        comment: str = self.get_lims_comment(sample_id=sample_obj.internal_id)
+        has_comment = bool(comment)
+
+        if "gonorrhoeae" in organism:
+            organism = "Neisseria spp."
+        elif "Cutibacterium acnes" in organism:
+            organism = "Propionibacterium acnes"
+
+        if organism == "VRE":
+            reference = sample_obj.organism.reference_genome
+            if reference == "NC_017960.1":
+                organism = "Enterococcus faecium"
+            elif reference == "NC_004668.1":
+                organism = "Enterococcus faecalis"
+            elif has_comment:
+                organism = comment
+
+        return organism
+
+    def get_parameters(self, sample_obj: models.Sample) -> Dict[str, str]:
+        """Fill a dict with case config information for one sample"""
+
+        sample_id = sample_obj.internal_id
+        method_library_prep = self.lims_api.get_prep_method(sample_id)
+        if method_library_prep:
+            method_library_prep, _ = method_library_prep.split(" ", 1)
+        method_sequencing = self.lims_api.get_sequencing_method(sample_id)
+        if method_sequencing:
+            method_sequencing, _ = method_sequencing.split(" ", 1)
+        priority = "research" if sample_obj.priority == 0 else "standard"
+
+        return {
+            "CG_ID_project": self.get_project(sample_id),
+            "Customer_ID_project": sample_obj.ticket_number,
+            "CG_ID_sample": sample_obj.internal_id,
+            "Customer_ID_sample": sample_obj.name,
+            "organism": self.get_organism(sample_obj),
+            "priority": priority,
+            "reference": sample_obj.reference_genome,
+            "Customer_ID": sample_obj.customer.internal_id,
+            "application_tag": sample_obj.application_version.application.tag,
+            "date_arrival": str(sample_obj.received_at or datetime.min),
+            "date_sequencing": str(sample_obj.sequenced_at or datetime.min),
+            "date_libprep": str(sample_obj.prepared_at or datetime.min),
+            "method_libprep": method_library_prep or "Not in LIMS",
+            "method_sequencing": method_sequencing or "Not in LIMS",
+            "sequencing_qc_passed": sample_obj.sequencing_qc,
+        }
+
+    def get_project(self, sample_id: str) -> str:
+        """Get LIMS project for a sample"""
+        return self.lims_api.get_sample_project(sample_id)
+
+    def get_cases_to_store(self) -> List[models.Family]:
+        """Retrieve a list of microbial deliverables files for orders where analysis finished
+        successfully, and are ready to be stored in Housekeeper"""
+        return [
+            case_obj
+            for case_obj in self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
+            if self.get_deliverables_file_path(case_id=case_obj.internal_id).exists()
+        ]
+
+    def resolve_case_sample_id(
+        self, sample: bool, ticket: bool, unique_id: Any
+    ) -> Tuple[str, Optional[str]]:
+        """Resolve case_id and sample_id w based on input arguments."""
+        if ticket and sample:
+            LOG.error("Flags -t and -s are mutually exclusive!")
+            raise click.Abort
+
+        if ticket:
+            case_id, sample_id = self.get_case_id_from_ticket(unique_id)
+
+        elif sample:
+            case_id, sample_id = self.get_case_id_from_sample(unique_id)
+
+        else:
+            case_id, sample_id = self.get_case_id_from_case(unique_id)
+
+        return case_id, sample_id
+
+    def get_case_id_from_ticket(self, unique_id: str) -> Tuple[str, None]:
+        """If ticked is provided as argument, finds the corresponding case_id and returns it.
+        Since sample_id is not specified, nothing is returned as sample_id"""
+        case_obj: models.Family = self.status_db.find_family_by_name(unique_id)
+        if not case_obj:
+            LOG.error("No case found for ticket number:  %s", unique_id)
+            raise click.Abort
+        case_id = case_obj.internal_id
+        return case_id, None
+
+    def get_case_id_from_sample(self, unique_id: str) -> Tuple[str, str]:
+        """If sample is specified, finds the corresponding case_id to which this sample belongs.
+        The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
         """
+        sample_obj: models.Sample = (
+            self.status_db.query(models.Sample)
+            .filter(models.Sample.internal_id == unique_id)
+            .first()
+        )
+        if not sample_obj:
+            LOG.error("No sample found with id: %s", unique_id)
+            raise click.Abort
+        case_id = sample_obj.links[0].family.internal_id
+        sample_id = sample_obj.internal_id
+        return case_id, sample_id
 
-        rs = {"lane": None, "flowcell": None, "readnumber": None}
-
-        parts = line.split(":")
-        if len(parts) == 5:  # @HWUSI-EAS100R:6:73:941:1973#0/1
-            rs["lane"] = parts[1]
-            rs["flowcell"] = "XXXXXX"
-            rs["readnumber"] = parts[-1].split("/")[-1]
-        if len(parts) == 10:  # @EAS139:136:FC706VJ:2:2104:15343:197393 1:Y:18:ATCACG
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[6].split(" ")[-1]
-        if len(parts) == 7:  # @ST-E00201:173:HCLCGALXX:1:2106:22516:34834/1
-            rs["lane"] = parts[3]
-            rs["flowcell"] = parts[2]
-            rs["readnumber"] = parts[-1].split("/")[-1]
-
-        return rs
-
-    def link_sample(self, fastq_handler: BaseFastqHandler, sample: str, case: str):
-        """Link FASTQ files for a sample."""
-        file_objs = self.hk.files(bundle=sample, tags=["fastq"])
-        files = []
-
-        for file_obj in file_objs:
-            # figure out flowcell name from header
-            with gzip.open(file_obj.full_path) as handle:
-                header_line = handle.readline().decode()
-                header_info = self.fastq_header(header_line)
-
-            data = {
-                "path": file_obj.full_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("_Undetermined_" in file_obj.path),
-            }
-            # look for tile identifier (HiSeq X runs)
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", file_obj.path)
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
-            files.append(data)
-
-        fastq_handler.link(case=case, sample=sample, files=files)
+    def get_case_id_from_case(self, unique_id: str) -> Tuple[str, None]:
+        """If case_id is specified, validates the presence of case_id in database and returns it"""
+        case_obj: models.Family = self.status_db.family(unique_id)
+        if not case_obj:
+            LOG.error("No case found with the id:  %s", unique_id)
+            raise click.Abort
+        case_id = case_obj.internal_id
+        return case_id, None

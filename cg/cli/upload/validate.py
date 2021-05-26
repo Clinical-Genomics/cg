@@ -1,28 +1,32 @@
 """Code for validating an upload via CLI"""
+from typing import List, Optional
 
 import click
+from cg.apps.coverage import ChanjoAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
 
-from cg.apps import coverage as coverage_app
-
-from .utils import _suggest_cases_to_upload
+from .utils import suggest_cases_to_upload
 
 
 @click.command()
 @click.argument("family_id", required=False)
-@click.pass_context
-def validate(context, family_id):
+@click.pass_obj
+def validate(context: CGConfig, family_id: Optional[str]):
     """Validate a family of samples."""
+
+    status_db: Store = context.status_db
+    chanjo_api: ChanjoAPI = context.chanjo_api
 
     click.echo(click.style("----------------- VALIDATE --------------------"))
 
     if not family_id:
-        _suggest_cases_to_upload(context)
-        context.abort()
+        suggest_cases_to_upload(context)
+        raise click.Abort
 
-    family_obj = context.obj["status"].family(family_id)
-    chanjo_api = coverage_app.ChanjoAPI(context.obj)
-    chanjo_samples = []
-    for link_obj in family_obj.links:
+    case_obj = status_db.family(family_id)
+    chanjo_samples: List[dict] = []
+    for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id
         chanjo_sample = chanjo_api.sample(sample_id)
         if chanjo_sample is None:
@@ -34,7 +38,7 @@ def validate(context, family_id):
         return
 
     coverage_results = chanjo_api.omim_coverage(chanjo_samples)
-    for link_obj in family_obj.links:
+    for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id
         if sample_id in coverage_results:
             completeness = coverage_results[sample_id]["mean_completeness"]

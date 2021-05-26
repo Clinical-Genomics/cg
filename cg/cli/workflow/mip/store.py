@@ -1,95 +1,100 @@
 """Click commands to store mip analyses"""
 import logging
 from pathlib import Path
-import sys
 
 import click
-
-from cg.apps import hk, tb
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import (
-    AnalysisNotFinishedError,
     AnalysisDuplicationError,
+    AnalysisNotFinishedError,
     BundleAlreadyAddedError,
-    PipelineUnknownError,
     MandatoryFilesMissing,
+    PipelineUnknownError,
 )
-from cg.meta.store.mip import gather_files_and_bundle_in_housekeeper
+from cg.meta.store.base import gather_files_and_bundle_in_housekeeper
+from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
-FAIL = 1
-SUCCESS = 0
 
 
 @click.group()
-@click.pass_context
-def store(context):
-    """Store results from MIP in housekeeper."""
-    context.obj["db"] = Store(context.obj["database"])
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["hk_api"] = hk.HousekeeperAPI(context.obj)
+@click.pass_obj
+def store(context: CGConfig):
+    """Store results from MIP in housekeeper"""
+
+    context.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context)
 
 
 @store.command()
 @click.argument("config-stream", type=click.File("r"), required=False)
-@click.pass_context
-def analysis(context, config_stream):
-    """Store a finished analysis in Housekeeper."""
-    status = context.obj["db"]
-    hk_api = context.obj["hk_api"]
+@click.pass_obj
+def analysis(context: CGConfig, config_stream):
+    """Store a finished analysis in Housekeeper"""
 
+    analysis_api: MipDNAAnalysisAPI = context.meta_apis["analysis_api"]
+
+    exit_code = EXIT_SUCCESS
     if not config_stream:
         LOG.error("Provide a config file.")
-        context.abort()
+        raise click.Abort
 
     try:
         new_analysis = gather_files_and_bundle_in_housekeeper(
-            config_stream,
-            hk_api,
-            status,
+            config_stream=config_stream,
+            hk_api=analysis_api.housekeeper_api,
+            status=analysis_api.status_db,
+            workflow=Pipeline.MIP_DNA,
         )
-    except AnalysisNotFinishedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except AnalysisDuplicationError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except BundleAlreadyAddedError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except PipelineUnknownError as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
-    except MandatoryFilesMissing as error:
-        click.echo(click.style(error.message, fg="red"))
-        context.abort()
+        analysis_api.status_db.add_commit(new_analysis)
+    except (
+        AnalysisNotFinishedError,
+        AnalysisDuplicationError,
+        BundleAlreadyAddedError,
+        PipelineUnknownError,
+        MandatoryFilesMissing,
+    ) as error:
+        LOG.error(error.message)
+        exit_code = EXIT_FAIL
     except FileNotFoundError as error:
-        click.echo(click.style(f"missing file: {error.args[0]}", fg="red"))
-        context.abort()
+        LOG.error(f"Missing file: {error}")
+        exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort
 
-    status.add_commit(new_analysis)
-    click.echo(click.style("included files in Housekeeper", fg="green"))
+    LOG.info("Included files in Housekeeper")
 
 
 @store.command()
 @click.pass_context
-def completed(context):
-    """Store all completed analyses."""
-    hk_api = context.obj["hk_api"]
-    tb_api = context.obj["tb_api"]
+def completed(context: click.Context):
+    """Store all completed analyses"""
 
-    exit_code = SUCCESS
-    for analysis_obj in tb_api.analyses(status="completed", deleted=False):
-        existing_record = hk_api.version(analysis_obj.family, analysis_obj.started_at)
-        if existing_record:
-            LOG.debug("analysis stored: %s - %s", analysis_obj.family, analysis_obj.started_at)
-            continue
-        click.echo(click.style(f"storing family: {analysis_obj.family}", fg="blue"))
-        with Path(analysis_obj.config_path).open() as config_stream:
-            try:
+    analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
+
+    exit_code = EXIT_SUCCESS
+    for case_obj in analysis_api.status_db.cases_to_store(pipeline=Pipeline.MIP_DNA):
+        try:
+            analysis_obj: TrailblazerAnalysis = analysis_api.trailblazer_api.get_latest_analysis(
+                case_id=case_obj.internal_id
+            )
+            if analysis_obj.status != "completed":
+                continue
+            LOG.info(f"Storing case: {analysis_obj.family}")
+            with Path(
+                analysis_api.get_case_config_path(case_id=case_obj.internal_id)
+            ).open() as config_stream:
+
                 context.invoke(analysis, config_stream=config_stream)
-            except Exception:
-                LOG.error("case storage failed: %s", analysis_obj.family, exc_info=True)
-                exit_code = FAIL
-
-    sys.exit(exit_code)
+        except (Exception, click.Abort) as error:
+            LOG.error(f"Case storage failed: {case_obj.internal_id}, {error}")
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort

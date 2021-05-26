@@ -1,0 +1,40 @@
+{
+  "name": "Cancer order",
+  "customer": "cust000",
+  "comment": "",
+  "samples": [
+    {
+      "name": "s1",
+      "container": "96 well plate",
+      "application": "WGTPCFC030",
+      "data_analysis": "balsamic",
+      "data_delivery": "scout",
+      "sex": "male",
+      "require_qcok": false,
+      "volume": "1",
+      "source": "blood",
+      "tumour": true,
+      "tumour_purity": "75",
+      "capture_kit": "LymphoMATIC",
+      "priority": "standard",
+      "container_name": "p1",
+      "well_position": "A:1",
+      "quantity": "2",
+      "family_name": "family1",
+      "elution_buffer": "Other (specify in 'Comments')",
+      "formalin_fixation_time": "1",
+      "post_formalin_fixation_time": "2",
+      "tissue_block_size": "small",
+      "comment": "other Elution buffer",
+      "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "cohorts": [
+        ""
+      ]
+    }
+  ]
+}

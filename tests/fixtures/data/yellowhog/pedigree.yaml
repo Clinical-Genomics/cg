@@ -1,0 +1,5 @@
+case: yellowhog
+default_gene_panels:
+  - '"IEM"'
+  - ' "EP"'
+samples: []

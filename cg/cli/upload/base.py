@@ -3,27 +3,30 @@ import datetime as dt
 import logging
 import sys
 import traceback
+from typing import Optional
 
 import click
 
-from cg.apps import coverage as coverage_app
-from cg.apps import gt, hk, lims, madeline, scoutapi, tb
-from cg.cli.workflow.mip_dna.deliver import CASE_TAGS, SAMPLE_TAGS
-from cg.exc import AnalysisUploadError
-from cg.meta.deliver import DeliverAPI
+from cg.cli.upload.nipt import nipt
+from cg.constants import Pipeline
+from cg.exc import AnalysisUploadError, CgError
 from cg.meta.report.api import ReportAPI
-from cg.meta.upload.scoutapi import UploadScoutAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
-from cg.store import Store
+from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
+from cg.utils.click.EnumChoice import EnumChoice
 
-from .beacon import beacon
+from . import vogue
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .genotype import genotypes
+from .gisaid import gisaid
 from .mutacc import process_solved, processed_solved
 from .observations import observations
-from .scout import scout, upload_case_to_scout
-from .utils import _suggest_cases_to_upload
+from .scout import create_scout_load_config, scout, upload_case_to_scout
+from .utils import suggest_cases_to_upload
 from .validate import validate
 
 LOG = logging.getLogger(__name__)
@@ -39,31 +42,34 @@ LOG = logging.getLogger(__name__)
     help="Force upload of analysis " "marked as started",
 )
 @click.pass_context
-def upload(context, family_id, force_restart):
+def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
     """Upload results from analyses."""
+    config_object: CGConfig = context.obj
+    if not config_object.meta_apis.get("analysis_api"):
+        config_object.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    analysis_api: AnalysisAPI = config_object.meta_apis["analysis_api"]
+    status_db: Store = config_object.status_db
 
     click.echo(click.style("----------------- UPLOAD ----------------------"))
 
-    context.obj["status"] = Store(context.obj["database"])
-
     if family_id:
-        family_obj = context.obj["status"].family(family_id)
-        if not family_obj:
-            message = f"family not found: {family_id}"
-            click.echo(click.style(message, fg="red"))
-            context.abort()
+        try:
+            analysis_api.verify_case_id_in_statusdb(case_id=family_id)
+        except CgError:
+            raise click.Abort
 
-        if not family_obj.analyses:
+        case_obj: models.Family = status_db.family(family_id)
+        if not case_obj.analyses:
             message = f"no analysis exists for family: {family_id}"
             click.echo(click.style(message, fg="red"))
-            context.abort()
+            raise click.Abort
 
-        analysis_obj = family_obj.analyses[0]
+        analysis_obj: models.Analysis = case_obj.analyses[0]
 
         if analysis_obj.uploaded_at is not None:
             message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
             click.echo(click.style(message, fg="red"))
-            context.abort()
+            raise click.Abort
 
         if not force_restart and analysis_obj.upload_started_at is not None:
             if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
@@ -76,94 +82,73 @@ def upload(context, family_id, force_restart):
             click.echo(click.style(message, fg="yellow"))
             return
 
-    context.obj["housekeeper_api"] = hk.HousekeeperAPI(context.obj)
-
-    context.obj["madeline_api"] = madeline.api.MadelineAPI(context.obj)
-    context.obj["genotype_api"] = gt.GenotypeAPI(context.obj)
-    context.obj["lims_api"] = lims.LimsAPI(context.obj)
-    context.obj["tb_api"] = tb.TrailblazerAPI(context.obj)
-    context.obj["chanjo_api"] = coverage_app.ChanjoAPI(context.obj)
-    context.obj["deliver_api"] = DeliverAPI(
-        context.obj,
-        hk_api=context.obj["housekeeper_api"],
-        lims_api=context.obj["lims_api"],
-        case_tags=CASE_TAGS,
-        sample_tags=SAMPLE_TAGS,
-    )
-    context.obj["scout_api"] = scoutapi.ScoutAPI(context.obj)
-    context.obj["analysis_api"] = AnalysisAPI(
-        context.obj,
-        hk_api=context.obj["housekeeper_api"],
-        scout_api=context.obj["scout_api"],
-        tb_api=context.obj["tb_api"],
-        lims_api=context.obj["lims_api"],
-        deliver_api=context.obj["deliver_api"],
-    )
-    context.obj["report_api"] = ReportAPI(
-        store=context.obj["status"],
-        lims_api=context.obj["lims_api"],
-        chanjo_api=context.obj["chanjo_api"],
-        analysis_api=context.obj["analysis_api"],
-        scout_api=context.obj["scout_api"],
+    context.obj.meta_apis["report_api"] = ReportAPI(
+        store=status_db,
+        lims_api=config_object.lims_api,
+        chanjo_api=config_object.chanjo_api,
+        analysis_api=analysis_api,
+        scout_api=config_object.scout_api,
     )
 
-    context.obj["scout_upload_api"] = UploadScoutAPI(
-        hk_api=context.obj["housekeeper_api"],
-        scout_api=context.obj["scout_api"],
-        madeline_api=context.obj["madeline_api"],
-        analysis_api=context.obj["analysis_api"],
-        lims_api=context.obj["lims_api"],
+    context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
+        hk_api=config_object.housekeeper_api,
+        scout_api=config_object.scout_api,
+        madeline_api=config_object.madeline_api,
+        analysis_api=analysis_api,
+        lims_api=config_object.lims_api,
     )
 
     if context.invoked_subcommand is not None:
         return
 
     if not family_id:
-        _suggest_cases_to_upload(context)
-        context.abort()
+        suggest_cases_to_upload(status_db=status_db)
+        raise click.Abort
 
-    family_obj = context.obj["status"].family(family_id)
-    analysis_obj = family_obj.analyses[0]
+    case_obj: models.Family = status_db.family(family_id)
+    analysis_obj: models.Analysis = case_obj.analyses[0]
     if analysis_obj.uploaded_at is not None:
         message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
         click.echo(click.style(message, fg="yellow"))
     else:
         analysis_obj.upload_started_at = dt.datetime.now()
-        context.obj["status"].commit()
+        status_db.commit()
         context.invoke(coverage, re_upload=True, family_id=family_id)
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
         context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
-        context.obj["status"].commit()
+        status_db.commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
 
 
 @upload.command()
-@click.option("--pipeline", type=str, help="Limit to specific pipeline")
+@click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
 @click.pass_context
-def auto(context: click.Context, pipeline: str = None):
+def auto(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses."""
+
+    status_db: Store = context.obj.status_db
 
     click.echo(click.style("----------------- AUTO ------------------------"))
 
     exit_code = 0
-    for analysis_obj in context.obj["status"].analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
 
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
-                "Newer analysis already uploaded for %s, skipping", analysis_obj.family.internal_id
+                "Newer analysis already uploaded for %s, skipping",
+                analysis_obj.family.internal_id,
             )
             continue
-
         internal_id = analysis_obj.family.internal_id
-        LOG.info("uploading family: %s", internal_id)
+
+        LOG.info("Uploading family: %s", internal_id)
         try:
             context.invoke(upload, family_id=internal_id)
         except Exception:
-
-            LOG.error("uploading family failed: %s", internal_id)
+            LOG.error("Uploading family failed: %s", internal_id)
             LOG.error(traceback.format_exc())
             exit_code = 1
 
@@ -173,12 +158,15 @@ def auto(context: click.Context, pipeline: str = None):
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
 upload.add_command(validate)
-upload.add_command(beacon)
 upload.add_command(scout)
 upload.add_command(upload_case_to_scout)
+upload.add_command(create_scout_load_config)
 upload.add_command(observations)
 upload.add_command(genotypes)
 upload.add_command(coverage)
 upload.add_command(delivery_report)
 upload.add_command(delivery_reports)
 upload.add_command(delivery_report_to_scout)
+upload.add_command(vogue)
+upload.add_command(gisaid)
+upload.add_command(nipt)

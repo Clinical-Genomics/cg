@@ -1,41 +1,21 @@
 """Fixtures for the meta tests"""
 
+from datetime import datetime
+
 import pytest
-from _pytest import tmpdir
+from tests.store_helpers import StoreHelpers
 
-from cg.apps.balsamic.fastq import FastqHandler as BalsamicFastqHandler
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.tb import TrailblazerAPI
-from cg.apps.usalt.fastq import FastqHandler as MicrosaltFastqHandler
-from cg.meta.deliver import DeliverAPI
-from cg.meta.workflow.mip_dna import AnalysisAPI
-from tests.mocks.hk_mock import MockFile
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.store import Store
 
 
-@pytest.yield_fixture(scope="function")
-def trailblazer_api(tmpdir):
-    """Setup Trailblazer api."""
-    root_path = tmpdir.mkdir("families")
-    _store = TrailblazerAPI(
-        {
-            "trailblazer": {
-                "database": "sqlite://",
-                "root": str(root_path),
-                "script": ".",
-                "mip_config": ".",
-            }
-        }
-    )
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
-@pytest.yield_fixture(scope="function")
-def analysis_store(base_store, analysis_family):
+@pytest.fixture(scope="function", name="analysis_store")
+def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
     """Setup a store instance for testing analysis API."""
     customer = base_store.customer("cust000")
     family = base_store.Family(
+        data_analysis=analysis_family["data_analysis"],
         name=analysis_family["name"],
         panels=analysis_family["panels"],
         internal_id=analysis_family["internal_id"],
@@ -52,7 +32,6 @@ def analysis_store(base_store, analysis_family):
             ticket=sample_data["ticket_number"],
             reads=sample_data["reads"],
             capture_kit=sample_data["capture_kit"],
-            data_analysis=sample_data["data_analysis"],
         )
         sample.family = family
         sample.application_version = application_version
@@ -73,176 +52,87 @@ def analysis_store(base_store, analysis_family):
     yield base_store
 
 
-class MockCrunchy(CrunchyAPI):
-
-    pass
-
-
-class MockLims:
-    """Mock lims fixture"""
-
-    lims = None
-
-    def __init__(self):
-        self.lims = self
-
-
-class MockDeliver(DeliverAPI):
-    def __init__(self):
-        self.housekeeper = None
-        self.lims = MockLims()
-
-    def get_post_analysis_files(self, case: str, version, tags):
-
-        if tags[0] == "mip-config":
-            path = f"/mnt/hds/proj/bioinfo/bundles/{case}/2018-01-30/{case}_config.yaml"
-        elif tags[0] == "sampleinfo":
-            path = f"/mnt/hds/proj/bioinfo/bundles/{case}/2018-01-30/{case}_qc_sample_info.yaml"
-        if tags[0] == "qcmetrics":
-            path = f"/mnt/hds/proj/bioinfo/bundles/{case}/2018-01-30/{case}_qc_metrics.yaml"
-
-        return [MockFile(path=path)]
-
-    def get_post_analysis_case_files(self, case: str, version, tags):
-        return ""
-
-    def get_post_analysis_files_root_dir(self):
-        return ""
-
-
-class MockPath:
-    def __init__(self, path):
-        self.yaml = None
-
-    def __call__(self, *args, **kwargs):
-        return self
-
-    def open(self):
-        return dict()
-
-    def joinpath(self, path):
-        return ""
-
-
-class MockLogger:
-    warnings = []
-
-    def warning(self, text, *interpolations):
-
-        self.warnings.append(text % interpolations)
-
-    def get_warnings(self) -> list:
-        return self.warnings
-
-
-class MockTB:
-    _get_trending_raises_keyerror = False
-
-    def __init__(self):
-        """Needed to initialise mock variables"""
-        self._make_config_was_called = False
-
-    def get_trending(self, mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
-        if self._get_trending_raises_keyerror:
-            raise KeyError("mockmessage")
-
-        # Returns: dict: parsed data
-        ### Define output dict
-        outdata = {
-            "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "family": "yellowhog",
-            "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
-            "genome_build": "hg19",
-            "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
-            "mip_version": "v4.0.20",
-            "sample_ids": ["2018-20203", "2018-20204"],
-            "genome_build": "37",
-            "rank_model_version": "1.18",
-        }
-
-        return outdata
-
-    def get_sampleinfo(self, analysis_obj):
-        return ""
-
-    def make_config(self, data, pipeline):
-        """Mock the make_config"""
-        self._make_config_was_called = True
-        del pipeline
-        return data
-
-
-class MockBalsamicFastq(BalsamicFastqHandler):
-    """Mock FastqHandler for analysis_api"""
-
-    def __init__(self):
-        super().__init__(config={"balsamic": {"root": tmpdir}})
-
-
-class MockMicrosaltFastq(MicrosaltFastqHandler):
-    """Mock FastqHandler for analysis_api"""
-
-    def __init__(self):
-        super().__init__(config={"usalt": {"root": tmpdir}})
-
-
-def safe_loader(path):
-    """Mock function for loading yaml"""
-
-    if path:
-        pass
-
-    return {
-        "human_genome_build": {"version": ""},
-        "recipe": {"rankvariant": {"rank_model": {"version": 1.18}}},
-    }
-
-
-@pytest.yield_fixture(scope="function")
-def analysis_api(analysis_store, housekeeper_api, scout_api):
-    """Setup an analysis API."""
-    Path_mock = MockPath("")
-    tb_mock = MockTB()
-    deliver_mock = MockDeliver()
-    deliver_mock.housekeeper = housekeeper_api
-
-    _analysis_api = AnalysisAPI(
-        db=analysis_store,
-        hk_api=housekeeper_api,
-        scout_api=scout_api,
-        tb_api=tb_mock,
-        lims_api=None,
-        deliver_api=deliver_mock,
-        yaml_loader=safe_loader,
-        path_api=Path_mock,
-        logger=MockLogger(),
-    )
-    yield _analysis_api
-
-
-@pytest.yield_fixture(scope="function")
-def deliver_api(analysis_store, housekeeper_api, case_id, timestamp, helpers):
-    """Fixture for deliver_api"""
-    lims_mock = MockLims()
-    hk_mock = housekeeper_api
-
+@pytest.fixture(scope="function", name="mip_hk_store")
+def fixture_mip_hk_store(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    timestamp: datetime,
+    case_id: str,
+) -> HousekeeperAPI:
     deliver_hk_bundle_data = {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": "/mock/path", "archive": False, "tags": ["case-tag"]},
-            {"path": "/mock/path", "archive": False, "tags": ["sample-tag", "ADM1"]},
+            {
+                "path": "tests/fixtures/apps/mip/dna/store/case_config.yaml",
+                "archive": False,
+                "tags": ["mip-config"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
+                "archive": False,
+                "tags": ["sampleinfo"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/case_qc_metrics.yaml",
+                "archive": False,
+                "tags": ["qcmetrics"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/case_file.txt",
+                "archive": False,
+                "tags": ["case-tag"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/sample_file.txt",
+                "archive": False,
+                "tags": ["sample-tag", "ADM1"],
+            },
         ],
     }
-    helpers.ensure_hk_bundle(hk_mock, deliver_hk_bundle_data)
+    helpers.ensure_hk_bundle(real_housekeeper_api, deliver_hk_bundle_data, include=True)
 
-    _api = DeliverAPI(
-        db=analysis_store,
-        hk_api=hk_mock,
-        lims_api=lims_mock,
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
-    )
+    empty_deliver_hk_bundle_data = {
+        "name": "case_missing_data",
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": "tests/fixtures/apps/mip/dna/store/empty_case_config.yaml",
+                "archive": False,
+                "tags": ["mip-config"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/dna/store/empty_case_qc_sample_info.yaml",
+                "archive": False,
+                "tags": ["sampleinfo"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/dna/store/empty_case_qc_metrics.yaml",
+                "archive": False,
+                "tags": ["qcmetrics"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/case_file.txt",
+                "archive": False,
+                "tags": ["case-tag"],
+            },
+            {
+                "path": "tests/fixtures/apps/mip/sample_file.txt",
+                "archive": False,
+                "tags": ["sample-tag", "ADM1"],
+            },
+        ],
+    }
+    helpers.ensure_hk_bundle(real_housekeeper_api, empty_deliver_hk_bundle_data, include=True)
 
-    yield _api
+    return real_housekeeper_api
+
+
+@pytest.fixture()
+def mip_analysis_api(context_config, mip_hk_store, analysis_store):
+    analysis_api = MipDNAAnalysisAPI(context_config)
+    analysis_api.housekeeper_api = mip_hk_store
+    analysis_api.status_db = analysis_store
+    return analysis_api

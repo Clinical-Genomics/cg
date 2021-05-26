@@ -1,36 +1,38 @@
 import logging
+from typing import Iterable, Optional
 
 import click
-from cg.store import Store
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group("reset")
-@click.pass_context
-def reset_cmd(context):
+def reset_cmd():
     """Reset information in the database."""
-    context.obj["status"] = Store(context.obj["database"])
+    pass
 
 
 @reset_cmd.command()
 @click.option("-c", "--case_id", help="internal case id, leave empty to process all")
-@click.pass_context
-def observations(context, case_id):
+@click.pass_obj
+def observations(context: CGConfig, case_id: Optional[str]):
     """Reset observation links from an analysis to LoqusDB."""
-
+    status_db: Store = context.status_db
+    observations_uploaded: Iterable[models.Family]
     if case_id:
-        observations_uploaded = [context.obj["status"].family(case_id)]
+        observations_uploaded = [status_db.family(case_id)]
     else:
-        observations_uploaded = context.obj["status"].observations_uploaded()
+        observations_uploaded = status_db.observations_uploaded()
 
-    for family_obj in observations_uploaded:
-        LOG.info("This would reset observation links for: %s", family_obj.internal_id)
+    for case_obj in observations_uploaded:
+        LOG.info("This would reset observation links for: %s", case_obj.internal_id)
 
     click.confirm("Do you want to continue?", abort=True)
 
-    for family_obj in observations_uploaded:
-        context.obj["status"].reset_observations(family_obj.internal_id)
-        LOG.info("Reset loqus observations for: %s", family_obj.internal_id)
+    for case_obj in observations_uploaded:
+        status_db.reset_observations(case_obj.internal_id)
+        LOG.info("Reset loqus observations for: %s", case_obj.internal_id)
 
-    context.obj["status"].commit()
+    status_db.commit()

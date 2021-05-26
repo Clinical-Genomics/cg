@@ -1,5 +1,6 @@
 """All models aggregated in a base class"""
 from attr import dataclass
+
 from cg.store import models
 
 
@@ -23,6 +24,4 @@ class BaseHandler:
     Pool = models.Pool
     Delivery = models.Delivery
     Invoice = models.Invoice
-    MicrobialSample = models.MicrobialSample
-    MicrobialOrder = models.MicrobialOrder
     Organism = models.Organism

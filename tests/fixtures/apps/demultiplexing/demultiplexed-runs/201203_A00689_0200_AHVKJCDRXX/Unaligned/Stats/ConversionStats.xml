@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Stats>
+  <Flowcell flowcell-id="HN3FKDSXY">
+    <Project name="150392">
+      <Sample name="AL-P-00427560-N-03908297-KH20210330-PN20210331">
+        <Barcode name="CTATAGCGAG+AGTCGACTAG">
+          <Lane number="1">
+            <Tile number="1101">
+              <Raw>
+                <ClusterCount>1604</ClusterCount>
+                <Read number="1">
+                  <Yield>242204</Yield>
+                  <YieldQ30>227405</YieldQ30>
+                  <QualityScoreSum>8705615</QualityScoreSum>
+                </Read>
+                <Read number="2">
+                  <Yield>242204</Yield>
+                  <YieldQ30>227784</YieldQ30>
+                  <QualityScoreSum>8718038</QualityScoreSum>
+                </Read>
+              </Raw>
+              <Pf>
+                <ClusterCount>1604</ClusterCount>
+                <Read number="1">
+                  <Yield>242204</Yield>
+                  <YieldQ30>227405</YieldQ30>
+                  <QualityScoreSum>8705615</QualityScoreSum>
+                </Read>
+                <Read number="2">
+                  <Yield>242204</Yield>
+                  <YieldQ30>227784</YieldQ30>
+                  <QualityScoreSum>8718038</QualityScoreSum>
+                </Read>
+              </Pf>
+            </Tile>
+            <Tile number="1102">
+              <Raw>
+                <ClusterCount>1654</ClusterCount>
+                <Read number="1">
+                  <Yield>249754</Yield>
+                  <YieldQ30>233997</YieldQ30>
+                  <QualityScoreSum>8968564</QualityScoreSum>
+                </Read>
+                <Read number="2">
+                  <Yield>249754</Yield>
+                  <YieldQ30>235200</YieldQ30>
+                  <QualityScoreSum>8996606</QualityScoreSum>
+                </Read>
+              </Raw>
+              <Pf>
+                <ClusterCount>1654</ClusterCount>
+                <Read number="1">
+                  <Yield>249754</Yield>
+                  <YieldQ30>233997</YieldQ30>
+                  <QualityScoreSum>8968564</QualityScoreSum>
+                </Read>
+                <Read number="2">
+                  <Yield>249754</Yield>
+                  <YieldQ30>235200</YieldQ30>
+                  <QualityScoreSum>8996606</QualityScoreSum>
+                </Read>
+              </Pf>
+            </Tile>
+          </Lane>
+          <Lane number="2">
+			<Tile number="1101">
+	          <Raw>
+	            <ClusterCount>1994</ClusterCount>
+	            <Read number="1">
+	              <Yield>301094</Yield>
+	              <YieldQ30>280694</YieldQ30>
+	              <QualityScoreSum>10787193</QualityScoreSum>
+	            </Read>
+	            <Read number="2">
+	              <Yield>301094</Yield>
+	              <YieldQ30>283035</YieldQ30>
+	              <QualityScoreSum>10834030</QualityScoreSum>
+	            </Read>
+	          </Raw>
+	          <Pf>
+	            <ClusterCount>1994</ClusterCount>
+	            <Read number="1">
+	              <Yield>301094</Yield>
+	              <YieldQ30>280694</YieldQ30>
+	              <QualityScoreSum>10787193</QualityScoreSum>
+	            </Read>
+	            <Read number="2">
+	              <Yield>301094</Yield>
+	              <YieldQ30>283035</YieldQ30>
+	              <QualityScoreSum>10834030</QualityScoreSum>
+	            </Read>
+	          </Pf>
+	        </Tile>
+	        <Tile number="1102">
+	          <Raw>
+	            <ClusterCount>1947</ClusterCount>
+	            <Read number="1">
+	              <Yield>293997</Yield>
+	              <YieldQ30>276488</YieldQ30>
+	              <QualityScoreSum>10581845</QualityScoreSum>
+	            </Read>
+	            <Read number="2">
+	              <Yield>293997</Yield>
+	              <YieldQ30>278450</YieldQ30>
+	              <QualityScoreSum>10620712</QualityScoreSum>
+	            </Read>
+	          </Raw>
+	          <Pf>
+	            <ClusterCount>1947</ClusterCount>
+	            <Read number="1">
+	              <Yield>293997</Yield>
+	              <YieldQ30>276488</YieldQ30>
+	              <QualityScoreSum>10581845</QualityScoreSum>
+	            </Read>
+	            <Read number="2">
+	              <Yield>293997</Yield>
+	              <YieldQ30>278450</YieldQ30>
+	              <QualityScoreSum>10620712</QualityScoreSum>
+	            </Read>
+	          </Pf>
+	        </Tile>
+          </Lane>
+        </Barcode>
+      </Sample>
+    </Project>
+	<Lane number="1">
+	      <TopUnknownBarcodes>
+	        <Barcode count="287675500" sequence="CAACAATGAT+CCGTGAAGGT"/>
+	        <Barcode count="134802960" sequence="CCGCGGTTAT+CTAGCGCTGT"/>
+	        <Barcode count="125897880" sequence="GGTACCTTAT+GACGTCTTGT"/>
+	        <Barcode count="116361020" sequence="TGGTGGCAAT+TTACAGGAGT"/>
+	        <Barcode count="108374140" sequence="GCAGAATTAT+TGGCCGGTGT"/>
+	        <Barcode count="102152120" sequence="ATGTAAGTAT+CATAGAGTGT"/>
+	        <Barcode count="99374840" sequence="TAATACAGAT+GTGAATATGT"/>
+	        <Barcode count="97159120" sequence="AAGTCCAAAT+TACTCATAGT"/>
+	        <Barcode count="93561120" sequence="AGTTCAGGAT+TCTGTTGGGT"/>
+	        <Barcode count="92722220" sequence="CGGCGTGAAT+ACAGGCGCGT"/>
+	      </TopUnknownBarcodes>
+	    </Lane>
+	    <Lane number="2">
+	      <TopUnknownBarcodes>
+	        <Barcode count="293489140" sequence="CAACAATGAT+CCGTGAAGGT"/>
+	        <Barcode count="134762440" sequence="CCGCGGTTAT+CTAGCGCTGT"/>
+	        <Barcode count="123383820" sequence="GGTACCTTAT+GACGTCTTGT"/>
+	        <Barcode count="117920580" sequence="TGGTGGCAAT+TTACAGGAGT"/>
+	        <Barcode count="108170900" sequence="GCAGAATTAT+TGGCCGGTGT"/>
+	        <Barcode count="102394080" sequence="ATGTAAGTAT+CATAGAGTGT"/>
+	        <Barcode count="101491260" sequence="TAATACAGAT+GTGAATATGT"/>
+	        <Barcode count="98569320" sequence="AAGTCCAAAT+TACTCATAGT"/>
+	        <Barcode count="95613280" sequence="AGTTCAGGAT+TCTGTTGGGT"/>
+	        <Barcode count="93195300" sequence="CGGCGTGAAT+ACAGGCGCGT"/>
+	      </TopUnknownBarcodes>
+	    </Lane>
+  </Flowcell>
+</Stats>

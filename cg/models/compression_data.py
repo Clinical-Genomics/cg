@@ -1,6 +1,7 @@
 """Class to hold file information about a compression entity"""
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 
 from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
@@ -37,6 +38,11 @@ class CompressionData:
         return self.stub.with_suffix(".json")
 
     @property
+    def analysis_dir(self) -> Path:
+        """Return the path to folder where analysis is"""
+        return self.stub.resolve().parent
+
+    @property
     def fastq_first(self) -> Path:
         """Return the path to the first read in pair"""
         return Path(self.stub_string + FASTQ_FIRST_READ_SUFFIX)
@@ -56,9 +62,7 @@ class CompressionData:
         LOG.info("Check if FASTQ pair exists")
         if not self.file_exists_and_is_accesible(self.fastq_first):
             return False
-        if not self.file_exists_and_is_accesible(self.fastq_second):
-            return False
-        return True
+        return bool(self.file_exists_and_is_accesible(self.fastq_second))
 
     @staticmethod
     def is_absolute(file_path: Path) -> bool:
@@ -91,6 +95,13 @@ class CompressionData:
         """Check if file path is symbolik link"""
         LOG.info("Check if %s is a symlink", file_path)
         return os.path.islink(file_path)
+
+    @staticmethod
+    def get_change_date(file_path: Path) -> datetime:
+        """Return the time when this file was changed"""
+        changed_date = datetime.fromtimestamp(file_path.stat().st_mtime)
+        LOG.info("File %s was changed %s", file_path, changed_date)
+        return changed_date
 
     def spring_exists(self) -> bool:
         """Check if the SPRING file exists"""

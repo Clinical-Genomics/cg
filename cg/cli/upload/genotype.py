@@ -1,31 +1,40 @@
 """Code for uploading genotype data via CLI"""
+import logging
+from typing import Optional
+
 import click
-
+from cg.apps.gt import GenotypeAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
 
-from .utils import _suggest_cases_to_upload
+from .utils import suggest_cases_to_upload
+
+LOG = logging.getLogger(__name__)
 
 
 @click.command()
 @click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
 @click.argument("family_id", required=False)
-@click.pass_context
-def genotypes(context, re_upload, family_id):
+@click.pass_obj
+def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
     """Upload genotypes from an analysis to Genotype."""
+
+    status_db: Store = context.status_db
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    genotype_api: GenotypeAPI = context.genotype_api
 
     click.echo(click.style("----------------- GENOTYPES -------------------"))
 
     if not family_id:
-        _suggest_cases_to_upload(context)
-        context.abort()
+        suggest_cases_to_upload(status_db=status_db)
+        raise click.Abort
+    case_obj: models.Family = status_db.family(family_id)
+    upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
+    results: dict = upload_genotypes_api.data(case_obj.analyses[0])
 
-    tb_api = context.obj["tb_api"]
-    gt_api = context.obj["genotype_api"]
-    hk_api = context.obj["housekeeper_api"]
-    status_api = context.obj["status"]
-    family_obj = status_api.family(family_id)
-
-    api = UploadGenotypesAPI(status_api, hk_api, tb_api, gt_api)
-    results = api.data(family_obj.analyses[0])
-    if results:
-        api.upload(results, replace=re_upload)
+    if not results:
+        LOG.warning("Could not find any results to upload")
+        return
+    upload_genotypes_api.upload(results, replace=re_upload)

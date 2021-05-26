@@ -1,16 +1,23 @@
 """Fixtures for cli compress functions"""
 
+import datetime as dt
+from pathlib import Path
+
 import pytest
-
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from tests.store_helpers import StoreHelpers
 
 
-class MockCompressAPI:
+class MockCompressAPI(CompressAPI):
     """Mock out necessary functions for running the compress CLI functions"""
 
     def __init__(self):
         """initialize mock"""
+        super().__init__(hk_api=None, crunchy_api=None)
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True
@@ -38,7 +45,7 @@ def fixture_compress_api():
     return MockCompressAPI()
 
 
-@pytest.yield_fixture(scope="function", name="real_crunchy_api")
+@pytest.fixture(scope="function", name="real_crunchy_api")
 def fixture_real_crunchy_api(crunchy_config_dict):
     """crunchy api fixture"""
     _api = CrunchyAPI(crunchy_config_dict)
@@ -47,15 +54,18 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 
 @pytest.fixture(name="real_compress_api")
-def fixture_real_compress_api(housekeeper_api, real_crunchy_api):
+def fixture_real_compress_api(
+    housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+) -> CompressAPI:
     """Return a compress context"""
-    hk_api = housekeeper_api
-    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=hk_api)
+    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=housekeeper_api)
     yield _api
 
 
 @pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
-def fixture_real_populated_compress_fastq_api(real_compress_api, compress_hk_fastq_bundle, helpers):
+def fixture_real_populated_compress_fastq_api(
+    real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
+) -> CompressAPI:
     """Populated compress api fixture"""
     helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
 
@@ -103,10 +113,10 @@ def fixture_compress_case_info(
 @pytest.fixture(name="populated_compress_store")
 def fixture_populated_compress_store(store, helpers, compress_case_info, analysis_family):
     """Return a store populated with a completed analysis"""
-    # Make sure that there is a family where anaylsis is completer
-    helpers.ensure_family(
+    # Make sure that there is a case where anaylsis is completer
+    helpers.ensure_case_from_dict(
         store,
-        family_info=analysis_family,
+        case_info=analysis_family,
         app_tag=compress_case_info.application_tag,
         ordered_at=compress_case_info.timestamp,
         completed_at=compress_case_info.later_timestamp,
@@ -128,62 +138,97 @@ def fixture_populated_compress_multiple_store(
     for number in range(10):
         analysis_family["internal_id"] = "_".join([str(number), case_id])
         analysis_family["name"] = "_".join([str(number), family_name])
+        for ind, sample in enumerate(analysis_family["samples"]):
+            analysis_family["samples"][ind]["internal_id"] = "_".join(
+                [str(number), sample["internal_id"]]
+            )
+            if "father" in analysis_family["samples"][ind]:
+                analysis_family["samples"][ind]["father"] = "_".join(
+                    [str(number), analysis_family["samples"][ind]["father"]]
+                )
+            if "mother" in analysis_family["samples"][ind]:
+                analysis_family["samples"][ind]["mother"] = "_".join(
+                    [str(number), analysis_family["samples"][ind]["mother"]]
+                )
 
-        helpers.ensure_family(
+        helpers.ensure_case_from_dict(
             store,
-            family_info=analysis_family,
+            case_info=analysis_family,
             app_tag=compress_case_info.application_tag,
             ordered_at=compress_case_info.timestamp,
             completed_at=compress_case_info.later_timestamp,
+            created_at=dt.datetime.now() - dt.timedelta(days=1000),
         )
-
     return store
 
 
 # Context fixtures
-
-
 @pytest.fixture(name="compress_context")
-def fixture_base_compress_context(compress_api, store):
+def fixture_base_compress_context(
+    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context"""
-    ctx = {"compress": compress_api, "db": store}
-    return ctx
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = store
+    return cg_config_object
+
+
+@pytest.fixture(name="store_fastq_context")
+def fixture_store_fastq_context(
+    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
+) -> CGConfig:
+    """Return a compress context"""
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = store
+    return cg_config_object
 
 
 @pytest.fixture(name="populated_multiple_compress_context")
-def fixture_populated_multiple_compress_context(compress_api, populated_compress_multiple_store):
+def fixture_populated_multiple_compress_context(
+    compress_api: CompressAPI, populated_compress_multiple_store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where anaylis is completer
-    return {"compress": compress_api, "db": populated_compress_multiple_store}
+    # Make sure that there is a case where anaylis is completer
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = populated_compress_multiple_store
+    return cg_config_object
 
 
 @pytest.fixture(name="populated_compress_context")
-def fixture_populated_compress_context(compress_api, populated_compress_store):
+def fixture_populated_compress_context(
+    compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
+) -> CGConfig:
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where analysis is completed
-    return {"compress": compress_api, "db": populated_compress_store}
+    # Make sure that there is a case where analysis is completed
+    cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = populated_compress_store
+    return cg_config_object
 
 
 @pytest.fixture(name="real_populated_compress_context")
 def fixture_real_populated_compress_context(
-    real_populated_compress_fastq_api, populated_compress_store
-):
+    real_populated_compress_fastq_api: CompressAPI,
+    populated_compress_store: Store,
+    cg_config_object: CGConfig,
+) -> CGConfig:
     """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a family where analysis is completed
-    return {"compress": real_populated_compress_fastq_api, "db": populated_compress_store}
+    # Make sure that there is a case where analysis is completed
+    cg_config_object.meta_apis["compress_api"] = real_populated_compress_fastq_api
+    cg_config_object.status_db_ = populated_compress_store
+    return cg_config_object
 
 
 # Bundle fixtures
 
 
 @pytest.fixture(scope="function", name="sample")
-def fixture_sample():
+def fixture_sample() -> str:
     """Return the sample id for first sample"""
     return "sample_1"
 
 
 @pytest.fixture(scope="function", name="new_dir")
-def fixture_new_dir(project_dir):
+def fixture_new_dir(project_dir: Path) -> Path:
     """Return the path to a subdirectory"""
     new_dir = project_dir / "new_dir/"
     new_dir.mkdir()
@@ -238,7 +283,7 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
 
 
 @pytest.fixture(name="symlinked_fastqs")
-def fixture_symlinked_fastqs(project_dir, new_dir):
+def fixture_symlinked_fastqs(project_dir: Path, new_dir: Path) -> dict:
     """Setup an environment that is similar to the case we want to solve"""
     fastq_first = project_dir / "first.fastq.gz"
     fastq_second = project_dir / "second.fastq.gz"

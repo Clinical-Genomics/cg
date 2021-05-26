@@ -177,7 +177,7 @@ cg upload auto
 You can of course specify which upload you want to do yourself as well:
 
 ```bash
-cg upload [coverage|genotypes|observations|scout|beacon] raredragon
+cg upload [coverage|genotypes|observations|scout] raredragon
 ```
 
 You can force a reupload of sequencing genotypes:
@@ -228,16 +228,6 @@ Includes: `status`, `lims`
 Some info if primarily stored in LIMS and needs to be syncronized over to `status`. This is the case for both the date when a samples was received and when it was finally delivered. This interface is intended to run continously as part of a crontab job.
 
 #### upload
-
-##### beacon
-
-Includes: `beacon`, `hk`, `scout`, `status`
-
-This command is used to upload variants from affected subject/s of a family to a beacon of genetic variants.
-The API will first use `status` to fetch the id of any affected subject from a given family. It will then use `hk` to retrieve a VCF file from the analyses. A temporary VCF file is then created by filtering for variants present in desired gene panel(s) (retrieved using `scout`). The `beacon` app will finally handle the upload to beacon.
-The required parameters for the upload are:
-- gene panel to use
-- id of the family
 
 ##### coverage
 

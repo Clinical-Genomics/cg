@@ -48,7 +48,7 @@
             'path': '/path/to/rare-disease/cases/case_id/analysis/case_id/multiqc_ar/multiqc_report.html',
             'tags': ['rd-rna', 'html', 'meta', 'case_id', 'multiqc_ar']},
            {'archive': False,
-            'path': '/path/to/rare-disease/cases/case_id/analysis/case_id_qc_sample_info.yaml',
+            'path': 'tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml',
             'tags': ['mip_analyse',
                      'rd-rna',
                      'meta',

@@ -3,6 +3,7 @@
 """
 
 import pytest
+
 from cg.apps.vogue import VogueAPI
 
 CONFIG = {"vogue": {"binary_path": "/path/to/vogue", "config_path": "vogue_config"}}
@@ -41,7 +42,7 @@ def genotype_dict():
 
 @pytest.fixture(scope="function", name="process")
 def fixture_process():
-    """"""
+    """ """
 
     return MockProcess()
 
