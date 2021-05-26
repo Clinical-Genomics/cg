@@ -8,11 +8,70 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
-## [x.x.x]
+## [21.10.0]
 ### Added
+- Support for showing demultiplexing in CiGRID
+
+## [21.9.3]
+### Fixed
+- bugfix
+
+## [21.9.2]
+### Fixed
+- gisaid -fixing bug accidentally inserted in the previous pr.
+
+## [21.9.1]
+### Fixed
+- gisaid get region and lab from sample udfs
+- gisaid adjusting for new fasta consensus file in housekeeper
+- gisaid removing failing tests 
+
 ### Changed
 ### Fixed
 
+## [21.9.0]
+### Added
+- Add Fluffy analysis results -> ftp upload functionality for cust002
+
+## [21.8.3]
+### Changed
+- Set memory allocation to 95G when demultiplexing on slurm 
+
+## [21.8.2]
+### Changed
+- Add batch-ref flag to command string for fluffy analyses
+
+
+## [21.8.1]
+### Changed
+- Changed so that barcode report is written to the correct path
+
+## [21.8.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
+## [21.7.2]
+### Added
+- Copy sample sheet to demuxed flowcell dir
+- Create `copycomplete.txt` after demux post-processing is done
+
+## [21.7.1]
+### Fixed
+- Fixed bug when checking if flowcell projects has been renamed
+
+## [21.7.0]
+### Added
+- Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
+
+## [21.6.9]
+### Changed
+- Check if versions are larger than known version when determining reverse complement in demultiplexing
+
+## [21.6.8]
+### Changed
+- Validate that flowcell name is correct when demultiplexing
 
 ## [21.6.7]
 ### Fixed

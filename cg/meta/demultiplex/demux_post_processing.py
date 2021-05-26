@@ -1,11 +1,14 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Iterable, List, Optional
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.constants.cgstats import STATS_HEADER
+from cg.exc import FlowcellError
 from cg.meta.demultiplex import files
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
@@ -113,6 +116,36 @@ class DemuxPostProcessingAPI:
             report_path: Path = demux_results.demux_dir / f"stats-{project_name}-{flowcell_id}.txt"
             self.write_report(report_path=report_path, report_data=report_data)
 
+    @staticmethod
+    def create_barcode_summary_report(demux_results: DemuxResults) -> None:
+        report_content = create_demux_report(conversion_stats=demux_results.conversion_stats)
+        report_path: Path = demux_results.barcode_report
+        if report_path.exists():
+            LOG.warning("Report path already exists!")
+            return
+        LOG.info("Write demux report to %s", report_path)
+        with report_path.open("w") as report_file:
+            report_file.write("\n".join(report_content))
+
+    @staticmethod
+    def copy_sample_sheet(demux_results: DemuxResults) -> None:
+        """Copy the sample sheet from run dir to demux dir"""
+        LOG.info(
+            "Copy sample sheet (%s) from flowcell to demuxed result dir (%s)",
+            demux_results.sample_sheet_path,
+            demux_results.demux_sample_sheet_path,
+        )
+        shutil.copy(
+            demux_results.sample_sheet_path.as_posix(),
+            demux_results.demux_sample_sheet_path.as_posix(),
+        )
+
+    @staticmethod
+    def create_copy_complete_file(demux_results: DemuxResults) -> None:
+        """Suggestion is to deprecate this as a flag and store information in database instead"""
+        LOG.info("Creating %s", demux_results.copy_complete_path)
+        demux_results.copy_complete_path.touch()
+
     def post_process_flowcell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post processing a demultiplexed flowcell
 
@@ -120,6 +153,7 @@ class DemuxPostProcessingAPI:
             1. rename all the necessary files and folders
             2. add the demux results to cgstats
             3. produce reports for every project
+            4. generate a report with samples that have low cluster count
         """
         if demux_results.files_renamed():
             LOG.info("Files have already been renamed")
@@ -127,6 +161,9 @@ class DemuxPostProcessingAPI:
             self.rename_files(demux_results=demux_results)
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)
+        self.create_barcode_summary_report(demux_results=demux_results)
+        self.copy_sample_sheet(demux_results=demux_results)
+        self.create_copy_complete_file(demux_results=demux_results)
 
     def finish_flowcell(self, flowcell_name: str, force: bool = False) -> None:
         """Go through the post processing steps for a flowcell
@@ -134,7 +171,10 @@ class DemuxPostProcessingAPI:
         Force is used to finish a flowcell even if the files are renamed already
         """
         LOG.info("Check demuxed flowcell %s", flowcell_name)
-        flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
+        try:
+            flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
+        except FlowcellError:
+            return
         if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
             LOG.warning("Demultiplex is not ready for %s", flowcell_name)
             return

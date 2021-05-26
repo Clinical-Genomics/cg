@@ -1,17 +1,18 @@
 """Functions that deals with modifications of the indexes"""
 import csv
 import logging
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.resources import valid_indexes_path
+from packaging import version
 from pydantic import BaseModel
 
 LOG = logging.getLogger(__name__)
 NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
-NEW_REAGENT_KIT_VERSION = 1.5
+NEW_REAGENT_KIT_VERSION = "1.5"
 DNA_COMPLEMENTS = {"A": "T", "C": "G", "G": "C", "T": "A"}
-REAGENT_KIT_PARAMETER_TO_VERSION = {"1": 1.0, "3": 1.5}
+REAGENT_KIT_PARAMETER_TO_VERSION = {"1": "1.0", "3": "1.5"}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
@@ -49,7 +50,7 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
     return indexes
 
 
-def get_reagent_kit_version(reagent_kit_version: str) -> float:
+def get_reagent_kit_version(reagent_kit_version: str) -> str:
     """Derives the reagent kit version from the run parameters"""
     LOG.info("Converting reagent kit parameter %s to version", reagent_kit_version)
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
@@ -64,13 +65,13 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
     reverse complement
     """
     LOG.info("Check if run is reverse complement")
-    if control_software_version != NEW_CONTROL_SOFTWARE_VERSION:
+    if version.parse(control_software_version) < version.parse(NEW_CONTROL_SOFTWARE_VERSION):
         LOG.warning(
             "Old software version %s, no need for reverse complement", control_software_version
         )
         return False
-    reagent_kit_version: float = get_reagent_kit_version(reagent_kit_version_string)
-    if reagent_kit_version != NEW_REAGENT_KIT_VERSION:
+    reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version_string)
+    if version.parse(reagent_kit_version) < version.parse(NEW_REAGENT_KIT_VERSION):
         LOG.warning(
             "Reagent kit version %s does not does not need reverse complement",
             reagent_kit_version,

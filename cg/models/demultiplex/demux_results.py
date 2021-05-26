@@ -4,6 +4,7 @@ import socket
 from pathlib import Path
 from typing import Iterable, Optional
 
+from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from pydantic import BaseModel
@@ -27,6 +28,7 @@ class DemuxResults:
         LOG.info("Instantiating DemuxResults with path %s", demux_dir)
         self.demux_dir: Path = demux_dir
         self.flowcell: Flowcell = flowcell
+        self._conversion_stats: Optional[ConversionStats] = None
 
     @property
     def run_name(self) -> str:
@@ -47,6 +49,13 @@ class DemuxResults:
         return socket.gethostname()
 
     @property
+    def conversion_stats(self) -> ConversionStats:
+        if self._conversion_stats:
+            return self._conversion_stats
+        self._conversion_stats = ConversionStats(self.conversion_stats_path)
+        return self._conversion_stats
+
+    @property
     def conversion_stats_path(self) -> Path:
         return self.results_dir / "Stats" / "ConversionStats.xml"
 
@@ -64,7 +73,23 @@ class DemuxResults:
 
     @property
     def sample_sheet_path(self) -> Path:
+        """Return the path to where the original sample sheet is"""
         return self.flowcell.sample_sheet_path
+
+    @property
+    def barcode_report(self) -> Path:
+        """Return the path to the report with samples with low cluster count"""
+        return self.demux_dir / "lane_barcode_summary.csv"
+
+    @property
+    def demux_sample_sheet_path(self) -> Path:
+        """Return the path to sample sheet in demuxed flowcell dir"""
+        return self.results_dir / self.flowcell.sample_sheet_path.name
+
+    @property
+    def copy_complete_path(self) -> Path:
+        """Return the path to a file named copycomplete.txt used as flag that post processing is ready"""
+        return self.demux_dir / "copycomplete.txt"
 
     @property
     def projects(self) -> Iterable[str]:
@@ -111,9 +136,9 @@ class DemuxResults:
     def files_renamed(self) -> bool:
         """Assert if the files have been renamed
 
-        Check if there are any raw projects, in that case it will need post processing
+        Check if the project files have been renamed, in that case it will not need post processing
         """
-        return bool(len(list(self.raw_projects)))
+        return bool(len(list(self.projects)))
 
     def get_logfile_parameters(self) -> LogfileParameters:
         log_path: Path = self.log_path
