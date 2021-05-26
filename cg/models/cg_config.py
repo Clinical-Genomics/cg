@@ -58,6 +58,10 @@ class TrailblazerConfig(BaseModel):
     host: str
 
 
+class NIPToolConfig(BaseModel):
+    host: str
+
+
 class CommonAppConfig(BaseModel):
     binary_path: str
     config_path: Optional[str]
@@ -186,6 +190,7 @@ class CGConfig(BaseModel):
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     fluffy: FluffyConfig = None
+    niptool_internal: NIPToolConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")

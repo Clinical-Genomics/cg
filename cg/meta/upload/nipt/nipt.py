@@ -25,6 +25,7 @@ class NiptUploadAPI:
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
+        self.niptool_internal_host: str = config.niptool_internal.host
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
@@ -122,7 +123,7 @@ class NiptUploadAPI:
             "curl",
             "-X",
             "POST",
-            "http://localhost:8000/api/v1/insert/batch",
+            f"{self.niptool_internal_host}/insert/batch",
             "-H",
             "accept: application/json",
             "-H",
