@@ -189,7 +189,7 @@ class CGConfig(BaseModel):
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
-    niptool_internal: NIPToolConfig = None
+    niptool: NIPToolConfig = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None

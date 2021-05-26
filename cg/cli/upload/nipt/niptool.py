@@ -18,13 +18,13 @@ def niptool():
 @niptool.command("case")
 @click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
-@click.pass_context
-def batch(context: CGConfig, case_id: str, dry_run: bool):
+@click.pass_obj
+def batch(configs: CGConfig, case_id: str, dry_run: bool):
     """Loading batch into the NIPT database"""
 
     LOG.info("*** NIPTool UPLOAD START ***")
 
-    nipt_upload_api = NiptUploadAPI(context)
+    nipt_upload_api = NiptUploadAPI(configs)
 
     try:
         hk_results_file: str = nipt_upload_api.get_housekeeper_results_file(
@@ -50,9 +50,3 @@ def batch(context: CGConfig, case_id: str, dry_run: bool):
 
     except Exception as error:
         LOG.error(f"{error}")
-
-    """nipt_upload_api.upload_to_niptool_database(
-        results_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/summary.csv",
-        multiqc_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/multiqc_report.html",
-        segmental_calls_file="/Users/maya.brandi/opt/lovedkitten2/2021-02-09/22c-2021-00355-05.WCXpredict_aberrations.filt.bed",
-    )"""

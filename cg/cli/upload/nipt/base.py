@@ -1,6 +1,7 @@
 """ Upload NIPT results via the CLI"""
 
 import logging
+
 from .ftp import ftp
 from .niptool import niptool
 

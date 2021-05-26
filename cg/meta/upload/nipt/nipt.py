@@ -22,11 +22,10 @@ class NiptUploadAPI:
     RESULT_FILE_TAGS = ["nipt", "metrics"]
 
     def __init__(self, config: CGConfig):
-        print(dir(config))
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
-        self.niptool_internal_host: str = config.niptool_internal.host
+        self.niptool_host: str = config.niptool.host
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
@@ -124,7 +123,7 @@ class NiptUploadAPI:
             "curl",
             "-X",
             "POST",
-            f"{self.niptool_internal_host}/insert/batch",
+            f"{self.niptool_host}/insert/batch",
             "-H",
             "accept: application/json",
             "-H",
