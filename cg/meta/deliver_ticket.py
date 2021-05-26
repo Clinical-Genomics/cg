@@ -89,8 +89,7 @@ class DeliverTicketAPI(MetaAPI):
 
     def remove_files_with_less_than_one_inode(self, reads: list) -> None:
         for file in reads:
-            inode_check_cmd = "stat -c %h " + file
-            n_inodes = subprocess.getoutput(inode_check_cmd)
+            n_inodes: int = os.stat(file).st_nlink
             if int(n_inodes) > 1:
                 LOG.info("Removing file: %s" % (file))
                 os.remove(file)
