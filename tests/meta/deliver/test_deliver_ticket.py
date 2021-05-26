@@ -77,6 +77,8 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_toda
         data_analysis=Pipeline.SARS_COV_2,
     )
 
+    case.ordered_at = timestamp_today
+
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case]
 
@@ -84,7 +86,25 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_toda
     date = deliver_ticket_api.generate_date_tag(ticket_id=123456)
 
     # THEN check that a date was returned
-    assert str(timestamp_today).startswith(date)
+    assert str(timestamp_today) == str(date)
+
+
+def test_sort_files(cg_context: CGConfig):
+    """Test to sort files"""
+    # GIVEN a deliver_ticket API
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+
+    # GIVEN a list of paths
+    unsorted_list_of_paths = []
+    unsorted_list_of_paths.append(Path("2.fastq"))
+    unsorted_list_of_paths.append(Path("1.fastq"))
+    unsorted_list_of_paths.append(Path("3.fastq"))
+
+    # WHEN when sorting the paths
+    sorted_list_of_paths = deliver_ticket_api.sort_files(unsorted_list_of_paths)
+
+    # THEN 1.fastq is first in the list
+    assert str(sorted_list_of_paths[0]) == "1.fastq"
 
 
 def test_check_if_concatenation_is_needed(
