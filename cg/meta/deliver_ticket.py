@@ -2,6 +2,7 @@
 import logging
 import os
 import re
+from datetime import datetime
 from pathlib import Path
 import shutil
 from typing import List
@@ -44,37 +45,35 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Could not find path: %s", customer_inbox)
         return is_upload_needed
 
-    def generate_date_tag(self, ticket_id: int) -> str:
+    def generate_date_tag(self, ticket_id: int) -> datetime.datetime:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
-        date = str(cases[0].ordered_at)
-        split_date = date.split(" ")
-        return split_date[0]
+        date: datetime.datetime = datetime.datetime.strptime(cases[0].ordered_at, "%y%m%d")
+        return date
 
     def generate_output_filename(
-        self, date: str, dir_name: Path, read_direction: int
+        self, date: datetime.datetime, dir_name: Path, read_direction: int
     ) -> Path:
         base_name = Path("_".join([dir_name.name, str(read_direction)]))
         if date:
-            base_name = Path("_".join([date,dir_name.name, str(read_direction)]))
+            base_name = Path("_".join([str(date), base_name]))
         fastq_file_name = base_name.with_suffix(".fastq.gz")
-        output = dir_name / fastq_file_name
+        output: Path = dir_name / fastq_file_name
         return output
 
     def get_current_read_direction(self, dir_name: Path, read_direction: int) -> List[Path]:
         same_direction = []
-        for file in os.listdir(dir_name):
-            abs_path_file = dir_name / file
+        for file in dir_name.iterdir():
             direction_string = ".+_R" + str(read_direction) + "_[0-9]+.fastq.gz"
             direction_pattern = re.compile(direction_string)
-            if direction_pattern.match(str(abs_path_file)):
-                same_direction.append(os.path.abspath(abs_path_file))
+            if direction_pattern.match(str(file)):
+                same_direction.append(os.path.abspath(file))
         same_direction.sort()
         return same_direction
 
     def get_total_size(self, files: list) -> int:
         total_size = 0
         for file in files:
-            total_size = total_size + Path(file).stat().st_size
+            total_size = total_size + file.stat().st_size
         return total_size
 
     def concatenate_same_read_direction(self, reads: list, output: Path) -> None:
@@ -87,10 +86,10 @@ class DeliverTicketAPI(MetaAPI):
         for file in reads:
             n_inodes: int = os.stat(file).st_nlink
             if int(n_inodes) > 1:
-                LOG.info("Removing file: %s" % (file))
+                LOG.info("Removing file: %s", file)
                 file.unlink()
             else:
-                LOG.warning("WARNING %s only got 1 inode, file will not be removed" % (file))
+                LOG.warning("WARNING %s only got 1 inode, file will not be removed", file)
 
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
@@ -111,7 +110,7 @@ class DeliverTicketAPI(MetaAPI):
                     dir_name=dir_name, read_direction=read_direction
                 )
                 total_size: int = self.get_total_size(files=same_direction)
-                date: str = self.generate_date_tag(ticket_id=ticket_id)
+                date: datetime.datetime = self.generate_date_tag(ticket_id=ticket_id)
                 output: Path = self.generate_output_filename(
                     date=date, dir_name=dir_name, read_direction=read_direction
                 )
