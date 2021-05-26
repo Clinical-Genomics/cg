@@ -2,8 +2,6 @@
 import logging
 import os
 import re
-import subprocess
-from email import message
 from pathlib import Path
 import shutil
 from typing import List
@@ -30,9 +28,7 @@ class DeliverTicketAPI(MetaAPI):
     def get_inbox_path(self, ticket_id: int) -> Path:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
-            message f"The customer id was not identified since no cases for ticket_id {ticket_id} was found"
-            raise CgError(message)
-
+            raise CgError(f"The customer id was not identified since no cases for ticket_id {ticket_id} was found")
         customer_id: str = cases[0].customer.internal_id
         customer_inbox = Path(self.delivery_path, customer_id, "inbox", str(ticket_id))
         return customer_inbox
@@ -57,14 +53,14 @@ class DeliverTicketAPI(MetaAPI):
     def generate_output_filename(
         self, date: str, dir_name: Path, read_direction: int
     ) -> Path:
-        fastq_file_name = str(os.path.basename(dir_name)) + "_" + str(read_direction) + ".fastq.gz"
+        base_name = Path("_".join([dir_name.name, str(read_direction)]))
         if date:
-            base_name = Path("_".join([date,dir_name.name, str(read_direction)])) 
-            fastq_file_name = base_name.with_suffix(".fastq.gz")
+            base_name = Path("_".join([date,dir_name.name, str(read_direction)]))
+        fastq_file_name = base_name.with_suffix(".fastq.gz")
         output = dir_name / fastq_file_name
         return output
 
-    def get_current_read_direction(self, dir_name: Path, read_direction: int) -> list:
+    def get_current_read_direction(self, dir_name: Path, read_direction: int) -> List[Path]:
         same_direction = []
         for file in os.listdir(dir_name):
             abs_path_file = dir_name / file
@@ -89,11 +85,10 @@ class DeliverTicketAPI(MetaAPI):
 
     def remove_files_with_less_than_one_inode(self, reads: list) -> None:
         for file in reads:
-            inode_check_cmd = "stat -c %h " + file
-            n_inodes = subprocess.getoutput(inode_check_cmd)
+            n_inodes: int = os.stat(file).st_nlink
             if int(n_inodes) > 1:
                 LOG.info("Removing file: %s" % (file))
-                os.remove(file)
+                file.unlink()
             else:
                 LOG.warning("WARNING %s only got 1 inode, file will not be removed" % (file))
 
@@ -112,7 +107,7 @@ class DeliverTicketAPI(MetaAPI):
             if not os.path.isdir(dir_name):
                 continue
             for read_direction in [1, 2]:
-                same_direction: list = self.get_current_read_direction(
+                same_direction: List[Path] = self.get_current_read_direction(
                     dir_name=dir_name, read_direction=read_direction
                 )
                 total_size: int = self.get_total_size(files=same_direction)
