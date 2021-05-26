@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import subprocess
+from email import message
 from pathlib import Path
 import shutil
 from typing import List
@@ -29,9 +30,8 @@ class DeliverTicketAPI(MetaAPI):
     def get_inbox_path(self, ticket_id: int) -> Path:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
-            message f"The customer id was not identified since no cases for ticket_id {ticket_id} was found",
-            LOG.warning(message)
-            raise CgError()
+            message f"The customer id was not identified since no cases for ticket_id {ticket_id} was found"
+            raise CgError(message)
 
         customer_id: str = cases[0].customer.internal_id
         customer_inbox = Path(self.delivery_path, customer_id, "inbox", str(ticket_id))
@@ -55,7 +55,7 @@ class DeliverTicketAPI(MetaAPI):
         return split_date[0]
 
     def generate_output_filename(
-        self, dir_path: Path, date: str, dir_name: Path, read_direction: int
+        self, date: str, dir_name: Path, read_direction: int
     ) -> Path:
         fastq_file_name = str(os.path.basename(dir_name)) + "_" + str(read_direction) + ".fastq.gz"
         if date:
@@ -67,13 +67,13 @@ class DeliverTicketAPI(MetaAPI):
                 + str(read_direction)
                 + ".fastq.gz"
             )
-        output = dir_path / fastq_file_name
+        output = dir_name / fastq_file_name
         return output
 
-    def get_current_read_direction(self, dir_path: Path, read_direction: int) -> list:
+    def get_current_read_direction(self, dir_name: Path, read_direction: int) -> list:
         same_direction = []
-        for file in os.listdir(dir_path):
-            abs_path_file = dir_path / file
+        for file in os.listdir(dir_name):
+            abs_path_file = dir_name / file
             direction_string = ".+_R" + str(read_direction) + "_[0-9]+.fastq.gz"
             direction_pattern = re.compile(direction_string)
             if direction_pattern.match(str(abs_path_file)):
@@ -112,20 +112,19 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("The path %s do not exist, nothing will be concatenated", customer_inbox)
             return
         for dir_name in customer_inbox.iterdir():
-            dir_path = customer_inbox / dir_name
-            if len(os.listdir(dir_path)) == 0:
-                LOG.info("Empty folder found: %s", dir_path)
+            if len(os.listdir(dir_name)) == 0:
+                LOG.info("Empty folder found: %s", dir_name)
                 continue
-            if not os.path.isdir(dir_path):
+            if not os.path.isdir(dir_name):
                 continue
             for read_direction in [1, 2]:
                 same_direction: list = self.get_current_read_direction(
-                    dir_path=dir_path, read_direction=read_direction
+                    dir_name=dir_name, read_direction=read_direction
                 )
                 total_size: int = self.get_total_size(files=same_direction)
                 date: str = self.generate_date_tag(ticket_id=ticket_id)
                 output: Path = self.generate_output_filename(
-                    dir_path=dir_path, date=date, dir_name=dir_name, read_direction=read_direction
+                    date=date, dir_name=dir_name, read_direction=read_direction
                 )
                 if dry_run:
                     for file in same_direction:
