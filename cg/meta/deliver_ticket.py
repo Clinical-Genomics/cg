@@ -55,7 +55,7 @@ class DeliverTicketAPI(MetaAPI):
     ) -> Path:
         base_name = Path("_".join([dir_name.name, str(read_direction)]))
         if date:
-            base_name = Path("_".join([str(date.strftime("%y%m%d")), base_name]))
+            base_name = Path("_".join([str(date.strftime("%y%m%d")), str(base_name)]))
         fastq_file_name = base_name.with_suffix(".fastq.gz")
         output: Path = dir_name / fastq_file_name
         return output
