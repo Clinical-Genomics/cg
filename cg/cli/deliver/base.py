@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
