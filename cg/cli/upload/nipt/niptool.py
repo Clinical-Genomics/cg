@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from cg.meta.upload.nipt import NiptUploadAPI
+from cg.meta.upload.nipt.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)

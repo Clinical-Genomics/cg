@@ -6,10 +6,6 @@ from .niptool import niptool
 
 import click
 
-from cg.meta.upload.nipt import NiptUploadAPI
-from cg.models.cg_config import CGConfig
-from cg.store import Store
-
 LOG = logging.getLogger(__name__)
 
 

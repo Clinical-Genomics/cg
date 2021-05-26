@@ -7,6 +7,7 @@ from typing import Iterable, List, Optional
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError
+from cg.meta.upload.nipt.models import UpploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils import Process
@@ -107,9 +108,15 @@ class NiptUploadAPI:
         return analysis_obj
 
     def upload_to_niptool_database(
-        self, results_file: Path, multiqc_file: Path, segmental_calls_file: Path
+        self, results_file: Path, multiqc_file: Optional[Path], segmental_calls_file: Optional[Path]
     ):
         """Upload nipt data via rest-API."""
+
+        upload_files = UpploadFiles(
+            result_file=results_file.absolute(),
+            multiqc_report=multiqc_file.absolute(),
+            segmental_calls=segmental_calls_file,
+        )
 
         load_call = [
             "curl",
@@ -121,11 +128,7 @@ class NiptUploadAPI:
             "-H",
             "Content-Type: application/json",
             "-d",
-            {
-                "result_file": results_file.absolute(),
-                "multiqc_report": multiqc_file.absolute(),
-                "segmental_calls": segmental_calls_file.parents[0],
-            },
+            str(upload_files.dict(exclude_none=True)),
         ]
         self.process.run_command(parameters=load_call)
 
