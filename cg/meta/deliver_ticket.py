@@ -29,10 +29,8 @@ class DeliverTicketAPI(MetaAPI):
     def get_inbox_path(self, ticket_id: int) -> Path:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
-            LOG.warning(
-                "The customer id was not identified since no cases for ticket_id %s was found",
-                ticket_id,
-            )
+            message f"The customer id was not identified since no cases for ticket_id {ticket_id} was found",
+            LOG.warning(message)
             raise CgError()
 
         customer_id: str = cases[0].customer.internal_id
