@@ -44,6 +44,7 @@ def test_demultiplex_flowcell(
     demultiplex_ready_flowcell: Path,
     demultiplex_context: CGConfig,
     caplog,
+    mocker,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for demultiplexing
@@ -55,7 +56,7 @@ def test_demultiplex_flowcell(
     assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
-
+    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
