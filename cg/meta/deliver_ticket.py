@@ -131,8 +131,7 @@ class DeliverTicketAPI(MetaAPI):
                         )
                         self.remove_files_with_less_than_one_inode(reads=same_direction)
                     else:
-                        LOG.warning("WARNING data lost in concatenation")
-                        raise CgError()
+                        raise CgError("WARNING data lost in concatenation")
 
     def get_app_tag(self, samples: list) -> str:
         app_tag = samples[0].application_version.application.tag
