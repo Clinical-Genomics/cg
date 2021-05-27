@@ -61,23 +61,6 @@ class PrepareFastqAPI:
             for compression_object in compression_objects
         )
 
-    def can_at_least_one_decompression_job_start(self, case_id: str, dry_run: bool) -> bool:
-        """Returns True if decompression started for at least one sample, otherwise False"""
-        case_obj: models.Family = self.store.family(case_id)
-        link: models.FamilySample
-        did_something_start = False
-        for link in case_obj.links:
-            sample_id = link.sample.internal_id
-            if dry_run:
-                LOG.info(
-                    f"This is a dry run, therefore decompression for {sample_id} won't be started"
-                )
-                continue
-            decompression_started = self.compress_api.decompress_spring(sample_id)
-            if decompression_started:
-                did_something_start = True
-        return did_something_start
-
     def check_fastq_links(self, case_id: str) -> None:
         """Check if all fastq files are linked in housekeeper"""
         case_obj: models.Family = self.store.family(case_id)
