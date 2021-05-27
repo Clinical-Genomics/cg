@@ -8,14 +8,207 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+
+__________ DO NOT TOUCH ___________
+
+
 ## [x.x.x]
 ### Added
 ### Changed
 ### Fixed
 
+__________ DO NOT TOUCH ___________
+
 ## [NG.NG.NG]
 ### Added
 - Avatars for cases
+
+## [21.11.0]
+### Added
+- Deliver, concatenate (if needed) and rsync in one command
+
+## [21.10.0]
+### Added
+- Support for showing demultiplexing in CiGRID
+
+## [21.9.3]
+### Fixed
+- bugfix
+
+## [21.9.2]
+### Fixed
+- gisaid -fixing bug accidentally inserted in the previous pr.
+
+## [21.9.1]
+### Fixed
+- gisaid get region and lab from sample udfs
+- gisaid adjusting for new fasta consensus file in housekeeper
+- gisaid removing failing tests
+
+## [21.9.0]
+### Added
+- Add Fluffy analysis results -> ftp upload functionality for cust002
+
+## [21.8.3]
+### Changed
+- Set memory allocation to 95G when demultiplexing on slurm 
+
+## [21.8.2]
+### Changed
+- Add batch-ref flag to command string for fluffy analyses
+
+## [21.8.1]
+### Changed
+- Changed so that barcode report is written to the correct path
+
+## [21.8.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
+## [21.7.2]
+### Added
+- Copy sample sheet to demuxed flowcell dir
+- Create `copycomplete.txt` after demux post-processing is done
+
+## [21.7.1]
+### Fixed
+- Fixed bug when checking if flowcell projects has been renamed
+
+## [21.7.0]
+### Added
+- Added support for SARS-CoV-2 Orderform 2184.5 with fields for GISAID upload
+
+## [21.6.9]
+### Changed
+- Check if versions are larger than known version when determining reverse complement in demultiplexing
+
+## [21.6.8]
+### Changed
+- Validate that flowcell name is correct when demultiplexing
+
+## [21.6.7]
+### Fixed
+- Fixed linking sample files from case bundle
+
+## [21.6.6]
+### Changed
+- Check that logfile exists before doing demux post-processing
+
+## [21.6.5]
+### Changed
+- Check if Unaligned dir exists before doing demux post-processing
+### Fixed
+- Fix bugs in create sample sheet all command
+
+## [21.6.4]
+### Fixed
+- Fix so that delivery will not break if fastq bundle is missing when delivering results with ticket id
+
+## [21.6.3]
+### Fixed
+- Fix bug in sqlalchemy models
+
+## [21.6.2]
+### Fixed
+- If a boolean value is passed to `cg set sample -kv <key> <value>` a boolean is passed to the db
+
+## [21.6.1]
+### Fixed
+- Fix bug in mip and balsamic crontab
+
+## [21.6.0]
+### Added
+- Functionality to do demultiplexing post processing from CG
+
+## [21.5.7]
+### Fixed
+- Set status to analyze when resolving decompression
+
+## [21.5.6]
+### Fixed
+- Use only the first item from region and lab code values in mutant workflow.
+
+## [21.5.5]
+### Fixed
+- Fix tag to deliver correct mutant result files to KS inbox
+
+## [21.5.4]
+### Fixed
+- Block orders unintentionally reusing case names 
+
+## [21.5.3]
+### Fixed
+- Set correct fluffy analysis finish path
+
+## [21.5.2]
+### Fixed
+- Fixed content of fluffy samplesheet according to customer specification
+
+## [21.5.1]
+### Fixed
+- By default fetch related flowcell information using `cg get sample <sample_id>`
+
+## [21.5.0]
+### Added
+- User field for allowing order portal login
+### Changed 
+- Delivery/Invoicing/Primary Contacts are now relations from Customer to User in admin
+
+## [21.4.4]
+### Fixed
+- Propagate all samples to microsalt, even those without reads
+
+## [21.4.3]
+### Fixed
+- Display invoice contact on invoice
+
+## [21.4.2]
+### Fixed
+- Remove default option for mip-dna priority
+
+## [21.4.1]
+### Changed
+- Change how samples are fetched for cgstats select command
+### Fixed
+- Bug when fetching info with `cg demultiplex select`-command
+
+## [21.4.0]
+### Added
+- A column in customer-group admin view in to show customers in the group
+
+## [21.3.1]
+### Fixed
+- PDC backup destination server for 2500 flowcells
+
+## [21.3.0]
+### Changed
+- Remove dependency `cgstats` from requirements.txt and move used functionality into CG
+
+## [21.2.0]
+### Added
+- Functionality for the cgstats api in CG
+
+## [21.1.0]
+### Added
+Select analyses to be uploaded to vogue based on analysis completed date (before or after a date, of between two dates)
+Add uploaded to vogue date to analysis table
+Only select potential analyses to upload that have not been uploaded
+
+## [21.0.0]
+
+### Changed
+- Add support for balsamic 7.x.x
+- Rework Balsamic server configurations
+
+### Fixed
+- Upload to scout now possible for all analysis types through cg upload scout
+
+
+## [20.26.2]
+### Added
+- Added more DNA and RNA positive control cases to VALIDATION_CASES
 
 ## [20.26.1]
 ### Fixed
@@ -25,7 +218,6 @@ Try to use the following format:
 ### Changed
 - Cases to analyze query checks if any samples in case are newer than latest analysis to start topups
 - Microsalt config-case wont include samples that dont pass sequencing qc
-
 
 ## [20.25.0]
 ### Changed
@@ -39,9 +231,6 @@ Try to use the following format:
 ### Added
 - gisaid uppload support via cli
 - gisaid API
-
-### Changed
-### Fixed
 
 ## [20.22.0]
 ### Added
@@ -92,10 +281,6 @@ Try to use the following format:
 
 ### Changed
 - use pydantic to control CLI context 
-
-## [NG.NG.NG]
-### Added
-- Avatars for cases
 
 ## [20.18.0]
 ### Added

@@ -84,7 +84,7 @@ def link(context: CGConfig, ticket: bool, sample: bool, unique_id: str, dry_run:
 def config_case(
     context: CGConfig, dry_run: bool, ticket: bool, sample: bool, unique_id: str
 ) -> None:
-    """ Create a config file for a case or a sample analysis in microSALT """
+    """Create a config file for a case or a sample analysis in microSALT"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_id, sample_id = analysis_api.resolve_case_sample_id(
@@ -98,11 +98,7 @@ def config_case(
         LOG.error("No sample found for that ticket/sample_id")
         raise click.Abort
 
-    parameters: List[dict] = [
-        analysis_api.get_parameters(sample_obj)
-        for sample_obj in sample_objs
-        if sample_obj.sequencing_qc
-    ]
+    parameters: List[dict] = [analysis_api.get_parameters(sample_obj) for sample_obj in sample_objs]
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
@@ -135,7 +131,7 @@ def run(
     sample: bool,
     unique_id: Any,
 ) -> None:
-    """ Start microSALT workflow by providing case, ticket or sample id """
+    """Start microSALT workflow by providing case, ticket or sample id"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
     case_id, sample_id = analysis_api.resolve_case_sample_id(

@@ -89,7 +89,7 @@ class FastqHandler:
 
     @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:
-        """"create a name for the concatenated file for some read files"""
+        """ "create a name for the concatenated file for some read files"""
         return f"concatenated_{'_'.join(linked_fastq_name.split('_')[-4:])}"
 
     @staticmethod
@@ -256,5 +256,5 @@ class MutantFastqHandler(FastqHandler):
 
     @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:
-        """"Create a name for the concatenated file from multiple lanes"""
+        """ "Create a name for the concatenated file from multiple lanes"""
         return "_".join(linked_fastq_name.split("_")[2:])

@@ -43,21 +43,25 @@ def before_request():
         return make_response(jsonify(ok=True), 204)
 
     endpoint_func = current_app.view_functions[request.endpoint]
-    if not getattr(endpoint_func, "is_public", None):
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            jwt_token = auth_header.split("Bearer ")[-1]
-        else:
-            return abort(403, "no JWT token found on request")
-        try:
-            user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
-        except ValueError:
-            return abort(make_response(jsonify(message="outdated login certificate"), 403))
-        user_obj = db.user(user_data["email"])
-        if user_obj is None:
-            message = f"{user_data['email']} doesn't have access"
-            return abort(make_response(jsonify(message=message), 403))
-        g.current_user = user_obj
+    if getattr(endpoint_func, "is_public", None):
+        return
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return abort(403, "no JWT token found on request")
+
+    jwt_token = auth_header.split("Bearer ")[-1]
+    try:
+        user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
+    except ValueError:
+        return abort(make_response(jsonify(message="outdated login certificate"), 403))
+
+    user_obj = db.user(user_data["email"])
+    if user_obj is None or not user_obj.order_portal_login:
+        message = f"{user_data['email']} doesn't have access"
+        return abort(make_response(jsonify(message=message), 403))
+
+    g.current_user = user_obj
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])

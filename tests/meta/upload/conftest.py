@@ -18,21 +18,21 @@ class MockCoverage(ChanjoAPI):
 
 
 class MockLoqusAPI:
-    """ Mock LoqusAPI class"""
+    """Mock LoqusAPI class"""
 
     def __init__(self, analysis_type="wgs"):
         self.analysis_type = analysis_type
 
     @staticmethod
     def load(*args, **kwargs):
-        """ Mock load method"""
+        """Mock load method"""
         _ = args
         _ = kwargs
         return dict(variants=12)
 
     @staticmethod
     def get_case(*args, **kwargs):
-        """ Mock get_case method"""
+        """Mock get_case method"""
         _ = args
         _ = kwargs
         return {"case_id": "case_id", "_id": "123"}
@@ -49,7 +49,7 @@ class MockLoqusAPI:
 def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
 ) -> dict:
-    """ Returns a dictionary in hk format with files used in upload gt process"""
+    """Returns a dictionary in hk format with files used in upload gt process"""
     data = {
         "name": case_id,
         "created": timestamp,
@@ -88,7 +88,7 @@ def fixture_upload_genotypes_api(
 
 @pytest.fixture(scope="function")
 def upload_observations_api(analysis_store, populated_housekeeper_api):
-    """ Create mocked UploadObservationsAPI object"""
+    """Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI()
 
@@ -103,7 +103,7 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
 
 @pytest.fixture(scope="function")
 def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
-    """ Create mocked UploadObservationsAPI object"""
+    """Create mocked UploadObservationsAPI object"""
 
     loqus_mock = MockLoqusAPI(analysis_type="wes")
 

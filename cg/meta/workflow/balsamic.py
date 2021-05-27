@@ -2,12 +2,11 @@
 
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from cg.exc import BalsamicStartError, CgError
+from cg.exc import BalsamicStartError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import CGConfig
@@ -31,9 +30,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config.balsamic.root
-        self.singularity = config.balsamic.singularity
-        self.reference_config = config.balsamic.reference_config
         self.account = config.balsamic.slurm.account
+        self.balsamic_cache = config.balsamic.balsamic_cache
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
@@ -62,7 +60,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         cases_to_analyze = []
         for case_obj in cases_query:
-            if not case_obj.latest_analyzed:
+            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
                 cases_to_analyze.append(case_obj)
             elif (
                 self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
@@ -435,14 +433,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return formatted_options
 
     def config_case(self, case_id: str, panel_bed: str, dry_run: bool = False) -> None:
-        """Create config file for BALSAMIC analysis """
+        """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(case_id=case_id, panel_bed=panel_bed)
         command = ["config", "case"]
         options = self.__build_command_str(
             {
                 "--analysis-dir": self.root_dir,
-                "--singularity": self.singularity,
-                "--reference-config": self.reference_config,
+                "--balsamic-cache": self.balsamic_cache,
                 "--case-id": arguments.get("case_id"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
@@ -467,6 +464,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if run_analysis else []
+        benchmark = ["--benchmark"]
         options = self.__build_command_str(
             {
                 "--account": self.account,
@@ -474,12 +472,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--qos": priority or self.get_priority_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),
-                "--disable-variant-caller": "mutect"
-                if self.get_case_application_type(case_id=case_id) == "wes"
-                else None,
             }
         )
-        parameters = command + options + run_analysis
+        parameters = command + options + run_analysis + benchmark
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(

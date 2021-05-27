@@ -151,6 +151,7 @@ class Analysis(Model):
 
     created_at = Column(types.DateTime, default=dt.datetime.now, nullable=False)
     family_id = Column(ForeignKey("family.id", ondelete="CASCADE"))
+    uploaded_to_vogue_at = Column(types.DateTime, nullable=True)
 
     def __str__(self):
         return f"{self.family.internal_id} | {self.completed_at.date()}"
@@ -164,7 +165,7 @@ class Analysis(Model):
 
 
 class Bed(Model):
-    """Model for bed target captures """
+    """Model for bed target captures"""
 
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
@@ -180,7 +181,7 @@ class Bed(Model):
 
 
 class BedVersion(Model):
-    """Model for bed target captures versions """
+    """Model for bed target captures versions"""
 
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
@@ -213,23 +214,27 @@ class Customer(Model):
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     comment = Column(types.Text)
-    customer_group_id = Column(ForeignKey("customer_group.id"), nullable=False)
-    delivery_contact_email = Column(types.String(128))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     invoice_address = Column(types.Text, nullable=False)
-    invoice_contact_email = Column(types.String(128))
     invoice_reference = Column(types.String(32), nullable=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
     name = Column(types.String(128), nullable=False)
     organisation_number = Column(types.String(32))
-    primary_contact_email = Column(types.String(128))
     priority = Column(types.Enum("diagnostic", "research"))
     project_account_ki = Column(types.String(32))
     project_account_kth = Column(types.String(32))
     return_samples = Column(types.Boolean, nullable=False, default=False)
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
+
+    customer_group_id = Column(ForeignKey("customer_group.id"), nullable=False)
+    delivery_contact_id = Column(ForeignKey("user.id"))
+    delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
+    invoice_contact_id = Column(ForeignKey("user.id"))
+    invoice_contact = orm.relationship("User", foreign_keys=[invoice_contact_id])
+    primary_contact_id = Column(ForeignKey("user.id"))
+    primary_contact = orm.relationship("User", foreign_keys=[primary_contact_id])
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -579,6 +584,7 @@ class User(Model):
     name = Column(types.String(128), nullable=False)
     email = Column(types.String(128), unique=True, nullable=False)
     is_admin = Column(types.Boolean, default=False)
+    order_portal_login = Column(types.Boolean, default=False)
 
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 

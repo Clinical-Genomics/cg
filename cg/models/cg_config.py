@@ -1,6 +1,10 @@
 import logging
 from typing import Optional
 
+from pydantic import BaseModel, EmailStr, Field
+from typing_extensions import Literal
+
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -13,12 +17,9 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.shipping import ShippingAPI
-from cg.apps.stats import StatsAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.store import Store
-from pydantic import BaseModel, EmailStr, Field
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -46,7 +47,8 @@ class HousekeeperConfig(BaseModel):
 
 
 class DemultiplexConfig(BaseModel):
-    out_dir: str
+    run_dir: str  # Base path to  un demultiplexed flowcells
+    out_dir: str  # Base path to where the demultiplexed results lives
     slurm: SlurmConfig
 
 
@@ -62,8 +64,15 @@ class CommonAppConfig(BaseModel):
     deploy_config: Optional[str]
 
 
+class FluffyUploadConfig(BaseModel):
+    user: str
+    password: str
+    host: str
+
+
 class FluffyConfig(CommonAppConfig):
     root_dir: str
+    sftp: FluffyUploadConfig
 
 
 class LimsConfig(BaseModel):
@@ -83,8 +92,7 @@ class MutaccAutoConfig(CommonAppConfig):
 
 class BalsamicConfig(CommonAppConfig):
     root: str
-    singularity: str
-    reference_config: str
+    balsamic_cache: str
     binary_path: str
     conda_env: str
     slurm: SlurmConfig

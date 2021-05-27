@@ -1,11 +1,14 @@
+import datetime
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
+from cg.exc import FlowcellError
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
+from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
 from pydantic import ValidationError
+from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -16,13 +19,40 @@ class Flowcell:
     def __init__(self, flowcell_path: Path):
         LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
-        LOG.debug("Set flowcell id to %s", self.flowcell_id)
         self._run_parameters: Optional[RunParameters] = None
+        self.run_date: datetime.datetime = datetime.datetime.now()
+        self.machine_name: str = ""
+        self.machine_number: int = 0
+        # Base name is flowcell-id + flowcell position
+        self.base_name: str = ""
+        self.flowcell_id: str = ""
+        self.flowcell_position: Literal["A", "B"] = "A"
+        self.parse_flowcell_name()
+
+    def parse_flowcell_name(self):
+        """Parse relevant information from flowcell name
+
+        This will assume that the flowcell naming convention is used. If not we skip the flowcell.
+        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
+        Example: 201203_A00689_0200_AHVKJCDRXX
+        """
+        split_name: List[str] = self.path.name.split("_")
+        if len(split_name) != 4:
+            message = f"Flowcell {self.path.name} does not follow the flowcell naming convention"
+            LOG.warning(message)
+            raise FlowcellError(message)
+        self.run_date = datetime.datetime.strptime(split_name[0], "%y%m%d")
+        self.machine_name = split_name[1]
+        self.machine_number = int(split_name[2])
+        base_name: str = split_name[-1]
+        self.base_name = base_name
+        LOG.debug("Set flowcell id to %s", self.flowcell_id)
+        self.flowcell_id = base_name[1:]
+        self.flowcell_position = base_name[0]
 
     @property
-    def flowcell_id(self) -> str:
-        base_name: str = self.path.name.split("_")[-1]
-        return base_name[1:]
+    def flowcell_full_name(self) -> str:
+        return self.path.name
 
     @property
     def sample_sheet_path(self) -> Path:
@@ -54,6 +84,10 @@ class Flowcell:
     def demultiplexing_started_path(self) -> Path:
         return Path(self.path, "demuxstarted.txt")
 
+    @property
+    def trailblazer_config_path(self) -> Path:
+        return Path(self.path, "slurm_job_ids.yaml")
+
     def is_demultiplexing_started(self) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
         return self.demultiplexing_started_path.exists()
@@ -72,6 +106,9 @@ class Flowcell:
             LOG.warning(error)
             return False
         return True
+
+    def get_sample_sheet(self) -> SampleSheet:
+        return get_sample_sheet_from_file(infile=self.sample_sheet_path, sheet_type="S4")
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done

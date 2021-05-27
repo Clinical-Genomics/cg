@@ -9,7 +9,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to get a flowcell using a non-existing flowcell """
+    """Test to get a flowcell using a non-existing flowcell"""
     # GIVEN an empty database
 
     # WHEN getting a flowcell

@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
 
-import ruamel.yaml
-
+import yaml
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
@@ -83,7 +82,7 @@ class UploadGenotypesAPI(object):
     def get_parsed_qc_metrics_data(qc_metrics: Path) -> dict:
         """Parse the information from a qc metrics file"""
         with qc_metrics.open() as in_stream:
-            qcmetrics_raw = ruamel.yaml.safe_load(in_stream)
+            qcmetrics_raw = yaml.safe_load(in_stream)
         return parse_qcmetrics(qcmetrics_raw)
 
     @staticmethod

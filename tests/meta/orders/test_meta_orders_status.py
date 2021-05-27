@@ -77,7 +77,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
 
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data["samples"][0]
-    assert sample_data.get("priority") in "research"
+    assert sample_data["priority"] == "research"
     assert sample_data["name"] == "all-fields"
     assert sample_data.get("internal_id") is None
     assert sample_data["organism_id"] == "M.upium"
@@ -103,18 +103,22 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
 
     # THEN first sample should contain all the relevant data from the microbial order
     sample_data = data["samples"][0]
-    assert sample_data.get("priority") in "research"
-    assert sample_data["name"] == "all-fields"
     assert sample_data.get("internal_id") is None
-    assert sample_data["organism_id"] == "SARS CoV-2"
-    assert sample_data["reference_genome"] == "NC_111"
+    assert sample_data["priority"] == "research"
     assert sample_data["application"] == "VWGDPTR001"
+    assert sample_data["collection_date"] == "2021-05-05"
     assert sample_data["comment"] == "plate comment"
-    assert sample_data["volume"] == "1"
-    assert sample_data["pre_processing_method"] == "COVIDSeq"
-    assert sample_data["region_code"] == "01 Region Stockholm"
     assert sample_data["lab_code"] == "SE110 Växjö"
+    assert sample_data["name"] == "all-fields"
+    assert sample_data["organism_id"] == "SARS CoV-2"
+    assert sample_data["original_lab"] == "Karolinska University Hospital Solna"
+    assert sample_data["original_lab_address"] == "171 76 Stockholm"
+    assert sample_data["pre_processing_method"] == "COVIDSeq"
+    assert sample_data["reference_genome"] == "NC_111"
+    assert sample_data["region"] == "Stockholm"
+    assert sample_data["region_code"] == "01"
     assert sample_data["selection_criteria"] == "1. Allmän övervakning"
+    assert sample_data["volume"] == "1"
 
 
 def test_families_to_status(mip_order_to_submit):
@@ -689,7 +693,7 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
     assert base_store.sample(internal_id)
 
     # WHEN storing a new case with one sample from the trio
-    for family in mip_status_data["families"]:
+    for family_idx, family in enumerate(mip_status_data["families"]):
         for sample_idx, sample in enumerate(family["samples"]):
             if sample["name"] == name:
                 sample["internal_id"] = internal_id
@@ -699,7 +703,10 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
 
         family["samples"] = list(filter(None, family["samples"]))
 
-    print(mip_status_data)
+        if not family["samples"]:
+            mip_status_data["families"][family_idx] = {}
+
+    mip_status_data["families"] = list(filter(None, mip_status_data["families"]))
 
     new_families = orders_api.store_cases(
         customer=mip_status_data["customer"],

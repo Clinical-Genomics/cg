@@ -1,13 +1,9 @@
 import csv
 import datetime as dt
 import logging
-import os
 import shutil
-from abc import ABC
 from pathlib import Path
-from subprocess import CalledProcessError
-from typing import List
-
+from typing import List, Optional
 from alchy import Query
 from cg.constants import Pipeline
 from cg.exc import CgError
@@ -48,7 +44,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Location in case folder where samplesheet is expected to be stored. Samplesheet is used as a config
         required to run Fluffy
         """
-        return Path(self.root_dir, case_id, "SampleSheet.csv")
+        starlims_id: str = self.status_db.family(case_id).links[0].sample.order
+        return Path(self.root_dir, case_id, f"SampleSheet_{starlims_id}.csv")
 
     def get_workdir_path(self, case_id: str) -> Path:
         """
@@ -84,7 +81,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         return Path(self.get_output_path(case_id), "sacct", "submitted_jobs.yaml")
 
     def get_analysis_finish_path(self, case_id: str) -> Path:
-        return Path(self.get_output_path(case_id), "analysis_finished")
+        return Path(self.get_output_path(case_id), "COMPLETE")
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
@@ -111,6 +108,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
+    def get_sample_starlims_id(self, sample_id: str) -> int:
+        sample_obj: models.Sample = self.status_db.sample(sample_id)
+        return sample_obj.order
+
+    def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
+        sample_obj: models.Sample = self.status_db.sample(sample_id)
+        sequenced_at: dt.datetime = sample_obj.sequenced_at
+        if sequenced_at:
+            return sequenced_at.date()
+
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
     ) -> None:
@@ -124,17 +131,22 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
         sample_name_index = None
         sample_id_index = None
+        project_index = None
         for row in csv_reader:
             if "SampleID" in row and not sample_id_index:
                 sample_name_index = row.index("SampleName")
                 sample_id_index = row.index("SampleID")
+                project_index = row.index("Project")
                 row.append("Library_nM")
+                row.append("SequencingDate")
                 csv_writer.writerow(row)
                 continue
             if sample_id_index:
                 sample_id = row[sample_id_index]
                 row[sample_name_index] = self.get_sample_name_from_lims_id(lims_id=sample_id)
+                row[project_index] = str(self.get_sample_starlims_id(sample_id=sample_id))
                 row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
+                row.append(str(self.get_sample_sequenced_date(sample_id=sample_id)))
                 csv_writer.writerow(row)
 
     def get_samplesheet_housekeeper_path(self, flowcell_name: str) -> Path:
@@ -192,6 +204,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "--out",
             self.get_output_path(case_id=case_id).as_posix(),
             "analyse",
+            "--batch-ref",
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 

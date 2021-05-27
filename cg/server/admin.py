@@ -1,7 +1,6 @@
 """Module for Flask-Admin views"""
 from flask import redirect, request, session, url_for
 from flask_admin.contrib.sqla import ModelView
-from flask_admin.form import thumbgen_filename
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
@@ -25,7 +24,7 @@ class BaseView(ModelView):
 def view_human_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
-    return Markup(u"%s" % (model.priority_human)) if model else u""
+    return Markup("%s" % (model.priority_human)) if model else ""
 
 
 def view_family_sample_link(unused1, unused2, model, unused3):
@@ -34,7 +33,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
 
     return Markup(
-        u"<a href='%s'>%s</a>"
+        "<a href='%s'>%s</a>"
         % (url_for("familysample.index_view", search=model.internal_id), model.internal_id)
     )
 
@@ -42,7 +41,7 @@ def view_family_sample_link(unused1, unused2, model, unused3):
 def is_external_application(unused1, unused2, model, unused3):
     """column formatter to open this view"""
     del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else u""
+    return model.application_version.application.is_external if model.application_version else ""
 
 
 class ApplicationView(BaseView):
@@ -83,14 +82,14 @@ class ApplicationView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (
                     url_for("application.index_view", search=model.application.tag),
                     model.application.tag,
                 )
             )
             if model.application
-            else u""
+            else ""
         )
 
 
@@ -123,11 +122,11 @@ class BedView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (url_for("bed.index_view", search=model.bed.name), model.bed.name)
             )
             if model.bed
-            else u""
+            else ""
         )
 
 
@@ -148,10 +147,11 @@ class CustomerView(BaseView):
     """Admin view for Model.Customer"""
 
     column_editable_list = [
-        "name",
         "scout_access",
         "loqus_upload",
         "return_samples",
+        "primary_contact",
+        "delivery_contact",
         "priority",
         "customer_group",
         "comment",
@@ -178,6 +178,8 @@ class CustomerGroupView(BaseView):
 
     column_editable_list = ["name"]
     column_filters = []
+    column_hide_backrefs = False
+    column_list = ("internal_id", "name", "customers")
     column_searchable_list = ["internal_id", "name"]
 
 
@@ -215,13 +217,13 @@ class FamilyView(BaseView):
     def view_family_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
         del unused1, unused2, unused3
-        markup = u""
+        markup = ""
         if model.family:
             if model.family.avatar_url:
                 markup += Markup('<img width="56" height="56" src="%s">' % model.family.avatar_url)
 
             markup += Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (url_for("family.index_view", search=model.family.internal_id), model.family)
             )
 
@@ -261,7 +263,7 @@ class InvoiceView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (
                     url_for("invoice.index_view", search=model.invoice.id),
                     model.invoice.invoiced_at.date()
@@ -270,7 +272,7 @@ class InvoiceView(BaseView):
                 )
             )
             if model.invoice
-            else u""
+            else ""
         )
 
 
@@ -345,11 +347,11 @@ class SampleView(BaseView):
         del unused1, unused2, unused3
         return (
             Markup(
-                u"<a href='%s'>%s</a>"
+                "<a href='%s'>%s</a>"
                 % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
             )
             if model.sample
-            else u""
+            else ""
         )
 
 
@@ -383,9 +385,10 @@ class UserView(BaseView):
     """Admin view for Model.User"""
 
     column_default_sort = "name"
-    column_filters = ["customers"]
+    column_editable_list = ["order_portal_login"]
+    column_filters = ["is_admin", "order_portal_login", "customers"]
     column_hide_backrefs = False
-    column_list = ("name", "is_admin", "email", "customers")
+    column_list = ("name", "email", "is_admin", "order_portal_login", "customers")
     column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
