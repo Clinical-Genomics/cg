@@ -77,21 +77,21 @@ class NiptUploadAPI:
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
-        LOG.info("Instantiating paramiko transport")
         transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.port))
         LOG.info(f"Connecting to SFTP server {self.sftp_host}")
         transport.connect(username=self.sftp_user, password=self.sftp_password)
         sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
         LOG.info(
             f"Uploading file {str(results_file)} to remote path "
-            f"/{self.remote_path}/{results_file.name}"
+            f"{self.remote_path}/{results_file.name}"
         )
-        sftp.put(localpath=str(results_file), remotepath=f"/{self.remote_path}/{results_file.name}")
-        LOG.info(f"Closing connection to SFTP server {self.sftp_host}")
+        sftp.put(
+            localpath=str(results_file),
+            remotepath=f"/{self.remote_path}/" f"{results_file.name}",
+            confirm=False,
+        )
         sftp.close()
-        LOG.info("Closing transport")
         transport.close()
-        LOG.info("")
 
     def update_analysis_uploaded_at_date(self, case_id: str) -> models.Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
