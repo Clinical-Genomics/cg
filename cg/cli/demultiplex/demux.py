@@ -4,6 +4,7 @@ from typing import Optional
 
 import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.exc import FlowcellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
@@ -28,6 +29,7 @@ def demultiplex_all(
         flowcells_directory: Path = Path(context.demultiplex.run_dir)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
+    tb_api: TrailblazerAPI = context.trailblazer_api
     LOG.info("Search for flowcells ready to demultiplex in %s", flowcells_directory)
     for sub_dir in flowcells_directory.iterdir():
         if not sub_dir.is_dir():
@@ -47,7 +49,10 @@ def demultiplex_all(
             )
             if not dry_run:
                 continue
-        demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
+        slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
+        demultiplex_api.add_to_trailblazer(
+            tb_api=tb_api, slurm_job_id=slurm_job_id, flowcell=flowcell_obj
+        )
 
 
 @click.command(name="flowcell")
@@ -79,4 +84,8 @@ def demultiplex_flowcell(
         )
         if not dry_run:
             raise click.Abort
-    demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
+    slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
+    tb_api: TrailblazerAPI = context.trailblazer_api
+    demultiplex_api.add_to_trailblazer(
+        tb_api=tb_api, slurm_job_id=slurm_job_id, flowcell=flowcell_obj
+    )
