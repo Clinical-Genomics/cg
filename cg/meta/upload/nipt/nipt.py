@@ -87,7 +87,7 @@ class NiptUploadAPI:
         )
         sftp.put(
             localpath=str(results_file),
-            remotepath=f"/{self.remote_path}/" f"{results_file.name}",
+            remotepath=f"/{self.remote_path}/{results_file.name}",
             confirm=False,
         )
         sftp.close()
