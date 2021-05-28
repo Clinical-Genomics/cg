@@ -45,7 +45,7 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool):
         nipt_upload_api.upload_to_niptool_database(
             results_file=results_file,
             multiqc_file=multiqc_file,
-            segmental_calls_file=segmental_calls_file.parents[0],
+            segmental_calls_file=segmental_calls_file.parent,
         )
 
     except Exception as error:

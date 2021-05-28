@@ -20,14 +20,13 @@ def ftp():
 @click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def nipt_upload_case(configs: CGConfig, case_id: str, dry_run: bool):
+def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
     """Upload the results file of a NIPT case"""
-    status_db: Store = configs.status_db
+    status_db: Store = context.status_db
 
     LOG.info("*** NIPT FTP UPLOAD START ***")
 
-    nipt_upload_api: NiptUploadAPI = NiptUploadAPI(configs)
-    print("hoh")
+    nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
     try:

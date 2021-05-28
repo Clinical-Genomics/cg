@@ -2,6 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
+import requests
 from typing import Iterable, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -118,20 +119,9 @@ class NiptUploadAPI:
             multiqc_report=multiqc_file.absolute(),
             segmental_calls=segmental_calls_file,
         )
-
-        load_call = [
-            "curl",
-            "-X",
-            "POST",
-            f"{self.niptool_host}/insert/batch",
-            "-H",
-            "accept: application/json",
-            "-H",
-            "Content-Type: application/json",
-            "-d",
-            str(upload_files.dict(exclude_none=True)),
-        ]
-        self.process.run_command(parameters=load_call)
+        requests.post(
+            url=f"{self.niptool_host}/insert/batch", data=str(upload_files.dict(exclude_none=True))
+        )
 
         # Execute command and print its stdout+stderr as it executes
         for line in self.process.stderr_lines():
