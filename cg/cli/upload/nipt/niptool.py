@@ -47,6 +47,5 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool):
             multiqc_file=multiqc_file,
             segmental_calls_file=segmental_calls_file.parent,
         )
-
     except Exception as error:
         LOG.error(f"{error}")
