@@ -1,7 +1,6 @@
 """API to prepare fastq files for analysis"""
 
 import logging
-import os
 from pathlib import Path
 from typing import Dict, List
 
