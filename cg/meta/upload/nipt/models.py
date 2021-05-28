@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class UpploadFiles(BaseModel):
-    result_file: Path
-    multiqc_report: Optional[Path]
-    segmental_calls: Optional[Path]
+class UploadFiles(BaseModel):
+    result_file: str
+    multiqc_report: Optional[str]
+    segmental_calls: Optional[str]

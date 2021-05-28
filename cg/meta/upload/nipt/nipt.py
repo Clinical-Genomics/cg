@@ -10,7 +10,7 @@ from requests import Request, Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError
-from cg.meta.upload.nipt.models import UpploadFiles
+from cg.meta.upload.nipt.models import UploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils import Process
@@ -116,10 +116,10 @@ class NiptUploadAPI:
     ):
         """Upload nipt data via rest-API."""
 
-        upload_files = UpploadFiles(
-            result_file=results_file.absolute(),
-            multiqc_report=multiqc_file.absolute(),
-            segmental_calls=segmental_calls_file,
+        upload_files = UploadFiles(
+            result_file=results_file.absolute().as_posix(),
+            multiqc_report=multiqc_file.absolute().as_posix(),
+            segmental_calls=segmental_calls_file.as_posix(),
         )
         response: Response = requests.post(
             url=f"{self.niptool_host}/insert/batch", data=str(upload_files.dict(exclude_none=True))
