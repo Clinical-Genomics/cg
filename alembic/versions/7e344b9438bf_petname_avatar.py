@@ -1,7 +1,7 @@
 """petname avatar
 
 Revision ID: 7e344b9438bf
-Revises: 1dadcefd3bbf
+Revises: ed0be7286cee
 Create Date: 2021-04-08 08:04:11.763421
 
 """
@@ -17,7 +17,7 @@ from sqlalchemy.ext.declarative import declarative_base
 # revision identifiers, used by Alembic.
 
 revision = "7e344b9438bf"
-down_revision = "1dadcefd3bbf"
+down_revision = "ed0be7286cee"
 branch_labels = None
 depends_on = None
 
