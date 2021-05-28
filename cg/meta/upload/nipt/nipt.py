@@ -121,8 +121,9 @@ class NiptUploadAPI:
             multiqc_report=multiqc_file.absolute().as_posix(),
             segmental_calls=segmental_calls_file.as_posix(),
         )
+
         response: Response = requests.post(
-            url=f"{self.niptool_host}/insert/batch", data=str(upload_files.dict(exclude_none=True))
+            url=f"{self.niptool_host}/insert/batch", data=upload_files.json(exclude_none=True)
         )
 
         # Execute command and print its stdout+stderr as it executes
