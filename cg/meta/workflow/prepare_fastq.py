@@ -72,6 +72,24 @@ class PrepareFastqAPI:
             compression_objs: List[CompressionData] = files.get_spring_paths(version_obj)
             for compression_obj in compression_objs:
                 if compression_obj.fastq_first not in fastq_files:
+                    LOG.info(
+                        "Adding %s to sample %s in housekeeper",
+                        (compression_obj.fastq_first, sample_id),
+                    )
                     self.compress_api.add_decompressed_fastq(sample_id)
+                else:
+                    LOG.info(
+                        "%s from sample %s is already in housekeeper",
+                        (compression_obj.fastq_first, sample_id),
+                    )
                 if compression_obj.fastq_second not in fastq_files:
+                    LOG.info(
+                        "Adding %s to sample %s in housekeeper",
+                        (compression_obj.fastq_first, sample_id),
+                    )
                     self.compress_api.add_decompressed_fastq(sample_id)
+                else:
+                    LOG.info(
+                        "%s from sample %s is already in housekeeper",
+                        (compression_obj.fastq_first, sample_id),
+                    )
