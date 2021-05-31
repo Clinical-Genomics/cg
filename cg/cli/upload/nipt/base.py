@@ -3,7 +3,7 @@
 import logging
 
 from .ftp import ftp
-from .niptool import niptool
+from .statina import statina
 
 import click
 
@@ -17,4 +17,4 @@ def nipt():
 
 
 nipt.add_command(ftp)
-nipt.add_command(niptool)
+nipt.add_command(statina)

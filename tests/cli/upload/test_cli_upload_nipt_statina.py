@@ -4,7 +4,7 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.upload.nipt.niptool import batch
+from cg.cli.upload.nipt.statina import batch
 from cg.models.cg_config import CGConfig
 
 

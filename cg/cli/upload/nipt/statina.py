@@ -10,12 +10,12 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-def niptool():
+def statina():
     """Upload NIPT result files"""
     pass
 
 
-@niptool.command("case")
+@statina.command("case")
 @click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
@@ -42,7 +42,7 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool):
         )
         segmental_calls_file: Path = nipt_upload_api.get_results_file_path(hk_segmental_calls_file)
 
-        nipt_upload_api.upload_to_niptool_database(
+        nipt_upload_api.upload_to_statina_database(
             results_file=results_file,
             multiqc_file=multiqc_file,
             segmental_calls_file=segmental_calls_file.parent,

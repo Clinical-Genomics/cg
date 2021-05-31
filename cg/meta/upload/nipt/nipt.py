@@ -28,7 +28,7 @@ class NiptUploadAPI:
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
-        self.niptool_host: str = config.statina.host
+        self.statina_host: str = config.statina.host
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
@@ -111,7 +111,7 @@ class NiptUploadAPI:
 
         return analysis_obj
 
-    def upload_to_niptool_database(
+    def upload_to_statina_database(
         self, results_file: Path, multiqc_file: Optional[Path], segmental_calls_file: Optional[Path]
     ):
         """Upload nipt data via rest-API."""
@@ -123,7 +123,7 @@ class NiptUploadAPI:
         )
 
         response: Response = requests.post(
-            url=f"{self.niptool_host}/insert/batch", data=upload_files.json(exclude_none=True)
+            url=f"{self.statina_host}/insert/batch", data=upload_files.json(exclude_none=True)
         )
 
         # Execute command and print its stdout+stderr as it executes
