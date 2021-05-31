@@ -14,6 +14,7 @@ __________ DO NOT TOUCH ___________
 
 ## [x.x.x]
 ### Added
+- cli for upload of data to statina
 ### Changed
 ### Fixed
 
