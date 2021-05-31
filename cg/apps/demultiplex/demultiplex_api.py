@@ -1,13 +1,16 @@
 """This api should handle everything around demultiplexing"""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
+import yaml
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch
+from cgmodels.cg.constants import Pipeline
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
@@ -28,6 +31,12 @@ class DemultiplexingAPI:
         self.environment: str = config.get("environment", "stage")
         LOG.info("Set environment to %s", self.environment)
         self.dry_run: bool = False
+
+    @property
+    def priority(self) -> Literal["high", "low"]:
+        if self.environment == "stage":
+            return "low"
+        return "high"
 
     def set_dry_run(self, dry_run: bool) -> None:
         LOG.debug("Set dry run to %s", dry_run)
@@ -160,6 +169,35 @@ class DemultiplexingAPI:
             return
         demultiplexing_started_path.touch(exist_ok=False)
 
+    @staticmethod
+    def get_trailblazer_config(slurm_job_id: int) -> Dict[str, List[str]]:
+        return {"jobs": [str(slurm_job_id)]}
+
+    @staticmethod
+    def write_trailblazer_config(content: dict, file_path: Path) -> None:
+        """Write the content to a yaml file"""
+        LOG.info("Writing yaml content %s to %s", content, file_path)
+        with file_path.open("w") as yaml_file:
+            yaml.safe_dump(content, yaml_file, indent=4, explicit_start=True)
+
+    def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flowcell: Flowcell):
+        """Add demultiplexing entry to trailblazer"""
+        if self.dry_run:
+            return
+        self.write_trailblazer_config(
+            content=self.get_trailblazer_config(slurm_job_id=slurm_job_id),
+            file_path=flowcell.trailblazer_config_path,
+        )
+        tb_api.add_pending_analysis(
+            case_id=flowcell.flowcell_id,
+            analysis_type="other",
+            config_path=flowcell.trailblazer_config_path.as_posix(),
+            out_dir=flowcell.trailblazer_config_path.parent.as_posix(),
+            priority=self.priority,
+            email=self.mail,
+            data_analysis=str(Pipeline.DEMULTIPLEX),
+        )
+
     def start_demultiplexing(self, flowcell: Flowcell):
         """Start demultiplexing for a flowcell"""
         self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
@@ -187,10 +225,11 @@ class DemultiplexingAPI:
                 job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
                 number_tasks=18,
-                memory=50,
+                memory=95,
                 log_dir=log_path.parent.as_posix(),
                 email=self.mail,
                 hours=36,
+                priority=self.priority,
                 commands=commands,
                 error=error_function,
             )

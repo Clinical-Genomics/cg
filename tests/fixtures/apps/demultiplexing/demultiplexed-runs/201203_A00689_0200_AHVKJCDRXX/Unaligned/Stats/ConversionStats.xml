@@ -123,5 +123,33 @@
         </Barcode>
       </Sample>
     </Project>
+	<Lane number="1">
+	      <TopUnknownBarcodes>
+	        <Barcode count="287675500" sequence="CAACAATGAT+CCGTGAAGGT"/>
+	        <Barcode count="134802960" sequence="CCGCGGTTAT+CTAGCGCTGT"/>
+	        <Barcode count="125897880" sequence="GGTACCTTAT+GACGTCTTGT"/>
+	        <Barcode count="116361020" sequence="TGGTGGCAAT+TTACAGGAGT"/>
+	        <Barcode count="108374140" sequence="GCAGAATTAT+TGGCCGGTGT"/>
+	        <Barcode count="102152120" sequence="ATGTAAGTAT+CATAGAGTGT"/>
+	        <Barcode count="99374840" sequence="TAATACAGAT+GTGAATATGT"/>
+	        <Barcode count="97159120" sequence="AAGTCCAAAT+TACTCATAGT"/>
+	        <Barcode count="93561120" sequence="AGTTCAGGAT+TCTGTTGGGT"/>
+	        <Barcode count="92722220" sequence="CGGCGTGAAT+ACAGGCGCGT"/>
+	      </TopUnknownBarcodes>
+	    </Lane>
+	    <Lane number="2">
+	      <TopUnknownBarcodes>
+	        <Barcode count="293489140" sequence="CAACAATGAT+CCGTGAAGGT"/>
+	        <Barcode count="134762440" sequence="CCGCGGTTAT+CTAGCGCTGT"/>
+	        <Barcode count="123383820" sequence="GGTACCTTAT+GACGTCTTGT"/>
+	        <Barcode count="117920580" sequence="TGGTGGCAAT+TTACAGGAGT"/>
+	        <Barcode count="108170900" sequence="GCAGAATTAT+TGGCCGGTGT"/>
+	        <Barcode count="102394080" sequence="ATGTAAGTAT+CATAGAGTGT"/>
+	        <Barcode count="101491260" sequence="TAATACAGAT+GTGAATATGT"/>
+	        <Barcode count="98569320" sequence="AAGTCCAAAT+TACTCATAGT"/>
+	        <Barcode count="95613280" sequence="AGTTCAGGAT+TCTGTTGGGT"/>
+	        <Barcode count="93195300" sequence="CGGCGTGAAT+ACAGGCGCGT"/>
+	      </TopUnknownBarcodes>
+	    </Lane>
   </Flowcell>
 </Stats>
