@@ -10,7 +10,6 @@ from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-from cg.utils import Process
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
@@ -30,7 +29,6 @@ class NiptUploadAPI:
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
-        self.process = Process(binary="lftp")
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
