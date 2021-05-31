@@ -58,7 +58,7 @@ class TrailblazerConfig(BaseModel):
     host: str
 
 
-class NIPToolConfig(BaseModel):
+class StatinaConfig(BaseModel):
     host: str
 
 
@@ -189,7 +189,7 @@ class CGConfig(BaseModel):
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
-    niptool: NIPToolConfig = None
+    statina: StatinaConfig = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None

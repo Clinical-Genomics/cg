@@ -1164,6 +1164,7 @@ def fixture_context_config(
             "root_dir": str(fluffy_dir),
             "sftp": {"user": "sftpuser", "password": "sftpassword", "host": "sftphost"},
         },
+        "statina": {"host": "http://localhost:28002"},
         "data-delivery": {
             "destination_path": "server.name.se:/some/%s/path/%s/",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
