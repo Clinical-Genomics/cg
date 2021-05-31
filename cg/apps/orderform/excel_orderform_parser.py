@@ -22,8 +22,6 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        "1508:22",  # REMOVE THIS LINE BEFORE MERGING !!!
-        "1508:23",  # REMOVE THIS LINE BEFORE MERGING !!!
         "1508:24",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
         "1541:6",  # Orderform Externally sequenced samples
         "1603:10",  # Microbial WGS
