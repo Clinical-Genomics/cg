@@ -22,7 +22,7 @@ def niptool():
 def batch(configs: CGConfig, case_id: str, dry_run: bool):
     """Loading batch into the NIPT database"""
 
-    LOG.info("*** NIPTool UPLOAD START ***")
+    LOG.info("*** Statina UPLOAD START ***")
 
     nipt_upload_api = NiptUploadAPI(configs)
 
