@@ -36,7 +36,7 @@ def results(context: CGConfig, family_id: str):
         fasta_file=gisaid_api.build_gisaid_fasta(
             gsaid_samples=gsaid_samples, file_name=f"{family_id}.fasta", family_id=family_id
         ),
-        log_file=gisaid_api.get_log_file(family_id=family_id),
+        log_file=gisaid_api.new_log_file(family_id=family_id),
     )
 
     if files:
@@ -56,7 +56,7 @@ def completion_file(context: CGConfig, family_id: str):
 
     gisaid_api = GisaidAPI(config=context)
     files: CompletionFiles = gisaid_api.get_completion_files(case_id=family_id)
-    completion_data: Dict[str, str] = gisaid_api.get_completion_data(log_file=files.log_file)
+    completion_data: Dict[str, str] = gisaid_api.get_accession_numbers(log_file=files.log_file)
     gisaid_api.update_completion(
         completion_file=files.completion_file, completion_data=completion_data
     )
