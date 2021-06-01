@@ -11,9 +11,29 @@ class FastaFile(BaseModel):
     sequence: str
 
 
+class GisaidAccession(BaseModel):
+    accession_nr: str
+    sample_id: str
+
+    @validator("accession_nr", always=True)
+    def parse_accession(cls, v):
+        print(v.split(";")[-1])
+        return v.split(";")[-1]
+
+    @validator("sample_id", always=True)
+    def parse_sample_id(cls, v):
+        return v.split("/")[2].split("_")[2]
+
+
 class UpploadFiles(BaseModel):
     csv_file: Path
     fasta_file: Path
+    log_file: Path
+
+
+class CompletionFiles(BaseModel):
+    log_file: Path
+    completion_file: Path
 
 
 class GisaidSample(BaseModel):
@@ -23,7 +43,7 @@ class GisaidSample(BaseModel):
     region: str
     region_code: str
     fn: str
-    covv_collection_date: date
+    covv_collection_date: str
     covv_subm_sample_id: str
     covv_virus_name: Optional[str]
     covv_orig_lab: Optional[str]
