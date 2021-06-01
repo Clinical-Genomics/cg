@@ -1,7 +1,6 @@
 """API to prepare fastq files for analysis"""
 
 import logging
-import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -61,23 +60,6 @@ class PrepareFastqAPI:
             for compression_object in compression_objects
         )
 
-    def can_at_least_one_decompression_job_start(self, case_id: str, dry_run: bool) -> bool:
-        """Returns True if decompression started for at least one sample, otherwise False"""
-        case_obj: models.Family = self.store.family(case_id)
-        link: models.FamilySample
-        did_something_start = False
-        for link in case_obj.links:
-            sample_id = link.sample.internal_id
-            if dry_run:
-                LOG.info(
-                    f"This is a dry run, therefore decompression for {sample_id} won't be started"
-                )
-                continue
-            decompression_started = self.compress_api.decompress_spring(sample_id)
-            if decompression_started:
-                did_something_start = True
-        return did_something_start
-
     def check_fastq_links(self, case_id: str) -> None:
         """Check if all fastq files are linked in housekeeper"""
         case_obj: models.Family = self.store.family(case_id)
@@ -89,7 +71,28 @@ class PrepareFastqAPI:
             )
             compression_objs: List[CompressionData] = files.get_spring_paths(version_obj)
             for compression_obj in compression_objs:
+                result = True
                 if compression_obj.fastq_first not in fastq_files:
-                    self.compress_api.add_decompressed_fastq(sample_id)
+                    LOG.info(
+                        "Adding %s to sample %s in housekeeper"
+                        % (compression_obj.fastq_first, sample_id)
+                    )
+                    result: bool = self.compress_api.add_decompressed_fastq(sample_id)
+                else:
+                    LOG.info(
+                        "%s from sample %s is already in housekeeper"
+                        % (compression_obj.fastq_first, sample_id)
+                    )
                 if compression_obj.fastq_second not in fastq_files:
-                    self.compress_api.add_decompressed_fastq(sample_id)
+                    LOG.info(
+                        "Adding %s to sample %s in housekeeper"
+                        % (compression_obj.fastq_first, sample_id)
+                    )
+                    result: bool = self.compress_api.add_decompressed_fastq(sample_id)
+                else:
+                    LOG.info(
+                        "%s from sample %s is already in housekeeper"
+                        % (compression_obj.fastq_first, sample_id)
+                    )
+                if not result:
+                    LOG.warning("Files where not added to fastq!")

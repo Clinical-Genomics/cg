@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [21.11.1]
+### Changed
+- Clarified the code for automatic decompression
 
 ## [21.11.0]
 ### Added

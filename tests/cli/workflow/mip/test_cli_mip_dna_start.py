@@ -31,10 +31,6 @@ def test_dna_case_included(cli_runner, caplog, dna_case, dna_mip_context, mocker
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
 
-    # GIVEN spring decompression successfully starts
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_decompression_job_start")
-    PrepareFastqAPI.can_at_least_one_decompression_job_start.return_value = True
-
     # GIVEN a case that is ready for MIP DNA analysis
     #   -> has a sample that is sequenced and has an dna-application (non-wts)
     for link in dna_case.links:
@@ -63,10 +59,6 @@ def test_rna_case_excluded(cli_runner, caplog, dna_mip_context, rna_case, mocker
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
 
-    # GIVEN spring decompression successfully starts
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_decompression_job_start")
-    PrepareFastqAPI.can_at_least_one_decompression_job_start.return_value = True
-
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
 
@@ -93,10 +85,6 @@ def test_mixed_dna_rna_case(cli_runner, caplog, dna_mip_context, dna_rna_mix_cas
     # GIVEN there is spring files that can be decompressed
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
-
-    # GIVEN spring decompression successfully starts
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_decompression_job_start")
-    PrepareFastqAPI.can_at_least_one_decompression_job_start.return_value = True
 
     # GIVEN a case that is ready for MIP RNA analysis
     #   -> has a sample that is sequenced and has an rna-application (wts)
