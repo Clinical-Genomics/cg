@@ -14,12 +14,16 @@ __________ DO NOT TOUCH ___________
 
 ## [x.x.x]
 ### Added
-- cli for upload of data to statina
 ### Changed
 ### Fixed
 
 __________ DO NOT TOUCH ___________
 
+## [x.x.x]
+### Added
+- cli for upload of data to statina
+### Changed
+### Fixed
 
 ## [21.11.0]
 ### Added

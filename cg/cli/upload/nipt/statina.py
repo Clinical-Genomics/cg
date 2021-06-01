@@ -1,8 +1,7 @@
 import logging
-from pathlib import Path
-
 import click
 
+from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.meta.upload.nipt.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig
 
@@ -25,27 +24,14 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool):
     LOG.info("*** Statina UPLOAD START ***")
 
     nipt_upload_api = NiptUploadAPI(configs)
-
+    nipt_upload_api.set_dry_run(dry_run=dry_run)
     try:
-        hk_results_file: str = nipt_upload_api.get_housekeeper_results_file(
-            case_id=case_id, tags=["nipt", "metrics"]
-        )
-        results_file: Path = nipt_upload_api.get_results_file_path(hk_results_file)
-
-        hk_multiqc_file: str = nipt_upload_api.get_housekeeper_results_file(
-            case_id=case_id, tags=["nipt", "multiqc-html"]
-        )
-        multiqc_file: Path = nipt_upload_api.get_results_file_path(hk_multiqc_file)
-
-        hk_segmental_calls_file: str = nipt_upload_api.get_housekeeper_results_file(
-            case_id=case_id, tags=["nipt", "wisecondor"]
-        )
-        segmental_calls_file: Path = nipt_upload_api.get_results_file_path(hk_segmental_calls_file)
-
-        nipt_upload_api.upload_to_statina_database(
-            results_file=results_file,
-            multiqc_file=multiqc_file,
-            segmental_calls_file=segmental_calls_file.parent,
-        )
+        statina_files: StatinaUploadFiles = nipt_upload_api.get_statina_files(case_id=case_id)
+        if dry_run:
+            LOG.info(
+                f"Found file paths for statina upload: {statina_files.json(exclude_none=True)}"
+            )
+        else:
+            nipt_upload_api.upload_to_statina_database(statina_files=statina_files)
     except Exception as error:
         LOG.error(f"{error}")
