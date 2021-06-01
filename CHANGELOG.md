@@ -45,6 +45,10 @@ __________ DO NOT TOUCH ___________
 - gisaid adjusting for new fasta consensus file in housekeeper
 - gisaid removing failing tests
 
+## [21.12.0]
+### Added
+- Support for Orderform 1508:24 for Clinical Samples
+
 ## [21.9.0]
 ### Added
 - Add Fluffy analysis results -> ftp upload functionality for cust002
