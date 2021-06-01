@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import FlowcellsNeededError
+from cg.exc import FlowcellsNeededError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -45,7 +45,11 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
     """Handles cases where decompression is needed before starting analysis"""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    analysis_api.resolve_decompression(case_id=case_id, dry_run=dry_run)
+    is_decompression_running: bool = analysis_api.resolve_decompression(
+        case_id=case_id, dry_run=dry_run
+    )
+    if is_decompression_running:
+        raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
 
 
 @click.command()

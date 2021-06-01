@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [21.11.1]
+### Changed
+- Clarified the code for automatic decompression
 
 ## [21.11.0]
 ### Added
@@ -44,6 +47,10 @@ __________ DO NOT TOUCH ___________
 
 ### Changed
 ### Fixed
+
+## [21.12.0]
+### Added
+- Support for Orderform 1508:24 for Clinical Samples
 
 ## [21.9.0]
 ### Added
