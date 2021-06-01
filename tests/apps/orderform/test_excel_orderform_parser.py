@@ -136,10 +136,9 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
 
     case_obj = orderform.cases[0]
     assert len(case_obj.samples) == 3
-    assert case_obj.name == "c1"
+    assert case_obj.name == "mipdnacase1"
     assert case_obj.priority == "research"
-    assert set(case_obj.panels) == set(["AD-HSP", "Ataxi", "ATX"])
-    assert case_obj.require_qcok is True
+    assert set(case_obj.panels) == set(["AD-HSP", "Ataxi", "Actionable"])
 
 
 def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
@@ -210,8 +209,8 @@ def test_fastq_samples_is_correct(fastq_order_parser: ExcelOrderformParser):
     # GIVEN a orderform parser where a fastq order is parsed
 
     # GIVEN a tumor and normal sample with known information
-    tumor_sample_id = "s1"
-    normal_sample_id = "s2"
+    tumor_sample_id = "fastqsample1"
+    normal_sample_id = "fastqsample2"
 
     # WHEN fetching the tumor and the normal sample
     tumour_sample = get_sample_obj(fastq_order_parser, tumor_sample_id)
