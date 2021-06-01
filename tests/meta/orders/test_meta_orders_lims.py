@@ -30,7 +30,6 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample.udfs.application == "WGTPCFC030"
     assert first_sample.udfs.source == "tissue (fresh frozen)"
     assert first_sample.udfs.quantity == "220"
-    assert first_sample.udfs.require_qcok is True
     assert first_sample.udfs.customer == "cust003"
     assert first_sample.udfs.volume == "1"
 
@@ -159,7 +158,6 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["udfs"]["sex"] == "M"
     assert first_sample["udfs"]["family_name"] == "family1"
     assert first_sample["udfs"]["customer"] == "cust000"
-    assert first_sample["udfs"]["require_qcok"] is False
     assert first_sample["udfs"]["source"] == "blood"
     assert first_sample["udfs"]["volume"] == "1"
     assert first_sample["udfs"]["priority"] == "standard"
