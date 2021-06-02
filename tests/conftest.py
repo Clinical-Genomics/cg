@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -1166,7 +1167,7 @@ def fixture_context_config(
                 "user": "sftpuser",
                 "password": "sftpassword",
                 "host": "sftphost",
-                "remotepath": "sftpremotepath",
+                "remote_path": "sftpremotepath",
                 "port": 22,
             },
         },
