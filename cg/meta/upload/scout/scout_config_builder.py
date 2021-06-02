@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ScoutConfigBuilder:
-    """Base class for handling files that should be included in Scout upload"""
+    """Base class for handling files that should be included in Scout upload_results_to_gisaid"""
 
     def __init__(
         self, hk_version_obj: hk_models.Version, analysis_obj: models.Analysis, lims_api: LimsAPI

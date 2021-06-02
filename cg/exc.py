@@ -42,7 +42,7 @@ class AnalysisDuplicationError(CgError):
 
 class AnalysisUploadError(CgError):
     """
-    Error related to trying to upload analysis data.
+    Error related to trying to upload_results_to_gisaid analysis data.
     """
 
 

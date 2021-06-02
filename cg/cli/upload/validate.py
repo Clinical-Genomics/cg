@@ -1,4 +1,4 @@
-"""Code for validating an upload via CLI"""
+"""Code for validating an upload_results_to_gisaid via CLI"""
 from typing import List, Optional
 
 import click
@@ -30,7 +30,9 @@ def validate(context: CGConfig, family_id: Optional[str]):
         sample_id = link_obj.sample.internal_id
         chanjo_sample = chanjo_api.sample(sample_id)
         if chanjo_sample is None:
-            click.echo(click.style(f"upload coverage for {sample_id}", fg="yellow"))
+            click.echo(
+                click.style(f"upload_results_to_gisaid coverage for {sample_id}", fg="yellow")
+            )
             continue
         chanjo_samples.append(chanjo_sample)
 

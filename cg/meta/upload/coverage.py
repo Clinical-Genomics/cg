@@ -45,7 +45,7 @@ class UploadCoverageApi:
                 LOG.warning("sample already loaded, skipping: %s", sample_data["sample"])
                 continue
 
-            LOG.debug("upload coverage for sample: %s", sample_data["sample"])
+            LOG.debug("upload_results_to_gisaid coverage for sample: %s", sample_data["sample"])
             self.chanjo_api.upload(
                 sample_id=sample_data["sample"],
                 sample_name=sample_data["sample_name"],

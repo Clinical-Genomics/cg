@@ -1,4 +1,4 @@
-"""NIPT ftp upload API"""
+"""NIPT ftp upload_results_to_gisaid API"""
 import datetime as dt
 import logging
 from pathlib import Path

@@ -18,7 +18,9 @@ LOG = logging.getLogger(__name__)
 
 @click.command()
 @click.option("-c", "--case_id", help="internal case id, leave empty to process all")
-@click.option("-l", "--case-limit", type=int, help="maximum number of cases to upload")
+@click.option(
+    "-l", "--case-limit", type=int, help="maximum number of cases to upload_results_to_gisaid"
+)
 @click.option("--dry-run", is_flag=True, help="only print cases to be processed")
 @click.pass_obj
 def observations(
@@ -44,12 +46,15 @@ def observations(
     for case_obj in families_to_upload:
 
         if case_limit is not None and nr_uploaded >= case_limit:
-            LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
+            LOG.info(
+                "Uploaded %d cases, observations upload_results_to_gisaid will now stop",
+                nr_uploaded,
+            )
             return
 
         if not case_obj.customer.loqus_upload:
             LOG.info(
-                "%s: %s not whitelisted for upload to loqusdb. Skipping!",
+                "%s: %s not whitelisted for upload_results_to_gisaid to loqusdb. Skipping!",
                 case_obj.internal_id,
                 case_obj.customer.internal_id,
             )
@@ -77,7 +82,7 @@ def observations(
         analysis_type = analysis_list[0]
 
         if dry_run:
-            LOG.info("%s: Would upload observations", case_obj.internal_id)
+            LOG.info("%s: Would upload_results_to_gisaid observations", case_obj.internal_id)
             continue
 
         upload_observations_api = UploadObservationsAPI(
@@ -89,6 +94,14 @@ def observations(
             LOG.info("%s: observations uploaded!", case_obj.internal_id)
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
-            LOG.info("%s: skipping observations upload: %s", case_obj.internal_id, error.message)
+            LOG.info(
+                "%s: skipping observations upload_results_to_gisaid: %s",
+                case_obj.internal_id,
+                error.message,
+            )
         except FileNotFoundError as error:
-            LOG.info("%s: skipping observations upload: %s", case_obj.internal_id, error)
+            LOG.info(
+                "%s: skipping observations upload_results_to_gisaid: %s",
+                case_obj.internal_id,
+                error,
+            )

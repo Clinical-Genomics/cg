@@ -124,7 +124,7 @@ def reagent_labels(context: CGConfig, days: int):
         "Final target to load bioinfo data."
         "Target orders are: all, raw, process."
         "Selecting all, will load raw, process, and sample."
-        "Selecting process, will upload raw and process."
+        "Selecting process, will upload_results_to_gisaid raw and process."
         "Selecting raw, will only load raw data."
     ),
 )
@@ -167,13 +167,13 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
 
     if workflow_name is None:
         raise AnalysisUploadError(
-            f"Case upload failed: {case_name}. Reason: Workflow name not found."
+            f"Case upload_results_to_gisaid failed: {case_name}. Reason: Workflow name not found."
         )
     workflow_name = workflow_name.lower()
 
     if workflow_name not in VOGUE_VALID_BIOINFO:
         raise AnalysisUploadError(
-            f"Case upload failed: {case_name}. Reason: Bad workflow name: {workflow_name}."
+            f"Case upload_results_to_gisaid failed: {case_name}. Reason: Bad workflow name: {workflow_name}."
         )
 
     load_bioinfo_raw_inputs["analysis_workflow_name"] = workflow_name
@@ -203,14 +203,14 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     "-a",
     callback=validate_date,
     default=None,
-    help="Only upload cases with an analysis that was completed after this date",
+    help="Only upload_results_to_gisaid cases with an analysis that was completed after this date",
 )
 @click.option(
     "--completed-before",
     "-b",
     callback=validate_date,
     default=None,
-    help="Only upload cases with an analysis that was completed before this date",
+    help="Only upload_results_to_gisaid cases with an analysis that was completed before this date",
 )
 @click.pass_context
 def bioinfo_all(
@@ -254,7 +254,7 @@ def bioinfo_all(
                 UploadVogueAPI.update_analysis_uploaded_to_vogue_date(analysis=analysis)
                 status_db.commit()
         except AnalysisUploadError:
-            LOG.error("Case upload failed: %s", case_name, exc_info=True)
+            LOG.error("Case upload_results_to_gisaid failed: %s", case_name, exc_info=True)
 
 
 def _get_multiqc_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:

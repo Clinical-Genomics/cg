@@ -15,7 +15,12 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
+@click.option(
+    "-r",
+    "--re-upload_results_to_gisaid",
+    is_flag=True,
+    help="re-upload_results_to_gisaid existing analysis",
+)
 @click.argument("family_id", required=False)
 @click.pass_obj
 def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
@@ -35,6 +40,6 @@ def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
     results: dict = upload_genotypes_api.data(case_obj.analyses[0])
 
     if not results:
-        LOG.warning("Could not find any results to upload")
+        LOG.warning("Could not find any results to upload_results_to_gisaid")
         return
     upload_genotypes_api.upload(results, replace=re_upload)

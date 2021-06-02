@@ -38,11 +38,11 @@ class UploadGenotypesAPI(object):
 
         """
         case_id = analysis_obj.family.internal_id
-        LOG.info("Fetching upload genotype data for %s", case_id)
+        LOG.info("Fetching upload_results_to_gisaid genotype data for %s", case_id)
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
         if hk_bcf is None:
-            LOG.warning("unable to find GBCF for genotype upload")
+            LOG.warning("unable to find GBCF for genotype upload_results_to_gisaid")
             return None
         data = {"bcf": hk_bcf.full_path, "samples_sex": {}}
         qc_metrics_file = self.get_qcmetrics_file(hk_version)

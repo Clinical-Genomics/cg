@@ -263,11 +263,11 @@ class DeliverAPI:
         self.ticket_id = str(ticket_nr)
 
     def set_customer_id(self, case_obj: Family) -> None:
-        """Set the customer_id for this upload"""
+        """Set the customer_id for this upload_results_to_gisaid"""
         self._set_customer_id(case_obj.customer.internal_id)
 
     def set_ticket_id(self, sample_obj: Sample) -> None:
-        """Set the ticket_id for this upload"""
+        """Set the ticket_id for this upload_results_to_gisaid"""
         self._set_ticket_id(sample_obj.ticket_number)
 
     def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:

@@ -1,4 +1,4 @@
-"""Code that handles CLI commands to upload"""
+"""Code that handles CLI commands to upload_results_to_gisaid"""
 import datetime as dt
 import logging
 import sys
@@ -39,10 +39,10 @@ LOG = logging.getLogger(__name__)
     "--restart",
     "force_restart",
     is_flag=True,
-    help="Force upload of analysis " "marked as started",
+    help="Force upload_results_to_gisaid of analysis " "marked as started",
 )
 @click.pass_context
-def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
+def upload_results_to_gisaid(context: click.Context, family_id: Optional[str], force_restart: bool):
     """Upload results from analyses."""
     config_object: CGConfig = context.obj
     if not config_object.meta_apis.get("analysis_api"):
@@ -74,11 +74,11 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         if not force_restart and analysis_obj.upload_started_at is not None:
             if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
                 raise AnalysisUploadError(
-                    f"The upload started at {analysis_obj.upload_started_at} "
+                    f"The upload_results_to_gisaid started at {analysis_obj.upload_started_at} "
                     f"something went wrong, restart it with the --restart flag"
                 )
 
-            message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
+            message = f"analysis upload_results_to_gisaid already started: {analysis_obj.upload_started_at.date()}"
             click.echo(click.style(message, fg="yellow"))
             return
 
