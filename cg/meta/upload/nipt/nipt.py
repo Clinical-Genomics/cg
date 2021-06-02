@@ -24,8 +24,8 @@ class NiptUploadAPI:
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
-        self.port = config.fluffy.sftp.port
-        self.remote_path = config.fluffy.sftp.remotepath
+        self.sftp_port = config.fluffy.sftp.port
+        self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.status_db: Store = config.status_db
@@ -75,17 +75,17 @@ class NiptUploadAPI:
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
-        transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.port))
+        transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.sftp_port))
         LOG.info(f"Connecting to SFTP server {self.sftp_host}")
         transport.connect(username=self.sftp_user, password=self.sftp_password)
         sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
         LOG.info(
             f"Uploading file {str(results_file)} to remote path "
-            f"{self.remote_path}/{results_file.name}"
+            f"{self.sftp_remote_path}/{results_file.name}"
         )
         sftp.put(
             localpath=str(results_file),
-            remotepath=f"/{self.remote_path}/{results_file.name}",
+            remotepath=f"/{self.sftp_remote_path}/{results_file.name}",
             confirm=False,
         )
         sftp.close()
