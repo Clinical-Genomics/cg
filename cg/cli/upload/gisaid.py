@@ -57,6 +57,7 @@ def completion_file(context: CGConfig, family_id: str):
 
     gisaid_api = GisaidAPI(config=context)
     files: CompletionFiles = gisaid_api.get_completion_files(case_id=family_id)
+    print(files)
     completion_data: Dict[str, str] = gisaid_api.get_accession_numbers(log_file=files.log_file)
     gisaid_api.update_completion(
         completion_file=files.completion_file, completion_data=completion_data
