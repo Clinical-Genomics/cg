@@ -183,6 +183,7 @@ class GisaidAPI:
     def get_accession_numbers(self, log_file: Path) -> Dict[str, str]:
         """parse accession numbers and sample ids from log file """
 
+        LOG.info("Parsing acccesion numbers from log file")
         completion_data = {}
         with open(str(log_file.absolute())) as log_file:
             log_data = json.load(log_file)
@@ -193,6 +194,7 @@ class GisaidAPI:
                     accession_nr=log.get("msg"), sample_id=log.get("msg")
                 )
                 completion_data[accession_obj.sample_id] = accession_obj.accession_nr
+        print(completion_data)
         return completion_data
 
     def get_completion_files(self, case_id) -> CompletionFiles:
@@ -219,7 +221,8 @@ class GisaidAPI:
                 selection_criteria = sample["urvalskriterium"]
                 completion_nr = completion_data.get(sample_id)
                 new_completion_file_data.append([sample_id, selection_criteria, completion_nr])
-
+        print(new_completion_file_data)
         with open(str(completion_file.absolute()), "w", newline="\n") as file:
+            LOG.info("writing accession numbers to new completion file")
             writer = csv.writer(file)
             writer.writerows(new_completion_file_data)
