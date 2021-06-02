@@ -9,8 +9,10 @@ from housekeeper.store.models import Version, File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
+from cg.models.email import EmailInfo
 from cg.store import models, Store
 from cg.utils import Process
+from cg.utils.email import send_mail
 from .constants import HEADERS
 from .models import GisaidSample, UpploadFiles, CompletionFiles, GisaidAccession
 import csv
@@ -35,6 +37,9 @@ class GisaidAPI:
         self.gisaid_submitter: str = config.gisaid.submitter
         self.gisaid_binary: str = config.gisaid.binary_path
         self.gisaid_log_dir: str = config.gisaid.log_dir
+        self.log_watch: str = config.gisaid.logwatch_email
+        self.email_base_settings = config.email_base_settings
+
         self.process = Process(binary=self.gisaid_binary)
 
     def get_gisaid_samples(self, family_id: str) -> List[GisaidSample]:
@@ -239,7 +244,7 @@ class GisaidAPI:
             writer = csv.writer(file)
             writer.writerows(new_completion_file_data)
 
-    def upload(self, family_id):
+    def upload(self, family_id: str):
         """Uploading results to gisaid and saving the accession numers in completion file"""
 
         gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(family_id=family_id)
@@ -254,7 +259,7 @@ class GisaidAPI:
         )
 
         if not files:
-            raise HousekeeperFileMissingError
+            raise HousekeeperFileMissingError(message="Files missing in housekeeper")
 
         self.upload_results_to_gisaid(files)
 
@@ -270,7 +275,10 @@ class GisaidAPI:
         )
 
         if len(accession_numbers) != len(gisaid_samples):
-            raise AccessionNumerMissingError
+            raise AccessionNumerMissingError(
+                message=f"Completion file was not updated with accession numbers. Accession numbers not found in gisaid "
+                f"log file for all samples in the bundle {family_id}."
+            )
 
         self.update_completion_file(
             completion_file=completion_files.completion_file, completion_data=accession_numbers

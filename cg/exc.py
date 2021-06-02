@@ -193,3 +193,7 @@ class FamilyLinkMissingError(CgError):
 
 class AccessionNumerMissingError(CgError):
     """Raised when accession numers are not found in a gisaid cli log"""
+
+
+class EmailNotSentError(CgError):
+    """Raised when email not sent"""
