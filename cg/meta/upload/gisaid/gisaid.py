@@ -13,12 +13,13 @@ from cg.models.cg_config import CGConfig
 from cg.store import models, Store
 from cg.utils import Process
 from .constants import HEADERS
-from .models import GisaidSample, FastaFile, UpploadFiles, CompletionFiles, GisaidAccession
+from .models import GisaidSample, UpploadFiles, CompletionFiles, GisaidAccession
 import csv
 
 from cg.exc import (
     HousekeeperVersionMissingError,
     FastaSequenceMissingError,
+    AccessionNumerMissingError,
 )
 
 LOG = logging.getLogger(__name__)
@@ -72,7 +73,6 @@ class GisaidAPI:
         fasta_file: File = self.file_from_hk(case_id=family_id, tags=["consensus"])
 
         gisaid_delivery_fasta = []
-        # with open("/Users/maya.brandi/opt/395698.consensus.fa") as handle:
         with open(fasta_file.full_path) as handle:
             fasta_lines = handle.readlines()
             for line in fasta_lines:
@@ -194,7 +194,8 @@ class GisaidAPI:
                     accession_nr=log.get("msg"), sample_id=log.get("msg")
                 )
                 completion_data[accession_obj.sample_id] = accession_obj.accession_nr
-        print(completion_data)
+        if not completion_data:
+            raise AccessionNumerMissingError
         return completion_data
 
     def get_completion_files(self, case_id) -> CompletionFiles:
@@ -205,10 +206,6 @@ class GisaidAPI:
         return CompletionFiles(
             log_file=logfile.full_path, completion_file=completion_file.full_path
         )
-        # return CompletionFiles(
-        #    log_file="/Users/maya.brandi/log/frankhusky.log",
-        #    completion_file="/Users/maya.brandi/log/kompleterings_fil.csv",
-        # )
 
     def update_completion(self, completion_file: Path, completion_data: Dict[str, str]) -> None:
         """Update completion file with accession numbers"""
@@ -221,7 +218,6 @@ class GisaidAPI:
                 selection_criteria = sample["urvalskriterium"]
                 completion_nr = completion_data.get(sample_id)
                 new_completion_file_data.append([sample_id, selection_criteria, completion_nr])
-        print(new_completion_file_data)
         with open(str(completion_file.absolute()), "w", newline="\n") as file:
             LOG.info("writing accession numbers to new completion file")
             writer = csv.writer(file)
