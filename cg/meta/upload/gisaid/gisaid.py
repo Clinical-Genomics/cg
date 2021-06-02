@@ -200,7 +200,9 @@ class GisaidAPI:
 
         completion_file = self.file_from_hk(case_id=case_id, tags=["komplettering"])
         logfile = self.file_from_hk(case_id=case_id, tags=["gisaid-log"])
-        return CompletionFiles(log_file=logfile, completion_file=completion_file)
+        return CompletionFiles(
+            log_file=logfile.full_path, completion_file=completion_file.full_path
+        )
         # return CompletionFiles(
         #    log_file="/Users/maya.brandi/log/frankhusky.log",
         #    completion_file="/Users/maya.brandi/log/kompleterings_fil.csv",
