@@ -43,7 +43,7 @@ class GisaidSample(BaseModel):
     region: str
     region_code: str
     fn: str
-    covv_collection_date: str
+    covv_collection_date: date
     covv_subm_sample_id: str
     covv_virus_name: Optional[str]
     covv_orig_lab: Optional[str]

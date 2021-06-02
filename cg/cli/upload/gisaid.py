@@ -7,8 +7,7 @@ import click
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.meta.upload.gisaid.models import UpploadFiles, GisaidSample, CompletionFiles
 from cg.models.cg_config import CGConfig
-from cg.store import Store
-from cg.store.models import Family
+
 
 LOG = logging.getLogger(__name__)
 
