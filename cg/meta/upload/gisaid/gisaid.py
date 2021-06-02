@@ -148,9 +148,10 @@ class GisaidAPI:
             with open(str(temp_log.absolute()), "r") as open_temp_log:
                 gisaid_log_list: List = json.load(open_gisaid_log)
                 temp_log_list: List = json.load(open_temp_log)
-
+        gisaid_log_list.extend(temp_log_list)
+        print(gisaid_log_list)
         with open(str(gisaid_log.absolute()), "w") as open_gisaid_log:
-            json.dump(gisaid_log_list.extend(temp_log_list), open_gisaid_log)
+            json.dump(gisaid_log_list, open_gisaid_log)
         temp_log.unlink()
 
     def file_to_hk(self, case_id: str, file: Path, tags: list):
