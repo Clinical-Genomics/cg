@@ -141,6 +141,16 @@ class GisaidAPI:
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
         return log_file
 
+    def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
+        """appends temp log to gisaid log"""
+
+        with open(str(gisaid_log.absolute()), "rw") as open_gisaid_log:
+            with open(str(temp_log.absolute()), "r") as open_temp_log:
+                gisaid_log_list: List = json.load(open_gisaid_log)
+                temp_log_list: List = json.load(open_temp_log)
+                json.dump(gisaid_log_list.extend(temp_log_list), open_gisaid_log)
+        temp_log.unlink()
+
     def file_to_hk(self, case_id: str, file: Path, tags: list):
         version_obj: Version = self.housekeeper_api.last_version(case_id)
         if not version_obj:
@@ -156,14 +166,6 @@ class GisaidAPI:
             raise HousekeeperVersionMissingError
         fasta_file: File = self.housekeeper_api.files(version=version_obj.id, tags=tags).first()
         return fasta_file
-
-    def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
-        """appends temp log to gisaid log"""
-
-        with open(str(gisaid_log.absolute()), "a+") as open_gisaid_log:
-            with open(str(temp_log.absolute()), "r") as open_temp_log:
-                open_gisaid_log.write(open_temp_log.read())
-        temp_log.unlink()
 
     def upload(self, files: UpploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
