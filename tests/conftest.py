@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -1162,7 +1163,13 @@ def fixture_context_config(
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
-            "sftp": {"user": "sftpuser", "password": "sftpassword", "host": "sftphost"},
+            "sftp": {
+                "user": "sftpuser",
+                "password": "sftpassword",
+                "host": "sftphost",
+                "remote_path": "sftpremotepath",
+                "port": 22,
+            },
         },
         "data-delivery": {
             "destination_path": "server.name.se:/some/%s/path/%s/",
