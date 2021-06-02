@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [21.11.2]
+### Fixed
+- NIPT upload to sftp server
+
 ## [21.11.1]
 ### Changed
 - Clarified the code for automatic decompression
