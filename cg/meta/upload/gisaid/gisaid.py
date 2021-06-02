@@ -70,7 +70,7 @@ class GisaidAPI:
     def get_gisaid_fasta(self, gsaid_samples: List[GisaidSample], family_id: str) -> List[str]:
         """Fetch a fasta files form house keeper for batch upload to gisaid"""
 
-        fasta_file: File = self.file_from_hk(case_id=family_id, tags=["consensus"])
+        fasta_file: File = self.file_in_hk(case_id=family_id, tags=["consensus"])
 
         gisaid_delivery_fasta = []
         with open(fasta_file.full_path) as handle:
@@ -162,13 +162,13 @@ class GisaidAPI:
         self.housekeeper_api.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
         self.housekeeper_api.commit()
 
-    def file_from_hk(self, case_id: str, tags: list) -> File:
+    def file_in_hk(self, case_id: str, tags: list) -> File:
         version_obj: Version = self.housekeeper_api.last_version(case_id)
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
-        fasta_file: File = self.housekeeper_api.files(version=version_obj.id, tags=tags).first()
-        return fasta_file
+        file: File = self.housekeeper_api.files(version=version_obj.id, tags=tags).first()
+        return file
 
     def upload(self, files: UpploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
@@ -217,8 +217,8 @@ class GisaidAPI:
     def get_completion_files(self, case_id) -> CompletionFiles:
         """Get log file and completion file."""
 
-        completion_file = self.file_from_hk(case_id=case_id, tags=["komplettering"])
-        logfile = self.file_from_hk(case_id=case_id, tags=["gisaid-log"])
+        completion_file = self.file_in_hk(case_id=case_id, tags=["komplettering"])
+        logfile = self.file_in_hk(case_id=case_id, tags=["gisaid-log"])
         return CompletionFiles(
             log_file=logfile.full_path, completion_file=completion_file.full_path
         )

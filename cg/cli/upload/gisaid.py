@@ -40,8 +40,9 @@ def results(context: CGConfig, family_id: str):
 
     if files:
         gisaid_api.upload(files)
-        gisaid_api.file_to_hk(case_id=family_id, file=files.log_file, tags=["gisaid-log"])
-        LOG.info("Result")
+        if not gisaid_api.file_in_hk(case_id=family_id, tags=["gisaid-log"]):
+            gisaid_api.file_to_hk(case_id=family_id, file=files.log_file, tags=["gisaid-log"])
+
         files.csv_file.unlink()
         files.fasta_file.unlink()
 
