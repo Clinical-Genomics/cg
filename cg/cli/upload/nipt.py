@@ -35,7 +35,7 @@ def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
         hk_results_file: str = nipt_upload_api.get_housekeeper_results_file(case_id=case_id)
         results_file: Path = nipt_upload_api.get_results_file_path(hk_results_file)
         LOG.info(f"Results file found: {results_file}")
-        LOG.info(f"Starting upload_results_to_gisaid!")
+        LOG.info(f"Starting upload!")
         nipt_upload_api.update_analysis_upload_started_date(case_id)
         nipt_upload_api.upload_to_ftp_server(results_file)
         LOG.info(f"Upload finished!")
