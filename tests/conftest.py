@@ -1093,7 +1093,13 @@ def fixture_context_config(
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
-            "sftp": {"user": "sftpuser", "password": "sftpassword", "host": "sftphost"},
+            "sftp": {
+                "user": "sftpuser",
+                "password": "sftpassword",
+                "host": "sftphost",
+                "remote_path": "sftpremotepath",
+                "port": 22,
+            },
         },
         "data-delivery": {
             "destination_path": "server.name.se:/some/%s/path/%s/",
