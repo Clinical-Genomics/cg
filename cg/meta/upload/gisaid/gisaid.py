@@ -144,11 +144,13 @@ class GisaidAPI:
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
         """appends temp log to gisaid log"""
 
-        with open(str(gisaid_log.absolute()), "rw") as open_gisaid_log:
+        with open(str(gisaid_log.absolute()), "r") as open_gisaid_log:
             with open(str(temp_log.absolute()), "r") as open_temp_log:
                 gisaid_log_list: List = json.load(open_gisaid_log)
                 temp_log_list: List = json.load(open_temp_log)
-                json.dump(gisaid_log_list.extend(temp_log_list), open_gisaid_log)
+
+        with open(str(gisaid_log.absolute()), "w") as open_gisaid_log:
+            json.dump(gisaid_log_list.extend(temp_log_list), open_gisaid_log)
         temp_log.unlink()
 
     def file_to_hk(self, case_id: str, file: Path, tags: list):
