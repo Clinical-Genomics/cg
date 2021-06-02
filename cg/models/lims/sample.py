@@ -42,7 +42,7 @@ class Udf(BaseModel):
     sex: Literal["M", "F", "unknown"] = "unknown"
     source: str = "NA"
     tissue_block_size: Optional[str]
-    tumour: bool = False
+    tumour: Optional[bool] = False
     tumour_purity: Optional[str]
     volume: Optional[str]
     well_position_rml: Optional[str]
