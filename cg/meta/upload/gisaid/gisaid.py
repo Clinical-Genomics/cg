@@ -133,10 +133,10 @@ class GisaidAPI:
 
         return file
 
-    def new_log_file(self, family_id: str) -> Path:
+    def gisaid_bundle_log_file(self, family_id: str) -> Path:
         """Path for gisaid bundle log"""
 
-        log_file = Path(f"{self.gisaid_log_dir}/{family_id}_{datetime.now().isoformat()}.log")
+        log_file = Path(f"{self.gisaid_log_dir}/{family_id}.log")
         if not log_file.parent.exists():
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
         return log_file
@@ -157,12 +157,22 @@ class GisaidAPI:
         fasta_file: File = self.housekeeper_api.files(version=version_obj.id, tags=tags).first()
         return fasta_file
 
+    def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
+        """appends temp log to gisaid log"""
+
+        with open(str(gisaid_log.absolute()), "a+") as open_gisaid_log:
+            with open(str(temp_log.absolute()), "r") as open_temp_log:
+                open_gisaid_log.write(open_temp_log.read())
+        temp_log.unlink()
+
     def upload(self, files: UpploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
+        temp_log_file = "/tmp/gisaid_log"
+
         load_call: list = [
             "--logfile",
-            str(files.log_file.absolute()),
+            temp_log_file,
             "CoV",
             "upload",
             "--csv",
@@ -171,6 +181,7 @@ class GisaidAPI:
             str(files.fasta_file.absolute()),
         ]
         self.process.run_command(parameters=load_call)
+        self.append_log(temp_log=Path(temp_log_file), gisaid_log=files.log_file)
 
         if self.process.stderr:
             LOG.info(f"gisaid stderr:\n{self.process.stderr}")

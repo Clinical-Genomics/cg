@@ -35,12 +35,11 @@ def results(context: CGConfig, family_id: str):
         fasta_file=gisaid_api.build_gisaid_fasta(
             gsaid_samples=gsaid_samples, file_name=f"{family_id}.fasta", family_id=family_id
         ),
-        log_file=gisaid_api.new_log_file(family_id=family_id),
+        log_file=gisaid_api.gisaid_bundle_log_file(family_id=family_id),
     )
 
     if files:
         gisaid_api.upload(files)
-        print(files.log_file)
         gisaid_api.file_to_hk(case_id=family_id, file=files.log_file, tags=["gisaid-log"])
         LOG.info("Result")
         files.csv_file.unlink()
