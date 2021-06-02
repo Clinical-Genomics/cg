@@ -147,6 +147,7 @@ class GisaidAPI:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
         self.housekeeper_api.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
+        self.housekeeper_api.commit()
 
     def file_from_hk(self, case_id: str, tags: list) -> File:
         version_obj: Version = self.housekeeper_api.last_version(case_id)
