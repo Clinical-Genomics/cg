@@ -19,6 +19,16 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.0.0]
+### Added
+- Adds store and store-available commands that use Hermes
+- Add pydantic models for mip config and mip sample info
+- Add constants for getting housekeeper MIP analysis tags
+  
+### Changed
+- Remove old MIP-DNA store command using cg internally
+- Remove old unused fixtures
+
 ## [21.11.2]
 ### Fixed
 - NIPT upload to sftp server
