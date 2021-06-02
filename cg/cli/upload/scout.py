@@ -22,9 +22,9 @@ LOG = logging.getLogger(__name__)
 @click.command()
 @click.option(
     "-r",
-    "--re-upload_results_to_gisaid",
+    "--re-upload",
     is_flag=True,
-    help="re-upload_results_to_gisaid existing analysis",
+    help="re-upload existing analysis",
 )
 @click.option("-p", "--print", "print_console", is_flag=True, help="print config values")
 @click.argument("case_id", required=False)
@@ -49,9 +49,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 @click.command(name="create-scout-load-config")
 @click.argument("case-id")
 @click.option("-p", "--print", "print_console", is_flag=True, help="Only print config")
-@click.option(
-    "-r", "--re-upload_results_to_gisaid", is_flag=True, help="Delete existing load configs"
-)
+@click.option("-r", "--re-upload", is_flag=True, help="Delete existing load configs")
 @click.pass_obj
 def create_scout_load_config(context: CGConfig, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
@@ -108,12 +106,12 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         raise click.Abort
 
 
-@click.command(name="upload_results_to_gisaid-case-to-scout")
+@click.command(name="upload-case-to-scout")
 @click.option(
     "-r",
-    "--re-upload_results_to_gisaid",
+    "--re-upload",
     is_flag=True,
-    help="re-upload_results_to_gisaid existing analysis",
+    help="re-upload existing analysis",
 )
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")

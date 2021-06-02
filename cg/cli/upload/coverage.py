@@ -12,9 +12,9 @@ from .utils import suggest_cases_to_upload
 @click.command()
 @click.option(
     "-r",
-    "--re-upload_results_to_gisaid",
+    "--re-upload",
     is_flag=True,
-    help="re-upload_results_to_gisaid existing analysis",
+    help="re-upload existing analysis",
 )
 @click.argument("family_id", required=False)
 @click.pass_obj

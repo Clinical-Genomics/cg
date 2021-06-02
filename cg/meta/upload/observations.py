@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 class UploadObservationsAPI:
 
-    """API to upload_results_to_gisaid observations to LoqusDB."""
+    """API to upload observations to LoqusDB."""
 
     def __init__(self, status_api: Store, hk_api: HousekeeperAPI, loqus_api: LoqusdbAPI):
         self.status = status_api
@@ -90,7 +90,7 @@ class UploadObservationsAPI:
             LOG.debug(log_msg)
 
     def process(self, analysis_obj: models.Analysis):
-        """Process an upload_results_to_gisaid observation counts for a case."""
+        """Process an upload observation counts for a case."""
         # check if some sample has already been uploaded
         for link in analysis_obj.family.links:
             if link.sample.loqusdb_id:

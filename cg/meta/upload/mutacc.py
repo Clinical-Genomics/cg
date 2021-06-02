@@ -1,5 +1,5 @@
 """
-    Module to upload_results_to_gisaid cases to mutacc
+    Module to upload cases to mutacc
 """
 
 import logging
@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 class UploadToMutaccAPI:
 
-    """API to upload_results_to_gisaid finished cases to mutacc"""
+    """API to upload finished cases to mutacc"""
 
     def __init__(self, scout_api: ScoutAPI, mutacc_auto_api: MutaccAutoAPI):
 

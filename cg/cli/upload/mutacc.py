@@ -30,7 +30,7 @@ def process_solved(
     mutacc_auto_api: MutaccAutoAPI = context.mutacc_auto_api
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
-    # Get cases to upload_results_to_gisaid into mutacc from scout
+    # Get cases to upload into mutacc from scout
     finished_cases: List[ScoutExportCase] = []
     if case_id is not None:
         finished_cases = scout_api.get_cases(finished=True, case_id=case_id)

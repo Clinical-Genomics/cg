@@ -216,7 +216,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         raise click.Abort
 
 
-@microsalt.command("upload_results_to_gisaid-analysis-vogue")
+@microsalt.command("upload-analysis-vogue")
 @OPTION_DRY_RUN
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_obj
@@ -245,9 +245,7 @@ def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> N
         bundle=unique_id, tags=["vogue"]
     ).first()
     if not analysis_result_file:
-        LOG.error(
-            "Vogue upload_results_to_gisaid file not found in Housekeeper for case %s", unique_id
-        )
+        LOG.error("Vogue upload file not found in Housekeeper for case %s", unique_id)
         raise click.Abort
 
     vogue_load_args = {
@@ -269,7 +267,7 @@ def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> N
     LOG.info("Successfully uploaded latest analysis data for case %s to Vogue!", unique_id)
 
 
-@microsalt.command("upload_results_to_gisaid-latest-analyses-vogue")
+@microsalt.command("upload-latest-analyses-vogue")
 @OPTION_DRY_RUN
 @click.pass_context
 def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
@@ -288,7 +286,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
             context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
         except Exception as e:
             LOG.error(
-                "Could not upload_results_to_gisaid data for %s to vogue, exception %s",
+                "Could not upload data for %s to vogue, exception %s",
                 unique_id,
                 e.__class__.__name__,
             )

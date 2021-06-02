@@ -268,7 +268,7 @@ def analyses():
     """Fetch analyses."""
     if request.args.get("status") == "delivery":
         analyses_q = db.analyses_to_deliver()
-    elif request.args.get("status") == "upload_results_to_gisaid":
+    elif request.args.get("status") == "upload":
         analyses_q = db.analyses_to_upload()
     else:
         analyses_q = db.Analysis.query

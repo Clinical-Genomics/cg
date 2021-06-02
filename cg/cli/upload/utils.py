@@ -1,4 +1,4 @@
-"""Utility functions for the upload_results_to_gisaid cli commands"""
+"""Utility functions for the upload cli commands"""
 import logging
 from typing import List, Optional
 
