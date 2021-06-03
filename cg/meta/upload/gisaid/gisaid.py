@@ -12,7 +12,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import models, Store
 from cg.utils import Process
 from .constants import HEADERS
-from .models import GisaidSample, UpploadFiles, CompletionFiles, GisaidAccession
+from .models import GisaidSample, UploadFiles, CompletionFiles, GisaidAccession
 import csv
 
 from cg.exc import (
@@ -172,7 +172,7 @@ class GisaidAPI:
         file: File = self.housekeeper_api.files(version=version_obj.id, tags=tags).first()
         return file
 
-    def upload_results_to_gisaid(self, files: UpploadFiles) -> None:
+    def upload_results_to_gisaid(self, files: UploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
         temp_log_file = "/tmp/gisaid_log"
@@ -246,7 +246,7 @@ class GisaidAPI:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
         gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(family_id=family_id)
-        files: UpploadFiles = UpploadFiles(
+        files: UploadFiles = UploadFiles(
             csv_file=self.build_gisaid_csv(
                 gsaid_samples=gisaid_samples, file_name=f"{family_id}.csv"
             ),

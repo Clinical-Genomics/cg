@@ -17,7 +17,6 @@ class GisaidAccession(BaseModel):
 
     @validator("accession_nr", always=True)
     def parse_accession(cls, v):
-        print(v.split(";")[-1])
         return v.split(";")[-1]
 
     @validator("sample_id", always=True)
@@ -25,7 +24,7 @@ class GisaidAccession(BaseModel):
         return v.split("/")[2].split("_")[2]
 
 
-class UpploadFiles(BaseModel):
+class UploadFiles(BaseModel):
     csv_file: Path
     fasta_file: Path
     log_file: Path
