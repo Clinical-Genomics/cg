@@ -174,11 +174,11 @@ class GisaidAPI:
     def upload_results_to_gisaid(self, files: UploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
-        temp_log_file = tempfile.TemporaryFile(dir="/tmp", mode="w+")
+        temp_log_file = tempfile.NamedTemporaryFile(dir="/tmp", mode="w+", delete=False)
 
         load_call: list = [
             "--logfile",
-            temp_log_file,
+            temp_log_file.name,
             "CoV",
             "upload_results_to_gisaid",
             "--csv",
@@ -187,7 +187,8 @@ class GisaidAPI:
             str(files.fasta_file.absolute()),
         ]
         self.process.run_command(parameters=load_call)
-        self.append_log(temp_log=Path(temp_log_file), gisaid_log=files.log_file)
+        self.append_log(temp_log=Path(temp_log_file.name), gisaid_log=files.log_file)
+        temp_log_file.close()
 
         if self.process.stderr:
             LOG.info(f"gisaid stderr:\n{self.process.stderr}")
