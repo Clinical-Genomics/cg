@@ -180,7 +180,7 @@ class GisaidAPI:
             "--logfile",
             temp_log_file.name,
             "CoV",
-            "upload_results_to_gisaid",
+            "upload",
             "--csv",
             str(files.csv_file.absolute()),
             "--fasta",
