@@ -35,6 +35,9 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
 
 
+## [21.11.2]
+### Fixed
+- NIPT upload to sftp server
 
 ## [21.11.1]
 ### Changed
