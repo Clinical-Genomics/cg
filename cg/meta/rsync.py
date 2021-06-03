@@ -61,3 +61,10 @@ class RsyncAPI(MetaAPI):
             covid_destination_path: str = self.covid_destination_path % customer_id
             parameters: List[str] = [rsync_options, covid_report_path, covid_destination_path]
             self.process.run_command(parameters=parameters, dry_run=dry_run)
+
+    @staticmethod
+    def create_pending_file(pending_path: Path, dry_run: bool) -> None:
+        LOG.info("Creating pending file %s", pending_path)
+        if dry_run:
+            return
+        pending_path.touch(exist_ok=False)
