@@ -237,7 +237,7 @@ class GisaidAPI:
             for sample in completion_file_reader:
                 sample_id = sample["provnummer"]
                 selection_criteria = sample["urvalskriterium"]
-                completion_nr = completion_data.get(sample_id)
+                completion_nr = completion_data.get(sample_id, "")
                 new_completion_file_data.append([sample_id, selection_criteria, completion_nr])
         with open(str(completion_file.absolute()), "w", newline="\n") as file:
             LOG.info("writing accession numbers to new completion file")
