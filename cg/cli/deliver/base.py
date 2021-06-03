@@ -4,11 +4,15 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION
 from cg.models.cg_config import CGConfig
+from cg.models.slurm.sbatch import Sbatch
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -85,10 +89,26 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     rsynced with this function to the customers inbox on caesar.
     """
     rsync_api = RsyncAPI(config=context)
+    slurm_api = SlurmAPI()
     log_dir: Path = rsync_api.create_log_dir(
         ticket_id=ticket_id, pending_path=context.rsync_base, dry_run=dry_run
     )
-    rsync_api.run_rsync_command(ticket_id=ticket_id, dry_run=dry_run)
+    commands = RSYNC_COMMAND.format(ticket_id=ticket_id)
+    error_function = ERROR_RSYNC_FUNCTION.format()
+    sbatch_info = {
+        "job_name": "_".join([ticket_id, "rsync"]),
+        "account": context["rsync"]["slurm"]["account"],
+        "number_tasks": 1,
+        "memory": 1,
+        "log_dir": log_dir.as_posix(),
+        "email": context["rsync"]["slurm"]["mail_user"],
+        "hours": 24,
+        "commands": commands,
+        "error": error_function,
+    }
+    sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+    sbatch_number: int = slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=log_dir)
+    LOG.info("Rsync to caesar running as job %s", sbatch_number)
 
 
 @deliver.command(name="concatenate")
