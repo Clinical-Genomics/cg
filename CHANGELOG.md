@@ -19,6 +19,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
 ## [22.0.0]
 ### Added
 - Adds store and store-available commands that use Hermes
@@ -28,6 +29,10 @@ __________ DO NOT TOUCH ___________
 ### Changed
 - Remove old MIP-DNA store command using cg internally
 - Remove old unused fixtures
+
+## [21.12.0]
+### Added
+- cli for upload of data to statina
 
 ## [21.11.2]
 ### Fixed
