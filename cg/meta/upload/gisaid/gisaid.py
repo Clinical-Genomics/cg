@@ -174,7 +174,7 @@ class GisaidAPI:
     def upload_results_to_gisaid(self, files: UploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
-        temp_log_file = tempfile.TemporaryFile(dir="/tmp/gisaid_log", mode="w+")
+        temp_log_file = tempfile.TemporaryFile(dir="/tmp", mode="w+")
 
         load_call: list = [
             "--logfile",
