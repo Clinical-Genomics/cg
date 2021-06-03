@@ -199,7 +199,7 @@ class GisaidAPI:
         return f"GisaidAPI(dry_run: {self.dry_run})"
 
     def get_accession_numbers(self, log_file: Path) -> Dict[str, str]:
-        """parse accession numbers and sample ids from log file """
+        """parse accession numbers and sample ids from log file"""
 
         LOG.info("Parsing acccesion numbers from log file")
         completion_data = {}
