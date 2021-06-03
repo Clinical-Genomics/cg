@@ -104,50 +104,6 @@ def test_no_samples_can_be_decompressed(
     assert res is False
 
 
-def test_at_least_one_decompression_job_starts(
-    populated_compress_spring_api: CompressAPI,
-    analysis_store_single_case: Store,
-    case_id: str,
-    mocker,
-):
-    # GIVEN spring decompression starts
-    mocker.patch.object(CompressAPI, "decompress_spring")
-    CompressAPI.decompress_spring.return_value = True
-
-    # GIVEN a populated prepare_fastq_api
-    prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case, compress_api=populated_compress_spring_api
-    )
-
-    # WHEN attempting to start spring decompression
-    res = prepare_fastq_api.can_at_least_one_decompression_job_start(case_id=case_id, dry_run=False)
-
-    # THEN assert that spring decompression did start
-    assert res is True
-
-
-def test_no_decompression_job_starts(
-    populated_compress_spring_api: CompressAPI,
-    analysis_store_single_case: Store,
-    case_id: str,
-    mocker,
-):
-    # GIVEN spring decompression fail to start
-    mocker.patch.object(CompressAPI, "decompress_spring")
-    CompressAPI.decompress_spring.return_value = False
-
-    # GIVEN a populated prepare_fastq_api
-    prepare_fastq_api = PrepareFastqAPI(
-        store=analysis_store_single_case, compress_api=populated_compress_spring_api
-    )
-
-    # WHEN attempting to start spring decompression
-    res = prepare_fastq_api.can_at_least_one_decompression_job_start(case_id=case_id, dry_run=False)
-
-    # THEN assert that spring decompression failed to start
-    assert res is False
-
-
 def test_no_fastq_in_housekeeper(
     populated_compress_spring_api: CompressAPI,
     analysis_store_single_case: Store,

@@ -19,11 +19,21 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+<<<<<<< HEAD
 ## [x.x.x]
 ### Added
 - cli for upload of data to statina
 ### Changed
 ### Fixed
+
+
+## [21.11.2]
+### Fixed
+- NIPT upload to sftp server
+
+## [21.11.1]
+### Changed
+- Clarified the code for automatic decompression
 
 ## [21.11.0]
 ### Added

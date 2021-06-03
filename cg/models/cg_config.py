@@ -72,6 +72,8 @@ class FluffyUploadConfig(BaseModel):
     user: str
     password: str
     host: str
+    remote_path: str
+    port: int
 
 
 class FluffyConfig(CommonAppConfig):

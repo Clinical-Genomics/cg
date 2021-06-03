@@ -28,6 +28,7 @@ lxml
 marshmallow>3               # due to code expects behaviour from >3
 openpyxl
 packaging
+paramiko
 petname
 pydantic
 pyschemes
