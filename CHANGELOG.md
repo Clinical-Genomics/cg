@@ -19,6 +19,13 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [21.12.0]
+### Added
+- cli for upload of data to statina
+
+
+
 ## [21.11.2]
 ### Fixed
 - NIPT upload to sftp server

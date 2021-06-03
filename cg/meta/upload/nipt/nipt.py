@@ -2,12 +2,16 @@
 import datetime as dt
 import logging
 from pathlib import Path
+import requests
 from typing import Iterable, List, Optional
+
+from requests import Response
 
 import paramiko
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError
+from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
@@ -24,6 +28,7 @@ class NiptUploadAPI:
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
+        self.statina_host: str = config.statina.host
         self.sftp_port = config.fluffy.sftp.port
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
@@ -108,3 +113,36 @@ class NiptUploadAPI:
         analysis_obj.upload_started_at = dt.datetime.now()
 
         return analysis_obj
+
+    def get_statina_files(self, case_id: str) -> StatinaUploadFiles:
+        """Get statina files from from housekeeper."""
+
+        hk_results_file: str = self.get_housekeeper_results_file(
+            case_id=case_id, tags=["nipt", "metrics"]
+        )
+        results_file: Path = self.get_results_file_path(hk_results_file)
+
+        hk_multiqc_file: str = self.get_housekeeper_results_file(
+            case_id=case_id, tags=["nipt", "multiqc-html"]
+        )
+        multiqc_file: Path = self.get_results_file_path(hk_multiqc_file)
+
+        hk_segmental_calls_file: str = self.get_housekeeper_results_file(
+            case_id=case_id, tags=["nipt", "wisecondor"]
+        )
+        segmental_calls_file: Path = self.get_results_file_path(hk_segmental_calls_file)
+
+        return StatinaUploadFiles(
+            result_file=results_file.absolute().as_posix(),
+            multiqc_report=multiqc_file.absolute().as_posix(),
+            segmental_calls=segmental_calls_file.as_posix(),
+        )
+
+    def upload_to_statina_database(self, statina_files: StatinaUploadFiles):
+        """Upload nipt data via rest-API."""
+
+        response: Response = requests.post(
+            url=f"{self.statina_host}/insert/batch", data=statina_files.json(exclude_none=True)
+        )
+
+        LOG.info("nipt output: %s", response.text)
