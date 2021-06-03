@@ -19,12 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-<<<<<<< HEAD
-## [x.x.x]
+
+## [21.12.0]
 ### Added
 - cli for upload of data to statina
-### Changed
-### Fixed
+
 
 
 ## [21.11.2]
