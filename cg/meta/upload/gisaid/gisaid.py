@@ -44,7 +44,7 @@ class GisaidAPI:
     def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
         """Get list of Gisaid sample objects."""
 
-        samples: List[models.Sample] = self.status_db.get_sequenced_samples(case_id=case_id)
+        samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=case_id)
         gisaid_samples = []
         for sample in samples:
             sample_id: str = sample.internal_id
