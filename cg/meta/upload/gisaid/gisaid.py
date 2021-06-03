@@ -21,6 +21,7 @@ from cg.exc import (
     HousekeeperFileMissingError,
     FastaSequenceMissingError,
     AccessionNumerMissingError,
+    GisaidUploadFailedError,
 )
 
 LOG = logging.getLogger(__name__)
@@ -259,7 +260,10 @@ class GisaidAPI:
         if not files:
             raise HousekeeperFileMissingError(message="Files missing in housekeeper")
 
-        self.upload_results_to_gisaid(files)
+        try:
+            self.upload_results_to_gisaid(files)
+        except Exception as e:
+            raise GisaidUploadFailedError(message=str(e))
 
         files.csv_file.unlink()
         files.fasta_file.unlink()

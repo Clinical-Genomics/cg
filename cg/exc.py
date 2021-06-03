@@ -197,3 +197,7 @@ class AccessionNumerMissingError(CgError):
 
 class EmailNotSentError(CgError):
     """Raised when email not sent"""
+
+
+class GisaidUploadFailedError(CgError):
+    """Raised when gisaid upload fails"""
