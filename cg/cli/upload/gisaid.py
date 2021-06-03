@@ -13,16 +13,16 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.argument("family_id", required=True)
+@click.argument("case_id", required=True)
 @click.pass_obj
-def gisaid(context: CGConfig, family_id: str):
+def gisaid(context: CGConfig, case_id: str):
     """Upload mutant analysis data to GISAID."""
 
     LOG.info("----------------- GISAID UPLOAD -------------------")
 
     gisaid_api = GisaidAPI(config=context)
     try:
-        gisaid_api.upload(family_id=family_id)
+        gisaid_api.upload(case_id=case_id)
     except CgError as error:
         email_info = EmailInfo(
             **gisaid_api.email_base_settings.dict(),
