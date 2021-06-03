@@ -85,6 +85,9 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     rsynced with this function to the customers inbox on caesar.
     """
     rsync_api = RsyncAPI(config=context)
+    log_dir: Path = rsync_api.create_log_dir(
+        ticket_id=ticket_id, pending_path=context.rsync_base, dry_run=dry_run
+    )
     rsync_api.run_rsync_command(ticket_id=ticket_id, dry_run=dry_run)
 
 

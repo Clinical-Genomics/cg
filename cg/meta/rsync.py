@@ -1,6 +1,8 @@
 """Module for building the rsync command to send files to customer inbox on caesar"""
+import datetime
 import glob
 import logging
+import os
 from pathlib import Path
 from typing import List
 
@@ -63,8 +65,16 @@ class RsyncAPI(MetaAPI):
             self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     @staticmethod
-    def create_pending_file(pending_path: Path, dry_run: bool) -> None:
-        LOG.info("Creating pending file %s", pending_path)
-        if dry_run:
-            return
-        pending_path.touch(exist_ok=False)
+    def create_log_dir(ticket_id: int, pending_path: Path, dry_run: bool) -> Path:
+        timestamp = datetime.datetime.now()
+        timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
+        folder_name = Path("_".join([str(ticket_id), timestamp_str]))
+        log_dir = pending_path / folder_name
+        LOG.info("Creating folder: %s", log_dir)
+        if log_dir.exists():
+            LOG.warning("Could not create %s, this folder already exist", log_dir)
+        elif dry_run:
+            LOG.info("Would have created path %s, but this is a dry run", log_dir)
+        else:
+            os.makedirs(log_dir)
+        return log_dir
