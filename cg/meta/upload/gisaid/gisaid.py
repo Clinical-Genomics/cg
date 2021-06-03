@@ -9,10 +9,8 @@ from housekeeper.store.models import Version, File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
-from cg.models.email import EmailInfo
 from cg.store import models, Store
 from cg.utils import Process
-from cg.utils.email import send_mail
 from .constants import HEADERS
 from .models import GisaidSample, UpploadFiles, CompletionFiles, GisaidAccession
 import csv
@@ -245,7 +243,7 @@ class GisaidAPI:
             writer.writerows(new_completion_file_data)
 
     def upload(self, family_id: str):
-        """Uploading results to gisaid and saving the accession numers in completion file"""
+        """Uploading results to gisaid and saving the accession numbers in completion file"""
 
         gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(family_id=family_id)
         files: UpploadFiles = UpploadFiles(
@@ -263,11 +261,11 @@ class GisaidAPI:
 
         self.upload_results_to_gisaid(files)
 
-        if not self.file_in_hk(case_id=family_id, tags=["gisaid-log"]):
-            self.file_to_hk(case_id=family_id, file=files.log_file, tags=["gisaid-log"])
-
         files.csv_file.unlink()
         files.fasta_file.unlink()
+
+        if not self.file_in_hk(case_id=family_id, tags=["gisaid-log"]):
+            self.file_to_hk(case_id=family_id, file=files.log_file, tags=["gisaid-log"])
 
         completion_files: CompletionFiles = self.get_completion_files(case_id=family_id)
         accession_numbers: Dict[str, str] = self.get_accession_numbers(
