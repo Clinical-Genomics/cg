@@ -36,7 +36,7 @@ class CompletionFiles(BaseModel):
 
 
 class GisaidSample(BaseModel):
-    family_id: str
+    case_id: str
     cg_lims_id: str
     submitter: str
     region: str

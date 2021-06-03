@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Dict
 
 from housekeeper.store.models import Version, File
+import tempfile
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -40,19 +41,19 @@ class GisaidAPI:
 
         self.process = Process(binary=self.gisaid_binary)
 
-    def get_gisaid_samples(self, family_id: str) -> List[GisaidSample]:
+    def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
         """Get list of Gisaid sample objects."""
 
-        samples: List[models.Sample] = self.status_db.get_sequenced_samples(family_id=family_id)
+        samples: List[models.Sample] = self.status_db.get_sequenced_samples(case_id=case_id)
         gisaid_samples = []
         for sample in samples:
             sample_id: str = sample.internal_id
             gisaid_sample = GisaidSample(
-                family_id=family_id,
+                case_id=case_id,
                 cg_lims_id=sample_id,
                 covv_subm_sample_id=sample.name,
                 submitter=self.gisaid_submitter,
-                fn=f"{family_id}.fasta",
+                fn=f"{case_id}.fasta",
                 covv_collection_date=self.lims_api.get_sample_attribute(
                     lims_id=sample_id, key="collection_date"
                 ),
@@ -70,10 +71,10 @@ class GisaidAPI:
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
 
-    def get_gisaid_fasta(self, gsaid_samples: List[GisaidSample], family_id: str) -> List[str]:
+    def get_gisaid_fasta(self, gsaid_samples: List[GisaidSample], case_id: str) -> List[str]:
         """Fetch a fasta files form house keeper for batch upload_results_to_gisaid to gisaid"""
 
-        fasta_file: File = self.file_in_hk(case_id=family_id, tags=["consensus"])
+        fasta_file: File = self.file_in_hk(case_id=case_id, tags=["consensus"])
 
         gisaid_delivery_fasta = []
         with open(fasta_file.full_path) as handle:
@@ -96,14 +97,12 @@ class GisaidAPI:
         raise FastaSequenceMissingError
 
     def build_gisaid_fasta(
-        self, gsaid_samples: List[GisaidSample], file_name: str, family_id: str
+        self, gsaid_samples: List[GisaidSample], file_name: str, case_id: str
     ) -> Path:
         """Writing a new fasta with headers adjusted for gisaid upload_results_to_gisaid"""
 
         file: Path = Path(file_name)
-        fasta_lines: List[str] = self.get_gisaid_fasta(
-            gsaid_samples=gsaid_samples, family_id=family_id
-        )
+        fasta_lines: List[str] = self.get_gisaid_fasta(gsaid_samples=gsaid_samples, case_id=case_id)
         with open(file, "w") as write_file_obj:
             write_file_obj.writelines(fasta_lines)
         return file
@@ -136,10 +135,10 @@ class GisaidAPI:
 
         return file
 
-    def gisaid_log_file(self, family_id: str) -> Path:
+    def gisaid_log_file(self, case_id: str) -> Path:
         """Path for gisaid bundle log"""
 
-        log_file = Path(f"{self.gisaid_log_dir}/{family_id}.log")
+        log_file = Path(f"{self.gisaid_log_dir}/{case_id}.log")
         if not log_file.parent.exists():
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
         return log_file
@@ -175,7 +174,7 @@ class GisaidAPI:
     def upload_results_to_gisaid(self, files: UploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
-        temp_log_file = "/tmp/gisaid_log"
+        temp_log_file = tempfile.TemporaryFile(dir="/tmp/gisaid_log", mode="w+")
 
         load_call: list = [
             "--logfile",
@@ -215,7 +214,7 @@ class GisaidAPI:
 
         return completion_data
 
-    def get_completion_files(self, case_id) -> CompletionFiles:
+    def get_completion_files(self, case_id: str) -> CompletionFiles:
         """Get log file and completion file."""
 
         completion_file = self.file_in_hk(case_id=case_id, tags=["komplettering"])
@@ -242,18 +241,18 @@ class GisaidAPI:
             writer = csv.writer(file)
             writer.writerows(new_completion_file_data)
 
-    def upload(self, family_id: str):
+    def upload(self, case_id: str):
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
-        gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(family_id=family_id)
+        gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(case_id=case_id)
         files: UploadFiles = UploadFiles(
             csv_file=self.build_gisaid_csv(
-                gsaid_samples=gisaid_samples, file_name=f"{family_id}.csv"
+                gsaid_samples=gisaid_samples, file_name=f"{case_id}.csv"
             ),
             fasta_file=self.build_gisaid_fasta(
-                gsaid_samples=gisaid_samples, file_name=f"{family_id}.fasta", family_id=family_id
+                gsaid_samples=gisaid_samples, file_name=f"{case_id}.fasta", case_id=case_id
             ),
-            log_file=self.gisaid_log_file(family_id=family_id),
+            log_file=self.gisaid_log_file(case_id=case_id),
         )
 
         if not files:
@@ -264,10 +263,10 @@ class GisaidAPI:
         files.csv_file.unlink()
         files.fasta_file.unlink()
 
-        if not self.file_in_hk(case_id=family_id, tags=["gisaid-log"]):
-            self.file_to_hk(case_id=family_id, file=files.log_file, tags=["gisaid-log"])
+        if not self.file_in_hk(case_id=case_id, tags=["gisaid-log"]):
+            self.file_to_hk(case_id=case_id, file=files.log_file, tags=["gisaid-log"])
 
-        completion_files: CompletionFiles = self.get_completion_files(case_id=family_id)
+        completion_files: CompletionFiles = self.get_completion_files(case_id=case_id)
         accession_numbers: Dict[str, str] = self.get_accession_numbers(
             log_file=completion_files.log_file
         )
@@ -278,5 +277,5 @@ class GisaidAPI:
 
         if len(accession_numbers) != len(gisaid_samples):
             raise AccessionNumerMissingError(
-                message=f"Not all samples in the bundle {family_id} have been uploaded to gisaid."
+                message=f"Not all samples in the bundle {case_id} have been uploaded to gisaid."
             )

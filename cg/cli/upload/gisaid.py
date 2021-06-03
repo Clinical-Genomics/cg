@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 def gisaid(context: CGConfig, family_id: str):
     """Upload mutant analysis data to GISAID."""
 
-    LOG.info("----------------- GISAID UPLOAD-------------------")
+    LOG.info("----------------- GISAID UPLOAD -------------------")
 
     gisaid_api = GisaidAPI(config=context)
     try:
