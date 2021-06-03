@@ -273,13 +273,12 @@ class GisaidAPI:
         accession_numbers: Dict[str, str] = self.get_accession_numbers(
             log_file=completion_files.log_file
         )
+        if accession_numbers:
+            self.update_completion_file(
+                completion_file=completion_files.completion_file, completion_data=accession_numbers
+            )
 
         if len(accession_numbers) != len(gisaid_samples):
             raise AccessionNumerMissingError(
-                message=f"Completion file was not updated with accession numbers. Accession numbers not found in gisaid "
-                f"log file for all samples in the bundle {family_id}."
+                message=f"Not all samples in the bundle {family_id} have been uploaded to gisaid."
             )
-
-        self.update_completion_file(
-            completion_file=completion_files.completion_file, completion_data=accession_numbers
-        )
