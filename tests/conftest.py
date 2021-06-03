@@ -10,12 +10,10 @@ import shutil
 from pathlib import Path
 
 import pytest
-import yaml
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
 from cg.constants import Pipeline
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
@@ -303,6 +301,12 @@ def fixture_orderform(fixtures_dir: Path) -> Path:
     return fixtures_dir / "orderforms"
 
 
+@pytest.fixture(name="case_qc_sample_info_path")
+def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
+    """Return path to case_qc_sample_info.yaml"""
+    return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
@@ -487,64 +491,10 @@ def fixture_bcf_file(apps_dir: Path) -> Path:
     return apps_dir / "gt" / "yellowhog.bcf"
 
 
-@pytest.fixture(scope="session", name="files")
-def fixture_files():
-    """Trailblazer api for mip files"""
-    return {
-        "config": "tests/fixtures/apps/mip/dna/store/case_config.yaml",
-        "sampleinfo": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
-        "qcmetrics": "tests/fixtures/apps/mip/case_qc_metrics.yaml",
-        "rna_config": "tests/fixtures/apps/mip/rna/case_config.yaml",
-        "rna_sampleinfo": "tests/fixtures/apps/mip/rna/case_qc_sampleinfo.yaml",
-        "rna_config_store": "tests/fixtures/apps/mip/rna/store/case_config.yaml",
-        "rna_sampleinfo_store": "tests/fixtures/apps/mip/rna/store/case_qc_sample_info.yaml",
-        "mip_rna_deliverables": "test/fixtures/apps/mip/rna/store/case_deliverables.yaml",
-        "dna_config_store": "tests/fixtures/apps/mip/dna/store/case_config.yaml",
-        "dna_sampleinfo_store": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
-        "mip_dna_deliverables": "test/fixtures/apps/mip/dna/store/case_deliverables.yaml",
-    }
-
-
 @pytest.fixture(scope="function", name="bed_file")
 def fixture_bed_file(analysis_dir) -> str:
     """Get the path to a bed file file"""
     return str(analysis_dir / "sample_coverage.bed")
-
-
-@pytest.fixture(scope="session", name="files_raw")
-def fixture_files_raw(files):
-    """Get some raw files"""
-    return {
-        "config": yaml.safe_load(open(files["config"])),
-        "sampleinfo": yaml.safe_load(open(files["sampleinfo"])),
-        "qcmetrics": yaml.safe_load(open(files["qcmetrics"])),
-        "rna_config": yaml.safe_load(open(files["rna_config"])),
-        "rna_sampleinfo": yaml.safe_load(open(files["rna_sampleinfo"])),
-        "rna_config_store": yaml.safe_load(open(files["rna_config_store"])),
-        "rna_sampleinfo_store": yaml.safe_load(open(files["rna_sampleinfo_store"])),
-        "dna_config_store": yaml.safe_load(open(files["dna_config_store"])),
-        "dna_sampleinfo_store": yaml.safe_load(open(files["dna_sampleinfo_store"])),
-    }
-
-
-@pytest.fixture(scope="session")
-def files_data(files_raw):
-    """Get some data files"""
-    return {
-        "config": parse_sampleinfo.parse_config(files_raw["config"]),
-        "sampleinfo": parse_sampleinfo.parse_sampleinfo(files_raw["sampleinfo"]),
-        "qcmetrics": parse_qcmetrics.parse_qcmetrics(files_raw["qcmetrics"]),
-        "rna_config": parse_sampleinfo.parse_config(files_raw["rna_config"]),
-        "rna_sampleinfo": parse_sampleinfo.parse_sampleinfo_rna(files_raw["rna_sampleinfo"]),
-        "rna_config_store": parse_sampleinfo.parse_config(files_raw["rna_config_store"]),
-        "rna_sampleinfo_store": parse_sampleinfo.parse_sampleinfo(
-            files_raw["rna_sampleinfo_store"]
-        ),
-        "dna_config_store": parse_sampleinfo.parse_config(files_raw["dna_config_store"]),
-        "dna_sampleinfo_store": parse_sampleinfo.parse_sampleinfo(
-            files_raw["dna_sampleinfo_store"]
-        ),
-    }
 
 
 # Helper fixtures
@@ -1056,26 +1006,6 @@ def sample_store(base_store) -> Store:
         sample.application_version = external_app if "external" in sample.name else wgs_app
     base_store.add_commit(new_samples)
     return base_store
-
-
-# @pytest.fixture(scope="function")
-# def disk_store(cli_runner, invoke_cli) -> Store:
-#     """Store on disk"""
-#     database = "./test_db.sqlite3"
-#     database_path = Path(database)
-#     with cli_runner.isolated_filesystem():
-#         assert database_path.exists() is False
-#
-#         database_uri = f"sqlite:///{database}"
-#         # WHEN calling "init"
-#         result = invoke_cli(["--database", database_uri, "init"])
-#
-#         # THEN it should setup the database with some tables
-#         assert result.exit_code == 0
-#         assert database_path.exists()
-#         assert len(Store(database_uri).engine.table_names()) > 0
-#
-#         yield Store(database_uri)
 
 
 @pytest.fixture(scope="function", name="trailblazer_api")

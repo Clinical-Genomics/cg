@@ -11,6 +11,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
+from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.scoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -63,7 +64,7 @@ def fixture_upload_genotypes_hk_bundle(
             {
                 "path": str(case_qc_metrics),
                 "archive": False,
-                "tags": ["qcmetrics"],
+                "tags": [HkMipAnalysisTag.QC_METRICS],
             },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],

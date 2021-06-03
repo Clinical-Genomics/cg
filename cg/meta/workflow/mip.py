@@ -1,15 +1,18 @@
 import logging
+import yaml
+
 from pathlib import Path
 from typing import Any, List, Optional
 
-import yaml
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
+from cg.constants.tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
 from cg.store import models
 
 CLI_OPTIONS = {
@@ -59,6 +62,17 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def get_case_config_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "analysis", f"{case_id}_config.yaml")
+
+    def get_deliverables_file_path(self, case_id: str) -> Path:
+        """
+        Location in working directory where deliverables file will be stored upon completion of analysis.
+        Deliverables file is used to communicate paths and tag definitions for files in a finished analysis
+        """
+        return Path(self.root, case_id, "analysis", f"{case_id}_deliverables.yaml")
+
+    def get_sample_info_path(self, case_id: str) -> Path:
+        """Get case analysis sample info path"""
+        return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
     def resolve_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
         if panel_bed:
@@ -182,9 +196,13 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, family_id: str) -> dict:
         """Get the latest trending data for a family."""
 
-        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag="mip-config")
-        qcmetrics_raw = self._get_latest_raw_file(family_id=family_id, tag="qcmetrics")
-        sampleinfo_raw = self._get_latest_raw_file(family_id=family_id, tag="sampleinfo")
+        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
+        qcmetrics_raw = self._get_latest_raw_file(
+            family_id=family_id, tag=HkMipAnalysisTag.QC_METRICS
+        )
+        sampleinfo_raw = self._get_latest_raw_file(
+            family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
+        )
         trending = dict()
         if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
             try:
@@ -282,3 +300,26 @@ class MipAnalysisAPI(AnalysisAPI):
 
     def config_sample(self, link_obj: models.FamilySample, panel_bed: str) -> dict:
         raise NotImplementedError
+
+    def get_pipeline_version(self, case_id: str) -> str:
+        """Get MIP version from sample info file"""
+        LOG.debug("Fetch pipeline version")
+        sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
+        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
+        return sample_info.mip_version
+
+    def is_analysis_finished(self, sample_info_path: Path) -> bool:
+        """Return True if analysis is finished"""
+        sample_info_raw = yaml.safe_load(sample_info_path.open())
+        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
+        return sample_info.is_finished
+
+    def get_cases_to_store(self) -> List[models.Family]:
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper"""
+        finished_cases: List[models.Family] = []
+        for case_object in self.get_running_cases():
+            if self.is_analysis_finished(self.get_sample_info_path(case_object.internal_id)):
+                finished_cases.append(case_object)
+
+        return finished_cases
