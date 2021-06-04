@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, EmailStr, Field, validator
 from typing import List
-from typing_extensions import Literal
 
 from cg.constants.priority import SlurmQos
 
