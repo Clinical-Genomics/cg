@@ -4,31 +4,38 @@ from typing import Optional
 
 import petname
 import requests
-from simple_image_download import simple_image_download as simp
-
-RANDOMIZING_WORDS = ["cute", "cuddly", "small", "pet"]
-
-response = simp.simple_image_download
+from cg.apps.avatar.bing_image_urls import bing_image_urls
 
 
 class Avatar:
     @staticmethod
-    def get_avatar_url(internal_id: str, tries: int = 25) -> Optional[bool]:
+    def get_avatar_url(internal_id: str) -> Optional[bool]:
 
+        urls = None
         adjective, animal = Avatar._split_petname(internal_id)
-        seed = secrets.choice(RANDOMIZING_WORDS)
-        keywords = f"{seed} {adjective} {animal} icon animal"
-        try:
-            urls = response().urls(
-                keywords=keywords,
-                limit=tries,
-                extensions={".gif", ".jpg", ".jpeg", ".png", ".tiff"},
+        filter_array = ["+filterui:license-L2_L3", "+filterui:photo-transparent", "+filterui:aspect-square", "+filterui:imagesize-small"]
+
+        try_cnt = 0
+        filters = "".join(filter_array)
+        while not urls and filters:
+            print(filters)
+            query = f"{adjective} {animal}"
+            urls = bing_image_urls(
+                query=query,
+                filters=filters,
+                verify_status_only=False,
             )
-        except TypeError:
-            urls = response().urls(
-                keywords=keywords,
-                limit=tries,
-            )
+            if not urls:
+                query = f"{animal}"
+                urls = bing_image_urls(
+                    query=query,
+                    filters=filters,
+                    verify_status_only=False,
+                )
+
+            try_cnt += 1
+            filters = "".join(filter_array[:len(filter_array) - try_cnt])
+
         random.shuffle(urls)
         for url in urls:
             if Avatar.is_url_image(url):
