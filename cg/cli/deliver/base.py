@@ -91,8 +91,11 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool) -> int:
     rsync_api = RsyncAPI(config=context)
     slurm_api = SlurmAPI()
     log_dir: Path = rsync_api.create_log_dir(
-        ticket_id=ticket_id, pending_path=Path(context.rsync.base_path), dry_run=dry_run
+        ticket_id=ticket_id, pending_path=Path("/home/proj/stage/rsync"), dry_run=dry_run
     )
+    # log_dir: Path = rsync_api.create_log_dir(
+    #    ticket_id=ticket_id, pending_path=Path(context.rsync.base_path), dry_run=dry_run
+    # )
     commands = RSYNC_COMMAND.format(ticket_id=ticket_id)
     error_function = ERROR_RSYNC_FUNCTION.format()
     sbatch_info = {
