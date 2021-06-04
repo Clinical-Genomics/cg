@@ -1,0 +1,126 @@
+{
+  "name": "MIP order",
+  "customer": "cust000",
+  "comment": "",
+  "samples": [
+    {
+      "age_at_sampling": "17.18192",
+      "application": "WGTPCFC030",
+      "cohorts":["Other"],
+      "comment": "comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "mip-dna",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "father": "sample3",
+      "mother": "sample2",
+      "name": "sample1",
+      "panels": [
+        "IEM"
+      ],
+      "phenotype_terms":["HP:0012747","HP:0025049"],
+      "priority": "standard",
+      "quantity": "220",
+      "sex": "female",
+      "source": "tissue (fresh frozen)",
+      "status": "affected",
+      "synopsis":["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "tumour": true,
+      "volume": "1",
+      "well_position": "A:1"
+    },
+    {
+      "age_at_sampling": "2.0",
+      "application": "WGTPCFC030",
+      "cohorts": [
+        ""
+      ],
+      "comment": "this is a sample comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "mip-dna",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "name": "sample2",
+      "panels": [
+        "IEM"
+      ],
+            "synopsis": [
+        ""
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "sex": "female",
+      "source": "tissue (fresh frozen)",
+      "status": "affected",
+      "tumour": false,
+      "volume": "2",
+      "well_position": "B:1"
+    },
+    {
+      "age_at_sampling": "3.0",
+      "application": "WGTPCFC030",
+      "cohorts": [
+        ""
+      ],
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "mip-dna",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "name": "sample3",
+      "panels": [
+        "IEM"
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "sex": "male",
+      "source": "tissue (fresh frozen)",
+      "status": "affected",
+      "synopsis": [
+        ""
+      ],
+      "tumour": false,
+      "volume": "3",
+      "well_position": "C:1"
+    },
+    {
+      "age_at_sampling": "4.0",
+      "application": "WGTPCFC030",
+      "cohorts": [
+        ""
+      ],
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "mip-dna",
+      "data_delivery": "scout",
+      "family_name": "family2",
+      "name": "sample4",
+      "panels": [
+        "IEM"
+      ],
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "sex": "female",
+      "source": "tissue (fresh frozen)",
+      "status": "affected",
+      "synopsis": [
+        ""
+      ],
+      "tumour": false,
+      "volume": "4",
+      "well_position": "D:1"
+    }
+  ]
+}
+

@@ -30,7 +30,6 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample.udfs.application == "WGTPCFC030"
     assert first_sample.udfs.source == "tissue (fresh frozen)"
     assert first_sample.udfs.quantity == "220"
-    assert first_sample.udfs.require_qcok is True
     assert first_sample.udfs.customer == "cust003"
     assert first_sample.udfs.volume == "1"
 
@@ -121,15 +120,19 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     assert len(samples) == 5
     # ... and pick out relevant UDFs
     first_sample = samples[0].dict()
-    assert first_sample["udfs"]["priority"] == "research"
-    assert first_sample["udfs"]["organism"] == "SARS CoV-2"
-    assert first_sample["udfs"]["reference_genome"] == "NC_111"
+    assert first_sample["udfs"]["collection_date"] == "2021-05-05"
     assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
-    assert first_sample["udfs"]["volume"] == "1"
-    assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
-    assert first_sample["udfs"]["region_code"] == "01 Region Stockholm"
     assert first_sample["udfs"]["lab_code"] == "SE110 Växjö"
+    assert first_sample["udfs"]["organism"] == "SARS CoV-2"
+    assert first_sample["udfs"]["original_lab"] == "Karolinska University Hospital Solna"
+    assert first_sample["udfs"]["original_lab_address"] == "171 76 Stockholm"
+    assert first_sample["udfs"]["pre_processing_method"] == "COVIDSeq"
+    assert first_sample["udfs"]["priority"] == "research"
+    assert first_sample["udfs"]["reference_genome"] == "NC_111"
+    assert first_sample["udfs"]["region"] == "Stockholm"
+    assert first_sample["udfs"]["region_code"] == "01"
     assert first_sample["udfs"]["selection_criteria"] == "1. Allmän övervakning"
+    assert first_sample["udfs"]["volume"] == "1"
 
 
 def test_to_lims_balsamic(balsamic_order_to_submit):
@@ -155,7 +158,6 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["udfs"]["sex"] == "M"
     assert first_sample["udfs"]["family_name"] == "family1"
     assert first_sample["udfs"]["customer"] == "cust000"
-    assert first_sample["udfs"]["require_qcok"] is False
     assert first_sample["udfs"]["source"] == "blood"
     assert first_sample["udfs"]["volume"] == "1"
     assert first_sample["udfs"]["priority"] == "standard"

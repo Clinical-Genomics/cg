@@ -105,6 +105,7 @@ delly_types:
   - INV
   - INS
 dry_run_all: 1
+email: someone@somewhere.com
 email_types:
   - FAIL
 endvariantannotationblock: 2

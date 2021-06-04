@@ -107,7 +107,6 @@ MIP_SAMPLE = {
     "tumour": bool,
     "source": OptionalNone(TypeValidatorNone(str)),
     "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
-    "require_qcok": bool,
     "volume": OptionalNone(TypeValidatorNone(str)),
     "container": OptionalNone(validators.Any(CONTAINER_OPTIONS)),
     # "required if plate for new samples"
@@ -149,7 +148,6 @@ BALSAMIC_SAMPLE = {
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     "family_name": validators.RegexValidator(NAME_PATTERN),
     "case_internal_id": OptionalNone(TypeValidatorNone(str)),
-    "require_qcok": bool,
     "volume": OptionalNone(TypeValidatorNone(str)),
     "tumour": bool,
     "source": OptionalNone(TypeValidatorNone(str)),
@@ -248,7 +246,6 @@ FASTQ_SAMPLE = {
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
     # todo: implement in OP or remove from OF
     # 'family_name': RegexValidator(NAME_PATTERN),
-    "require_qcok": bool,
     "volume": str,
     "source": str,
     "tumour": bool,
@@ -344,31 +341,35 @@ METAGENOME_SAMPLE = {
 SARSCOV2_SAMPLE = {
     # 2184 Orderform SARS-COV-2
     # "These fields are required"
-    "name": validators.RegexValidator(NAME_PATTERN),
-    "organism": str,
-    "reference_genome": str,
+    "application": str,
+    "collection_date": str,
+    "container": validators.Any(CONTAINER_OPTIONS),
     "data_analysis": str,
     "data_delivery": str,
-    "application": str,
-    "priority": validators.Any(PRIORITY_OPTIONS),
-    "require_qcok": bool,
     "elution_buffer": str,
     "extraction_method": str,
-    "pre_processing_method": str,
-    "region_code": str,
     "lab_code": str,
+    "name": validators.RegexValidator(NAME_PATTERN),
+    "organism": str,
+    "original_lab": str,
+    "original_lab_address": str,
+    "pre_processing_method": str,
+    "priority": validators.Any(PRIORITY_OPTIONS),
+    "reference_genome": str,
+    "region": str,
+    "region_code": str,
+    "require_qcok": bool,
     "selection_criteria": str,
     "volume": str,
-    "container": validators.Any(CONTAINER_OPTIONS),
     # "Required if Plate"
     "container_name": OptionalNone(TypeValidatorNone(str)),
     "well_position": OptionalNone(TypeValidatorNone(str)),
     # "Required if "Other" is chosen in column "Species""
     "organism_other": OptionalNone(TypeValidatorNone(str)),
     # "These fields are not required"
+    "comment": OptionalNone(TypeValidatorNone(str)),
     "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
-    "comment": OptionalNone(TypeValidatorNone(str)),
 }
 
 ORDER_SCHEMES = {

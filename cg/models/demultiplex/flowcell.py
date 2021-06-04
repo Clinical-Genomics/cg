@@ -84,6 +84,10 @@ class Flowcell:
     def demultiplexing_started_path(self) -> Path:
         return Path(self.path, "demuxstarted.txt")
 
+    @property
+    def trailblazer_config_path(self) -> Path:
+        return Path(self.path, "slurm_job_ids.yaml")
+
     def is_demultiplexing_started(self) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
         return self.demultiplexing_started_path.exists()

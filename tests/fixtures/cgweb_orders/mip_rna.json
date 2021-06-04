@@ -1,0 +1,60 @@
+{
+  "name": "MIP order",
+  "customer": "cust003",
+  "comment": "",
+  "samples": [
+    {
+      "application": "RNAPOAR025",
+      "cohorts": [
+        ""
+      ],
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "mip-rna",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "from_sample": "sample1",
+      "name": "sample1-rna-t1",
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "sex": "female",
+      "source": "tissue (fresh frozen)",
+      "synopsis": [
+        ""
+      ],
+      "time_point": "1",
+      "volume": "1",
+      "well_position": "A:1"
+    },
+    {
+      "application": "RNAPOAR025",
+      "cohorts": [
+        ""
+      ],
+      "comment": "this is a sample comment",
+      "container": "96 well plate",
+      "container_name": "CMMS",
+      "data_analysis": "mip-rna",
+      "data_delivery": "scout",
+      "family_name": "family1",
+      "from_sample": "sample1",
+      "name": "sample1-rna-t2",
+      "phenotype_terms": [
+        ""
+      ],
+      "priority": "standard",
+      "quantity": "220",
+      "sex": "female",
+      "source": "tissue (fresh frozen)",
+      "synopsis": [
+        ""
+      ],
+      "time_point": "2",
+      "volume": "2",
+      "well_position": "B:1"
+    }
+  ]
+}

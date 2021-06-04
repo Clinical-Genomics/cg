@@ -10,6 +10,7 @@ SEX_MAP = {"male": "M", "female": "F"}
 class Udf(BaseModel):
     application: str
     capture_kit: Optional[str]
+    collection_date: Optional[str]
     comment: Optional[str]
     concentration: Optional[str]
     concentration_sample: Optional[str]
@@ -25,12 +26,15 @@ class Udf(BaseModel):
     lab_code: Optional[str]
     organism: Optional[str]
     organism_other: Optional[str]
+    original_lab: Optional[str]
+    original_lab_address: Optional[str]
     pool: Optional[str]
     post_formalin_fixation_time: Optional[str]
     pre_processing_method: Optional[str]
     priority: str = "standard"
     quantity: Optional[str]
     reference_genome: Optional[str]
+    region: Optional[str]
     region_code: Optional[str]
     require_qcok: bool = False
     rml_plate_name: Optional[str]
@@ -38,7 +42,7 @@ class Udf(BaseModel):
     sex: Literal["M", "F", "unknown"] = "unknown"
     source: str = "NA"
     tissue_block_size: Optional[str]
-    tumour: bool = False
+    tumour: Optional[bool] = False
     tumour_purity: Optional[str]
     volume: Optional[str]
     well_position_rml: Optional[str]

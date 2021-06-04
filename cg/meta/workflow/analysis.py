@@ -8,7 +8,7 @@ from typing import List, Optional, Tuple
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.constants.priority import SlurmQos
-from cg.exc import BundleAlreadyAddedError, CgDataError, CgError, DecompressionNeededError
+from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.cg_config import CGConfig
@@ -320,67 +320,79 @@ class AnalysisAPI(MetaAPI):
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
 
-    def resolve_decompression(self, case_id: str, dry_run: bool) -> None:
-        """
-        Handles decompression automatically for case.
-        Raises error to interrupt the workflow execution if cannot be resolved immediately
-        """
-        decompression_needed: bool = self.prepare_fastq_api.is_spring_decompression_needed(case_id)
-
-        if decompression_needed:
-            LOG.info(
-                "The analysis for %s could not start, decompression is needed",
+    def decompression_running(self, case_id: str) -> None:
+        """Check if decompression is running for a case"""
+        is_decompression_running: bool = self.prepare_fastq_api.is_spring_decompression_running(
+            case_id
+        )
+        if not is_decompression_running:
+            LOG.warning(
+                "Decompression can not be started for %s",
                 case_id,
             )
-            decompression_possible: bool = (
-                self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(case_id)
+            return
+        LOG.info(
+            "Decompression is running for %s, analysis will be started when decompression is done",
+            case_id,
+        )
+        self.set_statusdb_action(case_id=case_id, action="analyze")
+
+    def decompress_case(self, case_id: str, dry_run: bool) -> None:
+        """Decompress all possible fastq files for all samples in a case"""
+        LOG.info(
+            "The analysis for %s could not start, decompression is needed",
+            case_id,
+        )
+        decompression_possible: bool = (
+            self.prepare_fastq_api.can_at_least_one_sample_be_decompressed(case_id)
+        )
+        if not decompression_possible:
+            self.decompression_running(case_id=case_id)
+            return
+        case_obj: models.Family = self.status_db.family(case_id)
+        link: models.FamilySample
+        any_decompression_started = False
+        for link in case_obj.links:
+            sample_id: str = link.sample.internal_id
+            if dry_run:
+                LOG.info(
+                    f"This is a dry run, therefore decompression for {sample_id} won't be started"
+                )
+                continue
+            decompression_started: bool = self.prepare_fastq_api.compress_api.decompress_spring(
+                sample_id
             )
-            if decompression_possible:
-                possible_to_start_decompression: bool = (
-                    self.prepare_fastq_api.can_at_least_one_decompression_job_start(
-                        case_id, dry_run
-                    )
-                )
-                if possible_to_start_decompression:
-                    if not dry_run:
-                        self.set_statusdb_action(case_id=case_id, action="analyze")
-                    LOG.info(
-                        "Decompression started for %s",
-                        case_id,
-                    )
-                else:
-                    LOG.warning(
-                        "Decompression failed to start for %s",
-                        case_id,
-                    )
-            else:
-                is_decompression_running = self.prepare_fastq_api.is_spring_decompression_running(
-                    case_id
-                )
-                if is_decompression_running:
-                    LOG.info(
-                        "Decompression is running for %s, analysis will be started when decompression is done",
-                        case_id,
-                    )
-                    self.set_statusdb_action(case_id=case_id, action="analyze")
-                else:
-                    LOG.warning(
-                        "Decompression can not be started for %s",
-                        case_id,
-                    )
-            raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+            if decompression_started:
+                any_decompression_started = True
+
+        if not any_decompression_started:
+            LOG.warning("Decompression failed to start for %s", case_id)
+            return
+        if not dry_run:
+            self.set_statusdb_action(case_id=case_id, action="analyze")
+        LOG.info("Decompression started for %s", case_id)
+
+    def resolve_decompression(self, case_id: str, dry_run: bool) -> bool:
+        """
+        Handles decompression automatically for case.
+        Return True if decompression is running
+        """
+        if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
+            self.decompress_case(case_id=case_id, dry_run=dry_run)
+            return True
 
         if self.prepare_fastq_api.is_spring_decompression_running(case_id):
             self.set_statusdb_action(case_id=case_id, action="analyze")
-            raise DecompressionNeededError("Workflow interrupted: decompression is running")
+            return True
 
         LOG.info("Linking fastq files in housekeeper for case %s", case_id)
         self.prepare_fastq_api.check_fastq_links(case_id)
 
         if self.prepare_fastq_api.is_spring_decompression_needed(case_id):
-            raise DecompressionNeededError("Workflow interrupted: decompression is not finished")
+            return True
 
         LOG.info("Decompression for case %s not needed", case_id)
+        return False
 
     @staticmethod
     def get_date_from_file_path(file_path: Path) -> dt.datetime.date:

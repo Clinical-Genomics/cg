@@ -15,9 +15,9 @@ def rename_index_dir(unaligned_dir: Path, dry_run: bool = False) -> None:
             LOG.debug("%s is already renamed", sub_dir)
             continue
         index_directory: Path = unaligned_dir / "_".join(["Project", sub_dir.name])
-        LOG.info("Move index directory %s", sub_dir)
+        LOG.debug("Move index directory %s", sub_dir)
         if not dry_run:
-            LOG.info("Move directory to %s", index_directory)
+            LOG.debug("Move directory to %s", index_directory)
             sub_dir.rename(index_directory)
 
 
@@ -26,7 +26,7 @@ def rename_project_directory(
 ) -> None:
     """Rename a project directory by adding the prefix Project_"""
     unaligned_directory: Path = project_directory.parent
-    LOG.info("Rename all sample directories in %s", unaligned_directory)
+    LOG.debug("Rename all sample directories in %s", unaligned_directory)
     for sample_dir in project_directory.iterdir():
         if sample_dir.name.startswith("Sample"):
             LOG.debug("%s is already renamed", sample_dir)
@@ -36,9 +36,9 @@ def rename_project_directory(
         )
     new_name: str = "_".join(["Project", project_directory.name])
     new_project_path: Path = unaligned_directory / new_name
-    LOG.info("Rename project dir %s", project_directory)
+    LOG.debug("Rename project dir %s", project_directory)
     if not dry_run:
-        LOG.info("Rename project dir to %s", new_project_path)
+        LOG.debug("Rename project dir to %s", new_project_path)
         project_directory.rename(new_project_path)
 
 
@@ -50,22 +50,22 @@ def rename_sample_directory(
     Renaming of the sample dir means adding Sample_ as a prefix
     """
     project_directory: Path = sample_directory.parent
-    LOG.info("Renaming all fastq files in %s", sample_directory)
+    LOG.debug("Renaming all fastq files in %s", sample_directory)
     for fastq_file in sample_directory.iterdir():
         rename_fastq_file(fastq_file=fastq_file, flowcell_id=flowcell_id, dry_run=dry_run)
     new_name: str = "_".join(["Sample", sample_directory.name])
     new_sample_directory: Path = project_directory / new_name
-    LOG.info("Renaming sample dir %s to %s", sample_directory, new_sample_directory)
+    LOG.debug("Renaming sample dir %s to %s", sample_directory, new_sample_directory)
     if not dry_run:
         sample_directory.rename(new_sample_directory)
-        LOG.info("Renamed sample dir to %s", new_sample_directory)
+        LOG.debug("Renamed sample dir to %s", new_sample_directory)
 
 
 def rename_fastq_file(fastq_file: Path, flowcell_id: str, dry_run: bool = False) -> None:
     """Rename a fastq file by appending the flowcell id as a prefix"""
     new_name: str = "_".join([flowcell_id, fastq_file.name])
     new_file: Path = Path(fastq_file.parent) / new_name
-    LOG.info("Renaming fastq file %s to %s", fastq_file, new_file)
+    LOG.debug("Renaming fastq file %s to %s", fastq_file, new_file)
     if not dry_run:
         fastq_file.rename(new_file)
-        LOG.info("Renamed fastq file to %s", new_file)
+        LOG.debug("Renamed fastq file to %s", new_file)
