@@ -100,11 +100,13 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool) -> int:
     error_function = ERROR_RSYNC_FUNCTION.format()
     sbatch_info = {
         "job_name": "_".join([str(ticket_id), "rsync"]),
-        "account": context.rsync.account,
+        "account": "development",
+        # "account": context.rsync.account,
         "number_tasks": 1,
         "memory": 1,
         "log_dir": log_dir.as_posix(),
-        "email": context.rsync.mail_user,
+        "email": "henning.onsbring@scilifelab.se",
+        # "email": context.rsync.mail_user,
         "hours": 24,
         "commands": commands,
         "error": error_function,
