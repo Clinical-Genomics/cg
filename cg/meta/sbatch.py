@@ -1,7 +1,7 @@
 """Sbatch templates for the rsync function"""
 
 RSYNC_COMMAND = """
-cg deliver rsync {ticket_id}
+rsync -rvL {source_path} {destination_path}
 """
 
 ERROR_RSYNC_FUNCTION = """

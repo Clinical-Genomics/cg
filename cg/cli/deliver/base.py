@@ -90,23 +90,18 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool) -> int:
     """
     rsync_api = RsyncAPI(config=context)
     slurm_api = SlurmAPI()
-    log_dir: Path = rsync_api.create_log_dir(
-        ticket_id=ticket_id, pending_path=Path("/home/proj/stage/rsync"), dry_run=dry_run
-    )
-    # log_dir: Path = rsync_api.create_log_dir(
-    #    ticket_id=ticket_id, pending_path=Path(context.rsync.base_path), dry_run=dry_run
-    # )
-    commands = RSYNC_COMMAND.format(ticket_id=ticket_id)
+    log_dir: Path = rsync_api.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
+    source_path: str = rsync_api.get_source_path(ticket_id=ticket_id)
+    destination_path: str = rsync_api.get_destination_path(ticket_id=ticket_id)
+    commands = RSYNC_COMMAND.format(source_path=source_path, destination_path=destination_path)
     error_function = ERROR_RSYNC_FUNCTION.format()
     sbatch_info = {
         "job_name": "_".join([str(ticket_id), "rsync"]),
-        "account": "development",
-        # "account": context.rsync.account,
+        "account": rsync_api.get_account(),
         "number_tasks": 1,
         "memory": 1,
         "log_dir": log_dir.as_posix(),
-        "email": "henning.onsbring@scilifelab.se",
-        # "email": context.rsync.mail_user,
+        "email": rsync_api.get_mail_user(),
         "hours": 24,
         "commands": commands,
         "error": error_function,
