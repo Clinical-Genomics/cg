@@ -84,31 +84,35 @@ def deliver_analysis(
 @click.argument("ticket_id", type=int, required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
+def rsync(context: CGConfig, ticket_id: int, dry_run: bool) -> int:
     """The folder generated using the "cg deliver analysis" command will be
     rsynced with this function to the customers inbox on caesar.
     """
     rsync_api = RsyncAPI(config=context)
     slurm_api = SlurmAPI()
     log_dir: Path = rsync_api.create_log_dir(
-        ticket_id=ticket_id, pending_path=context.rsync_base, dry_run=dry_run
+        ticket_id=ticket_id, pending_path=context["rsync"]["base_path"], dry_run=dry_run
     )
     commands = RSYNC_COMMAND.format(ticket_id=ticket_id)
     error_function = ERROR_RSYNC_FUNCTION.format()
     sbatch_info = {
         "job_name": "_".join([ticket_id, "rsync"]),
-        "account": context["rsync"]["slurm"]["account"],
+        "account": context["rsync"]["account"],
         "number_tasks": 1,
         "memory": 1,
         "log_dir": log_dir.as_posix(),
-        "email": context["rsync"]["slurm"]["mail_user"],
+        "email": context["rsync"]["mail_user"],
         "hours": 24,
         "commands": commands,
         "error": error_function,
     }
     sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-    sbatch_number: int = slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=log_dir)
+    sbatch_path = log_dir / "_".join([str(ticket_id), "rsync.sh"])
+    sbatch_number: int = slurm_api.submit_sbatch(
+        sbatch_content=sbatch_content, sbatch_path=sbatch_path
+    )
     LOG.info("Rsync to caesar running as job %s", sbatch_number)
+    return sbatch_number
 
 
 @deliver.command(name="concatenate")
