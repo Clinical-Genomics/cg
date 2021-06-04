@@ -160,13 +160,7 @@ class StatusHandler:
                 cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
             }
 
-            synopses: Set[str] = {
-                synopsis
-                for sample in case_samples
-                for synopsis in sample.get("synopsis", [])
-                if synopsis
-            }
-
+            synopsis = cls.get_single_value(case_name, case_samples, "synopsis")
             case_internal_id: str = cls.get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
@@ -198,6 +192,7 @@ class StatusHandler:
                         "internal_id": sample.get("internal_id"),
                         "mother": sample.get("mother"),
                         "name": sample["name"],
+                        "phenotype_groups": list(sample.get("phenotype_groups", "")),
                         "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
@@ -206,7 +201,7 @@ class StatusHandler:
                     }
                     for sample in case_samples
                 ],
-                "synopsis": synopses,
+                "synopsis": synopsis,
             }
 
             status_data["families"].append(case)
