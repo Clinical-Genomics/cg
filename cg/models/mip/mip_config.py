@@ -25,9 +25,7 @@ class MipBaseConfig(BaseModel):
     is_dry_run: bool = Field(False, alias="dry_run_all")
     log_path: str = Field(..., alias="log_file")
     out_dir: str = Field(..., alias="outdata_dir")
-    priority: Literal[SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH] = Field(
-        ..., alias="slurm_quality_of_service"
-    )
+    priority: SlurmQos = Field(..., alias="slurm_quality_of_service")
     sample_info_path: str = Field(..., alias="sample_info_file")
 
     @validator("case_id", always=True, pre=True)
