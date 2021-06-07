@@ -145,15 +145,17 @@ class GisaidAPI:
         return log_file
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
-        """appends temp log to gisaid log"""
+        """appends temp log to gisaid log and delete temp file"""
 
-        with open(str(gisaid_log.absolute()), "r") as open_gisaid_log:
-            with open(str(temp_log.absolute()), "r") as open_temp_log:
-                gisaid_log_list: List = json.load(open_gisaid_log)
-                temp_log_list: List = json.load(open_temp_log)
-        gisaid_log_list.extend(temp_log_list)
+        with open(str(temp_log.absolute()), "r") as open_temp_log:
+            new_log_data: List = json.load(open_temp_log)
+            if gisaid_log.stat().st_size != 0:
+                with open(str(gisaid_log.absolute()), "r") as open_gisaid_log:
+                    old_log_data: List = json.load(open_gisaid_log)
+                    new_log_data.extend(old_log_data)
+
         with open(str(gisaid_log.absolute()), "w") as open_gisaid_log:
-            json.dump(gisaid_log_list, open_gisaid_log)
+            json.dump(new_log_data, open_gisaid_log)
         temp_log.unlink()
 
     def file_to_hk(self, case_id: str, file: Path, tags: list):
@@ -176,7 +178,6 @@ class GisaidAPI:
         """Load batch data to GISAID using the gisiad cli."""
 
         temp_log_file = tempfile.NamedTemporaryFile(dir="/tmp", mode="w+", delete=False)
-
         load_call: list = [
             "--logfile",
             temp_log_file.name,
@@ -190,7 +191,6 @@ class GisaidAPI:
         self.process.run_command(parameters=load_call)
         self.append_log(temp_log=Path(temp_log_file.name), gisaid_log=files.log_file)
         temp_log_file.close()
-
         if self.process.stderr:
             LOG.info(f"gisaid stderr:\n{self.process.stderr}")
         if self.process.stdout:
@@ -202,7 +202,7 @@ class GisaidAPI:
     def get_accession_numbers(self, log_file: Path) -> Dict[str, str]:
         """parse accession numbers and sample ids from log file"""
 
-        LOG.info("Parsing acccesion numbers from log file")
+        LOG.info("Parsing accesion numbers from log file")
         completion_data = {}
         with open(str(log_file.absolute())) as log_file:
             log_data = json.load(log_file)
@@ -215,15 +215,6 @@ class GisaidAPI:
                 completion_data[accession_obj.sample_id] = accession_obj.accession_nr
 
         return completion_data
-
-    def get_completion_files(self, case_id: str) -> CompletionFiles:
-        """Get log file and completion file."""
-
-        completion_file = self.file_in_hk(case_id=case_id, tags=["komplettering"])
-        logfile = self.file_in_hk(case_id=case_id, tags=["gisaid-log"])
-        return CompletionFiles(
-            log_file=logfile.full_path, completion_file=completion_file.full_path
-        )
 
     def update_completion_file(
         self, completion_file: Path, completion_data: Dict[str, str]
@@ -258,7 +249,9 @@ class GisaidAPI:
         )
 
         if not files:
-            raise HousekeeperFileMissingError(message="Files missing in housekeeper")
+            raise HousekeeperFileMissingError(
+                message=f"Files missing in housekeeper for case {case_id}"
+            )
 
         try:
             self.upload_results_to_gisaid(files)
@@ -271,16 +264,21 @@ class GisaidAPI:
         if not self.file_in_hk(case_id=case_id, tags=["gisaid-log"]):
             self.file_to_hk(case_id=case_id, file=files.log_file, tags=["gisaid-log"])
 
-        completion_files: CompletionFiles = self.get_completion_files(case_id=case_id)
-        accession_numbers: Dict[str, str] = self.get_accession_numbers(
-            log_file=completion_files.log_file
-        )
+        completion_file = self.file_in_hk(case_id=case_id, tags=["komplettering"])
+        accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if accession_numbers:
             self.update_completion_file(
-                completion_file=completion_files.completion_file, completion_data=accession_numbers
+                completion_file=completion_file, completion_data=accession_numbers
             )
 
         if len(accession_numbers) != len(gisaid_samples):
             raise AccessionNumerMissingError(
                 message=f"Not all samples in the bundle {case_id} have been uploaded to gisaid."
             )
+
+        with open(files.log_file, "r") as gisaid_log:
+            if "error" in gisaid_log.read():
+                raise GisaidUploadFailedError(
+                    f"There has been some issues with the upload to gisaid for case: {case_id}. "
+                    f"Please check the logfile {str(files.log_file.absolute())} to make sue all samples have been uploaded."
+                )

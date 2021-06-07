@@ -21,6 +21,7 @@ def gisaid(context: CGConfig, case_id: str):
     LOG.info("----------------- GISAID UPLOAD -------------------")
 
     gisaid_api = GisaidAPI(config=context)
+
     try:
         gisaid_api.upload(case_id=case_id)
     except CgError as error:

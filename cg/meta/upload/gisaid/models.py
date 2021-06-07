@@ -30,11 +30,6 @@ class UploadFiles(BaseModel):
     log_file: Path
 
 
-class CompletionFiles(BaseModel):
-    log_file: Path
-    completion_file: Path
-
-
 class GisaidSample(BaseModel):
     case_id: str
     cg_lims_id: str
