@@ -191,6 +191,21 @@ def balsamic_past_run_dirs(
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
+@click.command("fluffy-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("before_str")
+@click.pass_context
+def fluffy_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Fluffy case run dirs"""
+
+    context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
 @click.command("mip-past-run-dirs")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
@@ -217,20 +232,5 @@ def mutant_past_run_dirs(
     """Clean up of "old" MUTANT case run dirs"""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
-
-    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
-
-
-@click.command("fluffy-past-run-dirs")
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.argument("before_str")
-@click.pass_context
-def fluffy_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
-):
-    """Clean up of "old" Fluffy case run dirs"""
-
-    context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
