@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import List, Dict
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File
 import tempfile
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -17,8 +17,6 @@ from .models import GisaidSample, UploadFiles, GisaidAccession
 import csv
 
 from cg.exc import (
-    HousekeeperVersionMissingError,
-    HousekeeperFileMissingError,
     FastaSequenceMissingError,
     AccessionNumerMissingError,
     GisaidUploadFailedError,
@@ -75,7 +73,7 @@ class GisaidAPI:
     def get_gisaid_fasta(self, gsaid_samples: List[GisaidSample], case_id: str) -> List[str]:
         """Fetch a fasta files form house keeper for batch upload_results_to_gisaid to gisaid"""
 
-        fasta_file: File = self.file_in_hk(case_id=case_id, tags=["consensus"])
+        fasta_file: File = self.find_file_in_latest_version(case_id=case_id, tags=["consensus"])
 
         gisaid_delivery_fasta = []
         with open(fasta_file.full_path) as handle:
@@ -136,7 +134,7 @@ class GisaidAPI:
 
         return file
 
-    def gisaid_log_file(self, case_id: str) -> Path:
+    def get_gisaid_log_file_path(self, case_id: str) -> Path:
         """Path for gisaid bundle log"""
 
         log_file = Path(f"{self.gisaid_log_dir}/{case_id}.log")
@@ -157,22 +155,6 @@ class GisaidAPI:
         with open(str(gisaid_log.absolute()), "w") as open_gisaid_log:
             json.dump(new_log_data, open_gisaid_log)
         temp_log.unlink()
-
-    def file_to_hk(self, case_id: str, file: Path, tags: list):
-        version_obj: Version = self.housekeeper_api.last_version(case_id)
-        if not version_obj:
-            LOG.info("Family ID: %s not found in housekeeper", case_id)
-            raise HousekeeperVersionMissingError
-        self.housekeeper_api.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
-        self.housekeeper_api.commit()
-
-    def file_in_hk(self, case_id: str, tags: list) -> File:
-        version_obj: Version = self.housekeeper_api.last_version(case_id)
-        if not version_obj:
-            LOG.info("Family ID: %s not found in housekeeper", case_id)
-            raise HousekeeperVersionMissingError
-        file: File = self.housekeeper_api.files(version=version_obj.id, tags=tags).first()
-        return file
 
     def upload_results_to_gisaid(self, files: UploadFiles) -> None:
         """Load batch data to GISAID using the gisiad cli."""
@@ -203,7 +185,7 @@ class GisaidAPI:
         """parse accession numbers and sample ids from log file"""
 
         LOG.info("Parsing accesion numbers from log file")
-        completion_data = {}
+        accession_numbers = {}
         with open(str(log_file.absolute())) as log_file:
             log_data = json.load(log_file)
             for log in log_data:
@@ -212,9 +194,9 @@ class GisaidAPI:
                 accession_obj = GisaidAccession(
                     accession_nr=log.get("msg"), sample_id=log.get("msg")
                 )
-                completion_data[accession_obj.sample_id] = accession_obj.accession_nr
+                accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
 
-        return completion_data
+        return accession_numbers
 
     def update_completion_file(
         self, completion_file: Path, completion_data: Dict[str, str]
@@ -234,7 +216,7 @@ class GisaidAPI:
             writer = csv.writer(file)
             writer.writerows(new_completion_file_data)
 
-    def upload(self, case_id: str):
+    def upload(self, case_id: str) -> None:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
         gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(case_id=case_id)
@@ -245,13 +227,8 @@ class GisaidAPI:
             fasta_file=self.build_gisaid_fasta(
                 gsaid_samples=gisaid_samples, file_name=f"{case_id}.fasta", case_id=case_id
             ),
-            log_file=self.gisaid_log_file(case_id=case_id),
+            log_file=self.get_gisaid_log_file_path(case_id=case_id),
         )
-
-        if not files:
-            raise HousekeeperFileMissingError(
-                message=f"Files missing in housekeeper for case {case_id}"
-            )
 
         try:
             self.upload_results_to_gisaid(files)
@@ -261,10 +238,16 @@ class GisaidAPI:
         files.csv_file.unlink()
         files.fasta_file.unlink()
 
-        if not self.file_in_hk(case_id=case_id, tags=["gisaid-log"]):
-            self.file_to_hk(case_id=case_id, file=files.log_file, tags=["gisaid-log"])
+        if not self.housekeeper_api.find_file_in_latest_version(
+            case_id=case_id, tags=["gisaid-log"]
+        ):
+            self.housekeeper_api.add_and_include_file_to_latest_version(
+                case_id=case_id, file=files.log_file, tags=["gisaid-log"]
+            )
 
-        completion_file = self.file_in_hk(case_id=case_id, tags=["komplettering"])
+        completion_file = self.housekeeper_api.find_file_in_latest_version(
+            case_id=case_id, tags=["komplettering"]
+        )
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if accession_numbers:
             self.update_completion_file(
@@ -275,10 +258,3 @@ class GisaidAPI:
             raise AccessionNumerMissingError(
                 message=f"Not all samples in the bundle {case_id} have been uploaded to gisaid."
             )
-
-        with open(files.log_file, "r") as gisaid_log:
-            if "error" in gisaid_log.read():
-                raise GisaidUploadFailedError(
-                    f"There has been some issues with the upload to gisaid for case: {case_id}. "
-                    f"Please check the logfile {str(files.log_file.absolute())} to make sue all samples have been uploaded."
-                )

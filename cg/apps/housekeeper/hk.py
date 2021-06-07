@@ -10,6 +10,9 @@ from alchy import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
+from housekeeper.store.models import Version, File
+
+from cg.exc import HousekeeperVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -229,3 +232,22 @@ class HousekeeperAPI:
     def destroy_db(self):
         """Drop all tables in the store"""
         self._store.drop_all()
+
+    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list):
+        version_obj: Version = self.housekeeper_api.last_version(case_id)
+        if not version_obj:
+            LOG.info("Family ID: %s not found in housekeeper", case_id)
+            raise HousekeeperVersionMissingError
+        file_obj = self.housekeeper_api.add_file(
+            version_obj=version_obj, tags=tags, path=str(file.absolute())
+        )
+        self._store.include_file(version_obj=version_obj, file_obj=file_obj)
+        self._store.commit()
+
+    def find_file_in_latest_version(self, case_id: str, tags: list) -> File:
+        version_obj: Version = self.housekeeper_api.last_version(case_id)
+        if not version_obj:
+            LOG.info("Family ID: %s not found in housekeeper", case_id)
+            raise HousekeeperVersionMissingError
+        file: File = self._store.files(version=version_obj.id, tags=tags).first()
+        return file

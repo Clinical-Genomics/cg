@@ -24,6 +24,7 @@ def gisaid(context: CGConfig, case_id: str):
 
     try:
         gisaid_api.upload(case_id=case_id)
+        LOG.info("Upload to GISAID successful")
     except CgError as error:
         email_info = EmailInfo(
             **gisaid_api.email_base_settings.dict(),
@@ -32,4 +33,4 @@ def gisaid(context: CGConfig, case_id: str):
             subject="Gisaid Upload Failed",
         )
         send_mail(email_info)
-        LOG.info("Upload Failed")
+        LOG.error("Upload Failed")

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, validator
-from datetime import date
+from datetime import date, datetime
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 
@@ -28,6 +28,8 @@ class UploadFiles(BaseModel):
     csv_file: Path
     fasta_file: Path
     log_file: Path
+
+    ### add validator to log file parent???
 
 
 class GisaidSample(BaseModel):
@@ -68,4 +70,5 @@ class GisaidSample(BaseModel):
     def parse_virus_name(cls, v, values):
         sample_name = values.get("covv_subm_sample_id")
         date = values.get("covv_collection_date")
-        return f"hCoV-19/Sweden/{sample_name}/{date}"
+        datetime_date = datetime.strptime(date, "%Y-%m-%d")
+        return f"hCoV-19/Sweden/{sample_name}/{datetime_date.year}"
