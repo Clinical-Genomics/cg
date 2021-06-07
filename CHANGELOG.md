@@ -23,6 +23,28 @@ __________ DO NOT TOUCH ___________
 ### Added
 - Avatars for cases
 
+## [22.0.0]
+### Added
+- Adds store and store-available commands that use Hermes
+- Add pydantic models for mip config and mip sample info
+- Add constants for getting housekeeper MIP analysis tags
+  
+### Changed
+- Remove old MIP-DNA store command using cg internally
+- Remove old unused fixtures
+
+## [21.12.0]
+### Added
+- cli for upload of data to statina
+
+## [21.11.2]
+### Fixed
+- NIPT upload to sftp server
+
+## [21.11.1]
+### Changed
+- Clarified the code for automatic decompression
+
 ## [21.11.0]
 ### Added
 - Deliver, concatenate (if needed) and rsync in one command

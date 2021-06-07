@@ -1,8 +1,9 @@
 """Fixtures for testing mip app"""
-import string
-from typing import List
 
 import pytest
+import string
+
+from typing import List
 
 
 @pytest.fixture
