@@ -268,7 +268,7 @@ class GisaidAPI:
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if accession_numbers:
             self.update_completion_file(
-                completion_file=completion_file, completion_data=accession_numbers
+                completion_file=Path(completion_file.full_path), completion_data=accession_numbers
             )
 
         if len(accession_numbers) != len(gisaid_samples):
