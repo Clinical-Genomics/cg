@@ -13,7 +13,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import models, Store
 from cg.utils import Process
 from .constants import HEADERS
-from .models import GisaidSample, UploadFiles, CompletionFiles, GisaidAccession
+from .models import GisaidSample, UploadFiles, GisaidAccession
 import csv
 
 from cg.exc import (
