@@ -1,6 +1,9 @@
 import logging
 from typing import Optional
 
+from pydantic import BaseModel, EmailStr, Field
+from typing_extensions import Literal
+
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
@@ -17,8 +20,6 @@ from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.store import Store
-from pydantic import BaseModel, EmailStr, Field
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -57,14 +58,27 @@ class TrailblazerConfig(BaseModel):
     host: str
 
 
+class StatinaConfig(BaseModel):
+    host: str
+
+
 class CommonAppConfig(BaseModel):
     binary_path: str
     config_path: Optional[str]
     deploy_config: Optional[str]
 
 
+class FluffyUploadConfig(BaseModel):
+    user: str
+    password: str
+    host: str
+    remote_path: str
+    port: int
+
+
 class FluffyConfig(CommonAppConfig):
     root_dir: str
+    sftp: FluffyUploadConfig
 
 
 class LimsConfig(BaseModel):
@@ -177,6 +191,7 @@ class CGConfig(BaseModel):
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
+    statina: StatinaConfig = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None

@@ -20,7 +20,7 @@ requests_cache
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
-cgmodels>=0.5
+cgmodels>=0.6
 colorclass
 coloredlogs
 email-validator
@@ -28,6 +28,7 @@ lxml
 marshmallow>3               # due to code expects behaviour from >3
 openpyxl
 packaging
+paramiko
 petname
 pydantic
 pyschemes

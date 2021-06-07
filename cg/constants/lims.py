@@ -40,6 +40,12 @@ PROP2UDF = {
     "verified_organism": "Verified organism",
     "volume": "Volume (uL)",
     "well_position_rml": "RML well position",
+    "verified_organism": "Verified organism",
+    "sequencing_qc_pass": "Passed Sequencing QC",
+    "region": "Region",
+    "collection_date": "Collection Date",
+    "original_lab_address": "Original Lab Address",
+    "original_lab": "Original Lab",
 }
 
 MASTER_STEPS_UDFS = {

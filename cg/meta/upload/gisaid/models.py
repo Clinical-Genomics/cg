@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, validator
+from datetime import date
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 
@@ -15,20 +16,14 @@ class UpploadFiles(BaseModel):
     fasta_file: Path
 
 
-class Lab(BaseModel):
-    city: str
-    address: str
-    region_nr: str
-    institute: str
-
-
 class GisaidSample(BaseModel):
     family_id: str
     cg_lims_id: str
-    lab: Lab
     submitter: str
+    region: str
+    region_code: str
     fn: str
-    covv_collection_date: str
+    covv_collection_date: date
     covv_subm_sample_id: str
     covv_virus_name: Optional[str]
     covv_orig_lab: Optional[str]
@@ -45,43 +40,15 @@ class GisaidSample(BaseModel):
     covv_subm_lab_addr: Optional[str] = "171 76 Stockholm, Sweden"
     covv_authors: Optional[str] = " ,".join(AUTHORS)
 
-    @validator("lab", pre=True)
-    def lab_info(cls, v):
-        if v == "Stockholm":
-            return Lab(
-                city="Stockholm",
-                address="171 76 Stockholm, Sweden",
-                region_nr="01",
-                institute="Karolinska University Hospital",
-            )
-        elif v == "Visby":
-            return Lab(
-                city="Visby",
-                address="621 84 Visby, Sweden",
-                region_nr="09",
-                institute="LaboratorieMedicinskt Centrum Gotland",
-            )
-        raise ValueError("must be Stockholm or Visby")
-
     @validator("covv_location", always=True)
     def parse_location(cls, v, values):
-        lab = values.get("lab")
-        return f"Europe/Sweden/{lab.city}"
-
-    @validator("covv_orig_lab_addr", always=True)
-    def parse_orig_lab_addr(cls, v, values):
-        lab = values.get("lab")
-        return lab.address
-
-    @validator("covv_orig_lab", always=True)
-    def parse_orig_lab(cls, v, values):
-        lab = values.get("lab")
-        return lab.institute
+        region: str = values.get("region")
+        return f"Europe/Sweden/{region}"
 
     @validator("covv_subm_sample_id", always=True)
     def parse_subm_sample_id(cls, v, values):
-        lab = values.get("lab")
-        return f"{lab.region_nr}_SE100_{v}"
+        region_code = values.get("region_code")
+        return f"{region_code}_SE100_{v}"
 
     @validator("covv_virus_name", always=True)
     def parse_virus_name(cls, v, values):

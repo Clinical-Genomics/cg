@@ -6,6 +6,7 @@ from typing import List, Optional
 import click
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -85,3 +86,56 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     """
     rsync_api = RsyncAPI(config=context)
     rsync_api.run_rsync_command(ticket_id=ticket_id, dry_run=dry_run)
+
+
+@deliver.command(name="concatenate")
+@click.argument("ticket_id", type=int, required=True)
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
+    """The fastq files in the folder generated using "cg deliver analysis"
+    will be concatenated into one forward and one reverse fastq file.
+    """
+    cg_context: CGConfig = context.obj
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+    deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
+
+
+@deliver.command(name="ticket")
+@click.option(
+    "-t",
+    "--ticket-id",
+    type=int,
+    help="Deliver and rsync the files for ALL cases connected to a ticket",
+    required=True,
+)
+@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
+@click.option("--dry-run", is_flag=True)
+@click.pass_context
+def deliver_ticket(
+    context: click.Context,
+    ticket_id: int,
+    delivery_type: str,
+    dry_run: bool,
+):
+    """Will first collect hard links in the customer inbox then
+    concatenate fastq files if needed and finally send the folder
+    from customer inbox hasta to the customer inbox on caesar.
+    """
+    cg_context: CGConfig = context.obj
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=ticket_id)
+    if is_upload_needed:
+        LOG.info("Delivering files to customer inbox on hasta")
+        context.invoke(
+            deliver_analysis, ticket_id=ticket_id, delivery_type=delivery_type, dry_run=dry_run
+        )
+    else:
+        LOG.info("Files already delivered to customer inbox on hasta")
+        return
+    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(
+        ticket_id=ticket_id
+    )
+    if is_concatenation_needed and delivery_type == "fastq":
+        context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
+    context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)

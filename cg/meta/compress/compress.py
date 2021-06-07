@@ -4,7 +4,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
@@ -164,9 +164,12 @@ class CompressAPI:
         LOG.info("Adds FASTQ to Housekeeper for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
+            LOG.warning("Could not find version obj for %s", sample_id)
             return False
 
-        spring_paths = files.get_spring_paths(version_obj)
+        spring_paths: List[CompressionData] = files.get_spring_paths(version_obj)
+        if not spring_paths:
+            LOG.warning("Could not find any spring paths for %s", sample_id)
         for compression_object in spring_paths:
             if not self.crunchy_api.is_spring_decompression_done(compression_object):
                 LOG.info("SPRING to FASTQ decompression not finished %s", sample_id)

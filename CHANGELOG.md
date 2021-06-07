@@ -8,16 +8,102 @@ Please add a new candidate release at the top after changing the latest one. Fee
 
 Try to use the following format:
 
+
+__________ DO NOT TOUCH ___________
+
+
 ## [x.x.x]
 ### Added
 ### Changed
 ### Fixed
 
-## [21.7.2]
+__________ DO NOT TOUCH ___________
+
+
+## [22.0.1]
 ### Added
 - Added two more cases to BALSAMIC's validation
 ### Changed
-- dividided VALIDATION_CASES into their own workflow lists to find them easier 
+- Dividided VALIDATION_CASES into their own workflow lists to find them easier 
+
+## [22.0.0]
+### Added
+- Adds store and store-available commands that use Hermes
+- Add pydantic models for mip config and mip sample info
+- Add constants for getting housekeeper MIP analysis tags
+  
+### Changed
+- Remove old MIP-DNA store command using cg internally
+- Remove old unused fixtures
+
+## [21.12.0]
+### Added
+- cli for upload of data to statina
+
+## [21.11.2]
+### Fixed
+- NIPT upload to sftp server
+
+## [21.11.1]
+### Changed
+- Clarified the code for automatic decompression
+
+## [21.11.0]
+### Added
+- Deliver, concatenate (if needed) and rsync in one command
+
+## [21.10.0]
+### Added
+- Support for showing demultiplexing in CiGRID
+
+## [21.9.3]
+### Fixed
+- bugfix
+
+## [21.9.2]
+### Fixed
+- gisaid -fixing bug accidentally inserted in the previous pr.
+
+## [21.9.1]
+### Fixed
+- gisaid get region and lab from sample udfs
+- gisaid adjusting for new fasta consensus file in housekeeper
+- gisaid removing failing tests 
+
+### Changed
+### Fixed
+
+## [21.12.0]
+### Added
+- Support for Orderform 1508:24 for Clinical Samples
+
+## [21.9.0]
+### Added
+- Add Fluffy analysis results -> ftp upload functionality for cust002
+
+## [21.8.3]
+### Changed
+- Set memory allocation to 95G when demultiplexing on slurm 
+
+## [21.8.2]
+### Changed
+- Add batch-ref flag to command string for fluffy analyses
+
+
+## [21.8.1]
+### Changed
+- Changed so that barcode report is written to the correct path
+
+## [21.8.0]
+### Added
+- Command `cg demultplex report` to generate barcode report for demuxed flowcells
+### Changed
+- Automatically generate barcode report when post processing demultiplexed flowcell
+
+## [21.7.2]
+### Added
+- Copy sample sheet to demuxed flowcell dir
+- Create `copycomplete.txt` after demux post-processing is done
 
 ## [21.7.1]
 ### Fixed

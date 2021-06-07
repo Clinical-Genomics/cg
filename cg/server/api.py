@@ -48,7 +48,7 @@ def before_request():
 
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        return abort(403, "no JWT token found on request")
+        return abort(make_response(jsonify(message="no JWT token found on request"), 403))
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:

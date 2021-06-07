@@ -144,13 +144,12 @@ class DemuxSample(BaseModel):
 
 
 def get_demux_samples(
-    conversion_stats_path: Path, demux_stats_path: Path, sample_sheet: SampleSheet
+    conversion_stats: ConversionStats, demux_stats_path: Path, sample_sheet: SampleSheet
 ) -> Dict[int, Dict[str, DemuxSample]]:
     """Gather information from demultiplexing results and create samples with the correct information"""
     LOG.info("Gather post demux statistics for demuxed samples")
     demux_samples: Dict[int, Dict[str, DemuxSample]] = {}
     demux_stats: DemuxStats = DemuxStats(demux_stats_path=demux_stats_path)
-    conversion_stats: ConversionStats = ConversionStats(conversion_stats_path=conversion_stats_path)
     raw_clusters: Dict[int, int] = conversion_stats.raw_clusters_per_lane
     flowcell_id: str = conversion_stats.flowcell_id
     sample: NovaSeqSample

@@ -3,8 +3,8 @@
 import logging
 
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.workflow.commands import resolve_compression
 from cg.cli.workflow.mip_dna.base import start, start_available
+from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
@@ -41,9 +41,9 @@ def test_spring_decompression_needed_and_started(
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
 
-    # GIVEN spring decompression successfully starts
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_decompression_job_start")
-    PrepareFastqAPI.can_at_least_one_decompression_job_start.return_value = True
+    # GIVEN there is spring files that can be decompressed
+    mocker.patch.object(CompressAPI, "decompress_spring")
+    CompressAPI.decompress_spring.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -52,6 +52,7 @@ def test_spring_decompression_needed_and_started(
     assert result.exit_code == 0
 
     # THEN it should be announced that spring decompression is started
+    # assert "Decompression started for" in caplog.text
     assert "Decompression started for" in caplog.text
 
 
@@ -88,10 +89,6 @@ def test_spring_decompression_needed_and_start_failed(
     # GIVEN there is spring files that can be decompressed
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
-
-    # GIVEN spring decompression fail to start
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_decompression_job_start")
-    PrepareFastqAPI.can_at_least_one_decompression_job_start.return_value = False
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)

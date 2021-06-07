@@ -28,9 +28,13 @@ def gisaid(context: CGConfig, family_id: str):
             gsaid_samples=gsaid_samples, file_name=f"{family_id}.csv"
         ),
         fasta_file=gisaid_api.build_gisaid_fasta(
-            gsaid_samples=gsaid_samples, file_name=f"{family_id}.fasta"
+            gsaid_samples=gsaid_samples, file_name=f"{family_id}.fasta", family_id=family_id
         ),
     )
+    try:
+        gisaid_api.auth()
+    except:
+        raise
     if files:
         gisaid_api.upload(**dict(files))
         files.csv_file.unlink()

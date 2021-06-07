@@ -1,4 +1,6 @@
-from cg.apps.mip import parse_qcmetrics, parse_sampleinfo
+from cg.apps.mip import parse_qcmetrics
+from cg.models.mip.mip_config import MipBaseConfig, parse_config
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
 
 
 def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
@@ -34,16 +36,12 @@ def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw
     return outdata
 
 
-def _add_rank_model_version(outdata: dict, sampleinfo_data: dict) -> None:
-    outdata["sv_rank_model_version"] = sampleinfo_data["sv_rank_model_version"]
-    outdata["rank_model_version"] = sampleinfo_data["rank_model_version"]
-
-
 def _qc_sample_info(outdata: dict, sampleinfo_raw: dict) -> None:
-    sampleinfo_data = _parse_qc_sample_info_file(sampleinfo_raw)
-    _add_mip_version(outdata, sampleinfo_data)
-    _add_genome_build(outdata, sampleinfo_data)
-    _add_rank_model_version(outdata, sampleinfo_data)
+    sample_info: MipBaseSampleInfo = parse_sample_info(sampleinfo_raw)
+    outdata["genome_build"] = sample_info.genome_build
+    outdata["mip_version"] = sample_info.mip_version
+    outdata["rank_model_version"] = sample_info.rank_model_version
+    outdata["sv_rank_model_version"] = sample_info.sv_rank_model_version
 
 
 def _qc_metrics(outdata: dict, qcmetrics_raw: dict) -> None:
@@ -51,23 +49,11 @@ def _qc_metrics(outdata: dict, qcmetrics_raw: dict) -> None:
     _add_sample_level_info_from_qc_metric_file(outdata, qcmetrics_data)
 
 
-def _config(mip_config_raw: dict, outdata: dict) -> dict:
-    config_data = _parse_raw_mip_config_into_dict(mip_config_raw)
-    _add_case_id(config_data, outdata)
-    _add_all_samples_from_mip_config(config_data, outdata)
-    return config_data
-
-
-def _add_genome_build(outdata: dict, sampleinfo_data: dict) -> None:
-    outdata["genome_build"] = sampleinfo_data["genome_build"]
-
-
-def _add_mip_version(outdata: dict, sampleinfo_data: dict) -> None:
-    outdata["mip_version"] = sampleinfo_data["version"]
-
-
-def _parse_qc_sample_info_file(sampleinfo_raw: dict) -> dict:
-    return parse_sampleinfo.parse_sampleinfo(sampleinfo_raw)
+def _config(mip_config_raw: dict, outdata: dict) -> None:
+    mip_config: MipBaseConfig = parse_config(mip_config_raw)
+    outdata["case"] = mip_config.case_id
+    for sample_data in mip_config.samples:
+        outdata["sample_ids"].append(sample_data.sample_id)
 
 
 def _add_sample_level_info_from_qc_metric_file(outdata: dict, qcmetrics_data: dict) -> None:
@@ -108,17 +94,3 @@ def _add_duplicate_reads(outdata: dict, sample_data: dict) -> None:
 def _parse_qc_metric_file_into_dict(qcmetrics_raw: dict) -> dict:
     qcmetrics_data = parse_qcmetrics.parse_qcmetrics(qcmetrics_raw)
     return qcmetrics_data
-
-
-def _parse_raw_mip_config_into_dict(mip_config_raw: dict) -> dict:
-    config_data = parse_sampleinfo.parse_config(mip_config_raw)
-    return config_data
-
-
-def _add_all_samples_from_mip_config(config_data: dict, outdata: dict) -> None:
-    for sample_data in config_data["samples"]:
-        outdata["sample_ids"].append(sample_data["id"])
-
-
-def _add_case_id(config_data: dict, outdata: dict) -> None:
-    outdata["case"] = config_data["case"]
