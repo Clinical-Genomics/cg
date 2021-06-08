@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [21.12.0]
+### Changed
+- Rsync now run on slurm instead of the login node
+
 ## [21.11.2]
 ### Fixed
 - NIPT upload to sftp server
