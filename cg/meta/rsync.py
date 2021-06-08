@@ -13,7 +13,6 @@ from cg.meta.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
-from cg.utils import Process
 from cgmodels.cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
@@ -29,16 +28,13 @@ class RsyncAPI(MetaAPI):
         self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
-        self._process = None
 
-    @property
-    def process(self):
-        if not self._process:
-            self._process = Process("rsync")
-        return self._process
+    def get_all_cases_from_ticket(self, ticket_id: int) -> List[models.Family]:
+        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        return cases
 
     def get_source_path(self, ticket_id: int) -> str:
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         if not cases:
             LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
             raise CgError()
@@ -49,7 +45,7 @@ class RsyncAPI(MetaAPI):
         return delivery_source_path
 
     def get_destination_path(self, ticket_id: int) -> str:
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         customer_id: str = cases[0].customer.internal_id
         rsync_destination_path: str = self.destination_path % (customer_id, ticket_id)
         return rsync_destination_path
@@ -72,7 +68,7 @@ class RsyncAPI(MetaAPI):
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         source_path: str = self.get_source_path(ticket_id=ticket_id)
         destination_path: str = self.get_destination_path(ticket_id=ticket_id)
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         customer_id: str = cases[0].customer.internal_id
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
