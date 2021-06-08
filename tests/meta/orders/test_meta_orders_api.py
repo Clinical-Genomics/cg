@@ -277,7 +277,7 @@ def test_submit_duplicate_sample_case_name(
 def test_submit_unique_sample_case_name(
     orders_api, mip_order_to_submit, ticket_number: int, user_name: str, user_mail: str, monkeypatch
 ):
-    # GIVEN we have an order with a case that is already in the database
+    # GIVEN we have an order with a case that is not existing in the database
     order_data = OrderIn.parse_obj(mip_order_to_submit)
     store = orders_api.status
 
