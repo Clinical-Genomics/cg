@@ -270,7 +270,7 @@ class OrdersAPI(StatusHandler):
     def _validate_samples_available_to_customer(
         self, project: OrderType, samples: List[dict], customer_id: str
     ):
-        """Validate that the customer have access to all samples in order"""
+        """Validate that the customer have access to all samples"""
         for sample in samples:
 
             if sample.get("internal_id"):
@@ -294,7 +294,7 @@ class OrdersAPI(StatusHandler):
                     raise OrderError(f"Sample not available: {sample.get('name')}")
 
     def _validate_case_names_are_unique(self, samples: List[dict], customer_id: str):
-        """Validate that the names of new samples and cases are unused for all samples in order"""
+        """Validate that the names of all cases are unused for all samples"""
         customer_obj = self.status.customer(customer_id)
 
         for sample in samples:
