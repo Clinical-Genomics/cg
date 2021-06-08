@@ -301,11 +301,15 @@ class OrdersAPI(StatusHandler):
 
             case_id = sample.get("family_name")
 
-            if sample.get("case_internal_id") or not case_id:
+            if self._existing_case_or_orders_without_explicit_case_name(sample, case_id):
                 continue
 
             if self.status.find_family(customer=customer_obj, name=case_id):
                 raise OrderError(f"Case name {case_id} already in use for customer {customer_id}")
+
+    @staticmethod
+    def _existing_case_or_orders_without_explicit_case_name(sample: dict, case_id: str):
+        return sample.get("case_internal_id") or not case_id
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
         """Get the submit method to call for the given type of project"""
