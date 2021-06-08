@@ -269,7 +269,7 @@ class OrdersAPI(StatusHandler):
 
     def _validate_samples_available_to_customer(
         self, project: OrderType, samples: List[dict], customer_id: str
-    ):
+    ) -> None:
         """Validate that the customer have access to all samples"""
         for sample in samples:
 
@@ -287,19 +287,19 @@ class OrdersAPI(StatusHandler):
                         f"{sample.get('name')}"
                     )
 
-                existing_sample = self.status.sample(sample.get("internal_id"))
-                data_customer = self.status.customer(customer_id)
+                existing_sample: models.Sample = self.status.sample(sample.get("internal_id"))
+                data_customer: models.Customer = self.status.customer(customer_id)
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")
 
-    def _validate_case_names_are_unique(self, samples: List[dict], customer_id: str):
+    def _validate_case_names_are_unique(self, samples: List[dict], customer_id: str) -> None:
         """Validate that the names of all cases are unused for all samples"""
-        customer_obj = self.status.customer(customer_id)
+        customer_obj: models.Customer = self.status.customer(customer_id)
 
         for sample in samples:
 
-            case_id = sample.get("family_name")
+            case_id: str = sample.get("family_name")
 
             if self._existing_case_or_orders_without_explicit_case_name(sample, case_id):
                 continue
@@ -308,7 +308,7 @@ class OrdersAPI(StatusHandler):
                 raise OrderError(f"Case name {case_id} already in use for customer {customer_id}")
 
     @staticmethod
-    def _existing_case_or_orders_without_explicit_case_name(sample: dict, case_id: str):
+    def _existing_case_or_orders_without_explicit_case_name(sample: dict, case_id: str) -> bool:
         return sample.get("case_internal_id") or not case_id
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
