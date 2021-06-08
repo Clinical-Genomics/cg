@@ -75,7 +75,7 @@ def test_get_destination_path(cg_context: CGConfig, helpers, mocker):
     destination_path = rsync_api.get_destination_path(ticket_id=999999)
 
     # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
-    assert destination_path == "server.name.se:/some/cust000/path/999999/"
+    assert destination_path == "server.name.se:/some/cust000/inbox/999999/"
 
 
 def test_create_log_dir(cg_context: CGConfig, caplog):

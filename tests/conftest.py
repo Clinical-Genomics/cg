@@ -1172,7 +1172,7 @@ def fixture_context_config(
             },
         },
         "data-delivery": {
-            "destination_path": "server.name.se:/some/%s/path/%s/",
+            "destination_path": "server.name.se:/some",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
             "base_path": "/another/path",

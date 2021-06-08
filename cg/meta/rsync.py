@@ -47,7 +47,9 @@ class RsyncAPI(MetaAPI):
     def get_destination_path(self, ticket_id: int) -> str:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         customer_id: str = cases[0].customer.internal_id
-        rsync_destination_path: str = self.destination_path % (customer_id, ticket_id)
+        rsync_destination_path: str = (
+            Path(self.destination_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
+        )
         return rsync_destination_path
 
     def create_log_dir(self, ticket_id: int, dry_run: bool) -> Path:
