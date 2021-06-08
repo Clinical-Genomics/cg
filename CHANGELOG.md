@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Fixed
+- Check for case name uniqueness before storing order to avoid half stored orders
 
 ## [22.0.0]
 ### Added
