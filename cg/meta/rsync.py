@@ -106,6 +106,7 @@ class RsyncAPI(MetaAPI):
             "error": error_function,
         }
         slurm_api = SlurmAPI()
+        slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path = log_dir / "_".join([str(ticket_id), "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
