@@ -153,6 +153,12 @@ class FastaSequenceMissingError(CgError):
     """
 
 
+class InvalidFastaError(CgError):
+    """
+    Exception raised when fasta file content is invalid.
+    """
+
+
 class StoreError(CgError):
     """
     Exception related to storing an analysis

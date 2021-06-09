@@ -20,6 +20,7 @@ from cg.exc import (
     FastaSequenceMissingError,
     AccessionNumerMissingError,
     GisaidUploadFailedError,
+    InvalidFastaError,
 )
 
 LOG = logging.getLogger(__name__)
@@ -70,22 +71,24 @@ class GisaidAPI:
             gisaid_samples.append(gisaid_sample)
         return gisaid_samples
 
-    def get_gisaid_fasta(self, gsaid_samples: List[GisaidSample], case_id: str) -> List[str]:
+    def get_gisaid_fasta(self, gisaid_samples: List[GisaidSample], case_id: str) -> List[str]:
         """Fetch a fasta files form house keeper for batch upload_results_to_gisaid to gisaid"""
-
-        fasta_file: File = self.find_file_in_latest_version(case_id=case_id, tags=["consensus"])
+        fasta_file: Path = self.housekeeper_api.find_file_in_latest_version(
+            case_id=case_id, tags=["consensus"]
+        )
 
         gisaid_delivery_fasta = []
-        with open(fasta_file.full_path) as handle:
+        with open(str(fasta_file.absolute())) as handle:
             fasta_lines = handle.readlines()
             for line in fasta_lines:
                 if line[0] == ">":
                     gisaid_delivery_fasta.append(
-                        self.get_new_header(old_header=line, samples=gsaid_samples)
+                        self.get_new_header(old_header=line, samples=gisaid_samples)
                     )
                 else:
                     gisaid_delivery_fasta.append(line)
-
+        if not gisaid_delivery_fasta:
+            raise InvalidFastaError(message="Empty fasta file")
         return gisaid_delivery_fasta
 
     def get_new_header(self, samples: List[GisaidSample], old_header: str) -> str:
@@ -96,12 +99,15 @@ class GisaidAPI:
         raise FastaSequenceMissingError
 
     def build_gisaid_fasta(
-        self, gsaid_samples: List[GisaidSample], file_name: str, case_id: str
+        self, gisaid_samples: List[GisaidSample], file_name: str, case_id: str
     ) -> Path:
         """Writing a new fasta with headers adjusted for gisaid upload_results_to_gisaid"""
 
         file: Path = Path(file_name)
-        fasta_lines: List[str] = self.get_gisaid_fasta(gsaid_samples=gsaid_samples, case_id=case_id)
+        fasta_lines: List[str] = self.get_gisaid_fasta(
+            gisaid_samples=gisaid_samples, case_id=case_id
+        )
+
         with open(file, "w") as write_file_obj:
             write_file_obj.writelines(fasta_lines)
         return file
@@ -245,7 +251,7 @@ class GisaidAPI:
                 case_id=case_id, file=files.log_file, tags=["gisaid-log"]
             )
 
-        completion_file = self.housekeeper_api.find_file_in_latest_version(
+        completion_file: Path = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["komplettering"]
         )
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
