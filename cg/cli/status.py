@@ -4,6 +4,7 @@ import click
 from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from colorclass import Color
 from tabulate import tabulate
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
@@ -214,17 +215,33 @@ def cases(
         max_tat = case.get("max_tat")
 
         if (
+            case.get("samples_received_bool")
+            and case.get("samples_delivered_bool")
+            and tat_number <= max_tat
+        ):
+            tat_color = "green"
+        elif tat_number == max_tat:
+            tat_color = "yellow"
+        elif tat_number > max_tat:
+            tat_color = "red"
+        else:
+            tat_color = "white"
+
+        color_start = Color("{" + f"{tat_color}" + "}")
+        color_end = Color("{/" + f"{tat_color}" + "}")
+
+        if (
             not case.get("case_external_bool")
             and case.get("samples_received_bool")
             and case.get("samples_delivered_bool")
         ):
-            tat = f"{tat_number}/{max_tat}"
+            tat = f"{tat_number}/{max_tat}" + color_end
         elif case.get("case_external_bool") and case.get("analysis_uploaded_bool"):
-            tat = f"{tat_number}/{max_tat}"
+            tat = f"{tat_number}/{max_tat}" + color_end
         else:
-            tat = f"({tat_number})/{max_tat}"
+            tat = f"({tat_number})/{max_tat}" + color_end
 
-        title = f"{case.get('internal_id')}"
+        title = color_start + f"{case.get('internal_id')}"
 
         if name:
             title = f"{title} ({case.get('name')})"
