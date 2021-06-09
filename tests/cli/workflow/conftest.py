@@ -1,5 +1,6 @@
 """Fixtures for cli analysis tests"""
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 from cg.constants import Pipeline
@@ -79,6 +80,22 @@ def dna_rna_mix_case(analysis_store, helpers) -> models.Family:
     """Case with MIP analysis type DNA and RNA application"""
     cust = helpers.ensure_customer(analysis_store)
     return analysis_store.find_family(cust, "dna_rna_mix_case")
+
+
+@pytest.fixture(name="create_multiqc_html_file")
+def fixture_create_multiqc_html_file(tmpdir_factory) -> Path:
+    output_dir = tmpdir_factory.mktemp("output")
+    file_path = Path(output_dir, "multiqc_report.html")
+    file_path.touch(exist_ok=True)
+    return file_path
+
+
+@pytest.fixture(name="create_multiqc_json_file")
+def fixture_create_multiqc_json_file(tmpdir_factory) -> Path:
+    output_dir = tmpdir_factory.mktemp("output")
+    file_path = Path(output_dir, "multiqc_report.json")
+    file_path.touch(exist_ok=True)
+    return file_path
 
 
 class MockTB:

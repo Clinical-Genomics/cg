@@ -19,9 +19,29 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [21.12.0]
+## [22.1.0]
 ### Changed
 - Rsync now run on slurm instead of the login node
+
+## [22.0.1]
+### Added
+- Added two more cases to BALSAMIC's validation
+### Changed
+- Dividided VALIDATION_CASES into their own workflow lists to find them easier 
+
+## [22.0.0]
+### Added
+- Adds store and store-available commands that use Hermes
+- Add pydantic models for mip config and mip sample info
+- Add constants for getting housekeeper MIP analysis tags
+  
+### Changed
+- Remove old MIP-DNA store command using cg internally
+- Remove old unused fixtures
+
+## [21.12.0]
+### Added
+- cli for upload of data to statina
 
 ## [21.11.2]
 ### Fixed
@@ -72,7 +92,6 @@ __________ DO NOT TOUCH ___________
 ### Changed
 - Add batch-ref flag to command string for fluffy analyses
 
-
 ## [21.8.1]
 ### Changed
 - Changed so that barcode report is written to the correct path
@@ -91,6 +110,7 @@ __________ DO NOT TOUCH ___________
 ## [21.7.1]
 ### Fixed
 - Fixed bug when checking if flowcell projects has been renamed
+
 
 ## [21.7.0]
 ### Added

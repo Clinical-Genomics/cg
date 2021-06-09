@@ -58,6 +58,10 @@ class TrailblazerConfig(BaseModel):
     host: str
 
 
+class StatinaConfig(BaseModel):
+    host: str
+
+
 class CommonAppConfig(BaseModel):
     binary_path: str
     config_path: Optional[str]
@@ -190,6 +194,7 @@ class CGConfig(BaseModel):
 
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
+    statina: StatinaConfig = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
