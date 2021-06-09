@@ -31,7 +31,6 @@ packaging
 paramiko
 petname
 pydantic
-pyschemes
 python-dateutil
 pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION

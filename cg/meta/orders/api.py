@@ -14,12 +14,12 @@ from typing import List, Optional
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.constants import OrderType
 from cg.exc import OrderError
 from cg.models.orders.order import OrderIn
 from cg.store import Store, models
 
 from .lims import process_lims
-from .schema import ORDER_SCHEMES, OrderType
 from .status import StatusHandler
 from .ticket_handler import TicketHandler
 
@@ -40,10 +40,6 @@ class OrdersAPI(StatusHandler):
 
         Main entry point for the class towards interfaces that implements it.
         """
-        try:
-            ORDER_SCHEMES[project].validate(order_in.dict())
-        except (ValueError, TypeError) as error:
-            raise OrderError(str(error))
         self._validate_customer_on_imported_samples(project=project, order=order_in)
 
         # detect manual ticket assignment
