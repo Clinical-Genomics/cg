@@ -23,6 +23,10 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Remove dependency to archived pypi colorclass
 
+## [22.1.1]
+### Fixed
+- Check for case name uniqueness before storing order to avoid half stored orders
+
 ## [22.1.0]
 ### Changed
 - Rsync now run on slurm instead of the login node
@@ -31,7 +35,7 @@ __________ DO NOT TOUCH ___________
 ### Added
 - Added two more cases to BALSAMIC's validation
 ### Changed
-- Dividided VALIDATION_CASES into their own workflow lists to find them easier 
+- Divided VALIDATION_CASES into their own workflow lists to find them easier 
 
 ## [22.0.0]
 ### Added
@@ -45,7 +49,7 @@ __________ DO NOT TOUCH ___________
 
 ## [21.12.0]
 ### Added
-- cli for upload of data to statina
+- cli for upload of data to Statina
 
 ## [21.11.2]
 ### Fixed
