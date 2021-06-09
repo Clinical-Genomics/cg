@@ -1,11 +1,12 @@
 """Functions to get sample sheet information from Lims"""
 import logging
 import re
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Union
+
+from pydantic import BaseModel, Field
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
-from pydantic import BaseModel, Field
 
 LOG = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ LOG = logging.getLogger(__name__)
 class LimsFlowcellSample(BaseModel):
     flowcell_id: str = Field(..., alias="FCID")
     lane: int = Field(..., alias="Lane")
-    sample_id: str = Field(..., alias="SampleID")
+    sample_id: str
     sample_ref: str = Field("hg19", alias="SampleRef")
     index: str
     index2: str = ""
@@ -22,7 +23,7 @@ class LimsFlowcellSample(BaseModel):
     control: str = Field("N", alias="Control")
     recipe: str = Field("R1", alias="Recipe")
     operator: str = Field("script", alias="Operator")
-    project: str = Field(..., alias="Project")
+    project: str
 
     class Config:
         allow_population_by_field_name = True
@@ -76,7 +77,23 @@ def get_index(lims: Lims, label: str) -> str:
     return sequence
 
 
-def flowcell_samples(lims: Lims, flowcell_id: str) -> Iterable[LimsFlowcellSample]:
+class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
+    sample_id: str = Field(..., alias="SampleID")
+    project: str = Field(..., alias="Project")
+
+
+class LimsFlowcellSampleDragen(LimsFlowcellSample):
+    sample_id: str = Field(..., alias="Sample_ID")
+    project: str = Field(..., alias="Sample_Project")
+
+
+def flowcell_samples(
+    lims: Lims, flowcell_id: str, bcl_converter: str
+) -> Iterable[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]]:
+    lims_flowcell_sample = {
+        "bcl2fastq": LimsFlowcellSampleBcl2Fastq,
+        "dragen": LimsFlowcellSampleDragen,
+    }
     LOG.info("Fetching samples from lims for flowcell %s", flowcell_id)
     containers: List[Container] = lims.get_containers(name=flowcell_id)
     if not containers:
@@ -91,7 +108,7 @@ def flowcell_samples(lims: Lims, flowcell_id: str) -> Iterable[LimsFlowcellSampl
             sample: Sample = artifact.samples[0]  # we are assured it only has one sample
             label: Optional[str] = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
-            yield LimsFlowcellSample(
+            yield lims_flowcell_sample[bcl_converter](
                 flowcell_id=flowcell_id,
                 lane=lane,
                 sample_id=sample.id,
