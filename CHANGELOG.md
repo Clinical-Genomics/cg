@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Fixed
+- Remove dependency to archived pypi colorclass
 
 ## [22.1.2]
 ### Changed
@@ -100,7 +103,6 @@ __________ DO NOT TOUCH ___________
 ## [21.8.2]
 ### Changed
 - Add batch-ref flag to command string for fluffy analyses
-
 
 ## [21.8.1]
 ### Changed
