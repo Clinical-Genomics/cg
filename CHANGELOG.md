@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.1.1]
+### Changed
+- Use slurm qos class and constants intead of hard coding priority options
+
 ## [22.1.0]
 ### Changed
 - Rsync now run on slurm instead of the login node
