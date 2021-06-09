@@ -7,6 +7,7 @@ import yaml
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants.priority import SlurmQos
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch
@@ -33,10 +34,10 @@ class DemultiplexingAPI:
         self.dry_run: bool = False
 
     @property
-    def priority(self) -> Literal["high", "low"]:
+    def priority(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
         if self.environment == "stage":
-            return "low"
-        return "high"
+            return SlurmQos.LOW
+        return SlurmQos.HIGH
 
     def set_dry_run(self, dry_run: bool) -> None:
         LOG.debug("Set dry run to %s", dry_run)

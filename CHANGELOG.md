@@ -23,6 +23,10 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Remove dependency to archived pypi colorclass
 
+## [22.1.2]
+### Changed
+- Use slurm qos class and constants intead of hard coding priority options
+
 ## [22.1.1]
 ### Fixed
 - Check for case name uniqueness before storing order to avoid half stored orders
