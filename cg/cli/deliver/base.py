@@ -140,3 +140,16 @@ def deliver_ticket(
     if is_concatenation_needed and delivery_type == "fastq":
         context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
     context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)
+
+
+@deliver.command(name="fohm")
+@click.argument("ticket_id", type=int, required=True)
+@click.option("--dry-run", is_flag=True)
+@click.pass_obj
+def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
+    """Deliver analysis files to customer inbox according to the
+    format requested by FOHM.
+    """
+    fohm_api = FohmAPI(config=context)
+    sbatch_number = rsync_api.run_rsync_on_slurm(ticket_id=ticket_id, dry_run=dry_run)
+    LOG.info("Rsync to caesar running as job %s", sbatch_number)
