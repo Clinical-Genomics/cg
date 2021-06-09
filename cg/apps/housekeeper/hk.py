@@ -233,7 +233,7 @@ class HousekeeperAPI:
         """Drop all tables in the store"""
         self._store.drop_all()
 
-    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list):
+    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
         version_obj: Version = self.housekeeper_api.last_version(case_id)
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
