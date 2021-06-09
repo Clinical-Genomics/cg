@@ -20,6 +20,12 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________
 
 
+## [22.0.1]
+### Added
+- Added two more cases to BALSAMIC's validation
+### Changed
+- Dividided VALIDATION_CASES into their own workflow lists to find them easier 
+
 ## [22.0.0]
 ### Added
 - Adds store and store-available commands that use Hermes
@@ -102,6 +108,7 @@ __________ DO NOT TOUCH ___________
 ## [21.7.1]
 ### Fixed
 - Fixed bug when checking if flowcell projects has been renamed
+
 
 ## [21.7.0]
 ### Added
