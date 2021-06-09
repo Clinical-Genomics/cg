@@ -143,7 +143,7 @@ class GisaidAPI:
     def get_gisaid_log_file_path(self, case_id: str) -> Path:
         """Path for gisaid bundle log"""
 
-        log_file = Path(f"{self.gisaid_log_dir}/{case_id}.log")
+        log_file = Path(self.gisaid_log_dir, case_id).with_suffix(".log")
         if not log_file.parent.exists():
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
         return log_file
