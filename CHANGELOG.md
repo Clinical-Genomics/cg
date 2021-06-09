@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Fixed
+- Remove dependency to archived pypi colorclass
+
 ## [22.1.0]
 ### Changed
 - Rsync now run on slurm instead of the login node
