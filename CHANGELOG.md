@@ -19,10 +19,13 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.2.0]
+### Added
+- Add cg clean fluffy_past_run_dirs command
 
 ## [22.1.2]
 ### Changed
-- Use slurm qos class and constants intead of hard coding priority options
+- Use slurm qos class and constants instead of hard coding priority options
 
 ## [22.1.1]
 ### Fixed
