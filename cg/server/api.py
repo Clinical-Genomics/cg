@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import List, Optional
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.constants.constants import OrderType
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
-from cg.meta.orders import OrdersAPI, OrderType
+from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn
 from cg.store import models
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request

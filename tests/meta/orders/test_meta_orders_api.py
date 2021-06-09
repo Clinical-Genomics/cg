@@ -1,9 +1,10 @@
 import datetime as dt
 
 import pytest
+from cg.constants.constants import OrderType
 
 from cg.exc import OrderError
-from cg.meta.orders import OrdersAPI, OrderType
+from cg.meta.orders import OrdersAPI
 from cg.store import models
 
 PROCESS_LIMS_FUNCTION = "cg.meta.orders.api.process_lims"

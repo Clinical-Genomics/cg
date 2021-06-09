@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import openpyxl
+from cg.constants.constants import OrderType
 from openpyxl.cell.cell import Cell
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -11,7 +12,6 @@ from pydantic import parse_obj_as
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError
-from cg.meta.orders import OrderType
 from cg.models.orders.excel_sample import ExcelSample
 
 LOG = logging.getLogger(__name__)

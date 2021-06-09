@@ -2,8 +2,8 @@ from typing import List, Set
 
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.constants import OrderType
 from cg.exc import OrderFormError
-from cg.meta.orders import OrderType
 from cg.models.orders.json_sample import JsonSample
 
 

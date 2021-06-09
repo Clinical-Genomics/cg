@@ -1,10 +1,11 @@
 import json
 
 import pytest
+from cg.constants.constants import OrderType
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
 
-from cg.meta.orders import OrdersAPI, OrderType
+from cg.meta.orders import OrdersAPI
 from cg.meta.orders.status import StatusHandler
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn
