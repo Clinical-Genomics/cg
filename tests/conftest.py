@@ -1104,9 +1104,12 @@ def fixture_context_config(
         },
         "statina": {"host": "http://localhost:28002"},
         "data-delivery": {
-            "destination_path": "server.name.se:/some/%s/path/%s/",
+            "destination_path": "server.name.se:/some",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
+            "base_path": "/another/path",
+            "account": "development",
+            "mail_user": "an@email.com",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
