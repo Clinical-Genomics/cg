@@ -127,7 +127,7 @@ FOHM_ANALYSIS_CASE_TAGS = [
 
 FOHM_ANALYSIS_SAMPLE_TAGS = [
     {"fastq"},
-    {"vcf"},
+    {"covid-vcf"},
 ]
 
 PIPELINE_ANALYSIS_TAG_MAP = {
