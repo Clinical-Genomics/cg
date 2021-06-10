@@ -168,6 +168,12 @@ def fixture_base_config_dict() -> dict:
             "database": "sqlite:///",
             "root": "path/to/root",
         },
+        "email_base_settings": {
+            "sll_port": 465,
+            "smtp_server": "smtp.gmail.com",
+            "sender_email": "test@gmail.com",
+            "sender_password": "testtest",
+        },
     }
 
 
