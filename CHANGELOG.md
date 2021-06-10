@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [NG.NG.NG]
+## [22.2.1]
 ### Fixed
 - Remove dependency to outdated project blinker
 
