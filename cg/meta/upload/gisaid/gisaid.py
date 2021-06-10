@@ -253,6 +253,13 @@ class GisaidAPI:
             log_file=self.get_gisaid_log_file_path(case_id=case_id),
         )
 
+        accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
+        if len(accession_numbers) == len(gisaid_samples):
+            raise GisaidUploadFailedError(
+                message=f"The samples in bundle {case_id} are already uploaded to GISAID and can not be uploaded more "
+                f"than once. "
+            )
+
         try:
             self.upload_results_to_gisaid(files)
         except Exception as e:
