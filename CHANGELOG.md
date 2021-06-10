@@ -33,6 +33,10 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
 
+## [22.2.1]
+### Added
+- Add more files to the mip-rna delivery
+
 ## [22.2.0]
 ### Added
 - Add cg clean fluffy_past_run_dirs command
