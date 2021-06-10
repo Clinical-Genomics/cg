@@ -65,3 +65,31 @@ def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, ca
     # THEN the NIPT upload should start and exit without errors
     assert "*** UPLOAD ALL AVAILABLE NIPT RESULTS ***" in caplog.text
     assert result.exit_code == 0
+
+
+def test_nipt_upload_case_not_changing_uploaded_at(
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers
+):
+    """Tests CLI command to upload a single case"""
+
+    # GIVEN a specified NIPT case that has its analysis stored but is not yet uploaded
+    caplog.set_level(logging.DEBUG)
+
+    analysis_obj = helpers.add_analysis(store=upload_context.status_db)
+    case_id = analysis_obj.family.internal_id
+    assert not analysis_obj.upload_started_at
+    assert not analysis_obj.uploaded_at
+
+    # WHEN adding a result file of a specified NIPT case
+    result = cli_runner.invoke(
+        nipt_upload_case, [case_id], obj=upload_context, catch_exceptions=False
+    )
+
+    # THEN set analysis.upload_started_at in the database
+    assert not analysis_obj.upload_started_at
+
+    # THEN set analysis.uploaded_at in the database
+    assert not analysis_obj.uploaded_at
+
+    # THEN exit without errors
+    assert result.exit_code == 0

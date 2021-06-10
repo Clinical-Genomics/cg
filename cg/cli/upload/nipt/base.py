@@ -1,6 +1,8 @@
 """ Upload NIPT results via the CLI"""
 
 import logging
+import sys
+import traceback
 from datetime import datetime
 from typing import Optional
 
@@ -23,7 +25,7 @@ LOG = logging.getLogger(__name__)
 def nipt(context: click.Context, case_id: Optional[str]):
     """Upload NIPT result files"""
 
-    click.echo(click.style("NIPT UPLOAD START"))
+    LOG.info("*** NIPT UPLOAD START ***")
 
     if context.invoked_subcommand is not None:
         return
@@ -39,8 +41,7 @@ def nipt(context: click.Context, case_id: Optional[str]):
     analysis_obj: models.Analysis = case_obj.analyses[0]
 
     if analysis_obj.uploaded_at is not None:
-        message = f"Analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-        click.echo(click.style(message, fg="yellow"))
+        LOG.warning("Analysis already uploaded: %s", analysis_obj.uploaded_at.date())
     else:
         analysis_obj.upload_started_at = datetime.now()
         status_db.commit()
@@ -48,9 +49,39 @@ def nipt(context: click.Context, case_id: Optional[str]):
         context.invoke(nipt_upload_case, case_id=case_id)
         analysis_obj.uploaded_at = datetime.now()
         status_db.commit()
-        click.echo(click.style(f"{case_id}: analysis uploaded!", fg="green"))
+        LOG.info("%s: analysis uploaded!", case_id)
+
+
+@nipt.command()
+@click.pass_context
+def auto(context: click.Context):
+    """Upload all NIPT result files"""
+
+    LOG.info("*** NIPT UPLOAD ALL START ***")
+
+    status_db: Store = context.obj.status_db
+
+    exit_code = 0
+    for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FLUFFY):
+
+        if analysis_obj.family.analyses[0].uploaded_at is not None:
+            LOG.warning(
+                "More recent analysis already uploaded for %s, skipping",
+                analysis_obj.family.internal_id,
+            )
+            continue
+        internal_id = analysis_obj.family.internal_id
+
+        LOG.info("Uploading case: %s", internal_id)
+        try:
+            context.invoke(nipt, case_id=internal_id)
+        except Exception:
+            LOG.error("Uploading case failed: %s", internal_id)
+            LOG.error(traceback.format_exc())
+            exit_code = 1
+
+    sys.exit(exit_code)
 
 
 nipt.add_command(ftp)
 nipt.add_command(statina)
-
