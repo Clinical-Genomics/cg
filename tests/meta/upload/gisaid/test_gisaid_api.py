@@ -7,12 +7,11 @@ from typing import List
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.exc import InvalidFastaError
+from cg.exc import InvalidFastaError, HousekeeperVersionMissingError
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.meta.upload.gisaid.models import FastaFile, GisaidSample
 
 
-"""
 def test_get_gisaid_fasta_objects_no_fasta(gisaid_api, dummy_gisaid_sample, mocker):
     # GIVEN a hk api and a dummy gisaid sample with family_id, not represented in the hk api
     mocker.patch.object(HousekeeperAPI, "last_version")
@@ -22,8 +21,6 @@ def test_get_gisaid_fasta_objects_no_fasta(gisaid_api, dummy_gisaid_sample, mock
     # THEN HousekeeperVersionMissingError is being raised
     with pytest.raises(HousekeeperVersionMissingError):
         gisaid_api.get_gisaid_fasta(gisaid_samples=[dummy_gisaid_sample], case_id="dummy_case")
-
-"""
 
 
 def test_build_gisaid_fasta_invalid_fata(
@@ -104,7 +101,7 @@ def test_build_gisaid_csv(
     # GIVEN four gisaid samples
 
     # WHEN running build_gisaid_csv
-    gisaid_api.build_gisaid_csv(gsaid_samples=four_gisaid_samples, file_name=temp_result_file)
+    gisaid_api.build_gisaid_csv(gisaid_samples=four_gisaid_samples, file_name=temp_result_file)
 
     # THEN the generated file should have the expected content
     assert temp_result_file.read_text() == four_samples_csv

@@ -238,14 +238,12 @@ class HousekeeperAPI:
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
-        file_obj = self.housekeeper_api.add_file(
-            version_obj=version_obj, tags=tags, path=str(file.absolute())
-        )
+        file_obj = self.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
         self._store.include_file(version_obj=version_obj, file_obj=file_obj)
         self._store.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Path:
-        version_obj: Version = self.housekeeper_api.last_version(case_id)
+        version_obj: Version = self.last_version(case_id)
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError

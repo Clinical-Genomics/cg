@@ -1,6 +1,7 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 import json
 import logging
+from datetime import date
 from pathlib import Path
 from typing import List, Dict
 
@@ -48,14 +49,15 @@ class GisaidAPI:
         gisaid_samples = []
         for sample in samples:
             sample_id: str = sample.internal_id
+
             gisaid_sample = GisaidSample(
                 case_id=case_id,
                 cg_lims_id=sample_id,
                 covv_subm_sample_id=sample.name,
                 submitter=self.gisaid_submitter,
                 fn=f"{case_id}.fasta",
-                covv_collection_date=self.lims_api.get_sample_attribute(
-                    lims_id=sample_id, key="collection_date"
+                covv_collection_date=str(
+                    self.lims_api.get_sample_attribute(lims_id=sample_id, key="collection_date")
                 ),
                 region=self.lims_api.get_sample_attribute(lims_id=sample_id, key="region"),
                 region_code=self.lims_api.get_sample_attribute(
@@ -118,16 +120,16 @@ class GisaidAPI:
         sample_dict = gisaid_sample.dict()
         return [sample_dict.get(header, "") for header in HEADERS]
 
-    def get_sample_rows(self, gsaid_samples: List[GisaidSample]) -> List[List[str]]:
+    def get_sample_rows(self, gisaid_samples: List[GisaidSample]) -> List[List[str]]:
         """Build sample row list for gisad csv file"""
 
         sample_rows = []
-        for sample in gsaid_samples:
+        for sample in gisaid_samples:
             sample_row: List[str] = self.get_sample_row(gisaid_sample=sample)
             sample_rows.append(sample_row)
         return sample_rows
 
-    def build_gisaid_csv(self, gsaid_samples: List[GisaidSample], file_name: str) -> Path:
+    def build_gisaid_csv(self, gisaid_samples: List[GisaidSample], file_name: str) -> Path:
         """Build batch upload_results_to_gisaid csv."""
 
         file: Path = Path(file_name)
@@ -135,7 +137,7 @@ class GisaidAPI:
         with open(file_name, "w", newline="\n") as gisaid_csv:
             wr = csv.writer(gisaid_csv, delimiter=",")
             wr.writerow(HEADERS)
-            sample_rows: List[List[str]] = self.get_sample_rows(gsaid_samples=gsaid_samples)
+            sample_rows: List[List[str]] = self.get_sample_rows(gisaid_samples=gisaid_samples)
             wr.writerows(sample_rows)
 
         return file
@@ -197,9 +199,7 @@ class GisaidAPI:
             for log in log_data:
                 if log.get("code") != "epi_isl_id":
                     continue
-                accession_obj = GisaidAccession(
-                    accession_nr=log.get("msg"), sample_id=log.get("msg")
-                )
+                accession_obj = GisaidAccession(log_message=log.get("msg"))
                 accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
 
         return accession_numbers
@@ -228,10 +228,10 @@ class GisaidAPI:
         gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(case_id=case_id)
         files: UploadFiles = UploadFiles(
             csv_file=self.build_gisaid_csv(
-                gsaid_samples=gisaid_samples, file_name=f"{case_id}.csv"
+                gisaid_samples=gisaid_samples, file_name=f"{case_id}.csv"
             ),
             fasta_file=self.build_gisaid_fasta(
-                gsaid_samples=gisaid_samples, file_name=f"{case_id}.fasta", case_id=case_id
+                gisaid_samples=gisaid_samples, file_name=f"{case_id}.fasta", case_id=case_id
             ),
             log_file=self.get_gisaid_log_file_path(case_id=case_id),
         )

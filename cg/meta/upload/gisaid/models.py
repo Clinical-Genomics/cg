@@ -12,16 +12,17 @@ class FastaFile(BaseModel):
 
 
 class GisaidAccession(BaseModel):
+    log_message: str
     accession_nr: str
     sample_id: str
 
     @validator("accession_nr", always=True)
-    def parse_accession(cls, v):
-        return v.split(";")[-1]
+    def parse_accession(cls, v, values):
+        return values["log_message"].split(";")[-1]
 
     @validator("sample_id", always=True)
-    def parse_sample_id(cls, v):
-        return v.split("/")[2].split("_")[2]
+    def parse_sample_id(cls, v, values):
+        return values["log_message"].split("/")[2].split("_")[2]
 
 
 class UploadFiles(BaseModel):
