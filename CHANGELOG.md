@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Added
+- Add a command to upload both to Statina and ftp 
+- Adds a command to run the first command for all available cases
+
 ## [22.2.0]
 ### Added
 - Add cg clean fluffy_past_run_dirs command
