@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Fixed
+- Remove dependency to outdated project blinker
+
 ## [22.2.0]
 ### Added
 - Add cg clean fluffy_past_run_dirs command
