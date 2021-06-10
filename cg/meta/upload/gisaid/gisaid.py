@@ -150,7 +150,6 @@ class GisaidAPI:
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
         if not log_file.exists():
             log_file.touch()
-        print(log_file)
         return log_file
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
@@ -232,6 +231,14 @@ class GisaidAPI:
             writer = csv.writer(file)
             writer.writerows(new_completion_file_data)
 
+    def ensure_log_in_housekeeper(self, case_id: str, file_path: Path, tags: List[str]) -> None:
+        """Adding file to housekeeper if it doesnt exist"""
+
+        if not self.housekeeper_api.find_file_in_latest_version(case_id=case_id, tags=tags):
+            self.housekeeper_api.add_and_include_file_to_latest_version(
+                case_id=case_id, file=file_path, tags=tags
+            )
+
     def upload(self, case_id: str) -> None:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
@@ -254,12 +261,9 @@ class GisaidAPI:
         files.csv_file.unlink()
         files.fasta_file.unlink()
 
-        if not self.housekeeper_api.find_file_in_latest_version(
-            case_id=case_id, tags=["gisaid-log"]
-        ):
-            self.housekeeper_api.add_and_include_file_to_latest_version(
-                case_id=case_id, file=files.log_file, tags=["gisaid-log"]
-            )
+        self.ensure_log_in_housekeeper(
+            case_id=case_id, tags=["gisaid-log"], file_path=files.log_file
+        )
 
         completion_file: Path = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["komplettering"]
