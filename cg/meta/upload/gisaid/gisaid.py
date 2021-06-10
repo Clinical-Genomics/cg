@@ -150,6 +150,7 @@ class GisaidAPI:
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
         if not log_file.exists():
             log_file.touch()
+        print(log_file)
         return log_file
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
@@ -198,13 +199,14 @@ class GisaidAPI:
 
         LOG.info("Parsing accesion numbers from log file")
         accession_numbers = {}
-        with open(str(log_file.absolute())) as log_file:
-            log_data = json.load(log_file)
-            for log in log_data:
-                if log.get("code") != "epi_isl_id":
-                    continue
-                accession_obj = GisaidAccession(log_message=log.get("msg"))
-                accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
+        if log_file.stat().st_size != 0:
+            with open(str(log_file.absolute())) as log_file:
+                log_data = json.load(log_file)
+                for log in log_data:
+                    if log.get("code") != "epi_isl_id":
+                        continue
+                    accession_obj = GisaidAccession(log_message=log.get("msg"))
+                    accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
 
         return accession_numbers
 
