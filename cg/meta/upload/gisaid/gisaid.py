@@ -204,10 +204,10 @@ class GisaidAPI:
 
         return accession_numbers
 
-    def update_completion_file(
+    def get_completion_file_data(
         self, completion_file: Path, completion_data: Dict[str, str]
-    ) -> None:
-        """Update completion file with accession numbers"""
+    ) -> List[List[str]]:
+        """Get completion file with accession numbers"""
 
         new_completion_file_data = [["provnummer", "urvalskriterium", "GISAID_accession"]]
         with open(str(completion_file.absolute()), "r") as file:
@@ -217,6 +217,13 @@ class GisaidAPI:
                 selection_criteria = sample["urvalskriterium"]
                 completion_nr = completion_data.get(sample_id, "")
                 new_completion_file_data.append([sample_id, selection_criteria, completion_nr])
+        return new_completion_file_data
+
+    def update_completion_file(
+        self, completion_file: Path, new_completion_file_data: List[List[str]]
+    ) -> None:
+        """Update completion file with accession numbers"""
+
         with open(str(completion_file.absolute()), "w", newline="\n") as file:
             LOG.info("writing accession numbers to new completion file")
             writer = csv.writer(file)
@@ -256,8 +263,12 @@ class GisaidAPI:
         )
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if accession_numbers:
+            new_completion_data: List[List[str]] = self.get_completion_file_data(
+                completion_file=completion_file, completion_data=accession_numbers
+            )
             self.update_completion_file(
-                completion_file=Path(completion_file.full_path), completion_data=accession_numbers
+                completion_file=completion_file,
+                new_completion_file_data=new_completion_data,
             )
 
         if len(accession_numbers) != len(gisaid_samples):
