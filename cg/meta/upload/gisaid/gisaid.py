@@ -148,6 +148,9 @@ class GisaidAPI:
         log_file = Path(self.gisaid_log_dir, case_id).with_suffix(".log")
         if not log_file.parent.exists():
             raise ValueError(f"Gisaid log dir: {self.gisaid_log_dir} doesnt exist")
+        if not log_file.exists():
+            log_file.touch()
+        print(log_file)
         return log_file
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:

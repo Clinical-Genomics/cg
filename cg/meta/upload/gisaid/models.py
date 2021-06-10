@@ -30,8 +30,6 @@ class UploadFiles(BaseModel):
     fasta_file: Path
     log_file: Path
 
-    ### add validator to log file parent???
-
 
 class GisaidSample(BaseModel):
     case_id: str
