@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.2.0]
+### Added
+- Tags for FOHM delivery
+
 ## [22.1.0]
 ### Changed
 - Rsync now run on slurm instead of the login node
