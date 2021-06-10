@@ -23,6 +23,10 @@ __________ DO NOT TOUCH ___________
 ### Added
 - Add cg clean fluffy_past_run_dirs command
 
+## [22.1.3]
+### Fixed
+- Remove dependency to archived pypi colorclass
+
 ## [22.1.2]
 ### Changed
 - Use slurm qos class and constants instead of hard coding priority options
@@ -103,7 +107,6 @@ __________ DO NOT TOUCH ___________
 ## [21.8.2]
 ### Changed
 - Add batch-ref flag to command string for fluffy analyses
-
 
 ## [21.8.1]
 ### Changed
