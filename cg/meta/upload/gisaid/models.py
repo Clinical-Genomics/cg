@@ -13,8 +13,8 @@ class FastaFile(BaseModel):
 
 class GisaidAccession(BaseModel):
     log_message: str
-    accession_nr: str
-    sample_id: str
+    accession_nr: Optional[str]
+    sample_id: Optional[str]
 
     @validator("accession_nr", always=True)
     def parse_accession(cls, v, values):
