@@ -136,7 +136,7 @@ def dummy_gisaid_sample(temp_result_file: Path) -> GisaidSample:
 
 @pytest.fixture
 def bundle_with_four_samples(gisaid_case_id, timestamp):
-    file = Path(f"tests/meta/upload/gisaid/fixtures/valid.fasta")
+    file = Path("tests/meta/upload/gisaid/fixtures/valid.fasta")
     files = [{"path": str(file.absolute()), "archive": False, "tags": ["consensus"]}]
     return {
         "name": gisaid_case_id,
