@@ -24,6 +24,10 @@ __________ DO NOT TOUCH ___________
 - Add a command to upload both to Statina and ftp 
 - Adds a command to run the first command for all available cases
 
+## [22.2.1]
+### Added
+- Add more files to the mip-rna delivery
+
 ## [22.2.0]
 ### Added
 - Add cg clean fluffy_past_run_dirs command
