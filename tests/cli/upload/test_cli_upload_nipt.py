@@ -45,7 +45,11 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     # GIVEN a case ready for upload
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj = helpers.add_analysis(store=upload_context.status_db, completed_at=datetime.datetime.now(), pipeline=Pipeline.FLUFFY)
+    analysis_obj = helpers.add_analysis(
+        store=upload_context.status_db,
+        completed_at=datetime.datetime.now(),
+        pipeline=Pipeline.FLUFFY,
+    )
     assert analysis_obj.completed_at
     assert not analysis_obj.uploaded_at
 
