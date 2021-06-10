@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.2.1]
+### Added
+- Add more files to the mip-rna delivery
+
 ## [22.2.0]
 ### Added
 - Add cg clean fluffy_past_run_dirs command
