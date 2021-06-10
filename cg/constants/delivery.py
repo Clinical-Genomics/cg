@@ -6,12 +6,14 @@ ONLY_ONE_CASE_PER_TICKET = [
     "fastq",
     "microsalt",
     "sarscov2",
+    "fohm",
 ]
 
 SKIP_MISSING = [
     "fastq",
     "microsalt",
     "sarscov2",
+    "fohm",
 ]
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
@@ -117,6 +119,17 @@ SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
     {"fastq"},
 ]
 
+FOHM_ANALYSIS_CASE_TAGS = [
+    {"pangolin"},
+    {"ks-delivery"},
+    {"instrument-properties"},
+]
+
+FOHM_ANALYSIS_SAMPLE_TAGS = [
+    {"fastq"},
+    {"vcf"},
+]
+
 PIPELINE_ANALYSIS_TAG_MAP = {
     "balsamic": {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
@@ -146,6 +159,10 @@ PIPELINE_ANALYSIS_TAG_MAP = {
     "sarscov2": {
         "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
         "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
+    },
+    "fohm": {
+        "case_tags": FOHM_ANALYSIS_CASE_TAGS,
+        "sample_tags": FOHM_ANALYSIS_SAMPLE_TAGS,
     },
 }
 
