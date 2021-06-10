@@ -1,4 +1,4 @@
-"""Test module cg.cli.upload.nipt"""
+"""Test module cg.cli.upload.nipt.ftp"""
 
 import logging
 
