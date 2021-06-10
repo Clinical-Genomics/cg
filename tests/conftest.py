@@ -1173,6 +1173,11 @@ def fixture_context_config(
             "binary_path": "echo",
             "padding": 300,
         },
+        "mutant": {
+            "binary_path": "echo",
+            "conda_env": "S_mutant",
+            "root": str(mip_dir),
+        },
         "crunchy": {
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "slurm": {
