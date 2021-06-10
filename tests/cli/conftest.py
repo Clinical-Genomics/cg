@@ -15,7 +15,7 @@ def fixture_cli_runner() -> CliRunner:
 
 @pytest.fixture(name="application_tag")
 def fixture_application_tag() -> str:
-    """Create a CliRunner"""
+    """Return a dummy tag"""
     return "dummy_tag"
 
 
@@ -27,6 +27,12 @@ def fixture_base_context(
     cg_config_object.status_db_ = base_store
     cg_config_object.housekeeper_api_ = housekeeper_api
     return cg_config_object
+
+
+@pytest.fixture(name="before_date")
+def fixture_before_date() -> str:
+    """Return a before date string"""
+    return "1999-12-31"
 
 
 @pytest.fixture(name="disk_store")
