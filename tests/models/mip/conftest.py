@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.priority import SlurmQos
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
@@ -25,7 +26,7 @@ def fixture_mip_analysis_config_dna_raw() -> dict:
         "log_file": "a_log_path",
         "outdata_dir": "tests/fixtures/apps/mip/dna/store",
         "sample_info_file": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
-        "slurm_quality_of_service": "low",
+        "slurm_quality_of_service": SlurmQos.LOW,
         "store_file": "tests/fixtures/apps/mip/dna/store/case_id_deliverables.yaml",
     }
 
