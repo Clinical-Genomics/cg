@@ -3,6 +3,8 @@
 from datetime import datetime
 
 import pytest
+
+from cg.constants.tags import HkMipAnalysisTag
 from tests.store_helpers import StoreHelpers
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -77,7 +79,7 @@ def fixture_mip_hk_store(
             {
                 "path": "tests/fixtures/apps/mip/case_qc_metrics.yaml",
                 "archive": False,
-                "tags": ["qcmetrics"],
+                "tags": [HkMipAnalysisTag.QC_METRICS],
             },
             {
                 "path": "tests/fixtures/apps/mip/case_file.txt",
@@ -111,7 +113,7 @@ def fixture_mip_hk_store(
             {
                 "path": "tests/fixtures/apps/mip/dna/store/empty_case_qc_metrics.yaml",
                 "archive": False,
-                "tags": ["qcmetrics"],
+                "tags": [HkMipAnalysisTag.QC_METRICS],
             },
             {
                 "path": "tests/fixtures/apps/mip/case_file.txt",

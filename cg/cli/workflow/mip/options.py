@@ -1,10 +1,12 @@
 import click
 
+from cg.constants.priority import SlurmQos
+
 EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
 PRIORITY_OPTION = click.option(
     "-p",
     "--priority",
-    type=click.Choice(["low", "normal", "high"]),
+    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH]),
 )
 START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="Start mip from this program.", type=str

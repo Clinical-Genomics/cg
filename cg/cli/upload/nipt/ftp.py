@@ -1,11 +1,9 @@
-""" Upload NIPT results via the CLI"""
-
 import logging
 from pathlib import Path
 
 import click
 
-from cg.meta.upload.nipt import NiptUploadAPI
+from cg.meta.upload.nipt.nipt import NiptUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -13,12 +11,12 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-def nipt():
+def ftp():
     """Upload NIPT result files"""
     pass
 
 
-@nipt.command("case")
+@ftp.command("case")
 @click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
@@ -26,7 +24,7 @@ def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
     """Upload the results file of a NIPT case"""
     status_db: Store = context.status_db
 
-    LOG.info("*** NIPT UPLOAD START ***")
+    LOG.info("*** NIPT FTP UPLOAD START ***")
 
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
@@ -46,7 +44,7 @@ def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
         LOG.error(f"{error}")
 
 
-@nipt.command("all")
+@ftp.command("all")
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
 def nipt_upload_all(context: click.Context, dry_run: bool):

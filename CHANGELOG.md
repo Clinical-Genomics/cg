@@ -22,7 +22,6 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-
 ## [x.x.x]
 ### Added
 - email functionality
@@ -34,6 +33,45 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
 
+## [22.2.0]
+### Added
+- Add cg clean fluffy_past_run_dirs command
+
+## [22.1.3]
+### Fixed
+- Remove dependency to archived pypi colorclass
+
+## [22.1.2]
+### Changed
+- Use slurm qos class and constants instead of hard coding priority options
+
+## [22.1.1]
+### Fixed
+- Check for case name uniqueness before storing order to avoid half stored orders
+
+## [22.1.0]
+### Changed
+- Rsync now run on slurm instead of the login node
+
+## [22.0.1]
+### Added
+- Added two more cases to BALSAMIC's validation
+### Changed
+- Divided VALIDATION_CASES into their own workflow lists to find them easier 
+
+## [22.0.0]
+### Added
+- Adds store and store-available commands that use Hermes
+- Add pydantic models for mip config and mip sample info
+- Add constants for getting housekeeper MIP analysis tags
+  
+### Changed
+- Remove old MIP-DNA store command using cg internally
+- Remove old unused fixtures
+
+## [21.12.0]
+### Added
+- cli for upload of data to Statina
 
 ## [21.11.2]
 ### Fixed
@@ -84,7 +122,6 @@ __________ DO NOT TOUCH ___________
 ### Changed
 - Add batch-ref flag to command string for fluffy analyses
 
-
 ## [21.8.1]
 ### Changed
 - Changed so that barcode report is written to the correct path
@@ -103,6 +140,7 @@ __________ DO NOT TOUCH ___________
 ## [21.7.1]
 ### Fixed
 - Fixed bug when checking if flowcell projects has been renamed
+
 
 ## [21.7.0]
 ### Added
