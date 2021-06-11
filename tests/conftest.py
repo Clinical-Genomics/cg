@@ -15,6 +15,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.observations.observations_input_files import ObservationsInputFiles
@@ -1172,7 +1173,7 @@ def fixture_context_config(
             "slurm": {
                 "mail_user": "test.email@scilifelab.se",
                 "account": "development",
-                "qos": "low",
+                "qos": SlurmQos.LOW,
             },
         },
         "microsalt": {
@@ -1199,6 +1200,11 @@ def fixture_context_config(
             "config_path": "mutacc-auto-stage.yaml",
             "binary_path": "echo",
             "padding": 300,
+        },
+        "mutant": {
+            "binary_path": "echo",
+            "conda_env": "S_mutant",
+            "root": str(mip_dir),
         },
         "crunchy": {
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",

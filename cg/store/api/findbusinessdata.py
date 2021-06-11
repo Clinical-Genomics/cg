@@ -5,7 +5,6 @@ from typing import List, Optional
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
 

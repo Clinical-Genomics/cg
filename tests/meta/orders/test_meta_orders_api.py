@@ -1,10 +1,15 @@
 import datetime as dt
+from typing import List
 
 import pytest
+from cg.constants import DataDelivery
 
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI, OrderType
-from cg.store import models
+from cg.models.orders.order import OrderIn
+from cg.store import models, Store
+from cgmodels.cg.constants import Pipeline
+import cg
 
 PROCESS_LIMS_FUNCTION = "cg.meta.orders.api.process_lims"
 
@@ -233,3 +238,63 @@ def test_submit_non_scout_legal_sample_customer(
         orders_api.submit(
             project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
         )
+
+
+def test_submit_duplicate_sample_case_name(
+    orders_api, mip_order_to_submit, ticket_number: int, user_name: str, user_mail: str, mocker
+):
+    # GIVEN we have an order with a case that is already in the database
+    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    for sample in order_data.samples:
+        case_id = sample["family_name"]
+        if not store.find_family(customer=customer_obj, name=case_id):
+            case_obj = store.add_case(
+                data_analysis=Pipeline.MIP_DNA,
+                data_delivery=DataDelivery.SCOUT,
+                name=case_id,
+                panels=None,
+            )
+            case_obj.customer = customer_obj
+            store.add_commit(case_obj)
+        assert store.find_family(customer=customer_obj, name=case_id)
+
+    mocker.patch(PROCESS_LIMS_FUNCTION)
+
+    # WHEN calling submit
+    # THEN an OrderError should be raised on duplicate case name
+    with pytest.raises(OrderError):
+        orders_api.submit(
+            project=OrderType.MIP_DNA, order_in=order_data, user_name=user_name, user_mail=user_mail
+        )
+
+    # Then no new samples should have been created in LIMS
+    cg.meta.orders.api.process_lims.assert_not_called()
+
+
+def test_submit_unique_sample_case_name(
+    orders_api, mip_order_to_submit, ticket_number: int, user_name: str, user_mail: str, monkeypatch
+):
+    # GIVEN we have an order with a case that is not existing in the database
+    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    store = orders_api.status
+
+    for sample in order_data.samples:
+        case_id = sample["family_name"]
+        customer_obj = store.customer(order_data.customer)
+        assert not store.find_family(customer=customer_obj, name=case_id)
+
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+    }
+    monkeypatch.setattr(PROCESS_LIMS_FUNCTION, lambda **kwargs: (lims_project_data, lims_map))
+
+    # WHEN calling submit
+    orders_api.submit(
+        project=OrderType.MIP_DNA, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
+
+    # Then no exception about duplicate names should be thrown

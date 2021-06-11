@@ -39,6 +39,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
             self._process = Process(binary=self.config.fluffy.binary_path)
         return self._process
 
+    def get_case_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id)
+
     def get_samplesheet_path(self, case_id: str) -> Path:
         """
         Location in case folder where samplesheet is expected to be stored. Samplesheet is used as a config

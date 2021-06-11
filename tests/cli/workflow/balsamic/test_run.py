@@ -5,9 +5,9 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import run
+from cg.constants import EXIT_SUCCESS
+from cg.constants.priority import SlurmQos
 from cg.models.cg_config import CGConfig
-
-EXIT_SUCCESS = 0
 
 
 def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
@@ -134,8 +134,8 @@ def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     caplog.set_level(logging.INFO)
     # GIVEN valid case-id
     case_id = "balsamic_case_wgs_single"
-    option_key = "--priority"
-    option_value = "high"
+    priority_key = "--priority"
+    priority_value = SlurmQos.HIGH
     # WHEN ensuring case config exists where it should be stored
     Path.mkdir(
         Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
@@ -146,21 +146,23 @@ def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     )
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        run, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context
+        run, [case_id, "--dry-run", priority_key, priority_value], obj=balsamic_context
     )
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
-    # THEN dry-print should include the the option-value
+    # THEN dry run should include the the priority value
     assert "--qos" in caplog.text
-    assert option_value in caplog.text
+    assert priority_value in caplog.text
 
 
 def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with case_id set to default NORMAL priority, when priority is not set manually"""
     caplog.set_level(logging.INFO)
+
     # GIVEN valid case-id
     case_id = "balsamic_case_wgs_single"
-    option_value = "normal"
+    priority_value = SlurmQos.NORMAL
+
     # WHEN ensuring case config exists where it should be stored
     Path.mkdir(
         Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
@@ -169,10 +171,13 @@ def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, ca
     Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
         exist_ok=True
     )
+
     # WHEN dry running with option specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=balsamic_context)
+
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
-    # THEN dry-print should include the the option-value
+
+    # THEN dry run should include the the priority value
     assert "--qos" in caplog.text
-    assert option_value in caplog.text
+    assert priority_value in caplog.text
