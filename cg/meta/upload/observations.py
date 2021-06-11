@@ -56,8 +56,8 @@ class UploadObservationsAPI:
             case_id=analysis_obj.family.internal_id,
             pedigree=hk_pedigree.full_path,
             snv_gbcf=hk_snv_gbcf.full_path,
+            snv_vcf=hk_snv_vcf.full_path,
             sv_vcf=sv_vcf_path,
-            vcf=hk_snv_vcf.full_path,
         )
 
     def upload(self, input_files: ObservationsInputFiles) -> None:

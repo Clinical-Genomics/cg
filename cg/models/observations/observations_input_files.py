@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
 
 from cg.constants.loqus_upload import ObservationAnalysisTag
 
@@ -20,21 +20,13 @@ class ObservationsInputFiles(BaseModel):
     case_id: str
     pedigree: Path
     snv_gbcf: Path
-    sv_vcf: Path = None
     snv_vcf: Path
+    sv_vcf: Path = None
 
     @validator("pedigree", always=True)
     def check_pedigree(cls, value) -> Path:
         """Check pedigree file exists in HK and file system"""
         if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.PEDIGREE, file=value):
-            return value
-
-    @validator("sv_vcf", always=True)
-    def check_sv_vcf(cls, value) -> Path:
-        """Check sv_vcf file exists in HK and file system"""
-        if not value:
-            return value
-        if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SV_VARIANTS, file=value):
             return value
 
     @validator("snv_gbcf", always=True)
@@ -49,6 +41,14 @@ class ObservationsInputFiles(BaseModel):
     def check_snv_vcf(cls, value) -> Path:
         """Check snv_vcf file exists in HK and file system"""
         if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SNV_VARIANTS, file=value):
+            return value
+
+    @validator("sv_vcf", always=True)
+    def check_sv_vcf(cls, value) -> Path:
+        """Check sv_vcf file exists in HK and file system"""
+        if not value:
+            return value
+        if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SV_VARIANTS, file=value):
             return value
 
 
