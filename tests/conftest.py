@@ -18,6 +18,7 @@ from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.models.observations.observations_input_files import ObservationsInputFiles
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -294,6 +295,33 @@ def fixture_project_dir(tmpdir_factory):
 def tmp_file(project_dir):
     """Get a temp file"""
     return project_dir / "test"
+
+
+@pytest.fixture(name="non_existing_file_path")
+def fixture_non_existing_file_path(project_dir: Path) -> Path:
+    """Return the path to a non existing file"""
+    return project_dir / "a_file.txt"
+
+
+@pytest.fixture(name="content")
+def fixture_content() -> str:
+    """Return some content for a file"""
+    _content = (
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
+        " ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ull"
+        "amco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehende"
+        "rit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaec"
+        "at cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    )
+    return _content
+
+
+@pytest.fixture(name="filled_file")
+def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
+    """Return the path to a existing file with some content"""
+    with open(non_existing_file_path, "w") as outfile:
+        outfile.write(content)
+    return non_existing_file_path
 
 
 @pytest.fixture(name="orderforms")
@@ -1198,3 +1226,20 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
+
+
+@pytest.fixture(name="observation_input_files_raw")
+def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
+    """Raw observations input files"""
+    return {
+        "vcf": filled_file,
+        "case_id": case_id,
+        "snv_gbcf": filled_file,
+        "pedigree": filled_file,
+        "sv_vcf": None,
+    }
+
+
+@pytest.fixture(name="observation_input_files")
+def fixture_observation_input_files(observation_input_files_raw: dict) -> ObservationsInputFiles:
+    return ObservationsInputFiles(**observation_input_files_raw)

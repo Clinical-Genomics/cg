@@ -1,14 +1,19 @@
 """
     API for uploading observations
 """
+from datetime import datetime
+from pathlib import Path
 
 import logging
-from pathlib import Path
 from typing import List
+
+from alchy import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.loqus_upload import ObservationAnalysisTag, ObservationAnalysisType
 from cg.exc import CaseNotFoundError, DuplicateRecordError, DuplicateSampleError
+from cg.models.observations.observations_input_files import ObservationsInputFiles
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -23,65 +28,58 @@ class UploadObservationsAPI:
         self.housekeeper = hk_api
         self.loqusdb = loqus_api
 
-    def get_input(self, analysis_obj: models.Analysis) -> dict:
-        """Fetch input data for an analysis to load observations."""
+    def get_input(self, analysis_obj: models.Analysis) -> ObservationsInputFiles:
+        """Fetch input files from an analysis to upload to observations"""
 
-        input_data = {}
+        analysis_date: datetime.datetime = analysis_obj.started_at or analysis_obj.completed_at
+        hk_version: models.Version = self.housekeeper.version(
+            analysis_obj.family.internal_id, analysis_date
+        )
 
-        analysis_date = analysis_obj.started_at or analysis_obj.completed_at
-        hk_version = self.housekeeper.version(analysis_obj.family.internal_id, analysis_date)
-        hk_vcf = self.housekeeper.files(version=hk_version.id, tags=["vcf-snv-research"]).first()
-        hk_snv_gbcf = self.housekeeper.files(version=hk_version.id, tags=["snv-gbcf"]).first()
-        hk_pedigree = self.housekeeper.files(version=hk_version.id, tags=["pedigree"]).first()
-
-        input_data["sv_vcf"] = None
-        if self.loqusdb.analysis_type == "wgs":
-            hk_sv_vcf = self.housekeeper.files(
-                version=hk_version.id, tags=["vcf-sv-research"]
+        hk_pedigree: Query = self.housekeeper.files(
+            version=hk_version.id, tags=[ObservationAnalysisTag.PEDIGREE]
+        ).first()
+        hk_snv_gbcf: Query = self.housekeeper.files(
+            version=hk_version.id, tags=[ObservationAnalysisTag.CHECK_PROFILE_GBCF]
+        ).first()
+        hk_vcf: Query = self.housekeeper.files(
+            version=hk_version.id, tags=[ObservationAnalysisTag.SNV_VARIANTS]
+        ).first()
+        sv_vcf_path = None
+        if self.loqusdb.analysis_type == ObservationAnalysisType.WGS:
+            hk_sv_vcf: Query = self.housekeeper.files(
+                version=hk_version.id, tags=[ObservationAnalysisTag.SV_VARIANTS]
             ).first()
-            if hk_sv_vcf is None:
-                raise FileNotFoundError("No file with vcf-sv-research tag in housekeeper")
-            if not Path(hk_sv_vcf.full_path).exists():
-                raise FileNotFoundError(f"{hk_sv_vcf.full_path} does not exist")
-            input_data["sv_vcf"] = hk_sv_vcf.full_path
+            sv_vcf_path: Path = hk_sv_vcf.full_path
 
-        hk_files = {"vcf-snv-research": hk_vcf, "snv-gbcf": hk_snv_gbcf, "pedigree": hk_pedigree}
+        return ObservationsInputFiles(
+            case_id=analysis_obj.family.internal_id,
+            pedigree=hk_pedigree.full_path,
+            snv_gbcf=hk_snv_gbcf.full_path,
+            sv_vcf=sv_vcf_path,
+            vcf=hk_vcf.full_path,
+        )
 
-        # Check if files exists. If hk returns None, or the path does not exist
-        # FileNotFound error is raised
-        for file_type, file in hk_files.items():
-            if file is None:
-                raise FileNotFoundError(f"No file with {file_type} tag in housekeeper")
-            if not Path(file.full_path).exists():
-                raise FileNotFoundError(f"{file.full_path} does not exist")
-
-        input_data["family"] = analysis_obj.family.internal_id
-        input_data["vcf"] = hk_vcf.full_path
-        input_data["snv_gbcf"] = hk_snv_gbcf.full_path
-        input_data["pedigree"] = hk_pedigree.full_path
-
-        return input_data
-
-    def upload(self, input_data: dict):
+    def upload(self, input_files: ObservationsInputFiles) -> None:
         """Upload data about genotypes for a family of samples."""
 
         try:
-            existing_case = self.loqusdb.get_case(case_id=input_data["family"])
+            existing_case = self.loqusdb.get_case(case_id=input_files.case_id)
 
         # If CaseNotFoundError is raised, this should trigger the load method of loqusdb
         except CaseNotFoundError:
 
-            duplicate = self.loqusdb.get_duplicate(input_data["snv_gbcf"])
+            duplicate = self.loqusdb.get_duplicate(input_files.snv_gbcf)
             if duplicate:
                 err_msg = f"Found duplicate {duplicate['ind_id']} in case {duplicate['case_id']}"
                 raise DuplicateSampleError(err_msg)
 
             results = self.loqusdb.load(
-                input_data["family"],
-                input_data["pedigree"],
-                input_data["vcf"],
-                input_data["snv_gbcf"],
-                vcf_sv_path=input_data["sv_vcf"],
+                input_files.case_id,
+                input_files.pedigree,
+                input_files.vcf,
+                input_files.snv_gbcf,
+                vcf_sv_path=input_files.sv_vcf,
             )
             LOG.info("parsed %s variants", results["variants"])
 
