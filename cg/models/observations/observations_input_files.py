@@ -17,9 +17,9 @@ class ObservationsInputFiles(BaseModel):
 
     case_id: str
     pedigree: Path
-    snv_gbcf: Path = Field(...)
+    snv_gbcf: Path
     sv_vcf: Path = None
-    vcf: Path = Field(...)
+    vcf: Path
 
     @validator("pedigree", always=True)
     def check_pedigree(cls, value) -> Path:
