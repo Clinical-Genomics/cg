@@ -3,12 +3,13 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from pydantic import ValidationError
+from typing_extensions import Literal
+
 from cg.exc import FlowcellError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
-from pydantic import ValidationError
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -16,9 +17,10 @@ LOG = logging.getLogger(__name__)
 class Flowcell:
     """Class to collect information about flowcell directories and there particular files"""
 
-    def __init__(self, flowcell_path: Path):
+    def __init__(self, flowcell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
         LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
         self.path = flowcell_path
+        self.bcl_converter: Optional[str] = bcl_converter
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_name: str = ""
@@ -100,7 +102,9 @@ class Flowcell:
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format"""
         try:
-            get_sample_sheet_from_file(infile=self.sample_sheet_path, sheet_type="S4")
+            get_sample_sheet_from_file(
+                infile=self.sample_sheet_path, sheet_type="S4", bcl_converter=self.bcl_converter
+            )
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
@@ -108,7 +112,9 @@ class Flowcell:
         return True
 
     def get_sample_sheet(self) -> SampleSheet:
-        return get_sample_sheet_from_file(infile=self.sample_sheet_path, sheet_type="S4")
+        return get_sample_sheet_from_file(
+            infile=self.sample_sheet_path, sheet_type="S4", bcl_converter=self.bcl_converter
+        )
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done
@@ -129,7 +135,8 @@ class Flowcell:
     def is_flowcell_ready(self) -> bool:
         """Check if a flowcell is ready for demultiplexing
 
-        A flowcell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the flowcell directory
+        A flowcell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
+        flowcell directory
         """
         LOG.info("Check if flowcell is ready for demultiplexing")
         if not self.is_sequencing_done():

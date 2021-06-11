@@ -4,14 +4,15 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
+from typing_extensions import Literal
+
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
-from cg.models.slurm.sbatch import Sbatch
+from cg.models.slurm.sbatch import SbatchDragen, SbatchHasta
 from cgmodels.cg.constants import Pipeline
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ class DemultiplexingAPI:
         unaligned_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
+        flowcell: Flowcell,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
         LOG.info("Creating the sbatch command string")
@@ -77,7 +79,7 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
+        return DEMULTIPLEX_COMMAND[flowcell.bcl_converter].format(**command_parameters.dict())
 
     @staticmethod
     def demultiplex_sbatch_path(flowcell: Flowcell) -> Path:
@@ -217,11 +219,12 @@ class DemultiplexingAPI:
             unaligned_dir=unaligned_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
+            flowcell=flowcell,
             environment=self.environment,
         )
 
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(
-            sbatch_parameters=Sbatch(
+        if flowcell.bcl_converter == "bcl2fastq":
+            sbatch_parameters = SbatchHasta(
                 job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
                 number_tasks=18,
@@ -233,6 +236,20 @@ class DemultiplexingAPI:
                 commands=commands,
                 error=error_function,
             )
+        if flowcell.bcl_converter == "dragen":
+            sbatch_parameters = SbatchDragen(
+                job_name=self.get_run_name(flowcell),
+                account=self.slurm_account,
+                log_dir=log_path.parent.as_posix(),
+                email=self.mail,
+                hours=36,
+                priority=self.priority,
+                commands=commands,
+                error=error_function,
+            )
+
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(
+            sbatch_parameters=sbatch_parameters
         )
         sbatch_path: Path = self.demultiplex_sbatch_path(flowcell=flowcell)
         sbatch_number: int = self.slurm_api.submit_sbatch(

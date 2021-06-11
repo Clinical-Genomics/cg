@@ -7,8 +7,6 @@ from typing_extensions import Literal
 class Sbatch(BaseModel):
     job_name: str
     account: str
-    number_tasks: int
-    memory: int
     log_dir: str
     email: str
     hours: int
@@ -16,3 +14,14 @@ class Sbatch(BaseModel):
     priority: Literal["high", "normal", "low"] = "low"
     commands: str
     error: Optional[str]
+
+
+class SbatchHasta(Sbatch):
+    number_tasks: int
+    memory: int
+
+
+class SbatchDragen(Sbatch):
+    partition: str = "dragen"
+    nodes: int = 1
+    cpus_per_task: int = 24
