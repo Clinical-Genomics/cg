@@ -1,8 +1,9 @@
 from pathlib import Path
 
+from click.testing import CliRunner, Result
+
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
-from click.testing import CliRunner, Result
 
 
 def test_validate_non_existing_sample_sheet(cli_runner: CliRunner, sample_sheet_context: dict):
@@ -43,11 +44,12 @@ def test_validate_sample_sheet_wrong_file_type(
 def test_validate_correct_sample_sheet(
     cli_runner: CliRunner, sample_sheet_context: dict, novaseq_sample_sheet_path: Path
 ):
-    # GIVEN the path to a sample sheet that exists
+    # GIVEN the path to a bcl2fastq sample sheet that exists
     sample_sheet: Path = novaseq_sample_sheet_path
+    bcl_converter = "bcl2fastq"
     assert sample_sheet.exists()
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(infile=sample_sheet, sheet_type="S2")
+    get_sample_sheet_from_file(infile=sample_sheet, sheet_type="S2", bcl_converter=bcl_converter)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
