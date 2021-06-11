@@ -42,7 +42,7 @@ class UploadObservationsAPI:
         hk_snv_gbcf: Query = self.housekeeper.files(
             version=hk_version.id, tags=[ObservationAnalysisTag.CHECK_PROFILE_GBCF]
         ).first()
-        hk_vcf: Query = self.housekeeper.files(
+        hk_snv_vcf: Query = self.housekeeper.files(
             version=hk_version.id, tags=[ObservationAnalysisTag.SNV_VARIANTS]
         ).first()
         sv_vcf_path = None
@@ -57,7 +57,7 @@ class UploadObservationsAPI:
             pedigree=hk_pedigree.full_path,
             snv_gbcf=hk_snv_gbcf.full_path,
             sv_vcf=sv_vcf_path,
-            vcf=hk_vcf.full_path,
+            vcf=hk_snv_vcf.full_path,
         )
 
     def upload(self, input_files: ObservationsInputFiles) -> None:
