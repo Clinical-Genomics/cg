@@ -1232,10 +1232,10 @@ def fixture_cg_context(
 def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
     """Raw observations input files"""
     return {
-        "vcf": filled_file,
         "case_id": case_id,
-        "snv_gbcf": filled_file,
         "pedigree": filled_file,
+        "snv_gbcf": filled_file,
+        "snv_vcf": filled_file,
         "sv_vcf": None,
     }
 

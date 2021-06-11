@@ -21,7 +21,7 @@ class ObservationsInputFiles(BaseModel):
     pedigree: Path
     snv_gbcf: Path
     sv_vcf: Path = None
-    vcf: Path
+    snv_vcf: Path
 
     @validator("pedigree", always=True)
     def check_pedigree(cls, value) -> Path:
@@ -45,9 +45,9 @@ class ObservationsInputFiles(BaseModel):
         ):
             return value
 
-    @validator("vcf", always=True)
-    def check_vcf(cls, value) -> Path:
-        """Check vcf file exists in HK and file system"""
+    @validator("snv_vcf", always=True)
+    def check_snv_vcf(cls, value) -> Path:
+        """Check snv_vcf file exists in HK and file system"""
         if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SNV_VARIANTS, file=value):
             return value
 
