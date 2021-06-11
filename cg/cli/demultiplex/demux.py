@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI

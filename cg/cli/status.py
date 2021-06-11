@@ -4,7 +4,8 @@ import click
 from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-from colorclass import Color
+from ansi.colour import fg
+from ansi.colour.fx import reset
 from tabulate import tabulate
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
@@ -219,16 +220,21 @@ def cases(
             and case.get("samples_delivered_bool")
             and tat_number <= max_tat
         ):
-            tat_color = "green"
+            tat_color = fg.green
         elif tat_number == max_tat:
-            tat_color = "yellow"
+            tat_color = fg.yellow
         elif tat_number > max_tat:
-            tat_color = "red"
+            tat_color = fg.red
         else:
-            tat_color = "white"
+            tat_color = fg.white
 
-        color_start = Color("{" + f"{tat_color}" + "}")
-        color_end = Color("{/" + f"{tat_color}" + "}")
+        color_start = tat_color
+        color_end = str(reset)
+
+        title = color_start + f"{case.get('internal_id')}"
+
+        if name:
+            title = f"{title} ({case.get('name')})"
 
         if (
             not case.get("case_external_bool")
@@ -240,11 +246,6 @@ def cases(
             tat = f"{tat_number}/{max_tat}" + color_end
         else:
             tat = f"({tat_number})/{max_tat}" + color_end
-
-        title = color_start + f"{case.get('internal_id')}"
-
-        if name:
-            title = f"{title} ({case.get('name')})"
 
         data_analysis = f"{case.get('data_analysis')}"
 
