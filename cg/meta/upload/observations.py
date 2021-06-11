@@ -77,7 +77,7 @@ class UploadObservationsAPI:
             results = self.loqusdb.load(
                 input_files.case_id,
                 input_files.pedigree,
-                input_files.vcf,
+                input_files.snv_vcf,
                 input_files.snv_gbcf,
                 vcf_sv_path=input_files.sv_vcf,
             )
