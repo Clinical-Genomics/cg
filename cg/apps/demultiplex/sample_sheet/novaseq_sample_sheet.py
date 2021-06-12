@@ -146,7 +146,9 @@ class SampleSheetCreator:
         sample_sheet: str = self.convert_to_sample_sheet()
         LOG.info("Validating sample sheet")
         get_sample_sheet(
-            bcl_converter=self.bcl_converter, sample_sheet=sample_sheet, sheet_type="S2"
+            sample_sheet=sample_sheet,
+            sheet_type="S2",
+            bcl_converter=self.bcl_converter,
         )
         LOG.info("Sample sheet looks fine")
         return sample_sheet

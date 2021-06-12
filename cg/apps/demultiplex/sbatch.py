@@ -28,14 +28,14 @@ log "bcl2fastq finished!"
     "dragen": """
 log "dragen --bcl-conversion-only true \
 --bcl-input-directory {run_dir} \
---output-directory {demux_dir} \
+--output-directory {unaligned_dir} \
 --bcl-sampleproject-subdirectories true \
 --force   
 touch {demux_completed_file}"
 
 dragen --bcl-conversion-only true \
 --bcl-input-directory {run_dir} \
---output-directory {demux_dir} \
+--output-directory {unaligned_dir} \
 --bcl-sampleproject-subdirectories true \
 --force   
 touch {demux_completed_file}
