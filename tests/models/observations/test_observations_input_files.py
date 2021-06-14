@@ -4,7 +4,6 @@ import pytest
 
 from cg.models.observations.observations_input_files import (
     ObservationsInputFiles,
-    parse_input_files,
     check_observation_file_from_hk,
 )
 
@@ -20,20 +19,7 @@ def test_instantiate_input_files(observation_input_files_raw: dict):
     assert isinstance(files_object, ObservationsInputFiles)
 
 
-def test_parse_input_files(
-    observation_input_files: ObservationsInputFiles, observation_input_files_raw: dict
-):
-    """Tests parse_input_files"""
-    # GIVEN a dictionary with the basic input files
-
-    # WHEN parsing raw input files
-    files_object = parse_input_files(observation_input_files_raw)
-
-    # THEN assert that it was successfully parsed
-    assert files_object == observation_input_files
-
-
-def test_parse_input_files_case_id(case_id: str, observation_input_files_raw: dict):
+def test_input_files_case_id(case_id: str, observation_input_files_raw: dict):
     """Test case_id"""
     # GIVEN a dictionary with the basic input files
 
@@ -89,7 +75,7 @@ def test_check_observation_file_from_hk_when_file_not_exists(
         check_observation_file_from_hk(file_tag=hk_tag, file=file_does_not_exist)
 
 
-def test_parse_input_files_pedigree(filled_file: Path, observation_input_files_raw: dict):
+def test_input_files_pedigree(filled_file: Path, observation_input_files_raw: dict):
     """Test pedigree validator"""
     # GIVEN a dictionary with the basic input files
 
@@ -100,7 +86,7 @@ def test_parse_input_files_pedigree(filled_file: Path, observation_input_files_r
     assert files_object.pedigree == filled_file
 
 
-def test_parse_input_files_pedigree_not_exists(
+def test_input_files_pedigree_not_exists(
     file_does_not_exist: Path, observation_input_files_raw: dict
 ):
     """Test pedigree validator when file does not exits"""
@@ -118,7 +104,7 @@ def test_parse_input_files_pedigree_not_exists(
         assert files_object.pedigree.exists() is False
 
 
-def test_parse_input_files_sv_vcf_when_none(observation_input_files_raw: dict):
+def test_input_files_sv_vcf_when_none(observation_input_files_raw: dict):
     """Test sv_vcf validator when file is None"""
     # GIVEN a dictionary with the basic input files
 
@@ -128,7 +114,7 @@ def test_parse_input_files_sv_vcf_when_none(observation_input_files_raw: dict):
     assert files_object.sv_vcf is None
 
 
-def test_parse_input_files_sv_vcf_when_file(filled_file: Path, observation_input_files_raw: dict):
+def test_input_files_sv_vcf_when_file(filled_file: Path, observation_input_files_raw: dict):
     """Test sv_vcf validator when file is supplied and exists"""
     # GIVEN a dictionary with the basic input files
 
