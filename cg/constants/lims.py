@@ -59,6 +59,10 @@ MASTER_STEPS_UDFS = {
             "method_number": "Method document",
             "method_version": "Document version",
         },
+        "Library Prep (Dev) v3": {
+            "method_number": "Method Document",
+            "method_version": "Document Version",
+        },
         "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
             "method_number": "Method document",
             "method_version": "Method document version",
