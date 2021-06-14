@@ -7,6 +7,7 @@ from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER, SAMPLE_SHEET_HEADERS
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet
 
@@ -15,35 +16,6 @@ LOG = logging.getLogger(__name__)
 
 class SampleSheetCreator:
     """Create a raw sample sheet for Novaseq flowcells"""
-
-    SAMPLE_SHEET_HEADERS = {
-        "bcl2fastq": [
-            "FCID",
-            "Lane",
-            "SampleID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Project",
-        ],
-        "dragen": [
-            "FCID",
-            "Lane",
-            "Sample_ID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Sample_Project",
-        ],
-    }
 
     def __init__(
         self,
@@ -116,13 +88,16 @@ class SampleSheetCreator:
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
         LOG.info("Convert samples to string")
-        sample_sheet = ["[Data]", ",".join(self.SAMPLE_SHEET_HEADERS[self.bcl_converter])]
+        sample_sheet = [
+            SAMPLE_SHEET_DATA_HEADER,
+            ",".join(SAMPLE_SHEET_HEADERS[self.bcl_converter]),
+        ]
         for sample in self.lims_samples:
             sample_sheet.append(
                 ",".join(
                     self.convert_sample_to_header_dict(
                         sample=sample,
-                        sample_sheet_headers=self.SAMPLE_SHEET_HEADERS[self.bcl_converter],
+                        sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
                     )
                 )
             )
