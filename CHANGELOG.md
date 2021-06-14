@@ -14,11 +14,8 @@ __________ DO NOT TOUCH ___________
 
 ## [x.x.x]
 ### Added
-
 ### Changed
-
 ### Fixed
-
 
 __________ DO NOT TOUCH ___________
 
@@ -32,6 +29,10 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: Accession numbers will be parsed from the log file 
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+## [22.2.2]
+### Changed
+- Header in indexreport to versal letters
 
 ## [22.2.1]
 ### Added
