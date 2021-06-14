@@ -225,27 +225,27 @@ class DemultiplexingAPI:
 
         if flowcell.bcl_converter == "bcl2fastq":
             sbatch_parameters = SbatchHasta(
-                job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
-                number_tasks=18,
-                memory=95,
-                log_dir=log_path.parent.as_posix(),
-                email=self.mail,
-                hours=36,
-                priority=self.priority,
                 commands=commands,
+                email=self.mail,
                 error=error_function,
+                hours=36,
+                job_name=self.get_run_name(flowcell),
+                log_dir=log_path.parent.as_posix(),
+                memory=95,
+                number_tasks=18,
+                priority=self.priority,
             )
         if flowcell.bcl_converter == "dragen":
             sbatch_parameters = SbatchDragen(
-                job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
-                log_dir=log_path.parent.as_posix(),
-                email=self.mail,
-                hours=36,
-                priority=self.priority,
                 commands=commands,
+                email=self.mail,
                 error=error_function,
+                hours=36,
+                job_name=self.get_run_name(flowcell),
+                log_dir=log_path.parent.as_posix(),
+                priority=self.priority,
             )
 
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
