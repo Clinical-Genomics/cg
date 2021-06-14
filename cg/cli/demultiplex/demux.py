@@ -5,20 +5,12 @@ import click
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowcellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 
 LOG = logging.getLogger(__name__)
-
-OPTION_BCL_CONVERTER = click.option(
-    "-b",
-    "--bcl-converter",
-    type=click.Choice(["bcl2fastq", "dragen"]),
-    default="bcl2fastq",
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
-    "bcl2fastq.",
-)
 
 
 @click.command(name="all")

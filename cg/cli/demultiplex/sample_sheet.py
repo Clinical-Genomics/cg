@@ -13,21 +13,13 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
     flowcell_samples,
 )
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowcellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 LOG = logging.getLogger(__name__)
-
-OPTION_BCL_CONVERTER = click.option(
-    "-b",
-    "--bcl-converter",
-    type=click.Choice(["bcl2fastq", "dragen"]),
-    default="bcl2fastq",
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
-    "bcl2fastq.",
-)
 
 
 @click.group(name="samplesheet")
