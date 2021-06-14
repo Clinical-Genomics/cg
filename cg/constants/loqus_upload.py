@@ -8,5 +8,5 @@ class ObservationAnalysisType(StrEnum):
 class ObservationAnalysisTag(StrEnum):
     PEDIGREE: str = "pedigree"
     CHECK_PROFILE_GBCF: str = "snv-gbcf"
-    SNV_VARIANTS: str = "vcf-snv-research"
+    SNV_VARIANTS: str = "deepvariant"
     SV_VARIANTS: str = "vcf-sv-research"
