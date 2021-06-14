@@ -172,7 +172,7 @@ def fixture_base_config_dict() -> dict:
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
-            "sender_password": "testtest",
+            "sender_password": "",
         },
     }
 
@@ -1091,7 +1091,7 @@ def fixture_context_config(
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
-            "sender_password": "testtest",
+            "sender_password": "",
         },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
