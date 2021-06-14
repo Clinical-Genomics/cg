@@ -1238,8 +1238,3 @@ def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict
         "snv_vcf": filled_file,
         "sv_vcf": None,
     }
-
-
-@pytest.fixture(name="observation_input_files")
-def fixture_observation_input_files(observation_input_files_raw: dict) -> ObservationsInputFiles:
-    return ObservationsInputFiles(**observation_input_files_raw)

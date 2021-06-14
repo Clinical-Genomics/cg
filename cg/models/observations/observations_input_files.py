@@ -50,8 +50,3 @@ class ObservationsInputFiles(BaseModel):
             return value
         if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SV_VARIANTS, file=value):
             return value
-
-
-def parse_input_files(input_file: dict) -> ObservationsInputFiles:
-    """Validate and parse MIP config file"""
-    return ObservationsInputFiles(**input_file)
