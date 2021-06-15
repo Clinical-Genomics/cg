@@ -269,6 +269,7 @@ class GisaidAPI:
         )
 
     def unlik_tmp_files(self, files: UploadFiles) -> None:
+        """Unlinking tmp files"""
         files.csv_file.unlink()
         files.fasta_file.unlink()
 
