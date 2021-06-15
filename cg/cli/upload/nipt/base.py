@@ -3,26 +3,22 @@
 import logging
 import sys
 import traceback
-from datetime import datetime
 from typing import Optional
 
-from cg.cli.upload.utils import suggest_cases_to_upload
-from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from cgmodels.cg.constants import Pipeline
+import click
+from cg.meta.upload.nipt import NiptUploadAPI
 
 from .ftp import ftp, nipt_upload_case
 from .statina import statina, batch
-
-import click
 
 LOG = logging.getLogger(__name__)
 
 
 @click.group(invoke_without_command=True)
 @click.option("-c", "--case", "case_id", help="Upload to all apps")
+@click.option("--dry-run", is_flag=True)
 @click.pass_context
-def nipt(context: click.Context, case_id: Optional[str]):
+def nipt(context: click.Context, case_id: Optional[str], dry_run: bool):
     """Upload NIPT result files"""
 
     LOG.info("*** NIPT UPLOAD START ***")
@@ -30,51 +26,35 @@ def nipt(context: click.Context, case_id: Optional[str]):
     if context.invoked_subcommand is not None:
         return
 
-    config_object: CGConfig = context.obj
-    status_db: Store = config_object.status_db
+    nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
+    nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    if not case_id:
-        suggest_cases_to_upload(status_db=status_db, pipeline=Pipeline.FLUFFY)
-        raise click.Abort
-
-    case_obj: models.Family = status_db.family(case_id)
-    analysis_obj: models.Analysis = case_obj.analyses[0]
-
-    if analysis_obj.uploaded_at is not None:
-        LOG.warning("Analysis already uploaded: %s", analysis_obj.uploaded_at.date())
-    else:
-        analysis_obj.upload_started_at = datetime.now()
-        status_db.commit()
-        context.invoke(batch, case_id=case_id)
-        context.invoke(nipt_upload_case, case_id=case_id)
-        analysis_obj.uploaded_at = datetime.now()
-        status_db.commit()
-        LOG.info("%s: analysis uploaded!", case_id)
+    nipt_upload_api.update_analysis_upload_started_date(case_id)
+    context.invoke(batch, case_id=case_id, dry_run=dry_run)
+    context.invoke(nipt_upload_case, case_id=case_id, dry_run=dry_run)
+    nipt_upload_api.update_analysis_uploaded_at_date(case_id)
+    LOG.info("%s: analysis uploaded!", case_id)
 
 
 @nipt.command()
+@click.option("--dry-run", is_flag=True)
 @click.pass_context
-def auto(context: click.Context):
+def auto(context: click.Context, dry_run: bool):
     """Upload all NIPT result files"""
 
     LOG.info("*** NIPT UPLOAD ALL START ***")
 
-    status_db: Store = context.obj.status_db
+    nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
+    nipt_upload_api.set_dry_run(dry_run=dry_run)
 
     exit_code = 0
-    for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FLUFFY):
+    for analysis_obj in nipt_upload_api.get_all_upload_analyses():
 
-        if analysis_obj.family.analyses[0].uploaded_at is not None:
-            LOG.warning(
-                "More recent analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
-            )
-            continue
         internal_id = analysis_obj.family.internal_id
 
         LOG.info("Uploading case: %s", internal_id)
         try:
-            context.invoke(nipt, case_id=internal_id)
+            context.invoke(nipt, case_id=internal_id, dry_run=dry_run)
         except Exception:
             LOG.error("Uploading case failed: %s", internal_id)
             LOG.error(traceback.format_exc())

@@ -81,9 +81,7 @@ def test_nipt_upload_case_not_changing_uploaded_at(
     assert not analysis_obj.uploaded_at
 
     # WHEN adding a result file of a specified NIPT case
-    result = cli_runner.invoke(
-        nipt_upload_case, [case_id], obj=upload_context, catch_exceptions=False
-    )
+    result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN set analysis.upload_started_at in the database
     assert not analysis_obj.upload_started_at
