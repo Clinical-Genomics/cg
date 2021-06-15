@@ -1,11 +1,11 @@
 """ Upload NIPT results via the CLI"""
 
 import logging
-import sys
 import traceback
 from typing import Optional
 
 import click
+from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
 
 from .ftp import ftp, nipt_upload_case as nipt_upload_ftp_case
@@ -53,7 +53,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    exit_code = 0
+    all_good = True
     for analysis_obj in nipt_upload_api.get_all_upload_analyses():
 
         internal_id = analysis_obj.family.internal_id
@@ -64,9 +64,10 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
         except Exception:
             LOG.error("Uploading case failed: %s", internal_id)
             LOG.error(traceback.format_exc())
-            exit_code = 1
+            all_good = False
 
-    sys.exit(exit_code)
+    if not all_good:
+        raise AnalysisUploadError("Some uploads failed")
 
 
 nipt.add_command(ftp)
