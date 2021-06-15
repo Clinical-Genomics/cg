@@ -18,8 +18,6 @@ from cgmodels.cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 
-RSYNC_COMPLETE = "rsync_complete.txt"
-
 
 class RsyncAPI(MetaAPI):
     def __init__(self, config: CGConfig):
@@ -50,14 +48,6 @@ class RsyncAPI(MetaAPI):
     def get_trailblazer_config(slurm_job_id: int) -> Dict[str, List[str]]:
         """Return dictionary of slurm job IDs"""
         return {"jobs": [str(slurm_job_id)]}
-
-    @staticmethod
-    def is_process_complete(process: Path) -> bool:
-        """Return True if process is completed"""
-        if (process / RSYNC_COMPLETE).exists():
-            return True
-        else:
-            return False
 
     @staticmethod
     def write_trailblazer_config(content: dict, config_path: Path) -> None:

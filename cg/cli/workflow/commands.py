@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import shutil
+import datetime as dt
 from pathlib import Path
 
 import click
@@ -126,15 +127,20 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 def clean_rsync_dir(context: CGConfig, dry_run: bool = False, yes: bool = False) -> None:
     """Remove deliver workflow commands"""
 
+    now: dt.datetime = dt.datetime.now()
+    removal_delta: dt.datetime = now - dt.timedelta(days=7)
+
     rsync_api: RsyncAPI = RsyncAPI(config=context)
+
     for process in rsync_api.rsync_processes:
-        if rsync_api.is_process_complete(process=process):
+        ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
+        if ctime > removal_delta:
             if dry_run:
                 LOG.info(f"Would have removed {process}")
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):
                 shutil.rmtree(process, ignore_errors=True)
         else:
-            LOG.info(f"Transfer of {process.as_posix()} is still ongoing")
+            LOG.info(f"{process.as_posix()} is still young")
 
 
 @click.command("clean-run-dir")
