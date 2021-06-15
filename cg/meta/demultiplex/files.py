@@ -1,6 +1,9 @@
 import logging
 from pathlib import Path
 
+from cg.constants.demultiplexing import FASTQ_FILE_SUFFIXES
+from cg.constants.symbols import UNDERSCORE
+
 LOG = logging.getLogger(__name__)
 
 
@@ -26,6 +29,23 @@ def rename_project_directory(
 ) -> None:
     """Rename a project directory by adding the prefix Project_"""
     unaligned_directory: Path = project_directory.parent
+    LOG.info("Check for Dragen fastq files in project directories.")
+    if dragen_fastq_files_in_project_directory(project_directory):
+        LOG.debug("Only Dragen fastq files found!")
+        breakpoint()
+        for dragen_fastq_file in project_directory.iterdir():
+            LOG.debug("Derive sample name from fastq file %s:", dragen_fastq_file)
+            dragen_sample_name: str = get_dragen_sample_name(dragen_fastq_file)
+            LOG.debug("Create sample directory %s:", dragen_sample_name)
+            (project_directory / dragen_sample_name).mkdir(exist_ok=False)
+            LOG.debug(
+                "Move fastq file into sample directory %s:",
+                project_directory / dragen_sample_name / dragen_fastq_file,
+            )
+            project_directory / dragen_fastq_file.rename(
+                project_directory / dragen_sample_name / dragen_fastq_file
+            )
+
     LOG.debug("Rename all sample directories in %s", unaligned_directory)
     for sample_dir in project_directory.iterdir():
         if sample_dir.name.startswith("Sample"):
@@ -69,3 +89,13 @@ def rename_fastq_file(fastq_file: Path, flowcell_id: str, dry_run: bool = False)
     if not dry_run:
         fastq_file.rename(new_file)
         LOG.debug("Renamed fastq file to %s", new_file)
+
+
+def dragen_fastq_files_in_project_directory(project_directory: Path) -> bool:
+    """Checks if the project directory contains Dragen fastq files instead of sample directories"""
+    return all(file_.suffixes == FASTQ_FILE_SUFFIXES for file_ in project_directory.iterdir())
+
+
+def get_dragen_sample_name(dragen_fastq_file: Path) -> str:
+    """Derives the sample name from a dragen fastq file"""
+    return dragen_fastq_file.name.split(UNDERSCORE)[0]

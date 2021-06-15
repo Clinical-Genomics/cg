@@ -41,3 +41,5 @@ OPTION_BCL_CONVERTER = click.option(
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
     "bcl2fastq.",
 )
+
+FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
