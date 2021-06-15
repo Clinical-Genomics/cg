@@ -8,18 +8,24 @@ from typing import Optional
 import click
 from cg.meta.upload.nipt import NiptUploadAPI
 
-from .ftp import ftp, nipt_upload_case
+from .ftp import ftp, nipt_upload_case as nipt_upload_ftp_case
 from .statina import statina, batch
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group(invoke_without_command=True)
-@click.option("-c", "--case", "case_id", help="Upload to all apps")
+@click.group()
+def nipt():
+    """Upload NIPT result files"""
+    pass
+
+
+@nipt.command("case")
+@click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def nipt(context: click.Context, case_id: Optional[str], dry_run: bool):
-    """Upload NIPT result files"""
+def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bool):
+    """Upload NIPT result files for a case"""
 
     LOG.info("*** NIPT UPLOAD START ***")
 
@@ -31,16 +37,16 @@ def nipt(context: click.Context, case_id: Optional[str], dry_run: bool):
 
     nipt_upload_api.update_analysis_upload_started_date(case_id)
     context.invoke(batch, case_id=case_id, dry_run=dry_run)
-    context.invoke(nipt_upload_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(nipt_upload_ftp_case, case_id=case_id, dry_run=dry_run)
     nipt_upload_api.update_analysis_uploaded_at_date(case_id)
     LOG.info("%s: analysis uploaded!", case_id)
 
 
-@nipt.command()
+@nipt.command("all")
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
-def auto(context: click.Context, dry_run: bool):
-    """Upload all NIPT result files"""
+def nipt_upload_all(context: click.Context, dry_run: bool):
+    """Upload NIPT result files for all cases"""
 
     LOG.info("*** NIPT UPLOAD ALL START ***")
 
@@ -54,7 +60,7 @@ def auto(context: click.Context, dry_run: bool):
 
         LOG.info("Uploading case: %s", internal_id)
         try:
-            context.invoke(nipt, case_id=internal_id, dry_run=dry_run)
+            context.invoke(nipt_upload_case, case_id=internal_id, dry_run=dry_run)
         except Exception:
             LOG.error("Uploading case failed: %s", internal_id)
             LOG.error(traceback.format_exc())

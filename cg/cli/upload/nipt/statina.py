@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group()
 def statina():
-    """Upload NIPT result files"""
+    """Upload NIPT result files to Statina"""
     pass
 
 

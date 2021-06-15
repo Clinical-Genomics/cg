@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group()
 def ftp():
-    """Upload NIPT result files"""
+    """Upload NIPT result files to ftp-server"""
     pass
 
 

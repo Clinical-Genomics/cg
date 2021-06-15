@@ -2,11 +2,10 @@
 import datetime
 import logging
 
-from cg.cli.upload.nipt.base import auto
+from cg.cli.upload.nipt.base import nipt_upload_case, nipt_upload_all
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
-from cg.cli.upload.nipt import nipt
 from cg.models.cg_config import CGConfig
 
 
@@ -22,7 +21,7 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading of a specified NIPT case
-    result = cli_runner.invoke(nipt, ["-c", case_id], obj=upload_context)
+    result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
     assert "*** NIPT UPLOAD START ***" in caplog.text
@@ -53,7 +52,7 @@ def test_nipt_statina_upload_case_dry_run(
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading a specified NIPT case with dry-run flag set
-    result = cli_runner.invoke(nipt, ["-c", case_id, "--dry-run"], obj=upload_context)
+    result = cli_runner.invoke(nipt_upload_case, [case_id, "--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
     assert "*** NIPT UPLOAD START ***" in caplog.text
@@ -85,7 +84,7 @@ def test_nipt_statina_upload_auto(upload_context: CGConfig, cli_runner: CliRunne
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading all NIPT cases
-    result = cli_runner.invoke(auto, [], obj=upload_context)
+    result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
     assert "*** NIPT UPLOAD ALL START ***" in caplog.text
@@ -119,7 +118,7 @@ def test_nipt_statina_upload_auto_dry_run(
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading all NIPT cases
-    result = cli_runner.invoke(auto, ["--dry-run"], obj=upload_context)
+    result = cli_runner.invoke(nipt_upload_all, ["--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
     assert "*** NIPT UPLOAD ALL START ***" in caplog.text
