@@ -268,26 +268,28 @@ class GisaidAPI:
             new_completion_file_data=new_completion_data,
         )
 
+    def unlik_tmp_files(self, files: UploadFiles) -> None:
+        files.csv_file.unlink()
+        files.fasta_file.unlink()
+
     def upload(self, case_id: str) -> None:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
         gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(case_id=case_id)
         files: UploadFiles = self.get_upload_files(gisaid_samples, case_id)
-
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if len(accession_numbers) == len(gisaid_samples):
+            self.unlik_tmp_files(files=files)
             raise GisaidUploadFailedError(
                 message=f"The samples in bundle {case_id} are already uploaded to GISAID and can not be uploaded more "
                 f"than once. "
             )
 
         try:
-            self.upload_results_to_gisaid(files)
+            self.upload_results_to_gisaid(files=files)
+            self.unlik_tmp_files(files=files)
         except Exception as e:
             raise GisaidUploadFailedError(message=str(e))
-
-        files.csv_file.unlink()
-        files.fasta_file.unlink()
 
         self.ensure_log_in_housekeeper(
             case_id=case_id, tags=["gisaid-log"], file_path=files.log_file
