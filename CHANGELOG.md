@@ -24,6 +24,10 @@ __________ DO NOT TOUCH ___________
 - Add a command to upload both to Statina and ftp 
 - Adds a command to run the first command for all available cases
 
+## [22.2.2]
+### Changed
+- Header in indexreport to versal letters
+
 ## [22.2.1]
 ### Added
 - Add more files to the mip-rna delivery
