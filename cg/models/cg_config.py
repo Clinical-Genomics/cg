@@ -220,7 +220,6 @@ class CGConfig(BaseModel):
             "loqusdb_api_": "loqusdb_api",
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
-            "rsync_api_": "rsync_api",
             "scout_api_": "scout_api",
             "shipping_api_": "shipping_api",
             "status_db_": "status_db",
