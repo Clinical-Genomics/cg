@@ -8,6 +8,11 @@ from click.testing import CliRunner
 
 from cg.models.cg_config import CGConfig
 
+NIPT_CASE_SUCCESS = "*** NIPT UPLOAD START ***"
+NIPT_ALL_SUCCESS = "*** NIPT UPLOAD ALL START ***"
+NIPT_STATINA_SUCCESS = "*** Statina UPLOAD START ***"
+NIPT_FTP_SUCCESS = "*** NIPT FTP UPLOAD START ***"
+
 
 def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers):
     """Tests CLI command to upload a single case"""
@@ -24,9 +29,9 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
-    assert "*** NIPT UPLOAD START ***" in caplog.text
-    assert "*** Statina UPLOAD START ***" in caplog.text
-    assert "*** NIPT FTP UPLOAD START ***" in caplog.text
+    assert NIPT_CASE_SUCCESS in caplog.text
+    assert NIPT_STATINA_SUCCESS in caplog.text
+    assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN set analysis.upload_started_at in the database
     assert analysis_obj.upload_started_at
@@ -55,9 +60,9 @@ def test_nipt_statina_upload_case_dry_run(
     result = cli_runner.invoke(nipt_upload_case, [case_id, "--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
-    assert "*** NIPT UPLOAD START ***" in caplog.text
-    assert "*** Statina UPLOAD START ***" in caplog.text
-    assert "*** NIPT FTP UPLOAD START ***" in caplog.text
+    assert NIPT_CASE_SUCCESS in caplog.text
+    assert NIPT_STATINA_SUCCESS in caplog.text
+    assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN analysis.upload_started_at should not be set in the database
     assert analysis_obj.upload_started_at is None
@@ -87,9 +92,9 @@ def test_nipt_statina_upload_auto(upload_context: CGConfig, cli_runner: CliRunne
     result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
-    assert "*** NIPT UPLOAD ALL START ***" in caplog.text
-    assert "*** Statina UPLOAD START ***" in caplog.text
-    assert "*** NIPT FTP UPLOAD START ***" in caplog.text
+    assert NIPT_ALL_SUCCESS in caplog.text
+    assert NIPT_STATINA_SUCCESS in caplog.text
+    assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN set analysis.upload_started_at in the database
     assert analysis_obj.upload_started_at
@@ -121,9 +126,9 @@ def test_nipt_statina_upload_auto_dry_run(
     result = cli_runner.invoke(nipt_upload_all, ["--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
-    assert "*** NIPT UPLOAD ALL START ***" in caplog.text
-    assert "*** Statina UPLOAD START ***" in caplog.text
-    assert "*** NIPT FTP UPLOAD START ***" in caplog.text
+    assert NIPT_ALL_SUCCESS in caplog.text
+    assert NIPT_STATINA_SUCCESS in caplog.text
+    assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN analysis.upload_started_at should not be set in the database
     assert analysis_obj.upload_started_at is None
