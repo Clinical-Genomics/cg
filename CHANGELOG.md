@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.3.0]
+### Changed
+- Methods in mutant config to AM doc number
+
 ## [22.2.2]
 ### Changed
 - Header in indexreport to versal letters
