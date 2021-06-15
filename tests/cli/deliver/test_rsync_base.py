@@ -1,12 +1,14 @@
 """Tests for rsync base"""
 import logging
 
+from click.testing import CliRunner
+
 from cg.cli.deliver.base import rsync
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
-def test_rsync_help(cli_runner):
+def test_rsync_help(cli_runner: CliRunner):
     """Test to run the rsync function"""
     # GIVEN a cli runner
 
@@ -19,13 +21,16 @@ def test_rsync_help(cli_runner):
     assert "The folder generated using the" in result.output
 
 
-def test_run_rsync_command_no_case(cg_context: CGConfig, cli_runner, helpers, caplog):
+def test_run_rsync_command_no_case(
+    cg_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
+):
     """Test generating the rsync command for ticket that doesnt exist"""
     caplog.set_level(logging.INFO)
 
     # Given an invalid ticket id where case was not created
 
     # WHEN running deliver rsync command
+    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
     result = cli_runner.invoke(rsync, ["--dry-run", "9898989898"], obj=cg_context)
 
     # THEN command failed successfully

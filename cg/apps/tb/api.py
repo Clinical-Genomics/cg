@@ -135,7 +135,7 @@ class TrailblazerAPI:
         out_dir: str,
         priority: str,
         email: str = None,
-        data_analysis: Pipeline = None,
+        data_analysis: str = None,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -144,7 +144,7 @@ class TrailblazerAPI:
             "config_path": config_path,
             "out_dir": out_dir,
             "priority": priority,
-            "data_analysis": str(data_analysis).upper(),
+            "data_analysis": data_analysis.upper(),
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
