@@ -4,7 +4,7 @@ import glob
 import logging
 import yaml
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -40,10 +40,24 @@ class RsyncAPI(MetaAPI):
         """Return Path to trailblazer config"""
         return self.log_dir / "slurm_job_ids.yaml"
 
+    @property
+    def rsync_processes(self) -> Iterable[Path]:
+        """Yield existing rsync processes"""
+        for process in self.base_path.iterdir():
+            yield process
+
     @staticmethod
     def get_trailblazer_config(slurm_job_id: int) -> Dict[str, List[str]]:
         """Return dictionary of slurm job IDs"""
         return {"jobs": [str(slurm_job_id)]}
+
+    @staticmethod
+    def is_process_complete(process: Path) -> bool:
+        """Return True if process is completed"""
+        if (process / RSYNC_COMPLETE).exists():
+            return True
+        else:
+            return False
 
     @staticmethod
     def write_trailblazer_config(content: dict, config_path: Path) -> None:

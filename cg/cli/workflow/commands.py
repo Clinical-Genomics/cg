@@ -7,12 +7,12 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
+from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
-from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from dateutil.parser import parse as parse_date
@@ -127,14 +127,14 @@ def clean_rsync_dir(context: CGConfig, dry_run: bool = False, yes: bool = False)
     """Remove deliver workflow commands"""
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
-    for rsync_process in rsync_api.rsync_processes:
-        if rsync_api.is_rsync_process_completed(process=rsync_process):
+    for process in rsync_api.rsync_processes:
+        if rsync_api.is_process_complete(process=process):
             if dry_run:
-                LOG.info(f"Would have removed {rsync_process}")
-            if yes or click.confirm(f"Do you want to remove all files in {rsync_process}?"):
-                shutil.rmtree(rsync_process, ignore_errors=True)
+                LOG.info(f"Would have removed {process}")
+            if yes or click.confirm(f"Do you want to remove all files in {process}?"):
+                shutil.rmtree(process, ignore_errors=True)
         else:
-            LOG.info(f"Transfer of {rsync_process.as_posix()} is still ongoing")
+            LOG.info(f"Transfer of {process.as_posix()} is still ongoing")
 
 
 @click.command("clean-run-dir")
