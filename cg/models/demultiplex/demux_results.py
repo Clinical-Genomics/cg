@@ -4,11 +4,12 @@ import socket
 from pathlib import Path
 from typing import Iterable, Optional
 
+from pydantic import BaseModel
+from typing_extensions import Literal
+
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.demultiplex.flowcell import Flowcell
-from pydantic import BaseModel
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ class DemuxResults:
                 LOG.debug("Skipping %s since it is not a directory", sub_dir)
                 continue
             dir_name: str = sub_dir.name
-            if dir_name in ["Stats", "Reports"]:
+            if dir_name in ["Stats", "Reports", "Logs"]:
                 LOG.debug("Skipping %s dir %s", dir_name, sub_dir)
                 continue
             if dir_name.startswith("Project_"):
