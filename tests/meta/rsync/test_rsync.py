@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cgmodels.cg.constants import Pipeline
 from cg.exc import CgError
-from cg.meta.rsync.rsync_api import RsyncAPI
+from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
