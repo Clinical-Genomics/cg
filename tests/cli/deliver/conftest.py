@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from housekeeper.store import models as hk_models
@@ -27,10 +26,7 @@ def fixture_deliver_vcf_path(
 
 @pytest.fixture(name="base_context")
 def fixture_base_context(
-    base_context: CGConfig,
-    project_dir: Path,
-    real_housekeeper_api: HousekeeperAPI,
-    rsync_api: RsyncAPI,
+    base_context: CGConfig, project_dir: Path, real_housekeeper_api: HousekeeperAPI
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
     base_context.delivery_path = str(project_dir)

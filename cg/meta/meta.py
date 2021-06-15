@@ -31,15 +31,15 @@ class MetaAPI:
         self.madeline_api: MadelineAPI = config.madeline_api
         self.mutacc_auto_api: MutaccAutoAPI = config.mutacc_auto_api
         self.prepare_fastq_api: PrepareFastqAPI = PrepareFastqAPI(
-            store=self.status_db,
-            compress_api=CompressAPI(hk_api=self.housekeeper_api, crunchy_api=self.crunchy_api),
+            store=config.status_db,
+            compress_api=CompressAPI(hk_api=config.housekeeper_api, crunchy_api=config.crunchy_api),
         )
         self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
         self.upload_vogue_api: UploadVogueAPI = UploadVogueAPI(
-            genotype_api=self.genotype_api,
-            vogue_api=self.vogue_api,
-            store=self.status_db,
+            genotype_api=config.genotype_api,
+            vogue_api=config.vogue_api,
+            store=config.status_db,
         )
         self.vogue_api: VogueAPI = config.vogue_api

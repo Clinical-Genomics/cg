@@ -28,7 +28,7 @@ class RsyncAPI(MetaAPI):
         self.destination_path: str = config.data_delivery.destination_path
         self.covid_destination_path: str = config.data_delivery.covid_destination_path
         self.covid_report_path: str = config.data_delivery.covid_report_path
-        self.base_path: str = config.data_delivery.base_path
+        self.base_path: Path = Path(config.data_delivery.base_path)
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
@@ -53,11 +53,12 @@ class RsyncAPI(MetaAPI):
             yaml.safe_dump(content, yaml_file, indent=4, explicit_start=True)
 
     def set_log_dir(self, ticket_id: int) -> None:
-        if self.log_dir == self.base_path:
+        if self.log_dir.as_posix() == self.base_path.as_posix():
             timestamp = datetime.datetime.now()
             timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
             folder_name = Path("_".join([str(ticket_id), timestamp_str]))
-            self.log_dir: Path = Path(self.base_path) / folder_name
+            LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
+            self.log_dir: Path = self.base_path / folder_name
 
     def get_all_cases_from_ticket(self, ticket_id: int) -> List[models.Family]:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
@@ -102,11 +103,11 @@ class RsyncAPI(MetaAPI):
             data_analysis=Pipeline.RSYNC,
         )
 
-    def make_log_dir(self, dry_run: bool) -> None:
+    def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir"""
-        log_dir = self.get_log_dir
+        log_dir: Path = self.log_dir
         LOG.info("Creating folder: %s", log_dir)
-        if self.get_log_dir.exists():
+        if log_dir.exists():
             LOG.warning("Could not create %s, this folder already exist", log_dir)
         elif dry_run:
             LOG.info("Would have created path %s, but this is a dry run", log_dir)
@@ -115,8 +116,7 @@ class RsyncAPI(MetaAPI):
 
     def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
         self.set_log_dir(ticket_id=ticket_id)
-        self.make_log_dir(dry_run=dry_run)
-        log_dir: Path = self.get_log_dir
+        self.create_log_dir(dry_run=dry_run)
         source_path: str = self.get_source_path(ticket_id=ticket_id)
         destination_path: str = self.get_destination_path(ticket_id=ticket_id)
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
@@ -139,7 +139,7 @@ class RsyncAPI(MetaAPI):
                 destination_path=destination_path,
                 covid_report_path=covid_report_path,
                 covid_destination_path=covid_destination_path,
-                log_dir=log_dir,
+                log_dir=self.log_dir,
             )
         else:
             commands = RSYNC_COMMAND.format(
@@ -151,7 +151,7 @@ class RsyncAPI(MetaAPI):
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
-            "log_dir": log_dir.as_posix(),
+            "log_dir": self.log_dir.as_posix(),
             "email": self.mail_user,
             "hours": 24,
             "priority": self.priority,
@@ -161,7 +161,7 @@ class RsyncAPI(MetaAPI):
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path = log_dir / "_".join([str(ticket_id), "rsync.sh"])
+        sbatch_path = self.log_dir / "_".join([str(ticket_id), "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
