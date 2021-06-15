@@ -18,9 +18,7 @@ LOG = logging.getLogger(__name__)
 
 class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
-        self,
-        config: CGConfig,
-        pipeline: Pipeline = Pipeline.SARS_COV_2,
+        self, config: CGConfig, pipeline: Pipeline = Pipeline.SARS_COV_2,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config.mutant.root
@@ -29,8 +27,7 @@ class MutantAnalysisAPI(AnalysisAPI):
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
-                binary=self.config.mutant.binary_path,
-                environment=self.config.mutant.conda_env,
+                binary=self.config.mutant.binary_path, environment=self.config.mutant.conda_env,
             )
         return self._process
 
@@ -85,7 +82,9 @@ class MutantAnalysisAPI(AnalysisAPI):
             Customer_ID_project=sample_obj.ticket_number,
             application_tag=sample_obj.application_version.application.tag,
             method_libprep=str(self.lims_api.get_prep_method(lims_id=sample_obj.internal_id)),
-            method_sequencing=str(self.lims_api.get_sequencing_method(lims_id=sample_obj.internal_id)),
+            method_sequencing=str(
+                self.lims_api.get_sequencing_method(lims_id=sample_obj.internal_id)
+            ),
             date_arrival=str(sample_obj.received_at),
             date_libprep=str(sample_obj.prepared_at),
             date_sequencing=str(sample_obj.sequenced_at),
