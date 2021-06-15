@@ -243,11 +243,9 @@ class GisaidAPI:
                 case_id=case_id, file=file_path, tags=tags
             )
 
-    def upload(self, case_id: str) -> None:
-        """Uploading results to gisaid and saving the accession numbers in completion file"""
-
-        gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(case_id=case_id)
-        files: UploadFiles = UploadFiles(
+    def get_upload_files(self, gisaid_samples: List[GisaidSample], case_id: str) -> UploadFiles:
+        """Get files for upload to gisaid"""
+        return UploadFiles(
             csv_file=self.build_gisaid_csv(
                 gisaid_samples=gisaid_samples, file_name=f"{case_id}.csv"
             ),
@@ -256,6 +254,25 @@ class GisaidAPI:
             ),
             log_file=self.get_gisaid_log_file_path(case_id=case_id),
         )
+
+    def manage_completion_file_data(self, case_id: str, accession_numbers: Dict[str, str]) -> None:
+        """Merging old completion file data with new"""
+        completion_file: Path = self.housekeeper_api.find_file_in_latest_version(
+            case_id=case_id, tags=["komplettering"]
+        )
+        new_completion_data: List[List[str]] = self.get_completion_file_data(
+            completion_file=completion_file, completion_data=accession_numbers
+        )
+        self.update_completion_file(
+            completion_file=completion_file,
+            new_completion_file_data=new_completion_data,
+        )
+
+    def upload(self, case_id: str) -> None:
+        """Uploading results to gisaid and saving the accession numbers in completion file"""
+
+        gisaid_samples: List[GisaidSample] = self.get_gisaid_samples(case_id=case_id)
+        files: UploadFiles = self.get_upload_files(gisaid_samples, case_id)
 
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if len(accession_numbers) == len(gisaid_samples):
@@ -276,18 +293,9 @@ class GisaidAPI:
             case_id=case_id, tags=["gisaid-log"], file_path=files.log_file
         )
 
-        completion_file: Path = self.housekeeper_api.find_file_in_latest_version(
-            case_id=case_id, tags=["komplettering"]
-        )
         accession_numbers: Dict[str, str] = self.get_accession_numbers(log_file=files.log_file)
         if accession_numbers:
-            new_completion_data: List[List[str]] = self.get_completion_file_data(
-                completion_file=completion_file, completion_data=accession_numbers
-            )
-            self.update_completion_file(
-                completion_file=completion_file,
-                new_completion_file_data=new_completion_data,
-            )
+            self.manage_completion_file_data(case_id=case_id, accession_numbers=accession_numbers)
 
         if len(accession_numbers) != len(gisaid_samples):
             raise AccessionNumerMissingError(
