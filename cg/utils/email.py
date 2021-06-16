@@ -1,8 +1,9 @@
 from smtplib import SMTP
 
-from email.message import EmailMessage
 from cg.exc import EmailNotSentError
 from cg.models.email import EmailInfo
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 def send_mail(email_info: EmailInfo):
@@ -10,11 +11,11 @@ def send_mail(email_info: EmailInfo):
 
     try:
         with SMTP(email_info.smtp_server) as server:
-            msg = EmailMessage()
-            msg.set_content(email_info.message)
-            msg["Subject"] = email_info.subject
+            msg = MIMEMultipart()
             msg["From"] = email_info.sender_email
             msg["To"] = email_info.receiver_email
-            server.send_message(msg)
+            msg["Subject"] = email_info.subject
+            msg.attach(MIMEText(email_info.message, "plain"))
+            server.sendmail(email_info.sender_email, email_info.receiver_email, msg.as_string())
     except:
         raise EmailNotSentError(message=f"Email could not be sent")
