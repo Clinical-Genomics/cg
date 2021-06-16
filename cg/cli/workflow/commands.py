@@ -133,10 +133,11 @@ def clean_rsync_dirs(context: CGConfig, dry_run: bool, yes: bool) -> None:
 
     for process in rsync_api.rsync_processes:
         ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
-        if ctime > removal_delta:
+        if removal_delta > ctime:
             if dry_run:
                 LOG.info(f"Would have removed {process}")
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):
+                LOG.info(f"removing ")
                 shutil.rmtree(process, ignore_errors=True)
         else:
             LOG.info(f"{process.as_posix()} is still young")
