@@ -7,10 +7,12 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+
 from cg.apps.cgstats.crud.create import create_novaseq_flowcell
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowcellError
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
 from cg.models.cg_config import CGConfig
@@ -21,9 +23,10 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command(name="add")
+@OPTION_BCL_CONVERTER
 @click.argument("flowcell-id")
 @click.pass_obj
-def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
+def add_flowcell_cmd(context: CGConfig, flowcell_id: str, bcl_converter: str):
     """Add a flowcell to the cgstats database"""
     stats_api: StatsAPI = context.cg_stats_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
@@ -39,7 +42,9 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str):
         flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
     except FlowcellError:
         raise click.Abort
-    demux_results: DemuxResults = DemuxResults(demux_dir=demux_results_path, flowcell=flowcell)
+    demux_results: DemuxResults = DemuxResults(
+        demux_dir=demux_results_path, flowcell=flowcell, bcl_converter=bcl_converter
+    )
     create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
 
 

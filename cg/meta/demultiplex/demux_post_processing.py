@@ -35,8 +35,6 @@ class DemuxPostProcessingAPI:
         LOG.info("Renaming files for flowcell %s", demux_results.flowcell.flowcell_full_name)
         flowcell_id: str = demux_results.flowcell.flowcell_id
         for project_dir in demux_results.raw_projects:
-            if "index" in project_dir.name:
-                continue
             files.rename_project_directory(
                 project_directory=project_dir, flowcell_id=flowcell_id, dry_run=self.dry_run
             )
@@ -165,7 +163,7 @@ class DemuxPostProcessingAPI:
         self.copy_sample_sheet(demux_results=demux_results)
         self.create_copy_complete_file(demux_results=demux_results)
 
-    def finish_flowcell(self, flowcell_name: str, force: bool = False) -> None:
+    def finish_flowcell(self, flowcell_name: str, bcl_converter: str, force: bool = False) -> None:
         """Go through the post processing steps for a flowcell
 
         Force is used to finish a flowcell even if the files are renamed already
@@ -179,7 +177,9 @@ class DemuxPostProcessingAPI:
             LOG.warning("Demultiplex is not ready for %s", flowcell_name)
             return
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=self.demux_api.out_dir / flowcell_name, flowcell=flowcell
+            demux_dir=self.demux_api.out_dir / flowcell_name,
+            flowcell=flowcell,
+            bcl_converter=bcl_converter,
         )
         if not demux_results.results_dir.exists():
             LOG.warning("Could not find results directory %s", demux_results.results_dir)

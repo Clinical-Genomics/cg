@@ -55,7 +55,7 @@ class DemultiplexingAPI:
         error_parameters: SbatchError = SbatchError(
             flowcell_name=flowcell.flowcell_id,
             email=email,
-            logfile=DemultiplexingAPI.get_logfile(flowcell=flowcell).as_posix(),
+            logfile=DemultiplexingAPI.get_stderr_logfile(flowcell=flowcell).as_posix(),
             demux_dir=demux_dir.as_posix(),
             demux_started=flowcell.demultiplexing_started_path.as_posix(),
         )
@@ -92,9 +92,14 @@ class DemultiplexingAPI:
         return f"{flowcell.flowcell_id}_demultiplex"
 
     @staticmethod
-    def get_logfile(flowcell: Flowcell) -> Path:
+    def get_stderr_logfile(flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
         return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stderr"
+
+    @staticmethod
+    def get_stdout_logfile(flowcell: Flowcell) -> Path:
+        """Create the path to the logfile"""
+        return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stdout"
 
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
@@ -111,7 +116,7 @@ class DemultiplexingAPI:
     def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
         LOG.info("Check if demultiplexing is ready for %s", flowcell.path)
-        logfile: Path = self.get_logfile(flowcell)
+        logfile: Path = self.get_stderr_logfile(flowcell)
         if not logfile.exists():
             LOG.warning("Could not find logfile!")
             return False
@@ -210,7 +215,7 @@ class DemultiplexingAPI:
             LOG.info("Creating demux dir %s", unaligned_dir)
             unaligned_dir.mkdir(exist_ok=False, parents=True)
 
-        log_path: Path = self.get_logfile(flowcell=flowcell)
+        log_path: Path = self.get_stderr_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
             flowcell=flowcell, email=self.mail, demux_dir=demux_dir
         )

@@ -2,10 +2,12 @@ import logging
 from typing import Dict, Iterable, Optional
 
 import sqlalchemy
+
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples
 from cg.apps.cgstats.stats import StatsAPI
+from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
@@ -41,7 +43,7 @@ def create_datasource(
     datasource.machine = demux_results.machine_name
     datasource.server = demux_results.demux_host
     datasource.document_path = str(demux_results.conversion_stats_path)
-    datasource.document_type = "xml"
+    datasource.document_type = demux_results.conversion_stats_path.suffix.strip(PERIOD)
     datasource.time = sqlalchemy.func.now()
     datasource.supportparams_id = support_parameters_id
 
@@ -148,6 +150,7 @@ def create_samples(
     project_name_to_id: Dict[str, int],
     demux_id: int,
 ) -> None:
+    breakpoint()
     LOG.info("Creating samples for flowcell %s", demux_results.flowcell.flowcell_full_name)
     sample_sheet: SampleSheet = demux_results.flowcell.get_sample_sheet()
     demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(

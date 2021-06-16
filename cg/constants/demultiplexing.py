@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import click
 
 SAMPLE_SHEET_HEADERS = {
@@ -43,3 +45,15 @@ OPTION_BCL_CONVERTER = click.option(
 )
 
 FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
+
+DEMUX_STATS_PATH = {
+    "bcl2fastq": {
+        "demultiplexing_stats": Path("Stats") / Path("DemultiplexingStats.xml"),
+        "conversion_stats": Path("Stats") / Path("ConversionStats.xml"),
+    },
+    "dragen": {
+        "demultiplexing_stats": Path("Reports") / Path("Demultiplex_Stats.csv"),
+        "conversion_stats": Path("Reports") / Path("Demultiplex_Stats.csv"),
+        "adapter_metrix_stats": Path("Reports") / Path("AdapterMetrics.csv"),
+    },
+}
