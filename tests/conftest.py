@@ -15,6 +15,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.priority import SlurmQos
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -1103,9 +1104,12 @@ def fixture_context_config(
         },
         "statina": {"host": "http://localhost:28002"},
         "data-delivery": {
-            "destination_path": "server.name.se:/some/%s/path/%s/",
+            "destination_path": "server.name.se:/some",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
             "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
+            "base_path": "/another/path",
+            "account": "development",
+            "mail_user": "an@email.com",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
@@ -1141,7 +1145,7 @@ def fixture_context_config(
             "slurm": {
                 "mail_user": "test.email@scilifelab.se",
                 "account": "development",
-                "qos": "low",
+                "qos": SlurmQos.LOW,
             },
         },
         "microsalt": {
@@ -1168,6 +1172,11 @@ def fixture_context_config(
             "config_path": "mutacc-auto-stage.yaml",
             "binary_path": "echo",
             "padding": 300,
+        },
+        "mutant": {
+            "binary_path": "echo",
+            "conda_env": "S_mutant",
+            "root": str(mip_dir),
         },
         "crunchy": {
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",

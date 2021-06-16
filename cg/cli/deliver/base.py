@@ -85,7 +85,8 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     rsynced with this function to the customers inbox on caesar.
     """
     rsync_api = RsyncAPI(config=context)
-    rsync_api.run_rsync_command(ticket_id=ticket_id, dry_run=dry_run)
+    sbatch_number = rsync_api.run_rsync_on_slurm(ticket_id=ticket_id, dry_run=dry_run)
+    LOG.info("Rsync to caesar running as job %s", sbatch_number)
 
 
 @deliver.command(name="concatenate")

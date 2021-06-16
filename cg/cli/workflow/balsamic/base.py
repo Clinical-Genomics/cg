@@ -6,6 +6,7 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import link, resolve_compression
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.priority import SlurmQos
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -40,7 +41,7 @@ OPTION_RUN_ANALYSIS = click.option(
 OPTION_PRIORITY = click.option(
     "-p",
     "--priority",
-    type=click.Choice(["low", "normal", "high"]),
+    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH]),
     help="Job priority in SLURM. Will be set automatically according to priority in ClinicalDB, \
          this option can be used to override server setting",
 )
