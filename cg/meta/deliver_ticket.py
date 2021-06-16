@@ -91,8 +91,24 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
-    def report_missing_samples(self, ticket_id: int) -> list:
-
+    def report_missing_samples(self, ticket_id: int, dry_run: bool) -> None:
+        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
+        missing_samples = []
+        if not customer_inbox.exists() and dry_run:
+            LOG.info("Dry run, will not search for missing data in: %s", customer_inbox)
+            return
+        if not customer_inbox.exists():
+            LOG.info(
+                "The path %s do not exist, no search for missing data will be done", customer_inbox
+            )
+            return
+        for dir_path in customer_inbox.iterdir():
+            if len(os.listdir(dir_path)) == 0:
+                missing_samples.append(os.path.basename(dir_path))
+        if len(missing_samples) > 0:
+            LOG.info("No data delivered for sample(s):")
+            for sample in missing_samples:
+                print(sample)
 
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
