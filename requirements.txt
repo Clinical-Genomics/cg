@@ -22,6 +22,7 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 # utils
 cgmodels>=0.6
 ansi
+bing-image-urls
 coloredlogs
 email-validator
 lxml
