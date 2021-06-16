@@ -91,20 +91,14 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
-    def report_missing_samples(self, ticket_id: int, dry_run: bool) -> None:
-        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
+    def report_missing_samples(self, ticket_id: int) -> None:
         missing_samples = []
-        if not customer_inbox.exists() and dry_run:
-            LOG.info("Dry run, will not search for missing data in: %s", customer_inbox)
-            return
-        if not customer_inbox.exists():
-            LOG.info(
-                "The path %s do not exist, no search for missing data will be done", customer_inbox
-            )
-            return
-        for dir_path in customer_inbox.iterdir():
-            if len(os.listdir(dir_path)) == 0:
-                missing_samples.append(os.path.basename(dir_path))
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        for case in cases:
+            for link_obj in case.links:
+                last_version = self.housekeeper_api.last_version(bundle=link_obj.sample.internal_id)
+                if not last_version:
+                    missing_samples.append(link_obj.sample.name)
         if len(missing_samples) > 0:
             LOG.info("No data delivered for sample(s):")
             for sample in missing_samples:
