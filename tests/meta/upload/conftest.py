@@ -7,6 +7,7 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.constants import Pipeline
+from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.observations import UploadObservationsAPI
@@ -55,7 +56,7 @@ def fixture_upload_genotypes_hk_bundle(
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(case_qc_metrics), "archive": False, "tags": ["qcmetrics"]},
+            {"path": str(case_qc_metrics), "archive": False, "tags": [HkMipAnalysisTag.QC_METRICS]},
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],
     }

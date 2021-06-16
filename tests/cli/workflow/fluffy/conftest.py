@@ -26,22 +26,9 @@ def fluffy_sample_lims_id():
 
 
 @pytest.fixture(scope="function")
-def fluffy_cases_dir(tmpdir_factory, fluffy_dir):
-    return tmpdir_factory.mktemp("cases")
-
-
-@pytest.fixture(scope="function")
 def fluffy_success_output_summary(tmpdir_factory):
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "summary.csv")
-    file_path.touch(exist_ok=True)
-    return file_path
-
-
-@pytest.fixture(scope="function")
-def fluffy_success_output_multiqc(tmpdir_factory):
-    output_dir = tmpdir_factory.mktemp("output")
-    file_path = Path(output_dir, "multiqc_report.html")
     file_path.touch(exist_ok=True)
     return file_path
 
@@ -75,11 +62,12 @@ def deliverables_yaml_fixture_path():
 
 @pytest.fixture()
 def fluffy_hermes_deliverables_response_data(
+    create_multiqc_html_file,
     fluffy_case_id_existing,
     fluffy_sample_lims_id,
-    fluffy_success_output_multiqc,
     fluffy_success_output_summary,
     fluffy_success_output_aberrations,
+    timestamp_yesterday,
 ):
     return InputBundle(
         **{
@@ -89,7 +77,7 @@ def fluffy_hermes_deliverables_response_data(
                     "tags": ["metrics", fluffy_case_id_existing, "nipt"],
                 },
                 {
-                    "path": fluffy_success_output_multiqc.as_posix(),
+                    "path": create_multiqc_html_file.as_posix(),
                     "tags": ["multiqc-html", fluffy_case_id_existing, "nipt"],
                 },
                 {
@@ -97,7 +85,7 @@ def fluffy_hermes_deliverables_response_data(
                     "tags": ["wisecondor", "cnv", fluffy_sample_lims_id, "nipt"],
                 },
             ],
-            "created": dt.datetime.now(),
+            "created": timestamp_yesterday,
             "name": fluffy_case_id_existing,
         }
     )
