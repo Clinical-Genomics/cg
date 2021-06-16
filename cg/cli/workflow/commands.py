@@ -129,8 +129,10 @@ def clean_rsync_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: boo
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
 
+    before = parse_date(before_str)
+
     for process in rsync_api.rsync_processes:
-        if rsync_api.process_ready_to_clean(before=int(before_str), process=process):
+        if rsync_api.process_ready_to_clean(before=before, process=process):
             if dry_run:
                 LOG.info(f"Would have removed {process}")
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):

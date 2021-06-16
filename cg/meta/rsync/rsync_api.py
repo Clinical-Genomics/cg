@@ -57,15 +57,12 @@ class RsyncAPI(MetaAPI):
             yaml.safe_dump(content, yaml_file, indent=4, explicit_start=True)
 
     @staticmethod
-    def process_ready_to_clean(before: int, process: Path) -> bool:
+    def process_ready_to_clean(before: dt.datetime, process: Path) -> bool:
         """Return True if analysis is old enough to be cleaned"""
-
-        now: dt.datetime = dt.datetime.now()
-        removal_delta: dt.datetime = now - dt.timedelta(days=before)
 
         ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
 
-        if removal_delta > ctime:
+        if before > ctime:
             return True
         else:
             return False
