@@ -4,7 +4,7 @@ from typing import Optional
 
 import petname
 import requests
-from cg.apps.avatar.bing_image_urls import bing_image_urls
+from bing_image_urls import bing_image_urls
 
 
 class Avatar:
