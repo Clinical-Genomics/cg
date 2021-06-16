@@ -109,6 +109,8 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("No data delivered for sample(s):")
             for sample in missing_samples:
                 print(sample)
+        else:
+            LOG.info("Data has been delivered for all samples:")
 
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
