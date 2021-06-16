@@ -12,6 +12,7 @@ from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
+Avatar.get_avatar_urls = lambda internal_id: [str(uuid.uuid4())]
 Avatar.get_avatar_url = lambda internal_id: str(uuid.uuid4())
 Avatar.is_url_image = lambda: True
 

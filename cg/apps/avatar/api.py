@@ -1,5 +1,4 @@
 import random
-import secrets
 from typing import Optional
 
 import petname
@@ -10,15 +9,25 @@ from bing_image_urls import bing_image_urls
 class Avatar:
     @staticmethod
     def get_avatar_url(internal_id: str) -> Optional[bool]:
+        for url in Avatar.get_avatar_urls(internal_id):
+            if Avatar.is_url_image(url):
+                return url
+
+    @staticmethod
+    def get_avatar_urls(internal_id: str) -> Optional[bool]:
 
         urls = None
         adjective, animal = Avatar._split_petname(internal_id)
-        filter_array = ["+filterui:license-L2_L3", "+filterui:photo-transparent", "+filterui:aspect-square", "+filterui:imagesize-small"]
+        filter_array = [
+            "+filterui:license-L2_L3",
+            "+filterui:aspect-square",
+            "+filterui:photo-transparent",
+            "+filterui:imagesize-small",
+        ]
 
         try_cnt = 0
         filters = "".join(filter_array)
         while not urls and filters:
-            print(filters)
             query = f"{adjective} {animal}"
             urls = bing_image_urls(
                 query=query,
@@ -34,14 +43,10 @@ class Avatar:
                 )
 
             try_cnt += 1
-            filters = "".join(filter_array[:len(filter_array) - try_cnt])
+            filters = "".join(filter_array[: len(filter_array) - try_cnt])
 
         random.shuffle(urls)
-        for url in urls:
-            if Avatar.is_url_image(url):
-                return url
-
-        return None
+        return urls
 
     @staticmethod
     def is_url_image(image_url: str) -> bool:

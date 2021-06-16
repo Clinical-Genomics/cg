@@ -167,9 +167,10 @@ class AddHandler(BaseHandler):
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
-        while True:
-            avatar_url = Avatar.get_avatar_url(internal_id)
-            if self.find_family_by_avatar_url(avatar_url=avatar_url) is None:
+        avatar_urls = Avatar.get_avatar_urls(internal_id)
+        avatar_url = None
+        for avatar_url in avatar_urls:
+            if avatar_url and self.find_family_by_avatar_url(avatar_url=avatar_url) is None:
                 break
             else:
                 LOG.debug(f"{avatar_url} already used - trying another url")
