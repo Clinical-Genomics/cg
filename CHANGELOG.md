@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.3.0]
+### Added
+- Report samples that won't be sent to caesar when running 'cg deliver ticket'
+
 ## [22.2.2]
 ### Changed
 - Header in indexreport to versal letters
