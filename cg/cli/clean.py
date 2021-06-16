@@ -10,6 +10,7 @@ from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
+    clean_rsync_dirs,
     mip_past_run_dirs,
     mutant_past_run_dirs,
     fluffy_past_run_dirs,
@@ -31,6 +32,7 @@ clean.add_command(balsamic_past_run_dirs)
 clean.add_command(fluffy_past_run_dirs)
 clean.add_command(mip_past_run_dirs)
 clean.add_command(mutant_past_run_dirs)
+clean.add_command(clean_rsync_dirs)
 
 
 @clean.command("hk-alignment-files")

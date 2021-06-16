@@ -119,12 +119,12 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         raise click.Abort
 
 
-@click.command("clean-rsync-dir")
+@click.command("clean-rsync-dirs")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
-def clean_rsync_dir(context: CGConfig, dry_run: bool = False, yes: bool = False) -> None:
+def clean_rsync_dirs(context: CGConfig, dry_run: bool, yes: bool) -> None:
     """Remove deliver workflow commands"""
 
     now: dt.datetime = dt.datetime.now()
