@@ -122,18 +122,15 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @click.command("clean-rsync-dirs")
 @OPTION_YES
 @OPTION_DRY
+@ARGUMENT_BEFORE_STR
 @click.pass_obj
-def clean_rsync_dirs(context: CGConfig, dry_run: bool, yes: bool) -> None:
+def clean_rsync_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
     """Remove deliver workflow commands"""
-
-    now: dt.datetime = dt.datetime.now()
-    removal_delta: dt.datetime = now - dt.timedelta(days=7)
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
 
     for process in rsync_api.rsync_processes:
-        ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
-        if removal_delta > ctime:
+        if rsync_api.process_ready_to_clean(before=int(before_str), process=process):
             if dry_run:
                 LOG.info(f"Would have removed {process}")
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):

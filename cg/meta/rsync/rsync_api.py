@@ -1,5 +1,5 @@
 """Module for building the rsync command to send files to customer inbox on caesar"""
-import datetime
+import datetime as dt
 import glob
 import logging
 import yaml
@@ -56,9 +56,23 @@ class RsyncAPI(MetaAPI):
         with config_path.open("w") as yaml_file:
             yaml.safe_dump(content, yaml_file, indent=4, explicit_start=True)
 
+    @staticmethod
+    def process_ready_to_clean(before: int, process: Path) -> bool:
+        """Return True if analysis is old enough to be cleaned"""
+
+        now: dt.datetime = dt.datetime.now()
+        removal_delta: dt.datetime = now - dt.timedelta(days=before)
+
+        ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
+
+        if removal_delta > ctime:
+            return True
+        else:
+            return False
+
     def set_log_dir(self, ticket_id: int) -> None:
         if self.log_dir.as_posix() == self.base_path.as_posix():
-            timestamp = datetime.datetime.now()
+            timestamp = dt.datetime.now()
             timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
             folder_name = Path("_".join([str(ticket_id), timestamp_str]))
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
