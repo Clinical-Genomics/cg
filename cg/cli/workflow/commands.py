@@ -137,7 +137,7 @@ def clean_rsync_dirs(context: CGConfig, dry_run: bool, yes: bool) -> None:
             if dry_run:
                 LOG.info(f"Would have removed {process}")
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):
-                LOG.info(f"removing ")
+                LOG.info(f"Removing {process.as_posix()}")
                 shutil.rmtree(process, ignore_errors=True)
         else:
             LOG.info(f"{process.as_posix()} is still young")
