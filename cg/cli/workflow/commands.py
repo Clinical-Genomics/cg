@@ -122,7 +122,6 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @click.command("clean-rsync-dirs")
 @OPTION_YES
 @OPTION_DRY
-@ARGUMENT_BEFORE_STR
 @click.pass_obj
 def clean_rsync_dirs(context: CGConfig, dry_run: bool, yes: bool) -> None:
     """Remove deliver workflow commands"""
