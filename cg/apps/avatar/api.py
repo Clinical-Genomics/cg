@@ -1,4 +1,5 @@
 import random
+from time import sleep
 from typing import Optional
 
 import petname
@@ -34,6 +35,7 @@ class Avatar:
                 filters=filters,
                 verify_status_only=False,
             )
+            sleep(random.randint(0, len(filter_array) - try_cnt))
             if not urls:
                 query = f"{animal}"
                 urls = bing_image_urls(
