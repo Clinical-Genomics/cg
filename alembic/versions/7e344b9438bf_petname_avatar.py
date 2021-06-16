@@ -46,32 +46,6 @@ def find_family_by_avatar_url(avatar_url, session):
 def upgrade():
     op.add_column("family", sa.Column("avatar_url", sa.TEXT))
 
-    bind = op.get_bind()
-    session = orm.Session(bind=bind)
-
-    for family in session.query(Family).order_by(Family.ordered_at.desc()):
-
-        print(f"Processing family: {str(family)}")
-
-        for cnt in range(random.randint(0, 10)):
-            sleep(1)
-            print(".", end="", flush=True)
-
-        avatar_urls = Avatar.get_avatar_urls(family.internal_id)
-        for avatar_url in avatar_urls:
-            if (
-                avatar_url
-                and find_family_by_avatar_url(avatar_url=avatar_url, session=session) is None
-            ):
-                break
-            else:
-                print(f"{avatar_url} already used - trying another url")
-
-        family.avatar_url = avatar_url
-        print(f"Altered family: {str(family)}")
-
-        session.commit()
-
 
 def downgrade():
     op.drop_column("family", "avatar_url")
