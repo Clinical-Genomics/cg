@@ -58,9 +58,7 @@ def family(
         LOG.info("Update action: %s -> %s", case_obj.action or "NA", action)
         case_obj.action = action
     if avatar_url:
-        if not Avatar.is_url_image(avatar_url) or status_db.find_family_by_avatar_url(
-            avatar_url
-        ):
+        if not Avatar.is_url_image(avatar_url) or status_db.find_family_by_avatar_url(avatar_url):
             avatar_url = Avatar.get_avatar_url(case_obj.internal_id)
         LOG.info("Update avatar_url: %s -> %s", case_obj.avatar_url or "NA", avatar_url)
         case_obj.avatar_url = avatar_url
