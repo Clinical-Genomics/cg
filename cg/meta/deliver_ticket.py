@@ -91,6 +91,9 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
+    def report_missing_samples(self, ticket_id: int) -> list:
+
+
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
         date: datetime.datetime = self.generate_date_tag(ticket_id=ticket_id)
