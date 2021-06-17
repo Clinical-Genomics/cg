@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [NG.NG.NG]
+## [22.3.0]
 ### Added
 - Add a command to upload both to Statina and ftp 
 - Adds a command to run the first command for all available cases
