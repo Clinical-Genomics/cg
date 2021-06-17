@@ -157,3 +157,25 @@ def test_check_if_concatenation_is_needed_part_deux(
 
     # THEN concatenation is needed
     assert is_concatenation_needed is True
+
+
+def test_get_all_samples_from_ticket(
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_nr
+):
+    """Test to get all samples from a ticket"""
+    # GIVEN a deliver_ticket API
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+
+    # GIVEN a case object
+    case_obj = analysis_store.family(case_id)
+
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
+    DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
+
+    # WHEN checking which samples there are in the ticket
+    all_samples = deliver_ticket_api.get_all_samples_from_ticket(ticket_id=ticket_nr)
+
+    # THEN concatenation is needed
+    assert "child" in all_samples
+    assert "father" in all_samples
+    assert "mother" in all_samples
