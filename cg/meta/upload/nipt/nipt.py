@@ -152,5 +152,7 @@ class NiptUploadAPI:
             headers={"Content-Type": "application/json"},
             data=statina_files.json(exclude_none=True),
         )
+        if not response.ok:
+            raise
 
         LOG.info("nipt output: %s", response.text)
