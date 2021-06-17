@@ -2,13 +2,14 @@
 
 import logging
 
+from cg.meta.upload.nipt import NiptUploadAPI
 from click.testing import CliRunner
 
 from cg.cli.upload.nipt.ftp import nipt_upload_all, nipt_upload_case
 from cg.models.cg_config import CGConfig
 
 
-def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog):
+def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
@@ -16,7 +17,9 @@ def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplo
     case_id = "angrybird"
 
     # WHEN adding a result file of a specified NIPT case
-    # result = cli_runner.invoke(nipt_upload_case, ["--dry-run", case_id], obj=upload_context)
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
@@ -24,7 +27,7 @@ def test_nipt_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplo
     assert result.exit_code == 0
 
 
-def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog):
+def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
@@ -32,6 +35,9 @@ def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, c
     case_id = "angrybird"
 
     # WHEN adding a result file of a specified NIPT case (dry run)
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_case, ["--dry-run", case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
@@ -39,13 +45,16 @@ def test_nipt_upload_case_dry(upload_context: CGConfig, cli_runner: CliRunner, c
     assert result.exit_code == 0
 
 
-def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog):
+def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
     # GIVEN adding all available NIPT case results
 
     # WHEN adding a result file of a all available NIPT cases
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_all, obj=upload_context)
 
     # THEN the NIPT upload should start and exit without errors
@@ -53,13 +62,16 @@ def test_nipt_upload_all(upload_context: CGConfig, cli_runner: CliRunner, caplog
     assert result.exit_code == 0
 
 
-def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog):
+def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, caplog, mocker):
     """Tests CLI command to upload a single case"""
 
     caplog.set_level(logging.DEBUG)
     # GIVEN adding all available NIPT case results
 
     # WHEN adding a result file of a all available NIPT cases (dry run)
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_all, ["--dry-run"], obj=upload_context)
 
     # THEN the NIPT upload should start and exit without errors
@@ -68,7 +80,7 @@ def test_nipt_upload_all_dry(upload_context: CGConfig, cli_runner: CliRunner, ca
 
 
 def test_nipt_upload_case_not_changing_uploaded_at(
-    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
     """Tests CLI command to upload a single case"""
 
@@ -81,6 +93,9 @@ def test_nipt_upload_case_not_changing_uploaded_at(
     assert not analysis_obj.uploaded_at
 
     # WHEN adding a result file of a specified NIPT case
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
 
     # THEN set analysis.upload_started_at in the database

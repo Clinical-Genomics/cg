@@ -1,8 +1,11 @@
 """Test module cg.cli.upload.nipt"""
 import datetime
+import json
 import logging
 
 from cg.cli.upload.nipt.base import nipt_upload_case, nipt_upload_all
+from cg.meta.upload.nipt import NiptUploadAPI
+from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
@@ -14,7 +17,14 @@ NIPT_STATINA_SUCCESS = "*** Statina UPLOAD START ***"
 NIPT_FTP_SUCCESS = "*** NIPT FTP UPLOAD START ***"
 
 
-def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers):
+class MockStatinaUploadFiles:
+    def json(self, *args, **kwargs):
+        return ""
+
+
+def test_nipt_statina_upload_case(
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
+):
     """Tests CLI command to upload a single case"""
 
     # GIVEN a specified NIPT case that has its analysis stored but is not yet uploaded
@@ -26,7 +36,14 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading of a specified NIPT case
-    result = cli_runner.invoke(nipt_upload_case, [case_id], obj=upload_context)
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    result = cli_runner.invoke(
+        nipt_upload_case, [case_id], obj=upload_context, catch_exceptions=False
+    )
 
     # THEN both the nipt ftp and statina upload should start
     assert NIPT_CASE_SUCCESS in caplog.text
@@ -44,7 +61,7 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
 
 
 def test_nipt_statina_upload_case_dry_run(
-    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
     """Tests CLI command to upload a single case"""
 
@@ -57,6 +74,11 @@ def test_nipt_statina_upload_case_dry_run(
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading a specified NIPT case with dry-run flag set
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_case, [case_id, "--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
@@ -74,7 +96,9 @@ def test_nipt_statina_upload_case_dry_run(
     assert result.exit_code == 0
 
 
-def test_nipt_statina_upload_auto(upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers):
+def test_nipt_statina_upload_auto(
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
+):
     """Tests CLI command to upload a single case"""
 
     # GIVEN a case ready for upload
@@ -89,6 +113,11 @@ def test_nipt_statina_upload_auto(upload_context: CGConfig, cli_runner: CliRunne
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading all NIPT cases
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
@@ -107,7 +136,7 @@ def test_nipt_statina_upload_auto(upload_context: CGConfig, cli_runner: CliRunne
 
 
 def test_nipt_statina_upload_auto_dry_run(
-    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
     """Tests CLI command to upload a single case"""
 
@@ -123,6 +152,11 @@ def test_nipt_statina_upload_auto_dry_run(
     assert not analysis_obj.uploaded_at
 
     # WHEN uploading all NIPT cases
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
     result = cli_runner.invoke(nipt_upload_all, ["--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
