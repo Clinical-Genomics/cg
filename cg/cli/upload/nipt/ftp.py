@@ -22,8 +22,6 @@ def ftp():
 @click.pass_obj
 def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
     """Upload the results file of a NIPT case"""
-    status_db: Store = context.status_db
-
     LOG.info("*** NIPT FTP UPLOAD START ***")
 
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
