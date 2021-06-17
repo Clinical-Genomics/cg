@@ -16,6 +16,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -220,6 +221,13 @@ def fixture_genotype_config() -> dict:
 
 
 # Api fixtures
+
+
+@pytest.fixture(name="rsync_api")
+def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
+    """RsyncAPI fixture"""
+    _rsync_api: RsyncAPI = RsyncAPI(config=cg_context)
+    return _rsync_api
 
 
 @pytest.fixture(name="genotype_api")

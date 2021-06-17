@@ -1,10 +1,10 @@
+import click
 import datetime as dt
 import logging
 import shutil
-import datetime as dt
+
 from pathlib import Path
 
-import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
@@ -19,10 +19,7 @@ from cg.store import Store
 from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
-    "-d", "--dry-run", help="Print command to console without executing", is_flag=True
-)
-OPTION_DRY_RUN_DIR = click.option(
-    "-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned"
+    "-d", "--dry-run", help="Simulate process without executing", is_flag=True
 )
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
@@ -119,12 +116,12 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         raise click.Abort
 
 
-@click.command("clean-rsync-dirs")
+@click.command("rsync-past-run-dirs")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
-def clean_rsync_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
+def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
     """Remove deliver workflow commands"""
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
@@ -135,6 +132,7 @@ def clean_rsync_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: boo
         if rsync_api.process_ready_to_clean(before=before, process=process):
             if dry_run:
                 LOG.info(f"Would have removed {process}")
+                continue
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):
                 LOG.info(f"Removing {process.as_posix()}")
                 shutil.rmtree(process, ignore_errors=True)
@@ -144,7 +142,7 @@ def clean_rsync_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: boo
 
 @click.command("clean-run-dir")
 @OPTION_YES
-@OPTION_DRY_RUN_DIR
+@OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
@@ -178,7 +176,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 
 @click.command("past-run-dirs")
 @OPTION_YES
-@OPTION_DRY_RUN_DIR
+@OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def past_run_dirs(
@@ -208,7 +206,7 @@ def past_run_dirs(
 
 @click.command("balsamic-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY_RUN_DIR
+@OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_past_run_dirs(
@@ -223,7 +221,7 @@ def balsamic_past_run_dirs(
 
 @click.command("fluffy-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY_RUN_DIR
+@OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def fluffy_past_run_dirs(
@@ -238,7 +236,7 @@ def fluffy_past_run_dirs(
 
 @click.command("mip-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY_RUN_DIR
+@OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_past_run_dirs(
@@ -253,7 +251,7 @@ def mip_past_run_dirs(
 
 @click.command("mutant-past-run-dirs")
 @OPTION_YES
-@OPTION_DRY_RUN_DIR
+@OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mutant_past_run_dirs(

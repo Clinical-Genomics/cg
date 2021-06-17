@@ -8,6 +8,7 @@ from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants.priority import SlurmQos
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
@@ -30,7 +31,7 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.priority: str = "low"
+        self.priority: str = SlurmQos.LOW
         self.pipeline: str = str(Pipeline.RSYNC)
 
     @property
@@ -41,8 +42,12 @@ class RsyncAPI(MetaAPI):
     @property
     def rsync_processes(self) -> Iterable[Path]:
         """Yield existing rsync processes"""
-        for process in self.base_path.iterdir():
-            yield process
+        yield from self.base_path.iterdir()
+
+    @staticmethod
+    def format_covid_destination_path(covid_destination_path: str, customer_id: str) -> str:
+        """Return destination path of covid report"""
+        return covid_destination_path % customer_id
 
     @staticmethod
     def get_trailblazer_config(slurm_job_id: int) -> Dict[str, List[str]]:
@@ -62,10 +67,7 @@ class RsyncAPI(MetaAPI):
 
         ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
 
-        if before > ctime:
-            return True
-        else:
-            return False
+        return before > ctime
 
     def set_log_dir(self, ticket_id: int) -> None:
         if self.log_dir.as_posix() == self.base_path.as_posix():
@@ -118,6 +120,19 @@ class RsyncAPI(MetaAPI):
             data_analysis=Pipeline.RSYNC,
         )
 
+    def format_covid_report_path(self, case: models.Family, ticket_id: int) -> str:
+        """Return a formatted of covid report path"""
+        covid_report_options: List[str] = glob.glob(
+            self.covid_report_path % (str(case.internal_id), ticket_id)
+        )
+        if not covid_report_options:
+            LOG.error(
+                f"No report file could be found with path"
+                f" {self.covid_report_path % (str(case.internal_id), ticket_id)}!"
+            )
+            raise CgError()
+        return covid_report_options[0]
+
     def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir"""
         log_dir: Path = self.log_dir
@@ -138,22 +153,13 @@ class RsyncAPI(MetaAPI):
         customer_id: str = cases[0].customer.internal_id
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
-            covid_report_options: List[str] = glob.glob(
-                self.covid_report_path % (str(cases[0].internal_id), ticket_id)
-            )
-            if not covid_report_options:
-                LOG.error(
-                    f"No report file could be found with path"
-                    f" {self.covid_report_path % (str(cases[0].internal_id), ticket_id)}!"
-                )
-                raise CgError()
-            covid_report_path: str = covid_report_options[0]
-            covid_destination_path: str = self.covid_destination_path % customer_id
             commands = COVID_RSYNC.format(
                 source_path=source_path,
                 destination_path=destination_path,
-                covid_report_path=covid_report_path,
-                covid_destination_path=covid_destination_path,
+                covid_report_path=self.format_covid_report_path(case=cases[0], ticket_id=ticket_id),
+                covid_destination_path=self.format_covid_destination_path(
+                    self.covid_destination_path, customer_id=customer_id
+                ),
                 log_dir=self.log_dir,
             )
         else:
