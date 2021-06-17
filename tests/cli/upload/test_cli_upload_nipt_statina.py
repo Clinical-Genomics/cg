@@ -16,7 +16,6 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     case_id = "angrybird"
 
     # WHEN adding a result file of a specified NIPT case
-    # result = cli_runner.invoke(nipt_upload_case, ["--dry-run", case_id], obj=upload_context)
     result = cli_runner.invoke(batch, [case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors
