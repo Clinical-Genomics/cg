@@ -117,7 +117,7 @@ class DeliverTicketAPI(MetaAPI):
         if len(missing_samples) > 0:
             LOG.info("No data delivered for sample(s):")
             for sample in missing_samples:
-                print(sample)
+                LOG.info(sample)
         else:
             LOG.info("Data has been delivered for all samples")
 
