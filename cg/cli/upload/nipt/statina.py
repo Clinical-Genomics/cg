@@ -27,8 +27,6 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool):
     nipt_upload_api.set_dry_run(dry_run=dry_run)
     statina_files: StatinaUploadFiles = nipt_upload_api.get_statina_files(case_id=case_id)
     if dry_run:
-        LOG.info(
-            f"Found file paths for statina upload: {statina_files.json(exclude_none=True)}"
-        )
+        LOG.info(f"Found file paths for statina upload: {statina_files.json(exclude_none=True)}")
     else:
         nipt_upload_api.upload_to_statina_database(statina_files=statina_files)
