@@ -114,12 +114,6 @@ def test_run_rsync_on_slurm(
     mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
 
-    mocker.patch.object(RsyncAPI, "format_covid_report_path")
-    RsyncAPI.format_covid_report_path.return_value = "."
-
-    mocker.patch.object(RsyncAPI, "format_covid_destination_path")
-    RsyncAPI.format_covid_destination_path.return_value = "."
-
     # WHEN the destination path is created
     sbatch_number: int = rsync_api.run_rsync_on_slurm(ticket_id=ticket_number, dry_run=True)
 
