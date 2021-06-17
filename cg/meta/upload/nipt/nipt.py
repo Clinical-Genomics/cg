@@ -148,7 +148,7 @@ class NiptUploadAPI:
         """Upload nipt data via rest-API."""
 
         response: Response = requests.post(
-            url=f"{self.statina_host}/insert/batch", json=statina_files.json(exclude_none=True)
+            url=f"{self.statina_host}/insert/batch", data=statina_files.dict(exclude_none=True)
         )
 
         LOG.info("nipt output: %s", response.text)
