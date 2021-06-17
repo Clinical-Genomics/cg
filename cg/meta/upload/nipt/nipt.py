@@ -101,7 +101,10 @@ class NiptUploadAPI:
 
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
-        analysis_obj.uploaded_at = dt.datetime.now()
+
+        if not self.dry_run:
+            analysis_obj.uploaded_at = dt.datetime.now()
+            self.status_db.commit()
 
         return analysis_obj
 
@@ -110,7 +113,10 @@ class NiptUploadAPI:
 
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
-        analysis_obj.upload_started_at = dt.datetime.now()
+
+        if not self.dry_run:
+            analysis_obj.upload_started_at = dt.datetime.now()
+            self.status_db.commit()
 
         return analysis_obj
 
