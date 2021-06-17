@@ -29,17 +29,12 @@ def nipt_upload_case(context: CGConfig, case_id: str, dry_run: bool):
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    try:
-        hk_results_file: str = nipt_upload_api.get_housekeeper_results_file(case_id=case_id)
-        results_file: Path = nipt_upload_api.get_results_file_path(hk_results_file)
-        LOG.info(f"Results file found: {results_file}")
-        LOG.info(f"Starting ftp upload!")
-        nipt_upload_api.upload_to_ftp_server(results_file)
-        LOG.info(f"Upload ftp finished!")
-        if not dry_run:
-            status_db.commit()
-    except Exception as error:
-        LOG.error(f"{error}")
+    hk_results_file: str = nipt_upload_api.get_housekeeper_results_file(case_id=case_id)
+    results_file: Path = nipt_upload_api.get_results_file_path(hk_results_file)
+    LOG.info(f"Results file found: {results_file}")
+    LOG.info(f"Starting ftp upload!")
+    nipt_upload_api.upload_to_ftp_server(results_file)
+    LOG.info(f"Upload ftp finished!")
 
 
 @ftp.command("all")
