@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.3.1]
+### Fixed
+Fixed statina load bug where missing headers prevented data from being read
+
 ## [22.3.0]
 ### Added
 - Add a command to upload both to Statina and ftp 
