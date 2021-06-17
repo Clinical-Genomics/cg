@@ -104,7 +104,7 @@ class NiptUploadAPI:
 
         if not self.dry_run:
             analysis_obj.uploaded_at = dt.datetime.now()
-            self.status_db.comit()
+            self.status_db.commit()
 
         return analysis_obj
 
