@@ -21,7 +21,7 @@ __________ DO NOT TOUCH ___________
 
 ## [22.4.0]
 ### Fixed
-- cg will no longer run slurm jobs on the gpu nodes
+- cg will no longer run rsync on the gpu nodes
 
 ## [22.3.1]
 ### Fixed
