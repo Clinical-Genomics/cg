@@ -293,7 +293,9 @@ def fixture_fastq_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory) -> Generator[Path]:
+def fixture_project_dir(
+    tmpdir_factory,
+) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored"""
     my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
     yield my_tmpdir
