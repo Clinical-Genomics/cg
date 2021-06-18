@@ -81,24 +81,20 @@ class RsyncAPI(MetaAPI):
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         return cases
 
-    def get_source_path(self, ticket_id: int) -> str:
+    def get_source_and_destination_paths(self, ticket_id: int) -> Dict[str, str]:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        source_and_destination_paths = {}
         if not cases:
             LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
             raise CgError()
         customer_id: str = cases[0].customer.internal_id
-        delivery_source_path: str = (
+        source_and_destination_paths["delivery_source_path"]: Path = (
             Path(self.delivery_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
         )
-        return delivery_source_path
-
-    def get_destination_path(self, ticket_id: int) -> str:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
-        customer_id: str = cases[0].customer.internal_id
-        rsync_destination_path: str = (
+        source_and_destination_paths["rsync_destination_path"]: Path = (
             Path(self.destination_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
         )
-        return rsync_destination_path
+        return source_and_destination_paths
 
     def add_to_trailblazer_api(
         self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket_id: int, dry_run: bool
@@ -147,15 +143,16 @@ class RsyncAPI(MetaAPI):
     def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
         self.set_log_dir(ticket_id=ticket_id)
         self.create_log_dir(dry_run=dry_run)
-        source_path: str = self.get_source_path(ticket_id=ticket_id)
-        destination_path: str = self.get_destination_path(ticket_id=ticket_id)
+        source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
+            ticket_id=ticket_id
+        )
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         customer_id: str = cases[0].customer.internal_id
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
             commands = COVID_RSYNC.format(
-                source_path=source_path,
-                destination_path=destination_path,
+                source_path=source_and_destination_paths["delivery_source_path"],
+                destination_path=source_and_destination_paths["rsync_destination_path"],
                 covid_report_path=self.format_covid_report_path(case=cases[0], ticket_id=ticket_id),
                 covid_destination_path=self.format_covid_destination_path(
                     self.covid_destination_path, customer_id=customer_id
@@ -164,7 +161,8 @@ class RsyncAPI(MetaAPI):
             )
         else:
             commands = RSYNC_COMMAND.format(
-                source_path=source_path, destination_path=destination_path
+                source_path=source_and_destination_paths["delivery_source_path"],
+                destination_path=source_and_destination_paths["rsync_destination_path"],
             )
         error_function = ERROR_RSYNC_FUNCTION.format()
         sbatch_info = {
