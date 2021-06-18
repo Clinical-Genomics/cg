@@ -32,7 +32,7 @@ class RsyncAPI(MetaAPI):
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
         self.priority: str = SlurmQos.LOW
-        self.pipeline: str = str(Pipeline.RSYNC)
+        self.pipeline: str = Pipeline.RSYNC
 
     @property
     def trailblazer_config_path(self) -> Path:

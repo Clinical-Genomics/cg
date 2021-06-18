@@ -291,9 +291,9 @@ def fixture_fastq_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory):
+def fixture_project_dir(tmpdir_factory) -> Path:
     """Path to a temporary directory where intermediate files can be stored"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
+    my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
     yield my_tmpdir
     shutil.rmtree(str(my_tmpdir))
 
@@ -554,6 +554,12 @@ def fixture_timestamp_today() -> dt.datetime:
 def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
     """Return a time stamp of yesterdays date in date time format"""
     return timestamp_today - dt.timedelta(days=1)
+
+
+@pytest.fixture(scope="function", name="timestamp_in_2_weeks")
+def fixture_timestamp_in_2_weeks(timestamp_today: dt.datetime) -> dt.datetime:
+    """Return a time stamp 14 days ahead in time"""
+    return timestamp_today + dt.timedelta(days=14)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
