@@ -9,8 +9,7 @@ SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
 #SBATCH --qos={priority}
-#SBATCH --exclude=compute-0
-#SBATCH --exclude=compute-1
+#SBATCH --exclude=gpu-compute-0-[0-1]
 
 set -eu -o pipefail
 
