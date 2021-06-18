@@ -19,10 +19,19 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.3.0]
+## [22.4.0]
 ### Added
 - Added rsync processes into trailblazer
 - Added cleanup of rsync directories
+
+## [22.3.1]
+### Fixed
+Fixed statina load bug where missing headers prevented data from being read
+
+## [22.3.0]
+### Added
+- Add a command to upload both to Statina and ftp 
+- Adds a command to run the first command for all available cases
 
 ## [22.2.2]
 ### Changed

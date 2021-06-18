@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group()
 def statina():
-    """Upload NIPT result files"""
+    """Upload NIPT result files to Statina"""
     pass
 
 
@@ -25,13 +25,8 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool):
 
     nipt_upload_api = NiptUploadAPI(configs)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
-    try:
-        statina_files: StatinaUploadFiles = nipt_upload_api.get_statina_files(case_id=case_id)
-        if dry_run:
-            LOG.info(
-                f"Found file paths for statina upload: {statina_files.json(exclude_none=True)}"
-            )
-        else:
-            nipt_upload_api.upload_to_statina_database(statina_files=statina_files)
-    except Exception as error:
-        LOG.error(f"{error}")
+    statina_files: StatinaUploadFiles = nipt_upload_api.get_statina_files(case_id=case_id)
+    if dry_run:
+        LOG.info(f"Found file paths for statina upload: {statina_files.json(exclude_none=True)}")
+    else:
+        nipt_upload_api.upload_to_statina_database(statina_files=statina_files)
