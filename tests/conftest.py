@@ -6,10 +6,12 @@ import datetime as dt
 import json
 import logging
 import os
-import shutil
-from pathlib import Path
-
 import pytest
+import shutil
+
+from pathlib import Path
+from typing import Generator
+
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -291,7 +293,7 @@ def fixture_fastq_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory) -> Path:
+def fixture_project_dir(tmpdir_factory) -> Generator[Path]:
     """Path to a temporary directory where intermediate files can be stored"""
     my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
     yield my_tmpdir

@@ -131,11 +131,11 @@ def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: 
     for process in rsync_api.rsync_processes:
         if rsync_api.process_ready_to_clean(before=before, process=process):
             if yes or click.confirm(f"Do you want to remove all files in {process}?"):
-                LOG.info(f"Removing {process.as_posix()}")
-                shutil.rmtree(process, ignore_errors=True)
                 if dry_run:
                     LOG.info(f"Would have removed {process}")
                     continue
+                LOG.info(f"Removing {process.as_posix()}")
+                shutil.rmtree(process, ignore_errors=True)
         else:
             LOG.info(f"{process.as_posix()} is still young")
 
