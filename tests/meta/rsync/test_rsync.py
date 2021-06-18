@@ -10,7 +10,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import models
 
 
-def test_get_source_path(
+def test_get_source_and_destination_paths(
     mutant_case: models.Family, rsync_api: RsyncAPI, ticket_number: int, mocker
 ):
     """Test generating the source path before rsync"""
@@ -23,10 +23,19 @@ def test_get_source_path(
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the source path is created
-    source_path = rsync_api.get_source_path(ticket_id=ticket_number)
+    source_and_destination_paths = rsync_api.get_source_and_destination_paths(
+        ticket_id=ticket_number
+    )
 
     # THEN the source path ends with a customer id, followed by "inbox" and a ticket id
-    assert source_path.endswith(f"/cust000/inbox/{str(ticket_number)}/")
+    assert source_and_destination_paths["delivery_source_path"].endswith(
+        f"/cust000/inbox/{str(ticket_number)}/"
+    )
+    # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
+    assert (
+        source_and_destination_paths["rsync_destination_path"]
+        == f"server.name.se:/some/cust000/inbox/{str(ticket_number)}/"
+    )
 
 
 def test_get_source_path_no_case(rsync_api: RsyncAPI, ticket_number: int, mocker, helpers, caplog):
@@ -39,29 +48,10 @@ def test_get_source_path_no_case(rsync_api: RsyncAPI, ticket_number: int, mocker
 
     with pytest.raises(CgError):
         # WHEN the source path is collected
-        rsync_api.get_source_path(ticket_id=ticket_number)
+        rsync_api.get_source_and_destination_paths(ticket_id=ticket_number)
 
         # THEN the source path ends with a customer id, followed by "inbox" and a ticket id
         assert "Could not find any cases for ticket_id" in caplog.text
-
-
-def test_get_destination_path(
-    mutant_case: models.Family, rsync_api: RsyncAPI, ticket_number: int, helpers, mocker
-):
-    """Test generating the destination path before rsync"""
-
-    # GIVEN a valid Sars-cov-2 case
-    case: models.Family = mutant_case
-
-    # GIVEN file exists
-    mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
-    RsyncAPI.get_all_cases_from_ticket.return_value = [case]
-
-    # WHEN the destination path is created
-    destination_path: str = rsync_api.get_destination_path(ticket_id=ticket_number)
-
-    # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
-    assert destination_path == f"server.name.se:/some/cust000/inbox/{str(ticket_number)}/"
 
 
 def test_set_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
@@ -105,11 +95,11 @@ def test_run_rsync_on_slurm(
     case: models.Family = microsalt_case
 
     # GIVEN paths needed to run rsync
-    mocker.patch.object(RsyncAPI, "get_source_path")
-    RsyncAPI.get_source_path.return_value = Path("/path/to/source")
-
-    mocker.patch.object(RsyncAPI, "get_destination_path")
-    RsyncAPI.get_destination_path.return_value = Path("/path/to/destination")
+    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
+    RsyncAPI.get_source_and_destination_paths.return_value = {
+        "delivery_source_path": Path("/path/to/source"),
+        "rsync_destination_path": Path("/path/to/destination"),
+    }
 
     mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
