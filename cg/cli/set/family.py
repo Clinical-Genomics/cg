@@ -37,7 +37,7 @@ LOG = logging.getLogger(__name__)
 def family(
     context: CGConfig,
     action: Optional[str],
-    avatar_url: str,
+    avatar_url: Optional[str],
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[str],
