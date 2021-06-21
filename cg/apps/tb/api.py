@@ -135,7 +135,7 @@ class TrailblazerAPI:
         out_dir: str,
         priority: str,
         email: str = None,
-        data_analysis: str = None,
+        data_analysis: Pipeline = None,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,

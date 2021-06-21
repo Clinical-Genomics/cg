@@ -15,7 +15,7 @@ from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYN
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
-from cgmodels.cg.constants import Pipeline
+from cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 
