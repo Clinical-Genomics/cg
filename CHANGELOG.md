@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Added
+- Avatars for cases
 
 ## [22.4.1]
 ### Fixed
@@ -114,7 +117,7 @@ Fixed statina load bug where missing headers prevented data from being read
 ### Fixed
 - gisaid get region and lab from sample udfs
 - gisaid adjusting for new fasta consensus file in housekeeper
-- gisaid removing failing tests 
+- gisaid removing failing tests
 
 ### Changed
 ### Fixed
@@ -153,7 +156,6 @@ Fixed statina load bug where missing headers prevented data from being read
 ## [21.7.1]
 ### Fixed
 - Fixed bug when checking if flowcell projects has been renamed
-
 
 ## [21.7.0]
 ### Added
@@ -276,14 +278,12 @@ Add uploaded to vogue date to analysis table
 Only select potential analyses to upload that have not been uploaded
 
 ## [21.0.0]
-
 ### Changed
 - Add support for balsamic 7.x.x
 - Rework Balsamic server configurations
 
 ### Fixed
 - Upload to scout now possible for all analysis types through cg upload scout
-
 
 ## [20.26.2]
 ### Added
@@ -311,6 +311,7 @@ Only select potential analyses to upload that have not been uploaded
 - gisaid uppload support via cli
 - gisaid API
 
+## [20.22.0]
 ### Added
 - Add command `cg get analysis` to view analysis information
 
