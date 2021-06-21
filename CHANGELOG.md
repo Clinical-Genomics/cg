@@ -23,6 +23,15 @@ __________ DO NOT TOUCH ___________
 ### Added
 - Avatars for cases
 
+## [22.3.1]
+### Fixed
+Fixed statina load bug where missing headers prevented data from being read
+
+## [22.3.0]
+### Added
+- Add a command to upload both to Statina and ftp 
+- Adds a command to run the first command for all available cases
+
 ## [22.2.2]
 ### Changed
 - Header in indexreport to versal letters
@@ -100,6 +109,9 @@ __________ DO NOT TOUCH ___________
 - gisaid get region and lab from sample udfs
 - gisaid adjusting for new fasta consensus file in housekeeper
 - gisaid removing failing tests
+
+### Changed
+### Fixed
 
 ## [21.12.0]
 ### Added
