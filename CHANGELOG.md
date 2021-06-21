@@ -23,6 +23,15 @@ __________ DO NOT TOUCH ___________
 ### Added
 - Avatars for cases
 
+## [22.4.1]
+### Fixed
+- Statina upload api call to raise error when server response is not ok
+
+
+## [22.4.0]
+### Fixed
+- cg will no longer run rsync on the gpu nodes
+
 ## [22.3.1]
 ### Fixed
 Fixed statina load bug where missing headers prevented data from being read
@@ -275,7 +284,6 @@ Only select potential analyses to upload that have not been uploaded
 
 ### Fixed
 - Upload to scout now possible for all analysis types through cg upload scout
-
 
 ## [20.26.2]
 ### Added
