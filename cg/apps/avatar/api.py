@@ -70,12 +70,16 @@ class Avatar:
     def _split_petname(cls, merged_name: str) -> (str, str):
 
         found_adj = ""
-        for adjective in petname.adjectives:
+        sorted_adjectives = sorted(petname.adjectives, key=len, reverse=True)
+        sorted_pets = sorted(petname.names, key=len, reverse=True)
+        for adjective in sorted_adjectives:
             if adjective in merged_name:
                 found_adj = adjective
+                break
         found_pet = ""
-        for pet in petname.names:
+        for pet in sorted_pets:
             if pet in merged_name:
                 found_pet = pet
+                break
 
         return found_adj, found_pet
