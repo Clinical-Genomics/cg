@@ -299,7 +299,6 @@ def fixture_project_dir(
     """Path to a temporary directory where intermediate files can be stored"""
     my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
     yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
 
 
 @pytest.fixture(scope="function")
