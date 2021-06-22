@@ -7,6 +7,7 @@ from typing import Any, List, Optional
 from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
+from cg.constants.tb import AnylysisStatus
 from cg.constants.tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -308,12 +309,6 @@ class MipAnalysisAPI(AnalysisAPI):
         sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
         return sample_info.mip_version
 
-    def is_analysis_finished(self, sample_info_path: Path) -> bool:
-        """Return True if analysis is finished"""
-        sample_info_raw = yaml.safe_load(sample_info_path.open())
-        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
-        return sample_info.is_finished
-
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
@@ -321,7 +316,7 @@ class MipAnalysisAPI(AnalysisAPI):
         for case_object in self.get_running_cases():
             if (
                 self.trailblazer_api.get_latest_analysis_status(case_id=case_object.internal_id)
-                == "completed"
+                == AnylysisStatus.COMPLETED
             ):
                 finished_cases.append(case_object)
 
