@@ -9,6 +9,7 @@ SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
 #SBATCH --qos={priority}
+#SBATCH {exclude}
 
 set -eu -o pipefail
 
