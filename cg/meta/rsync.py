@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants.priority import RSYNC_ACCOUNT_TO_QOS
+from cg.constants.priority import SLURM_ACCOUNT_TO_QOS
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
@@ -96,8 +96,8 @@ class RsyncAPI(MetaAPI):
             commands = RSYNC_COMMAND.format(
                 source_path=source_path, destination_path=destination_path
             )
-        if RSYNC_ACCOUNT_TO_QOS[self.account]:
-            priority = RSYNC_ACCOUNT_TO_QOS[self.account]
+        if SLURM_ACCOUNT_TO_QOS[self.account]:
+            priority = SLURM_ACCOUNT_TO_QOS[self.account]
         else:
             priority = "low"
         sbatch_info = {
