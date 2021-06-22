@@ -73,12 +73,12 @@ class Avatar:
         sorted_adjectives = sorted(petname.adjectives, key=len, reverse=True)
         sorted_pets = sorted(petname.names, key=len, reverse=True)
         for adjective in sorted_adjectives:
-            if adjective in merged_name:
+            if merged_name.startswith(adjective):
                 found_adj = adjective
                 break
         found_pet = ""
         for pet in sorted_pets:
-            if pet in merged_name:
+            if merged_name.endswith(pet):
                 found_pet = pet
                 break
 
