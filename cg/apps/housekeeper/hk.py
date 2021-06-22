@@ -242,9 +242,9 @@ class HousekeeperAPI:
             raise HousekeeperVersionMissingError
         file_obj = self.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
         print(file_obj.full_path)
-        self._store.include_file(version_obj=version_obj, file_obj=file_obj)
+        self.include_file(version_obj=version_obj, file_obj=file_obj)
         print("hej")
-        self._store.commit()
+        self.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
         version_obj: Version = self.last_version(case_id)
