@@ -19,14 +19,30 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.4.0]
+## [22.6.0]
 ### Added
 - Added rsync processes into trailblazer
 - Added cleanup of rsync directories
 
+[22.5.1]
+### Fixed
+- Avatar name lookup problem
+
+[22.5.0]
+### Added
+- Avatars for cases
+
+[22.4.1]
+### Fixed
+- Statina upload api call to raise error when server response is not ok
+
+## [22.4.0]
+### Fixed
+- cg will no longer run rsync on the gpu nodes
+
 ## [22.3.1]
 ### Fixed
-Fixed statina load bug where missing headers prevented data from being read
+- Fixed statina load bug where missing headers prevented data from being read
 
 ## [22.3.0]
 ### Added
