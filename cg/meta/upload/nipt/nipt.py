@@ -10,7 +10,7 @@ from requests import Response
 import paramiko
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.exc import HousekeeperFileMissingError
+from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -152,5 +152,7 @@ class NiptUploadAPI:
             headers={"Content-Type": "application/json"},
             data=statina_files.json(exclude_none=True),
         )
+        if not response.ok:
+            raise StatinaAPIHTTPError(response.text)
 
         LOG.info("nipt output: %s", response.text)
