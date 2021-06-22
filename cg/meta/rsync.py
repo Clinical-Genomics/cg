@@ -95,7 +95,10 @@ class RsyncAPI(MetaAPI):
             commands = RSYNC_COMMAND.format(
                 source_path=source_path, destination_path=destination_path
             )
-        error_function = ERROR_RSYNC_FUNCTION.format()
+        if QOS[self.account]:
+            priority = QOS[self.account]
+        else:
+            priority = "low"
         sbatch_info = {
             "job_name": "_".join([str(ticket_id), "rsync"]),
             "account": self.account,
@@ -105,9 +108,9 @@ class RsyncAPI(MetaAPI):
             "email": self.mail_user,
             "hours": 24,
             "commands": commands,
-            "error": error_function,
+            "error": ERROR_RSYNC_FUNCTION.format(),
             "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
-            "priority": QOS[self.account],
+            "priority": priority,
         }
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
