@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import date
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from housekeeper.store.models import File
 import tempfile
@@ -22,6 +22,7 @@ from cg.exc import (
     AccessionNumerMissingError,
     GisaidUploadFailedError,
     InvalidFastaError,
+    HousekeeperFileMissingError,
 )
 
 LOG = logging.getLogger(__name__)
@@ -256,9 +257,12 @@ class GisaidAPI:
 
     def manage_completion_file_data(self, case_id: str, accession_numbers: Dict[str, str]) -> None:
         """Merging old completion file data with new"""
-        completion_file: Path = self.housekeeper_api.find_file_in_latest_version(
+        completion_file: Optional[File] = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["komplettering"]
         )
+        if not completion_file:
+            msg = f"completion file missing for bundle {case_id}"
+            raise HousekeeperFileMissingError(message=msg)
         new_completion_data: List[List[str]] = self.get_completion_file_data(
             completion_file=completion_file, completion_data=accession_numbers
         )

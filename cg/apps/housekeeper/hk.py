@@ -246,13 +246,10 @@ class HousekeeperAPI:
         print("hej")
         self._store.commit()
 
-    def find_file_in_latest_version(self, case_id: str, tags: list) -> Path:
+    def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
         version_obj: Version = self.last_version(case_id)
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
         file: File = self._store.files(version=version_obj.id, tags=tags).first()
-        if not file:
-            msg = f"File with tags {', '.join(tags)} for bundle {case_id} missing"
-            raise HousekeeperFileMissingError(message=msg)
-        return Path(file.full_path)
+        return file
