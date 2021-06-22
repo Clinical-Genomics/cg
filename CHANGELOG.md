@@ -30,6 +30,10 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
 
+## [22.5.1]
+### Fixed
+- Avatar name lookup problem 
+
 ## [22.5.0]
 ### Added
 - Avatars for cases
