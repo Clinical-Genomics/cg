@@ -319,7 +319,10 @@ class MipAnalysisAPI(AnalysisAPI):
         and is ready to be stored in Housekeeper"""
         finished_cases: List[models.Family] = []
         for case_object in self.get_running_cases():
-            if self.trailblazer_api.get_latest_analysis_status(case_id=case_object.internal_id):
+            if (
+                self.trailblazer_api.get_latest_analysis_status(case_id=case_object.internal_id)
+                == "completed"
+            ):
                 finished_cases.append(case_object)
 
         return finished_cases

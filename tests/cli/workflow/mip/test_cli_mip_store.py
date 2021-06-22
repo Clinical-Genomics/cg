@@ -3,6 +3,7 @@ from cg.cli.workflow.mip_dna.base import store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store import Store
 from click.testing import CliRunner
 
 
@@ -135,7 +136,7 @@ def test_cli_store_available_case_is_running(
 ):
     caplog.set_level("INFO")
     mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
-
+    store_api: Store = dna_mip_context.status_db
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is "running"
@@ -161,9 +162,9 @@ def test_cli_store_available_case_is_running(
     mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")
     MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
 
-    # GIVEN a finished case analysis
-    mocker.patch.object(MipDNAAnalysisAPI, "is_analysis_finished")
-    MipDNAAnalysisAPI.is_analysis_finished.return_value = True
+    # GIVEN that the mip case is completed in trailblazer
+    mocker.patch.object(MipDNAAnalysisAPI, "get_cases_to_store")
+    MipDNAAnalysisAPI.get_cases_to_store.return_value = [store_api.family(internal_id=mip_case_id)]
 
     # WHEN running command
     result = cli_runner.invoke(store_available, [], obj=dna_mip_context)
