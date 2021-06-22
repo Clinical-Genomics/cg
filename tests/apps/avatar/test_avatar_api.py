@@ -8,13 +8,13 @@ from cg.apps.avatar.api import Avatar
 def test_split_petname():
     """Test to instantiate a avatar api"""
     # GIVEN a merged petname
-    merged_petname = "justhusky"
+    merged_petname = "simpleox"
 
     # WHEN splitting the petname
-    split_petname = Avatar._split_petname(merged_petname)
+    split_adjective, split_pet = Avatar._split_petname(merged_petname)
 
     # THEN the parts of the petname should be the same as the original merged one
-    assert split_petname[0] + split_petname[1] == merged_petname
+    assert split_adjective + split_pet == merged_petname
 
 
 @pytest.mark.parametrize("adjective", ["apt", "adapted"])

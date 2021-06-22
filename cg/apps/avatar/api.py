@@ -36,7 +36,7 @@ class Avatar:
                 filters=filters,
                 verify_status_only=False,
             )
-            sleep(secrets.SystemRandom().randint(0, len(filter_array) - try_cnt))
+            sleep(secrets.SystemRandom().randint(0, min(len(filter_array) - try_cnt, 1)))
             if not urls:
                 query = f"{animal}"
                 urls = bing_image_urls(
@@ -73,12 +73,12 @@ class Avatar:
         sorted_adjectives = sorted(petname.adjectives, key=len, reverse=True)
         sorted_pets = sorted(petname.names, key=len, reverse=True)
         for adjective in sorted_adjectives:
-            if adjective in merged_name:
+            if merged_name.startswith(adjective):
                 found_adj = adjective
                 break
         found_pet = ""
         for pet in sorted_pets:
-            if pet in merged_name:
+            if merged_name.endswith(pet):
                 found_pet = pet
                 break
 

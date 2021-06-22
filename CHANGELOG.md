@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.5.1]
+### Fixed
+- Avatar name lookup problem 
+
 ## [22.5.0]
 ### Added
 - Avatars for cases
