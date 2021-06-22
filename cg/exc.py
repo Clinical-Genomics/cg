@@ -207,3 +207,7 @@ class EmailNotSentError(CgError):
 
 class GisaidUploadFailedError(CgError):
     """Raised when gisaid upload fails"""
+
+
+class StatinaAPIHTTPError(CgError):
+    """Raised when Statina REST API response code is not 200"""

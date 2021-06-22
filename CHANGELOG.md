@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.3.0]
+## [22.6.0]
 ### Added
 - email functionality
 
@@ -29,6 +29,28 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: Accession numbers will be parsed from the log file 
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+## [22.5.0]
+### Added
+- Avatars for cases
+
+## [22.4.1]
+### Fixed
+- Statina upload api call to raise error when server response is not ok
+
+
+## [22.4.0]
+### Fixed
+- cg will no longer run rsync on the gpu nodes
+
+## [22.3.1]
+### Fixed
+Fixed statina load bug where missing headers prevented data from being read
+
+## [22.3.0]
+### Added
+- Add a command to upload both to Statina and ftp 
+- Adds a command to run the first command for all available cases
 
 ## [22.2.2]
 ### Changed
@@ -106,7 +128,7 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - gisaid get region and lab from sample udfs
 - gisaid adjusting for new fasta consensus file in housekeeper
-- gisaid removing failing tests 
+- gisaid removing failing tests
 
 ### Changed
 ### Fixed
@@ -145,7 +167,6 @@ __________ DO NOT TOUCH ___________
 ## [21.7.1]
 ### Fixed
 - Fixed bug when checking if flowcell projects has been renamed
-
 
 ## [21.7.0]
 ### Added
@@ -268,14 +289,12 @@ Add uploaded to vogue date to analysis table
 Only select potential analyses to upload that have not been uploaded
 
 ## [21.0.0]
-
 ### Changed
 - Add support for balsamic 7.x.x
 - Rework Balsamic server configurations
 
 ### Fixed
 - Upload to scout now possible for all analysis types through cg upload scout
-
 
 ## [20.26.2]
 ### Added
@@ -303,6 +322,7 @@ Only select potential analyses to upload that have not been uploaded
 - gisaid uppload support via cli
 - gisaid API
 
+## [20.22.0]
 ### Added
 - Add command `cg get analysis` to view analysis information
 
