@@ -235,14 +235,15 @@ class HousekeeperAPI:
 
     def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
         version_obj: Version = self.last_version(case_id)
-        LOG.info(case_id)
+        print("hoho")
+        print(case_id)
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
         file_obj = self.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
-        LOG.info(file_obj.full_path)
+        print(file_obj.full_path)
         self._store.include_file(version_obj=version_obj, file_obj=file_obj)
-        LOG.info("hej")
+        print("hej")
         self._store.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Path:
