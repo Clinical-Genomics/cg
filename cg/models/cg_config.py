@@ -134,7 +134,6 @@ class MicrosaltConfig(BaseModel):
 class GisaidConfig(CommonAppConfig):
     submitter: str
     log_dir: str
-    sender_email: str
     logwatch_email: EmailStr
 
 
@@ -152,6 +151,11 @@ class DataDeliveryConfig(BaseModel):
     mail_user: str
 
 
+class EmailBaseSettings(BaseModel):
+    sender_email: EmailStr
+    smtp_server: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -159,6 +163,7 @@ class CGConfig(BaseModel):
     bed_path: str
     delivery_path: str
     max_flowcells: Optional[int]
+    email_base_settings: EmailBaseSettings
 
     # Base APIs that always should exist
     status_db_: Store = None

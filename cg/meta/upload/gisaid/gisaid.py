@@ -39,7 +39,8 @@ class GisaidAPI:
         self.gisaid_binary: str = config.gisaid.binary_path
         self.gisaid_log_dir: str = config.gisaid.log_dir
         self.log_watch: str = config.gisaid.logwatch_email
-        self.sender_email = config.gisaid.sender_email
+        self.email_base_settings = config.email_base_settings
+
         self.process = Process(binary=self.gisaid_binary)
 
     def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
