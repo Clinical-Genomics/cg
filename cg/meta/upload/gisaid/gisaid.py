@@ -76,12 +76,12 @@ class GisaidAPI:
 
     def get_gisaid_fasta(self, gisaid_samples: List[GisaidSample], case_id: str) -> List[str]:
         """Fetch a fasta files form house keeper for batch upload_results_to_gisaid to gisaid"""
-        fasta_file: Path = self.housekeeper_api.find_file_in_latest_version(
+        fasta_file: File = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["consensus"]
         )
 
         gisaid_delivery_fasta = []
-        with open(str(fasta_file)) as handle:
+        with open(str(fasta_file.full_path)) as handle:
             fasta_lines = handle.readlines()
             for line in fasta_lines:
                 if line[0] == ">":
