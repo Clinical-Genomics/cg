@@ -80,7 +80,7 @@ class GisaidAPI:
         )
 
         gisaid_delivery_fasta = []
-        with open(str(fasta_file.absolute())) as handle:
+        with open(str(fasta_file)) as handle:
             fasta_lines = handle.readlines()
             for line in fasta_lines:
                 if line[0] == ">":
