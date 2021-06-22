@@ -176,6 +176,7 @@ class RsyncAPI(MetaAPI):
             "priority": self.priority,
             "commands": commands,
             "error": error_function,
+            "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
         }
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
