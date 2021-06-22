@@ -10,6 +10,7 @@ from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
+from cg.constants.tb import AnylysisStatus
 from cg.exc import TrailblazerAPIHTTPError
 
 LOG = logging.getLogger(__name__)
@@ -18,8 +19,14 @@ LOG = logging.getLogger(__name__)
 class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
-    __STARTED_STATUSES = ["completed", "failed", "pending", "running", "error"]
-    __ONGOING_STATUSES = ["pending", "running", "error"]
+    __STARTED_STATUSES = [
+        AnylysisStatus.COMPLETED,
+        AnylysisStatus.FAILED,
+        AnylysisStatus.PENDING,
+        AnylysisStatus.RUNNING,
+        AnylysisStatus.ERROR,
+    ]
+    __ONGOING_STATUSES = [AnylysisStatus.PENDING, AnylysisStatus.RUNNING, AnylysisStatus.ERROR]
 
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
@@ -71,7 +78,7 @@ class TrailblazerAPI:
             "before": str(before) if before else None,
             "is_visible": is_visible,
             "family": family,
-            "data_analysis": str(data_analysis).upper() if data_analysis else None,
+            "data_analysis": data_analysis.upper() if data_analysis else None,
         }
         response = self.query_trailblazer(command="query-analyses", request_body=request_body)
         if response:
