@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.6.0]
+### Fixed
+- QoS will be set to standard for production when running "cg deliver rsync"
+
 ## [22.5.1]
 ### Fixed
 - Avatar name lookup problem 
