@@ -253,7 +253,6 @@ class HousekeeperAPI:
             raise HousekeeperVersionMissingError
         file: File = self._store.files(version=version_obj.id, tags=tags).first()
         if not file:
-            raise HousekeeperFileMissingError(
-                message=f"File with tags {', '.join(tags)} for bundle {case_id} missing"
-            )
+            msg = f"File with tags {', '.join(tags)} for bundle {case_id} missing"
+            raise HousekeeperFileMissingError(message=msg)
         return Path(file.full_path)
