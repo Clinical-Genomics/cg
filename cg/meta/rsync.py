@@ -9,7 +9,7 @@ from typing import List
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
-from cg.meta.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
+from cg.meta.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC, QOS
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
@@ -107,6 +107,7 @@ class RsyncAPI(MetaAPI):
             "commands": commands,
             "error": error_function,
             "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
+            "priority": QOS[self.account],
         }
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)

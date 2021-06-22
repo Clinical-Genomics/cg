@@ -12,3 +12,8 @@ rsync -rvL {covid_report_path} {covid_destination_path}
 ERROR_RSYNC_FUNCTION = """
 echo "Rsync failed"
 """
+
+QOS = {
+    "production": "standard",
+    "development": "low",
+}
