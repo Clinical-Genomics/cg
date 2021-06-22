@@ -10,7 +10,7 @@ from requests import Response
 import paramiko
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
-from cg.exc import HousekeeperFileMissingError
+from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -101,7 +101,10 @@ class NiptUploadAPI:
 
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
-        analysis_obj.uploaded_at = dt.datetime.now()
+
+        if not self.dry_run:
+            analysis_obj.uploaded_at = dt.datetime.now()
+            self.status_db.commit()
 
         return analysis_obj
 
@@ -110,7 +113,10 @@ class NiptUploadAPI:
 
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
-        analysis_obj.upload_started_at = dt.datetime.now()
+
+        if not self.dry_run:
+            analysis_obj.upload_started_at = dt.datetime.now()
+            self.status_db.commit()
 
         return analysis_obj
 
@@ -135,14 +141,18 @@ class NiptUploadAPI:
         return StatinaUploadFiles(
             result_file=results_file.absolute().as_posix(),
             multiqc_report=multiqc_file.absolute().as_posix(),
-            segmental_calls=segmental_calls_file.as_posix(),
+            segmental_calls=segmental_calls_file.parent.as_posix(),
         )
 
     def upload_to_statina_database(self, statina_files: StatinaUploadFiles):
         """Upload nipt data via rest-API."""
 
         response: Response = requests.post(
-            url=f"{self.statina_host}/insert/batch", data=statina_files.json(exclude_none=True)
+            url=f"{self.statina_host}/insert/batch",
+            headers={"Content-Type": "application/json"},
+            data=statina_files.json(exclude_none=True),
         )
+        if not response.ok:
+            raise StatinaAPIHTTPError(response.text)
 
         LOG.info("nipt output: %s", response.text)

@@ -189,3 +189,7 @@ class MultipleFamilyLinksError(CgError):
 
 class FamilyLinkMissingError(CgError):
     """Raised when faimly link missing for a sample"""
+
+
+class StatinaAPIHTTPError(CgError):
+    """Raised when Statina REST API response code is not 200"""
