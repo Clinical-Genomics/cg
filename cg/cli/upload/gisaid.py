@@ -34,3 +34,4 @@ def gisaid(context: CGConfig, case_id: str):
         )
         send_mail(email_info)
         LOG.error("Upload Failed")
+        raise

@@ -12,7 +12,7 @@ from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Version, File
 
-from cg.exc import HousekeeperVersionMissingError
+from cg.exc import HousekeeperVersionMissingError, HousekeeperFileMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -252,4 +252,8 @@ class HousekeeperAPI:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
         file: File = self._store.files(version=version_obj.id, tags=tags).first()
+        if not file:
+            raise HousekeeperFileMissingError(
+                message=f"File with tags {', '.join(tags)} for bundle {case_id} missing"
+            )
         return Path(file.full_path)
