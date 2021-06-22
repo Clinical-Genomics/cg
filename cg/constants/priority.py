@@ -7,13 +7,14 @@ REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
 
 PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 
-RSYNC_ACCOUNT_TO_QOS = {
-    "production": "normal",
-    "development": "low",
-}
-
 
 class SlurmQos(StrEnum):
     LOW: str = "low"
     NORMAL: str = "normal"
     HIGH: str = "high"
+
+
+RSYNC_ACCOUNT_TO_QOS = {
+    "production": SlurmQos.NORMAL,
+    "development": SlurmQos.LOW,
+}
