@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.lims.samplesheet import LimsFlowcellSample
@@ -116,8 +117,8 @@ def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunPa
     return RunParameters(novaseq_run_parameters)
 
 
-@pytest.fixture(name="novaseq_sample_sheet_object")
-def fixture_novaseq_sample_sheet_object(
+@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
+def fixture_novaseq_bcl2fastq_sample_sheet_object(
     flowcell_name: str,
     lims_novaseq_samples: List[LimsFlowcellSample],
     novaseq_run_parameters_object: RunParameters,
@@ -126,4 +127,19 @@ def fixture_novaseq_sample_sheet_object(
         flowcell_id=flowcell_name,
         lims_samples=lims_novaseq_samples,
         run_parameters=novaseq_run_parameters_object,
+        bcl_converter="bcl2fastq",
+    )
+
+
+@pytest.fixture(name="novaseq_dragen_sample_sheet_object")
+def fixture_novaseq_bcl2fastq_sample_sheet_object(
+    flowcell_name: str,
+    lims_novaseq_samples: List[LimsFlowcellSample],
+    novaseq_run_parameters_object: RunParameters,
+) -> SampleSheetCreator:
+    return SampleSheetCreator(
+        flowcell_id=flowcell_name,
+        lims_samples=lims_novaseq_samples,
+        run_parameters=novaseq_run_parameters_object,
+        bcl_converter="dragen",
     )

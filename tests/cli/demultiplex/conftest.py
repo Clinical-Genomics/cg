@@ -3,13 +3,14 @@ import shutil
 from pathlib import Path
 
 import pytest
+from click.testing import CliRunner
+
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
-from click.testing import CliRunner
 from tests.apps.cgstats.conftest import (
     fixture_demultiplexed_flowcell,
     fixture_demultiplexed_runs,
@@ -138,8 +139,8 @@ def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq
     working_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_working_directory)
     shutil.copy(str(existing_flowcell.sample_sheet_path), str(working_flowcell.sample_sheet_path))
     shutil.copy(
-        str(DemultiplexingAPI.get_logfile(existing_flowcell)),
-        str(DemultiplexingAPI.get_logfile(working_flowcell)),
+        str(DemultiplexingAPI.get_stderr_logfile(existing_flowcell)),
+        str(DemultiplexingAPI.get_stderr_logfile(working_flowcell)),
     )
     working_flowcell.copy_complete_path.touch()
     working_flowcell.rta_complete_path.touch()

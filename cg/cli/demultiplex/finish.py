@@ -17,13 +17,14 @@ def finish_group():
 
 
 @finish_group.command(name="all")
+@OPTION_BCL_CONVERTER
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def finish_all_cmd(context: CGConfig, dry_run: bool):
+def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool):
     """Command to post process all demultiplexed flowcells"""
     demux_post_processing_api = DemuxPostProcessingAPI(config=context)
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    demux_post_processing_api.finish_all_flowcells()
+    demux_post_processing_api.finish_all_flowcells(bcl_converter=bcl_converter)
 
 
 @finish_group.command(name="flowcell")

@@ -50,10 +50,12 @@ DEMUX_STATS_PATH = {
     "bcl2fastq": {
         "demultiplexing_stats": Path("Stats") / Path("DemultiplexingStats.xml"),
         "conversion_stats": Path("Stats") / Path("ConversionStats.xml"),
+        "runinfo": None,
     },
     "dragen": {
         "demultiplexing_stats": Path("Reports") / Path("Demultiplex_Stats.csv"),
         "conversion_stats": Path("Reports") / Path("Demultiplex_Stats.csv"),
-        "adapter_metrix_stats": Path("Reports") / Path("AdapterMetrics.csv"),
+        "adapter_metrics_stats": Path("Reports") / Path("Adapter_Metrics.csv"),
+        "runinfo": Path("Reports") / Path("RunInfo.xml"),
     },
 }

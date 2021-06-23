@@ -1,12 +1,14 @@
-"""Get samples with information from demultiplexing"""
 import logging
 from pathlib import Path
 from typing import Dict
 
+from pydantic import BaseModel, validator
+
+from cg.apps.cgstats.dragen_demux_sample import DragenDemuxSample
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
+from cg.models.demultiplex.demux_results import DemuxResults
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-from pydantic import BaseModel, validator
 
 LOG = logging.getLogger(__name__)
 
@@ -143,11 +145,49 @@ class DemuxSample(BaseModel):
         return barcode_stats.one_mismatch_barcode_count or 0
 
 
+def get_dragen_demux_samples(
+    demux_results: DemuxResults,
+    sample_sheet: SampleSheet,
+) -> Dict[int, Dict[str, DragenDemuxSample]]:
+    """Gather information from Dragen demultiplexing results and create samples with the correct
+    information"""
+    LOG.info("Gather post Dragen demultiplexing statistics for demultiplexed samples")
+    demux_samples: Dict[int, Dict[str, DragenDemuxSample]] = {}
+
+    for sample in sample_sheet.samples:
+        if sample.lane not in demux_samples:
+            demux_samples[sample.lane] = {}
+
+        demultiplexing_stats = demux_results.demultiplexing_stats.parsed_stats[sample.lane][
+            sample.sample_id
+        ]
+        adapter_metrics = demux_results.adapter_metrics.parsed_metrics[sample.lane][
+            sample.sample_id
+        ]
+
+        demux_samples[sample.lane][sample.sample_id] = DragenDemuxSample(
+            sample_name=sample.sample_id,
+            flowcell=demux_results.flowcell.flowcell_id,
+            lane=sample.lane,
+            reads=int(demultiplexing_stats["# Reads"]),
+            perfect_reads=int(demultiplexing_stats["# Perfect Index Reads"]),
+            one_mismatch_reads=int(demultiplexing_stats["# One Mismatch Index Reads"]),
+            pass_filter_q30=int(demultiplexing_stats["# of >= Q30 Bases (PF)"]),
+            mean_quality_score=float(demultiplexing_stats["Mean Quality Score (PF)"]),
+            r1_sample_bases=int(adapter_metrics["R1_SampleBases"]),
+            r2_sample_bases=int(adapter_metrics["R2_SampleBases"]),
+            read_length=demux_results.run_info.read_length,
+        )
+
+    return demux_samples
+
+
 def get_demux_samples(
     conversion_stats: ConversionStats, demux_stats_path: Path, sample_sheet: SampleSheet
 ) -> Dict[int, Dict[str, DemuxSample]]:
-    """Gather information from demultiplexing results and create samples with the correct information"""
-    LOG.info("Gather post demux statistics for demuxed samples")
+    """Gather information from demultiplexing results and create samples with the correct
+    information"""
+    LOG.info("Gather post demultiplexing statistics for demultiplexed samples")
     demux_samples: Dict[int, Dict[str, DemuxSample]] = {}
     demux_stats: DemuxStats = DemuxStats(demux_stats_path=demux_stats_path)
     raw_clusters: Dict[int, int] = conversion_stats.raw_clusters_per_lane

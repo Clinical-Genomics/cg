@@ -2,12 +2,15 @@ import datetime
 import logging
 import socket
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, Optional, Union
 
 from pydantic import BaseModel
 from typing_extensions import Literal
 
+from cg.apps.cgstats.parsers.adapter_metrics import AdapterMetrics
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
+from cg.apps.cgstats.parsers.dragen_demultiplexing_stats import DragenDemultiplexingStats
+from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DEMUX_STATS_PATH
 from cg.models.demultiplex.flowcell import Flowcell
@@ -32,6 +35,9 @@ class DemuxResults:
         self.flowcell: Flowcell = flowcell
         self.bcl_converter = bcl_converter
         self._conversion_stats: Optional[ConversionStats] = None
+        self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
+        self._adapter_metrics: Optional[AdapterMetrics] = None
+        self._runinfo: Optional[RunInfo] = None
 
     @property
     def run_name(self) -> str:
@@ -52,11 +58,32 @@ class DemuxResults:
         return socket.gethostname()
 
     @property
-    def conversion_stats(self) -> Optional[ConversionStats]:
+    def conversion_stats(self) -> ConversionStats:
         if self._conversion_stats:
             return self._conversion_stats
         self._conversion_stats = ConversionStats(self.conversion_stats_path)
         return self._conversion_stats
+
+    @property
+    def demultiplexing_stats(self) -> DragenDemultiplexingStats:
+        if self._demultiplexing_stats:
+            return self._demultiplexing_stats
+        self._demultiplexing_stats = DragenDemultiplexingStats(self.demux_stats_path)
+        return self._demultiplexing_stats
+
+    @property
+    def adapter_metrics(self) -> AdapterMetrics:
+        if self._adapter_metrics:
+            return self._adapter_metrics
+        self._adapter_metrics = AdapterMetrics(self.adapter_metrics_path)
+        return self._adapter_metrics
+
+    @property
+    def run_info(self) -> RunInfo:
+        if self._runinfo:
+            return self._runinfo
+        self._runinfo = RunInfo(self.runinfo_path)
+        return self._runinfo
 
     @property
     def conversion_stats_path(self) -> Union[Path, None]:
@@ -69,6 +96,10 @@ class DemuxResults:
     @property
     def adapter_metrics_path(self) -> Path:
         return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["adapter_metrics_stats"]
+
+    @property
+    def runinfo_path(self) -> Path:
+        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["runinfo"]
 
     @property
     def stderr_log_path(self) -> Path:
@@ -236,6 +267,7 @@ class DemuxResults:
 
                     line = line.strip()
                     split_line = line.split(" ")
+                    command_line: str = " ".join(split_line[1:])
                     program = split_line[6]  # get the executed program
 
                 if "bcl2fastq v" in line:
