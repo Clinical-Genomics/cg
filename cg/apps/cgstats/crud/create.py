@@ -197,6 +197,81 @@ def _create_samples(
     return sample_id
 
 
+def _create_dragen_samples(
+    manager: StatsAPI,
+    demux_results: DemuxResults,
+    project_name_to_id: Dict[str, int],
+    demux_id: int,
+    sample_sheet: SampleSheet,
+):
+    """Handles sample creation: creates sample objects and unaligned objects in their respective
+    tabeles in cgstats"""
+
+    demux_samples: Dict[int, dict] = get_dragen_demux_samples(
+        demux_results=demux_results,
+        sample_sheet=sample_sheet,
+    )
+
+    sample: NovaSeqSample
+    for sample in sample_sheet.samples:
+        sample_id = _create_samples(
+            manager=manager, sample=sample, project_name_to_id=project_name_to_id
+        )
+
+        if not sample_id:
+            continue
+
+        unaligned_id: Optional[int] = find.get_unaligned_id(
+            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+        )
+        if not unaligned_id:
+            dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
+            create_dragen_unaligned(
+                manager=manager,
+                demux_sample=dragen_demux_sample,
+                sample_id=sample_id,
+                demux_id=demux_id,
+            )
+
+
+def _create_bcl2fastq_samples(
+    manager: StatsAPI,
+    demux_results: DemuxResults,
+    project_name_to_id: Dict[str, int],
+    demux_id: int,
+    sample_sheet: SampleSheet,
+):
+    """Handles sample creation: creates sample objects and unaligned objects in their respective
+    tabeles in cgstats"""
+
+    demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(
+        conversion_stats=demux_results.conversion_stats,
+        demux_stats_path=demux_results.demux_stats_path,
+        sample_sheet=sample_sheet,
+    )
+
+    sample: NovaSeqSample
+    for sample in sample_sheet.samples:
+        sample_id = _create_samples(
+            manager=manager, sample=sample, project_name_to_id=project_name_to_id
+        )
+
+        if not sample_id:
+            continue
+
+        unaligned_id: Optional[int] = find.get_unaligned_id(
+            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+        )
+        if not unaligned_id:
+            demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
+            create_unaligned(
+                manager=manager,
+                demux_sample=demux_sample,
+                sample_id=sample_id,
+                demux_id=demux_id,
+            )
+
+
 def create_samples(
     manager: StatsAPI,
     demux_results: DemuxResults,
@@ -206,62 +281,13 @@ def create_samples(
     LOG.info("Creating samples for flowcell %s", demux_results.flowcell.flowcell_full_name)
     sample_sheet: SampleSheet = demux_results.flowcell.get_sample_sheet()
 
-    if demux_results.bcl_converter == "dragen":
-        demux_samples: Dict[int, dict] = get_dragen_demux_samples(
-            demux_results=demux_results,
-            sample_sheet=sample_sheet,
-        )
-
-        sample: NovaSeqSample
-        for sample in sample_sheet.samples:
-            sample_id = _create_samples(
-                manager=manager, sample=sample, project_name_to_id=project_name_to_id
-            )
-
-            if not sample_id:
-                continue
-
-            unaligned_id: Optional[int] = find.get_unaligned_id(
-                sample_id=sample_id, demux_id=demux_id, lane=sample.lane
-            )
-            if not unaligned_id:
-                dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][
-                    sample.sample_id
-                ]
-                create_dragen_unaligned(
-                    manager=manager,
-                    demux_sample=dragen_demux_sample,
-                    sample_id=sample_id,
-                    demux_id=demux_id,
-                )
-
-    if demux_results.bcl_converter == "bcl2fastq":
-        demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(
-            conversion_stats=demux_results.conversion_stats,
-            demux_stats_path=demux_results.demux_stats_path,
-            sample_sheet=sample_sheet,
-        )
-
-        sample: NovaSeqSample
-        for sample in sample_sheet.samples:
-            sample_id = _create_samples(
-                manager=manager, sample=sample, project_name_to_id=project_name_to_id
-            )
-
-            if not sample_id:
-                continue
-
-            unaligned_id: Optional[int] = find.get_unaligned_id(
-                sample_id=sample_id, demux_id=demux_id, lane=sample.lane
-            )
-            if not unaligned_id:
-                demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
-                create_unaligned(
-                    manager=manager,
-                    demux_sample=demux_sample,
-                    sample_id=sample_id,
-                    demux_id=demux_id,
-                )
+    create_samples_function = {
+        "dragen": _create_dragen_samples,
+        "bcl2fastq": _create_bcl2fastq_samples,
+    }
+    create_samples_function[demux_results.bcl_converter](
+        manager, demux_results, project_name_to_id, demux_id, sample_sheet
+    )
 
 
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
