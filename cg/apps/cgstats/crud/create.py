@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable, Optional, Union
 
 import sqlalchemy
 
@@ -133,7 +133,6 @@ def create_unaligned(
 def create_dragen_unaligned(
     manager: StatsAPI, demux_sample: DragenDemuxSample, sample_id: int, demux_id: int
 ) -> stats_models.Unaligned:
-    # breakpoint()
     unaligned: stats_models.Unaligned = manager.Unaligned()
     unaligned.sample_id = sample_id
     unaligned.demux_id = demux_id
@@ -173,6 +172,31 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
     return project_name_to_id
 
 
+def _create_samples(
+    manager: StatsAPI, sample: NovaSeqSample, project_name_to_id: Dict[str, int]
+) -> Union[int, None]:
+    """ handles sample objects creation in the table `Sample` in cgstats """
+
+    barcode = (
+        sample.index if not sample.second_index else "+".join([sample.index, sample.second_index])
+    )
+    sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
+    if sample.project == "indexcheck":
+        LOG.debug("Skip adding indexcheck sample to database")
+        return
+    project_id: int = project_name_to_id[sample.project]
+    if not sample_id:
+        sample_object: stats_models.Sample = create_sample(
+            manager=manager,
+            sample_id=sample.sample_id,
+            barcode=barcode,
+            project_id=project_id,
+        )
+        sample_id: int = sample_object.sample_id
+        return sample_id
+    return sample_id
+
+
 def create_samples(
     manager: StatsAPI,
     demux_results: DemuxResults,
@@ -184,41 +208,26 @@ def create_samples(
 
     if demux_results.bcl_converter == "dragen":
         demux_samples: Dict[int, dict] = get_dragen_demux_samples(
-            # demultiplexing_stats=demux_results.demultiplexing_stats,
-            # adapter_metrics=demux_results.adapter_metrics,
             demux_results=demux_results,
             sample_sheet=sample_sheet,
         )
 
         sample: NovaSeqSample
         for sample in sample_sheet.samples:
-            barcode = (
-                sample.index
-                if not sample.second_index
-                else "+".join([sample.index, sample.second_index])
+            sample_id = _create_samples(
+                manager=manager, sample=sample, project_name_to_id=project_name_to_id
             )
-            lane: int = sample.lane
-            sample_id: Optional[int] = find.get_sample_id(
-                sample_id=sample.sample_id, barcode=barcode
-            )
-            if sample.project == "indexcheck":
-                LOG.debug("Skip adding indexcheck sample to database")
-                continue
-            project_id: int = project_name_to_id[sample.project]
+
             if not sample_id:
-                sample_object: stats_models.Sample = create_sample(
-                    manager=manager,
-                    sample_id=sample.sample_id,
-                    barcode=barcode,
-                    project_id=project_id,
-                )
-                sample_id: int = sample_object.sample_id
+                continue
 
             unaligned_id: Optional[int] = find.get_unaligned_id(
                 sample_id=sample_id, demux_id=demux_id, lane=sample.lane
             )
             if not unaligned_id:
-                dragen_demux_sample: DragenDemuxSample = demux_samples[lane][sample.sample_id]
+                dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][
+                    sample.sample_id
+                ]
                 create_dragen_unaligned(
                     manager=manager,
                     demux_sample=dragen_demux_sample,
@@ -235,33 +244,18 @@ def create_samples(
 
         sample: NovaSeqSample
         for sample in sample_sheet.samples:
-            barcode = (
-                sample.index
-                if not sample.second_index
-                else "+".join([sample.index, sample.second_index])
+            sample_id = _create_samples(
+                manager=manager, sample=sample, project_name_to_id=project_name_to_id
             )
-            lane: int = sample.lane
-            sample_id: Optional[int] = find.get_sample_id(
-                sample_id=sample.sample_id, barcode=barcode
-            )
-            if sample.project == "indexcheck":
-                LOG.debug("Skip adding indexcheck sample to database")
-                continue
-            project_id: int = project_name_to_id[sample.project]
+
             if not sample_id:
-                sample_object: stats_models.Sample = create_sample(
-                    manager=manager,
-                    sample_id=sample.sample_id,
-                    barcode=barcode,
-                    project_id=project_id,
-                )
-                sample_id: int = sample_object.sample_id
+                continue
 
             unaligned_id: Optional[int] = find.get_unaligned_id(
                 sample_id=sample_id, demux_id=demux_id, lane=sample.lane
             )
             if not unaligned_id:
-                demux_sample: DemuxSample = demux_samples[lane][sample.sample_id]
+                demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
                 create_unaligned(
                     manager=manager,
                     demux_sample=demux_sample,
