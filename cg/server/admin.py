@@ -186,6 +186,12 @@ class CustomerGroupView(BaseView):
 class FamilyView(BaseView):
     """Admin view for Model.Family"""
 
+    def _list_thumbnail(view, context, model, name):
+        if not model.avatar_url:
+            return ""
+
+        return Markup('<img width="56" height="56" src="%s">' % model.avatar_url)
+
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
     column_exclude_list = ["created_at"]
@@ -196,7 +202,11 @@ class FamilyView(BaseView):
         "data_analysis",
         "data_delivery",
     ]
-    column_formatters = {"internal_id": view_family_sample_link, "priority": view_human_priority}
+    column_formatters = {
+        "internal_id": view_family_sample_link,
+        "priority": view_human_priority,
+        "avatar_url": _list_thumbnail,
+    }
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
     form_extra_fields = {
         "data_analysis": SelectEnumField(enum_class=Pipeline),
@@ -207,14 +217,17 @@ class FamilyView(BaseView):
     def view_family_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
         del unused1, unused2, unused3
-        return (
-            Markup(
+        markup = ""
+        if model.family:
+            if model.family.avatar_url:
+                markup += Markup('<img width="56" height="56" src="%s">' % model.family.avatar_url)
+
+            markup += Markup(
                 "<a href='%s'>%s</a>"
                 % (url_for("family.index_view", search=model.family.internal_id), model.family)
             )
-            if model.family
-            else ""
-        )
+
+        return markup
 
 
 class FlowcellView(BaseView):

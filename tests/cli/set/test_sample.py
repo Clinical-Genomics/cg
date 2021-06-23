@@ -102,7 +102,6 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
         sample,
         [sample_obj.internal_id, "-kv", key, new_value, "-y"],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS
@@ -184,7 +183,6 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
         sample,
         [sample_obj.internal_id, "-kv", key, new_value, "-y"],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN then it should have new_value as attribute key on the sample and in LIMS
