@@ -38,14 +38,18 @@ def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flowcell_full_name:
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")
-def fixture_demux_results(demultiplexed_flowcell: Path, flowcell_object: Flowcell) -> DemuxResults:
+def fixture_bcl2fastq_demux_results(
+    demultiplexed_flowcell: Path, flowcell_object: Flowcell
+) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_flowcell, flowcell=flowcell_object, bcl_converter="bcl2fastq"
     )
 
 
 @pytest.fixture(name="dragen_demux_results")
-def fixture_demux_results(demultiplexed_flowcell: Path, flowcell_object: Flowcell) -> DemuxResults:
+def fixture_dragen_demux_results(
+    demultiplexed_flowcell: Path, flowcell_object: Flowcell
+) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_flowcell, flowcell=flowcell_object, bcl_converter="dragen"
     )

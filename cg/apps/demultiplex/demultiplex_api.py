@@ -12,7 +12,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.priority import SlurmQos
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
-from cg.models.slurm.sbatch import SbatchDragen, SbatchHasta
+from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ class DemultiplexingAPI:
         )
 
         if flowcell.bcl_converter == "bcl2fastq":
-            sbatch_parameters = SbatchHasta(
+            sbatch_parameters = Sbatch(
                 account=self.slurm_account,
                 commands=commands,
                 email=self.mail,

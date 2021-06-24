@@ -12,9 +12,9 @@ from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import (
+    fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_flowcell,
     fixture_demultiplexed_runs,
-    fixture_demux_results,
     fixture_populated_stats_api,
     fixture_stats_api,
 )
