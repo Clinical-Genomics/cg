@@ -18,3 +18,4 @@ class Sbatch(BaseModel):
     priority: SlurmQos = SlurmQos.LOW
     commands: str
     error: Optional[str]
+    exclude: Optional[str] = ""
