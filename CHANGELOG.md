@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.5.2]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
 ## [22.5.1]
 ### Fixed
 - Avatar name lookup problem 
