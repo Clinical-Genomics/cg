@@ -35,7 +35,7 @@ class DragenDemultiplexingStats:
     def parse_stats_file(
         self,
     ) -> Dict[int, dict]:
-        """Parse the Dragen demultiplexing stats file """
+        """Parse the Dragen demultiplexing stats file"""
         LOG.info("Parsing Dragen demultiplexing stats file %s", self.demux_stats_path)
 
         parsed_stats = {}

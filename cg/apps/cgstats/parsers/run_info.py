@@ -13,7 +13,7 @@ class RunInfo:
         self.root = self.parse_file()
 
     def parse_file(self) -> ET.Element:
-        """ Parse the file RunInfo.xml"""
+        """Parse the file RunInfo.xml"""
         LOG.info("Parsing demux conversion stats file %s", self.runinfo_path)
         tree = ET.parse(self.runinfo_path)
         return tree.getroot()

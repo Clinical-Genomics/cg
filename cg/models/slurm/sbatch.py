@@ -18,6 +18,7 @@ class Sbatch(BaseModel):
     error: Optional[str]
     exclude: Optional[str] = ""
 
+
 class SbatchHasta(Sbatch):
     number_tasks: int
     memory: int
