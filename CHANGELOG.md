@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.2.3]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
 ## [22.2.2]
 ### Changed
 - Header in indexreport to versal letters
