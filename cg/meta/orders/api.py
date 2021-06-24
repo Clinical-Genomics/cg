@@ -44,7 +44,13 @@ class OrdersAPI(StatusHandler):
             ORDER_SCHEMES[project].validate(order_in.dict())
         except (ValueError, TypeError) as error:
             raise OrderError(str(error))
-        self._validate_customer_on_imported_samples(project=project, order=order_in)
+
+        self._validate_samples_available_to_customer(
+            project=project, samples=order_in.samples, customer_id=order_in.customer
+        )
+        self._validate_case_names_are_unique(
+            samples=order_in.samples, customer_id=order_in.customer
+        )
 
         # detect manual ticket assignment
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
@@ -261,9 +267,11 @@ class OrdersAPI(StatusHandler):
             )
             sample["verified_organism"] = is_verified
 
-    def _validate_customer_on_imported_samples(self, project: OrderType, order: OrderIn):
-        """Validate that the customer have access to all samples in order"""
-        for sample in order.samples:
+    def _validate_samples_available_to_customer(
+        self, project: OrderType, samples: List[dict], customer_id: str
+    ) -> None:
+        """Validate that the customer have access to all samples"""
+        for sample in samples:
 
             if sample.get("internal_id"):
 
@@ -279,11 +287,29 @@ class OrdersAPI(StatusHandler):
                         f"{sample.get('name')}"
                     )
 
-                existing_sample = self.status.sample(sample.get("internal_id"))
-                data_customer = self.status.customer(order.customer)
+                existing_sample: models.Sample = self.status.sample(sample.get("internal_id"))
+                data_customer: models.Customer = self.status.customer(customer_id)
 
                 if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
                     raise OrderError(f"Sample not available: {sample.get('name')}")
+
+    def _validate_case_names_are_unique(self, samples: List[dict], customer_id: str) -> None:
+        """Validate that the names of all cases are unused for all samples"""
+        customer_obj: models.Customer = self.status.customer(customer_id)
+
+        for sample in samples:
+
+            case_id: str = sample.get("family_name")
+
+            if self._existing_case_or_orders_without_explicit_case_name(sample, case_id):
+                continue
+
+            if self.status.find_family(customer=customer_obj, name=case_id):
+                raise OrderError(f"Case name {case_id} already in use for customer {customer_id}")
+
+    @staticmethod
+    def _existing_case_or_orders_without_explicit_case_name(sample: dict, case_id: str) -> bool:
+        return sample.get("case_internal_id") or not case_id
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
         """Get the submit method to call for the given type of project"""

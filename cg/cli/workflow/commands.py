@@ -9,6 +9,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -186,6 +187,21 @@ def balsamic_past_run_dirs(
     """Clean up of "old" Balsamic case run dirs"""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("fluffy-past-run-dirs")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.argument("before_str")
+@click.pass_context
+def fluffy_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Fluffy case run dirs"""
+
+    context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 

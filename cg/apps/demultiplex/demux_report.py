@@ -11,7 +11,7 @@ from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 MIN_CLUSTER_COUNT = 1000000
-DEMUX_REPORT_HEADER: List[str] = ["barcode", "sample", "type", "lane", "read_count"]
+DEMUX_REPORT_HEADER: List[str] = ["BARCODE", "SAMPLE", "TYPE", "LANE", "READ_COUNT"]
 
 
 class SampleData(BaseModel):

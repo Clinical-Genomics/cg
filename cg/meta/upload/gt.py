@@ -6,6 +6,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.apps.mip.parse_qcmetrics import parse_qcmetrics
+from cg.constants.tags import HkMipAnalysisTag
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -74,7 +75,9 @@ class UploadGenotypesAPI(object):
 
     def get_qcmetrics_file(self, hk_version_obj: housekeeper_models.Version) -> Path:
         """Fetch a qc_metrics file and return the path"""
-        hk_qcmetrics = self.hk.files(version=hk_version_obj.id, tags=["qcmetrics"]).first()
+        hk_qcmetrics = self.hk.files(
+            version=hk_version_obj.id, tags=[HkMipAnalysisTag.QC_METRICS]
+        ).first()
         LOG.debug("Found qc metrics file %s", hk_qcmetrics.full_path)
         return Path(hk_qcmetrics.full_path)
 

@@ -5,7 +5,6 @@ from typing import List, Optional
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
-from cg.constants import Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
 
@@ -162,6 +161,10 @@ class FindBusinessDataHandler(BaseHandler):
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
+
+    def find_family_by_avatar_url(self, avatar_url: str) -> models.Family:
+        """Fetch a family by avatar_url from the database."""
+        return self.Family.query.filter_by(avatar_url=avatar_url).first()
 
     def find_family_by_name(self, name: str) -> models.Family:
         """Find a family by family name within a customer."""

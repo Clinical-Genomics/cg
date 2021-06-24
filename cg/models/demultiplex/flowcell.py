@@ -48,7 +48,7 @@ class Flowcell:
         self.machine_number = int(split_name[2])
         base_name: str = split_name[-1]
         self.base_name = base_name
-        LOG.debug("Set flowcell id to %s", self.flowcell_id)
+        LOG.debug("Set flowcell id to %s", base_name)
         self.flowcell_id = base_name[1:]
         self.flowcell_position = base_name[0]
 
@@ -58,7 +58,7 @@ class Flowcell:
 
     @property
     def sample_sheet_path(self) -> Path:
-        return Path(self.path, "SampleSheet.csv")
+        return self.path / "SampleSheet.csv"
 
     @property
     def run_parameters_path(self) -> Path:
