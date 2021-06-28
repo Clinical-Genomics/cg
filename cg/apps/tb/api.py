@@ -115,6 +115,9 @@ class TrailblazerAPI:
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES
 
+    def is_latest_analysis_completed(self, case_id: str) -> bool:
+        return self.get_latest_analysis_status(case_id=case_id) == AnylysisStatus.COMPLETED
+
     def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
         """Raises TrailblazerAPIHTTPError"""
         request_body = {"analysis_id": analysis_id, "force": force}

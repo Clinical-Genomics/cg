@@ -8,7 +8,6 @@ from cg.apps.mip import parse_trending
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.constants.tags import HkMipAnalysisTag
-from cg.constants.tb import AnylysisStatus
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
@@ -312,12 +311,10 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
-        finished_cases: List[models.Family] = []
-        for case_object in self.get_running_cases():
-            if (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_object.internal_id)
-                == AnylysisStatus.COMPLETED
-            ):
-                finished_cases.append(case_object)
+        finished_cases: List[models.Family] = [
+            case_object
+            for case_object in self.get_running_cases()
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+        ]
 
         return finished_cases
