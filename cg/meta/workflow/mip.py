@@ -308,18 +308,13 @@ class MipAnalysisAPI(AnalysisAPI):
         sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
         return sample_info.mip_version
 
-    def is_analysis_finished(self, sample_info_path: Path) -> bool:
-        """Return True if analysis is finished"""
-        sample_info_raw = yaml.safe_load(sample_info_path.open())
-        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
-        return sample_info.is_finished
-
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
-        finished_cases: List[models.Family] = []
-        for case_object in self.get_running_cases():
-            if self.is_analysis_finished(self.get_sample_info_path(case_object.internal_id)):
-                finished_cases.append(case_object)
+        finished_cases: List[models.Family] = [
+            case_object
+            for case_object in self.get_running_cases()
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+        ]
 
         return finished_cases

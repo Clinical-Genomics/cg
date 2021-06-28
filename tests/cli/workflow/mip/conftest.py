@@ -108,9 +108,11 @@ def fixture_dna_mip_context(
     helpers: StoreHelpers,
     mip_case_ids: dict,
     real_housekeeper_api: HousekeeperAPI,
+    tb_api,
 ) -> CGConfig:
     _store = cg_context.status_db
     cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.trailblazer_api_ = tb_api
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # Add apptag to db
