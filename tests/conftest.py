@@ -6,16 +6,19 @@ import datetime as dt
 import json
 import logging
 import os
-import shutil
-from pathlib import Path
-
 import pytest
+import shutil
+
+from pathlib import Path
+from typing import Generator
+
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -222,6 +225,13 @@ def fixture_genotype_config() -> dict:
 # Api fixtures
 
 
+@pytest.fixture(name="rsync_api")
+def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
+    """RsyncAPI fixture"""
+    _rsync_api: RsyncAPI = RsyncAPI(config=cg_context)
+    return _rsync_api
+
+
 @pytest.fixture(name="genotype_api")
 def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     """
@@ -283,11 +293,12 @@ def fixture_fastq_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory):
+def fixture_project_dir(
+    tmpdir_factory,
+) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
+    my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
     yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
 
 
 @pytest.fixture(scope="function")
@@ -546,6 +557,12 @@ def fixture_timestamp_today() -> dt.datetime:
 def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
     """Return a time stamp of yesterdays date in date time format"""
     return timestamp_today - dt.timedelta(days=1)
+
+
+@pytest.fixture(scope="function", name="timestamp_in_2_weeks")
+def fixture_timestamp_in_2_weeks(timestamp_today: dt.datetime) -> dt.datetime:
+    """Return a time stamp 14 days ahead in time"""
+    return timestamp_today + dt.timedelta(days=14)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
