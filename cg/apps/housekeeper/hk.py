@@ -78,7 +78,9 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def add_file(self, path, version_obj: models.Version, tags, to_archive=False) -> models.File:
+    def add_file(
+        self, path, version_obj: models.Version, tags: list, to_archive: bool = False
+    ) -> models.File:
         """Add a file to the database"""
         if isinstance(tags, str):
             tags = [tags]
@@ -247,5 +249,5 @@ class HousekeeperAPI:
         if not version_obj:
             LOG.info("Family ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
-        file: File = self._store.files(version=version_obj.id, tags=tags).first()
+        file: File = self.files(version=version_obj.id, tags=tags).first()
         return file
