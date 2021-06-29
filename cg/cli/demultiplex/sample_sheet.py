@@ -54,6 +54,7 @@ def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
 @click.pass_obj
 def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_run: bool):
     """Command to create a sample sheet
+    flowcell-name is the flowcell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
 
     Search the flowcell in the directory specified in config
     """

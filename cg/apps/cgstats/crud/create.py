@@ -138,7 +138,7 @@ def create_dragen_unaligned(
     unaligned.demux_id = demux_id
     unaligned.lane = demux_sample.lane
     unaligned.passed_filter_pct = 100.00000
-    unaligned.readcounts = demux_sample.reads
+    unaligned.readcounts = demux_sample.reads * 2
     unaligned.perfect_indexreads_pct = round(
         demux_sample.perfect_reads / demux_sample.reads * 100, 5
     )
