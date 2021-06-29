@@ -19,6 +19,68 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.5.2]
+### Fixed
+- mip check if analysis is complete
+
+## [22.5.1]
+### Fixed
+- Avatar name lookup problem 
+
+## [22.5.0]
+### Added
+- Avatars for cases
+
+## [22.4.1]
+### Fixed
+- Statina upload api call to raise error when server response is not ok
+
+## [22.4.0]
+### Fixed
+- cg will no longer run rsync on the gpu nodes
+
+## [22.3.1]
+### Fixed
+Fixed statina load bug where missing headers prevented data from being read
+
+## [22.3.0]
+### Added
+- Add a command to upload both to Statina and ftp 
+- Adds a command to run the first command for all available cases
+
+## [22.2.2]
+### Changed
+- Header in indexreport to versal letters
+
+## [22.2.1]
+### Added
+- Add more files to the mip-rna delivery
+
+## [22.2.0]
+### Added
+- Add cg clean fluffy_past_run_dirs command
+
+## [22.1.3]
+### Fixed
+- Remove dependency to archived pypi colorclass
+
+## [22.1.2]
+### Changed
+- Use slurm qos class and constants instead of hard coding priority options
+
+## [22.1.1]
+### Fixed
+- Check for case name uniqueness before storing order to avoid half stored orders
+
+## [22.1.0]
+### Changed
+- Rsync now run on slurm instead of the login node
+
+## [22.0.1]
+### Added
+- Added two more cases to BALSAMIC's validation
+### Changed
+- Divided VALIDATION_CASES into their own workflow lists to find them easier 
 
 ## [22.0.0]
 ### Added
@@ -32,7 +94,7 @@ __________ DO NOT TOUCH ___________
 
 ## [21.12.0]
 ### Added
-- cli for upload of data to statina
+- cli for upload of data to Statina
 
 ## [21.11.2]
 ### Fixed
@@ -62,7 +124,7 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - gisaid get region and lab from sample udfs
 - gisaid adjusting for new fasta consensus file in housekeeper
-- gisaid removing failing tests 
+- gisaid removing failing tests
 
 ### Changed
 ### Fixed
@@ -82,7 +144,6 @@ __________ DO NOT TOUCH ___________
 ## [21.8.2]
 ### Changed
 - Add batch-ref flag to command string for fluffy analyses
-
 
 ## [21.8.1]
 ### Changed
@@ -224,14 +285,12 @@ Add uploaded to vogue date to analysis table
 Only select potential analyses to upload that have not been uploaded
 
 ## [21.0.0]
-
 ### Changed
 - Add support for balsamic 7.x.x
 - Rework Balsamic server configurations
 
 ### Fixed
 - Upload to scout now possible for all analysis types through cg upload scout
-
 
 ## [20.26.2]
 ### Added
@@ -259,6 +318,7 @@ Only select potential analyses to upload that have not been uploaded
 - gisaid uppload support via cli
 - gisaid API
 
+## [20.22.0]
 ### Added
 - Add command `cg get analysis` to view analysis information
 

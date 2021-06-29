@@ -19,6 +19,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
+from cg.constants.priority import SlurmQos
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class SlurmConfig(BaseModel):
     account: str
     mail_user: EmailStr
     conda_env: Optional[str]
-    qos: Literal["low", "normal", "high"] = "low"
+    qos: SlurmQos = SlurmQos.LOW
 
 
 class HousekeeperConfig(BaseModel):
@@ -143,6 +144,9 @@ class DataDeliveryConfig(BaseModel):
     covid_destination_path: str
     covid_source_path = str
     covid_report_path: str
+    account: str
+    base_path: str
+    mail_user: str
 
 
 class CGConfig(BaseModel):

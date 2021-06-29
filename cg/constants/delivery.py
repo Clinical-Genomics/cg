@@ -82,13 +82,23 @@ MIP_DNA_ANALYSIS_CASE_TAGS = [
 
 MIP_DNA_ANALYSIS_SAMPLE_TAGS = [{"bam"}, {"bam-index"}, {"cram"}, {"cram-index"}]
 
-MIP_RNA_ANALYSIS_CASE_TAGS = []
+MIP_RNA_ANALYSIS_CASE_TAGS = [
+    {"fusion", "clinical", "pdf"},
+    {"fusion", "research", "pdf"},
+    {"fusion", "vcf"},
+    {"fusion", "vcf-index"},
+    {"vcf-snv-clinical"},
+    {"vcf-snv-clinical-index"},
+    {"vcf-snv-research"},
+    {"vcf-snv-research-index"},
+]
 
 MIP_RNA_ANALYSIS_SAMPLE_TAGS = [
-    {"bam"},
-    {"bam-index"},
     {"cram"},
     {"cram-index"},
+    {"fusion", "vcf"},
+    {"fusion", "vcf-index"},
+    {"salmon-quant"},
 ]
 
 MICROSALT_ANALYSIS_CASE_TAGS = [
