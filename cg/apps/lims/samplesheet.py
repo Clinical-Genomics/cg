@@ -29,6 +29,16 @@ class LimsFlowcellSample(BaseModel):
         allow_population_by_field_name = True
 
 
+class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
+    sample_id: str = Field(..., alias="SampleID")
+    project: str = Field(..., alias="Project")
+
+
+class LimsFlowcellSampleDragen(LimsFlowcellSample):
+    sample_id: str = Field(..., alias="Sample_ID")
+    project: str = Field(..., alias="Sample_Project")
+
+
 def get_placement_lane(lane: str) -> int:
     """Parse out the lane information from an artifact.placement"""
     return int(lane.split(":")[0])
@@ -75,16 +85,6 @@ def get_index(lims: Lims, label: str) -> str:
         assert match.group(1) == sequence
 
     return sequence
-
-
-class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
-    sample_id: str = Field(..., alias="SampleID")
-    project: str = Field(..., alias="Project")
-
-
-class LimsFlowcellSampleDragen(LimsFlowcellSample):
-    sample_id: str = Field(..., alias="Sample_ID")
-    project: str = Field(..., alias="Sample_Project")
 
 
 def flowcell_samples(
