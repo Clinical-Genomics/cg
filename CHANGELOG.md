@@ -24,6 +24,11 @@ __________ DO NOT TOUCH ___________
 - Added rsync processes into trailblazer
 - Added cleanup of rsync directories
 
+## [22.5.2]
+### Fixed
+- mip check if analysis is complete
+
+
 ## [22.5.1]
 ### Fixed
 - Avatar name lookup problem 
