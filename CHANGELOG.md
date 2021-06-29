@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.5.2]
+### Fixed
+- mip check if analysis is complete
+
 ## [22.5.1]
 ### Fixed
 - Avatar name lookup problem 
@@ -30,7 +34,6 @@ __________ DO NOT TOUCH ___________
 ## [22.4.1]
 ### Fixed
 - Statina upload api call to raise error when server response is not ok
-
 
 ## [22.4.0]
 ### Fixed
