@@ -132,7 +132,7 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
-def fixture_novaseq_bcl2fastq_sample_sheet_object(
+def fixture_novaseq_dragen_sample_sheet_object(
     flowcell_name: str,
     lims_novaseq_samples: List[LimsFlowcellSample],
     novaseq_run_parameters_object: RunParameters,
