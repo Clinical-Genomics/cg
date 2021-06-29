@@ -40,5 +40,5 @@ def fixture_demultiplexing_stats_path(bcl2fastq_demux_results: DemuxResults) -> 
 
 
 @pytest.fixture(name="conversion_stats_path")
-def fixture_conversion_stats_path(demux_results: DemuxResults) -> Path:
-    return demux_results.conversion_stats_path
+def fixture_conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
+    return bcl2fastq_demux_results.conversion_stats_path
