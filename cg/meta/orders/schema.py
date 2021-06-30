@@ -131,8 +131,10 @@ MIP_SAMPLE = {
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(str),
+    "subject_id": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 BALSAMIC_SAMPLE = {
@@ -169,8 +171,9 @@ BALSAMIC_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 MIP_RNA_SAMPLE = {
@@ -201,8 +204,9 @@ MIP_RNA_SAMPLE = {
     "time_point": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 EXTERNAL_SAMPLE = {

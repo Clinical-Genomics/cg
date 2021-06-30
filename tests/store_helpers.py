@@ -560,6 +560,19 @@ class StoreHelpers:
         if not case_obj:
             LOG.warning("Could not find case")
             return None
-        case_obj._synopsis = synopsis
-        store.add_commit(case_obj)
+        case_obj.synopsis = synopsis
+        store.commit()
         return case_obj
+
+    @staticmethod
+    def add_phenotype_groups_to_sample(
+        store: Store, sample_id: str, phenotype_groups: str = "a phenotype group"
+    ) -> Optional[models.Sample]:
+        """Function for adding a phenotype group to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.phenotype_groups = phenotype_groups
+        store.commit()
+        return sample_obj

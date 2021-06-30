@@ -71,14 +71,27 @@ def test_include_delivery_report_mip(mip_config_builder: MipConfigBuilder):
 def test_include_synopsis(mip_config_builder: MipConfigBuilder):
     # GIVEN a config builder with some data
 
-    # GIVEN a config without a delivery report
+    # GIVEN a config without synopsis
     assert mip_config_builder.load_config.synopsis is None
 
-    # WHEN including the delivery report
+    # WHEN including the synopsis
     mip_config_builder.include_synopsis()
 
-    # THEN assert that the delivery report was added
+    # THEN assert that the synopsis was added
     assert mip_config_builder.load_config.synopsis is not None
+
+
+def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
+    # GIVEN a config builder with some data
+
+    # GIVEN a config without a phenotype groups
+    assert mip_config_builder.load_config.phenotype_groups is None
+
+    # WHEN including the phenotype groups
+    mip_config_builder.include_phenotype_groups()
+
+    # THEN assert that the phenotype groups were added
+    assert mip_config_builder.load_config.phenotype_groups is not None
 
 
 def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):

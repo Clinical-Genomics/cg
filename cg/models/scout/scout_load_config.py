@@ -65,6 +65,7 @@ class ScoutLoadConfig(BaseModel):
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
     phenotype_terms: Optional[List[str]] = None
+    phenotype_groups: Optional[List[str]] = None
     gene_panels: Optional[List[str]] = None
     default_gene_panels: List[str] = []
     cohorts: Optional[List[str]] = None

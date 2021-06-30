@@ -219,6 +219,11 @@ def fixture_mip_analysis_obj(
         pipeline=Pipeline.MIP_DNA,
         completed_at=timestamp,
     )
+    for link in case_obj.links:
+        helpers.add_phenotype_groups_to_sample(
+            store=analysis_store_trio, sample_id=link.sample.internal_id
+        )
+        print(link.sample.phenotype_groups)
     return analysis_obj
 
 

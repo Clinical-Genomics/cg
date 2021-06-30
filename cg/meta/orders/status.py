@@ -256,6 +256,7 @@ class StatusHandler:
                         name=sample["name"],
                         order=order,
                         ordered=ordered,
+                        phenotype_groups=sample["phenotype_groups"],
                         phenotype_terms=sample["phenotype_terms"],
                         priority=case["priority"],
                         sex=sample["sex"],

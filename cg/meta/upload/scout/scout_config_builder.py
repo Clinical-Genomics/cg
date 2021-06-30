@@ -95,9 +95,25 @@ class ScoutConfigBuilder:
         if phenotype_terms:
             self.load_config.phenotype_terms = list(phenotype_terms)
 
+    def include_phenotype_groups(self) -> None:
+        LOG.info("Adding phenotype groups to scout load config")
+        phenotype_groups: Set[str] = set()
+        link_obj: models.FamilySample
+        for link_obj in self.analysis_obj.family.links:
+            sample_obj: models.Sample = link_obj.sample
+            for phenotype_group in sample_obj.phenotype_groups:
+                LOG.debug(
+                    "Adding group %s from sample %s to phenotype groups",
+                    phenotype_group,
+                    sample_obj.internal_id,
+                )
+                phenotype_groups.add(phenotype_group)
+        if phenotype_groups:
+            self.load_config.phenotype_groups = list(phenotype_groups)
+
     def include_synopsis(self) -> None:
         LOG.info("Adding synopsis string to scout load config")
-        synopsis_string: str = " ".join(self.analysis_obj.family.synopsis)
+        synopsis_string: str = self.analysis_obj.family.synopsis
         if synopsis_string:
             LOG.debug("Adding synopsis string %s", synopsis_string)
             self.load_config.synopsis = synopsis_string

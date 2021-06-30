@@ -18,6 +18,9 @@
       "family_name": "family1",
       "formalin_fixation_time": "1",
       "name": "s1",
+      "phenotype_groups": [
+        ""
+      ],
       "phenotype_terms": [
         ""
       ],
@@ -26,9 +29,7 @@
       "quantity": "2",
       "sex": "male",
       "source": "blood",
-      "synopsis": [
-        ""
-      ],
+      "synopsis": "",
       "tissue_block_size": "small",
       "tumour": true,
       "tumour_purity": "75",
