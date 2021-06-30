@@ -58,6 +58,7 @@ def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_
 
     Search the flowcell in the directory specified in config
     """
+
     LOG.info("Creating sample sheet for flowcell %s", flowcell_name)
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     flowcell_path: Path = demultiplex_api.run_dir / flowcell_name

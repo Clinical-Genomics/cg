@@ -101,6 +101,7 @@ class Flowcell:
 
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format"""
+        breakpoint()
         try:
             get_sample_sheet_from_file(
                 infile=self.sample_sheet_path, sheet_type="S4", bcl_converter=self.bcl_converter

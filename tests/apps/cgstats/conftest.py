@@ -34,6 +34,10 @@ def fixture_populated_stats_api(
     return stats_api
 
 
+# vars(stats_api)
+# {'config': {'SQLALCHEMY_DATABASE_URI': 'sqlite://', 'SQLALCHEMY_BINDS': None, 'SQLALCHEMY_ECHO': False, 'SQLALCHEMY_POOL_SIZE': None, 'SQLALCHEMY_POOL_TIMEOUT': None, 'SQLALCHEMY_POOL_RECYCLE': None, 'SQLALCHEMY_MAX_OVERFLOW': None}, '_engines': {None: Engine(sqlite://)}, '_binds': {None: 'sqlite://'}, 'session_class': <class 'alchy.session.Session'>, 'session': <sqlalchemy.orm.scoping.scoped_session object at 0x7f4bdfcee3d0>, 'Model': <class 'alchy.model.Base'>, 'root_dir': PosixPath('tests/fixtures/DEMUX')}
+
+
 @pytest.fixture(name="demultiplexing_stats_path")
 def fixture_demultiplexing_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
     return bcl2fastq_demux_results.demux_stats_path
