@@ -20,7 +20,8 @@ requests_cache
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
-cgmodels>=0.6
+pandas
+cgmodels>=0.7
 ansi
 bing-image-urls
 coloredlogs
