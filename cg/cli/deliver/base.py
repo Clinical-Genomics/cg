@@ -4,10 +4,12 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+from cg.meta.rsync.rsync_api import RsyncAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
-from cg.meta.rsync import RsyncAPI
+
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -84,9 +86,13 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
     rsynced with this function to the customers inbox on caesar.
     """
-    rsync_api = RsyncAPI(config=context)
-    sbatch_number = rsync_api.run_rsync_on_slurm(ticket_id=ticket_id, dry_run=dry_run)
-    LOG.info("Rsync to caesar running as job %s", sbatch_number)
+    tb_api: TrailblazerAPI = context.trailblazer_api
+    rsync_api: RsyncAPI = RsyncAPI(config=context)
+    slurm_id = rsync_api.run_rsync_on_slurm(ticket_id=ticket_id, dry_run=dry_run)
+    LOG.info("Rsync to caesar running as job %s", slurm_id)
+    rsync_api.add_to_trailblazer_api(
+        tb_api=tb_api, slurm_job_id=slurm_id, ticket_id=ticket_id, dry_run=dry_run
+    )
 
 
 @deliver.command(name="concatenate")

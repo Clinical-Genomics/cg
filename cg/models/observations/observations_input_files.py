@@ -21,7 +21,7 @@ class ObservationsInputFiles(BaseModel):
     pedigree: Path
     snv_gbcf: Path
     snv_vcf: Path
-    sv_vcf: Path = None
+    sv_vcf: Optional[Path] = None
 
     @validator("pedigree", always=True)
     def check_pedigree(cls, value) -> Path:
