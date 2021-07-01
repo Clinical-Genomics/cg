@@ -56,14 +56,14 @@ class FOHMUploadAPI:
     def reports_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases"""
         if not isinstance(self._reports_dataframe, pd.DataFrame):
-            self._reports_dataframe = self.create_joined_dataframe(self._daily_reports_list)
+            self._reports_dataframe = self.create_joined_dataframe(self.daily_reports_list)
         return self._reports_dataframe
 
     @property
     def pangolin_dataframe(self) -> pd.DataFrame:
         """Dataframe with all pangolin rows from multiple cases"""
         if not isinstance(self._pangolin_dataframe, pd.DataFrame):
-            self._pangolin_dataframe = self.create_joined_dataframe(self._daily_pangolin_list)
+            self._pangolin_dataframe = self.create_joined_dataframe(self.daily_pangolin_list)
         return self._pangolin_dataframe
 
     @property
@@ -109,12 +109,11 @@ class FOHMUploadAPI:
         """Add field with internal_id to dataframe
         TODO: get internal_id from sample_id
         """
-        self._aggregation_dataframe["internal_id"] = self._aggregation_dataframe[
-            "provnummer"
-        ].apply(lambda x: self.status_db.samples_by_ids(name=x).first().internal_id)
-        self._aggregation_dataframe["region_lab"] = self._aggregation_dataframe[
-            "internal_id"
-        ].apply(
+
+        self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
+            lambda x: self.status_db.samples_by_ids(name=x).first().internal_id
+        )
+        self.aggregation_dataframe["region_lab"] = self.aggregation_dataframe["internal_id"].apply(
             lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code').split(' ')[0]}"
             f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code').split(' ')[0]}"
         )
