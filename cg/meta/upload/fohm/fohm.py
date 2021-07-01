@@ -55,21 +55,21 @@ class FOHMUploadAPI:
     @property
     def reports_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases"""
-        if not self._reports_dataframe:
+        if not isinstance(self._reports_dataframe, pd.DataFrame):
             self._reports_dataframe = self.create_joined_dataframe(self._daily_reports_list)
         return self._reports_dataframe
 
     @property
     def pangolin_dataframe(self) -> pd.DataFrame:
         """Dataframe with all pangolin rows from multiple cases"""
-        if not self._pangolin_dataframe:
+        if not isinstance(self._pangolin_dataframe, pd.DataFrame):
             self._pangolin_dataframe = self.create_joined_dataframe(self._daily_pangolin_list)
         return self._pangolin_dataframe
 
     @property
     def aggregation_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases, and additional rows to be used for aggregation"""
-        if not self._aggregation_dataframe:
+        if not isinstance(self._aggregation_dataframe, pd.DataFrame):
             self._aggregation_dataframe = self.reports_dataframe.copy()
         return self._aggregation_dataframe
 
