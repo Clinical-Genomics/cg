@@ -115,8 +115,8 @@ class FOHMUploadAPI:
         return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
     def append_metadata_to_aggregation_df(self) -> None:
-        """Add field with internal_id to dataframe
-        TODO: get internal_id from sample_id
+        """
+        Add field with internal_id to dataframe
         """
 
         self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
@@ -128,8 +128,8 @@ class FOHMUploadAPI:
         )
 
     def link_sample_rawdata(self) -> None:
-        """Hardlink samples rawdata files to fohm delivery folder
-        TODO: for each sample_internal_id, find case_id, then find corresponding HK bundle, and link sample rawdata
+        """
+        Hardlink samples rawdata files to fohm delivery folder
         """
         for sample_id in self.aggregation_dataframe["internal_id"]:
             sample_obj: models.Sample = self.status_db.sample(sample_id)
@@ -178,18 +178,12 @@ class FOHMUploadAPI:
                 EmailInfo(
                     receiver_email="maryia.ropart@scilifelab.se",
                     sender_email="fohm.uploader@hasta.scilifelab.se",
+                    smtp_server="hasta.scilifelab.se",
+                    subject="Komplettering",
                     message=" ",
                     file=file,
                 )
             )
-
-    def upload_daily_batch(self):
-        self.sync_delivery_dir(datestr=self.current_datestr)
-        self.send_mail_reports(datestr=self.current_datestr)
-
-    def send_mail(self):
-        """Send one email with one csv to FOHM"""
-        pass
 
     def update_upload_started_at(self, case_id: str):
         """Update timestamp for cases which started being processed as batch"""
