@@ -76,14 +76,12 @@ class FOHMUploadAPI:
     @property
     def daily_reports_list(self) -> List[Path]:
         if not self._daily_reports_list:
-            self._daily_reports_list = [
-                Path(
+            for case_id in self._cases_to_aggregate:
+                self._daily_reports_list.append(
                     self.housekeeper_api.find_file_in_latest_version(
                         case_id=case_id, tags=["komplettering"]
                     ).full_path
-                    for case_id in self._cases_to_aggregate
                 )
-            ]
         return self._daily_reports_list
 
     @property
