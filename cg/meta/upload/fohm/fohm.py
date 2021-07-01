@@ -32,7 +32,7 @@ class FOHMUploadAPI:
     @property
     def current_datestr(self) -> str:
         if not self._current_datestr:
-            self._current_datestr = str(dt.date.today)
+            self._current_datestr = str(dt.date.today())
         return self._current_datestr
 
     @property
