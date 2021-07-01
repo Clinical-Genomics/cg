@@ -1,6 +1,7 @@
+import logging
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import datetime as dt
 import pandas as pd
 
@@ -11,6 +12,8 @@ from cg.models.email import EmailInfo
 from cg.store import Store, models
 from cg.utils.email import send_mail
 from housekeeper.store.models import Version
+
+LOG = logging.getLogger(__name__)
 
 
 class FOHMUploadAPI:
@@ -167,17 +170,15 @@ class FOHMUploadAPI:
         self.append_metadata_to_aggregation_df()
         self.reaggregate_reports()
         self.link_sample_rawdata()
-        self.send_mail_reports()
 
-    def sync_delivery_dir(self, datestr: str = None):
-        pass
-
-    def send_mail_reports(self):
+    def send_mail_reports(self, date: Optional[str] = None):
+        if date:
+            self._current_datestr = date
         for file in self.daily_report_path.iterdir():
             send_mail(
                 EmailInfo(
-                    receiver_email="maryia.ropart@scilifelab.se",
-                    sender_email="fohm.uploader@hasta.scilifelab.se",
+                    receiver_email="clinicaldelivery@scilifelab.se",
+                    sender_email="clinical.genomics@hasta.scilifelab.se",
                     smtp_server="hasta.scilifelab.se",
                     subject="Komplettering",
                     message=" ",
