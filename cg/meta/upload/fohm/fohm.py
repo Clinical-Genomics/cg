@@ -70,8 +70,34 @@ class FOHMUploadAPI:
     def aggregation_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases, and additional rows to be used for aggregation"""
         if not self._aggregation_dataframe:
-            raise NotImplementedError
+            self._aggregation_dataframe = self.reports_dataframe.copy()
         return self._aggregation_dataframe
+
+    @property
+    def daily_reports_list(self) -> List[Path]:
+        if not self._daily_reports_list:
+            self._daily_reports_list = [
+                Path(
+                    self.housekeeper_api.find_file_in_latest_version(
+                        case_id=case_id, tags=["komplettering"]
+                    ).full_path
+                    for case_id in self._cases_to_aggregate
+                )
+            ]
+        return self._daily_reports_list
+
+    @property
+    def daily_pangolin_list(self) -> List[Path]:
+        if not self._daily_pangolin_list:
+            self._daily_pangolin_list = [
+                Path(
+                    self.housekeeper_api.find_file_in_latest_version(
+                        case_id=case_id, tags=["pangolin-typing-fohm"]
+                    ).full_path
+                    for case_id in self._cases_to_aggregate
+                )
+            ]
+        return self._daily_pangolin_list
 
     def create_daily_delivery_folders(self) -> None:
         self.daily_rawdata_path.mkdir(parents=True, exist_ok=True)
@@ -83,23 +109,17 @@ class FOHMUploadAPI:
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
         return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
-    def parse_csv_from_bundles(self, cases: List[str]) -> None:
-        """Get csv to aggregate from all bundles"""
-        for case in cases:
-            print("Will find csv in hk and append to list")
-        pass
-
-    def append_internal_id_to_aggregation_df(self) -> None:
+    def append_metadata_to_aggregation_df(self) -> None:
         """Add field with internal_id to dataframe
         TODO: get internal_id from sample_id
         """
-        pass
-
-    def append_regionlab_to_aggregation_df(self) -> None:
-        """Add field with regionlab to dataframe
-        TODO: get regionlab from internal_id in lims
-        """
-        pass
+        self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
+            lambda x: self.status_db.samples_by_ids(name=x)
+        )
+        self.aggregation_dataframe["region_lab"] = self.aggregation_dataframe["internal_id"].apply(
+            lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code')}"
+            f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code')}"
+        )
 
     def link_sample_rawdata(self) -> None:
         """Hardlink samples rawdata files to fohm delivery folder
@@ -117,6 +137,9 @@ class FOHMUploadAPI:
 
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
         self._cases_to_aggregate = cases
+        self.append_metadata_to_aggregation_df()
+        print(self.aggregation_dataframe)
+
         """Rearrange data and put in delivery dir"""
         pass
 
