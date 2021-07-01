@@ -9,8 +9,8 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.pass_context
-def fohm(context):
+@click.pass_obj
+def fohm(context: CGConfig):
     pass
 
 
