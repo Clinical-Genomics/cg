@@ -87,14 +87,12 @@ class FOHMUploadAPI:
     @property
     def daily_pangolin_list(self) -> List[Path]:
         if not self._daily_pangolin_list:
-            self._daily_pangolin_list = [
-                Path(
+            for case_id in self._cases_to_aggregate:
+                self._daily_pangolin_list.append(
                     self.housekeeper_api.find_file_in_latest_version(
                         case_id=case_id, tags=["pangolin-typing-fohm"]
                     ).full_path
-                    for case_id in self._cases_to_aggregate
                 )
-            ]
         return self._daily_pangolin_list
 
     def create_daily_delivery_folders(self) -> None:
@@ -111,11 +109,12 @@ class FOHMUploadAPI:
         """Add field with internal_id to dataframe
         TODO: get internal_id from sample_id
         """
-        print(self.aggregation_dataframe)
-        self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
-            lambda x: self.status_db.samples_by_ids(name=x)
-        )
-        self.aggregation_dataframe["region_lab"] = self.aggregation_dataframe["internal_id"].apply(
+        self._aggregation_dataframe["internal_id"] = self._aggregation_dataframe[
+            "provnummer"
+        ].apply(lambda x: self.status_db.samples_by_ids(name=x))
+        self._aggregation_dataframe["region_lab"] = self._aggregation_dataframe[
+            "internal_id"
+        ].apply(
             lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code')}"
             f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code')}"
         )
@@ -130,6 +129,7 @@ class FOHMUploadAPI:
         self._cases_to_aggregate = cases
         print(self._cases_to_aggregate)
         print(self.daily_reports_list)
+        print(self.aggregation_dataframe)
         self.append_metadata_to_aggregation_df()
         print(self.aggregation_dataframe)
 
