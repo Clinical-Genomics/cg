@@ -111,7 +111,7 @@ class FOHMUploadAPI:
         """
         self._aggregation_dataframe["internal_id"] = self._aggregation_dataframe[
             "provnummer"
-        ].apply(lambda x: self.status_db.samples_by_ids(name=x))
+        ].apply(lambda x: self.status_db.samples_by_ids(name=x).first().internal_id)
         self._aggregation_dataframe["region_lab"] = self._aggregation_dataframe[
             "internal_id"
         ].apply(
