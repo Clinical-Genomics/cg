@@ -56,18 +56,14 @@ class FOHMUploadAPI:
     def reports_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases"""
         if not isinstance(self._reports_dataframe, pd.DataFrame):
-            self._reports_dataframe = self.create_joined_dataframe(
-                self._daily_reports_list
-            ).sort_values(by=["provnummer"])
+            self._reports_dataframe = self.create_joined_dataframe(self._daily_reports_list)
         return self._reports_dataframe
 
     @property
     def pangolin_dataframe(self) -> pd.DataFrame:
         """Dataframe with all pangolin rows from multiple cases"""
         if not isinstance(self._pangolin_dataframe, pd.DataFrame):
-            self._pangolin_dataframe = self.create_joined_dataframe(
-                self._daily_pangolin_list
-            ).sort_values(by=["taxon"])
+            self._pangolin_dataframe = self.create_joined_dataframe(self._daily_pangolin_list)
         return self._pangolin_dataframe
 
     @property
