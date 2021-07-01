@@ -31,9 +31,9 @@ class FOHMUploadAPI:
 
     @property
     def current_datestr(self) -> str:
-        if not self._current_date:
-            self._current_date = str(dt.date.today)
-        return self._current_date
+        if not self._current_datestr:
+            self._current_datestr = str(dt.date.today)
+        return self._current_datestr
 
     @property
     def daily_bundle_path(self) -> Path:
