@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.6.0]
+## [22.7.0]
 ### Added
 - email functionality
 
@@ -29,6 +29,22 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: Accession numbers will be parsed from the log file 
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+
+
+## [22.6.1]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
+## [22.6.0]
+### Added
+- Added rsync processes into trailblazer
+- Added cleanup of rsync directories
+
+## [22.5.2]
+### Fixed
+- mip check if analysis is complete
+
 
 ## [22.5.1]
 ### Fixed
@@ -42,14 +58,13 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Statina upload api call to raise error when server response is not ok
 
-
 ## [22.4.0]
 ### Fixed
 - cg will no longer run rsync on the gpu nodes
 
 ## [22.3.1]
 ### Fixed
-Fixed statina load bug where missing headers prevented data from being read
+- Fixed statina load bug where missing headers prevented data from being read
 
 ## [22.3.0]
 ### Added
