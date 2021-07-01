@@ -10,6 +10,7 @@ from cg.apps.lims import LimsAPI
 from cg.exc import InvalidFastaError, HousekeeperVersionMissingError
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.meta.upload.gisaid.models import FastaFile, GisaidSample
+from housekeeper.store.models import File
 
 
 def test_get_gisaid_fasta_objects_no_fasta(gisaid_api, dummy_gisaid_sample, mocker):
@@ -23,7 +24,7 @@ def test_get_gisaid_fasta_objects_no_fasta(gisaid_api, dummy_gisaid_sample, mock
         gisaid_api.get_gisaid_fasta(gisaid_samples=[dummy_gisaid_sample], case_id="dummy_case")
 
 
-def test_build_gisaid_fasta_invalid_fata(
+def test_build_gisaid_fasta_invalid_fasta(
     gisaid_api: GisaidAPI,
     four_gisaid_samples: List[GisaidSample],
     invalid_fasta_file,
@@ -33,7 +34,9 @@ def test_build_gisaid_fasta_invalid_fata(
 ):
     # GIVEN four gisaid samples and a hk api populated with a bundle with a consensus file related to the samples
     mocker.patch.object(HousekeeperAPI, "find_file_in_latest_version")
-    HousekeeperAPI.find_file_in_latest_version.return_value = invalid_fasta_file
+    HousekeeperAPI.find_file_in_latest_version.return_value = File(
+        path=invalid_fasta_file.absolute()
+    )
 
     # WHEN running build_gisaid_fasta with the four gisaid samples
 
@@ -54,7 +57,9 @@ def test_build_gisaid_fasta(
 ):
     # GIVEN four gisaid samples and a hk api populated with a bundle with a consensus file related to the samples
     mocker.patch.object(HousekeeperAPI, "find_file_in_latest_version")
-    HousekeeperAPI.find_file_in_latest_version.return_value = valid_housekeeper_fasta_file
+    HousekeeperAPI.find_file_in_latest_version.return_value = File(
+        path=valid_housekeeper_fasta_file.absolute()
+    )
 
     # WHEN running build_gisaid_fasta with the four gisaid samples
     fasta_file: Path = gisaid_api.build_gisaid_fasta(
