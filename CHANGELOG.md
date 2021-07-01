@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [22.6.1]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
 ## [22.6.0]
 ### Added
 - Added rsync processes into trailblazer
