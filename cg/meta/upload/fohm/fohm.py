@@ -7,6 +7,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from housekeeper.store.models import Version
 
 
 class FOHMUploadAPI:
@@ -122,6 +123,14 @@ class FOHMUploadAPI:
         """Hardlink samples rawdata files to fohm delivery folder
         TODO: for each sample_internal_id, find case_id, then find corresponding HK bundle, and link sample rawdata
         """
+        for sample_id in self.aggregation_dataframe["internal_id"]:
+            sample_obj: models.Sample = self.status_db.sample(sample_id)
+            bundle_name = sample_obj.links[0].family.internal_id
+            version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+            files = self.housekeeper_api.files(version=version_obj, tags=[sample_id])
+            for file in files:
+                print(file.full_path)
+
         pass
 
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
