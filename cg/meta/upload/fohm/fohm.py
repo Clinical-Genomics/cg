@@ -7,7 +7,9 @@ import pandas as pd
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
+from cg.models.email import EmailInfo
 from cg.store import Store, models
+from cg.utils.email import send_mail
 from housekeeper.store.models import Version
 
 
@@ -163,13 +165,23 @@ class FOHMUploadAPI:
         self._cases_to_aggregate = cases
         self.create_daily_delivery_folders()
         self.append_metadata_to_aggregation_df()
+        self.reaggregate_reports()
         self.link_sample_rawdata()
+        self.send_mail_reports()
 
     def sync_delivery_dir(self, datestr: str = None):
         pass
 
-    def send_mail_reports(self, datestr: str = None):
-        pass
+    def send_mail_reports(self):
+        for file in self.daily_report_path.iterdir():
+            send_mail(
+                EmailInfo(
+                    receiver_email="maryia.ropart@scilifelab.se",
+                    sender_email="fohm.uploader@hasta.scilifelab.se",
+                    message=" ",
+                    file=file,
+                )
+            )
 
     def upload_daily_batch(self):
         self.sync_delivery_dir(datestr=self.current_datestr)
