@@ -115,8 +115,8 @@ class FOHMUploadAPI:
         self._aggregation_dataframe["region_lab"] = self._aggregation_dataframe[
             "internal_id"
         ].apply(
-            lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code')}"
-            f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code')}"
+            lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code').split(' ')[0]}"
+            f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code').split(' ')[0]}"
         )
 
     def link_sample_rawdata(self) -> None:
