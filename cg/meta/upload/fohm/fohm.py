@@ -137,11 +137,7 @@ class FOHMUploadAPI:
             for file in files:
                 shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
-    def assemble_fohm_delivery(self, cases: List[str]) -> None:
-        """Rearrange data and put in delivery dir"""
-        self._cases_to_aggregate = cases
-        self.append_metadata_to_aggregation_df()
-
+    def reaggregate_reports(self):
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
         for region_lab in unique_regionlabs:
             pangolin_df = self.pangolin_dataframe[
@@ -162,9 +158,12 @@ class FOHMUploadAPI:
                 index=False,
             )
 
+    def assemble_fohm_delivery(self, cases: List[str]) -> None:
+        """Rearrange data and put in delivery dir"""
+        self._cases_to_aggregate = cases
+        self.create_daily_delivery_folders()
+        self.append_metadata_to_aggregation_df()
         self.link_sample_rawdata()
-
-        pass
 
     def sync_delivery_dir(self, datestr: str = None):
         pass
