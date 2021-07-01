@@ -56,14 +56,18 @@ class FOHMUploadAPI:
     def reports_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases"""
         if not isinstance(self._reports_dataframe, pd.DataFrame):
-            self._reports_dataframe = self.create_joined_dataframe(self._daily_reports_list)
+            self._reports_dataframe = self.create_joined_dataframe(
+                self._daily_reports_list
+            ).sort_values(by=["provnummer"], inplace=True)
         return self._reports_dataframe
 
     @property
     def pangolin_dataframe(self) -> pd.DataFrame:
         """Dataframe with all pangolin rows from multiple cases"""
         if not isinstance(self._pangolin_dataframe, pd.DataFrame):
-            self._pangolin_dataframe = self.create_joined_dataframe(self._daily_pangolin_list)
+            self._pangolin_dataframe = self.create_joined_dataframe(
+                self._daily_pangolin_list
+            ).sort_values(by=["taxon"], inplace=True)
         return self._pangolin_dataframe
 
     @property
@@ -127,11 +131,15 @@ class FOHMUploadAPI:
 
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
         self._cases_to_aggregate = cases
-        print(self._cases_to_aggregate)
-        print(self.daily_reports_list)
-        print(self.aggregation_dataframe)
         self.append_metadata_to_aggregation_df()
-        print(self.aggregation_dataframe)
+
+        unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
+        for region_lab in unique_regionlabs:
+            print(
+                self.aggregation_dataframe[self.aggregation_dataframe["region_lab"] == region_lab]
+            )
+            print(self.reports_dataframe[self.aggregation_dataframe["region_lab"] == region_lab])
+            print(self.pangolin_dataframe[self.aggregation_dataframe["region_lab"] == region_lab])
 
         """Rearrange data and put in delivery dir"""
         pass
