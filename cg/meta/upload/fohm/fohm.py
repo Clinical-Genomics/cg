@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from typing import List
 import datetime as dt
@@ -17,7 +18,6 @@ class FOHMUploadAPI:
         self.lims_api: LimsAPI = config.lims_api
         self.status_db: Store = config.status_db
 
-        self.fohm_delivery_path = Path(config.mutant.root).parent / "fohm"
         self._current_datestr = None
         self._daily_bundle_path = None
         self._daily_rawdata_path = None
@@ -38,7 +38,9 @@ class FOHMUploadAPI:
     @property
     def daily_bundle_path(self) -> Path:
         if not self._daily_bundle_path:
-            self._daily_bundle_path = self.fohm_delivery_path / self.current_datestr
+            self._daily_bundle_path = (
+                Path(self.config.mutant.root).parent / "fohm" / self.current_datestr
+            )
         return self._daily_bundle_path
 
     @property
@@ -133,21 +135,33 @@ class FOHMUploadAPI:
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
             files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
             for file in files:
-                print(file.full_path)
+                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
         """Rearrange data and put in delivery dir"""
         self._cases_to_aggregate = cases
         self.append_metadata_to_aggregation_df()
-        print(self.aggregation_dataframe)
 
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
         for region_lab in unique_regionlabs:
-            print(
-                self.aggregation_dataframe[self.aggregation_dataframe["region_lab"] == region_lab]
+            pangolin_df = self.pangolin_dataframe[
+                self.aggregation_dataframe["region_lab"] == region_lab
+            ]
+            pangolin_df.to_csv(
+                self.daily_rawdata_path
+                / f"{region_lab}_{self.current_datestr}_pangolin_classification_format3.txt",
+                sep="\t",
+                index=False,
             )
-            print(self.reports_dataframe[self.aggregation_dataframe["region_lab"] == region_lab])
-            print(self.pangolin_dataframe[self.aggregation_dataframe["region_lab"] == region_lab])
+            report_df = self.reports_dataframe[
+                self.aggregation_dataframe["region_lab"] == region_lab
+            ]
+            report_df.to_csv(
+                self.daily_report_path / f"{region_lab}_{self.current_datestr}_komplettering.csv",
+                sep=",",
+                index=False,
+            )
+
         self.link_sample_rawdata()
 
         pass
