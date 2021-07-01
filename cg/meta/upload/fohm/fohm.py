@@ -57,14 +57,18 @@ class FOHMUploadAPI:
     def reports_dataframe(self) -> pd.DataFrame:
         """Dataframe with all komplettering rows from multiple cases"""
         if not isinstance(self._reports_dataframe, pd.DataFrame):
-            self._reports_dataframe = self.create_joined_dataframe(self.daily_reports_list)
+            self._reports_dataframe = self.create_joined_dataframe(
+                self.daily_reports_list
+            ).sort_values(by=["provnummer"])
         return self._reports_dataframe
 
     @property
     def pangolin_dataframe(self) -> pd.DataFrame:
         """Dataframe with all pangolin rows from multiple cases"""
         if not isinstance(self._pangolin_dataframe, pd.DataFrame):
-            self._pangolin_dataframe = self.create_joined_dataframe(self.daily_pangolin_list)
+            self._pangolin_dataframe = self.create_joined_dataframe(
+                self.daily_pangolin_list
+            ).sort_values(by=["taxon"])
         return self._pangolin_dataframe
 
     @property
@@ -127,11 +131,9 @@ class FOHMUploadAPI:
             sample_obj: models.Sample = self.status_db.sample(sample_id)
             bundle_name = sample_obj.links[0].family.internal_id
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-            files = self.housekeeper_api.files(version=version_obj, tags=[sample_id])
+            files = self.housekeeper_api.files(version=version_obj, tags=[sample_id]).all()
             for file in files:
                 print(file.full_path)
-
-        pass
 
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
         """Rearrange data and put in delivery dir"""
