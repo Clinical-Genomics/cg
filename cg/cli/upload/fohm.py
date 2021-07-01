@@ -14,7 +14,7 @@ def fohm(context: CGConfig):
     pass
 
 
-@fohm.command
+@fohm.command("preprocess")
 @click.option("cases", "-c", multiple=True, type=str, required=True)
 @click.pass_obj
 def preprocess(context: CGConfig, cases: list):
@@ -22,9 +22,9 @@ def preprocess(context: CGConfig, cases: list):
     fohm_api.assemble_fohm_delivery(cases=cases)
 
 
-@fohm.command
+@fohm.command("send-reports")
 @click.argument("date", type=str, required=False)
 @click.pass_obj
-def send_reports(context: CGConfig, date):
+def send_reports(context: CGConfig, date: str):
     fohm_api = FOHMUploadAPI(context)
     fohm_api.send_mail_reports(date)
