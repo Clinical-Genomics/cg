@@ -113,6 +113,7 @@ class FOHMUploadAPI:
         """Add field with internal_id to dataframe
         TODO: get internal_id from sample_id
         """
+        print(self.aggregation_dataframe)
         self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
             lambda x: self.status_db.samples_by_ids(name=x)
         )
@@ -127,16 +128,10 @@ class FOHMUploadAPI:
         """
         pass
 
-    def create_reaggregated_report_regionlab(self, region_lab: str) -> None:
-        """Write separate komplettering csv report for regionlab"""
-        pass
-
-    def create_reaggregated_pangolin_regionlab(self, region_lab: str) -> None:
-        """Write separate pangolin csv report for regionlab"""
-        pass
-
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
         self._cases_to_aggregate = cases
+        print(self._cases_to_aggregate)
+        print(self.daily_reports_list)
         self.append_metadata_to_aggregation_df()
         print(self.aggregation_dataframe)
 
