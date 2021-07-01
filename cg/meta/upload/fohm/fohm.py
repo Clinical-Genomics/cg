@@ -134,6 +134,7 @@ class FOHMUploadAPI:
         pass
 
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
+        """Rearrange data and put in delivery dir"""
         self._cases_to_aggregate = cases
         self.append_metadata_to_aggregation_df()
         print(self.aggregation_dataframe)
@@ -145,8 +146,8 @@ class FOHMUploadAPI:
             )
             print(self.reports_dataframe[self.aggregation_dataframe["region_lab"] == region_lab])
             print(self.pangolin_dataframe[self.aggregation_dataframe["region_lab"] == region_lab])
+        self.link_sample_rawdata()
 
-        """Rearrange data and put in delivery dir"""
         pass
 
     def sync_delivery_dir(self, datestr: str = None):
