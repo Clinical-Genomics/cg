@@ -131,7 +131,7 @@ class FOHMUploadAPI:
             sample_obj: models.Sample = self.status_db.sample(sample_id)
             bundle_name = sample_obj.links[0].family.internal_id
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-            files = self.housekeeper_api.files(version=version_obj, tags=[sample_id]).all()
+            files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
             for file in files:
                 print(file.full_path)
 
