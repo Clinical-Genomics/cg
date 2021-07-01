@@ -10,7 +10,12 @@ from .utils import suggest_cases_to_upload
 
 
 @click.command()
-@click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing analysis",
+)
 @click.argument("family_id", required=False)
 @click.pass_obj
 def coverage(context: CGConfig, re_upload, family_id):

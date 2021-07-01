@@ -20,7 +20,12 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing analysis",
+)
 @click.option("-p", "--print", "print_console", is_flag=True, help="print config values")
 @click.argument("case_id", required=False)
 @click.pass_context
@@ -102,7 +107,12 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
 
 
 @click.command(name="upload-case-to-scout")
-@click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing analysis",
+)
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj

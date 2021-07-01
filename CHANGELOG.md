@@ -19,6 +19,18 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.7.0]
+### Added
+- email functionality
+
+### Changed
+- gisaid upload command: gisaid cli log file will be saved in housekeeper with tag gisaid-log
+- gisaid upload command: the log file will be appended to if the upload is run again for the same case.
+- gisaid upload command: Accession numbers will be parsed from the log file 
+- gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
+- gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+
 
 ## [22.6.1]
 ### Changed
