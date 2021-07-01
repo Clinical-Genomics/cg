@@ -58,7 +58,7 @@ class FOHMUploadAPI:
         if not isinstance(self._reports_dataframe, pd.DataFrame):
             self._reports_dataframe = self.create_joined_dataframe(
                 self._daily_reports_list
-            ).sort_values(by=["provnummer"], inplace=True)
+            ).sort_values(by=["provnummer"])
         return self._reports_dataframe
 
     @property
@@ -67,7 +67,7 @@ class FOHMUploadAPI:
         if not isinstance(self._pangolin_dataframe, pd.DataFrame):
             self._pangolin_dataframe = self.create_joined_dataframe(
                 self._daily_pangolin_list
-            ).sort_values(by=["taxon"], inplace=True)
+            ).sort_values(by=["taxon"])
         return self._pangolin_dataframe
 
     @property
@@ -132,6 +132,7 @@ class FOHMUploadAPI:
     def assemble_fohm_delivery(self, cases: List[str]) -> None:
         self._cases_to_aggregate = cases
         self.append_metadata_to_aggregation_df()
+        print(self.aggregation_dataframe)
 
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
         for region_lab in unique_regionlabs:
