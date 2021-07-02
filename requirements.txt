@@ -20,6 +20,7 @@ requests_cache
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
+paramiko
 pandas
 cgmodels>=0.7
 ansi
