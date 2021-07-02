@@ -34,7 +34,7 @@ def aggregate_delivery(
     fohm_api.append_metadata_to_aggregation_df()
     fohm_api.create_komplettering_reports()
     fohm_api.create_pangolin_reports()
-    fohm_api.link_sample_rawdata()
+    fohm_api.link_sample_rawdata_files()
 
 
 @fohm.command("create-komplettering")
@@ -71,7 +71,7 @@ def preprocess_all(
     fohm_api.append_metadata_to_aggregation_df()
     fohm_api.create_komplettering_reports()
     fohm_api.create_pangolin_reports()
-    fohm_api.link_sample_rawdata()
+    fohm_api.link_sample_rawdata_files()
     fohm_api.send_mail_reports()
     for case_id in cases:
         fohm_api.update_uploaded_at(case_id=case_id)

@@ -154,7 +154,7 @@ class FOHMUploadAPI:
             f"_{self.lims_api.get_sample_attribute(lims_id=x, key='lab_code').split(' ')[0]}"
         )
 
-    def link_sample_rawdata(self) -> None:
+    def link_sample_rawdata_files(self) -> None:
         """
         Hardlink samples rawdata files to fohm delivery folder
         """
@@ -170,7 +170,7 @@ class FOHMUploadAPI:
                     )
                     continue
                 shutil.copy(file.full_path, Path(self.daily_rawdata_path))
-                Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0777)
+                Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0664)
 
     def create_pangolin_reports(self) -> None:
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
@@ -181,12 +181,16 @@ class FOHMUploadAPI:
             if self._dry_run:
                 LOG.info(pangolin_df)
                 continue
+            pangolin_path = Path(
+                self.daily_rawdata_path,
+                f"{region_lab}_{self.current_datestr}_pangolin_classification_format3.txt",
+            )
             pangolin_df.to_csv(
-                self.daily_rawdata_path
-                / f"{region_lab}_{self.current_datestr}_pangolin_classification_format3.txt",
+                pangolin_path,
                 sep="\t",
                 index=False,
             )
+            pangolin_path.chmod(0o0664)
 
     def create_komplettering_reports(self) -> None:
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
