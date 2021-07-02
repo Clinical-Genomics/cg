@@ -9,7 +9,7 @@ from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
-ARGUMENT_DATE = click.argument("date", type=str, required=False)
+ARGUMENT_DATE = click.argument("datestr", type=str, required=False)
 OPTION_CASES = click.option("cases", "-c", multiple=True, type=str, required=True)
 OPTION_DRY_RUN = click.option("dry_run", "--dry-run", is_flag=True, default=False)
 
