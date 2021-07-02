@@ -19,6 +19,13 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [22.8.0]
+### Added
+- Added support for FOHM batch upload
+
+
+
 ## [22.7.0]
 ### Added
 - email functionality
