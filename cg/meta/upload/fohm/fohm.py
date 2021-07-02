@@ -46,8 +46,8 @@ class FOHMUploadAPI:
     @property
     def daily_bundle_path(self) -> Path:
         if not self._daily_bundle_path:
-            self._daily_bundle_path = (
-                Path(self.config.mutant.root).parent / "fohm" / self.current_datestr
+            self._daily_bundle_path: Path = Path(
+                Path(self.config.mutant.root).parent, "fohm", self.current_datestr
             )
         return self._daily_bundle_path
 
@@ -65,7 +65,7 @@ class FOHMUploadAPI:
 
     @property
     def reports_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all komplettering rows from multiple cases"""
+        """Dataframe with all 'komplettering' rows from multiple cases"""
         if not isinstance(self._reports_dataframe, pd.DataFrame):
             self._reports_dataframe = self.create_joined_dataframe(
                 self.daily_reports_list
@@ -83,7 +83,7 @@ class FOHMUploadAPI:
 
     @property
     def aggregation_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all komplettering rows from multiple cases, and additional rows to be used for aggregation"""
+        """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be used for aggregation"""
         if not isinstance(self._aggregation_dataframe, pd.DataFrame):
             self._aggregation_dataframe = self.reports_dataframe.copy()
         return self._aggregation_dataframe
