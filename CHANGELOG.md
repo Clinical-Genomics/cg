@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Added
+- Data delivery export to LIMS 
+
 ## [22.7.0]
 ### Added
 - email functionality
@@ -29,8 +33,6 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: Accession numbers will be parsed from the log file 
 - gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
-
-
 
 ## [22.6.1]
 ### Changed
