@@ -54,13 +54,13 @@ class FOHMUploadAPI:
     @property
     def daily_rawdata_path(self) -> Path:
         if not self._daily_rawdata_path:
-            self._daily_rawdata_path = self.daily_bundle_path / "rawdata"
+            self._daily_rawdata_path: Path = Path(self.daily_bundle_path, "rawdata")
         return self._daily_rawdata_path
 
     @property
     def daily_report_path(self) -> Path:
         if not self._daily_report_path:
-            self._daily_report_path = self.daily_bundle_path / "reports"
+            self._daily_report_path: Path = Path(self.daily_bundle_path, "reports")
         return self._daily_report_path
 
     @property
@@ -137,7 +137,7 @@ class FOHMUploadAPI:
 
     @staticmethod
     def create_joined_dataframe(file_list: List[Path]) -> pd.DataFrame:
-        """Creates datafame with all csv files used in daily delivery"""
+        """Creates dataframe with all csv files used in daily delivery"""
         dataframe_list = [pd.read_csv(filename, index_col=None, header=0) for filename in file_list]
         return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
