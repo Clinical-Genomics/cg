@@ -1,4 +1,6 @@
 import logging
+import getpass
+import paramiko
 import shutil
 from pathlib import Path
 from typing import List, Optional
@@ -7,6 +9,7 @@ import pandas as pd
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.store import Store, models
@@ -17,13 +20,13 @@ LOG = logging.getLogger(__name__)
 
 
 class FOHMUploadAPI:
-    def __init__(self, config: CGConfig):
+    def __init__(self, config: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
         self.config: CGConfig = config
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api
         self.status_db: Store = config.status_db
-
-        self._current_datestr = None
+        self._dry_run: bool = dry_run
+        self._current_datestr: str = datestr or str(dt.date.today())
         self._daily_bundle_path = None
         self._daily_rawdata_path = None
         self._daily_report_path = None
@@ -107,7 +110,28 @@ class FOHMUploadAPI:
                 )
         return self._daily_pangolin_list
 
+    @property
+    def dry_run(self):
+        return self._dry_run
+
+    def check_username(self) -> None:
+        if self._dry_run:
+            return
+        if getpass.getuser() == self.config.fohm.valid_uploader:
+            return
+        raise CgError(
+            f"Cannot upload to FOHM as {getpass.getuser()}, please log in as {self.config.fohm.valid_uploader}"
+        )
+
+    def set_cases_to_aggregate(self, cases: list) -> None:
+        LOG.info(f"Preparing aggregated delivery for {cases}")
+        self._cases_to_aggregate = cases
+
     def create_daily_delivery_folders(self) -> None:
+        LOG.info(f"Creating direcroty: {self.daily_rawdata_path}")
+        LOG.info(f"Creating direcroty: {self.daily_report_path}")
+        if self._dry_run:
+            return
         self.daily_rawdata_path.mkdir(parents=True, exist_ok=True)
         self.daily_report_path.mkdir(parents=True, exist_ok=True)
 
@@ -119,7 +143,7 @@ class FOHMUploadAPI:
 
     def append_metadata_to_aggregation_df(self) -> None:
         """
-        Add field with internal_id to dataframe
+        Add fields with internal_id and region_lab to dataframe
         """
 
         self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
@@ -140,60 +164,90 @@ class FOHMUploadAPI:
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
             files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
             for file in files:
+                if self._dry_run:
+                    LOG.info(
+                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
+                    )
+                    continue
                 shutil.copy(file.full_path, Path(self.daily_rawdata_path))
+                Path(self.daily_rawdata_path, file.name).chmod(0o0777)
 
-    def reaggregate_reports(self):
+    def create_pangolin_reports(self) -> None:
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
         for region_lab in unique_regionlabs:
             pangolin_df = self.pangolin_dataframe[
                 self.aggregation_dataframe["region_lab"] == region_lab
             ]
+            if self._dry_run:
+                LOG.info(pangolin_df)
+                continue
             pangolin_df.to_csv(
                 self.daily_rawdata_path
                 / f"{region_lab}_{self.current_datestr}_pangolin_classification_format3.txt",
                 sep="\t",
                 index=False,
             )
+
+    def create_komplettering_reports(self) -> None:
+        unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
+        for region_lab in unique_regionlabs:
             report_df = self.reports_dataframe[
                 self.aggregation_dataframe["region_lab"] == region_lab
             ]
+            if self._dry_run:
+                LOG.info(report_df)
+                continue
             report_df.to_csv(
                 self.daily_report_path / f"{region_lab}_{self.current_datestr}_komplettering.csv",
                 sep=",",
                 index=False,
             )
 
-    def assemble_fohm_delivery(self, cases: List[str]) -> None:
-        """Rearrange data and put in delivery dir"""
-        self._cases_to_aggregate = cases
-        self.create_daily_delivery_folders()
-        self.append_metadata_to_aggregation_df()
-        self.reaggregate_reports()
-        self.link_sample_rawdata()
-
-    def send_mail_reports(self, date: Optional[str] = None):
-        if date:
-            self._current_datestr = date
+    def send_mail_reports(self) -> None:
         for file in self.daily_report_path.iterdir():
+            LOG.info(
+                f"Sending {file.name} report file to {self.config.fohm.email_recipient}, dry run: {self._dry_run}"
+            )
+            if self._dry_run:
+                return
             send_mail(
                 EmailInfo(
-                    receiver_email="clinicaldelivery@scilifelab.se",
-                    sender_email="clinical.genomics@hasta.scilifelab.se",
-                    smtp_server="hasta.scilifelab.se",
-                    subject="Komplettering",
+                    receiver_email=self.config.fohm.email_recipient,
+                    sender_email=self.config.fohm.email_sender,
+                    smtp_server=self.config.fohm.email_host,
+                    subject=file.name,
                     message=" ",
                     file=file,
                 )
             )
 
-    def update_upload_started_at(self, case_id: str):
+    def sync_files_sftp(self) -> None:
+        self.check_username()
+        transport = paramiko.Transport((self.config.fohm.host, self.config.fohm.port))
+        ed_key = paramiko.Ed25519Key.from_private_key_file(self.config.fohm.key)
+        transport.connect(username=self.config.fohm.username, pkey=ed_key)
+        sftp = paramiko.SFTPClient.from_transport(transport)
+        for file in self.daily_rawdata_path.iterdir():
+            LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
+            if self._dry_run:
+                continue
+            sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
+            LOG.info(f"Finished sending {file}")
+        sftp.close()
+        transport.close()
+
+    def update_upload_started_at(self, case_id: str) -> None:
         """Update timestamp for cases which started being processed as batch"""
+        if self._dry_run:
+            return
         case_obj: models.Family = self.status_db.family(case_id)
         case_obj.analyses[0].upload_started_at = dt.datetime.now()
         self.status_db.commit()
 
     def update_uploaded_at(self, case_id: str) -> None:
         """Update timestamp for cases which uploaded successfully"""
+        if self._dry_run:
+            return
         case_obj: models.Family = self.status_db.family(case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.commit()
