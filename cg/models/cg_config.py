@@ -20,7 +20,6 @@ from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.constants.priority import SlurmQos
-from cg.meta.upload.fohm.fohm import FOHMUploadAPI
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
