@@ -176,7 +176,9 @@ class AddHandler(BaseHandler):
                 else:
                     LOG.debug(f"{avatar_url} already used - trying another url")
         except Exception as e:
-            LOG.error("Could not fetch case avatar url for case: %s, Error: %s", internal_id, str(e))
+            LOG.error(
+                "Could not fetch case avatar url for case: %s, Error: %s", internal_id, str(e)
+            )
 
         priority_db = PRIORITY_MAP[priority]
         new_case = self.Family(
