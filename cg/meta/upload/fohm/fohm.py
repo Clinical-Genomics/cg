@@ -170,7 +170,7 @@ class FOHMUploadAPI:
                     )
                     continue
                 shutil.copy(file.full_path, Path(self.daily_rawdata_path))
-                Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0664)
+                Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0777)
 
     def create_pangolin_reports(self) -> None:
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
@@ -190,7 +190,7 @@ class FOHMUploadAPI:
                 sep="\t",
                 index=False,
             )
-            pangolin_path.chmod(0o0664)
+            pangolin_path.chmod(0o0777)
 
     def create_komplettering_reports(self) -> None:
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
