@@ -8,6 +8,7 @@ PROP2UDF = {
     "concentration_sample": "Sample Conc.",
     "customer": "customer",
     "data_analysis": "Data Analysis",
+    "data_delivery": "Data Delivery",
     "elution_buffer": "Sample Buffer",
     "extraction_method": "Extraction method",
     "family_name": "familyID",
