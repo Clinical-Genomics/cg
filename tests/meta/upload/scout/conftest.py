@@ -223,7 +223,9 @@ def fixture_mip_analysis_obj(
         helpers.add_phenotype_groups_to_sample(
             store=analysis_store_trio, sample_id=link.sample.internal_id
         )
-        print(link.sample.phenotype_groups)
+        helpers.add_subject_id_to_sample(
+            store=analysis_store_trio, sample_id=link.sample.internal_id
+        )
     return analysis_obj
 
 

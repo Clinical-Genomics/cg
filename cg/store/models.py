@@ -497,6 +497,7 @@ class Sample(Model, PriorityMixin):
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
+    subject_id = Column(types.String(128))
     ticket_number = Column(types.Integer)
     time_point = Column(types.Integer)
 

@@ -29,6 +29,7 @@
       "quantity": "2",
       "sex": "male",
       "source": "blood",
+      "subject_id": "s1",
       "synopsis": "",
       "tissue_block_size": "small",
       "tumour": true,

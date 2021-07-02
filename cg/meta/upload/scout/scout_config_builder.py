@@ -28,18 +28,19 @@ class ScoutConfigBuilder:
         self.sample_tags: SampleTags
         self.load_config: ScoutLoadConfig = ScoutLoadConfig()
 
-    def add_mandatory_info_to_load_config(self) -> None:
+    def add_common_info_to_load_config(self) -> None:
         """Add the mandatory common information to a scout load config object"""
         self.load_config.analysis_date = self.analysis_obj.completed_at
         self.load_config.default_gene_panels = self.analysis_obj.family.panels
         self.load_config.family = self.analysis_obj.family.internal_id
         self.load_config.family_name = self.analysis_obj.family.name
         self.load_config.owner = self.analysis_obj.family.customer.internal_id
-        self.include_synopsis()
+        self.load_config.synopsis = self.analysis_obj.family.synopsis
         self.include_cohorts()
+        self.include_phenotype_groups()
         self.include_phenotype_terms()
 
-    def add_mandatory_sample_info(
+    def add_common_sample_info(
         self,
         config_sample: ScoutIndividual,
         db_sample: models.FamilySample,
@@ -59,6 +60,8 @@ class ScoutConfigBuilder:
         config_sample.analysis_type = db_sample.sample.application_version.application.analysis_type
         config_sample.sample_name = db_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
+        print("db_sample.sample.subject_id: ", db_sample.sample.subject_id)
+        config_sample.subject_id = db_sample.sample.subject_id
 
         self.include_sample_alignment_file(config_sample=config_sample)
         self.include_sample_files(config_sample=config_sample)

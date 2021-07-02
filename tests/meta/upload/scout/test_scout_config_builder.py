@@ -1,4 +1,5 @@
 """Tests for the file handlers"""
+import logging
 from typing import Optional
 
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -75,10 +76,10 @@ def test_include_synopsis(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.load_config.synopsis is None
 
     # WHEN including the synopsis
-    mip_config_builder.include_synopsis()
+    mip_config_builder.build_load_config()
 
     # THEN assert that the synopsis was added
-    assert mip_config_builder.load_config.synopsis is not None
+    assert mip_config_builder.load_config.synopsis
 
 
 def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
@@ -138,6 +139,23 @@ def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_i
             assert sample.mt_bam is not None
             file_found = True
     assert file_found
+
+
+def test_include_mip_sample_subject_id(mip_config_builder: MipConfigBuilder, sample_id: str, caplog):
+    # GIVEN subject_id on the sample
+    caplog.set_level(level=logging.DEBUG)
+
+    # WHEN building the config
+    mip_config_builder.build_load_config()
+
+    # THEN the subject_id was added to the scout sample
+    print(caplog.text)
+    subject_id_found = False
+    for sample in mip_config_builder.load_config.samples:
+        if sample.sample_id == sample_id:
+            subject_id_found = True
+            assert sample.subject_id is not None
+    assert subject_id_found
 
 
 def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuilder):

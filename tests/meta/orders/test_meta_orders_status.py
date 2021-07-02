@@ -145,6 +145,7 @@ def test_families_to_status(mip_order_to_submit):
     assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
+    assert first_sample["subject_id"] == "sample1"
     assert first_sample["mother"] == "sample2"
     assert first_sample["father"] == "sample3"
 
@@ -478,6 +479,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
 
     assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
+    assert new_link.sample.subject_id == "sample1"
 
     assert new_link.sample.age_at_sampling == 17.18192
 

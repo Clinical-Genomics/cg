@@ -566,7 +566,7 @@ class StoreHelpers:
 
     @staticmethod
     def add_phenotype_groups_to_sample(
-        store: Store, sample_id: str, phenotype_groups: str = "a phenotype group"
+        store: Store, sample_id: str, phenotype_groups: [str] = ["a phenotype group"]
     ) -> Optional[models.Sample]:
         """Function for adding a phenotype group to a sample in the database"""
         sample_obj: models.Sample = store.sample(internal_id=sample_id)
@@ -574,5 +574,18 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.phenotype_groups = phenotype_groups
+        store.commit()
+        return sample_obj
+
+    @staticmethod
+    def add_subject_id_to_sample(
+        store: Store, sample_id: str, subject_id: str = "a subject_id"
+    ) -> Optional[models.Sample]:
+        """Function for adding a subject_id to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.subject_id = subject_id
         store.commit()
         return sample_obj

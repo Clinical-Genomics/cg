@@ -196,6 +196,7 @@ class StatusHandler:
                         "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
+                        "subject_id": sample.get("subject_id"),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
@@ -260,6 +261,7 @@ class StatusHandler:
                         phenotype_terms=sample["phenotype_terms"],
                         priority=case["priority"],
                         sex=sample["sex"],
+                        subject_id=sample["subject_id"],
                         ticket=ticket,
                         time_point=sample["time_point"],
                         tumour=sample["tumour"],
