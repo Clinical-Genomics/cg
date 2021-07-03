@@ -138,12 +138,11 @@ class GisaidAPI:
         )
 
     def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
-        print([gisaid_sample.dict() for gisaid_sample in gisaid_samples])
         samples_df = pd.DataFrame.from_dict(
             data=[gisaid_sample.dict() for gisaid_sample in gisaid_samples],
-            orient="index",
             columns=HEADERS,
         )
+
         gisaid_csv_file = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["gisaid-csv", case_id]
         )
