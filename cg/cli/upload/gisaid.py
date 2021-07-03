@@ -21,19 +21,16 @@ def gisaid(context: CGConfig, case_id: str):
     LOG.info("----------------- GISAID UPLOAD -------------------")
 
     gisaid_api = GisaidAPI(config=context)
-    gisaid_api.create_gisaid_files_in_housekeeper(case_id=case_id)
-
-
-#    try:
-#        gisaid_api.upload(case_id=case_id)
-#        LOG.info("Upload to GISAID successful")
-#    except CgError as error:
-#        email_info: EmailInfo = EmailInfo(
-#            **gisaid_api.email_base_settings.dict(),
-#            receiver_email=gisaid_api.log_watch,
-#            message=error.message,
-#            subject="Gisaid Upload Failed",
-#        )
-#        send_mail(email_info)
-#        LOG.error("Upload Failed")
-#        raise
+    try:
+        gisaid_api.upload(case_id=case_id)
+        LOG.info("Upload to GISAID successful")
+    except CgError as error:
+        email_info: EmailInfo = EmailInfo(
+            **gisaid_api.email_base_settings.dict(),
+            receiver_email=gisaid_api.log_watch,
+            message=error.message,
+            subject="Gisaid Upload Failed",
+        )
+        send_mail(email_info)
+        LOG.error("Upload Failed")
+        raise

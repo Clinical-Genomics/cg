@@ -212,7 +212,7 @@ class GisaidAPI:
             gisaid_fasta_path,
         ]
         self.process.run_command(parameters=load_call)
-        self.append_log(temp_log=Path(temp_log_file.name), gisaid_log=gisaid_log_path)
+        self.append_log(temp_log=Path(temp_log_file.name), gisaid_log=Path(gisaid_log_path))
         temp_log_file.close()
         if self.process.stderr:
             LOG.info(f"gisaid stderr:\n{self.process.stderr}")
@@ -276,6 +276,7 @@ class GisaidAPI:
             LOG.info("All samples already uploaded")
             return
         try:
+            self.create_gisaid_files_in_housekeeper(case_id=case_id)
             self.upload_results_to_gisaid(case_id=case_id)
             self.update_completion_file(case_id=case_id)
         except Exception as e:
