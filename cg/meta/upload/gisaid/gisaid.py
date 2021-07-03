@@ -272,7 +272,7 @@ class GisaidAPI:
 
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
-        if len(completion_df["GISAID_accession"].dropna) == len(completion_df["provnummer"]):
+        if len(completion_df["GISAID_accession"].dropna()) == len(completion_df["provnummer"]):
             LOG.info("All samples already uploaded")
             return
         try:
