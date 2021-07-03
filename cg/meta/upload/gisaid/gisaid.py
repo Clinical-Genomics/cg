@@ -1,7 +1,6 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 import json
 import logging
-from datetime import date
 from pathlib import Path
 from typing import List, Dict, Optional
 import pandas as pd
@@ -15,12 +14,9 @@ from cg.models.cg_config import CGConfig
 from cg.store import models, Store
 from cg.utils import Process
 from .constants import HEADERS
-from .models import GisaidSample, UploadFiles, GisaidAccession
-import csv
+from .models import GisaidSample, GisaidAccession
 
 from cg.exc import (
-    FastaSequenceMissingError,
-    AccessionNumerMissingError,
     GisaidUploadFailedError,
     InvalidFastaError,
     HousekeeperFileMissingError,
@@ -45,9 +41,6 @@ class GisaidAPI:
 
         self.process = Process(binary=self.gisaid_binary)
 
-    def __str__(self):
-        return f"GisaidAPI(dry_run: {self.dry_run})"
-
     def get_completion_file_from_hk(self, case_id: str) -> File:
         completion_file: Optional[File] = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["komplettering"]
@@ -57,13 +50,14 @@ class GisaidAPI:
             raise HousekeeperFileMissingError(message=msg)
         return completion_file
 
-    def get_completion_dataframe(self, completion_file: Path) -> pd.DataFrame:
+    def get_completion_dataframe(self, completion_file: File) -> pd.DataFrame:
         completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
         completion_df.drop_duplicates(inplace=True)
         return completion_df
 
     def get_gisaid_sample_list(self, case_id: str) -> List[models.Sample]:
-        completion_df = self.get_completion_dataframe(case_id=case_id)
+        completion_file = self.get_completion_file_from_hk(case_id=case_id)
+        completion_df = self.get_completion_dataframe(completion_file=completion_file)
         sample_names = list(completion_df["provnummer"].unique())
         return [
             self.status_db.samples_by_ids(name=sample_name).first() for sample_name in sample_names
@@ -206,7 +200,7 @@ class GisaidAPI:
 
         gisaid_log_path = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["gisaid-log", case_id]
-        )
+        ).full_path
 
         load_call: list = [
             "--logfile",
