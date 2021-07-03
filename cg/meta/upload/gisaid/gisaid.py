@@ -110,7 +110,8 @@ class GisaidAPI:
         else:
             gisaid_fasta_path: Path = self.get_gisaid_fasta_path(case_id=case_id)
 
-        fasta_lines: []
+        fasta_lines: List[str] = []
+
         for sample in gisaid_samples:
             fasta_file: File = self.housekeeper_api.find_file_in_latest_version(
                 case_id=case_id, tags=[sample.cg_lims_id, "consensus-sample"]
@@ -124,8 +125,6 @@ class GisaidAPI:
                         fasta_lines.append(f">{sample.covv_virus_name}\n")
                     else:
                         fasta_lines.append(line)
-        if not fasta_lines:
-            raise InvalidFastaError(message="Empty fasta file")
 
         with open(gisaid_fasta_path, "w") as write_file_obj:
             write_file_obj.writelines(fasta_lines)
