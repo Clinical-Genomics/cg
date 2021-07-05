@@ -31,6 +31,8 @@ class GisaidAPI:
         self.lims_api: LimsAPI = config.lims_api
         self.status_db: Store = config.status_db
         self.gisaid_submitter: str = config.gisaid.submitter
+        self.upload_password: str = config.gisaid.upload_password
+        self.upload_cid: str = config.gisaid.upload_cid
         self.gisaid_binary: str = config.gisaid.binary_path
         self.gisaid_log_dir: str = config.gisaid.log_dir
         self.log_watch: str = config.gisaid.logwatch_email
@@ -194,6 +196,19 @@ class GisaidAPI:
         self.create_gisaid_fasta(gisaid_samples=gisaid_samples, case_id=case_id)
         self.create_gisaid_log_file(case_id=case_id)
 
+    def authenticate_gisaid(self):
+        load_call: list = [
+            "CoV",
+            "authenticate",
+            "--cid",
+            self.upload_cid,
+            "--user",
+            self.gisaid_submitter,
+            "--pass",
+            self.upload_password,
+        ]
+        self.process.run_command(parameters=load_call)
+
     def upload_results_to_gisaid(self, case_id: str) -> None:
         """Load batch data to GISAID using the gisiad cli."""
 
@@ -212,6 +227,7 @@ class GisaidAPI:
             case_id=case_id, tags=["gisaid-log", case_id]
         ).full_path
 
+        self.authenticate_gisaid()
         load_call: list = [
             "--logfile",
             temp_log_file.name,

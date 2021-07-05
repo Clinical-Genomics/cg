@@ -135,6 +135,8 @@ class GisaidConfig(CommonAppConfig):
     submitter: str
     log_dir: str
     logwatch_email: EmailStr
+    upload_password: str
+    upload_cid: str
 
 
 class ShippingConfig(CommonAppConfig):
