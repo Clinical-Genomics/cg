@@ -20,6 +20,12 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________
 
 
+## [22.8.1]
+### Changed
+- Upload gisaid uses once again single fasta
+- Upload gisaid uses pandas
+- Upload gisaid uploads only qc pass files
+
 ## [22.8.0]
 ### Added
 - Added support for FOHM batch upload
