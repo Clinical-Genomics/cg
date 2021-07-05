@@ -76,7 +76,7 @@ class GisaidAPI:
         gisaid_samples = []
         for sample in samples:
             sample_id: str = sample.internal_id
-            print(sample_id)
+            LOG.info(f"Creating GisaidSample for {sample_id}")
             gisaid_sample = GisaidSample(
                 case_id=case_id,
                 cg_lims_id=sample_id,
