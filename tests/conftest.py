@@ -1180,6 +1180,8 @@ def fixture_context_config(
             "log_dir": "/path/to/log",
             "submitter": "s.submitter",
             "logwatch_email": "some@email.com",
+            "upload_password": "pass",
+            "upload_cid": "cid",
         },
         "lims": {
             "host": "https://lims.scilifelab.se",
