@@ -70,6 +70,7 @@ class FOHMUploadAPI:
             self._reports_dataframe = self.create_joined_dataframe(
                 self.daily_reports_list
             ).sort_values(by=["provnummer"])
+            self._reports_dataframe.drop_duplicates(inplace=True)
         return self._reports_dataframe
 
     @property
@@ -79,6 +80,7 @@ class FOHMUploadAPI:
             self._pangolin_dataframe = self.create_joined_dataframe(
                 self.daily_pangolin_list
             ).sort_values(by=["taxon"])
+            self._pangolin_dataframe.drop_duplicates(inplace=True)
         return self._pangolin_dataframe
 
     @property

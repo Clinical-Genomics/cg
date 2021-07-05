@@ -302,7 +302,7 @@ class FindBusinessDataHandler(BaseHandler):
             identifier = getattr(models.Sample, identifier_name)
             records = records.filter(identifier.contains(identifier_value))
 
-        return records.order_by(models.Sample.internal_id.asc())
+        return records.order_by(models.Sample.internal_id.desc())
 
     def samples_in_customer_group(
         self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
