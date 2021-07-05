@@ -275,9 +275,7 @@ class GisaidAPI:
         if len(completion_df["GISAID_accession"].dropna()) == len(completion_df["provnummer"]):
             LOG.info("All samples already uploaded")
             return
-        try:
-            self.create_gisaid_files_in_housekeeper(case_id=case_id)
-            self.upload_results_to_gisaid(case_id=case_id)
-            self.update_completion_file(case_id=case_id)
-        except Exception as e:
-            raise GisaidUploadFailedError(message=str(e))
+
+        self.create_gisaid_files_in_housekeeper(case_id=case_id)
+        self.upload_results_to_gisaid(case_id=case_id)
+        self.update_completion_file(case_id=case_id)
