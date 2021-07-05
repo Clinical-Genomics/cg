@@ -261,7 +261,7 @@ class GisaidAPI:
         accession_dict = self.get_accession_numbers(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         completion_df["GISAID_accession"] = completion_df["provnummer"].apply(
-            lambda x: accession_dict[self.status_db.samples_by_ids(name=x).first().internal_id]
+            lambda x: accession_dict[x]
         )
         completion_df.to_csv(
             completion_file.full_path,
