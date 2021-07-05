@@ -17,8 +17,6 @@ from .constants import HEADERS
 from .models import GisaidSample, GisaidAccession
 
 from cg.exc import (
-    GisaidUploadFailedError,
-    InvalidFastaError,
     HousekeeperFileMissingError,
 )
 
@@ -42,6 +40,8 @@ class GisaidAPI:
         self.process = Process(binary=self.gisaid_binary)
 
     def get_completion_file_from_hk(self, case_id: str) -> File:
+        """Find completon file in Housekeeper and return it"""
+
         completion_file: Optional[File] = self.housekeeper_api.find_file_in_latest_version(
             case_id=case_id, tags=["komplettering"]
         )
@@ -51,11 +51,16 @@ class GisaidAPI:
         return completion_file
 
     def get_completion_dataframe(self, completion_file: File) -> pd.DataFrame:
+        """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
         completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
         completion_df.drop_duplicates(inplace=True)
         return completion_df
 
     def get_gisaid_sample_list(self, case_id: str) -> List[models.Sample]:
+        """Get list of Sample objects eligeble for upload.
+        The criteria is that the sample reached 20x coverage for >95% bases.
+        The sample will be included in completion file."""
+
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         sample_names = list(completion_df["provnummer"].unique())
@@ -64,9 +69,11 @@ class GisaidAPI:
         ]
 
     def get_gisaid_fasta_path(self, case_id: str) -> Path:
+        """Get path to gisaid fasta"""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}.fasta")
 
     def get_gisaid_csv_path(self, case_id: str) -> Path:
+        """Get path to gisaid csv"""
         return Path(self.mutant_root_dir, case_id, "results", f"{case_id}.csv")
 
     def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
@@ -138,6 +145,7 @@ class GisaidAPI:
         )
 
     def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
+        """Create csv file for gisaid upload"""
         samples_df = pd.DataFrame(
             data=[gisaid_sample.dict() for gisaid_sample in gisaid_samples],
             columns=HEADERS,
@@ -179,6 +187,7 @@ class GisaidAPI:
         )
 
     def create_gisaid_files_in_housekeeper(self, case_id: str) -> None:
+        """Create all gisaid files in Housekeeper, if needed."""
         gisaid_samples = self.get_gisaid_samples(case_id=case_id)
         self.create_gisaid_csv(gisaid_samples=gisaid_samples, case_id=case_id)
         self.create_gisaid_fasta(gisaid_samples=gisaid_samples, case_id=case_id)
@@ -221,7 +230,7 @@ class GisaidAPI:
             LOG.info(f"gisaid stdout:\n{self.process.stdout}")
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
-        """appends temp log to gisaid log and delete temp file"""
+        """Appends temp log to gisaid log and delete temp file"""
 
         with open(str(temp_log.absolute()), "r") as open_temp_log:
             new_log_data: List = json.load(open_temp_log)
@@ -235,7 +244,7 @@ class GisaidAPI:
         temp_log.unlink()
 
     def get_accession_numbers(self, case_id: str) -> Dict[str, str]:
-        """parse accession numbers and sample ids from log file"""
+        """Parse accession numbers and sample ids from log file"""
 
         LOG.info("Parsing accesion numbers from log file")
         accession_numbers = {}
