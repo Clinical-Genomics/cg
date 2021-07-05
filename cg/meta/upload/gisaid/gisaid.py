@@ -251,6 +251,7 @@ class GisaidAPI:
                         continue
                     accession_obj = GisaidAccession(log_message=log.get("msg"))
                     accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
+        print(accession_numbers)
         return accession_numbers
 
     def update_completion_file(self, case_id: str) -> None:
