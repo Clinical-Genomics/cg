@@ -3,11 +3,9 @@ import logging
 
 import click
 
-from cg.exc import CgError
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig
-from cg.models.email import EmailInfo
-from cg.utils.email import send_mail
+
 
 LOG = logging.getLogger(__name__)
 

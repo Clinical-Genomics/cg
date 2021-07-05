@@ -125,8 +125,9 @@ class GisaidAPI:
                 case_id=case_id, tags=[sample.cg_lims_id, "consensus-sample"]
             )
             if not fasta_file:
-                LOG.warning(f"No fasta file found for sample {sample.cg_lims_id}")
-                continue
+                raise HousekeeperFileMissingError(
+                    message=f"No fasta file found for sample {sample.cg_lims_id}"
+                )
             with open(str(fasta_file.full_path)) as handle:
                 for line in handle.readlines():
                     if line[0] == ">":
