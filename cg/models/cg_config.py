@@ -135,6 +135,8 @@ class GisaidConfig(CommonAppConfig):
     submitter: str
     log_dir: str
     logwatch_email: EmailStr
+    upload_password: str
+    upload_cid: str
 
 
 class ShippingConfig(CommonAppConfig):
@@ -154,6 +156,17 @@ class DataDeliveryConfig(BaseModel):
 class EmailBaseSettings(BaseModel):
     sender_email: EmailStr
     smtp_server: str
+
+
+class FOHMConfig(BaseModel):
+    host: str
+    port: int
+    key: str
+    username: str
+    valid_uploader: str
+    email_sender: str
+    email_recipient: str
+    email_host: str
 
 
 class CGConfig(BaseModel):
@@ -205,6 +218,7 @@ class CGConfig(BaseModel):
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
+    fohm: Optional[FOHMConfig] = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None

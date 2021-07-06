@@ -19,9 +19,26 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [NG.NG.NG]
+
+## [22.8.3]
 ### Added
 - Data delivery export to LIMS 
+
+## [22.8.2]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
+
+## [22.8.1]
+### Changed
+- Upload gisaid uses once again single fasta
+- Upload gisaid uses pandas
+- Upload gisaid uploads only qc pass files
+
+## [22.8.0]
+### Added
+- Added support for FOHM batch upload
+
+
 
 ## [22.7.0]
 ### Added
