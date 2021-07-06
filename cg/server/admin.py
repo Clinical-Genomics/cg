@@ -190,7 +190,7 @@ class FamilyView(BaseView):
         if not model.avatar_url:
             return ""
 
-        return Markup('<img width="56" height="56" src="%s">' % model.avatar_url)
+        return Markup('<img width="48" height="48" src="%s">' % model.avatar_url)
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
@@ -220,7 +220,7 @@ class FamilyView(BaseView):
         markup = ""
         if model.family:
             if model.family.avatar_url:
-                markup += Markup('<img width="56" height="56" src="%s">' % model.family.avatar_url)
+                markup += Markup('<img width="24" height="24" src="%s">' % model.family.avatar_url)
 
             markup += Markup(
                 "<a href='%s'>%s</a>"

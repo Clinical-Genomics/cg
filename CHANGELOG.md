@@ -23,6 +23,14 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Fail graceful if Avatar url lookup fails 
 
+## [22.8.3]
+### Added
+- Data delivery export to LIMS 
+
+## [22.8.2]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
+
 ## [22.8.1]
 ### Changed
 - Upload gisaid uses once again single fasta
@@ -43,10 +51,8 @@ __________ DO NOT TOUCH ___________
 - gisaid upload command: gisaid cli log file will be saved in housekeeper with tag gisaid-log
 - gisaid upload command: the log file will be appended to if the upload is run again for the same case.
 - gisaid upload command: Accession numbers will be parsed from the log file 
-- gisaid upload command: The completion file which already exisit in housekeeper will be updated with accession numbers
+- gisaid upload command: The completion file which already exists in housekeeper will be updated with accession numbers
 - gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
-
-
 
 ## [22.6.1]
 ### Changed
