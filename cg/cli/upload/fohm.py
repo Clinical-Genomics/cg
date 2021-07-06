@@ -75,6 +75,7 @@ def create_komplettering(
 def preprocess_all(
     context: CGConfig, cases: list, dry_run: bool = False, datestr: Optional[str] = None
 ):
+    """Create all FOHM upload files, upload to GISAID, sync SFTP and mail reports for all provided cases"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     gisaid_api = GisaidAPI(config=context)
     cases = list(cases)
