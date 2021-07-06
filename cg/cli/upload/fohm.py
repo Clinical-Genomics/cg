@@ -13,8 +13,6 @@ ARGUMENT_DATE = click.argument(
     "datestr",
     type=str,
     required=False,
-    help="Date string in format YYYY-MM-DD used for saving re-aggredated data and prefixing upload filenames. "
-    "If none is given, today's date will be used",
 )
 OPTION_CASES = click.option(
     "cases",
