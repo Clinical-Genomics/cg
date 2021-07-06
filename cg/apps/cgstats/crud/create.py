@@ -214,7 +214,6 @@ def _create_samples(
             project_id=project_id,
         )
         sample_id: int = sample_object.sample_id
-        return sample_id
     return sample_id
 
 
