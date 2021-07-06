@@ -203,8 +203,8 @@ def _create_samples(
     if sample.project == "indexcheck":
         LOG.debug("Skip adding indexcheck sample to database")
         return
-    project_id: int = project_name_to_id[sample.project]
     if not sample_id:
+        project_id: int = project_name_to_id[sample.project]
         sample_object: stats_models.Sample = create_sample(
             manager=manager,
             sample_id=sample.sample_id,
