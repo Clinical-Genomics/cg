@@ -232,7 +232,7 @@ def _create_dragen_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id = _create_samples(
+        sample_id: int = _create_samples(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
         )
 
@@ -270,7 +270,7 @@ def _create_bcl2fastq_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id = _create_samples(
+        sample_id: int = _create_samples(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
         )
 
