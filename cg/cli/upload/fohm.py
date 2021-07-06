@@ -9,9 +9,23 @@ from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
-ARGUMENT_DATE = click.argument("datestr", type=str, required=False)
-OPTION_CASES = click.option("cases", "-c", multiple=True, type=str, required=True)
-OPTION_DRY_RUN = click.option("dry_run", "--dry-run", is_flag=True, default=False)
+ARGUMENT_DATE = click.argument(
+    "datestr",
+    type=str,
+    required=False,
+    help="Date string in format YYYY-MM-DD used for saving re-aggredated data and prefixing upload filenames. If none is given, today's date will be used",
+)
+OPTION_CASES = click.option(
+    "cases",
+    "-c",
+    multiple=True,
+    type=str,
+    required=True,
+    help="CG internal id of cases to aggregate for daily delivery",
+)
+OPTION_DRY_RUN = click.option(
+    "dry_run", "--dry-run", is_flag=True, default=False, help="Run command in dry run"
+)
 
 
 @click.group()
@@ -28,6 +42,7 @@ def fohm(context: CGConfig):
 def aggregate_delivery(
     context: CGConfig, cases: list, dry_run: bool = False, datestr: Optional[str] = None
 ):
+    """Re-aggregates delivery files for FOHM and saves them to default working directory"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.set_cases_to_aggregate(cases=cases)
     fohm_api.create_daily_delivery_folders()
@@ -45,6 +60,7 @@ def aggregate_delivery(
 def create_komplettering(
     context: CGConfig, cases: list, dry_run: bool = False, datestr: Optional[str] = None
 ):
+    """Re-aggregates komplettering files for FOHM and saves them to default working directory"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.set_cases_to_aggregate(cases=cases)
     fohm_api.create_daily_delivery_folders()
@@ -63,9 +79,16 @@ def preprocess_all(
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     gisaid_api = GisaidAPI(config=context)
     for case_id in cases:
-        fohm_api.update_upload_started_at(case_id=case_id)
-        gisaid_api.upload(case_id=case_id)
-        LOG.info("Upload to GISAID successful")
+        try:
+            gisaid_api.upload(case_id=case_id)
+            fohm_api.update_upload_started_at(case_id=case_id)
+            LOG.info(f"Upload of case {case_id} to GISAID was successful")
+        except Exception as e:
+            LOG.error(
+                f"Upload of case {case_id} to GISAID unseccessful {e}, case {case_id} "
+                f"will be removed from delivery batch"
+            )
+            cases.remove(case_id)
     fohm_api.set_cases_to_aggregate(cases=cases)
     fohm_api.create_daily_delivery_folders()
     fohm_api.append_metadata_to_aggregation_df()
@@ -83,6 +106,7 @@ def preprocess_all(
 @OPTION_DRY_RUN
 @click.pass_obj
 def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
+    """Deliver files in daily upload directory via sftp"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.sync_files_sftp()
 
@@ -92,5 +116,6 @@ def upload_rawdata(context: CGConfig, dry_run: bool = False, datestr: Optional[s
 @OPTION_DRY_RUN
 @click.pass_obj
 def send_reports(context: CGConfig, dry_run: bool = False, datestr: Optional[str] = None):
+    """Send all komplettering reports found in current daily directory to target recipients"""
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     fohm_api.send_mail_reports()
