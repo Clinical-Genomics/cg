@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [NG.NG.NG]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
 
 ## [22.8.1]
 ### Changed
