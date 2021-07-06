@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.8.2]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
 
 ## [22.8.3]
 ### Added
