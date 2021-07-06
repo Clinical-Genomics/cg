@@ -21,7 +21,7 @@ __________ DO NOT TOUCH ___________
 
 ## [22.8.3]
 ### Fixed
-- Fail graceful if Avatar url lookup fails 
+- Tooltips for fohm upload functions
 
 ## [22.8.2]
 ### Fixed
