@@ -59,3 +59,5 @@ DEMUX_STATS_PATH = {
         "runinfo": Path("Reports") / Path("RunInfo.xml"),
     },
 }
+
+DRAGEN_PASSED_FILTER_PCT = 100.00000

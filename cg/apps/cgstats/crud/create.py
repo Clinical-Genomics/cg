@@ -8,6 +8,7 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples, get_dragen_demux_samples
 from cg.apps.cgstats.dragen_demux_sample import DragenDemuxSample
 from cg.apps.cgstats.stats import StatsAPI
+from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
@@ -138,24 +139,43 @@ def create_dragen_unaligned(
     unaligned.sample_id: int = sample_id
     unaligned.demux_id: int = demux_id
     unaligned.lane: int = demux_sample.lane
-    unaligned.passed_filter_pct: float = 100.00000
-    unaligned.readcounts: int = demux_sample.reads * 2
-    unaligned.perfect_indexreads_pct: float = round(
-        demux_sample.perfect_reads / demux_sample.reads * 100, 5
-    )
-    unaligned.q30_bases_pct: float = round(
-        demux_sample.pass_filter_q30
-        / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
-        * 100,
-        5,
-    )
-    unaligned.yield_mb: float = round(demux_sample.reads * demux_sample.read_length / 1000000, 0)
+    unaligned.passed_filter_pct: float = DRAGEN_PASSED_FILTER_PCT
+    unaligned.readcounts: int = _calculate_read_counts(demux_sample)
+    unaligned.perfect_indexreads_pct: float = _calculate_perfect_indexreads_pct(demux_sample)
+    unaligned.q30_bases_pct: float = _calculate_q30_bases_pct(demux_sample)
+    unaligned.yield_mb: float = _calculate_yield(demux_sample)
     unaligned.mean_quality_score: float = demux_sample.mean_quality_score
     unaligned.time: sqlalchemy.sql.functions.now = sqlalchemy.func.now()
 
     manager.add(unaligned)
     manager.flush()
     return unaligned
+
+
+def _calculate_perfect_indexreads_pct(demux_sample: DragenDemuxSample) -> float:
+    """calculates the percentage of perfect index reads"""
+    return round(demux_sample.perfect_reads / demux_sample.reads * 100, 2)
+
+
+def _calculate_q30_bases_pct(demux_sample: DragenDemuxSample) -> float:
+    """calculates the percentage of bases with a sequencing quality score of 30 or over"""
+    return round(
+        demux_sample.pass_filter_q30
+        / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
+        * 100,
+        2,
+    )
+
+
+def _calculate_yield(demux_sample: DragenDemuxSample) -> float:
+    """calculates the amount of data produced in MB"""
+    total_reads = _calculate_read_counts(demux_sample)
+    return round(total_reads * demux_sample.read_length / 1000000, 0)
+
+
+def _calculate_read_counts(demux_sample: DragenDemuxSample) -> int:
+    """calculates the number of reads from the number of clusters"""
+    return demux_sample.reads * 2
 
 
 def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str, int]:
