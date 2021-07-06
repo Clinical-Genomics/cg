@@ -133,24 +133,25 @@ def create_unaligned(
 def create_dragen_unaligned(
     manager: StatsAPI, demux_sample: DragenDemuxSample, sample_id: int, demux_id: int
 ) -> stats_models.Unaligned:
+    breakpoint()
     unaligned: stats_models.Unaligned = manager.Unaligned()
-    unaligned.sample_id = sample_id
-    unaligned.demux_id = demux_id
-    unaligned.lane = demux_sample.lane
-    unaligned.passed_filter_pct = 100.00000
-    unaligned.readcounts = demux_sample.reads * 2
-    unaligned.perfect_indexreads_pct = round(
+    unaligned.sample_id: int = sample_id
+    unaligned.demux_id: int = demux_id
+    unaligned.lane: int = demux_sample.lane
+    unaligned.passed_filter_pct: float = 100.00000
+    unaligned.readcounts: int = demux_sample.reads * 2
+    unaligned.perfect_indexreads_pct: float = round(
         demux_sample.perfect_reads / demux_sample.reads * 100, 5
     )
-    unaligned.q30_bases_pct = round(
+    unaligned.q30_bases_pct: float = round(
         demux_sample.pass_filter_q30
         / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
         * 100,
         5,
     )
-    unaligned.yield_mb = round(demux_sample.reads * demux_sample.read_length / 1000000, 0)
-    unaligned.mean_quality_score = demux_sample.mean_quality_score
-    unaligned.time = sqlalchemy.func.now()
+    unaligned.yield_mb: float = round(demux_sample.reads * demux_sample.read_length / 1000000, 0)
+    unaligned.mean_quality_score: float = demux_sample.mean_quality_score
+    unaligned.time: sqlalchemy.sql.functions.now = sqlalchemy.func.now()
 
     manager.add(unaligned)
     manager.flush()
