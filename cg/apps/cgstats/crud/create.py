@@ -145,7 +145,7 @@ def create_dragen_unaligned(
     unaligned.q30_bases_pct: float = _calculate_q30_bases_pct(demux_sample)
     unaligned.yield_mb: float = _calculate_yield(demux_sample)
     unaligned.mean_quality_score: float = demux_sample.mean_quality_score
-    unaligned.time: sqlalchemy.sql.functions.now = sqlalchemy.func.now()
+    unaligned.time: sqlalchemy.sql.func.now = sqlalchemy.func.now()
 
     manager.add(unaligned)
     manager.flush()
