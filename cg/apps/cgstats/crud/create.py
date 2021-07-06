@@ -223,7 +223,7 @@ def _create_dragen_samples(
     sample_sheet: SampleSheet,
 ):
     """Handles sample creation: creates sample objects and unaligned objects in their respective
-    tabeles in cgstats"""
+    tables in cgstats for samples demultiplexed with Dragen"""
 
     demux_samples: Dict[int, dict] = get_dragen_demux_samples(
         demux_results=demux_results,
@@ -260,7 +260,7 @@ def _create_bcl2fastq_samples(
     sample_sheet: SampleSheet,
 ):
     """Handles sample creation: creates sample objects and unaligned objects in their respective
-    tabeles in cgstats"""
+    tables in cgstats for samples demultiplexed with bcl2fastq"""
 
     demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(
         conversion_stats=demux_results.conversion_stats,
