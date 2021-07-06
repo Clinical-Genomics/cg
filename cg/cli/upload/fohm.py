@@ -77,6 +77,7 @@ def preprocess_all(
 ):
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     gisaid_api = GisaidAPI(config=context)
+    cases = list(cases)
     for case_id in cases:
         try:
             gisaid_api.upload(case_id=case_id)
@@ -94,6 +95,7 @@ def preprocess_all(
     fohm_api.create_komplettering_reports()
     fohm_api.create_pangolin_reports()
     fohm_api.link_sample_rawdata_files()
+    fohm_api.sync_files_sftp()
     fohm_api.send_mail_reports()
     for case_id in cases:
         fohm_api.update_uploaded_at(case_id=case_id)

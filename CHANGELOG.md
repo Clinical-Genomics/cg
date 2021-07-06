@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.8.4]
+### Fixed
+- Sftp upload before sending email to FOHM
+
 ## [22.8.3]
 ### Fixed
 - Tooltips for fohm upload functions
