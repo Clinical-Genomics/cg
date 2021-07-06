@@ -25,8 +25,7 @@ class AdapterMetrics:
             for row in metrics_reader:
                 lane = int(row["Lane"])
                 sample_id = row["Sample_ID"]
-                if lane not in parsed_metrics:
-                    parsed_metrics[lane] = {}
+                parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 parsed_metrics[lane][sample_id] = row
 
         return parsed_metrics

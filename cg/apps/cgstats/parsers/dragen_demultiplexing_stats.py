@@ -45,8 +45,7 @@ class DragenDemultiplexingStats:
             for row in stats_reader:
                 lane = int(row["Lane"])
                 sample_id = row["SampleID"]
-                if lane not in parsed_stats:
-                    parsed_stats[lane] = {}
+                parsed_stats[lane] = parsed_stats.get(lane, {})
                 parsed_stats[lane][sample_id] = row
 
         return parsed_stats
