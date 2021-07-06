@@ -196,7 +196,7 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
 def _create_samples(
     manager: StatsAPI, sample: NovaSeqSample, project_name_to_id: Dict[str, int]
 ) -> Union[int, None]:
-    """handles sample objects creation in the table `Sample` in cgstats"""
+    """handles sample objects creation for the table `Sample` in cgstats"""
 
     barcode = (
         sample.index if not sample.second_index else "+".join([sample.index, sample.second_index])
