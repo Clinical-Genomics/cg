@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [NG.NG.NG]
+## [22.8.2]
 ### Fixed
 - Fail graceful if Avatar url lookup fails 
 
