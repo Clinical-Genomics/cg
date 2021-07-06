@@ -133,7 +133,6 @@ def create_unaligned(
 def create_dragen_unaligned(
     manager: StatsAPI, demux_sample: DragenDemuxSample, sample_id: int, demux_id: int
 ) -> stats_models.Unaligned:
-    breakpoint()
     unaligned: stats_models.Unaligned = manager.Unaligned()
     unaligned.sample_id: int = sample_id
     unaligned.demux_id: int = demux_id
