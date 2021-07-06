@@ -36,8 +36,8 @@ class Avatar:
                 filters=filters,
                 verify_status_only=False,
             )
-            sleep(secrets.SystemRandom().randint(0, min(len(filter_array) - try_cnt, 1)))
             if not urls:
+                sleep(secrets.SystemRandom().randint(0, max(len(filter_array) - try_cnt, 1)))
                 query = f"{animal}"
                 urls = bing_image_urls(
                     query=query,
