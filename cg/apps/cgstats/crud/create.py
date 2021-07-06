@@ -198,7 +198,7 @@ def _create_samples(
 ) -> Union[int, None]:
     """handles sample objects creation in the table `Sample` in cgstats"""
 
-    barcode = (
+    barcode: str = (
         sample.index if not sample.second_index else "+".join([sample.index, sample.second_index])
     )
     sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
