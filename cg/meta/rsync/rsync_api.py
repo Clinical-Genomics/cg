@@ -2,21 +2,20 @@
 import datetime as dt
 import glob
 import logging
-from pathlib import Path
-from typing import Dict, Iterable, List
-
 import yaml
+from pathlib import Path
+from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.priority import SLURM_ACCOUNT_TO_QOS, SlurmQos
+from cg.constants.priority import SlurmQos
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
+from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
-from cgmodels.cg.constants import Pipeline
+from cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
 
@@ -142,55 +141,47 @@ class RsyncAPI(MetaAPI):
             log_dir.mkdir(parents=True, exist_ok=True)
 
     def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
-        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
-        source_path: str = self.get_source_path(ticket_id=ticket_id)
-        destination_path: str = self.get_destination_path(ticket_id=ticket_id)
+        self.set_log_dir(ticket_id=ticket_id)
+        self.create_log_dir(dry_run=dry_run)
+        source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
+            ticket_id=ticket_id
+        )
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         customer_id: str = cases[0].customer.internal_id
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
-            covid_report_options: List[str] = glob.glob(
-                self.covid_report_path % (str(cases[0].internal_id), ticket_id)
-            )
-            if not covid_report_options:
-                LOG.error(
-                    f"No report file could be found with path"
-                    f" {self.covid_report_path % (str(cases[0].internal_id), ticket_id)}!"
-                )
-                raise CgError()
-            covid_report_path: str = covid_report_options[0]
-            covid_destination_path: str = self.covid_destination_path % customer_id
             commands = COVID_RSYNC.format(
-                source_path=source_path,
-                destination_path=destination_path,
-                covid_report_path=covid_report_path,
-                covid_destination_path=covid_destination_path,
+                source_path=source_and_destination_paths["delivery_source_path"],
+                destination_path=source_and_destination_paths["rsync_destination_path"],
+                covid_report_path=self.format_covid_report_path(case=cases[0], ticket_id=ticket_id),
+                covid_destination_path=self.format_covid_destination_path(
+                    self.covid_destination_path, customer_id=customer_id
+                ),
+                log_dir=self.log_dir,
             )
         else:
             commands = RSYNC_COMMAND.format(
-                source_path=source_path, destination_path=destination_path
+                source_path=source_and_destination_paths["delivery_source_path"],
+                destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        if SLURM_ACCOUNT_TO_QOS[self.account]:
-            priority = SLURM_ACCOUNT_TO_QOS[self.account]
-        else:
-            priority = "low"
+        error_function = ERROR_RSYNC_FUNCTION.format()
         sbatch_info = {
             "job_name": "_".join([str(ticket_id), "rsync"]),
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
-            "log_dir": log_dir.as_posix(),
+            "log_dir": self.log_dir.as_posix(),
             "email": self.mail_user,
             "hours": 24,
+            "priority": self.priority,
             "commands": commands,
-            "error": ERROR_RSYNC_FUNCTION.format(),
+            "error": error_function,
             "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
-            "priority": priority,
         }
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path = log_dir / "_".join([str(ticket_id), "rsync.sh"])
+        sbatch_path = self.log_dir / "_".join([str(ticket_id), "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
