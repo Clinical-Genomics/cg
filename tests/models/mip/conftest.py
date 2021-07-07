@@ -36,6 +36,22 @@ def fixture_mip_analysis_config_dna(mip_analysis_config_dna_raw: dict) -> MipBas
     return MipBaseConfig(**mip_analysis_config_dna_raw)
 
 
+@pytest.fixture(name="mip_metrics_deliverables_raw")
+def fixture_mip_metrics_deliverables_raw() -> dict:
+    """Raw MIP metrics deliverables"""
+    return {
+        "metrics": [
+            {
+                "id": "an_id",
+                "input": "some_input",
+                "name": "name_of_metric",
+                "step": "metric_from:step",
+                "value": "value_of_metric",
+            }
+        ],
+    }
+
+
 @pytest.fixture(name="sample_info_dna_raw")
 def fixture_sample_info_dna_raw() -> dict:
     """Raw sample_info fixture"""
