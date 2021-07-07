@@ -18,10 +18,68 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________
-
-## [22.6.0]
+## [22.9.0]
 ### Fixed
 - QoS will be set to standard for production when running "cg deliver rsync"
+
+
+## [22.8.6]
+### Fixed
+- Statina load use latest file
+
+## [22.8.5]
+### Fixed
+- Sftp upload before sending email to FOHM
+
+## [22.8.4]
+### Fixed
+- Tooltips for fohm upload functions
+
+
+## [22.8.3]
+### Added
+- Data delivery export to LIMS 
+
+## [22.8.2]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
+
+## [22.8.1]
+### Changed
+- Upload gisaid uses once again single fasta
+- Upload gisaid uses pandas
+- Upload gisaid uploads only qc pass files
+
+## [22.8.0]
+### Added
+- Added support for FOHM batch upload
+
+
+
+## [22.7.0]
+### Added
+- email functionality
+
+### Changed
+- gisaid upload command: gisaid cli log file will be saved in housekeeper with tag gisaid-log
+- gisaid upload command: the log file will be appended to if the upload is run again for the same case.
+- gisaid upload command: Accession numbers will be parsed from the log file 
+- gisaid upload command: The completion file which already exists in housekeeper will be updated with accession numbers
+- gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+## [22.6.1]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
+## [22.6.0]
+### Added
+- Added rsync processes into trailblazer
+- Added cleanup of rsync directories
+
+## [22.5.2]
+### Fixed
+- mip check if analysis is complete
+
 
 ## [22.5.1]
 ### Fixed
@@ -35,14 +93,13 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Statina upload api call to raise error when server response is not ok
 
-
 ## [22.4.0]
 ### Fixed
 - cg will no longer run rsync on the gpu nodes
 
 ## [22.3.1]
 ### Fixed
-Fixed statina load bug where missing headers prevented data from being read
+- Fixed statina load bug where missing headers prevented data from being read
 
 ## [22.3.0]
 ### Added

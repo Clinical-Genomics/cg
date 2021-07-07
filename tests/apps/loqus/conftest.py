@@ -2,8 +2,6 @@
     conftest for loqusdb API
 """
 
-from subprocess import CalledProcessError
-
 import pytest
 from cg.apps.loqus import LoqusdbAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
@@ -138,7 +136,7 @@ def loqusdb_case_output():
     """
 
     _output = (
-        b'[{"_id": "1234", "case_id": "a_case", '
+        b'[{"_id": "1234", "case_id": "yellowhog", '
         b'"vcf_path": "test.vcf.gz", "vcf_sv_path": null, "nr_variants": 15, '
         b'"nr_sv_variants": null, "profile_path": "test.vcf.gz", "individuals": '
         b'[{"ind_id": "proband", "name": "proband", "case_id": "recessive_trio", '

@@ -8,6 +8,7 @@ PROP2UDF = {
     "concentration_sample": "Sample Conc.",
     "customer": "customer",
     "data_analysis": "Data Analysis",
+    "data_delivery": "Data Delivery",
     "elution_buffer": "Sample Buffer",
     "extraction_method": "Extraction method",
     "family_name": "familyID",
@@ -40,12 +41,6 @@ PROP2UDF = {
     "verified_organism": "Verified organism",
     "volume": "Volume (uL)",
     "well_position_rml": "RML well position",
-    "verified_organism": "Verified organism",
-    "sequencing_qc_pass": "Passed Sequencing QC",
-    "region": "Region",
-    "collection_date": "Collection Date",
-    "original_lab_address": "Original Lab Address",
-    "original_lab": "Original Lab",
 }
 
 MASTER_STEPS_UDFS = {
