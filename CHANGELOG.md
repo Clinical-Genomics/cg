@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.9.0]
+### Added
+- Samples that lack data during delivery is reported
+
 
 ## [22.8.6]
 ### Fixed
