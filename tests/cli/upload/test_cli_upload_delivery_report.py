@@ -23,7 +23,7 @@ def test_no_parameters(upload_context: CGConfig, cli_runner: CliRunner, caplog):
 
     # THEN it should fail on missing case_id
     assert result.exit_code != EXIT_CODE_SUCCESS
-    assert "provide a case, suggestions:" in caplog.text
+    assert "Provide a case, suggestions:" in caplog.text
 
 
 def test_analysis_started_at(

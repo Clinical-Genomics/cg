@@ -162,6 +162,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
 
+    def find_family_by_avatar_url(self, avatar_url: str) -> models.Family:
+        """Fetch a family by avatar_url from the database."""
+        return self.Family.query.filter_by(avatar_url=avatar_url).first()
+
     def find_family_by_name(self, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
@@ -298,7 +302,7 @@ class FindBusinessDataHandler(BaseHandler):
             identifier = getattr(models.Sample, identifier_name)
             records = records.filter(identifier.contains(identifier_value))
 
-        return records.order_by(models.Sample.internal_id.asc())
+        return records.order_by(models.Sample.internal_id.desc())
 
     def samples_in_customer_group(
         self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None

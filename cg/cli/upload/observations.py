@@ -44,7 +44,10 @@ def observations(
     for case_obj in families_to_upload:
 
         if case_limit is not None and nr_uploaded >= case_limit:
-            LOG.info("Uploaded %d cases, observations upload will now stop", nr_uploaded)
+            LOG.info(
+                "Uploaded %d cases, observations upload will now stop",
+                nr_uploaded,
+            )
             return
 
         if not case_obj.customer.loqus_upload:
@@ -89,6 +92,14 @@ def observations(
             LOG.info("%s: observations uploaded!", case_obj.internal_id)
             nr_uploaded += 1
         except (DuplicateRecordError, DuplicateSampleError) as error:
-            LOG.info("%s: skipping observations upload: %s", case_obj.internal_id, error.message)
+            LOG.info(
+                "%s: skipping observations upload: %s",
+                case_obj.internal_id,
+                error.message,
+            )
         except FileNotFoundError as error:
-            LOG.info("%s: skipping observations upload: %s", case_obj.internal_id, error)
+            LOG.info(
+                "%s: skipping observations upload: %s",
+                case_obj.internal_id,
+                error,
+            )

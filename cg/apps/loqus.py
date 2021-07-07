@@ -1,6 +1,7 @@
 """
     Module for loqusdb API
 """
+from pathlib import Path
 
 import json
 import logging
@@ -33,7 +34,12 @@ class LoqusdbAPI:
         self.process = Process(self.loqusdb_binary, self.loqusdb_config)
 
     def load(
-        self, family_id: str, ped_path: str, vcf_path: str, gbcf_path: str, vcf_sv_path: str = None
+        self,
+        family_id: str,
+        ped_path: Path,
+        vcf_path: Path,
+        gbcf_path: Path,
+        vcf_sv_path: Path = None,
     ) -> dict:
         """Add observations from a VCF."""
         load_call_parameters = [
@@ -41,18 +47,18 @@ class LoqusdbAPI:
             "-c",
             family_id,
             "-f",
-            ped_path,
+            ped_path.as_posix(),
             "--variant-file",
-            vcf_path,
+            vcf_path.as_posix(),
             "--check-profile",
-            gbcf_path,
+            gbcf_path.as_posix(),
             "--hard-threshold",
             "0.95",
             "--soft-threshold",
             "0.90",
         ]
         if self.analysis_type == "wgs" and vcf_sv_path:
-            load_call_parameters.extend(["--sv-variants", vcf_sv_path])
+            load_call_parameters.extend(["--sv-variants", vcf_sv_path.as_posix()])
 
         nr_variants = 0
         self.process.run_command(parameters=load_call_parameters)
@@ -80,10 +86,16 @@ class LoqusdbAPI:
 
         return case_obj
 
-    def get_duplicate(self, vcf_file: str) -> dict:
+    def get_duplicate(self, vcf_file: Path) -> dict:
         """Find matching profiles in loqusdb"""
         ind_obj = {}
-        duplicates_params = ["profile", "--check-vcf", vcf_file, "--profile-threshold", "0.95"]
+        duplicates_params = [
+            "profile",
+            "--check-vcf",
+            vcf_file.as_posix(),
+            "--profile-threshold",
+            "0.95",
+        ]
 
         try:
             self.process.run_command(parameters=duplicates_params)

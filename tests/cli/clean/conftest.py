@@ -14,6 +14,7 @@ from tests.store_helpers import StoreHelpers
 def clean_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
+    project_dir: Path,
     timestamp_yesterday: datetime.datetime,
     timestamp_today: datetime.datetime,
 ) -> CGConfig:
@@ -69,4 +70,17 @@ def clean_context(
     )
     Path(analysis_api.get_case_path("balsamic_case_not_clean")).mkdir(exist_ok=True, parents=True)
     cg_context.meta_apis["analysis_api"] = analysis_api
+
+    cg_context.data_delivery.base_path = f"{project_dir}/rsync"
+
     return cg_context
+
+
+@pytest.fixture(name="rsync_process")
+def fixture_rsync_process(project_dir: Path) -> Path:
+    """Return a rsync process after ensuing that is is created"""
+
+    rsync_process = project_dir / "rsync" / "rsync_process"
+
+    rsync_process.mkdir(exist_ok=True, parents=True)
+    return rsync_process

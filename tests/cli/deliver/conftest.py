@@ -26,7 +26,7 @@ def fixture_deliver_vcf_path(
 
 @pytest.fixture(name="base_context")
 def fixture_base_context(
-    base_context: CGConfig, real_housekeeper_api: HousekeeperAPI, project_dir: Path
+    base_context: CGConfig, project_dir: Path, real_housekeeper_api: HousekeeperAPI
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
     base_context.delivery_path = str(project_dir)

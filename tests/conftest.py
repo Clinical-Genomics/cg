@@ -6,18 +6,22 @@ import datetime as dt
 import json
 import logging
 import os
-import shutil
-from pathlib import Path
-
 import pytest
+import shutil
+
+from pathlib import Path
+from typing import Generator
+
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.models.observations.observations_input_files import ObservationsInputFiles
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -168,6 +172,12 @@ def fixture_base_config_dict() -> dict:
             "database": "sqlite:///",
             "root": "path/to/root",
         },
+        "email_base_settings": {
+            "sll_port": 465,
+            "smtp_server": "smtp.gmail.com",
+            "sender_email": "test@gmail.com",
+            "sender_password": "",
+        },
     }
 
 
@@ -220,6 +230,13 @@ def fixture_genotype_config() -> dict:
 
 
 # Api fixtures
+
+
+@pytest.fixture(name="rsync_api")
+def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
+    """RsyncAPI fixture"""
+    _rsync_api: RsyncAPI = RsyncAPI(config=cg_context)
+    return _rsync_api
 
 
 @pytest.fixture(name="genotype_api")
@@ -283,17 +300,45 @@ def fixture_fastq_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function", name="project_dir")
-def fixture_project_dir(tmpdir_factory):
+def fixture_project_dir(
+    tmpdir_factory,
+) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored"""
-    my_tmpdir = Path(tmpdir_factory.mktemp("data"))
+    my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
     yield my_tmpdir
-    shutil.rmtree(str(my_tmpdir))
 
 
 @pytest.fixture(scope="function")
 def tmp_file(project_dir):
     """Get a temp file"""
     return project_dir / "test"
+
+
+@pytest.fixture(name="non_existing_file_path")
+def fixture_non_existing_file_path(project_dir: Path) -> Path:
+    """Return the path to a non existing file"""
+    return project_dir / "a_file.txt"
+
+
+@pytest.fixture(name="content")
+def fixture_content() -> str:
+    """Return some content for a file"""
+    _content = (
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
+        " ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ull"
+        "amco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehende"
+        "rit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaec"
+        "at cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    )
+    return _content
+
+
+@pytest.fixture(name="filled_file")
+def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
+    """Return the path to a existing file with some content"""
+    with open(non_existing_file_path, "w") as outfile:
+        outfile.write(content)
+    return non_existing_file_path
 
 
 @pytest.fixture(name="orderforms")
@@ -546,6 +591,12 @@ def fixture_timestamp_today() -> dt.datetime:
 def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
     """Return a time stamp of yesterdays date in date time format"""
     return timestamp_today - dt.timedelta(days=1)
+
+
+@pytest.fixture(scope="function", name="timestamp_in_2_weeks")
+def fixture_timestamp_in_2_weeks(timestamp_today: dt.datetime) -> dt.datetime:
+    """Return a time stamp 14 days ahead in time"""
+    return timestamp_today + dt.timedelta(days=14)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
@@ -1081,6 +1132,12 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "email_base_settings": {
+            "sll_port": 465,
+            "smtp_server": "smtp.gmail.com",
+            "sender_email": "test@gmail.com",
+            "sender_password": "",
+        },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
@@ -1117,6 +1174,14 @@ def fixture_context_config(
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
             "host": "https://trailblazer.scilifelab.se/",
+        },
+        "gisaid": {
+            "binary_path": "/path/to/gisaid_uploader.py",
+            "log_dir": "/path/to/log",
+            "submitter": "s.submitter",
+            "logwatch_email": "some@email.com",
+            "upload_password": "pass",
+            "upload_cid": "cid",
         },
         "lims": {
             "host": "https://lims.scilifelab.se",
@@ -1198,3 +1263,15 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
+
+
+@pytest.fixture(name="observation_input_files_raw")
+def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
+    """Raw observations input files"""
+    return {
+        "case_id": case_id,
+        "pedigree": filled_file,
+        "snv_gbcf": filled_file,
+        "snv_vcf": filled_file,
+        "sv_vcf": None,
+    }

@@ -140,7 +140,6 @@ def test_set_family_data_analysis(
         family,
         [case_obj.internal_id, "--data-analysis", str(data_analysis)],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN then it should set data_analysis on the case
@@ -181,7 +180,6 @@ def test_set_family_data_delivery(
         family,
         [case_obj.internal_id, "--data-delivery", str(data_delivery)],
         obj=base_context,
-        catch_exceptions=False,
     )
 
     # THEN then it should set data_delivery on the case

@@ -133,6 +133,10 @@ class MicrosaltConfig(BaseModel):
 
 class GisaidConfig(CommonAppConfig):
     submitter: str
+    log_dir: str
+    logwatch_email: EmailStr
+    upload_password: str
+    upload_cid: str
 
 
 class ShippingConfig(CommonAppConfig):
@@ -149,6 +153,22 @@ class DataDeliveryConfig(BaseModel):
     mail_user: str
 
 
+class EmailBaseSettings(BaseModel):
+    sender_email: EmailStr
+    smtp_server: str
+
+
+class FOHMConfig(BaseModel):
+    host: str
+    port: int
+    key: str
+    username: str
+    valid_uploader: str
+    email_sender: str
+    email_recipient: str
+    email_host: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -156,6 +176,8 @@ class CGConfig(BaseModel):
     bed_path: str
     delivery_path: str
     max_flowcells: Optional[int]
+    email_base_settings: EmailBaseSettings
+
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -196,6 +218,7 @@ class CGConfig(BaseModel):
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
+    fohm: Optional[FOHMConfig] = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None
@@ -228,22 +251,31 @@ class CGConfig(BaseModel):
         }
 
     @property
-    def status_db(self) -> Store:
-        status_db = self.__dict__.get("status_db_")
-        if status_db is None:
-            LOG.debug("Instantiating status db")
-            status_db = Store(self.database)
-            self.status_db_ = status_db
-        return status_db
+    def chanjo_api(self) -> ChanjoAPI:
+        api = self.__dict__.get("chanjo_api_")
+        if api is None:
+            LOG.debug("Instantiating chanjo api")
+            api = ChanjoAPI(config=self.dict())
+            self.chanjo_api_ = api
+        return api
 
     @property
-    def housekeeper_api(self) -> HousekeeperAPI:
-        housekeeper_api = self.__dict__.get("housekeeper_api_")
-        if housekeeper_api is None:
-            LOG.debug("Instantiating housekeeper api")
-            housekeeper_api = HousekeeperAPI(config=self.dict())
-            self.housekeeper_api_ = housekeeper_api
-        return housekeeper_api
+    def cg_stats_api(self) -> StatsAPI:
+        api = self.__dict__.get("cg_stats_api_")
+        if api is None:
+            LOG.debug("Instantiating cg_stats api")
+            api = StatsAPI(config=self.dict())
+            self.cg_stats_api_ = api
+        return api
+
+    @property
+    def crunchy_api(self) -> CrunchyAPI:
+        api = self.__dict__.get("crunchy_api_")
+        if api is None:
+            LOG.debug("Instantiating crunchy api")
+            api = CrunchyAPI(config=self.dict())
+            self.crunchy_api_ = api
+        return api
 
     @property
     def demultiplex_api(self) -> DemultiplexingAPI:
@@ -255,6 +287,15 @@ class CGConfig(BaseModel):
         return demultiplex_api
 
     @property
+    def genotype_api(self) -> GenotypeAPI:
+        api = self.__dict__.get("genotype_api_")
+        if api is None:
+            LOG.debug("Instantiating genotype api")
+            api = GenotypeAPI(config=self.dict())
+            self.genotype_api_ = api
+        return api
+
+    @property
     def hermes_api(self) -> HermesApi:
         hermes_api = self.__dict__.get("hermes_api_")
         if hermes_api is None:
@@ -264,22 +305,13 @@ class CGConfig(BaseModel):
         return hermes_api
 
     @property
-    def scout_api(self) -> ScoutAPI:
-        api = self.__dict__.get("scout_api_")
-        if api is None:
-            LOG.debug("Instantiating scout api")
-            api = ScoutAPI(config=self.dict())
-            self.scout_api_ = api
-        return api
-
-    @property
-    def trailblazer_api(self) -> TrailblazerAPI:
-        api = self.__dict__.get("trailblazer_api_")
-        if api is None:
-            LOG.debug("Instantiating trailblazer api")
-            api = TrailblazerAPI(config=self.dict())
-            self.trailblazer_api_ = api
-        return api
+    def housekeeper_api(self) -> HousekeeperAPI:
+        housekeeper_api = self.__dict__.get("housekeeper_api_")
+        if housekeeper_api is None:
+            LOG.debug("Instantiating housekeeper api")
+            housekeeper_api = HousekeeperAPI(config=self.dict())
+            self.housekeeper_api_ = housekeeper_api
+        return housekeeper_api
 
     @property
     def lims_api(self) -> LimsAPI:
@@ -291,21 +323,12 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def vogue_api(self) -> VogueAPI:
-        api = self.__dict__.get("vogue_api_")
+    def loqusdb_api(self) -> LoqusdbAPI:
+        api = self.__dict__.get("loqusdb_api_")
         if api is None:
-            LOG.debug("Instantiating vogue api")
-            api = VogueAPI(config=self.dict())
-            self.vogue_api_ = api
-        return api
-
-    @property
-    def crunchy_api(self) -> CrunchyAPI:
-        api = self.__dict__.get("crunchy_api_")
-        if api is None:
-            LOG.debug("Instantiating crunchy api")
-            api = CrunchyAPI(config=self.dict())
-            self.crunchy_api_ = api
+            LOG.debug("Instantiating loqusdb api")
+            api = LoqusdbAPI(config=self.dict())
+            self.loqusdb_api_ = api
         return api
 
     @property
@@ -327,21 +350,12 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def genotype_api(self) -> GenotypeAPI:
-        api = self.__dict__.get("genotype_api_")
+    def scout_api(self) -> ScoutAPI:
+        api = self.__dict__.get("scout_api_")
         if api is None:
-            LOG.debug("Instantiating genotype api")
-            api = GenotypeAPI(config=self.dict())
-            self.genotype_api_ = api
-        return api
-
-    @property
-    def chanjo_api(self) -> ChanjoAPI:
-        api = self.__dict__.get("chanjo_api_")
-        if api is None:
-            LOG.debug("Instantiating chanjo api")
-            api = ChanjoAPI(config=self.dict())
-            self.chanjo_api_ = api
+            LOG.debug("Instantiating scout api")
+            api = ScoutAPI(config=self.dict())
+            self.scout_api_ = api
         return api
 
     @property
@@ -354,19 +368,28 @@ class CGConfig(BaseModel):
         return api
 
     @property
-    def cg_stats_api(self) -> StatsAPI:
-        api = self.__dict__.get("cg_stats_api_")
+    def status_db(self) -> Store:
+        status_db = self.__dict__.get("status_db_")
+        if status_db is None:
+            LOG.debug("Instantiating status db")
+            status_db = Store(self.database)
+            self.status_db_ = status_db
+        return status_db
+
+    @property
+    def trailblazer_api(self) -> TrailblazerAPI:
+        api = self.__dict__.get("trailblazer_api_")
         if api is None:
-            LOG.debug("Instantiating cg_stats api")
-            api = StatsAPI(config=self.dict())
-            self.cg_stats_api_ = api
+            LOG.debug("Instantiating trailblazer api")
+            api = TrailblazerAPI(config=self.dict())
+            self.trailblazer_api_ = api
         return api
 
     @property
-    def loqusdb_api(self) -> LoqusdbAPI:
-        api = self.__dict__.get("loqusdb_api_")
+    def vogue_api(self) -> VogueAPI:
+        api = self.__dict__.get("vogue_api_")
         if api is None:
-            LOG.debug("Instantiating loqusdb api")
-            api = LoqusdbAPI(config=self.dict())
-            self.loqusdb_api_ = api
+            LOG.debug("Instantiating vogue api")
+            api = VogueAPI(config=self.dict())
+            self.vogue_api_ = api
         return api
