@@ -48,9 +48,9 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_files: Iterable[hk_models.File] = self.housekeeper_api.get_files(
-            bundle=case_id, tags=tags
-        )
+        hk_all_results_files: Iterable[
+            hk_models.File
+        ] = self.housekeeper_api.find_file_in_latest_version(bundle=case_id, tags=tags)
 
         if not list(hk_all_results_files):
             raise HousekeeperFileMissingError(
@@ -123,17 +123,17 @@ class NiptUploadAPI:
     def get_statina_files(self, case_id: str) -> StatinaUploadFiles:
         """Get statina files from from housekeeper."""
 
-        hk_results_file: str = self.housekeeper_api.find_file_in_latest_version(
+        hk_results_file: str = self.housekeeper_api.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "metrics"]
         )
         results_file: Path = self.get_results_file_path(hk_results_file)
 
-        hk_multiqc_file: str = self.housekeeper_api.find_file_in_latest_version(
+        hk_multiqc_file: str = self.housekeeper_api.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "multiqc-html"]
         )
         multiqc_file: Path = self.get_results_file_path(hk_multiqc_file)
 
-        hk_segmental_calls_file: str = self.housekeeper_api.find_file_in_latest_version(
+        hk_segmental_calls_file: str = self.housekeeper_api.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "wisecondor"]
         )
         segmental_calls_file: Path = self.get_results_file_path(hk_segmental_calls_file)
