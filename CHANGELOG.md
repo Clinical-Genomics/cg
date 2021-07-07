@@ -19,17 +19,19 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.8.4]
+
+## [22.8.6]
+### Fixed
+- Statina load use latest file
+
+## [22.8.5]
 ### Fixed
 - Sftp upload before sending email to FOHM
 
-## [22.8.3]
+## [22.8.4]
 ### Fixed
 - Tooltips for fohm upload functions
 
-## [22.8.2]
-### Fixed
-- Fail graceful if Avatar url lookup fails 
 
 ## [22.8.3]
 ### Added
