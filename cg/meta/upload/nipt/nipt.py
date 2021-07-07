@@ -57,7 +57,7 @@ class NiptUploadAPI:
                 f"No results files found in Housekeeper for NIPT case {case_id}."
             )
 
-        return hk_all_results_file.full_path
+        return hk_all_results_file.path
 
     def get_results_file_path(self, hk_results_file: str) -> Path:
         """Get the full path to the results file on Hasta"""
