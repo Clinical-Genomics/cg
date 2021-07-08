@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.9.2]
+### Added
+- Added UMI validation cases to skip spring compress
+
 ## [22.9.1]
 ### Fixed
 - Send multiple emails properly
