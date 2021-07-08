@@ -19,6 +19,12 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.9.1]
+### Fixed
+- Send multiple emails properly
+### Added
+- Progress bar when uploading to FOHM
+
 ## [22.9.0]
 ### Added
 - Samples that lack data during delivery is reported
