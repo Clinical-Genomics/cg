@@ -168,7 +168,7 @@ class RsyncAPI(MetaAPI):
         if self.account in SLURM_ACCOUNT_TO_QOS.keys():
             priority = SLURM_ACCOUNT_TO_QOS[self.account]
         else:
-            priority ="low"
+            priority = "low"
         sbatch_info = {
             "job_name": "_".join([str(ticket_id), "rsync"]),
             "account": self.account,

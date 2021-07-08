@@ -13,6 +13,7 @@ class SlurmQos(StrEnum):
     NORMAL: str = "normal"
     HIGH: str = "high"
 
+
 SLURM_ACCOUNT_TO_QOS = {
     "production": SlurmQos.NORMAL,
     "development": SlurmQos.LOW,
