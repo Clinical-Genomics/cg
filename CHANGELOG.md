@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.9.2]
+### Added
+- New Balsamic UMI validation cases to skip compression
+
 ## [22.9.1]
 ### Fixed
 - Send multiple emails properly
