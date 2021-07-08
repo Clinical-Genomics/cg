@@ -34,6 +34,9 @@ BALSAMIC_VALIDATION_CASES = [
     "moralgoat",  # BALSAMIC validation case tumor-normal wgs
     "sweetelf",  # BALSAMIC positive control tumor-only panel
     "unitedbeagle",  # BALSAMIC validation case tumor-normal panel
+    "equalbug",
+    "stableraven",
+    "sunnyiguana",
 ]
 
 MIP_VALIDATION_CASES = [
