@@ -161,7 +161,7 @@ class FOHMUploadAPI:
         """
         Hardlink samples rawdata files to fohm delivery folder
         """
-        samples_to_link = self.aggregation_dataframe["internal_id"].count()
+        samples_to_link = len(self.aggregation_dataframe)
         with alive_bar(samples_to_link) as bar:
             for sample_id in self.aggregation_dataframe["internal_id"]:
                 sample_obj: models.Sample = self.status_db.sample(sample_id)
