@@ -35,9 +35,9 @@ BALSAMIC_VALIDATION_CASES = [
     "sweetelf",  # BALSAMIC positive control tumor-only panel
     "unitedbeagle",  # BALSAMIC validation case tumor-normal panel
     "equalbug",  # UMI seracare validation case (AF 0.5%) tumor-normal panel
-    "stableraven", # UMI seracare validation case (AF 1%) tumor-normal panel
-    "sunnyiguana", # UMI seracare validation case (AF 0.1%) tumor-normal panel
-    "uphippo",   # UMI seracare validation case (AF 0.5%) tumor-only panel
+    "stableraven",  # UMI seracare validation case (AF 1%) tumor-normal panel
+    "sunnyiguana",  # UMI seracare validation case (AF 0.1%) tumor-normal panel
+    "uphippo",  # UMI seracare validation case (AF 0.5%) tumor-only panel
 ]
 
 MIP_VALIDATION_CASES = [
