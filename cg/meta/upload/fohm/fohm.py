@@ -169,7 +169,6 @@ class FOHMUploadAPI:
                 version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
                 files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
                 for file in files:
-                    bar()
                     if self._dry_run:
                         LOG.info(
                             f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
@@ -177,6 +176,7 @@ class FOHMUploadAPI:
                         continue
                     shutil.copy(file.full_path, Path(self.daily_rawdata_path))
                     Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0777)
+                bar()
 
     def create_pangolin_reports(self) -> None:
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
