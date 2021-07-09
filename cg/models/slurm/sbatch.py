@@ -16,14 +16,17 @@ class Sbatch(BaseModel):
     commands: str
     error: Optional[str]
     exclude: Optional[str] = ""
+    number_tasks: int
+    memory: int
 
 
 class SbatchBcl2Fastq(Sbatch):
-    number_tasks: int
-    memory: int
+    pass
 
 
 class SbatchDragen(Sbatch):
     partition: str = "dragen"
     nodes: int = 1
     cpus_per_task: int = 24
+    number_tasks: int = None
+    memory: int = None
