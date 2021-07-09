@@ -2,7 +2,7 @@ import datetime
 import logging
 import socket
 from pathlib import Path
-from typing import Iterable, Optional, Union
+from typing import Dict, Iterable, Optional, Union
 
 from pydantic import BaseModel
 from typing_extensions import Literal
@@ -12,7 +12,6 @@ from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
 from cg.apps.cgstats.parsers.dragen_demultiplexing_stats import DragenDemultiplexingStats
 from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.constants.demultiplexing import DEMUX_STATS_PATH
 from cg.models.demultiplex.flowcell import Flowcell
 
 LOG = logging.getLogger(__name__)
@@ -29,11 +28,18 @@ class LogfileParameters(BaseModel):
 class DemuxResults:
     """Class to gather information from a demultiplex result"""
 
-    def __init__(self, demux_dir: Path, flowcell: Flowcell, bcl_converter: str):
+    def __init__(
+        self,
+        demux_dir: Path,
+        flowcell: Flowcell,
+        bcl_converter: str,
+        demux_stats_files: Optional[Dict] = None,
+    ):
         LOG.info("Instantiating DemuxResults with path %s", demux_dir)
         self.demux_dir: Path = demux_dir
         self.flowcell: Flowcell = flowcell
-        self.bcl_converter = bcl_converter
+        self.bcl_converter: str = bcl_converter
+        self.demux_stats_files: Dict = demux_stats_files
         self._conversion_stats: Optional[ConversionStats] = None
         self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
         self._adapter_metrics: Optional[AdapterMetrics] = None
@@ -87,19 +93,19 @@ class DemuxResults:
 
     @property
     def conversion_stats_path(self) -> Union[Path, None]:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["conversion_stats"]
+        return self.demux_stats_files["conversion_stats"]
 
     @property
     def demux_stats_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["demultiplexing_stats"]
+        return self.demux_stats_files["demultiplexing_stats"]
 
     @property
     def adapter_metrics_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["adapter_metrics_stats"]
+        return self.demux_stats_files["adapter_metrics"]
 
     @property
     def runinfo_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["runinfo"]
+        return self.demux_stats_files["run_info"]
 
     @property
     def stderr_log_path(self) -> Path:
@@ -291,4 +297,8 @@ class DemuxResults:
         return time
 
     def __str__(self):
-        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=Flowcell(flowcell_path={self.flowcell.path})"
+        return (
+            f"DemuxResults(demux_dir={self.demux_dir},"
+            f"demux_stats_files={self.demux_stats_files}, flowcell=Flowcell(flowcell_path"
+            f"={self.flowcell.path}, bcl_converter={self.bcl_converter})"
+        )

@@ -4,7 +4,7 @@ This is a way to interact with cgstats manually. In automated production these c
 """
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import click
 
@@ -39,11 +39,17 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str, bcl_converter: str):
         LOG.warning("Could not find demultiplex result path %s", demux_results_path)
         raise click.Abort
     try:
-        flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path)
+        flowcell: Flowcell = Flowcell(flowcell_path=flowcell_run_path, bcl_converter=bcl_converter)
     except FlowcellError:
         raise click.Abort
+    demux_stats_files: Dict = demultiplex_api.get_demux_stats_files(
+        flowcell=flowcell, bcl_converter=bcl_converter
+    )
     demux_results: DemuxResults = DemuxResults(
-        demux_dir=demux_results_path, flowcell=flowcell, bcl_converter=bcl_converter
+        demux_dir=demux_results_path,
+        flowcell=flowcell,
+        bcl_converter=bcl_converter,
+        demux_stats_files=demux_stats_files,
     )
     create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
 

@@ -47,9 +47,25 @@ class HousekeeperConfig(BaseModel):
     root: str
 
 
+class Bcl2FastqFiles(BaseModel):
+    demultiplexing_stats: str
+    conversion_stats: str
+    run_info: str
+
+
+class DragenFiles(Bcl2FastqFiles):
+    adapter_metrics: str
+
+
+class DemuxStatsFiles(BaseModel):
+    bcl2fastq: Bcl2FastqFiles
+    dragen: DragenFiles
+
+
 class DemultiplexConfig(BaseModel):
     run_dir: str  # Base path to  un demultiplexed flowcells
     out_dir: str  # Base path to where the demultiplexed results lives
+    demux_stats_files: DemuxStatsFiles
     slurm: SlurmConfig
 
 

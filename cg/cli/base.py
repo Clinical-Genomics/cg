@@ -3,10 +3,11 @@ import logging
 import sys
 from typing import Optional
 
-import cg
 import click
 import coloredlogs
 import yaml
+
+import cg
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
 from cg.cli.store.store import store as store_cmd

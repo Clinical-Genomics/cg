@@ -12,7 +12,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.priority import SlurmQos
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
-from cg.models.slurm.sbatch import Sbatch, SbatchDragen
+from cg.models.slurm.sbatch import SbatchBcl2Fastq, SbatchDragen
 from cgmodels.cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
@@ -30,6 +30,7 @@ class DemultiplexingAPI:
         self.mail: str = config["demultiplex"]["slurm"]["mail_user"]
         self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
         self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
+        self.demux_stats_files: Dict = config["demultiplex"]["demux_stats_files"]
         self.environment: str = config.get("environment", "stage")
         LOG.info("Set environment to %s", self.environment)
         self.dry_run: bool = False
@@ -230,7 +231,7 @@ class DemultiplexingAPI:
         )
 
         if flowcell.bcl_converter == "bcl2fastq":
-            sbatch_parameters = Sbatch(
+            sbatch_parameters = SbatchBcl2Fastq(
                 account=self.slurm_account,
                 commands=commands,
                 email=self.mail,
@@ -263,3 +264,9 @@ class DemultiplexingAPI:
         )
         LOG.info("Demultiplexing running as job %s", sbatch_number)
         return sbatch_number
+
+    def get_demux_stats_files(self, bcl_converter, flowcell):
+        return {
+            file_type: self.unaligned_dir_path(flowcell) / file_name
+            for file_type, file_name in self.demux_stats_files[bcl_converter].items()
+        }
