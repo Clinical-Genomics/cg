@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.9.3]
+### Changed
+- Remove KS validation cases from upload to GISAID/FOHM
+
+
 ## [22.9.2]
 ### Added
 - Added UMI validation cases to skip spring compress
