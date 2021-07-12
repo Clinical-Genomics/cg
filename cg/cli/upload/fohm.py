@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 import click
 
@@ -79,18 +79,19 @@ def preprocess_all(
     fohm_api = FOHMUploadAPI(config=context, dry_run=dry_run, datestr=datestr)
     gisaid_api = GisaidAPI(config=context)
     cases = list(cases)
+    upload_cases: List = []
     for case_id in cases:
         try:
             gisaid_api.upload(case_id=case_id)
             fohm_api.update_upload_started_at(case_id=case_id)
             LOG.info(f"Upload of case {case_id} to GISAID was successful")
+            upload_cases.append(case_id)
         except Exception as e:
             LOG.error(
                 f"Upload of case {case_id} to GISAID unseccessful {e}, case {case_id} "
                 f"will be removed from delivery batch"
             )
-            cases.remove(case_id)
-    fohm_api.set_cases_to_aggregate(cases=cases)
+    fohm_api.set_cases_to_aggregate(cases=upload_cases)
     fohm_api.create_daily_delivery_folders()
     fohm_api.append_metadata_to_aggregation_df()
     fohm_api.create_komplettering_reports()
@@ -98,7 +99,7 @@ def preprocess_all(
     fohm_api.link_sample_rawdata_files()
     fohm_api.sync_files_sftp()
     fohm_api.send_mail_reports()
-    for case_id in cases:
+    for case_id in upload_cases:
         fohm_api.update_uploaded_at(case_id=case_id)
     LOG.info("Upload to FOHM completed")
 

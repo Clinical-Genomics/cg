@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [22.9.4]
+### Fixed
+- Cases removed from FOHM batch properly
+
 ## [22.9.3]
 ### Changed
 - Remove KS validation cases from upload to GISAID/FOHM
