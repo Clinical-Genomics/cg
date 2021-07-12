@@ -72,6 +72,9 @@ class FOHMUploadAPI:
                 self.daily_reports_list
             ).sort_values(by=["provnummer"])
             self._reports_dataframe.drop_duplicates(inplace=True)
+            self._reports_dataframe = self._reports_dataframe[
+                self._reports_dataframe["provnummer"].str.contains("21CS\(|\)|\d{6}")
+            ]
         return self._reports_dataframe
 
     @property
@@ -82,6 +85,9 @@ class FOHMUploadAPI:
                 self.daily_pangolin_list
             ).sort_values(by=["taxon"])
             self._pangolin_dataframe.drop_duplicates(inplace=True)
+            self._pangolin_dataframe = self.pangolin_dataframe[
+                self._pangolin_dataframe["taxon"].str.contains("21CS\(|\)|\d{6}")
+            ]
         return self._pangolin_dataframe
 
     @property
