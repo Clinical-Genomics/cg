@@ -1,0 +1,9 @@
+[2021-06-14T08:23:35] Running on: cg-dragen.scilifelab.se
+[2021-06-14T08:23:35] dragen --bcl-conversion-only true --bcl-input-directory /home/proj/stage/flowcells/novaseq/runs/210428_A00689_0260_BHNC2FDSXY --output-directory /home/proj/stage/demultiplexed-runs/210428_A00689_0260_BHNC2FDSXY/Unaligned --bcl-sampleproject-subdirectories true --force   
+touch /home/proj/stage/demultiplexed-runs/210428_A00689_0260_BHNC2FDSXY/demuxcomplete.txt
+
+WARNING: Insufficient hamming distance in the i7 index sequences to identify index hopped reads in lane 1. Index hopping report is only produced for unique dual indexes.
+WARNING: Insufficient hamming distance in the i7 index sequences to identify index hopped reads in lane 2. Index hopping report is only produced for unique dual indexes.
+WARNING: Insufficient hamming distance in the i7 index sequences to identify index hopped reads in lane 3. Index hopping report is only produced for unique dual indexes.
+WARNING: Insufficient hamming distance in the i7 index sequences to identify index hopped reads in lane 4. Index hopping report is only produced for unique dual indexes.
+[2021-06-14T11:33:11] Dragen BCL Convert finished!
