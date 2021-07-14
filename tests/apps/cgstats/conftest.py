@@ -8,16 +8,6 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from tests.apps.demultiplex.conftest import *
 from tests.models.demultiplexing.conftest import *
 
-# from tests.models.demultiplexing.conftest import (
-#     fixture_bcl2fastq_demux_results,
-#     fixture_demultiplexed_flowcell,
-#     fixture_demultiplexed_runs,
-#     fixture_flowcell_full_name,
-#     fixture_flowcell_object,
-#     fixture_flowcell_path,
-#     fixture_flowcell_runs,
-# )
-
 
 @pytest.fixture(name="stats_api")
 def fixture_stats_api(project_dir: Path) -> StatsAPI:
