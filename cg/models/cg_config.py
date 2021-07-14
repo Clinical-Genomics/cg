@@ -53,8 +53,15 @@ class Bcl2FastqFiles(BaseModel):
     run_info: str
 
 
-class DragenFiles(Bcl2FastqFiles):
+# class DragenFiles(Bcl2FastqFiles):
+#     adapter_metrics: str
+
+
+class DragenFiles(BaseModel):
     adapter_metrics: str
+    demultiplexing_stats: str
+    conversion_stats: str
+    run_info: str
 
 
 class DemuxStatsFiles(BaseModel):

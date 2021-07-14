@@ -1,7 +1,7 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Dict
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
@@ -179,10 +179,14 @@ class DemuxPostProcessingAPI:
         if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
             LOG.warning("Demultiplex is not ready for %s", flowcell_name)
             return
+        demux_stats_files: Dict = self.demux_api.get_demux_stats_files(
+            flowcell=flowcell, bcl_converter=bcl_converter
+        )
         demux_results: DemuxResults = DemuxResults(
             demux_dir=self.demux_api.out_dir / flowcell_name,
             flowcell=flowcell,
             bcl_converter=bcl_converter,
+            demux_stats_files=demux_stats_files,
         )
         if not demux_results.results_dir.exists():
             LOG.warning("Could not find results directory %s", demux_results.results_dir)

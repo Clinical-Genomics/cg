@@ -22,8 +22,6 @@ from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
     fixture_demultiplex_fixtures,
     fixture_demux_run_dir,
-    fixture_demux_run_dir_bcl2fastq,
-    fixture_demux_run_dir_dragen,
     fixture_flowcell_full_name,
     fixture_flowcell_name,
     fixture_lims_novaseq_bcl2fastq_samples,
@@ -31,7 +29,6 @@ from tests.apps.demultiplex.conftest import (
     fixture_lims_novaseq_samples,
     fixture_lims_novaseq_samples_file,
     fixture_novaseq_dir,
-    fixture_novaseq_dir_bcl2fastq,
     fixture_novaseq_dir_dragen,
     fixture_novaseq_run_parameters,
     fixture_raw_samples_dir,

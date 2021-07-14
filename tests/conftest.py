@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
+from typing import Dict
 
 import pytest
 
@@ -282,6 +283,60 @@ def fixture_fastq_dir(fixtures_dir: Path) -> Path:
     return fixtures_dir / "fastq"
 
 
+# @pytest.fixture(name="finished_demuxes_dir")
+# def fixture_finished_demuxes_dir(fixtures_dir: Path) -> Path:
+#     """returns the path to all finished demux fixtures"""
+#     return fixtures_dir / "DEMUX"
+#
+#
+# @pytest.fixture(name="finished_bcl2fastq_demux_dir")
+# def fixture_finish_bcl2fastq_demux_dir(finished_demuxes_dir: Path) -> Path:
+#     """returns the path to all finished bcl2fastq demux fixtures"""
+#     return finished_demuxes_dir / "bcl2fastq"
+#
+#
+# @pytest.fixture(name="bcl2fastq_demux_outdir")
+# def fixture_bcl2fastq_demux_outdir(finished_bcl2fastq_demux_dir: Path) -> Path:
+#     """return the path to a finished demultiplexed run (bcl2fastq)"""
+#     return finished_bcl2fastq_demux_dir / "210428_A00689_0260_BHNC2FDSXY"
+#
+#
+# @pytest.fixture(name="bcl2fastq_unaligned_dir")
+# def fixture_bcl2fastq_unaligned_dir(bcl2fastq_demux_outdir: Path) -> Path:
+#     """return the path to a bcl2fastq unaligned dir"""
+#     return bcl2fastq_demux_outdir / "Unaligned"
+#
+#
+# @pytest.fixture(name="bcl2fastq_demux_stats_files")
+# def fixture_bcl2fastq_demux_stats_files(
+#     bcl2fastq_conversion_stats: Path, bcl2fastq_demultiplexing_stats: Path
+# ) -> Dict:
+#     """return a fixture for bcl2fastq demux_stats_files"""
+#     return {
+#         "conversion_stats": bcl2fastq_conversion_stats,
+#         "demultiplexing_stats": bcl2fastq_demultiplexing_stats,
+#         "runinfo": "",
+#     }
+#
+#
+# @pytest.fixture(name="bcl2fastq_conversion_stats")
+# def fixture_bcl2fastq_conversion_stats(bcl2fastq_stats_dir: Path) -> Path:
+#     """return the path to the conversion stats file"""
+#     return bcl2fastq_stats_dir / "ConversionStats.xml"
+#
+#
+# @pytest.fixture(name="bcl2fastq_demultiplexing_stats")
+# def fixture_bcl2fastq_demultiplexing_stats(bcl2fastq_stats_dir: Path) -> Path:
+#     """return the path to the demultiplexing stats file"""
+#     return bcl2fastq_stats_dir / "DemultiplexingStats.xml"
+#
+#
+# @pytest.fixture(name="bcl2fastq_stats_dir")
+# def fixture_bcl2fastq_stats_dir(bcl2fastq_unaligned_dir: Path) -> Path:
+#     """return the path to a bcl2fastq Stats dir"""
+#     return bcl2fastq_unaligned_dir / "Stats"
+#
+#
 @pytest.fixture(scope="function", name="project_dir")
 def fixture_project_dir(tmpdir_factory):
     """Path to a temporary directory where intermediate files can be stored"""
@@ -1084,6 +1139,19 @@ def fixture_context_config(
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
+            "demux_stats_files": {
+                "bcl2fastq": {
+                    "demultiplexing_stats": "Stats/DemultiplexingStats.xml",
+                    "conversion_stats": "Stats/ConversionStats.xml",
+                    "run_info": "",
+                },
+                "dragen": {
+                    "demultiplexing_stats": "Reports/Demultiplex_Stats.csv",
+                    "conversion_stats": "Reports/Demultiplex_Stats.csv",
+                    "adapter_metrics": "Reports/Adapter_Metrics.csv",
+                    "run_info": "Reports/RunInfo.xml",
+                },
+            },
             "slurm": {
                 "account": "development",
                 "mail_user": "mans.magnusson@scilifelab.se",
