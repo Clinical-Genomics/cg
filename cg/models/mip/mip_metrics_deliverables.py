@@ -18,7 +18,7 @@ class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
     metrics: List[MetricsBase]
-    duplicates: Optional[Dict]
+    duplicates: Optional[Dict[str, float]]
 
     @validator("duplicates", always=True)
     def set_duplicates(cls, _, values: dict) -> dict:
