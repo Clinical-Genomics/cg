@@ -131,12 +131,12 @@ def fixture_bcl2fastq_flowcell_object(bcl2fastq_flowcell_dir: Path) -> Flowcell:
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flowcell: Path,
+    bcl2fastq_finished_flowcell: Path,
     bcl2fastq_flowcell_object: Flowcell,
     bcl2fastq_demux_stats_files: Dict,
 ) -> DemuxResults:
     return DemuxResults(
-        demux_dir=demultiplexed_flowcell,
+        demux_dir=bcl2fastq_finished_flowcell,
         flowcell=bcl2fastq_flowcell_object,
         bcl_converter="bcl2fastq",
         demux_stats_files=bcl2fastq_demux_stats_files,
