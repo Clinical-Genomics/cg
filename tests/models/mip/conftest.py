@@ -44,10 +44,17 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
             {
                 "id": "an_id",
                 "input": "some_input",
-                "name": "name_of_metric",
-                "step": "metric_from:step",
-                "value": "value_of_metric",
-            }
+                "name": "fraction_duplicates",
+                "step": "markduplicates",
+                "value": "0.0748899652117993",
+            },
+            {
+                "id": "another_id",
+                "input": "some_input",
+                "name": "fraction_duplicates",
+                "step": "markduplicates",
+                "value": "0.09",
+            },
         ],
     }
 
