@@ -11,6 +11,8 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleBcl2Fastq,
     LimsFlowcellSampleDragen,
 )
+from cg.models.demultiplex.demux_results import DemuxResults
+from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -28,7 +30,7 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(name="demultiplexed_runs_dir")
 def fixture_demultiplexed_runs_dir(demultiplex_fixtures: Path) -> Path:
     """returns the path to all finished demux fixtures"""
-    return demultiplex_fixtures / "demultiplexed_runs"
+    return demultiplex_fixtures / "demultiplexed-runs"
 
 
 @pytest.fixture(name="flowcell_name")
@@ -74,12 +76,12 @@ def fixture_bcl2fastq_flowcell_dir(
 
 
 @pytest.fixture(name="bcl2fastq_output_dirs")
-def fixture_bcl2fastq_output_dirs(finished_demuxes_dir: Path) -> Path:
-    return finished_demuxes_dir / "bcl2fastq"
+def fixture_bcl2fastq_output_dirs(demultiplexed_runs_dir: Path) -> Path:
+    return demultiplexed_runs_dir / "bcl2fastq"
 
 
-@pytest.fixture(name="bcl2fastq_demux_outdir")
-def fixture_bcl2fastq_demux_outdir(
+@pytest.fixture(name="bcl2fastq_finished_flowcell")
+def fixture_bcl2fastq_finished_flowcell(
     bcl2fastq_output_dirs: Path, bcl2fastq_flowcell_full_name: Path
 ) -> Path:
     """return the path to a finished demultiplexed run (bcl2fastq)"""
@@ -87,9 +89,9 @@ def fixture_bcl2fastq_demux_outdir(
 
 
 @pytest.fixture(name="bcl2fastq_unaligned_dir")
-def fixture_bcl2fastq_unaligned_dir(bcl2fastq_demux_outdir: Path) -> Path:
+def fixture_bcl2fastq_unaligned_dir(bcl2fastq_finished_flowcell: Path) -> Path:
     """return the path to a bcl2fastq unaligned dir"""
-    return bcl2fastq_demux_outdir / "Unaligned"
+    return bcl2fastq_finished_flowcell / "Unaligned"
 
 
 @pytest.fixture(name="bcl2fastq_stats_dir")
@@ -120,6 +122,25 @@ def fixture_bcl2fastq_demux_stats_files(
         "demultiplexing_stats": bcl2fastq_demultiplexing_stats,
         "runinfo": "",
     }
+
+
+@pytest.fixture(name="bcl2fastq_flowcell_object")
+def fixture_bcl2fastq_flowcell_object(bcl2fastq_flowcell_dir: Path) -> Flowcell:
+    return Flowcell(bcl2fastq_flowcell_dir)
+
+
+@pytest.fixture(name="bcl2fastq_demux_results")
+def fixture_bcl2fastq_demux_results(
+    demultiplexed_flowcell: Path,
+    bcl2fastq_flowcell_object: Flowcell,
+    bcl2fastq_demux_stats_files: Dict,
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=demultiplexed_flowcell,
+        flowcell=bcl2fastq_flowcell_object,
+        bcl_converter="bcl2fastq",
+        demux_stats_files=bcl2fastq_demux_stats_files,
+    )
 
 
 # fixtures related to dragen demultiplexing of novaseq flowcells
