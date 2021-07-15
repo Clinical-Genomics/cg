@@ -133,6 +133,10 @@ class MicrosaltConfig(BaseModel):
 
 class GisaidConfig(CommonAppConfig):
     submitter: str
+    log_dir: str
+    logwatch_email: EmailStr
+    upload_password: str
+    upload_cid: str
 
 
 class ShippingConfig(CommonAppConfig):
@@ -149,6 +153,22 @@ class DataDeliveryConfig(BaseModel):
     mail_user: str
 
 
+class EmailBaseSettings(BaseModel):
+    sender_email: EmailStr
+    smtp_server: str
+
+
+class FOHMConfig(BaseModel):
+    host: str
+    port: int
+    key: str
+    username: str
+    valid_uploader: str
+    email_sender: str
+    email_recipient: str
+    email_host: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -156,6 +176,8 @@ class CGConfig(BaseModel):
     bed_path: str
     delivery_path: str
     max_flowcells: Optional[int]
+    email_base_settings: EmailBaseSettings
+
     # Base APIs that always should exist
     status_db_: Store = None
     housekeeper: HousekeeperConfig
@@ -196,6 +218,7 @@ class CGConfig(BaseModel):
     # Meta APIs that will use the apps from CGConfig
     balsamic: BalsamicConfig = None
     statina: StatinaConfig = None
+    fohm: Optional[FOHMConfig] = None
     fluffy: FluffyConfig = None
     microsalt: MicrosaltConfig = None
     gisaid: GisaidConfig = None

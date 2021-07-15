@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, validator
-from datetime import date
+from datetime import date, datetime
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 
@@ -11,19 +11,34 @@ class FastaFile(BaseModel):
     sequence: str
 
 
-class UpploadFiles(BaseModel):
+class GisaidAccession(BaseModel):
+    log_message: str
+    accession_nr: Optional[str]
+    sample_id: Optional[str]
+
+    @validator("accession_nr", always=True)
+    def parse_accession(cls, v, values):
+        return values["log_message"].split(";")[-1]
+
+    @validator("sample_id", always=True)
+    def parse_sample_id(cls, v, values):
+        return values["log_message"].split("/")[2].split("_")[2]
+
+
+class UploadFiles(BaseModel):
     csv_file: Path
     fasta_file: Path
+    log_file: Path
 
 
 class GisaidSample(BaseModel):
-    family_id: str
+    case_id: str
     cg_lims_id: str
     submitter: str
     region: str
     region_code: str
     fn: str
-    covv_collection_date: date
+    covv_collection_date: str
     covv_subm_sample_id: str
     covv_virus_name: Optional[str]
     covv_orig_lab: Optional[str]
@@ -54,4 +69,5 @@ class GisaidSample(BaseModel):
     def parse_virus_name(cls, v, values):
         sample_name = values.get("covv_subm_sample_id")
         date = values.get("covv_collection_date")
-        return f"hCoV-19/Sweden/{sample_name}/{date}"
+        datetime_date = datetime.strptime(date, "%Y-%m-%d")
+        return f"hCoV-19/Sweden/{sample_name}/{datetime_date.year}"

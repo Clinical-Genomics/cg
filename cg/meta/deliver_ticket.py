@@ -91,6 +91,36 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
+    def get_all_samples_from_ticket(self, ticket_id: int) -> list:
+        all_samples = []
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        for case in cases:
+            for link_obj in case.links:
+                all_samples.append(link_obj.sample.name)
+        return all_samples
+
+    def report_missing_samples(self, ticket_id: int, dry_run: bool) -> None:
+        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
+        missing_samples = []
+        all_samples: list = self.get_all_samples_from_ticket(ticket_id=ticket_id)
+        if not customer_inbox.exists() and dry_run:
+            LOG.info("Dry run, will not search for missing data in: %s", customer_inbox)
+            return
+        if not customer_inbox.exists():
+            LOG.info(
+                "The path %s do not exist, no search for missing data will be done", customer_inbox
+            )
+            return
+        for dir_path in customer_inbox.iterdir():
+            if len(os.listdir(dir_path)) == 0 and os.path.basename(dir_path) in all_samples:
+                missing_samples.append(os.path.basename(dir_path))
+        if len(missing_samples) > 0:
+            LOG.info("No data delivered for sample(s):")
+            for sample in missing_samples:
+                LOG.info(sample)
+        else:
+            LOG.info("Data has been delivered for all samples")
+
     def concatenate(self, ticket_id: int, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
         date: datetime.datetime = self.generate_date_tag(ticket_id=ticket_id)

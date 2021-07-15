@@ -15,7 +15,12 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option("-r", "--re-upload", is_flag=True, help="re-upload existing analysis")
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing analysis",
+)
 @click.argument("family_id", required=False)
 @click.pass_obj
 def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):

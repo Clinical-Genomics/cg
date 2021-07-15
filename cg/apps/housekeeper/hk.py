@@ -10,6 +10,9 @@ from alchy import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
+from housekeeper.store.models import Version, File
+
+from cg.exc import HousekeeperVersionMissingError, HousekeeperFileMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -75,7 +78,9 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def add_file(self, path, version_obj: models.Version, tags, to_archive=False) -> models.File:
+    def add_file(
+        self, path, version_obj: models.Version, tags: list, to_archive: bool = False
+    ) -> models.File:
         """Add a file to the database"""
         if isinstance(tags, str):
             tags = [tags]
@@ -229,3 +234,20 @@ class HousekeeperAPI:
     def destroy_db(self):
         """Drop all tables in the store"""
         self._store.drop_all()
+
+    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
+        version_obj: Version = self.last_version(case_id)
+        if not version_obj:
+            LOG.info("Family ID: %s not found in housekeeper", case_id)
+            raise HousekeeperVersionMissingError
+        file_obj = self.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
+        self.include_file(version_obj=version_obj, file_obj=file_obj)
+        self.commit()
+
+    def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
+        version_obj: Version = self.last_version(case_id)
+        if not version_obj:
+            LOG.info("Family ID: %s not found in housekeeper", case_id)
+            raise HousekeeperVersionMissingError
+        file: File = self.files(version=version_obj.id, tags=tags).first()
+        return file

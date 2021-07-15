@@ -19,6 +19,79 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [22.9.4]
+### Fixed
+- Cases removed from FOHM batch properly
+
+## [22.9.3]
+### Changed
+- Remove KS validation cases from upload to GISAID/FOHM
+
+
+## [22.9.2]
+### Added
+- Added UMI validation cases to skip spring compress
+
+## [22.9.1]
+### Fixed
+- Send multiple emails properly
+### Added
+- Progress bar when uploading to FOHM
+
+## [22.9.0]
+### Added
+- Samples that lack data during delivery is reported
+
+
+## [22.8.6]
+### Fixed
+- Statina load use latest file
+
+## [22.8.5]
+### Fixed
+- Sftp upload before sending email to FOHM
+
+## [22.8.4]
+### Fixed
+- Tooltips for fohm upload functions
+
+
+## [22.8.3]
+### Added
+- Data delivery export to LIMS 
+
+## [22.8.2]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
+
+## [22.8.1]
+### Changed
+- Upload gisaid uses once again single fasta
+- Upload gisaid uses pandas
+- Upload gisaid uploads only qc pass files
+
+## [22.8.0]
+### Added
+- Added support for FOHM batch upload
+
+
+
+## [22.7.0]
+### Added
+- email functionality
+
+### Changed
+- gisaid upload command: gisaid cli log file will be saved in housekeeper with tag gisaid-log
+- gisaid upload command: the log file will be appended to if the upload is run again for the same case.
+- gisaid upload command: Accession numbers will be parsed from the log file 
+- gisaid upload command: The completion file which already exists in housekeeper will be updated with accession numbers
+- gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+## [22.6.1]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
 ## [22.6.0]
 ### Added
 - Added rsync processes into trailblazer
