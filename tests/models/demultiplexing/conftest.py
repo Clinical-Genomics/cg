@@ -5,11 +5,7 @@ import pytest
 
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
-from tests.apps.demultiplex.conftest import (
-    fixture_bcl2fastq_finished_flowcell,
-    fixture_bcl2fastq_flowcell_dir,
-    fixture_demultiplex_fixtures,
-)
+from tests.apps.demultiplex.conftest import *
 
 
 @pytest.fixture(name="flowcell_full_name")
