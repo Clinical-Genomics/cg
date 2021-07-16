@@ -22,7 +22,7 @@ __________ DO NOT TOUCH ___________
 
 ## [22.9.5]
 ### Fixed
-- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being of by a factor off 
+- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being off by a factor of 
 100.
 
 ## [22.9.4]
