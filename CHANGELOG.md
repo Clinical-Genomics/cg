@@ -20,6 +20,11 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________
 
 
+## [22.9.5]
+### Fixed
+- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being of by a factor off 
+100.
+
 ## [22.9.4]
 ### Fixed
 - Cases removed from FOHM batch properly
