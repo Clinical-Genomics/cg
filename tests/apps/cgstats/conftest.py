@@ -18,11 +18,17 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
     _store.drop_all()
 
 
+# @pytest.fixture(name="populated_stats_api")
+# def fixture_populated_stats_api(
+#     stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
+# ) -> StatsAPI:
+#     create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
+#     return stats_api
+
+
 @pytest.fixture(name="populated_stats_api")
-def fixture_populated_stats_api(
-    stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
-) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
+def fixture_populated_stats_api(stats_api: StatsAPI, demux_results: DemuxResults) -> StatsAPI:
+    create.create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
     return stats_api
 
 

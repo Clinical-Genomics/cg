@@ -38,23 +38,23 @@ def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flowcell_full_name:
     return demultiplexed_runs / flowcell_full_name
 
 
-# @pytest.fixture(name="bcl2fastq_flowcell_object")
-# def fixture_bcl2fastq_flowcell_object(bcl2fastq_flowcell_dir: Path) -> Flowcell:
-#     return Flowcell(bcl2fastq_flowcell_dir)
-#
-#
-# @pytest.fixture(name="bcl2fastq_demux_results")
-# def fixture_bcl2fastq_demux_results(
-#     demultiplexed_flowcell: Path,
-#     bcl2fastq_flowcell_object: Flowcell,
-#     bcl2fastq_demux_stats_files: Dict,
-# ) -> DemuxResults:
-#     return DemuxResults(
-#         demux_dir=demultiplexed_flowcell,
-#         flowcell=bcl2fastq_flowcell_object,
-#         bcl_converter="bcl2fastq",
-#         demux_stats_files=bcl2fastq_demux_stats_files,
-#     )
+@pytest.fixture(name="bcl2fastq_flowcell_object")
+def fixture_bcl2fastq_flowcell_object(bcl2fastq_flowcell_dir: Path) -> Flowcell:
+    return Flowcell(bcl2fastq_flowcell_dir)
+
+
+@pytest.fixture(name="bcl2fastq_demux_results")
+def fixture_bcl2fastq_demux_results(
+    demultiplexed_flowcell: Path,
+    bcl2fastq_flowcell_object: Flowcell,
+    bcl2fastq_demux_stats_files: Dict,
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=demultiplexed_flowcell,
+        flowcell=bcl2fastq_flowcell_object,
+        bcl_converter="bcl2fastq",
+        demux_stats_files=bcl2fastq_demux_stats_files,
+    )
 
 
 @pytest.fixture(name="finished_dragen_demux_dir")

@@ -72,7 +72,7 @@ def fixture_bcl2fastq_flowcell_dir(
     return bcl2fastq_demux_run_dir / bcl2fastq_flowcell_full_name
 
 
-# 2. output directories (post demultiplexing)
+# 2. bcl2fastq output directories (post demultiplexing)
 
 
 @pytest.fixture(name="bcl2fastq_output_dirs")
@@ -144,10 +144,9 @@ def fixture_bcl2fastq_demux_results(
 
 
 # fixtures related to dragen demultiplexing of novaseq flowcells
-# 1. run directories (bcl files)
+# 1. run directories (pre demultiplexing)
 @pytest.fixture(name="dragen_demux_run_dir")
 def fixture_dragen_demux_run_dir_dragen(demux_run_dir: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
     return demux_run_dir / "dragen"
 
 
@@ -162,8 +161,85 @@ def fixture_dragen_flowcell_full_name() -> str:
 
 
 @pytest.fixture(name="dragen_flowcell_dir")
-def fixture_dragen_novaseq_dir(dragen_demux_run_dir: Path, dragen_flowcell_full_name: str) -> Path:
+def fixture_dragen_flowcell_dir(dragen_demux_run_dir: Path, dragen_flowcell_full_name: str) -> Path:
     return dragen_demux_run_dir / dragen_flowcell_full_name
+
+
+# 2. dragen output directories and files (post demultiplexing)
+
+
+@pytest.fixture(name="dragen_output_dirs")
+def fixture_dragen_output_dirs(demultiplexed_runs_dir: Path) -> Path:
+    return demultiplexed_runs_dir / "dragen"
+
+
+@pytest.fixture(name="dragen_finished_flowcell")
+def fixture_dragen_finished_flowcell(
+    dragen_output_dirs: Path, dragen_flowcell_full_name: Path
+) -> Path:
+    """return the path to a finished demultiplexed run (bcl2fastq)"""
+    return dragen_output_dirs / dragen_flowcell_full_name
+
+
+@pytest.fixture(name="dragen_unaligned_dir")
+def fixture_dragen_unaligned_dir(dragen_finished_flowcell: Path) -> Path:
+    """return the path to a dragen unaligned dir"""
+    return dragen_finished_flowcell / "Unaligned"
+
+
+@pytest.fixture(name="dragen_reports_dir")
+def fixture_dragen_reports_dir(dragen_unaligned_dir: Path) -> Path:
+    """return the path to a dragen Stats dir"""
+    return dragen_unaligned_dir / "Reports"
+
+
+@pytest.fixture(name="dragen_conversion_stats")
+def fixture_dragen_conversion_stats(dragen_reports_dir: Path) -> Path:
+    """return the path to the conversion stats file"""
+    return dragen_reports_dir / "Demultiplex_Stats.csv"
+
+
+@pytest.fixture(name="dragen_demultiplexing_stats")
+def fixture_dragen_demultiplexing_stats(dragen_reports_dir: Path) -> Path:
+    """return the path to the demultiplexing stats file"""
+    return dragen_reports_dir / "Demultiplex_Stats.csv"
+
+
+@pytest.fixture(name="dragen_runinfo")
+def fixture_dragen_runinfo(dragen_reports_dir: Path) -> Path:
+    """return the path to the demultiplexing stats file"""
+    return dragen_reports_dir / "RunInfo.xml"
+
+
+@pytest.fixture(name="dragen_demux_stats_files")
+def fixture_dragen_demux_stats_files(
+    dragen_conversion_stats: Path, dragen_demultiplexing_stats: Path, dragen_runinfo: Path
+) -> Dict:
+    """return a fixture for bcl2fastq demux_stats_files"""
+    return {
+        "conversion_stats": dragen_conversion_stats,
+        "demultiplexing_stats": dragen_demultiplexing_stats,
+        "runinfo": dragen_runinfo,
+    }
+
+
+@pytest.fixture(name="dragen_flowcell_object")
+def fixture_dragen_flowcell_object(dragen_flowcell_dir: Path) -> Flowcell:
+    return Flowcell(dragen_flowcell_dir)
+
+
+@pytest.fixture(name="dragen_demux_results")
+def fixture_dragen_demux_results(
+    dragen_finished_flowcell: Path,
+    dragen_flowcell_object: Flowcell,
+    dragen_demux_stats_files: Dict,
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=dragen_finished_flowcell,
+        flowcell=dragen_finished_flowcell,
+        bcl_converter="dragen",
+        demux_stats_files=dragen_demux_stats_files,
+    )
 
 
 @pytest.fixture(name="index_obj")
@@ -177,10 +253,10 @@ def fixture_raw_samples_dir(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "raw_lims_samples"
 
 
-@pytest.fixture(name="novaseq_dir_dragen")
-def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flowcell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return demux_run_dir_dragen / flowcell_full_name
+# @pytest.fixture(name="novaseq_dir_dragen")
+# def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flowcell_full_name: str) -> Path:
+#     """Return the path to the novaseq demultiplex fixtures"""
+#     return demux_run_dir_dragen / flowcell_full_name
 
 
 @pytest.fixture(name="hiseq_dir")
