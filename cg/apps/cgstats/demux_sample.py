@@ -3,10 +3,11 @@ import logging
 from pathlib import Path
 from typing import Dict
 
+from pydantic import BaseModel, validator
+
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
-from pydantic import BaseModel, validator
 
 LOG = logging.getLogger(__name__)
 
@@ -104,8 +105,7 @@ class DemuxSample(BaseModel):
         if not conversion_stats.pass_filter_yield:
             return value
         return round(
-            conversion_stats.pass_filter_quality_score_sum
-            / conversion_stats.pass_filter_yield,
+            conversion_stats.pass_filter_quality_score_sum / conversion_stats.pass_filter_yield,
             2,
         )
 
