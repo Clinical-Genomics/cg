@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Dict
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
@@ -14,18 +14,27 @@ class MetricsBase(BaseModel):
     value: str
 
 
+class DuplicateReads(BaseModel):
+    """Definition of duplicate reads metric"""
+
+    value: float
+    sample_id: str
+
+
 class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
     metrics: List[MetricsBase]
-    duplicates: Optional[Dict[str, float]]
+    duplicate_reads: Optional[List[DuplicateReads]]
 
-    @validator("duplicates", always=True)
-    def set_duplicates(cls, _, values: dict) -> dict:
-        """Set duplicates"""
-        duplicate: dict = {}
+    @validator("duplicate_reads", always=True)
+    def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
+        """Set duplicate_reads"""
+        duplicate_reads: List = []
         raw_metrics: List = values.get("metrics")
         for metric in raw_metrics:
             if metric.step is "markduplicates":
-                duplicate[metric.id] = float(metric.value)
-        return duplicate
+                duplicate_reads.append(
+                    DuplicateReads(sample_id=metric.id, value=float(metric.value))
+                )
+        return duplicate_reads
