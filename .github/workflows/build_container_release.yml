@@ -1,6 +1,6 @@
 ---
 
-name: Build container of latest release
+name: Build container from latest release
 on:
   release:
     types:
@@ -18,7 +18,7 @@ jobs:
       - name: Build and publish to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: clinicalgenomics/cg-service
+          name: clinicalgenomics/statina
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: "${{ github.event.release.tag_name }}"
+          tags: "${{ github.event.release.tag_name }}, latest"
