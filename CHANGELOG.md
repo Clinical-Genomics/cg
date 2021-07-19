@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.10.0]
+### Fixed
+- Changed how qos for rsync is handled
+
 
 ## [22.9.4]
 ### Fixed
