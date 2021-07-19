@@ -23,6 +23,20 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Changed how qos for rsync is handled
 
+
+## [22.9.4]
+### Fixed
+- Cases removed from FOHM batch properly
+
+## [22.9.3]
+### Changed
+- Remove KS validation cases from upload to GISAID/FOHM
+
+
+## [22.9.2]
+### Added
+- Added UMI validation cases to skip spring compress
+
 ## [22.9.1]
 ### Fixed
 - Send multiple emails properly

@@ -56,6 +56,7 @@ class GisaidAPI:
         """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
         completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
         completion_df.drop_duplicates(inplace=True)
+        completion_df = completion_df[completion_df["provnummer"].str.contains("21CS\(|\)|\d{6}")]
         return completion_df
 
     def get_gisaid_sample_list(self, case_id: str) -> List[models.Sample]:
