@@ -20,6 +20,11 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________
 
 
+## [22.10.2]
+### Fixed
+- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being off by a factor of 
+100.
+
 ## [22.10.1]
 ### Fixed
 - Integrate with bump2version-ci workflow
