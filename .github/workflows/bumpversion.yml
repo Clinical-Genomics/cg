@@ -1,0 +1,19 @@
+name: 'Bump2version-CI'
+on:
+  push:
+    branches:
+      - 'master'
+      - 'main'
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    name: Bump version and push tags to master
+    steps:
+      - name: Bump version
+        uses: Clinical-Genomics/bump2version-ci@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        with:
+          release_pat: ${{ secrets.BUMPVERSION_TOKEN }}

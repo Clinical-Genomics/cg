@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [22.10.1]
+### Fixed
+- Integrate with bump2version-ci workflow
+
 ## [22.10.0]
 ### Fixed
 - Changed how qos for rsync is handled
