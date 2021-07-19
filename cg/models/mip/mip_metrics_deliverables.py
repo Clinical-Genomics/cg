@@ -26,6 +26,7 @@ class MetricsDeliverables(BaseModel):
 
     metrics: List[MetricsBase]
     duplicate_reads: Optional[List[DuplicateReads]]
+    ids: Optional[set]
 
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
@@ -38,3 +39,12 @@ class MetricsDeliverables(BaseModel):
                     DuplicateReads(sample_id=metric.id, value=float(metric.value))
                 )
         return duplicate_reads
+
+    @validator("ids", always=True)
+    def set_ids(cls, _, values: dict) -> set:
+        """Set ids gathered from all metrics"""
+        ids: List = []
+        raw_metrics: List = values.get("metrics")
+        for metric in raw_metrics:
+            ids.append(metric.id)
+        return set(ids)

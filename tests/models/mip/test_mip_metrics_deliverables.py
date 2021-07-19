@@ -1,4 +1,5 @@
 """Test MIP metrics deliverables"""
+
 from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables, DuplicateReads
 
 
@@ -38,3 +39,16 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
 
     # THEN assert that value was set
     assert duplicate_read.value == float(expected_duplicate_read["value"])
+
+
+def test_instantiate_mip_metrics_ids(mip_metrics_deliverables_raw: dict):
+    """
+    Tests set ids
+    """
+    # GIVEN a dictionary with the some metrics
+
+    # WHEN instantiating a MetricsDeliverables object
+    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+    # THEN assert that ids was successfully created
+    assert metrics_object.ids == {"an_id", "another_id"}
