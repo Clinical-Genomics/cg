@@ -18,7 +18,7 @@ jobs:
       - name: Build and publish to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: clinicalgenomics/statina
+          name: clinicalgenomics/cg-service
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           tags: "${{ github.event.release.tag_name }}, latest"
