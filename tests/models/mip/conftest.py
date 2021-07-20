@@ -44,6 +44,20 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
             {
                 "id": "an_id",
                 "input": "some_input",
+                "name": "gender",
+                "step": "chanjo_sexcheck",
+                "value": "female",
+            },
+            {
+                "id": "another_id",
+                "input": "some_input",
+                "name": "gender",
+                "step": "chanjo_sexcheck",
+                "value": "male",
+            },
+            {
+                "id": "an_id",
+                "input": "some_input",
                 "name": "fraction_duplicates",
                 "step": "markduplicates",
                 "value": "0.0748899652117993",
