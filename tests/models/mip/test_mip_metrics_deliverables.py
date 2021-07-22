@@ -5,6 +5,8 @@ from cg.models.mip.mip_metrics_deliverables import (
     DuplicateReads,
     ParsedMetrics,
     GenderCheck,
+    MeanInsertSize,
+    MappedReads,
 )
 
 
@@ -59,6 +61,42 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     assert duplicate_read.value == float(expected_duplicate_read["value"])
 
 
+def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
+    """
+    Tests set mapped reads
+    """
+    # GIVEN a dictionary with the some metrics
+
+    # WHEN instantiating a MetricsDeliverables object
+    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+    # THEN assert that mapped reads was set
+    assert metrics_object.mapped_reads
+
+    mapped_reads: MappedReads = metrics_object.mapped_reads.pop()
+
+    # THEN assert that it was successfully created
+    assert isinstance(mapped_reads, MappedReads)
+
+
+def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
+    """
+    Tests set predicted sex
+    """
+    # GIVEN a dictionary with the some metrics
+
+    # WHEN instantiating a MetricsDeliverables object
+    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+    # THEN assert that mean insert size was set
+    assert metrics_object.mean_insert_size
+
+    mean_insert_size: MeanInsertSize = metrics_object.mean_insert_size.pop()
+
+    # THEN assert that it was successfully created
+    assert isinstance(mean_insert_size, MeanInsertSize)
+
+
 def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     """
     Tests set predicted sex
@@ -68,11 +106,12 @@ def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     # WHEN instantiating a MetricsDeliverables object
     metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
 
-    # THEN assert that read duplicates was set
+    # THEN assert that predicted sex was set
     assert metrics_object.predicted_sex
 
     predicted_sex: GenderCheck = metrics_object.predicted_sex.pop()
 
+    # THEN assert that it was successfully created
     assert isinstance(predicted_sex, GenderCheck)
 
 
@@ -88,7 +127,15 @@ def test_instantiate_mip_metrics_set_id_metrics(mip_metrics_deliverables_raw: di
     # THEN assert that id metrics was set
     assert metrics_object.id_metrics
 
-    id_metric: ParsedMetrics = metrics_object.id_metrics.pop()
+    # WHEN looping through id metrics
+    for id_metric in metrics_object.id_metrics:
 
-    # THEN assert that id metrics was successfully created
-    assert isinstance(id_metric, ParsedMetrics)
+        # THEN assert that id metrics was successfully created
+        assert isinstance(id_metric, ParsedMetrics)
+
+        # THEN assert that metrics are set for id
+        if id_metric.id == "an_id":
+            assert id_metric.duplicate_reads == 0.0748899652117993
+            assert id_metric.mapped_reads == 0.9975489233589259
+            assert id_metric.mean_insert_size == 422.0
+            assert id_metric.predicted_sex == "female"

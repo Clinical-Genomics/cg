@@ -19,14 +19,14 @@ class MetricsBase(BaseModel):
     input: str
     name: str
     step: str
-    value: str
+    value: Any
 
 
 class DuplicateReads(BaseModel):
     """Definition of duplicate reads metric"""
 
-    value: float
     id: str
+    value: float
 
 
 class Gender(str, Enum):
@@ -38,8 +38,27 @@ class Gender(str, Enum):
 class GenderCheck(BaseModel):
     """Definition of gender check metric"""
 
-    value: str
     id: str
+    value: str
+
+
+class MappedReads(BaseModel):
+    """Definition of mapped reads metric"""
+
+    id: str
+    value: float
+
+
+class MeanInsertSize(BaseModel):
+    """Definition of insert size metric"""
+
+    id: str
+    value: float
+
+    @validator("value", always=True)
+    def convert_mean_insert_size(cls, value) -> int:
+        """Convert raw value from float to int"""
+        return int(value)
 
 
 class ParsedMetrics(BaseModel):
@@ -47,6 +66,8 @@ class ParsedMetrics(BaseModel):
 
     id: str
     duplicate_reads: float
+    mapped_reads: float
+    mean_insert_size: int
     predicted_sex: Gender = Gender.UNKNOWN
 
 
@@ -56,6 +77,8 @@ class MetricsDeliverables(BaseModel):
     metrics: List[MetricsBase]
     ids: Optional[set]
     duplicate_reads: Optional[List[DuplicateReads]]
+    mapped_reads: Optional[List[MappedReads]]
+    mean_insert_size: Optional[List[MeanInsertSize]]
     predicted_sex: Optional[List[GenderCheck]]
     id_metrics: Optional[List[ParsedMetrics]]
 
@@ -75,8 +98,38 @@ class MetricsDeliverables(BaseModel):
         raw_metrics: List = values.get("metrics")
         for metric in raw_metrics:
             if metric.name is "fraction_duplicates":
-                duplicate_reads.append(DuplicateReads(id=metric.id, value=float(metric.value)))
+                duplicate_reads.append(DuplicateReads(id=metric.id, value=metric.value))
         return duplicate_reads
+
+    @validator("mapped_reads", always=True)
+    def set_mapped_reads(cls, _, values: dict) -> List[MappedReads]:
+        """Set mapped reads"""
+        ids: set = values.get("ids")
+        mapped_reads: List = []
+        total_sequences: dict = {}
+        reads_mapped: dict = {}
+        raw_metrics: List = values.get("metrics")
+        for metric in raw_metrics:
+            if metric.name is "raw_total_sequences":
+                raw_total_sequences = total_sequences.get(metric.id, 0)
+                total_sequences[metric.id] = int(metric.value) + raw_total_sequences
+            if metric.name is "reads_mapped":
+                raw_reads_mapped = reads_mapped.get(metric.id, 0)
+                reads_mapped[metric.id] = int(metric.value) + raw_reads_mapped
+        for id in ids:
+            fraction_mapped_read = reads_mapped[id] / total_sequences[id]
+            mapped_reads.append(MappedReads(id=id, value=fraction_mapped_read))
+        return mapped_reads
+
+    @validator("mean_insert_size", always=True)
+    def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
+        """Set mean insert size"""
+        mean_insert_size: List = []
+        raw_metrics: List = values.get("metrics")
+        for metric in raw_metrics:
+            if metric.name is "MEAN_INSERT_SIZE":
+                mean_insert_size.append(MeanInsertSize(id=metric.id, value=metric.value))
+        return mean_insert_size
 
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
@@ -95,6 +148,8 @@ class MetricsDeliverables(BaseModel):
         id_metrics: list = []
         metric_per_id_map: dict = {
             "duplicate_reads": values.get("duplicate_reads"),
+            "mapped_reads": values.get("mapped_reads"),
+            "mean_insert_size": values.get("mean_insert_size"),
             "predicted_sex": values.get("predicted_sex"),
         }
         for id in ids:
