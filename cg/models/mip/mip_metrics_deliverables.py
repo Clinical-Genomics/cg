@@ -1,7 +1,8 @@
-from enum import Enum
 from typing import List, Optional, Any
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
+
+from cg.constants.gender import Gender
 
 
 def _get_id_metric(id: str, metric_objs: list) -> Any:
@@ -27,12 +28,6 @@ class DuplicateReads(BaseModel):
 
     id: str
     value: float
-
-
-class Gender(str, Enum):
-    FEMALE = "female"
-    MALE = "male"
-    UNKNOWN = "unknown"
 
 
 class GenderCheck(BaseModel):
@@ -74,7 +69,7 @@ class ParsedMetrics(BaseModel):
 class MetricsDeliverables(BaseModel):
     """Specification for a metric general deliverables file"""
 
-    metrics: List[MetricsBase]
+    metrics_: List[MetricsBase] = Field(..., alias="metrics")
     ids: Optional[set]
     duplicate_reads: Optional[List[DuplicateReads]]
     mapped_reads: Optional[List[MappedReads]]
@@ -86,7 +81,7 @@ class MetricsDeliverables(BaseModel):
     def set_ids(cls, _, values: dict) -> set:
         """Set ids gathered from all metrics"""
         ids: List = []
-        raw_metrics: List = values.get("metrics")
+        raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
             ids.append(metric.id)
         return set(ids)
@@ -95,7 +90,7 @@ class MetricsDeliverables(BaseModel):
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
         """Set duplicate_reads"""
         duplicate_reads: List = []
-        raw_metrics: List = values.get("metrics")
+        raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name is "fraction_duplicates":
                 duplicate_reads.append(DuplicateReads(id=metric.id, value=metric.value))
@@ -108,7 +103,7 @@ class MetricsDeliverables(BaseModel):
         mapped_reads: List = []
         total_sequences: dict = {}
         reads_mapped: dict = {}
-        raw_metrics: List = values.get("metrics")
+        raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name is "raw_total_sequences":
                 raw_total_sequences = total_sequences.get(metric.id, 0)
@@ -125,7 +120,7 @@ class MetricsDeliverables(BaseModel):
     def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
         """Set mean insert size"""
         mean_insert_size: List = []
-        raw_metrics: List = values.get("metrics")
+        raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name is "MEAN_INSERT_SIZE":
                 mean_insert_size.append(MeanInsertSize(id=metric.id, value=metric.value))
@@ -135,7 +130,7 @@ class MetricsDeliverables(BaseModel):
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
         """Set predicted sex"""
         predicted_sex: List = []
-        raw_metrics: List = values.get("metrics")
+        raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name is "gender":
                 predicted_sex.append(GenderCheck(id=metric.id, value=metric.value))
