@@ -19,6 +19,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.11.0]
+### Fixed
+- New families can be created without the --panel flag
 
 ## [22.10.2]
 ### Fixed
