@@ -58,7 +58,7 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     assert duplicate_read.id == expected_duplicate_read["id"]
 
     # THEN assert that value was set
-    assert duplicate_read.value == float(expected_duplicate_read["value"])
+    assert duplicate_read.value == float(expected_duplicate_read["value"]) * 100
 
 
 def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
@@ -135,7 +135,7 @@ def test_instantiate_mip_metrics_set_id_metrics(mip_metrics_deliverables_raw: di
 
         # THEN assert that metrics are set for id
         if id_metric.id == "an_id":
-            assert id_metric.duplicate_reads == 0.0748899652117993
-            assert id_metric.mapped_reads == 0.9975489233589259
+            assert id_metric.duplicate_reads == 0.0748899652117993 * 100
+            assert id_metric.mapped_reads == 0.9975489233589259 * 100
             assert id_metric.mean_insert_size == 422.0
             assert id_metric.predicted_sex == "female"

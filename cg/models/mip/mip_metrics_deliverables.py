@@ -29,6 +29,11 @@ class DuplicateReads(BaseModel):
     id: str
     value: float
 
+    @validator("value", always=True)
+    def convert_duplicate_read(cls, value) -> float:
+        """Convert raw value from fraction to percent"""
+        return value * 100
+
 
 class GenderCheck(BaseModel):
     """Definition of gender check metric"""
@@ -42,6 +47,11 @@ class MappedReads(BaseModel):
 
     id: str
     value: float
+
+    @validator("value", always=True)
+    def convert_mapped_read(cls, value) -> float:
+        """Convert raw value from fraction to percent"""
+        return value * 100
 
 
 class MeanInsertSize(BaseModel):
