@@ -135,3 +135,9 @@ def analysis(analysis_store, case_id, timestamp):
     _analysis.config_path = "dummy_path"
     _analysis.completed_at = timestamp
     yield _analysis
+
+
+@pytest.fixture(name="genotype_analysis_sex")
+def fixture_genotype_analysis_sex() -> dict:
+    """Return predicted sex per sample_id"""
+    return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}

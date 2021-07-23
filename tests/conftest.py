@@ -531,6 +531,12 @@ def fixture_case_qc_metrics(apps_dir: Path) -> Path:
     return Path("tests/fixtures/apps/mip/case_qc_metrics.yaml")
 
 
+@pytest.fixture(name="case_qc_metrics_deliverables")
+def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
+
+
 @pytest.fixture(name="bcf_file")
 def fixture_bcf_file(apps_dir: Path) -> Path:
     """Return the path to a bcf file"""
