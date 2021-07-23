@@ -7,6 +7,7 @@ from cg.models.mip.mip_metrics_deliverables import (
     GenderCheck,
     MeanInsertSize,
     MappedReads,
+    get_id_metric,
 )
 
 
@@ -139,3 +140,19 @@ def test_instantiate_mip_metrics_set_id_metrics(mip_metrics_deliverables_raw: di
             assert id_metric.mapped_reads == 0.9975489233589259 * 100
             assert id_metric.mean_insert_size == 422.0
             assert id_metric.predicted_sex == "female"
+
+
+def test_get_id_metric(mip_metrics_deliverables_raw: dict):
+    """
+    Tests get id metrics
+    """
+    # GIVEN a dictionary with the some metrics
+
+    # WHEN instantiating a MetricsDeliverables object
+    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+    # When getting an id_metric
+    id_metric = get_id_metric(id="an_id", id_metrics=metrics_object.id_metrics)
+
+    # THEN assert that id metric for id was returned
+    assert id_metric.id == "an_id"

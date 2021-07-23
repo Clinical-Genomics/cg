@@ -16,6 +16,7 @@ from cg.meta.report.report_helper import ReportHelper
 from cg.meta.report.report_validator import ReportValidator
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.mip.mip_metrics_deliverables import get_id_metric
 from cg.store import Store, models
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -220,15 +221,13 @@ class ReportAPI:
         """Incorporate trending data into a set of samples."""
         trending_data = self.analysis.get_latest_metadata(family_id=case_id)
 
-        mapped_reads_all_samples = trending_data.get("mapped_reads", {})
-        duplicates_all_samples = trending_data.get("duplicates", {})
-        analysis_sex_all_samples = trending_data.get("analysis_sex", {})
-
         for sample in report_data["samples"]:
-            lims_id = sample["internal_id"]
-            sample["analysis_sex"] = analysis_sex_all_samples.get(lims_id)
-            sample["mapped_reads"] = mapped_reads_all_samples.get(lims_id)
-            sample["duplicates"] = duplicates_all_samples.get(lims_id)
+            id_metric = get_id_metric(
+                id=sample["internal_id"], id_metrics=trending_data["id_metrics"]
+            )
+            sample["analysis_sex"] = id_metric.predicted_sex
+            sample["duplicates"] = id_metric.duplicate_reads
+            sample["mapped_reads"] = id_metric.mapped_reads
 
         report_data["genome_build"] = trending_data.get("genome_build")
 

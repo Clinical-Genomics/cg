@@ -1,5 +1,8 @@
+from typing import List
+
 from cg.apps.mip import parse_qcmetrics
 from cg.models.mip.mip_config import MipBaseConfig, parse_config
+from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
 
 
@@ -14,25 +17,25 @@ def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw
     Returns:
         dict: parsed data
     """
+    mip_config: MipBaseConfig = parse_config(mip_config_raw)
+    sample_info: MipBaseSampleInfo = parse_sample_info(sampleinfo_raw)
+    qc_metrics = MetricsDeliverables(**qcmetrics_raw)
     outdata = {
+        "id_metrics": qc_metrics.id_metrics,
         "analysis_sex": {},
         "at_dropout": {},
-        "case": None,
+        "case": mip_config.case_id,
         "duplicates": {},
         "gc_dropout": {},
-        "genome_build": None,
-        "rank_model_version": None,
+        "genome_build": sample_info.genome_build,
         "insert_size_standard_deviation": {},
         "mapped_reads": {},
         "median_insert_size": {},
-        "mip_version": None,
-        "sample_ids": [],
+        "mip_version": sample_info.mip_version,
+        "rank_model_version": sample_info.rank_model_version,
+        "sample_ids": _get_sample_ids(mip_config=mip_config),
+        "sv_rank_model_version": sample_info.sv_rank_model_version,
     }
-
-    _config(mip_config_raw=mip_config_raw, outdata=outdata)
-    _qc_metrics(qcmetrics_raw=qcmetrics_raw, outdata=outdata)
-    _qc_sample_info(sampleinfo_raw=sampleinfo_raw, outdata=outdata)
-
     return outdata
 
 
@@ -49,11 +52,11 @@ def _qc_metrics(outdata: dict, qcmetrics_raw: dict) -> None:
     _add_sample_level_info_from_qc_metric_file(outdata, qcmetrics_data)
 
 
-def _config(mip_config_raw: dict, outdata: dict) -> None:
-    mip_config: MipBaseConfig = parse_config(mip_config_raw)
-    outdata["case"] = mip_config.case_id
+def _get_sample_ids(mip_config: MipBaseConfig) -> List:
+    sample_ids: list = []
     for sample_data in mip_config.samples:
-        outdata["sample_ids"].append(sample_data.sample_id)
+        sample_ids.append(sample_data.sample_id)
+    return sample_ids
 
 
 def _add_sample_level_info_from_qc_metric_file(outdata: dict, qcmetrics_data: dict) -> None:

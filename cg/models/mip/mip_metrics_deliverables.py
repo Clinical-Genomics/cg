@@ -5,7 +5,7 @@ from pydantic import BaseModel, validator, Field
 from cg.constants.gender import Gender
 
 
-def _get_id_metric(id: str, metric_objs: list) -> Any:
+def _get_metric_per_id(id: str, metric_objs: list) -> Any:
     """Get metric for an id from metric object"""
     for metric in metric_objs:
         if id == metric.id:
@@ -102,7 +102,7 @@ class MetricsDeliverables(BaseModel):
         duplicate_reads: List = []
         raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
-            if metric.name is "fraction_duplicates":
+            if metric.name == "fraction_duplicates":
                 duplicate_reads.append(DuplicateReads(id=metric.id, value=metric.value))
         return duplicate_reads
 
@@ -115,10 +115,10 @@ class MetricsDeliverables(BaseModel):
         reads_mapped: dict = {}
         raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
-            if metric.name is "raw_total_sequences":
+            if metric.name == "raw_total_sequences":
                 raw_total_sequences = total_sequences.get(metric.id, 0)
                 total_sequences[metric.id] = int(metric.value) + raw_total_sequences
-            if metric.name is "reads_mapped":
+            if metric.name == "reads_mapped":
                 raw_reads_mapped = reads_mapped.get(metric.id, 0)
                 reads_mapped[metric.id] = int(metric.value) + raw_reads_mapped
         for id in ids:
@@ -132,7 +132,7 @@ class MetricsDeliverables(BaseModel):
         mean_insert_size: List = []
         raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
-            if metric.name is "MEAN_INSERT_SIZE":
+            if metric.name == "MEAN_INSERT_SIZE":
                 mean_insert_size.append(MeanInsertSize(id=metric.id, value=metric.value))
         return mean_insert_size
 
@@ -142,7 +142,7 @@ class MetricsDeliverables(BaseModel):
         predicted_sex: List = []
         raw_metrics: List = values.get("metrics_")
         for metric in raw_metrics:
-            if metric.name is "gender":
+            if metric.name == "gender":
                 predicted_sex.append(GenderCheck(id=metric.id, value=metric.value))
         return predicted_sex
 
@@ -161,9 +161,16 @@ class MetricsDeliverables(BaseModel):
             metric_per_id: dict = {}
             metric_per_id["id"] = id
             for metric_name, metric_objs in metric_per_id_map.items():
-                metric_value: Any = _get_id_metric(id=id, metric_objs=metric_objs)
+                metric_value: Any = _get_metric_per_id(id=id, metric_objs=metric_objs)
                 if metric_value:
                     metric_per_id[metric_name] = metric_value
                     continue
             id_metrics.append(ParsedMetrics(**metric_per_id))
         return id_metrics
+
+
+def get_id_metric(id_metrics: List[ParsedMetrics], id: str) -> ParsedMetrics:
+    """Get parsed metrics for an id"""
+    for id_metric in id_metrics:
+        if id == id_metric.id:
+            return id_metric

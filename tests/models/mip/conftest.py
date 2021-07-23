@@ -36,6 +36,32 @@ def fixture_mip_analysis_config_dna(mip_analysis_config_dna_raw: dict) -> MipBas
     return MipBaseConfig(**mip_analysis_config_dna_raw)
 
 
+@pytest.fixture(name="sample_info_dna_raw")
+def fixture_sample_info_dna_raw() -> dict:
+    """Raw sample_info fixture"""
+    return {
+        "analysisrunstatus": "finished",
+        "analysis_date": "2021-05-05T16:16:01",
+        "case_id": "yellowhog",
+        "family_id": "a_family_id",
+        "human_genome_build": {"version": 37, "source": "grch"},
+        "mip_version": "v9.0.0",
+        "recipe": {
+            "genmod": {
+                "rank_model": {"version": "v1.0"},
+            },
+            "sv_genmod": {
+                "sv_rank_model": {"version": "v1.2.0"},
+            },
+        },
+    }
+
+
+@pytest.fixture(name="sample_info_dna")
+def fixture_sample_info_dna(sample_info_dna_raw: dict) -> MipBaseSampleInfo:
+    return MipBaseSampleInfo(**sample_info_dna_raw)
+
+
 @pytest.fixture(name="mip_metrics_deliverables_raw")
 def fixture_mip_metrics_deliverables_raw() -> dict:
     """Raw MIP metrics deliverables"""
@@ -141,29 +167,3 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
             },
         ],
     }
-
-
-@pytest.fixture(name="sample_info_dna_raw")
-def fixture_sample_info_dna_raw() -> dict:
-    """Raw sample_info fixture"""
-    return {
-        "analysisrunstatus": "finished",
-        "analysis_date": "2021-05-05T16:16:01",
-        "case_id": "yellowhog",
-        "family_id": "a_family_id",
-        "human_genome_build": {"version": 37, "source": "grch"},
-        "mip_version": "v9.0.0",
-        "recipe": {
-            "genmod": {
-                "rank_model": {"version": "v1.0"},
-            },
-            "sv_genmod": {
-                "sv_rank_model": {"version": "v1.2.0"},
-            },
-        },
-    }
-
-
-@pytest.fixture(name="sample_info_dna")
-def fixture_sample_info_dna(sample_info_dna_raw: dict) -> MipBaseSampleInfo:
-    return MipBaseSampleInfo(**sample_info_dna_raw)
