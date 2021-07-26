@@ -19,9 +19,9 @@ def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw
     sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sampleinfo_raw)
 
     outdata = {
-        "id_metrics": qc_metrics.id_metrics,
         "case": mip_config.case_id,
         "genome_build": sample_info.genome_build,
+        "id_metrics": qc_metrics.id_metrics,
         "mip_version": sample_info.mip_version,
         "rank_model_version": sample_info.rank_model_version,
         "sample_ids": mip_config.sample_ids,
