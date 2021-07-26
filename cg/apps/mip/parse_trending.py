@@ -21,15 +21,8 @@ def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw
     qc_metrics = MetricsDeliverables(**qcmetrics_raw)
     outdata = {
         "id_metrics": qc_metrics.id_metrics,
-        "analysis_sex": {},
-        "at_dropout": {},
         "case": mip_config.case_id,
-        "duplicates": {},
-        "gc_dropout": {},
         "genome_build": sample_info.genome_build,
-        "insert_size_standard_deviation": {},
-        "mapped_reads": {},
-        "median_insert_size": {},
         "mip_version": sample_info.mip_version,
         "rank_model_version": sample_info.rank_model_version,
         "sample_ids": _get_sample_ids(mip_config=mip_config),
