@@ -48,7 +48,7 @@ class MockLoqusAPI:
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
 def fixture_upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
+    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gt process"""
     data = {
@@ -56,7 +56,11 @@ def fixture_upload_genotypes_hk_bundle(
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(case_qc_metrics), "archive": False, "tags": [HkMipAnalysisTag.QC_METRICS]},
+            {
+                "path": str(case_qc_metrics_deliverables),
+                "archive": False,
+                "tags": [HkMipAnalysisTag.QC_METRICS],
+            },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],
     }
