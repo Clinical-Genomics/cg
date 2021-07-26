@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from cg.models.mip.mip_config import MipBaseConfig, parse_config
+from cg.models.mip.mip_config import MipBaseConfig
 
 
 def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
@@ -18,19 +18,6 @@ def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
 
     # THEN assert that it was successfully created
     assert isinstance(config_object, MipBaseConfig)
-
-
-def test_parse_config(mip_analysis_config_dna_raw: dict, mip_analysis_config_dna: MipBaseConfig):
-    """
-    Tests parse_config dict
-    """
-    # GIVEN a dictionary with the basic config
-
-    # WHEN parsing raw mip config data
-    mip_config = parse_config(mip_analysis_config_dna_raw)
-
-    # THEN assert that it was successfully parsed
-    assert mip_config == mip_analysis_config_dna
 
 
 def test_mip_config(mip_case_config_dna: Path):

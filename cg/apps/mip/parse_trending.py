@@ -1,8 +1,8 @@
 from typing import List
 
-from cg.models.mip.mip_config import MipBaseConfig, parse_config
+from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
-from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
 def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw: dict) -> dict:
@@ -16,8 +16,8 @@ def parse_mip_analysis(mip_config_raw: dict, qcmetrics_raw: dict, sampleinfo_raw
     Returns:
         dict: parsed data
     """
-    mip_config: MipBaseConfig = parse_config(mip_config_raw)
-    sample_info: MipBaseSampleInfo = parse_sample_info(sampleinfo_raw)
+    mip_config: MipBaseConfig = MipBaseConfig(**mip_config_raw)
+    sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sampleinfo_raw)
     qc_metrics = MetricsDeliverables(**qcmetrics_raw)
     outdata = {
         "id_metrics": qc_metrics.id_metrics,

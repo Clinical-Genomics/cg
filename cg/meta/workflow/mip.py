@@ -12,7 +12,7 @@ from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
-from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 from cg.store import models
 
 CLI_OPTIONS = {
@@ -305,7 +305,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get MIP version from sample info file"""
         LOG.debug("Fetch pipeline version")
         sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
-        sample_info: MipBaseSampleInfo = parse_sample_info(sample_info_raw)
+        sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
 
     def get_cases_to_store(self) -> List[models.Family]:
