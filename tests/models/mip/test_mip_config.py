@@ -9,7 +9,7 @@ from cg.models.mip.mip_config import MipBaseConfig
 
 def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
     """
-    Tests parse_config against a pydantic MipBaseConfig
+    Tests mip config against a pydantic MipBaseConfig
     """
     # GIVEN a dictionary with the basic config
 
