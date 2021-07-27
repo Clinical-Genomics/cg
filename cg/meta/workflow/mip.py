@@ -4,7 +4,8 @@ import yaml
 from pathlib import Path
 from typing import Any, List, Optional
 
-from cg.apps.mip import parse_trending
+from pydantic import ValidationError
+
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.constants.tags import HkMipAnalysisTag
@@ -12,6 +13,7 @@ from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_analysis import MipAnalysis, parse_mip_analysis
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 from cg.store import models
 
@@ -193,37 +195,37 @@ class MipAnalysisAPI(AnalysisAPI):
         full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
         return yaml.safe_load(open(full_file_path))
 
-    def get_latest_metadata(self, family_id: str) -> dict:
-        """Get the latest trending data for a family."""
+    def get_latest_metadata(self, family_id: str) -> MipAnalysis:
+        """Get the latest trending data for a family"""
 
         mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
-        qcmetrics_raw = self._get_latest_raw_file(
+        qc_metrics_raw = self._get_latest_raw_file(
             family_id=family_id, tag=HkMipAnalysisTag.QC_METRICS
         )
-        sampleinfo_raw = self._get_latest_raw_file(
+        sample_info_raw = self._get_latest_raw_file(
             family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
         )
-        trending = dict()
-        if mip_config_raw and qcmetrics_raw and sampleinfo_raw:
+        mip_analysis = MipAnalysis
+        if mip_config_raw and qc_metrics_raw and sample_info_raw:
             try:
-                trending = parse_trending.parse_mip_analysis(
+                mip_analysis: MipAnalysis = parse_mip_analysis(
                     mip_config_raw=mip_config_raw,
-                    qcmetrics_raw=qcmetrics_raw,
-                    sampleinfo_raw=sampleinfo_raw,
+                    qc_metrics_raw=qc_metrics_raw,
+                    sample_info_raw=sample_info_raw,
                 )
-            except KeyError as error:
+            except ValidationError as error:
                 LOG.warning(
-                    "get_latest_metadata failed for '%s', missing key: %s",
+                    "get_latest_metadata failed for '%s', missing attribute: %s",
                     family_id,
                     error,
                 )
                 LOG.warning(
-                    "get_latest_metadata failed for '%s', missing key: %s",
+                    "get_latest_metadata failed for '%s', missing attribute: %s",
                     family_id,
                     error,
                 )
-                trending = {}
-        return trending
+                mip_analysis = MipAnalysis
+        return mip_analysis
 
     @staticmethod
     def is_dna_only_case(case_obj: models.Family) -> bool:

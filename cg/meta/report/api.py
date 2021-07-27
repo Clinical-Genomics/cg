@@ -16,6 +16,7 @@ from cg.meta.report.report_helper import ReportHelper
 from cg.meta.report.report_validator import ReportValidator
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import get_id_metric
 from cg.store import Store, models
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -219,17 +220,17 @@ class ReportAPI:
 
     def _incorporate_trending_data(self, report_data: dict, case_id: str):
         """Incorporate trending data into a set of samples."""
-        trending_data = self.analysis.get_latest_metadata(family_id=case_id)
+        mip_analysis: MipAnalysis = self.analysis.get_latest_metadata(family_id=case_id)
 
+        if not mip_analysis:
+            return
         for sample in report_data["samples"]:
-            id_metric = get_id_metric(
-                id=sample["internal_id"], id_metrics=trending_data["id_metrics"]
-            )
+            id_metric = get_id_metric(id=sample["internal_id"], id_metrics=mip_analysis.id_metrics)
             sample["analysis_sex"] = id_metric.predicted_sex
             sample["duplicates"] = id_metric.duplicate_reads
             sample["mapped_reads"] = id_metric.mapped_reads
 
-        report_data["genome_build"] = trending_data.get("genome_build")
+        report_data["genome_build"] = mip_analysis.genome_build
 
     def _incorporate_coverage_data(self, samples: list, panels: list):
         """Incorporate coverage data from Chanjo for each sample ."""

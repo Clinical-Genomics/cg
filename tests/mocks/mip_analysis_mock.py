@@ -1,5 +1,6 @@
 import yaml
 
+from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
 
 
@@ -24,16 +25,15 @@ class MockMipAnalysis:
         # Returns: dict: parsed data
         # Define output dict
         metrics: MetricsDeliverables = create_mip_metrics_deliverables()
-        out_data = {
-            "case": family_id or "yellowhog",
-            "genome_build": "hg19",
-            "id_metrics": metrics.id_metrics,
-            "mip_version": "v4.0.20",
-            "rank_model_version": "1.18",
-            "sample_ids": ["2018-20203", "2018-20204"],
-            "sv_rank_model_version": "1.08",
-        }
-        return out_data
+        return MipAnalysis(
+            case=family_id or "yellowhog",
+            genome_build="hg19",
+            id_metrics=metrics.id_metrics,
+            mip_version="v4.0.20",
+            rank_model_version="1.18",
+            sample_ids=["2018-20203", "2018-20204"],
+            sv_rank_model_version="1.08",
+        )
 
     @staticmethod
     def convert_panels(customer_id, panels):
