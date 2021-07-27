@@ -26,8 +26,8 @@ def send_mail(email_info: EmailInfo) -> None:
             server.connect()
             server.sendmail(
                 from_addr=email_info.sender_email,
-                to_addrs=email_info.receiver_email,
+                to_addrs=email_info.receiver_email.split(","),
                 msg=msg.as_string(),
             )
-        except:
+        except Exception:
             raise EmailNotSentError(message=f"Email could not be sent")

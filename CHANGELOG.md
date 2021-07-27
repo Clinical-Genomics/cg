@@ -19,6 +19,45 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+## [22.10.3]
+### Changed
+- Increased flowcells ondisk cap
+
+
+## [22.10.2]
+### Fixed
+- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being off by a factor of 
+100.
+
+## [22.10.1]
+### Fixed
+- Integrate with bump2version-ci workflow
+
+## [22.10.0]
+### Fixed
+- Changed how qos for rsync is handled
+
+
+## [22.9.4]
+### Fixed
+- Cases removed from FOHM batch properly
+
+## [22.9.3]
+### Changed
+- Remove KS validation cases from upload to GISAID/FOHM
+
+
+## [22.9.2]
+### Added
+- Added UMI validation cases to skip spring compress
+
+## [22.9.1]
+### Fixed
+- Send multiple emails properly
+### Added
+- Progress bar when uploading to FOHM
+
 ## [22.9.0]
 ### Added
 - Samples that lack data during delivery is reported

@@ -16,6 +16,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
 from cg.constants import Pipeline
+from cg.constants.priority import SLURM_ACCOUNT_TO_QOS
 
 LOG = logging.getLogger(__name__)
 
@@ -164,7 +165,10 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        error_function = ERROR_RSYNC_FUNCTION.format()
+        if self.account in SLURM_ACCOUNT_TO_QOS.keys():
+            priority = SLURM_ACCOUNT_TO_QOS[self.account]
+        else:
+            priority = "low"
         sbatch_info = {
             "job_name": "_".join([str(ticket_id), "rsync"]),
             "account": self.account,
@@ -173,9 +177,9 @@ class RsyncAPI(MetaAPI):
             "log_dir": self.log_dir.as_posix(),
             "email": self.mail_user,
             "hours": 24,
-            "priority": self.priority,
+            "priority": priority,
             "commands": commands,
-            "error": error_function,
+            "error": ERROR_RSYNC_FUNCTION.format(),
             "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
         }
         slurm_api = SlurmAPI()

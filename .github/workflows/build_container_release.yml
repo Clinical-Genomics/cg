@@ -1,6 +1,6 @@
 ---
 
-name: Build container of latest release
+name: Build container from latest release
 on:
   release:
     types:
@@ -21,4 +21,4 @@ jobs:
           name: clinicalgenomics/cg-service
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: "${{ github.event.release.tag_name }}"
+          tags: "${{ github.event.release.tag_name }}, latest"
