@@ -94,7 +94,7 @@ class ExternalDataAPI(MetaAPI):
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         cust_id = cases[0].customer.internal_id
         for case in cases:
-            links = cases.links
+            links = case.links
             for link in links:
                 lims_sample_id = link.sample.internal_id
                 cust_sample_id = link.sample.name
