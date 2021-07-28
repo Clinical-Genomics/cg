@@ -26,7 +26,7 @@ class MipBaseConfig(BaseModel):
     out_dir: str = Field(..., alias="outdata_dir")
     priority: SlurmQos = Field(..., alias="slurm_quality_of_service")
     sample_info_path: str = Field(..., alias="sample_info_file")
-    sample_ids: List[str] = None
+    sample_ids: List[str]
 
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict) -> str:

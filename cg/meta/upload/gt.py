@@ -6,7 +6,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.tags import HkMipAnalysisTag
-from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables, get_id_metric
+from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -59,7 +59,10 @@ class UploadGenotypesAPI(object):
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
         qc_metrics: MetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
-        return {id_metric.id: id_metric.predicted_sex for id_metric in qc_metrics.id_metrics}
+        return {
+            sample_id_metric.sample_id: sample_id_metric.predicted_sex
+            for sample_id_metric in qc_metrics.sample_id_metrics
+        }
 
     def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
         """Fetch a bcf file and return the file object"""

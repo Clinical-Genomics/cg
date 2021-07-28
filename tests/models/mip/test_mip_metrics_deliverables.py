@@ -7,7 +7,7 @@ from cg.models.mip.mip_metrics_deliverables import (
     GenderCheck,
     MeanInsertSize,
     MappedReads,
-    get_id_metric,
+    get_sample_id_metric,
 )
 
 
@@ -24,17 +24,17 @@ def test_instantiate_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict
     assert isinstance(metrics_object, MetricsDeliverables)
 
 
-def test_instantiate_mip_metrics_ids(mip_metrics_deliverables_raw: dict):
+def test_instantiate_mip_metrics_sample_ids(mip_metrics_deliverables_raw: dict):
     """
-    Tests set ids
+    Tests set sample_ids
     """
     # GIVEN a dictionary with the some metrics
 
     # WHEN instantiating a MetricsDeliverables object
     metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
 
-    # THEN assert that ids was successfully created
-    assert metrics_object.ids == {"an_id", "another_id"}
+    # THEN assert that sample_ids was successfully created
+    assert metrics_object.sample_ids == {"an_id", "another_id"}
 
 
 def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
@@ -56,7 +56,7 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     expected_duplicate_read: dict = mip_metrics_deliverables_raw["metrics"].pop()
 
     # THEN assert that sample id was set
-    assert duplicate_read.id == expected_duplicate_read["id"]
+    assert duplicate_read.sample_id == expected_duplicate_read["id"]
 
     # THEN assert that value was set
     assert duplicate_read.value == float(expected_duplicate_read["value"]) * 100
@@ -116,43 +116,45 @@ def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     assert isinstance(predicted_sex, GenderCheck)
 
 
-def test_instantiate_mip_metrics_set_id_metrics(mip_metrics_deliverables_raw: dict):
+def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_raw: dict):
     """
-    Tests set id metrics
-    """
-    # GIVEN a dictionary with the some metrics
-
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
-
-    # THEN assert that id metrics was set
-    assert metrics_object.id_metrics
-
-    # WHEN looping through id metrics
-    for id_metric in metrics_object.id_metrics:
-
-        # THEN assert that id metrics was successfully created
-        assert isinstance(id_metric, ParsedMetrics)
-
-        # THEN assert that metrics are set for id
-        if id_metric.id == "an_id":
-            assert id_metric.duplicate_reads == 0.0748899652117993 * 100
-            assert id_metric.mapped_reads == 0.9975489233589259 * 100
-            assert id_metric.mean_insert_size == 422.0
-            assert id_metric.predicted_sex == "female"
-
-
-def test_get_id_metric(mip_metrics_deliverables_raw: dict):
-    """
-    Tests get id metrics
+    Tests set sample_id metrics
     """
     # GIVEN a dictionary with the some metrics
 
     # WHEN instantiating a MetricsDeliverables object
     metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
 
-    # When getting an id_metric
-    id_metric = get_id_metric(id="an_id", id_metrics=metrics_object.id_metrics)
+    # THEN assert that sample_id metrics was set
+    assert metrics_object.sample_id_metrics
 
-    # THEN assert that id metric for id was returned
-    assert id_metric.id == "an_id"
+    # WHEN looping through sample_id metrics
+    for sample_id_metric in metrics_object.sample_id_metrics:
+
+        # THEN assert that sample_id metrics was successfully created
+        assert isinstance(sample_id_metric, ParsedMetrics)
+
+        # THEN assert that metrics are set for sample_id
+        if sample_id_metric.sample_id == "an_id":
+            assert sample_id_metric.duplicate_reads == 0.0748899652117993 * 100
+            assert sample_id_metric.mapped_reads == 0.9975489233589259 * 100
+            assert sample_id_metric.mean_insert_size == 422.0
+            assert sample_id_metric.predicted_sex == "female"
+
+
+def test_get_sample_id_metric(mip_metrics_deliverables_raw: dict):
+    """
+    Tests get sample_id metrics
+    """
+    # GIVEN a dictionary with the some metrics
+
+    # WHEN instantiating a MetricsDeliverables object
+    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+    # When getting an sample_id_metric
+    sample_id_metric = get_sample_id_metric(
+        sample_id="an_id", sample_id_metrics=metrics_object.sample_id_metrics
+    )
+
+    # THEN assert that sample_id metric for sample_id was returned
+    assert sample_id_metric.sample_id == "an_id"

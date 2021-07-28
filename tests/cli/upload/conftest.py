@@ -156,7 +156,6 @@ def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_confi
 class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
@@ -166,7 +165,6 @@ class MockScoutApi(ScoutAPI):
 class MockReportApi(ReportAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def create_delivery_report(self, *args, **kwargs):
         """docstring for create_delivery_report"""

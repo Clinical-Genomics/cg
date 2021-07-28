@@ -28,7 +28,7 @@ class MockMipAnalysis:
         return MipAnalysis(
             case=family_id or "yellowhog",
             genome_build="hg19",
-            id_metrics=metrics.id_metrics,
+            sample_id_metrics=metrics.sample_id_metrics,
             mip_version="v4.0.20",
             rank_model_version="1.18",
             sample_ids=["2018-20203", "2018-20204"],

@@ -25,6 +25,7 @@ def fixture_mip_analysis_config_dna_raw() -> dict:
         "dry_run_all": False,
         "log_file": "a_log_path",
         "outdata_dir": "tests/fixtures/apps/mip/dna/store",
+        "sample_ids": ["sample_id"],
         "sample_info_file": "tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml",
         "slurm_quality_of_service": SlurmQos.LOW,
         "store_file": "tests/fixtures/apps/mip/dna/store/case_id_deliverables.yaml",

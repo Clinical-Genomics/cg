@@ -10,14 +10,16 @@ from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 class MipAnalysis(BaseModel):
     case: str
     genome_build: str
-    id_metrics: List[ParsedMetrics]
+    sample_id_metrics: List[ParsedMetrics]
     mip_version: str
     rank_model_version: str
     sample_ids: List[str]
     sv_rank_model_version: str
 
 
-def parse_mip_analysis(mip_config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict) -> dict:
+def parse_mip_analysis(
+    mip_config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
+) -> MipAnalysis:
     """Parse the output analysis files from MIP
 
     Args:
@@ -34,7 +36,7 @@ def parse_mip_analysis(mip_config_raw: dict, qc_metrics_raw: dict, sample_info_r
     return MipAnalysis(
         case=mip_config.case_id,
         genome_build=sample_info.genome_build,
-        id_metrics=qc_metrics.id_metrics,
+        sample_id_metrics=qc_metrics.sample_id_metrics,
         mip_version=sample_info.mip_version,
         rank_model_version=sample_info.rank_model_version,
         sample_ids=mip_config.sample_ids,

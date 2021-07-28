@@ -17,7 +17,7 @@ from cg.meta.report.report_validator import ReportValidator
 from cg.meta.report.sample_calculator import SampleCalculator
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.mip.mip_metrics_deliverables import get_id_metric
+from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store import Store, models
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -225,10 +225,12 @@ class ReportAPI:
         if not mip_analysis:
             return
         for sample in report_data["samples"]:
-            id_metric = get_id_metric(id=sample["internal_id"], id_metrics=mip_analysis.id_metrics)
-            sample["analysis_sex"] = id_metric.predicted_sex
-            sample["duplicates"] = id_metric.duplicate_reads
-            sample["mapped_reads"] = id_metric.mapped_reads
+            sample_id_metric = get_sample_id_metric(
+                sample_id=sample["internal_id"], sample_id_metrics=mip_analysis.sample_id_metrics
+            )
+            sample["analysis_sex"] = sample_id_metric.predicted_sex
+            sample["duplicates"] = sample_id_metric.duplicate_reads
+            sample["mapped_reads"] = sample_id_metric.mapped_reads
 
         report_data["genome_build"] = mip_analysis.genome_build
 
