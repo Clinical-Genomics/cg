@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 
 import click
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
+from cg.meta.orders.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -262,3 +263,19 @@ def relationship(
     )
     status_db.add_commit(new_record)
     LOG.info("related %s to %s", case_obj.internal_id, sample_obj.internal_id)
+
+
+@add.command()
+@click.option(
+    "-t",
+    "--ticket-id",
+    type=int,
+    help="Ticket id",
+    required=True,
+)
+@click.option("--dry-run", is_flag=True)
+@click.pass_obj
+def external(context: CGConfig, ticket_id: int, dry_run: bool):
+    """Downloads external data from caesar and places it in appropriate folder on hasta"""
+    external_data_api = ExternalDataAPI(config=context)
+    external_data_api.download_from_caesar(ticket_id=ticket_id, dry_run=dry_run)
