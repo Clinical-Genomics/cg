@@ -4,6 +4,7 @@ import pytest
 
 from cg.constants.priority import SlurmQos
 from cg.models.mip.mip_config import MipBaseConfig
+from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -37,8 +38,22 @@ def fixture_mip_analysis_config_dna(mip_analysis_config_dna_raw: dict) -> MipBas
     return MipBaseConfig(**mip_analysis_config_dna_raw)
 
 
+@pytest.fixture(name="mip_rank_model_version")
+def fixture_mip_rank_model_version() -> str:
+    """Return mip rank model version"""
+    return "v1.0"
+
+
+@pytest.fixture(name="mip_sv_rank_model_version")
+def fixture_mip_sv_rank_model_version() -> str:
+    """Return mip sv rank model version"""
+    return "v1.2.0"
+
+
 @pytest.fixture(name="sample_info_dna_raw")
-def fixture_sample_info_dna_raw() -> dict:
+def fixture_sample_info_dna_raw(
+    mip_rank_model_version: str, mip_sv_rank_model_version: str
+) -> dict:
     """Raw sample_info fixture"""
     return {
         "analysisrunstatus": "finished",
@@ -49,10 +64,10 @@ def fixture_sample_info_dna_raw() -> dict:
         "mip_version": "v9.0.0",
         "recipe": {
             "genmod": {
-                "rank_model": {"version": "v1.0"},
+                "rank_model": {"version": mip_rank_model_version},
             },
             "sv_genmod": {
-                "sv_rank_model": {"version": "v1.2.0"},
+                "sv_rank_model": {"version": mip_sv_rank_model_version},
             },
         },
     }
@@ -167,4 +182,28 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
                 "value": "0.09",
             },
         ],
+    }
+
+
+@pytest.fixture(name="mip_metrics_deliverables")
+def fixture_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict) -> MetricsDeliverables:
+    return MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+
+@pytest.fixture(name="mip_analysis_raw")
+def fixture_mip_analysis_raw(
+    case_id: str,
+    mip_metrics_deliverables: MetricsDeliverables,
+    mip_rank_model_version: str,
+    mip_sv_rank_model_version: str,
+    sample_id,
+) -> dict:
+    return {
+        "case": case_id,
+        "genome_build": "grch37",
+        "sample_id_metrics": mip_metrics_deliverables.sample_id_metrics,
+        "mip_version": "10.0.0",
+        "rank_model_version": mip_rank_model_version,
+        "sample_ids": [sample_id],
+        "sv_rank_model_version": mip_sv_rank_model_version,
     }
