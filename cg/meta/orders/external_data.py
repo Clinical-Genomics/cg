@@ -103,6 +103,6 @@ class ExternalDataAPI(MetaAPI):
                     dry_run=dry_run,
                 )
                 LOG.info(
-                    "Downloading sample %s from caesar by submitting sbatch job %s",
-                    (lims_sample_id, sbatch_number),
+                    "Downloading sample %s from caesar by submitting sbatch job %s"
+                    % (lims_sample_id, sbatch_number)
                 )
