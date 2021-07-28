@@ -40,31 +40,28 @@ class ExternalDataAPI(MetaAPI):
 
     def create_source_path(
         self, cust_id: str, ticket_id: int, raw_path: str, cust_sample_id: str
-    ) -> Path:
-        cust_id_added_to_path: Path = Path(
+    ) -> str:
+        cust_id_added_to_path = (
             raw_path % cust_id + "/" + str(ticket_id) + "/" + cust_sample_id + "/"
         )
         return cust_id_added_to_path
 
-    def create_destination_path(
-        self, cust_id: str, ticket_id: int, raw_path: str, lims_sample_id: str
-    ) -> Path:
-        cust_id_added_to_path: Path = Path(raw_path % cust_id + "/" + lims_sample_id + "/")
+    def create_destination_path(self, cust_id: str, raw_path: str, lims_sample_id: str) -> str:
+        cust_id_added_to_path = raw_path % cust_id + "/" + lims_sample_id + "/"
         return cust_id_added_to_path
 
     def download_sample(
         self, cust_id: str, ticket_id: int, cust_sample_id: str, lims_sample_id: str, dry_run: bool
     ) -> int:
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
-        source_path: Path = self.create_source_path(
+        source_path: str = self.create_source_path(
             cust_id=cust_id,
             ticket_id=ticket_id,
             raw_path=self.caesar_path,
             cust_sample_id=cust_sample_id,
         )
-        destination_path: Path = self.create_destination_path(
+        destination_path: str = self.create_destination_path(
             cust_id=cust_id,
-            ticket_id=ticket_id,
             raw_path=self.hasta_path,
             lims_sample_id=lims_sample_id,
         )
