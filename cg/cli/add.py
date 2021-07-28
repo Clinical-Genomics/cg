@@ -278,4 +278,4 @@ def relationship(
 def external(context: CGConfig, ticket_id: int, dry_run: bool):
     """Downloads external data from caesar and places it in appropriate folder on hasta"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.download_from_caesar(ticket_id=ticket_id, dry_run=dry_run)
+    external_data_api.download_ticket(ticket_id=ticket_id, dry_run=dry_run)
