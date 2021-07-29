@@ -3,8 +3,12 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
+from housekeeper.store.models import Bundle
+
+from cg.apps.cgstats.db.models import Version
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION
@@ -23,6 +27,7 @@ class ExternalDataAPI(MetaAPI):
         self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
+        self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
     def create_log_dir(self, ticket_id: int, dry_run: bool) -> Path:
         timestamp = dt.datetime.now()
@@ -106,3 +111,69 @@ class ExternalDataAPI(MetaAPI):
                     "Downloading sample %s from caesar by submitting sbatch job %s"
                     % (lims_sample_id, sbatch_number)
                 )
+
+    def get_all_fastq(self, sample_folder: str) -> List[Path]:
+        all_fastqs = []
+        for leaf in os.listdir(sample_folder):
+            abs_path = sample_folder / leaf
+            if abs_path.suffix == "fastq.gz":
+                abs_path.append(all_fastqs)
+        return all_fastqs
+
+    def get_all_paths(self, lims_sample_id: str, cust_id: str) -> List[Path]:
+        fastq_folder: str = self.create_destination_path(
+            cust_id=cust_id, lims_sample_id=lims_sample_id, raw_path=self.hasta_path
+        )
+        all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
+        return all_fastq_in_folder
+
+    def add_fastq_to_hk(
+        self,
+        bundle_result: Tuple[Bundle, Version],
+        lims_sample_id: str,
+        cust_id: str,
+    ) -> None:
+        sample_paths: list = self.get_all_paths(lims_sample_id=lims_sample_id, cust_id=cust_id)
+        self.housekeeper_api.add_file(tags=["fastq"], version_obj=bundle_result[1], path="")
+
+    def create_dict(self, name: str) -> dict:
+        timestamp = dt.datetime.now()
+        hk_dict = {
+            "name": name,
+            "created_at": timestamp.strftime("%y-%m-%d %H:%M"),
+            "expires_at": None,
+        }
+        return hk_dict
+
+    def create_hk_bundle(self, bundle_name: str, dry_run: bool) -> Tuple[Bundle, Version]:
+        hk_dict = self.create_dict(name=bundle_name)
+        if not dry_run:
+            bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
+                bundle_data=hk_dict
+            )
+            return bundle_result
+        else:
+            LOG.info(
+                "Would have created bundle %s in housekeeper, but this is dry-run", bundle_name
+            )
+
+    def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
+        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cust_id = cases[0].customer.internal_id
+        for case in cases:
+            links = case.links
+            for link in links:
+                lims_sample_id = link.sample.internal_id
+                bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
+                    bundle_name=lims_sample_id, dry_run=dry_run
+                )
+                if not dry_run:
+                    self.add_fastq_to_hk(
+                        bundle_result=bundle_result,
+                        lims_sample_id=lims_sample_id,
+                        cust_id=cust_id,
+                    )
+                else:
+                    LOG.info(
+                        "Would have added %s to housekeeper, but this is dry-run", lims_sample_id
+                    )

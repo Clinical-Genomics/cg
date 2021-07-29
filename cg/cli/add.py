@@ -279,3 +279,19 @@ def external(context: CGConfig, ticket_id: int, dry_run: bool):
     """Downloads external data from caesar and places it in appropriate folder on hasta"""
     external_data_api = ExternalDataAPI(config=context)
     external_data_api.download_ticket(ticket_id=ticket_id, dry_run=dry_run)
+
+
+@add.command("external-hk")
+@click.option(
+    "-t",
+    "--ticket-id",
+    type=int,
+    help="Ticket id",
+    required=True,
+)
+@click.option("--dry-run", is_flag=True)
+@click.pass_obj
+def external_hk(context: CGConfig, ticket_id: int, dry_run: bool):
+    """Adds external data to housekeeper"""
+    external_data_api = ExternalDataAPI(config=context)
+    external_data_api.configure_housekeeper(ticket_id=ticket_id, dry_run=dry_run)
