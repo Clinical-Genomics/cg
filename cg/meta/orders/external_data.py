@@ -134,7 +134,8 @@ class ExternalDataAPI(MetaAPI):
         cust_id: str,
     ) -> None:
         sample_paths: list = self.get_all_paths(lims_sample_id=lims_sample_id, cust_id=cust_id)
-        self.housekeeper_api.add_file(tags=["fastq"], version_obj=bundle_result[1], path="")
+        for fastq in sample_paths:
+            self.housekeeper_api.add_file(tags=["fastq"], version_obj=bundle_result[1], path=fastq)
 
     def create_dict(self, name: str) -> dict:
         timestamp = dt.datetime.now()
