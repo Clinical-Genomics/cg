@@ -166,7 +166,7 @@ class ExternalDataAPI(MetaAPI):
             links = case.links
             for link in links:
                 lims_sample_id = link.sample.internal_id
-                LOG.info("Crating bundle for sample %s in housekeeper", lims_sample_id)
+                LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
                 bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
                     bundle_name=lims_sample_id, dry_run=dry_run
                 )
