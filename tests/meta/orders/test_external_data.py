@@ -1,10 +1,12 @@
 """Tests for the transfer of external data"""
 import logging
 from pathlib import Path
+import os
 
 from cgmodels.cg.constants import Pipeline
 from cg.meta.orders.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
+from cg.store import Store
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI):
@@ -46,7 +48,7 @@ def test_create_destination_path(external_data_api: ExternalDataAPI):
 
 
 def test_download_sample(external_data_api: ExternalDataAPI, mocker):
-    """Test for running rsync on slurm"""
+    """Test for downloading external data via slurm"""
 
     # GIVEN paths needed to run rsync
     mocker.patch.object(ExternalDataAPI, "create_log_dir")
@@ -69,3 +71,33 @@ def test_download_sample(external_data_api: ExternalDataAPI, mocker):
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
+
+def test_get_all_fastq(
+    cg_context: CGConfig, external_data_directory,external_data_api: ExternalDataAPI):
+    """Test the finding of fastq.gz files in customer directories."""
+    for folder in os.listdir(external_data_directory):
+        # WHEN the list of file-paths is created
+        files = external_data_api.get_all_fastq(sample_folder=str(external_data_directory)+"/"+folder)
+        # THEN only fast.gz files are returned
+        assert [tmp.endswith("fastq.gz") for tmp in files]
+
+def test_configure_housekeeper(
+    cg_context: CGConfig, external_data_directory,external_data_api: ExternalDataAPI,caplog,helpers,mocker):
+    caplog.set_level(logging.INFO)
+    """Test the finding of fastq.gz files in customer directories."""
+    # GIVEN a case
+    case = helpers.add_case(
+        store=cg_context.status_db,
+        internal_id="rareviper",
+        case_id=999999,
+        data_analysis=Pipeline.MIP_DNA,
+    )
+    # GIVEN a case is available for analysis
+    mocker.patch.object(CGConfig.status_db, "get_cases_from_ticket")
+    CGConfig.status_db.get_cases_from_ticket.return_value = [case]
+
+    # WHEN
+    external_data_api.configure_housekeeper(ticket_id=999999,dry_run=True)
+
+    # Then
+    assert "Would have" in caplog.text
