@@ -127,16 +127,6 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def add_fastq_to_hk(
-            self,
-            bundle_result: Tuple[Bundle, Version],
-            lims_sample_id: str,
-            cust_id: str,
-    ) -> None:
-        sample_paths: list = self.get_all_paths(lims_sample_id=lims_sample_id, cust_id=cust_id)
-        for fastq in sample_paths:
-            self.housekeeper_api.add_file(tags=["fastq"], version_obj=bundle_result[1], path=fastq)
-
     def create_data_dict(self, name: str, file_list: List[dict]) -> dict:
         timestamp = dt.datetime.now()
         hk_dict = {
@@ -179,6 +169,8 @@ class ExternalDataAPI(MetaAPI):
                     bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
                         bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
                     )
+                    self.housekeeper_api.include(bundle_result[1])
+                    self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
                 else:
                     LOG.info(
                         "Would have added %s to housekeeper and linked associated files, but this is dry-run", lims_sample_id
