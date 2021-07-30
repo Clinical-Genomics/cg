@@ -115,9 +115,9 @@ class ExternalDataAPI(MetaAPI):
     def get_all_fastq(self, sample_folder: str) -> List[Path]:
         all_fastqs = []
         for leaf in os.listdir(sample_folder):
-            abs_path = sample_folder / leaf
+            abs_path = Path(sample_folder + leaf)
             if abs_path.suffix == "fastq.gz":
-                abs_path.append(all_fastqs)
+                all_fastqs.append(abs_path)
         return all_fastqs
 
     def get_all_paths(self, lims_sample_id: str, cust_id: str) -> List[Path]:
