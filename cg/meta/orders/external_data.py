@@ -157,8 +157,12 @@ class ExternalDataAPI(MetaAPI):
                 "Would have created bundle %s in housekeeper, but this is dry-run", bundle_name
             )
 
-    def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
+    def get_all_cases_from_ticket(self, ticket_id: int):
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        return cases
+
+    def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
+        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         cust_id = cases[0].customer.internal_id
         for case in cases:
             links = case.links
@@ -168,7 +172,6 @@ class ExternalDataAPI(MetaAPI):
                     lims_id=lims_sample_id, cust_id=cust_id
                 )
                 hk_dict = self.create_data_dict(name=lims_sample_id, file_list=file_list)
-
                 if not dry_run:
                     LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
                     bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(

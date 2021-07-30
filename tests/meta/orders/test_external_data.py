@@ -90,13 +90,9 @@ def test_get_all_fastq(
 
 
 def test_configure_housekeeper(
-    cg_context: CGConfig,
-    external_data_directory,
     external_data_api: ExternalDataAPI,
     caplog,
-    helpers,
     mocker,
-    store: Store,
     case_id,
     ticket_nr,
     dna_mip_context,
@@ -109,14 +105,19 @@ def test_configure_housekeeper(
     case = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
-    mocker.patch.object(external_data_api.status_db, "get_cases_from_ticket")
-    external_data_api.status_db.return_value = [case]
+    mocker.patch.object(ExternalDataAPI, "get_all_cases_from_ticket")
+    ExternalDataAPI.get_all_cases_from_ticket.return_value = [case]
 
-    # WHEN
-    result = external_data_api.configure_housekeeper(ticket_id=ticket_nr, dry_run=True)
+    # GIVEN a dictionary
+    mocker.patch.object(ExternalDataAPI, "create_file_list")
+    ExternalDataAPI.create_file_list.return_value = {
+        "path": "/path/hej",
+        "tags": ["fastq"],
+        "archive": False,
+    }
 
-    # THEN command should run without errors
-    assert result.exit_code == 0
+    # WHEN files are added to housekeeper
+    external_data_api.configure_housekeeper(ticket_id=ticket_nr, dry_run=True)
 
-    # Then
+    # THEN it is announced that files would have been added
     assert "Would have" in caplog.text
