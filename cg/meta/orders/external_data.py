@@ -143,6 +143,7 @@ class ExternalDataAPI(MetaAPI):
             "name": name,
             "created_at": timestamp.strftime("%y-%m-%d %H:%M"),
             "expires_at": None,
+            "files": [],
         }
         return hk_dict
 
