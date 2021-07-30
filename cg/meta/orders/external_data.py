@@ -112,20 +112,20 @@ class ExternalDataAPI(MetaAPI):
                     % (lims_sample_id, sbatch_number)
                 )
 
-    def get_all_fastq(self, sample_folder: str) -> List[Path]:
+    def get_all_fastq(self, sample_folder: str) -> List[str]:
         all_fastqs = []
         for leaf in os.listdir(sample_folder):
-            abs_path = Path(sample_folder + "/" + leaf)
+            abs_path = sample_folder + "/" + leaf
             LOG.info("Found file %s inside folder %s" % (abs_path, sample_folder))
-            if str(abs_path).endswith("fastq.gz"):
+            if abs_path.endswith("fastq.gz"):
                 all_fastqs.append(abs_path)
         return all_fastqs
 
-    def get_all_paths(self, lims_sample_id: str, cust_id: str) -> List[Path]:
+    def get_all_paths(self, lims_sample_id: str, cust_id: str) -> List[str]:
         fastq_folder: str = self.create_destination_path(
             cust_id=cust_id, lims_sample_id=lims_sample_id, raw_path=self.hasta_path
         )
-        all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
+        all_fastq_in_folder: List[str] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
     def create_data_dict(self, name: str, file_list: List[dict]) -> dict:
