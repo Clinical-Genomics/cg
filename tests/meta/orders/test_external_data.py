@@ -3,7 +3,10 @@ import logging
 from pathlib import Path
 import os
 
-
+from tests.cli.workflow.mip.conftest import fixture_dna_mip_context
+from tests.cli.workflow.mip.conftest import fixture_mip_case_ids
+from tests.cli.workflow.mip.conftest import fixture_mip_case_id
+from tests.apps.mip.conftest import tb_api
 from cg.meta.orders.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -110,7 +113,10 @@ def test_configure_housekeeper(
     external_data_api.status_db.return_value = [case]
 
     # WHEN
-    external_data_api.configure_housekeeper(ticket_id=ticket_nr, dry_run=True)
+    result = external_data_api.configure_housekeeper(ticket_id=ticket_nr, dry_run=True)
+
+    # THEN command should run without errors
+    assert result.exit_code == 0
 
     # Then
     assert "Would have" in caplog.text
