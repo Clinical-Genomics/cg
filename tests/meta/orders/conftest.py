@@ -11,6 +11,7 @@ from cg.models.orders.order import OrderIn
 from cg.store import Store
 from pathlib import Path
 
+
 @pytest.fixture
 def all_orders_to_submit(
     balsamic_order_to_submit,
@@ -92,6 +93,7 @@ def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
 @pytest.fixture(name="ticket_handler")
 def fixture_ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
     return TicketHandler(status_db=store, osticket_api=osticket)
+
 
 @pytest.fixture(name="external_data_directory")
 def external_data_directory(tmpdir_factory) -> Path:
