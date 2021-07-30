@@ -44,10 +44,10 @@ class ExternalDataAPI(MetaAPI):
         return log_dir
 
     def create_source_path(
-        self, cust_id: str, ticket_id: int, raw_path: str, cust_sample_id: str
+            self, cust_id: str, ticket_id: int, raw_path: str, cust_sample_id: str
     ) -> str:
         cust_id_added_to_path = (
-            raw_path % cust_id + "/" + str(ticket_id) + "/" + cust_sample_id + "/"
+                raw_path % cust_id + "/" + str(ticket_id) + "/" + cust_sample_id + "/"
         )
         return cust_id_added_to_path
 
@@ -56,7 +56,7 @@ class ExternalDataAPI(MetaAPI):
         return cust_id_added_to_path
 
     def download_sample(
-        self, cust_id: str, ticket_id: int, cust_sample_id: str, lims_sample_id: str, dry_run: bool
+            self, cust_id: str, ticket_id: int, cust_sample_id: str, lims_sample_id: str, dry_run: bool
     ) -> int:
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         source_path: str = self.create_source_path(
@@ -128,30 +128,35 @@ class ExternalDataAPI(MetaAPI):
         return all_fastq_in_folder
 
     def add_fastq_to_hk(
-        self,
-        bundle_result: Tuple[Bundle, Version],
-        lims_sample_id: str,
-        cust_id: str,
+            self,
+            bundle_result: Tuple[Bundle, Version],
+            lims_sample_id: str,
+            cust_id: str,
     ) -> None:
         sample_paths: list = self.get_all_paths(lims_sample_id=lims_sample_id, cust_id=cust_id)
         for fastq in sample_paths:
             self.housekeeper_api.add_file(tags=["fastq"], version_obj=bundle_result[1], path=fastq)
 
-    def create_dict(self, name: str) -> dict:
+    def create_data_dict(self, name: str, file_list: List[dict]) -> dict:
         timestamp = dt.datetime.now()
         hk_dict = {
             "name": name,
             "created_at": timestamp.strftime("%y-%m-%d %H:%M"),
             "expires_at": None,
-            "files": [],
+            "files": file_list,
         }
         return hk_dict
 
-    def create_hk_bundle(self, bundle_name: str, dry_run: bool) -> Tuple[Bundle, Version]:
-        hk_dict = self.create_dict(name=bundle_name)
+    def create_file_list(self, lims_id: str, cust_id: str ) -> List[dict]:
+        file_list: List[dict] = []
+        for file in self.get_all_paths(lims_sample_id=lims_id, cust_id=cust_id):
+            file_list.append({"path": file, "tags": ["fastq"], "archive": False})
+        return file_list
+
+    def create_hk_bundle(self, bundle_name: str, dry_run: bool, data_dict: dict) -> Tuple[Bundle, Version]:
         if not dry_run:
             bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-                bundle_data=hk_dict
+                bundle_data=data_dict
             )
             return bundle_result
         else:
@@ -166,18 +171,15 @@ class ExternalDataAPI(MetaAPI):
             links = case.links
             for link in links:
                 lims_sample_id = link.sample.internal_id
-                LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
-                bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
-                    bundle_name=lims_sample_id, dry_run=dry_run
-                )
+                file_list: List[dict] = self.create_file_list(lims_id=lims_sample_id, cust_id=cust_id)
+                hk_dict = self.create_data_dict(name=lims_sample_id, file_list=file_list)
+
                 if not dry_run:
-                    LOG.info("Adding fastqs for sample %s to housekeeper", lims_sample_id)
-                    self.add_fastq_to_hk(
-                        bundle_result=bundle_result,
-                        lims_sample_id=lims_sample_id,
-                        cust_id=cust_id,
+                    LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+                    bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
+                        bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
                     )
                 else:
                     LOG.info(
-                        "Would have added %s to housekeeper, but this is dry-run", lims_sample_id
+                        "Would have added %s to housekeeper and linked associated files, but this is dry-run", lims_sample_id
                     )
