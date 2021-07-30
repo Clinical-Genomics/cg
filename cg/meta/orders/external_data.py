@@ -141,7 +141,7 @@ class ExternalDataAPI(MetaAPI):
         timestamp = dt.datetime.now()
         hk_dict = {
             "name": name,
-            "created_at": timestamp.strftime("%y-%m-%d %H:%M"),
+            "created_at": timestamp,
             "expires_at": None,
             "files": file_list,
         }
