@@ -103,6 +103,7 @@ def test_configure_housekeeper(
     # GIVEN a case to analyze
     mip_api = dna_mip_context.meta_apis["analysis_api"]
     cases = mip_api.status_db.query(models.Family).filter(models.Family.internal_id == case_id)
+
     # GIVEN a case is available for analysis
     mocker.patch.object(Store, "get_cases_from_ticket")
     Store.get_cases_from_ticket.return_value = cases

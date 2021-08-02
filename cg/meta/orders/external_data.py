@@ -147,19 +147,15 @@ class ExternalDataAPI(MetaAPI):
     def create_hk_bundle(
         self, bundle_name: str, dry_run: bool, data_dict: dict
     ) -> Tuple[Bundle, Version]:
-        if not dry_run:
-            bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-                bundle_data=data_dict
-            )
-            return bundle_result
-        else:
+        if dry_run:
             LOG.info(
                 "Would have created bundle %s in housekeeper, but this is dry-run", bundle_name
             )
-
-    def get_all_cases_from_ticket(self, ticket_id: int):
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        return cases
+            return
+        bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
+            bundle_data=data_dict
+        )
+        return bundle_result
 
     def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
         cases = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
