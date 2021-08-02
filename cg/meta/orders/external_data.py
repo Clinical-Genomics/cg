@@ -162,7 +162,7 @@ class ExternalDataAPI(MetaAPI):
         return cases
 
     def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
-        cases = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        cases = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         cust_id = cases[0].customer.internal_id
         for case in cases:
             links = case.links

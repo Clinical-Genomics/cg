@@ -9,7 +9,7 @@ from tests.cli.workflow.mip.conftest import fixture_mip_case_id
 from tests.apps.mip.conftest import tb_api
 from cg.meta.orders.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store import Store, models
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI):
@@ -102,11 +102,10 @@ def test_configure_housekeeper(
 
     # GIVEN a case to analyze
     mip_api = dna_mip_context.meta_apis["analysis_api"]
-    case = mip_api.status_db.family(case_id)
-
+    cases = mip_api.status_db.query(models.Family).filter(models.Family.internal_id == case_id)
     # GIVEN a case is available for analysis
-    mocker.patch.object(ExternalDataAPI, "get_all_cases_from_ticket")
-    ExternalDataAPI.get_all_cases_from_ticket.return_value = [case]
+    mocker.patch.object(Store, "get_cases_from_ticket")
+    Store.get_cases_from_ticket.return_value = cases
 
     # GIVEN a dictionary
     mocker.patch.object(ExternalDataAPI, "create_file_list")
