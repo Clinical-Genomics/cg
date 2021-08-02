@@ -128,22 +128,6 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: List[str] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def create_data_dict(self, name: str, file_list: List[dict]) -> dict:
-        timestamp = dt.datetime.now()
-        hk_dict = {
-            "name": name,
-            "created_at": timestamp,
-            "expires_at": None,
-            "files": file_list,
-        }
-        return hk_dict
-
-    def create_file_list(self, lims_id: str, cust_id: str) -> List[dict]:
-        file_list: List[dict] = []
-        for file in self.get_all_paths(lims_sample_id=lims_id, cust_id=cust_id):
-            file_list.append({"path": file, "tags": ["fastq"], "archive": False})
-        return file_list
-
     def create_hk_bundle(
         self, bundle_name: str, dry_run: bool, data_dict: dict
     ) -> Tuple[Bundle, Version]:
@@ -164,17 +148,26 @@ class ExternalDataAPI(MetaAPI):
             links = case.links
             for link in links:
                 lims_sample_id = link.sample.internal_id
-                file_list: List[dict] = self.create_file_list(
-                    lims_id=lims_sample_id, cust_id=cust_id
+                paths: List[str] = self.get_all_paths(
+                    lims_sample_id=lims_sample_id, cust_id=cust_id
                 )
-                hk_dict = self.create_data_dict(name=lims_sample_id, file_list=file_list)
                 if not dry_run:
-                    LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
-                    bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
-                        bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
-                    )
-                    self.housekeeper_api.include(bundle_result[1])
-                    self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
+                    last_version = self.housekeeper_api.last_version(bundle=lims_sample_id)
+                    if not last_version:
+                        LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+                        bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
+                            bundle_name=lims_sample_id, data_dict={}, dry_run=dry_run
+                        )
+                        last_version = bundle_result[1]
+                        self.housekeeper_api.include(bundle_result[1])
+                        self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
+                    for path in paths:
+                        LOG.info(
+                            "Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id)
+                        )
+                        self.housekeeper_api.add_file(
+                            path=path, version_obj=last_version, tags=["fastq"]
+                        )
                 else:
                     LOG.info(
                         "Would have added %s to housekeeper and linked associated files, but this is dry-run",

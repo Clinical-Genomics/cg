@@ -108,13 +108,9 @@ def test_configure_housekeeper(
     mocker.patch.object(Store, "get_cases_from_ticket")
     Store.get_cases_from_ticket.return_value = cases
 
-    # GIVEN a dictionary
-    mocker.patch.object(ExternalDataAPI, "create_file_list")
-    ExternalDataAPI.create_file_list.return_value = {
-        "path": "/path/hej",
-        "tags": ["fastq"],
-        "archive": False,
-    }
+    # GIVEN a list of paths
+    mocker.patch.object(ExternalDataAPI, "get_all_paths")
+    ExternalDataAPI.get_all_paths.return_value = ["/path/to/something/"]
 
     # WHEN files are added to housekeeper
     external_data_api.configure_housekeeper(ticket_id=ticket_nr, dry_run=True)
