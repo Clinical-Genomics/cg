@@ -1,7 +1,9 @@
 """ Test the CLI for run mip-dna """
 import logging
+import pytest
 
 from cg.cli.workflow.mip_dna.base import run
+from cg.exc import CgError
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
@@ -78,3 +80,29 @@ def test_mip_run(
 
     # THEN log should be printed
     assert "mip-dna run started" in caplog.text
+
+
+def test_mip_run_fail(cli_runner, mocker, caplog, case_id, email_adress, dna_mip_context, tb_api):
+    """Test already ongoing analysis MIP run"""
+
+    caplog.set_level(logging.INFO)
+
+    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
+    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = (
+        "tests/fixtures/apps/mip/rna/case_config.yaml"
+    )
+    mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
+    MipDNAAnalysisAPI.run_analysis.return_value = 0
+
+    mocker.patch.object(tb_api, "is_latest_analysis_ongoing")
+    tb_api.is_latest_analysis_ongoing.return_value = True
+
+    # GIVEN a cli function
+    # WHEN we run a case
+    result = cli_runner.invoke(run, ["--email", email_adress, case_id], obj=dna_mip_context)
+
+    # THEN command should return an exit fail code
+    assert result.exit_code == 1
+
+    # THEN an error should be logged
+    assert "Analysis still ongoing in Trailblazer" in caplog.text
