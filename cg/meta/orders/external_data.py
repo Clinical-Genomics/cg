@@ -35,12 +35,10 @@ class ExternalDataAPI(MetaAPI):
         folder_name = Path("_".join([str(ticket_id), timestamp_str]))
         log_dir = Path(self.base_path) / folder_name
         LOG.info("Creating folder: %s", log_dir)
-        if log_dir.exists():
-            LOG.warning("Could not create %s, this folder already exist", log_dir)
-        elif dry_run:
+        if dry_run:
             LOG.info("Would have created path %s, but this is a dry run", log_dir)
-        else:
-            os.makedirs(log_dir)
+            return log_dir
+        log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
     def create_source_path(
@@ -141,6 +139,15 @@ class ExternalDataAPI(MetaAPI):
         )
         return bundle_result
 
+    def create_dict(self, name: str) -> dict:
+        hk_dict = {
+            "name": name,
+            "created_at": dt.datetime.now(),
+            "expires_at": None,
+            "files": [],
+        }
+        return hk_dict
+
     def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
         cases = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         cust_id = cases[0].customer.internal_id
@@ -151,26 +158,24 @@ class ExternalDataAPI(MetaAPI):
                 paths: List[str] = self.get_all_paths(
                     lims_sample_id=lims_sample_id, cust_id=cust_id
                 )
-                if not dry_run:
-                    last_version = self.housekeeper_api.last_version(bundle=lims_sample_id)
-                    if not last_version:
-                        LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
-                        bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
-                            bundle_name=lims_sample_id, data_dict={}, dry_run=dry_run
-                        )
-                        last_version = bundle_result[1]
-                        self.housekeeper_api.include(bundle_result[1])
-                        self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
-                    for path in paths:
-                        LOG.info(
-                            "Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id)
-                        )
-                        self.housekeeper_api.add_file(
-                            path=path, version_obj=last_version, tags=["fastq"]
-                        )
-                        self.housekeeper_api.commit()
-                else:
+                if dry_run:
                     LOG.info(
                         "Would have added %s to housekeeper and linked associated files, but this is dry-run",
                         lims_sample_id,
                     )
+                    return
+                last_version = self.housekeeper_api.last_version(bundle=lims_sample_id)
+                if not last_version:
+                    LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+                    hk_dict: dict = self.create_dict(name=lims_sample_id)
+                    bundle_result: Tuple[Bundle, Version] = self.create_hk_bundle(
+                        bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
+                    )
+                    last_version = bundle_result[1]
+                    self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
+                for path in paths:
+                    LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
+                    self.housekeeper_api.add_file(
+                        path=path, version_obj=last_version, tags=["fastq"]
+                    )
+                    self.housekeeper_api.commit()
