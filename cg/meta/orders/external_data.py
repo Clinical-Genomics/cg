@@ -165,11 +165,8 @@ class ExternalDataAPI(MetaAPI):
                         LOG.info(
                             "Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id)
                         )
-                        file_obj = self.housekeeper_api.add_file(
+                        self.housekeeper_api.add_file(
                             path=path, version_obj=last_version, tags=["fastq"]
-                        )
-                        self.housekeeper_api.include_file(
-                            version_obj=last_version, file_obj=file_obj
                         )
                         self.housekeeper_api.commit()
                 else:
