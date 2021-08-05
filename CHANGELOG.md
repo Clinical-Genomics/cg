@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.12.0]
+### Added
+- Added support for multiple delivery flags for the command cg deliver analysis.
+
 ## [22.11.0]
 ### Fixed
 - New families can be created without the --panel flag
