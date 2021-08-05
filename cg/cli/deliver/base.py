@@ -27,14 +27,20 @@ def deliver():
 @click.option(
     "-t", "--ticket-id", type=int, help="Deliver the files for ALL cases connected to a ticket"
 )
-@click.option("-d", "--delivery-type_list", multiple=True, type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
+@click.option(
+    "-d",
+    "--delivery-type",
+    multiple=True,
+    type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
+    required=True,
+)
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
     case_id: Optional[str],
     ticket_id: Optional[int],
-    delivery_type_list: List[str],
+    delivery_type: List[str],
     dry_run: bool,
 ):
     """Deliver analysis files to customer inbox
@@ -52,14 +58,14 @@ def deliver_analysis(
         return
 
     status_db: Store = context.status_db
-    for delivery_type in delivery_type_list:
+    for delivery in delivery_type:
         deliver_api = DeliverAPI(
             store=status_db,
             hk_api=context.housekeeper_api,
-            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
-            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],
+            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
             project_base_path=Path(inbox),
-            delivery_type=delivery_type,
+            delivery_type=delivery,
         )
         deliver_api.set_dry_run(dry_run)
         cases: List[models.Family] = []

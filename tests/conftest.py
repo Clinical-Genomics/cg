@@ -73,6 +73,12 @@ def fixture_sample_id() -> str:
     return "ADM1"
 
 
+@pytest.fixture(name="cust_sample_id")
+def fixture_cust_sample_id() -> str:
+    """Returns a customer sample id"""
+    return "child"
+
+
 @pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
     """Return a case name"""
@@ -401,6 +407,12 @@ def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     return mip_dna_store_files / "yellowhog_clinical_selected.vcf"
 
 
+@pytest.fixture(name="fastq_file")
+def fixture_fastq_file(fastq_dir: Path) -> Path:
+    """Return the path to to a fastq file"""
+    return fastq_dir / "dummy_run_R1_001.fastq.gz"
+
+
 # Orderform fixtures
 
 
@@ -611,10 +623,10 @@ def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) 
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample: str, timestamp: dt.datetime) -> dict:
+def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     return {
-        "name": sample,
+        "name": sample_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [],
