@@ -1,7 +1,6 @@
 """Tests for running the delivery command"""
 
 import logging
-import os
 from pathlib import Path
 
 from cg.cli.deliver.base import deliver_analysis
