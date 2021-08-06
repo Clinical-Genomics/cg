@@ -19,6 +19,13 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.11.1]
+
+### Changed
+- Updated bump2version action to v3
+- Removed build container action (for time being) since we never use the containers
+
+
 ## [22.11.0]
 ### Fixed
 - New families can be created without the --panel flag
