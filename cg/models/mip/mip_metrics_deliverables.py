@@ -73,7 +73,7 @@ class ParsedMetrics(BaseModel):
     duplicate_reads: float
     mapped_reads: float
     mean_insert_size: int
-    predicted_sex: Gender = Gender.UNKNOWN
+    predicted_sex: str = Gender.UNKNOWN
 
 
 class MetricsDeliverables(BaseModel):
