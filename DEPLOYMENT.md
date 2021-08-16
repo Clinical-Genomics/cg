@@ -30,18 +30,18 @@ the title if not.
 
 
 8. Deploy master to stage:
-
-    1. `us`
-    2. Request stage environment `paxa` and follow instructions
-    3. `bash update-cg-stage.sh master`
-    4. Make sure that installation was successful
+    1. Log in to appropriate server `ssh <server.scilifelab.se>`
+    2. `us`
+    3. Request stage environment `paxa` and follow instructions
+    4. `bash update-cg-stage.sh master`
+    5. Make sure that installation was successful
    
 
 9. Deploy master to production
-
-          1. `up`
-     2. `bash update-cg-prod.sh`
-     3. Make sure that installation was successful
+     1. Log in to appropriate server `ssh <server.scilifelab.se>`
+     2. `up`
+     3. `bash update-cg-prod.sh`
+     4. Make sure that installation was successful
 
 
 11. Take a screenshot or copy log text and post as a comment on the PR. Screenshot should include environment and that it succeeded.
