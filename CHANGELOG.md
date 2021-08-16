@@ -19,6 +19,13 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+
+
+## [22.11.2]
+### Changed
+* Update deployment instructions
+
+
 ## [22.11.1]
 
 ### Changed
