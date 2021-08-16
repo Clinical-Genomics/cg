@@ -12,6 +12,7 @@ from cg.cli.workflow.mip.options import (
     OPTION_PANEL_BED,
     OPTION_SKIP_EVALUATION,
     PRIORITY_OPTION,
+    START_AFTER_PROGRAM,
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -66,6 +67,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
 @click.command()
 @PRIORITY_OPTION
 @EMAIL_OPTION
+@START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @ARGUMENT_CASE_ID
 @OPTION_DRY
@@ -80,6 +82,7 @@ def run(
     mip_dry_run: bool = False,
     priority: str = None,
     skip_evaluation: bool = False,
+    start_after: str = None,
     start_with: str = None,
 ):
     """Run the analysis for a case"""
@@ -91,6 +94,7 @@ def run(
         priority=priority or analysis_api.get_priority_for_case(case_id),
         email=email or environ_email(),
         dryrun=mip_dry_run,
+        start_after=start_after, 
         start_with=start_with,
         skip_evaluation=analysis_api.get_skip_evaluation_flag(
             case_id=case_id, skip_evaluation=skip_evaluation
@@ -125,6 +129,7 @@ def run(
 @OPTION_PANEL_BED
 @OPTION_SKIP_EVALUATION
 @PRIORITY_OPTION
+@START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @click.pass_context
 def start(
@@ -136,6 +141,7 @@ def start(
     panel_bed: str,
     priority: str,
     skip_evaluation: bool,
+    start_after: str,
     start_with: str,
 ):
     """Start full MIP analysis workflow for a case"""
@@ -155,6 +161,7 @@ def start(
             case_id=case_id,
             priority=priority,
             email=email,
+            start_after=start_after,
             start_with=start_with,
             dry_run=dry_run,
             mip_dry_run=mip_dry_run,
