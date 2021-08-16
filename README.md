@@ -10,12 +10,6 @@
 
 `cg` stands for _Clinical Genomics_; a clinical sequencing platform under [SciLifeLab][scilife]
 
-This is our main package for interacting with data and samples that flow through our pipeline. We rely on a set of specialized "apps" to deal with a lot of complexity like:
-
-- [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics pipeline
-- [Housekeeper][housekeeper]: storage, retrieval, and archival of files
-- [Genotype][genotype]: managing genotypes for detecting sample mix-ups
-
 In this context, `cg` provides the interface between these tools to facilitate automation and other necessary cross-talk. It also exposes some APIs:
 
 - HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
@@ -48,12 +42,6 @@ or (without pipenv)
 
 ```
 pip install -r requirements-dev.txt --editable .
-```
-
-Files will be blacked automatically with each push to github. If you would like to automatically [Black][black] format your commits on your local machince:
-
-```
-pre-commit install
 ```
 
 
