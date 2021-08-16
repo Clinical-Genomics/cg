@@ -41,7 +41,7 @@ the title if not.
 
           1. `up`
      2. `bash update-cg-prod.sh`
-     3. make sure that installation was successful
+     3. Make sure that installation was successful
 
 
 11. Take a screenshot or copy log text and post as a comment on the PR. Screenshot should include environment and that it succeeded.
