@@ -2,7 +2,7 @@ import logging
 import yaml
 
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from pydantic import ValidationError
 
@@ -195,7 +195,7 @@ class MipAnalysisAPI(AnalysisAPI):
         full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
         return yaml.safe_load(open(full_file_path))
 
-    def get_latest_metadata(self, family_id: str) -> MipAnalysis:
+    def get_latest_metadata(self, family_id: str) -> Union[MipAnalysis, None]:
         """Get the latest trending data for a family"""
 
         mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
@@ -205,7 +205,7 @@ class MipAnalysisAPI(AnalysisAPI):
         sample_info_raw = self._get_latest_raw_file(
             family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
         )
-        mip_analysis = MipAnalysis
+        mip_analysis = None
         if mip_config_raw and qc_metrics_raw and sample_info_raw:
             try:
                 mip_analysis: MipAnalysis = parse_mip_analysis(
@@ -224,7 +224,7 @@ class MipAnalysisAPI(AnalysisAPI):
                     family_id,
                     error,
                 )
-                mip_analysis = MipAnalysis
+                mip_analysis = None
         return mip_analysis
 
     @staticmethod

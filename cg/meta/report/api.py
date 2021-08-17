@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, TextIO
+from typing import Optional, TextIO, Union
 
 import housekeeper
 import requests
@@ -218,9 +218,11 @@ class ReportAPI:
         """Get coverage data from Chanjo for a sample."""
         return self.chanjo.sample_coverage(lims_id, genes)
 
-    def _incorporate_trending_data(self, report_data: dict, case_id: str):
+    def _incorporate_trending_data(self, report_data: dict, case_id: str) -> None:
         """Incorporate trending data into a set of samples."""
-        mip_analysis: MipAnalysis = self.analysis.get_latest_metadata(family_id=case_id)
+        mip_analysis: Union[MipAnalysis, None] = self.analysis.get_latest_metadata(
+            family_id=case_id
+        )
 
         if not mip_analysis:
             return
