@@ -19,18 +19,25 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+<<<<<<< HEAD
 ## [x.x.x]
 
 ### Added
 
 - MIP command to start after a given step
 
-## [22.11.1]
+## [22.11.3]
+### Fixed
+- Show more errors from parsing orderforms 
 
+## [22.11.2]
+### Changed
+- Update deployment instructions
+
+## [22.11.1]
 ### Changed
 - Updated bump2version action to v3
 - Removed build container action (for time being) since we never use the containers
-
 
 ## [22.11.0]
 ### Fixed
@@ -39,7 +46,6 @@ __________ DO NOT TOUCH ___________
 ## [22.10.3]
 ### Changed
 - Increased flowcells ondisk cap
-
 
 ## [22.10.2]
 ### Fixed
