@@ -19,6 +19,12 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [x.x.x]
+
+### Added
+
+- MIP command to start after a given step
+
 ## [22.11.1]
 
 ### Changed
