@@ -365,7 +365,7 @@ def orderform():
             json_data = json.load(input_file.stream)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
-    except (OrderFormError, ValidationError) as error:
+    except (OrderFormError, ValidationError, AttributeError) as error:
         if hasattr(error, "message"):
             message = error.message
         else:
