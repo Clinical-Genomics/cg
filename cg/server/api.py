@@ -152,7 +152,7 @@ def family_in_customer_group(family_id):
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (
+    if not g.current_user.is_admin and (
         case_obj.customer.customer_group
         not in set(customer.customer_group for customer in g.current_user.customers)
     ):
@@ -203,7 +203,7 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
         return abort(401)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
@@ -215,7 +215,7 @@ def sample_in_customer_group(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(404)
-    elif not g.current_user.is_admin and (
+    if not g.current_user.is_admin and (
         sample_obj.customer.customer_group
         not in set(customer.customer_group for customer in g.current_user.customers)
     ):
@@ -241,7 +241,7 @@ def pool(pool_id):
     record = db.pool(pool_id)
     if record is None:
         return abort(404)
-    elif not g.current_user.is_admin and (record.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (record.customer not in g.current_user.customers):
         return abort(401)
     return jsonify(**record.to_dict())
 
