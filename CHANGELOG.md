@@ -19,6 +19,15 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.12.0]
+
+### Added
+- Add new model for qc_metrics
+- Add new model for mip_analysis
+
+### Changed
+- Use new metrics deliverables format, which is already part of qc_metrics file
+- Use new models when parsing mip analysis files
 
 ## [22.10.3]
 ### Changed
