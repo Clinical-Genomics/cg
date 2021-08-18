@@ -20,7 +20,6 @@ def test_upload_genotype(
     """Test to upload genotypes via the CLI"""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a case that is ready for upload sequence genotypes
-    analysis_api = upload_context.meta_apis["analysis_api"]
     upload_context.status_db_ = analysis_store_trio
     upload_context.housekeeper_api_ = upload_genotypes_hk_api
     case_obj = upload_context.status_db.family(case_id)
@@ -28,7 +27,9 @@ def test_upload_genotype(
 
     # WHEN uploading the genotypes
     result = cli_runner.invoke(upload_genotypes_cmd, [case_id], obj=upload_context)
+
     # THEN check that the command exits with success
     assert result.exit_code == 0
+
     # THEN assert the correct information is communicated
     assert "loading VCF genotypes for sample(s):" in caplog.text

@@ -5,8 +5,8 @@ import yaml
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
-from cg.apps.mip.parse_qcmetrics import parse_qcmetrics
 from cg.constants.tags import HkMipAnalysisTag
+from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -58,12 +58,10 @@ class UploadGenotypesAPI(object):
 
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
-        qcmetrics_data = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        qc_metrics: MetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
         return {
-            sample_id: self.get_sample_predicted_sex(
-                sample_id=sample_id, parsed_qcmetrics_data=qcmetrics_data
-            )
-            for sample_id in qcmetrics_data
+            sample_id_metric.sample_id: sample_id_metric.predicted_sex
+            for sample_id_metric in qc_metrics.sample_id_metrics
         }
 
     def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
@@ -82,18 +80,11 @@ class UploadGenotypesAPI(object):
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
-    def get_parsed_qc_metrics_data(qc_metrics: Path) -> dict:
+    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MetricsDeliverables:
         """Parse the information from a qc metrics file"""
         with qc_metrics.open() as in_stream:
             qcmetrics_raw = yaml.safe_load(in_stream)
-        return parse_qcmetrics(qcmetrics_raw)
-
-    @staticmethod
-    def get_sample_predicted_sex(sample_id: str, parsed_qcmetrics_data: dict) -> str:
-        """Get the predicted sex for a sample"""
-        if sample_id in parsed_qcmetrics_data:
-            return parsed_qcmetrics_data[sample_id].get("predicted_sex", "unknown")
-        return "unknown"
+        return MetricsDeliverables(**qcmetrics_raw)
 
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
