@@ -19,6 +19,40 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.11.3]
+### Fixed
+- Show more errors from parsing orderforms 
+
+## [22.11.2]
+### Changed
+- Update deployment instructions
+
+## [22.11.1]
+### Changed
+- Updated bump2version action to v3
+- Removed build container action (for time being) since we never use the containers
+
+## [22.11.0]
+### Fixed
+- New families can be created without the --panel flag
+
+## [22.10.3]
+### Changed
+- Increased flowcells ondisk cap
+
+## [22.10.2]
+### Fixed
+- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being off by a factor of 
+100.
+
+## [22.10.1]
+### Fixed
+- Integrate with bump2version-ci workflow
+
+## [22.10.0]
+### Fixed
+- Changed how qos for rsync is handled
+
 
 ## [22.9.4]
 ### Fixed
