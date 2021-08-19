@@ -26,6 +26,7 @@ CLI_OPTIONS = {
     "gene_list": {"option": "--vcfparser_slt_fl"},
     "max_gaussian": {"option": "--gatk_varrecal_snv_max_gau"},
     "skip_evaluation": {"option": "--qccollect_skip_evaluation"},
+    "start_after": {"option": "--start_after_recipe"},
     "start_with": {"option": "--start_with_recipe"},
 }
 
