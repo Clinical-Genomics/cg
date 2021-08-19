@@ -353,6 +353,12 @@ def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
     return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
 
 
+@pytest.fixture(name="case_qc_metrics_deliverables")
+def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
@@ -523,12 +529,6 @@ def fixture_compression_object(
 
 
 # Unknown file fixtures
-
-
-@pytest.fixture(name="case_qc_metrics")
-def fixture_case_qc_metrics(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics file with case data"""
-    return Path("tests/fixtures/apps/mip/case_qc_metrics.yaml")
 
 
 @pytest.fixture(name="bcf_file")

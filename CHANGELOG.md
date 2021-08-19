@@ -19,11 +19,37 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+s
+## [22.12.0]
+
+### Added
+- Add new model for qc_metrics
+- Add new model for mip_analysis
+
+### Changed
+- Use new metrics deliverables format, which is already part of qc_metrics file
+- Use new models when parsing mip analysis files
+
+## [22.11.3]
+### Fixed
+- Show more errors from parsing orderforms 
+
+## [22.11.2]
+### Changed
+- Update deployment instructions
+
+## [22.11.1]
+### Changed
+- Updated bump2version action to v3
+- Removed build container action (for time being) since we never use the containers
+
+## [22.11.0]
+### Fixed
+- New families can be created without the --panel flag
 
 ## [22.10.3]
 ### Changed
 - Increased flowcells ondisk cap
-
 
 ## [22.10.2]
 ### Fixed
