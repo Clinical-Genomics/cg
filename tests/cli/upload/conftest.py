@@ -53,7 +53,7 @@ def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestam
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
 def fixture_upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
+    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gt process"""
     return {
@@ -62,7 +62,7 @@ def fixture_upload_genotypes_hk_bundle(
         "expires": datetime.now(),
         "files": [
             {
-                "path": str(case_qc_metrics),
+                "path": str(case_qc_metrics_deliverables),
                 "archive": False,
                 "tags": [HkMipAnalysisTag.QC_METRICS],
             },
@@ -156,7 +156,6 @@ def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_confi
 class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
@@ -166,7 +165,6 @@ class MockScoutApi(ScoutAPI):
 class MockReportApi(ReportAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def create_delivery_report(self, *args, **kwargs):
         """docstring for create_delivery_report"""

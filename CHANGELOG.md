@@ -19,12 +19,22 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-<<<<<<< HEAD
-## [x.x.x]
+## [22.13.0]
 
 ### Added
 
 - MIP command to start after a given step
+
+## [22.12.0]
+
+### Added
+- Add new model for qc_metrics
+- Add new model for mip_analysis
+
+### Changed
+- Use new metrics deliverables format, which is already part of qc_metrics file
+- Use new models when parsing mip analysis files
+>>>>>>> bea6da8bd2de1ddde09221d4ff2bf4631e1c82f7
 
 ## [22.11.3]
 ### Fixed
