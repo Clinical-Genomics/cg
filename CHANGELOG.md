@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.17.0]
+### Added
+- Added support for multiple delivery flags for the command cg deliver analysis.
+
+
 ## [22.16.0]
 ### Added
 - Function for downloading external data from caesar
