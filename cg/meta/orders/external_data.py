@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from housekeeper.store.models import Bundle
 
@@ -128,7 +128,7 @@ class ExternalDataAPI(MetaAPI):
 
     def create_hk_bundle(
         self, bundle_name: str, dry_run: bool, data_dict: dict
-    ) -> Tuple[Bundle, Version]:
+    ) -> Optional[Tuple[Bundle, Version]]:
         if dry_run:
             LOG.info(
                 "Would have created bundle %s in housekeeper, but this is dry-run", bundle_name
