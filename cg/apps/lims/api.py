@@ -30,6 +30,8 @@ AM_METHODS = {
     "1518": "200 ng input Manual SureSelect XT Target Enrichment",
     "1079": "Manuel SureSelect XT Target Enrichment for Illumina sequencing",
     "1879": "Method - Manual Twist Target Enrichment",
+    "2182": "Manual SARS-CoV-2 library preparation using Illumina COVIDseq Test",
+    "2175": "Manual SARS-CoV-2 library preparation using Illumina DNA Prep",
     "1830": "NovaSeq 6000 Sequencing method",
 }
 METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2

@@ -19,6 +19,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.14.1]
+### Changed
+- Methods in mutant config to AM doc number
+
+
 ## [22.14.0]
 ### Changed
 
@@ -169,13 +174,14 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 - Statina upload api call to raise error when server response is not ok
 
+
 ## [22.4.0]
 ### Fixed
 - cg will no longer run rsync on the gpu nodes
 
 ## [22.3.1]
 ### Fixed
-- Fixed statina load bug where missing headers prevented data from being read
+Fixed statina load bug where missing headers prevented data from being read
 
 ## [22.3.0]
 ### Added
