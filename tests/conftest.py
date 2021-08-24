@@ -18,6 +18,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.meta.orders.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
@@ -237,6 +238,13 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
     """RsyncAPI fixture"""
     _rsync_api: RsyncAPI = RsyncAPI(config=cg_context)
     return _rsync_api
+
+
+@pytest.fixture(name="external_data_api")
+def fixture_external_data_api(cg_context: CGConfig) -> ExternalDataAPI:
+    """ExternalDataAPI fixture"""
+    _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
+    return _external_data_api
 
 
 @pytest.fixture(name="genotype_api")
@@ -1167,6 +1175,10 @@ def fixture_context_config(
             "base_path": "/another/path",
             "account": "development",
             "mail_user": "an@email.com",
+        },
+        "external": {
+            "hasta": "/path/on/hasta/%s",
+            "caesar": "server.name.se:/path/%s/on/caesar",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},

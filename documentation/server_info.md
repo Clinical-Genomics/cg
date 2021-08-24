@@ -3,7 +3,6 @@
 
 Date for below information:
 
-[0|0|436] [mans.magnusson@hasta:~] [P_main] 3s $ date
 Wed May 27 16:44:09 CEST 2020
 
 
