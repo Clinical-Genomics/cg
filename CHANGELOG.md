@@ -19,9 +19,53 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.11.0]
+## [22.16.0]
 ### Added
 - Function for downloading external data from caesar
+
+
+## [22.15.0]
+### Changed
+- Methods in mutant config to AM doc number
+
+
+## [22.14.0]
+### Changed
+
+- Removed balsamic bam and bam index files from cg deliver analysis command
+
+## [22.13.0]
+
+### Added
+
+- MIP command to start after a given step
+
+## [22.12.0]
+
+### Added
+- Add new model for qc_metrics
+- Add new model for mip_analysis
+
+### Changed
+- Use new metrics deliverables format, which is already part of qc_metrics file
+- Use new models when parsing mip analysis files
+
+## [22.11.3]
+### Fixed
+- Show more errors from parsing orderforms 
+
+## [22.11.2]
+### Changed
+- Update deployment instructions
+
+## [22.11.1]
+### Changed
+- Updated bump2version action to v3
+- Removed build container action (for time being) since we never use the containers
+
+## [22.11.0]
+### Fixed
+- New families can be created without the --panel flag
 
 ## [22.10.3]
 ### Changed

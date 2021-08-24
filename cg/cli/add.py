@@ -163,7 +163,7 @@ def sample(
 @click.option(
     "--priority", type=click.Choice(PRIORITY_OPTIONS), default="standard", help="analysis priority"
 )
-@click.option("-p", "--panel", "panels", multiple=True, required=True, help="default gene panels")
+@click.option("-p", "--panel", "panels", multiple=True, help="default gene panels")
 @click.option(
     "-a",
     "--analysis",
