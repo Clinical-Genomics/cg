@@ -18,6 +18,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.meta.orders.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
@@ -245,6 +246,13 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
     return _rsync_api
 
 
+@pytest.fixture(name="external_data_api")
+def fixture_external_data_api(cg_context: CGConfig) -> ExternalDataAPI:
+    """ExternalDataAPI fixture"""
+    _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
+    return _external_data_api
+
+
 @pytest.fixture(name="genotype_api")
 def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     """
@@ -357,6 +365,12 @@ def fixture_orderform(fixtures_dir: Path) -> Path:
 def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
     """Return path to case_qc_sample_info.yaml"""
     return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
+
+
+@pytest.fixture(name="case_qc_metrics_deliverables")
+def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
 
 
 @pytest.fixture(name="mip_dna_store_files")
@@ -535,12 +549,6 @@ def fixture_compression_object(
 
 
 # Unknown file fixtures
-
-
-@pytest.fixture(name="case_qc_metrics")
-def fixture_case_qc_metrics(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics file with case data"""
-    return Path("tests/fixtures/apps/mip/case_qc_metrics.yaml")
 
 
 @pytest.fixture(name="bcf_file")
@@ -1179,6 +1187,10 @@ def fixture_context_config(
             "base_path": "/another/path",
             "account": "development",
             "mail_user": "an@email.com",
+        },
+        "external": {
+            "hasta": "/path/on/hasta/%s",
+            "caesar": "server.name.se:/path/%s/on/caesar",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
