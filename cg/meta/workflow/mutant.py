@@ -115,6 +115,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         if dry_run:
             LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
             LOG.info(case_config_list)
+        config_path.parent.mkdir(parents=True, exist_ok=True)
         json.dump(case_config_list, open(config_path, "w"), indent=4)
         LOG.info("Saved config to %s", config_path)
 
