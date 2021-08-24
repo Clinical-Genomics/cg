@@ -19,9 +19,148 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.6.0]
+## [22.14.1]
 ### Changed
 - Methods in mutant config to AM doc number
+
+
+## [22.14.0]
+### Changed
+
+- Removed balsamic bam and bam index files from cg deliver analysis command
+
+## [22.13.0]
+
+### Added
+
+- MIP command to start after a given step
+
+## [22.12.0]
+
+### Added
+- Add new model for qc_metrics
+- Add new model for mip_analysis
+
+### Changed
+- Use new metrics deliverables format, which is already part of qc_metrics file
+- Use new models when parsing mip analysis files
+
+## [22.11.3]
+### Fixed
+- Show more errors from parsing orderforms 
+
+## [22.11.2]
+### Changed
+- Update deployment instructions
+
+## [22.11.1]
+### Changed
+- Updated bump2version action to v3
+- Removed build container action (for time being) since we never use the containers
+
+## [22.11.0]
+### Fixed
+- New families can be created without the --panel flag
+
+## [22.10.3]
+### Changed
+- Increased flowcells ondisk cap
+
+## [22.10.2]
+### Fixed
+- Fixed mean Q score added to cgstats by `cg demultiplex add <flowcell>` being off by a factor of 
+100.
+
+## [22.10.1]
+### Fixed
+- Integrate with bump2version-ci workflow
+
+## [22.10.0]
+### Fixed
+- Changed how qos for rsync is handled
+
+
+## [22.9.4]
+### Fixed
+- Cases removed from FOHM batch properly
+
+## [22.9.3]
+### Changed
+- Remove KS validation cases from upload to GISAID/FOHM
+
+
+## [22.9.2]
+### Added
+- Added UMI validation cases to skip spring compress
+
+## [22.9.1]
+### Fixed
+- Send multiple emails properly
+### Added
+- Progress bar when uploading to FOHM
+
+## [22.9.0]
+### Added
+- Samples that lack data during delivery is reported
+
+
+## [22.8.6]
+### Fixed
+- Statina load use latest file
+
+## [22.8.5]
+### Fixed
+- Sftp upload before sending email to FOHM
+
+## [22.8.4]
+### Fixed
+- Tooltips for fohm upload functions
+
+
+## [22.8.3]
+### Added
+- Data delivery export to LIMS 
+
+## [22.8.2]
+### Fixed
+- Fail graceful if Avatar url lookup fails 
+
+## [22.8.1]
+### Changed
+- Upload gisaid uses once again single fasta
+- Upload gisaid uses pandas
+- Upload gisaid uploads only qc pass files
+
+## [22.8.0]
+### Added
+- Added support for FOHM batch upload
+
+
+
+## [22.7.0]
+### Added
+- email functionality
+
+### Changed
+- gisaid upload command: gisaid cli log file will be saved in housekeeper with tag gisaid-log
+- gisaid upload command: the log file will be appended to if the upload is run again for the same case.
+- gisaid upload command: Accession numbers will be parsed from the log file 
+- gisaid upload command: The completion file which already exists in housekeeper will be updated with accession numbers
+- gisaid upload command: If files are missing or not all samples within the case were uploaded to gisiad, an email will be sent to logwatch.
+
+## [22.6.1]
+### Changed
+- Add deepvariant for input file in upload to loqusDB
+
+## [22.6.0]
+### Added
+- Added rsync processes into trailblazer
+- Added cleanup of rsync directories
+
+## [22.5.2]
+### Fixed
+- mip check if analysis is complete
+
 
 ## [22.5.1]
 ### Fixed
@@ -34,6 +173,7 @@ __________ DO NOT TOUCH ___________
 ## [22.4.1]
 ### Fixed
 - Statina upload api call to raise error when server response is not ok
+
 
 ## [22.4.0]
 ### Fixed

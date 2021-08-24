@@ -8,7 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
-MAX_FLOWCELLS_ON_DISK = 1250  # Increased by 250 when the previous limit of 1000 was reached
+MAX_FLOWCELLS_ON_DISK = 125000
 
 
 @click.group()

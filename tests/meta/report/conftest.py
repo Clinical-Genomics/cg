@@ -6,6 +6,7 @@ import pytest
 from cg.meta.report.api import ReportAPI
 from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 
 @pytest.fixture
@@ -66,27 +67,6 @@ class MockPath:
 
     def open(self):
         pass
-
-
-class MockAnalysis:
-    def panel(self, case_obj) -> [str]:
-        """Create the aggregated panel file."""
-        return [""]
-
-    def get_latest_metadata(self, family_id):
-        # Returns: dict: parsed data
-        # Define output dict
-        out_data = {
-            "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "family": "yellowhog",
-            "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
-            "genome_build": "hg19",
-            "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
-            "mip_version": "v4.0.20",
-            "sample_ids": ["2018-20203", "2018-20204"],
-        }
-
-        return out_data
 
 
 class MockLogger:
@@ -155,7 +135,7 @@ def report_api(report_store, lims_samples):
     db = MockDB(report_store)
     lims = MockLimsAPI(samples=lims_samples)
     chanjo = MockChanjo()
-    analysis = MockAnalysis()
+    analysis = MockMipAnalysis()
     scout = MockScout()
     logger = MockLogger()
     path_tool = MockPath()

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from cg.models.mip.mip_sample_info import MipBaseSampleInfo, parse_sample_info
+from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
 def test_instantiate_mip_sampleinfo(sample_info_dna_raw: dict):
@@ -16,17 +16,6 @@ def test_instantiate_mip_sampleinfo(sample_info_dna_raw: dict):
 
     # THEN assert that it was successfully created
     assert isinstance(sample_info_object, MipBaseSampleInfo)
-
-
-def test_parse_sampleinfo(sample_info_dna_raw: dict, sample_info_dna: MipBaseSampleInfo):
-    """Tests parse_sampleinfo dict"""
-    # GIVEN a dictionary with the basic config
-
-    # WHEN parsing raw mip sampleinfo data
-    sample_info_parsed = parse_sample_info(sample_info_dna_raw)
-
-    # THEN assert that it was successfully parsed
-    assert sample_info_parsed == sample_info_dna
 
 
 def test_mip_sampleinfo(case_qc_sample_info_path: Path):

@@ -153,6 +153,12 @@ class FastaSequenceMissingError(CgError):
     """
 
 
+class InvalidFastaError(CgError):
+    """
+    Exception raised when fasta file content is invalid.
+    """
+
+
 class StoreError(CgError):
     """
     Exception related to storing an analysis
@@ -189,6 +195,18 @@ class MultipleFamilyLinksError(CgError):
 
 class FamilyLinkMissingError(CgError):
     """Raised when faimly link missing for a sample"""
+
+
+class AccessionNumerMissingError(CgError):
+    """Raised when accession numers are not found in a gisaid cli log"""
+
+
+class EmailNotSentError(CgError):
+    """Raised when email not sent"""
+
+
+class GisaidUploadFailedError(CgError):
+    """Raised when gisaid upload fails"""
 
 
 class StatinaAPIHTTPError(CgError):
