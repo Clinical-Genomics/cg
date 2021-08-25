@@ -169,6 +169,11 @@ class FOHMConfig(BaseModel):
     email_host: str
 
 
+class ExternalConfig(BaseModel):
+    hasta: str
+    caesar: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -194,6 +199,7 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
+    external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
     hermes: CommonAppConfig = None

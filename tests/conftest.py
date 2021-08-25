@@ -18,6 +18,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.meta.orders.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
@@ -71,6 +72,12 @@ def fixture_case_id() -> str:
 def fixture_sample_id() -> str:
     """Returns a sample id"""
     return "ADM1"
+
+
+@pytest.fixture(name="cust_sample_id")
+def fixture_cust_sample_id() -> str:
+    """Returns a customer sample id"""
+    return "child"
 
 
 @pytest.fixture(name="family_name")
@@ -239,6 +246,13 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
     return _rsync_api
 
 
+@pytest.fixture(name="external_data_api")
+def fixture_external_data_api(cg_context: CGConfig) -> ExternalDataAPI:
+    """ExternalDataAPI fixture"""
+    _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
+    return _external_data_api
+
+
 @pytest.fixture(name="genotype_api")
 def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     """
@@ -353,6 +367,12 @@ def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
     return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
 
 
+@pytest.fixture(name="case_qc_metrics_deliverables")
+def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
@@ -399,6 +419,12 @@ def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to to a vcf file"""
     return mip_dna_store_files / "yellowhog_clinical_selected.vcf"
+
+
+@pytest.fixture(name="fastq_file")
+def fixture_fastq_file(fastq_dir: Path) -> Path:
+    """Return the path to to a fastq file"""
+    return fastq_dir / "dummy_run_R1_001.fastq.gz"
 
 
 # Orderform fixtures
@@ -525,12 +551,6 @@ def fixture_compression_object(
 # Unknown file fixtures
 
 
-@pytest.fixture(name="case_qc_metrics")
-def fixture_case_qc_metrics(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics file with case data"""
-    return Path("tests/fixtures/apps/mip/case_qc_metrics.yaml")
-
-
 @pytest.fixture(name="bcf_file")
 def fixture_bcf_file(apps_dir: Path) -> Path:
     """Return the path to a bcf file"""
@@ -611,10 +631,10 @@ def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) 
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample: str, timestamp: dt.datetime) -> dict:
+def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     return {
-        "name": sample,
+        "name": sample_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [],
@@ -1167,6 +1187,10 @@ def fixture_context_config(
             "base_path": "/another/path",
             "account": "development",
             "mail_user": "an@email.com",
+        },
+        "external": {
+            "hasta": "/path/on/hasta/%s",
+            "caesar": "server.name.se:/path/%s/on/caesar",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},

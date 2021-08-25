@@ -24,6 +24,13 @@ def fixture_deliver_vcf_path(
     return delivery_inbox / family_name / vcf_file.name.replace(case_id, family_name)
 
 
+@pytest.fixture(name="deliver_fastq_path")
+def fixture_deliver_fastq_path(
+    delivery_inbox: Path, family_name: str, case_id: str, fastq_file: Path, cust_sample_id: str
+) -> Path:
+    return delivery_inbox / cust_sample_id / "dummy_run_R1_001.fastq.gz"
+
+
 @pytest.fixture(name="base_context")
 def fixture_base_context(
     base_context: CGConfig, project_dir: Path, real_housekeeper_api: HousekeeperAPI
@@ -45,14 +52,36 @@ def fixture_mip_delivery_bundle(
     return case_hk_bundle_no_files
 
 
+@pytest.fixture(name="fastq_delivery_bundle")
+def fixture_fastq_delivery_bundle(
+    sample_hk_bundle_no_files: dict, fastq_file: Path, sample_id: str
+) -> dict:
+    """Return a sample bundle that includes a fastq file"""
+    sample_hk_bundle_no_files["name"] = sample_id
+    sample_hk_bundle_no_files["files"] = [
+        {"path": str(fastq_file), "archive": False, "tags": ["fastq", "deliver", "ADM1"]},
+    ]
+    return sample_hk_bundle_no_files
+
+
 @pytest.fixture(name="mip_dna_housekeeper")
 def fixture_mip_dna_housekeeper(
-    real_housekeeper_api: HousekeeperAPI, mip_delivery_bundle: dict, helpers: StoreHelpers
+    real_housekeeper_api: HousekeeperAPI,
+    mip_delivery_bundle: dict,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
 ) -> HousekeeperAPI:
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=mip_delivery_bundle)
+    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=fastq_delivery_bundle)
     # assert that the files exists
-    version_obj: hk_models.Version = real_housekeeper_api.last_version(mip_delivery_bundle["name"])
-    real_housekeeper_api.include(version_obj=version_obj)
+    version_obj_mip: hk_models.Version = real_housekeeper_api.last_version(
+        mip_delivery_bundle["name"]
+    )
+    version_obj_fastq: hk_models.Version = real_housekeeper_api.last_version(
+        fastq_delivery_bundle["name"]
+    )
+    real_housekeeper_api.include(version_obj=version_obj_mip)
+    real_housekeeper_api.include(version_obj=version_obj_fastq)
 
     return real_housekeeper_api
 

@@ -19,6 +19,42 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.17.0]
+### Added
+- Added support for multiple delivery flags for the command cg deliver analysis.
+
+
+## [22.16.0]
+### Added
+- Function for downloading external data from caesar
+
+
+## [22.15.0]
+### Changed
+- Methods in mutant config to AM doc number
+
+
+## [22.14.0]
+### Changed
+
+- Removed balsamic bam and bam index files from cg deliver analysis command
+
+## [22.13.0]
+
+### Added
+
+- MIP command to start after a given step
+
+## [22.12.0]
+
+### Added
+- Add new model for qc_metrics
+- Add new model for mip_analysis
+
+### Changed
+- Use new metrics deliverables format, which is already part of qc_metrics file
+- Use new models when parsing mip analysis files
+
 ## [22.11.3]
 ### Fixed
 - Show more errors from parsing orderforms 
@@ -39,6 +75,7 @@ __________ DO NOT TOUCH ___________
 ## [22.10.3]
 ### Changed
 - Increased flowcells ondisk cap
+
 
 ## [22.10.2]
 ### Fixed
