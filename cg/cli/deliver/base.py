@@ -15,6 +15,16 @@ from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
+DRY_RUN = click.option("--dry-run", is_flag=True)
+DELIVERY_TYPE = click.option(
+    "-d",
+    "--delivery-type",
+    multiple=True,
+    type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
+    required=True,
+)
+TICKET_ID_ARG = click.argument("ticket_id", type=int, required=True)
+
 
 @click.group()
 def deliver():
@@ -23,18 +33,12 @@ def deliver():
 
 
 @deliver.command(name="analysis")
+@DRY_RUN
+@DELIVERY_TYPE
 @click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
     "-t", "--ticket-id", type=int, help="Deliver the files for ALL cases connected to a ticket"
 )
-@click.option(
-    "-d",
-    "--delivery-type",
-    multiple=True,
-    type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
-    required=True,
-)
-@click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
@@ -86,8 +90,8 @@ def deliver_analysis(
 
 
 @deliver.command(name="rsync")
-@click.argument("ticket_id", type=int, required=True)
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
+@TICKET_ID_ARG
 @click.pass_obj
 def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
@@ -103,8 +107,8 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 
 
 @deliver.command(name="concatenate")
-@click.argument("ticket_id", type=int, required=True)
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
+@TICKET_ID_ARG
 @click.pass_context
 def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
     """The fastq files in the folder generated using "cg deliver analysis"
@@ -116,6 +120,8 @@ def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
 
 
 @deliver.command(name="ticket")
+@DELIVERY_TYPE
+@DRY_RUN
 @click.option(
     "-t",
     "--ticket-id",
@@ -123,13 +129,11 @@ def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
     help="Deliver and rsync the files for ALL cases connected to a ticket",
     required=True,
 )
-@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
-@click.option("--dry-run", is_flag=True)
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
     ticket_id: int,
-    delivery_type: str,
+    delivery_type: List[str],
     dry_run: bool,
 ):
     """Will first collect hard links in the customer inbox then
