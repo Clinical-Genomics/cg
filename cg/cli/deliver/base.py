@@ -154,7 +154,7 @@ def deliver_ticket(
     is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(
         ticket_id=ticket_id
     )
-    if is_concatenation_needed and delivery_type == "fastq":
+    if is_concatenation_needed and "fastq" in delivery_type:
         context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
     deliver_ticket_api.report_missing_samples(ticket_id=ticket_id, dry_run=dry_run)
     context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)
