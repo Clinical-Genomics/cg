@@ -19,6 +19,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
+## [22.18.0]
+### Changed
+- Raised sbatch memory parameter for demultiplexing
+
 ## [22.17.0]
 ### Added
 - Added support for multiple delivery flags for the command cg deliver analysis.
