@@ -201,7 +201,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
         mip_config_raw = self._get_latest_raw_file(
             family_id=family_id, tags=HkMipAnalysisTag.CONFIG
-        ) 
+        )
         qc_metrics_raw = self._get_latest_raw_file(
             family_id=family_id, tags=HkMipAnalysisTag.QC_METRICS
         )
