@@ -1,11 +1,11 @@
 """Tags for storing analyses in Housekeeper"""
 
-from cgmodels.cg.constants import StrEnum
+from typing import List
 
 HK_FASTQ_TAGS = ["fastq"]
 
 
-class HkMipAnalysisTag(StrEnum):
-    CONFIG: str = "mip-config"
-    QC_METRICS: str = "qc-metrics"
-    SAMPLE_INFO: str = "sample-info"
+class HkMipAnalysisTag:
+    CONFIG: List[str] = ["mip-config"]
+    QC_METRICS: List[str] = ["qc-metrics", "deliverables"]
+    SAMPLE_INFO: List[str] = ["sample-info"]

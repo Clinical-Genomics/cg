@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.constants.tags import HkMipAnalysisTag
-from cg.exc import CgError
+from cg.exc import CgError, TrailblazerMissingAnalysisError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
@@ -171,13 +171,13 @@ class MipAnalysisAPI(AnalysisAPI):
 
         return list(all_panels)
 
-    def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
+    def _get_latest_raw_file(self, family_id: str, tags: List[str]) -> Any:
         """Get a python object file for a tag and a family ."""
 
         last_version = self.housekeeper_api.last_version(bundle=family_id)
 
         analysis_files = self.housekeeper_api.files(
-            bundle=family_id, version=last_version.id, tags=[tag]
+            bundle=family_id, version=last_version.id, tags=tags
         ).all()
 
         if analysis_files:
@@ -199,12 +199,12 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, family_id: str) -> Union[MipAnalysis, None]:
         """Get the latest trending data for a family"""
 
-        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
+        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tags=HkMipAnalysisTag.CONFIG)
         qc_metrics_raw = self._get_latest_raw_file(
-            family_id=family_id, tag=HkMipAnalysisTag.QC_METRICS
+            family_id=family_id, tags=HkMipAnalysisTag.QC_METRICS
         )
         sample_info_raw = self._get_latest_raw_file(
-            family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
+            family_id=family_id, tags=HkMipAnalysisTag.SAMPLE_INFO
         )
         mip_analysis = None
         if mip_config_raw and qc_metrics_raw and sample_info_raw:

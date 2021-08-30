@@ -74,7 +74,7 @@ class UploadGenotypesAPI(object):
     def get_qcmetrics_file(self, hk_version_obj: housekeeper_models.Version) -> Path:
         """Fetch a qc_metrics file and return the path"""
         hk_qcmetrics = self.hk.files(
-            version=hk_version_obj.id, tags=[HkMipAnalysisTag.QC_METRICS]
+            version=hk_version_obj.id, tags=HkMipAnalysisTag.QC_METRICS
         ).first()
         LOG.debug("Found qc metrics file %s", hk_qcmetrics.full_path)
         return Path(hk_qcmetrics.full_path)

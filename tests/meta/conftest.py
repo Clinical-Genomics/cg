@@ -79,7 +79,7 @@ def fixture_mip_hk_store(
             {
                 "path": "tests/fixtures/apps/mip/case_metrics_deliverables.yaml",
                 "archive": False,
-                "tags": [HkMipAnalysisTag.QC_METRICS],
+                "tags": HkMipAnalysisTag.QC_METRICS,
             },
             {
                 "path": "tests/fixtures/apps/mip/case_file.txt",
@@ -113,7 +113,7 @@ def fixture_mip_hk_store(
             {
                 "path": "tests/fixtures/apps/mip/dna/store/empty_case_metrics_deliverables.yaml",
                 "archive": False,
-                "tags": [HkMipAnalysisTag.QC_METRICS],
+                "tags": HkMipAnalysisTag.QC_METRICS,
             },
             {
                 "path": "tests/fixtures/apps/mip/case_file.txt",
