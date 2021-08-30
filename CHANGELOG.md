@@ -19,24 +19,25 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________
 
-## [22.18.0]
+## [22.17.2]
 ### Changed
 - Raised sbatch memory parameter for demultiplexing
+
+## [22.17.1]
+### Fixed
+- Delivery type also works for one type
 
 ## [22.17.0]
 ### Added
 - Added support for multiple delivery flags for the command cg deliver analysis.
 
-
 ## [22.16.0]
 ### Added
 - Function for downloading external data from caesar
 
-
 ## [22.15.0]
 ### Changed
 - Methods in mutant config to AM doc number
-
 
 ## [22.14.0]
 ### Changed
