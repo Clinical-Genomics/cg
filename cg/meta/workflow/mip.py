@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.constants.tags import HkMipAnalysisTag
-from cg.exc import CgError, TrailblazerMissingAnalysisError
+from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
