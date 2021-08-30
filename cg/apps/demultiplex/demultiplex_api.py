@@ -226,7 +226,7 @@ class DemultiplexingAPI:
                 job_name=self.get_run_name(flowcell),
                 account=self.slurm_account,
                 number_tasks=18,
-                memory=95,
+                memory=125,
                 log_dir=log_path.parent.as_posix(),
                 email=self.mail,
                 hours=36,
