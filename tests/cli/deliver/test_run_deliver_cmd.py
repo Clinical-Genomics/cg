@@ -129,6 +129,40 @@ def test_delivery_ticket_id(
     assert delivery_inbox.exists() is True
 
 
+def test_run_deliver_multiple_delivery_flags(
+    populated_mip_context: CGConfig,
+    case_id: str,
+    delivery_inbox: Path,
+    project_dir: Path,
+    deliver_vcf_path: Path,
+    deliver_fastq_path: Path,
+    caplog,
+):
+    """Test to run the deliver command when the provided case does not exist"""
+    caplog.set_level(logging.WARNING)
+    # GIVEN a context with a case that has files and a sample with a file, in housekeeper to deliver
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # WHEN running the deliver command with multiple delivery flags
+
+    assert deliver_vcf_path.exists() is False
+    assert deliver_fastq_path.exists() is False
+
+    result = runner.invoke(
+        deliver_analysis,
+        ["--case-id", case_id, "--delivery-type", "fastq", "--delivery-type", "mip-dna"],
+        obj=populated_mip_context,
+    )
+
+    # THEN assert the command exits without problems
+    assert result.exit_code == 0
+    # THEN assert that the case file was delivered to the inbox
+    assert deliver_vcf_path.exists() is True
+    # THEN assert that the sample file was delivered to the inbox
+    assert deliver_fastq_path.exists() is True
+
+
 def test_case_file_is_delivered(
     populated_mip_context: CGConfig,
     case_id: str,

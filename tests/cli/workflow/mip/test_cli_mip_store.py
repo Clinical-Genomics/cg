@@ -135,7 +135,6 @@ def test_cli_store_available_case_is_running(
 ):
     caplog.set_level("INFO")
     mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
-
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is "running"
@@ -161,9 +160,11 @@ def test_cli_store_available_case_is_running(
     mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")
     MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
 
-    # GIVEN a finished case analysis
-    mocker.patch.object(MipDNAAnalysisAPI, "is_analysis_finished")
-    MipDNAAnalysisAPI.is_analysis_finished.return_value = True
+    # GIVEN that the case analysis is finished in trailblazer
+    mocker.patch.object(MipDNAAnalysisAPI, "get_cases_to_store")
+    MipDNAAnalysisAPI.get_cases_to_store.return_value = [
+        mip_analysis_api.status_db.family(internal_id=mip_case_id)
+    ]
 
     # WHEN running command
     result = cli_runner.invoke(store_available, [], obj=dna_mip_context)

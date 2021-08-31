@@ -26,6 +26,7 @@ class MipBaseConfig(BaseModel):
     out_dir: str = Field(..., alias="outdata_dir")
     priority: SlurmQos = Field(..., alias="slurm_quality_of_service")
     sample_info_path: str = Field(..., alias="sample_info_file")
+    sample_ids: List[str]
 
     @validator("case_id", always=True, pre=True)
     def set_case_id(cls, value, values: dict) -> str:
@@ -40,8 +41,3 @@ class MipBaseConfig(BaseModel):
             AnalysisType(sample_id=sample_id, analysis_type=analysis_type)
             for sample_id, analysis_type in raw_samples.items()
         ]
-
-
-def parse_config(data: dict) -> MipBaseConfig:
-    """Validate and parse MIP config file"""
-    return MipBaseConfig(**data)

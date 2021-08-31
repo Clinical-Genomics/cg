@@ -84,10 +84,10 @@ class MutantAnalysisAPI(AnalysisAPI):
             CG_ID_project=sample_obj.links[0].family.name,
             Customer_ID_project=sample_obj.ticket_number,
             application_tag=sample_obj.application_version.application.tag,
-            method_libprep=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="pre_processing_method"
+            method_libprep=str(self.lims_api.get_prep_method(lims_id=sample_obj.internal_id)),
+            method_sequencing=str(
+                self.lims_api.get_sequencing_method(lims_id=sample_obj.internal_id)
             ),
-            method_sequencing="novaseq",
             date_arrival=str(sample_obj.received_at),
             date_libprep=str(sample_obj.prepared_at),
             date_sequencing=str(sample_obj.sequenced_at),
@@ -115,6 +115,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         if dry_run:
             LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
             LOG.info(case_config_list)
+        config_path.parent.mkdir(parents=True, exist_ok=True)
         json.dump(case_config_list, open(config_path, "w"), indent=4)
         LOG.info("Saved config to %s", config_path)
 

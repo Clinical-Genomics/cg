@@ -1,4 +1,5 @@
 """Tests for the deliver ticket command"""
+import logging
 from pathlib import Path
 
 from cg.meta.deliver_ticket import DeliverTicketAPI
@@ -157,3 +158,79 @@ def test_check_if_concatenation_is_needed_part_deux(
 
     # THEN concatenation is needed
     assert is_concatenation_needed is True
+
+
+def test_get_all_samples_from_ticket(
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_nr
+):
+    """Test to get all samples from a ticket"""
+    # GIVEN a deliver_ticket API
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+
+    # GIVEN a case object
+    case_obj = analysis_store.family(case_id)
+
+    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
+    DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
+
+    # WHEN checking which samples there are in the ticket
+    all_samples = deliver_ticket_api.get_all_samples_from_ticket(ticket_id=ticket_nr)
+
+    # THEN concatenation is needed
+    assert "child" in all_samples
+    assert "father" in all_samples
+    assert "mother" in all_samples
+
+
+def test_all_samples_in_cust_inbox(
+    cg_context: CGConfig, mocker, caplog, ticket_nr, all_samples_in_inbox
+):
+    """Test that no samples will be reported as missing when all samples in inbox"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a deliver_ticket API
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+
+    # GIVEN a path to the customer inbox
+    mocker.patch.object(DeliverTicketAPI, "get_inbox_path")
+    DeliverTicketAPI.get_inbox_path.return_value = all_samples_in_inbox
+
+    # GIVEN a ticket with certain samples
+    mocker.patch.object(DeliverTicketAPI, "get_all_samples_from_ticket")
+    DeliverTicketAPI.get_all_samples_from_ticket.return_value = ["ACC1", "ACC2"]
+
+    # WHEN checking if a sample is missing
+    deliver_ticket_api.report_missing_samples(ticket_id=ticket_nr, dry_run=False)
+
+    # THEN assert that all files were delivered
+    assert "Data has been delivered for all samples" in caplog.text
+
+
+def test_samples_missing_in_inbox(
+    cg_context: CGConfig, mocker, caplog, ticket_nr, samples_missing_in_inbox
+):
+    """Test when samples is missing in customer inbox"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a deliver_ticket API
+    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
+
+    # GIVEN a path to the customer inbox
+    mocker.patch.object(DeliverTicketAPI, "get_inbox_path")
+    DeliverTicketAPI.get_inbox_path.return_value = samples_missing_in_inbox
+
+    # GIVEN a ticket with certain samples
+    mocker.patch.object(DeliverTicketAPI, "get_all_samples_from_ticket")
+    DeliverTicketAPI.get_all_samples_from_ticket.return_value = ["sample1", "sample2"]
+
+    # WHEN checking if a sample is missing
+    deliver_ticket_api.report_missing_samples(ticket_id=ticket_nr, dry_run=False)
+
+    # THEN assert that a sample that is not missing is not missing
+    assert "sample1" not in caplog.text
+
+    # THEN assert that the empty case folder is not considered as a sample that is missing data
+    assert "case_with_no_data" not in caplog.text
+
+    # THEN assert that a missing sample is logged as missing
+    assert "sample2" in caplog.text

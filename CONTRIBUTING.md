@@ -207,59 +207,6 @@ cg add customer cust101 "Massachusetts Institute of Technology"
 
 You can also accomplish simliar tasks through the admin interface of the REST server.
 
-#### Workflow (Analysis)
-
-The MIP pipeline is accessed through Trailblazer but `cg` provides additional conventions and hooks into the status database that makes managing analyses simpler.
-
-You can start the analysis of a single family "raredragon" by just running:
-
-```bash
-cg workflow mip-dna -c raredragon
-```
-
-This command will create the MIP config in the correct location, link and rename FASTQ files from Housekeeper, and write an aggregated gene panel file. Then it will start the pipeline. All these 4 actions can be issued individually as well:
-
-```bash
-cg workflow mip-dna [config-case|link|panel|run] raredragon
-```
-
-The final command is intended to run in a crontab and will continously check for families where all samples have been sequenced and start them automatically.
-
-```bash
-cg workflow mip-dna start
-```
-
-#### Status (cgweb)
-
-The main interface for getting an overview of data in the system is provided through the [web interface][cgweb], however, it's possible to use the same database APIs to get an idea of the status of things from the command line.
-
-To get a list of families that are waiting in the analysis queue e.g. you can run:
-
-```bash
-cg status analysis
-```
-
-To get a general overview of samples or a sample in particular:
-
-```bash
-cg status samples ADM4565A1
-ADM4565A1 (17101-1-1A) [SEQUENCED: 2017-09-02]
-```
-
-#### Store
-
-This group of commands facilitate the Housekeeper integration. For example, when an analysis finishes and you want to store important files and update the status database accordingly, you run:
-
-```bash
-cg workflow mip-dna store analysis /path/to/cases/raredragon/analysis/raredragon_config.yaml
-```
-
-... or just wait for the crontab process to pick up the analysis automatically:
-
-```bash
-cg workflow mip-dna store completed
-```
-
 #### Transfer
 
 ##### Lims
@@ -298,25 +245,6 @@ cg transfer flowcell HGF2KBCXX
 
 The command will update the _total_ read counts of each sample and check against the application for the sample if it has been fully sequenced. It will also make sure to link the related FASTQ files to Housekeeper. You can run the command over and over - only additional information will be updated.
 
-#### Upload
-
-Much like the group of analysis subcommands you can perform an upload of analysis results (stored in Housekeeper) all at once by running:
-
-```bash
-cg upload --family raredragon
-```
-
-All analyses that are marked as completed will be uploaded this way automatically:
-
-```bash
-cg upload auto
-```
-
-You can of course specify which upload you want to do yourself as well:
-
-```bash
-cg upload [coverage|genotypes|observations|scout] raredragon
-```
 
 ### Meta
 
@@ -364,27 +292,6 @@ Given an analysis record, it will fetch required files from `hk` and upload the 
 Includes: `status`, `hk`, `scoutapi`
 
 Given the analysis record it will generate a Scout config file using information from `status`. It will use the "meta/analysis" API to convert the default panels for the family to the corresponding set of panels used to run the analysis. It will fetch all related VCF files and others from `hk`. Finally it will use the config to upload the resuls to Scout. The `scoutapi` interface will figure out if there's an existing analysis that needs to be replaced.
-
-#### Analysis
-
-Includes: `status`, `tb`, `hk`, `scoutapi`, `lims`
-
-Starting an analysis requires complex interactions of many individual tools:
-
-- The config/pedigree is almost entirely generated from info in `status`
-- the only exception is the bait kit for targetted sequencing samples which is fetched using `lims`
-- the gene panel file that determines the "clinical" variants is generated from the panels assigned to the family in `status` by using `scoutapi`
-- the FASTQ files are fetched for each sample in the family from `hk` and renamed and placed in the correct location using `tb`
-- the analysis is finally started using `tb`
-
-We need to keep track of running analyses so we don't start the same family twice. This status is maintained by the "action" field in `status` which can be used to control when to start runs:
-
-- **[EMPTY]**: the empty state will trigger an automatic start of the analysis when all related samples have been sequenced AND no previous analysis of the family has occured
-- **analyze**: to re-run an analysis of a family you just need to set the field to "analyze" and it will start regardless if a previous analysis has completed
-- **running**: this state will be maintained after a successful start of a family until it has completed. If the analysis fails you need to manually make sure to restart it OR set the field to "analyze".
-- **hold**: this state will make sure that the family is excluded from any automated starts, however, it will not affect/warn when you start an analysis of the family manually
-
-You update the status via the admin interface of the server.
 
 #### Invoice
 
