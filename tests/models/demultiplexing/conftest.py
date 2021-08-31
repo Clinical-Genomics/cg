@@ -14,7 +14,7 @@ def fixture_flowcell_full_name() -> str:
 
 @pytest.fixture(name="flowcell_runs")
 def fixture_flowcell_runs(demultiplex_fixtures: Path) -> Path:
-    return demultiplex_fixtures / "flowcell_runs"
+    return demultiplex_fixtures / "flowcell-runs"
 
 
 @pytest.fixture(name="flowcell_path")

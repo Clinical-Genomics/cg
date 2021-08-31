@@ -30,10 +30,23 @@ def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     return apps_dir / "demultiplexing"
 
 
+@pytest.fixture(name="demultiplexed_runs_dir")
+def fixture_demultiplexed_runs_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flowcells ready for demultiplexing"""
+    return demultiplex_fixtures / "demultiplexed-runs"
+
+
+@pytest.fixture(name="output_dirs_bcl2fastq")
+def fixture_output_dirs_bcl2fastq(demultiplexed_runs_dir: Path) -> Path:
+    """Return the output path a dir with flowcells that have finished demultiplexing using
+    bcl2fastq"""
+    return demultiplexed_runs_dir / "bcl2fastq"
+
+
 @pytest.fixture(name="demux_run_dir")
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return demultiplex_fixtures / "flowcell_runs"
+    return demultiplex_fixtures / "flowcell-runs"
 
 
 @pytest.fixture(name="demux_run_dir_bcl2fastq")
@@ -65,13 +78,13 @@ def fixture_novaseq_dir(demux_run_dir: Path, flowcell_full_name: str) -> Path:
     return demux_run_dir / flowcell_full_name
 
 
-@pytest.fixture(name="novaseq_dir_bcl2fastq")
+@pytest.fixture(name="flowcell_dir_bcl2fastq")
 def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flowcell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return demux_run_dir_bcl2fastq / flowcell_full_name
 
 
-@pytest.fixture(name="novaseq_dir_dragen")
+@pytest.fixture(name="flowcell_dir_dragen")
 def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flowcell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return demux_run_dir_dragen / flowcell_full_name

@@ -1082,7 +1082,7 @@ def fixture_context_config(
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
+            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",

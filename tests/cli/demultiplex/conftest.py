@@ -73,7 +73,7 @@ def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path
 @pytest.fixture(name="flowcell_runs_working_directory")
 def fixture_flowcell_runs_working_directory(project_dir: Path):
     """Return the path to a working directory with flowcells ready for demux"""
-    working_dir = project_dir / "flowcell_runs"
+    working_dir = project_dir / "flowcell-runs"
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -148,15 +148,33 @@ def fixture_flowcell_working_directory(
 
 @pytest.fixture(name="flowcell_working_directory_bcl2fastq")
 def fixture_flowcell_working_directory_bcl2fastq(
-    novaseq_dir_bcl2fastq: Path, flowcell_runs_working_directory_bcl2fastq: Path
+    flowcell_dir_bcl2fastq: Path, flowcell_runs_working_directory: Path
 ) -> Path:
     """Return the path to a working directory that will be deleted after test is run
 
     This is a path to a flowcell directory with the run parameters present
     """
-    working_dir: Path = flowcell_runs_working_directory_bcl2fastq / novaseq_dir_bcl2fastq.name
+    working_dir: Path = flowcell_runs_working_directory / flowcell_dir_bcl2fastq.name
     working_dir.mkdir(parents=True)
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir_bcl2fastq)
+    existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_bcl2fastq)
+    working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
+    shutil.copy(
+        str(existing_flowcell.run_parameters_path), str(working_flowcell.run_parameters_path)
+    )
+    return working_dir
+
+
+@pytest.fixture(name="flowcell_working_directory_bcl2fastq")
+def fixture_flowcell_working_directory_bcl2fastq(
+    flowcell_dir_bcl2fastq: Path, flowcell_runs_working_directory_bcl2fastq: Path
+) -> Path:
+    """Return the path to a working directory that will be deleted after test is run
+
+    This is a path to a flowcell directory with the run parameters present
+    """
+    working_dir: Path = flowcell_runs_working_directory_bcl2fastq / flowcell_dir_bcl2fastq.name
+    working_dir.mkdir(parents=True)
+    existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_bcl2fastq)
     working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
     shutil.copy(
         str(existing_flowcell.run_parameters_path), str(working_flowcell.run_parameters_path)
@@ -166,15 +184,15 @@ def fixture_flowcell_working_directory_bcl2fastq(
 
 @pytest.fixture(name="flowcell_working_directory_dragen")
 def fixture_flowcell_working_directory_dragen(
-    novaseq_dir_dragen: Path, flowcell_runs_working_directory_dragen: Path
+    flowcell_dir_dragen: Path, flowcell_runs_working_directory_dragen: Path
 ) -> Path:
     """Return the path to a working directory that will be deleted after test is run
 
     This is a path to a flowcell directory with the run parameters present
     """
-    working_dir: Path = flowcell_runs_working_directory_dragen / novaseq_dir_dragen.name
+    working_dir: Path = flowcell_runs_working_directory_dragen / flowcell_dir_dragen.name
     working_dir.mkdir(parents=True)
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir_dragen)
+    existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_dragen)
     working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
     shutil.copy(
         str(existing_flowcell.run_parameters_path), str(working_flowcell.run_parameters_path)
