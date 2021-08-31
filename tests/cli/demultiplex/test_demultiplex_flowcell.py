@@ -75,14 +75,14 @@ def test_demultiplex_flowcell(
 
 def test_demultiplex_bcl2fastq_flowcell(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flowcell_bcl2fastq: Path,
     demultiplex_context: CGConfig,
     caplog,
     mocker,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for bcl2fastq demultiplexing
-    flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell)
+    flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell_bcl2fastq)
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
@@ -94,7 +94,7 @@ def test_demultiplex_bcl2fastq_flowcell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
-        [str(demultiplex_ready_flowcell)],
+        [str(demultiplex_ready_flowcell_bcl2fastq)],
         obj=demultiplex_context,
     )
     # THEN assert the command exits without problems
@@ -106,37 +106,37 @@ def test_demultiplex_bcl2fastq_flowcell(
     assert demux_api.demultiplex_sbatch_path(flowcell).exists()
 
 
-# def test_demultiplex_dragen_flowcell(
-#     cli_runner: testing.CliRunner,
-#     demultiplex_ready_flowcell_dragen: Path,
-#     demultiplex_context: CGConfig,
-#     caplog,
-#     mocker,
-# ):
-#     caplog.set_level(logging.INFO)
-#     # GIVEN that all files are present for dragen demultiplexing
-#     flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell_dragen, bcl_converter="dragen")
-#     # GIVEN a out dir that does not exist
-#     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-#     demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
-#     unaligned_dir: Path = demux_dir / "Unaligned"
-#     assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
-#     assert demux_dir.exists() is False
-#     assert unaligned_dir.exists() is False
-#     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-#     # WHEN starting demultiplexing from the CLI with dry run flag
-#     result: testing.Result = cli_runner.invoke(
-#         demultiplex_flowcell,
-#         [str(demultiplex_ready_flowcell_dragen), "-b", "dragen"],
-#         obj=demultiplex_context,
-#     )
-#     # THEN assert the command exits without problems
-#     assert result.exit_code == 0
-#     # THEN assert the results folder was created
-#     assert demux_dir.exists()
-#     assert unaligned_dir.exists()
-#     # THEN assert that the sbatch script was created
-#     assert demux_api.demultiplex_sbatch_path(flowcell).exists()
+def test_demultiplex_dragen_flowcell(
+    cli_runner: testing.CliRunner,
+    demultiplex_ready_flowcell_dragen: Path,
+    demultiplex_context: CGConfig,
+    caplog,
+    mocker,
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN that all files are present for dragen demultiplexing
+    flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell_dragen, bcl_converter="dragen")
+    # GIVEN a out dir that does not exist
+    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    unaligned_dir: Path = demux_dir / "Unaligned"
+    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
+    assert demux_dir.exists() is False
+    assert unaligned_dir.exists() is False
+    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
+    # WHEN starting demultiplexing from the CLI with dry run flag
+    result: testing.Result = cli_runner.invoke(
+        demultiplex_flowcell,
+        [str(demultiplex_ready_flowcell_dragen), "-b", "dragen"],
+        obj=demultiplex_context,
+    )
+    # THEN assert the command exits without problems
+    assert result.exit_code == 0
+    # THEN assert the results folder was created
+    assert demux_dir.exists()
+    assert unaligned_dir.exists()
+    # THEN assert that the sbatch script was created
+    assert demux_api.demultiplex_sbatch_path(flowcell).exists()
 
 
 def test_demultiplex_all(
