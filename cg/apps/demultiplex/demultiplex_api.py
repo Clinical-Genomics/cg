@@ -238,7 +238,7 @@ class DemultiplexingAPI:
                 hours=36,
                 job_name=self.get_run_name(flowcell),
                 log_dir=log_path.parent.as_posix(),
-                memory=95,
+                memory=125,
                 number_tasks=18,
                 priority=self.priority,
             )

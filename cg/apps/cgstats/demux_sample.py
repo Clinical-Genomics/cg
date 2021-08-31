@@ -106,9 +106,7 @@ class DemuxSample(BaseModel):
         if not conversion_stats.pass_filter_yield:
             return value
         return round(
-            conversion_stats.pass_filter_quality_score_sum
-            / conversion_stats.pass_filter_yield
-            * 100,
+            conversion_stats.pass_filter_quality_score_sum / conversion_stats.pass_filter_yield,
             2,
         )
 

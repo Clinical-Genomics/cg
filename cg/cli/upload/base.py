@@ -21,6 +21,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 from . import vogue
 from .coverage import coverage
 from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
+from .fohm import fohm
 from .genotype import genotypes
 from .gisaid import gisaid
 from .mutacc import process_solved, processed_solved
@@ -170,3 +171,4 @@ upload.add_command(delivery_report_to_scout)
 upload.add_command(vogue)
 upload.add_command(gisaid)
 upload.add_command(nipt)
+upload.add_command(fohm)
