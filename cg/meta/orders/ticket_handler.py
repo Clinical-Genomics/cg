@@ -53,7 +53,7 @@ class TicketHandler:
 
     def create_new_ticket_message(self, order: OrderIn, user_name: str, project: str) -> str:
         message = (
-            f"data:text/html;charset=utf-8, {len(order.samples)} new incoming {project} samples: "
+            f"data:text/html;charset=utf-8, New order with {len(order.samples)} {project} samples: "
         )
 
         for sample in order.samples:
