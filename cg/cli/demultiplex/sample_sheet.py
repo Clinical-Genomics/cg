@@ -25,7 +25,6 @@ LOG = logging.getLogger(__name__)
 @click.group(name="samplesheet")
 def sample_sheet_commands():
     """Command group for the sample sheet commands"""
-    pass
 
 
 @sample_sheet_commands.command(name="validate")

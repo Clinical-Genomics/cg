@@ -13,7 +13,6 @@ LOG = logging.getLogger(__name__)
 @click.group(name="finish")
 def finish_group():
     """Finish up after demultiplexing"""
-    pass
 
 
 @finish_group.command(name="all")
