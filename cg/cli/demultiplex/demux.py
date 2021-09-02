@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def demultiplex_all(
     context: CGConfig,
-    bcl_converter,
+    bcl_converter: str,
     flowcells_directory: click.Path,
     dry_run: bool,
 ):
