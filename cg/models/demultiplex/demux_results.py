@@ -191,7 +191,7 @@ class DemuxResults:
 
         Check if the project files have been renamed, in that case it will not need post processing
         """
-        return bool(len(list(self.projects)))
+        return bool(self.projects)
 
     def get_logfile_parameters(self) -> LogfileParameters:
         get_logfile_parameters = {
