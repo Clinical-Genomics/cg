@@ -140,7 +140,9 @@ def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_i
     assert file_found
 
 
-def test_include_mip_sample_subject_id(mip_config_builder: MipConfigBuilder, sample_id: str, caplog):
+def test_include_mip_sample_subject_id(
+    mip_config_builder: MipConfigBuilder, sample_id: str, caplog
+):
     # GIVEN subject_id on the sample
     caplog.set_level(level=logging.DEBUG)
 
