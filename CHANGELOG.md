@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.19.0]
+### Added
+- New field, sample_id, in clinical samples json orders for Scout 
+
 ## [22.18.0]
 ### Added
 - Display number of samples in order ticket
