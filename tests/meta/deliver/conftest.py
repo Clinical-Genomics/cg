@@ -62,3 +62,27 @@ def fixture_populated_deliver_api(
         delivery_type="balsamic",
     )
     return _deliver_api
+
+
+@pytest.fixture(name="all_samples_in_inbox")
+def fixture_all_samples_in_inbox(tmpdir_factory) -> Path:
+    """Fixture that returns a customer inbox path with all samples delivered"""
+    inbox = tmpdir_factory.mktemp("inbox")
+    Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
+    Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
+    Path(inbox, "case").mkdir(exist_ok=True, parents=True)
+    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
+    Path(inbox, "sample2", "sample_file.txt").touch(exist_ok=True)
+    Path(inbox, "case", "case_file.txt").touch(exist_ok=True)
+    return Path(inbox)
+
+
+@pytest.fixture(name="samples_missing_in_inbox")
+def fixture_samples_missing_in_inbox(tmpdir_factory) -> Path:
+    """Fixture that returns a customer inbox path with all samples delivered"""
+    inbox = tmpdir_factory.mktemp("inbox")
+    Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
+    Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
+    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
+    Path(inbox, "case_with_no_data").mkdir(exist_ok=True, parents=True)
+    return Path(inbox)

@@ -48,7 +48,7 @@ class MockLoqusAPI:
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
 def fixture_upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
+    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gt process"""
     data = {
@@ -56,7 +56,11 @@ def fixture_upload_genotypes_hk_bundle(
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(case_qc_metrics), "archive": False, "tags": [HkMipAnalysisTag.QC_METRICS]},
+            {
+                "path": str(case_qc_metrics_deliverables),
+                "archive": False,
+                "tags": [HkMipAnalysisTag.QC_METRICS],
+            },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],
     }
@@ -135,3 +139,9 @@ def analysis(analysis_store, case_id, timestamp):
     _analysis.config_path = "dummy_path"
     _analysis.completed_at = timestamp
     yield _analysis
+
+
+@pytest.fixture(name="genotype_analysis_sex")
+def fixture_genotype_analysis_sex() -> dict:
+    """Return predicted sex per sample_id"""
+    return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}

@@ -48,16 +48,16 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_files: Iterable[hk_models.File] = self.housekeeper_api.get_files(
-            bundle=case_id, tags=tags
+        hk_all_results_file: hk_models.File = self.housekeeper_api.find_file_in_latest_version(
+            case_id=case_id, tags=tags
         )
 
-        if not list(hk_all_results_files):
+        if not hk_all_results_file:
             raise HousekeeperFileMissingError(
                 f"No results files found in Housekeeper for NIPT case {case_id}."
             )
 
-        return hk_all_results_files.first().path
+        return hk_all_results_file.path
 
     def get_results_file_path(self, hk_results_file: str) -> Path:
         """Get the full path to the results file on Hasta"""

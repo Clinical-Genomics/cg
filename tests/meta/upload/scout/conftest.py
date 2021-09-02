@@ -21,36 +21,9 @@ from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
+from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 LOG = logging.getLogger(__name__)
-
-
-class MockAnalysis:
-    """Mock an analysis object"""
-
-    @staticmethod
-    def get_latest_metadata(family_id=None):
-        """Mock get_latest_metadata"""
-        # Returns: dict: parsed data
-        # Define output dict
-        out_data = {
-            "analysis_sex": {"ADM1": "female", "ADM2": "female", "ADM3": "female"},
-            "case": family_id or "yellowhog",
-            "duplicates": {"ADM1": 13.525, "ADM2": 12.525, "ADM3": 14.525},
-            "genome_build": "hg19",
-            "rank_model_version": "1.18",
-            "mapped_reads": {"ADM1": 98.8, "ADM2": 99.8, "ADM3": 97.8},
-            "mip_version": "v4.0.20",
-            "sample_ids": ["2018-20203", "2018-20204"],
-            "sv_rank_model_version": "1.08",
-        }
-        return out_data
-
-    @staticmethod
-    def convert_panels(customer_id, panels):
-        """Mock convert_panels"""
-        _ = customer_id, panels
-        return ""
 
 
 @pytest.fixture(name="lims_family")
@@ -241,7 +214,7 @@ def fixture_mip_config_builder(
     mip_analysis_hk_version: hk_models.Version,
     mip_analysis_obj: models.Analysis,
     lims_api: MockLimsAPI,
-    mip_analysis_api: MockAnalysis,
+    mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
 ) -> MipConfigBuilder:
     return MipConfigBuilder(
@@ -285,8 +258,8 @@ def fixture_lims_api(lims_samples: List[dict]) -> MockLimsAPI:
 
 
 @pytest.fixture(name="mip_analysis_api")
-def fixture_mip_analysis_api() -> MockAnalysis:
-    return MockAnalysis()
+def fixture_mip_analysis_api() -> MockMipAnalysis:
+    return MockMipAnalysis()
 
 
 @pytest.fixture(name="upload_scout_api")
@@ -297,7 +270,7 @@ def fixture_upload_scout_api(
     housekeeper_api: MockHousekeeperAPI,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
-    analysis_mock = MockAnalysis()
+    analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
     return UploadScoutAPI(
@@ -317,7 +290,7 @@ def fixture_upload_mip_analysis_scout_api(
     mip_analysis_hk_api: MockHousekeeperAPI,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
-    analysis_mock = MockAnalysis()
+    analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(
@@ -339,7 +312,7 @@ def fixture_upload_balsamic_analysis_scout_api(
     balsamic_analysis_hk_api: MockHousekeeperAPI,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
-    analysis_mock = MockAnalysis()
+    analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(

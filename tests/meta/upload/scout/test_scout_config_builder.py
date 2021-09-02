@@ -15,16 +15,15 @@ from cg.store import models
 from housekeeper.store import models as hk_models
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.mip_analysis_mock import MockMipAnalysis
 from tests.store_helpers import StoreHelpers
-
-from .conftest import MockAnalysis
 
 
 def test_mip_config_builder(
     hk_version_obj: hk_models.Version,
     mip_analysis_obj: models.Analysis,
     lims_api: MockLimsAPI,
-    mip_analysis_api: MockAnalysis,
+    mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
 ):
     # GIVEN a mip file handler
