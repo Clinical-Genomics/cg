@@ -532,14 +532,14 @@ class Sample(Model, PriorityMixin):
         """Get the current sample state."""
         if self.delivered_at:
             return f"Delivered {self.delivered_at.date()}"
-        elif self.sequenced_at:
+        if self.sequenced_at:
             return f"Sequenced {self.sequenced_at.date()}"
-        elif self.sequence_start:
+        if self.sequence_start:
             return f"Sequencing {self.sequence_start.date()}"
-        elif self.received_at:
+        if self.received_at:
             return f"Received {self.received_at.date()}"
-        else:
-            return f"Ordered {self.ordered_at.date()}"
+
+        return f"Ordered {self.ordered_at.date()}"
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
