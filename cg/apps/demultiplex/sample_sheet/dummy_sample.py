@@ -1,5 +1,9 @@
 """Functions that deals with dummy samples"""
-from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.apps.lims.samplesheet import (
+    LimsFlowcellSample,
+    LimsFlowcellSampleBcl2Fastq,
+    LimsFlowcellSampleDragen,
+)
 
 
 def dummy_sample_name(sample_name: str) -> str:
@@ -10,9 +14,15 @@ def dummy_sample_name(sample_name: str) -> str:
     return sample_name.replace(" ", "-").replace("(", "-").replace(")", "-")
 
 
-def dummy_sample(flowcell: str, dummy_index: str, lane: int, name: str) -> LimsFlowcellSample:
+def dummy_sample(
+    flowcell: str, dummy_index: str, lane: int, name: str, bcl_converter: str
+) -> LimsFlowcellSample:
     """Constructs and returns a dummy sample in novaseq sample sheet format"""
-    return LimsFlowcellSample(
+    lims_flowcell_sample = {
+        "bcl2fastq": LimsFlowcellSampleBcl2Fastq,
+        "dragen": LimsFlowcellSampleDragen,
+    }
+    return lims_flowcell_sample[bcl_converter](
         flowcell_id=flowcell,
         lane=lane,
         sample_id=dummy_sample_name(sample_name=name),

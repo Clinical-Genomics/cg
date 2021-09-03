@@ -35,8 +35,6 @@ class DemuxPostProcessingAPI:
         LOG.info("Renaming files for flowcell %s", demux_results.flowcell.flowcell_full_name)
         flowcell_id: str = demux_results.flowcell.flowcell_id
         for project_dir in demux_results.raw_projects:
-            if "index" in project_dir.name:
-                continue
             files.rename_project_directory(
                 project_directory=project_dir, flowcell_id=flowcell_id, dry_run=self.dry_run
             )
@@ -161,25 +159,30 @@ class DemuxPostProcessingAPI:
             self.rename_files(demux_results=demux_results)
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)
-        self.create_barcode_summary_report(demux_results=demux_results)
+        if demux_results.bcl_converter == "bcl2fastq":
+            self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
         self.create_copy_complete_file(demux_results=demux_results)
 
-    def finish_flowcell(self, flowcell_name: str, force: bool = False) -> None:
+    def finish_flowcell(self, flowcell_name: str, bcl_converter: str, force: bool = False) -> None:
         """Go through the post processing steps for a flowcell
 
         Force is used to finish a flowcell even if the files are renamed already
         """
         LOG.info("Check demuxed flowcell %s", flowcell_name)
         try:
-            flowcell: Flowcell = Flowcell(flowcell_path=self.demux_api.run_dir / flowcell_name)
+            flowcell: Flowcell = Flowcell(
+                flowcell_path=self.demux_api.run_dir / flowcell_name, bcl_converter=bcl_converter
+            )
         except FlowcellError:
             return
         if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
             LOG.warning("Demultiplex is not ready for %s", flowcell_name)
             return
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=self.demux_api.out_dir / flowcell_name, flowcell=flowcell
+            demux_dir=self.demux_api.out_dir / flowcell_name,
+            flowcell=flowcell,
+            bcl_converter=bcl_converter,
         )
         if not demux_results.results_dir.exists():
             LOG.warning("Could not find results directory %s", demux_results.results_dir)
@@ -192,10 +195,10 @@ class DemuxPostProcessingAPI:
             LOG.info("Post processing flowcell anyway")
         self.post_process_flowcell(demux_results=demux_results)
 
-    def finish_all_flowcells(self) -> None:
+    def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flowcells and post process those that need it"""
         demuxed_flowcells_dir: Path = self.demux_api.out_dir
         for flowcell_dir in demuxed_flowcells_dir.iterdir():
             if not flowcell_dir.is_dir():
                 continue
-            self.finish_flowcell(flowcell_name=flowcell_dir.name)
+            self.finish_flowcell(flowcell_name=flowcell_dir.name, bcl_converter=bcl_converter)
