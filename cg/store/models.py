@@ -15,7 +15,6 @@ from cg.constants import (
     DataDelivery,
     Pipeline,
 )
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
