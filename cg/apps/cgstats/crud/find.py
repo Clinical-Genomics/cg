@@ -2,10 +2,11 @@ import logging
 from typing import List, Optional
 
 import alchy
-from cg.apps.cgstats.db import models
-from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.cgstats.stats_sample import StatsSample
 from sqlalchemy import or_
+
+from cg.apps.cgstats.db import models
+from cg.models.cgstats.stats_sample import StatsSample
+from cg.models.demultiplex.demux_results import DemuxResults
 
 LOG = logging.getLogger(__name__)
 SAMPLE_PATTERN = "{}\_%"
@@ -26,9 +27,13 @@ def get_support_parameters_id(demux_results: DemuxResults) -> Optional[int]:
 
 def get_datasource_id(demux_results: DemuxResults) -> Optional[int]:
     """Fetch the datasource id for a certain run"""
-    LOG.debug("Search for datasource with file %s", demux_results.conversion_stats_path)
+    stats_path = {
+        "bcl2fastq": demux_results.conversion_stats_path,
+        "dragen": demux_results.demux_stats_path,
+    }
+    LOG.debug("Search for datasource with file %s", stats_path[demux_results.bcl_converter])
     datasource_id: Optional[int] = models.Datasource.exists(
-        str(demux_results.conversion_stats_path)
+        str(stats_path[demux_results.bcl_converter])
     )
     if datasource_id:
         LOG.debug("Found datasource with id %s", datasource_id)

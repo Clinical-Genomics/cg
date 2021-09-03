@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
@@ -13,7 +14,7 @@ def fixture_flowcell_full_name() -> str:
 
 @pytest.fixture(name="flowcell_runs")
 def fixture_flowcell_runs(demultiplex_fixtures: Path) -> Path:
-    return demultiplex_fixtures / "flowcell_runs"
+    return demultiplex_fixtures / "flowcell-runs"
 
 
 @pytest.fixture(name="flowcell_path")
@@ -36,6 +37,19 @@ def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flowcell_full_name:
     return demultiplexed_runs / flowcell_full_name
 
 
-@pytest.fixture(name="demux_results")
-def fixture_demux_results(demultiplexed_flowcell: Path, flowcell_object: Flowcell) -> DemuxResults:
-    return DemuxResults(demux_dir=demultiplexed_flowcell, flowcell=flowcell_object)
+@pytest.fixture(name="bcl2fastq_demux_results")
+def fixture_bcl2fastq_demux_results(
+    demultiplexed_flowcell: Path, flowcell_object: Flowcell
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=demultiplexed_flowcell, flowcell=flowcell_object, bcl_converter="bcl2fastq"
+    )
+
+
+@pytest.fixture(name="dragen_demux_results")
+def fixture_dragen_demux_results(
+    demultiplexed_flowcell: Path, flowcell_object: Flowcell
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=demultiplexed_flowcell, flowcell=flowcell_object, bcl_converter="dragen"
+    )

@@ -31,9 +31,13 @@ def test_get_dummy_sample_name():
 def test_get_dummy_sample(flowcell_name: str, index_obj: Index):
     # GIVEN some dummy sample data
 
-    # WHEN creating the dummy sample
+    # WHEN creating the dummy sample for a bcl2fastq samplesheet
     dummy_sample_obj: LimsFlowcellSample = dummy_sample.dummy_sample(
-        flowcell=flowcell_name, dummy_index=index_obj.sequence, lane=1, name=index_obj.name
+        flowcell=flowcell_name,
+        dummy_index=index_obj.sequence,
+        lane=1,
+        name=index_obj.name,
+        bcl_converter="bcl2fastq",
     )
 
     # THEN assert the sample id was correct

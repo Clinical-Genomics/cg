@@ -1,5 +1,9 @@
 import logging
+import sys
 from pathlib import Path
+
+from cg.constants.demultiplexing import FASTQ_FILE_SUFFIXES
+from cg.constants.symbols import UNDERSCORE
 
 LOG = logging.getLogger(__name__)
 
@@ -26,6 +30,14 @@ def rename_project_directory(
 ) -> None:
     """Rename a project directory by adding the prefix Project_"""
     unaligned_directory: Path = project_directory.parent
+    LOG.info("Check for Dragen fastq files in project directories.")
+    if dragen_fastq_files_in_project_directory(project_directory):
+        LOG.debug("Only Dragen fastq files found!")
+        move_dragen_fastq_files(project_directory=project_directory, dry_run=dry_run)
+        if dry_run:
+            LOG.info("Can't continue dry run...")
+            sys.exit()
+
     LOG.debug("Rename all sample directories in %s", unaligned_directory)
     for sample_dir in project_directory.iterdir():
         if sample_dir.name.startswith("Sample"):
@@ -40,6 +52,25 @@ def rename_project_directory(
     if not dry_run:
         LOG.debug("Rename project dir to %s", new_project_path)
         project_directory.rename(new_project_path)
+
+
+def move_dragen_fastq_files(project_directory: Path, dry_run: bool = False) -> None:
+    """Move Dragen fastq files into sample directories"""
+
+    for dragen_fastq_file in project_directory.iterdir():
+        LOG.debug(
+            "Derive sample name from fastq file %s: %s",
+            dragen_fastq_file,
+            get_dragen_sample_name(dragen_fastq_file),
+        )
+        dragen_sample_name: str = get_dragen_sample_name(dragen_fastq_file)
+        LOG.debug("Create sample directory %s:", project_directory / dragen_sample_name)
+        if not dry_run:
+            (project_directory / dragen_sample_name).mkdir(exist_ok=True)
+        target_directory: Path = project_directory / dragen_sample_name / dragen_fastq_file.name
+        LOG.debug("Move fastq file into sample directory: %s", target_directory)
+        if not dry_run:
+            dragen_fastq_file.rename(target_directory)
 
 
 def rename_sample_directory(
@@ -69,3 +100,13 @@ def rename_fastq_file(fastq_file: Path, flowcell_id: str, dry_run: bool = False)
     if not dry_run:
         fastq_file.rename(new_file)
         LOG.debug("Renamed fastq file to %s", new_file)
+
+
+def dragen_fastq_files_in_project_directory(project_directory: Path) -> bool:
+    """Checks if the project directory contains Dragen fastq files instead of sample directories"""
+    return all(file_.suffixes == FASTQ_FILE_SUFFIXES for file_ in project_directory.iterdir())
+
+
+def get_dragen_sample_name(dragen_fastq_file: Path) -> str:
+    """Derives the sample name from a dragen fastq file"""
+    return dragen_fastq_file.name.split(UNDERSCORE)[0]
