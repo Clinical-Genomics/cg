@@ -449,12 +449,6 @@ def rml_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def OLD_mip_json_orderform(orderforms: Path) -> dict:
-    """Load an example old generation json scout order."""
-    return json.load(open(orderforms / "OLD-mip-json.json"))
-
-
-@pytest.fixture
 def mip_json_orderform(orderforms: Path) -> dict:
     """Load an example of json scout order."""
     return json.load(open(orderforms / "mip-json.json"))
