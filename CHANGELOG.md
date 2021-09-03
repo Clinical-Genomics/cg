@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________ -->
 
 ## [22.19.1]
-### Added
+### Fixed
 - Fix changelog
 
 ## [22.19.0]
