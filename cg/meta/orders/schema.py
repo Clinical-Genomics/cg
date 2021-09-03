@@ -3,7 +3,6 @@ from collections import Iterable
 from pyschemes import Scheme, validators
 
 from cg.constants import (
-    CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
     PRIORITY_OPTIONS,
     SEX_OPTIONS,
