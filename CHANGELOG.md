@@ -17,6 +17,13 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+## [22.19.1]
+### Fixed
+- demultiplexed runs project checks
+
+## [22.19.0]
+### Added
+- Novaseq Dragen Demultiplexing
 
 ## [22.18.0]
 ### Added
