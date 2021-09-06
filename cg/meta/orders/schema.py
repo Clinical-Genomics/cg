@@ -227,15 +227,14 @@ EXTERNAL_SAMPLE = {
     "source": OptionalNone(TypeValidatorNone(str)),
     # "Required if data analysis in Scout"
     "panels": ListValidator(str, min_items=0),
-    # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
     "status": OptionalNone(validators.Any(STATUS_OPTIONS)),
+
     # "Required if samples are part of trio/family"
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-    # todo: find out if "Other relations" is removed in current OF
+
     # "Not Required"
     "tumour": OptionalNone(bool, False),
-    # todo: find out if "Gel picture" is "lost in translation", implement in OP or remove from OF
     "extraction_method": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
@@ -249,8 +248,7 @@ FASTQ_SAMPLE = {
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-    # todo: implement in OP or remove from OF
-    # 'family_name': RegexValidator(NAME_PATTERN),
+
     "volume": str,
     "source": str,
     "tumour": bool,
