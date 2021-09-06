@@ -154,16 +154,22 @@ def create_dragen_unaligned(
 
 def _calculate_perfect_indexreads_pct(demux_sample: DragenDemuxSample) -> float:
     """calculates the percentage of perfect index reads"""
-    return round(demux_sample.perfect_reads / demux_sample.reads * 100, 2) if demux_sample.reads else 0
+    return (
+        round(demux_sample.perfect_reads / demux_sample.reads * 100, 2) if demux_sample.reads else 0
+    )
 
 
 def _calculate_q30_bases_pct(demux_sample: DragenDemuxSample) -> float:
     """calculates the percentage of bases with a sequencing quality score of 30 or over"""
-    return round(
-        demux_sample.pass_filter_q30
-        / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
-        * 100,
-        2,
+    return (
+        round(
+            demux_sample.pass_filter_q30
+            / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
+            * 100,
+            2,
+        )
+        if demux_sample.r1_sample_bases + demux_sample.r2_sample_bases
+        else 0
     )
 
 
@@ -206,10 +212,7 @@ def _create_samples(
     if not sample_id:
         project_id: int = project_name_to_id[sample.project]
         sample_object: stats_models.Sample = create_sample(
-            manager=manager,
-            sample_id=sample.sample_id,
-            barcode=barcode,
-            project_id=project_id,
+            manager=manager, sample_id=sample.sample_id, barcode=barcode, project_id=project_id,
         )
         sample_id: int = sample_object.sample_id
     return sample_id
@@ -226,8 +229,7 @@ def _create_dragen_samples(
     tables in cgstats for samples demultiplexed with Dragen"""
 
     demux_samples: Dict[int, dict] = get_dragen_demux_samples(
-        demux_results=demux_results,
-        sample_sheet=sample_sheet,
+        demux_results=demux_results, sample_sheet=sample_sheet,
     )
 
     sample: NovaSeqSample
@@ -283,10 +285,7 @@ def _create_bcl2fastq_samples(
         if not unaligned_id:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
             create_unaligned(
-                manager=manager,
-                demux_sample=demux_sample,
-                sample_id=sample_id,
-                demux_id=demux_id,
+                manager=manager, demux_sample=demux_sample, sample_id=sample_id, demux_id=demux_id,
             )
 
 
