@@ -228,11 +228,9 @@ EXTERNAL_SAMPLE = {
     # "Required if data analysis in Scout"
     "panels": ListValidator(str, min_items=0),
     "status": OptionalNone(validators.Any(STATUS_OPTIONS)),
-
     # "Required if samples are part of trio/family"
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-
     # "Not Required"
     "tumour": OptionalNone(bool, False),
     "extraction_method": OptionalNone(TypeValidatorNone(str)),
@@ -248,7 +246,6 @@ FASTQ_SAMPLE = {
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-
     "volume": str,
     "source": str,
     "tumour": bool,
