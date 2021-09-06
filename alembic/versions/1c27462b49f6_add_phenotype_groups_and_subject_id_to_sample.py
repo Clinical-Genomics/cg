@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     op.alter_column("family", "_synopsis", new_column_name="synopsis", existing_type=sa.Text())
-    op.add_column("sample", sa.Column("_phenotype_groups", sa.DateTime(), nullable=True))
+    op.add_column("sample", sa.Column("_phenotype_groups", sa.Text(), nullable=True))
     op.add_column("sample", sa.Column("subject_id", sa.String(length=128), nullable=True))
 
 
