@@ -154,7 +154,7 @@ def create_dragen_unaligned(
 
 def _calculate_perfect_indexreads_pct(demux_sample: DragenDemuxSample) -> float:
     """calculates the percentage of perfect index reads"""
-    return round(demux_sample.perfect_reads / demux_sample.reads * 100, 2)
+    return round(demux_sample.perfect_reads / demux_sample.reads * 100, 2) if demux_sample.reads else 0
 
 
 def _calculate_q30_bases_pct(demux_sample: DragenDemuxSample) -> float:
