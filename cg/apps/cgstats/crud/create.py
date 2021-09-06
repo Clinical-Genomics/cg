@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Iterable, Optional, Union
 
 import sqlalchemy
+from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models as stats_models
@@ -11,7 +12,6 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
-from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
 LOG = logging.getLogger(__name__)
 
@@ -154,16 +154,22 @@ def create_dragen_unaligned(
 
 def _calculate_perfect_indexreads_pct(demux_sample: DragenDemuxSample) -> float:
     """calculates the percentage of perfect index reads"""
-    return round(demux_sample.perfect_reads / demux_sample.reads * 100, 2)
+    return (
+        round(demux_sample.perfect_reads / demux_sample.reads * 100, 2) if demux_sample.reads else 0
+    )
 
 
 def _calculate_q30_bases_pct(demux_sample: DragenDemuxSample) -> float:
     """calculates the percentage of bases with a sequencing quality score of 30 or over"""
-    return round(
-        demux_sample.pass_filter_q30
-        / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
-        * 100,
-        2,
+    return (
+        round(
+            demux_sample.pass_filter_q30
+            / (demux_sample.r1_sample_bases + demux_sample.r2_sample_bases)
+            * 100,
+            2,
+        )
+        if demux_sample.r1_sample_bases + demux_sample.r2_sample_bases
+        else 0
     )
 
 
