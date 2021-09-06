@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Iterable, Optional, Union
 
 import sqlalchemy
+from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models as stats_models
@@ -11,7 +12,6 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
-from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
 LOG = logging.getLogger(__name__)
 
@@ -212,7 +212,10 @@ def _create_samples(
     if not sample_id:
         project_id: int = project_name_to_id[sample.project]
         sample_object: stats_models.Sample = create_sample(
-            manager=manager, sample_id=sample.sample_id, barcode=barcode, project_id=project_id,
+            manager=manager,
+            sample_id=sample.sample_id,
+            barcode=barcode,
+            project_id=project_id,
         )
         sample_id: int = sample_object.sample_id
     return sample_id
@@ -229,7 +232,8 @@ def _create_dragen_samples(
     tables in cgstats for samples demultiplexed with Dragen"""
 
     demux_samples: Dict[int, dict] = get_dragen_demux_samples(
-        demux_results=demux_results, sample_sheet=sample_sheet,
+        demux_results=demux_results,
+        sample_sheet=sample_sheet,
     )
 
     sample: NovaSeqSample
@@ -285,7 +289,10 @@ def _create_bcl2fastq_samples(
         if not unaligned_id:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
             create_unaligned(
-                manager=manager, demux_sample=demux_sample, sample_id=sample_id, demux_id=demux_id,
+                manager=manager,
+                demux_sample=demux_sample,
+                sample_id=sample_id,
+                demux_id=demux_id,
             )
 
 
