@@ -4,15 +4,16 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
+from typing_extensions import Literal
+
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.priority import SlurmQos
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
-from cg.models.slurm.sbatch import Sbatch
+from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class DemultiplexingAPI:
         error_parameters: SbatchError = SbatchError(
             flowcell_name=flowcell.flowcell_id,
             email=email,
-            logfile=DemultiplexingAPI.get_logfile(flowcell=flowcell).as_posix(),
+            logfile=DemultiplexingAPI.get_stderr_logfile(flowcell=flowcell).as_posix(),
             demux_dir=demux_dir.as_posix(),
             demux_started=flowcell.demultiplexing_started_path.as_posix(),
         )
@@ -67,6 +68,7 @@ class DemultiplexingAPI:
         unaligned_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
+        flowcell: Flowcell,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
         LOG.info("Creating the sbatch command string")
@@ -78,7 +80,7 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND.format(**command_parameters.dict())
+        return DEMULTIPLEX_COMMAND[flowcell.bcl_converter].format(**command_parameters.dict())
 
     @staticmethod
     def demultiplex_sbatch_path(flowcell: Flowcell) -> Path:
@@ -91,9 +93,14 @@ class DemultiplexingAPI:
         return f"{flowcell.flowcell_id}_demultiplex"
 
     @staticmethod
-    def get_logfile(flowcell: Flowcell) -> Path:
+    def get_stderr_logfile(flowcell: Flowcell) -> Path:
         """Create the path to the logfile"""
         return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stderr"
+
+    @staticmethod
+    def get_stdout_logfile(flowcell: Flowcell) -> Path:
+        """Create the path to the logfile"""
+        return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stdout"
 
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
@@ -110,7 +117,7 @@ class DemultiplexingAPI:
     def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
         LOG.info("Check if demultiplexing is ready for %s", flowcell.path)
-        logfile: Path = self.get_logfile(flowcell)
+        logfile: Path = self.get_stderr_logfile(flowcell)
         if not logfile.exists():
             LOG.warning("Could not find logfile!")
             return False
@@ -209,7 +216,7 @@ class DemultiplexingAPI:
             LOG.info("Creating demux dir %s", unaligned_dir)
             unaligned_dir.mkdir(exist_ok=False, parents=True)
 
-        log_path: Path = self.get_logfile(flowcell=flowcell)
+        log_path: Path = self.get_stderr_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
             flowcell=flowcell, email=self.mail, demux_dir=demux_dir
         )
@@ -218,22 +225,37 @@ class DemultiplexingAPI:
             unaligned_dir=unaligned_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
+            flowcell=flowcell,
             environment=self.environment,
         )
 
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(
-            sbatch_parameters=Sbatch(
-                job_name=self.get_run_name(flowcell),
+        if flowcell.bcl_converter == "bcl2fastq":
+            sbatch_parameters = Sbatch(
                 account=self.slurm_account,
-                number_tasks=18,
-                memory=95,
-                log_dir=log_path.parent.as_posix(),
-                email=self.mail,
-                hours=36,
-                priority=self.priority,
                 commands=commands,
+                email=self.mail,
                 error=error_function,
+                hours=36,
+                job_name=self.get_run_name(flowcell),
+                log_dir=log_path.parent.as_posix(),
+                memory=125,
+                number_tasks=18,
+                priority=self.priority,
             )
+        if flowcell.bcl_converter == "dragen":
+            sbatch_parameters = SbatchDragen(
+                account=self.slurm_account,
+                commands=commands,
+                email=self.mail,
+                error=error_function,
+                hours=36,
+                job_name=self.get_run_name(flowcell),
+                log_dir=log_path.parent.as_posix(),
+                priority=self.priority,
+            )
+
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(
+            sbatch_parameters=sbatch_parameters
         )
         sbatch_path: Path = self.demultiplex_sbatch_path(flowcell=flowcell)
         sbatch_number: int = self.slurm_api.submit_sbatch(

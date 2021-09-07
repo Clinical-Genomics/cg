@@ -1159,7 +1159,7 @@ def fixture_context_config(
             "sender_password": "",
         },
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
+            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",

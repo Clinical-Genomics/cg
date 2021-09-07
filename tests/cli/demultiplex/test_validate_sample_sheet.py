@@ -1,8 +1,9 @@
 from pathlib import Path
 
+from click.testing import CliRunner, Result
+
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
-from click.testing import CliRunner, Result
 
 
 def test_validate_non_existing_sample_sheet(cli_runner: CliRunner, sample_sheet_context: dict):
@@ -40,18 +41,38 @@ def test_validate_sample_sheet_wrong_file_type(
     assert "seems to be in wrong format" in caplog.text
 
 
-def test_validate_correct_sample_sheet(
-    cli_runner: CliRunner, sample_sheet_context: dict, novaseq_sample_sheet_path: Path
+def test_validate_correct_bcl2fastq_sample_sheet(
+    cli_runner: CliRunner, sample_sheet_context: dict, novaseq_bcl2fastq_sample_sheet_path: Path
 ):
-    # GIVEN the path to a sample sheet that exists
-    sample_sheet: Path = novaseq_sample_sheet_path
+    # GIVEN the path to a bcl2fastq sample sheet that exists
+    sample_sheet: Path = novaseq_bcl2fastq_sample_sheet_path
+    bcl_converter = "bcl2fastq"
     assert sample_sheet.exists()
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(infile=sample_sheet, sheet_type="S2")
+    get_sample_sheet_from_file(infile=sample_sheet, sheet_type="S2", bcl_converter=bcl_converter)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
         validate_sample_sheet, [str(sample_sheet)], obj=sample_sheet_context
+    )
+
+    # THEN assert that it exits without any problems
+    assert result.exit_code == 0
+
+
+def test_validate_correct_dragen_sample_sheet(
+    cli_runner: CliRunner, sample_sheet_context: dict, novaseq_dragen_sample_sheet_path: Path
+):
+    # GIVEN the path to a bcl2fastq sample sheet that exists
+    sample_sheet: Path = novaseq_dragen_sample_sheet_path
+    bcl_converter = "dragen"
+    assert sample_sheet.exists()
+    # GIVEN that the sample sheet is correct
+    get_sample_sheet_from_file(infile=sample_sheet, sheet_type="S2", bcl_converter=bcl_converter)
+
+    # WHEN validating the sample sheet
+    result: Result = cli_runner.invoke(
+        validate_sample_sheet, [str(sample_sheet), "-b", "dragen"], obj=sample_sheet_context
     )
 
     # THEN assert that it exits without any problems

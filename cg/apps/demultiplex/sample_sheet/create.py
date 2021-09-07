@@ -10,7 +10,9 @@ from cg.store.models import Flowcell
 LOG = logging.getLogger(__name__)
 
 
-def create_sample_sheet(flowcell: Flowcell, lims_samples: List[LimsFlowcellSample]) -> str:
+def create_sample_sheet(
+    flowcell: Flowcell, lims_samples: List[LimsFlowcellSample], bcl_converter: str
+) -> str:
     """Create a sample sheet for a flowcell"""
     if flowcell.sample_sheet_path.exists():
         message = f"Sample sheet {flowcell.sample_sheet_path} already exists!"
@@ -28,5 +30,6 @@ def create_sample_sheet(flowcell: Flowcell, lims_samples: List[LimsFlowcellSampl
         flowcell_id=flowcell.flowcell_id,
         lims_samples=lims_samples,
         run_parameters=run_parameters,
+        bcl_converter=bcl_converter,
     )
     return sample_sheet_creator.construct_sample_sheet()
