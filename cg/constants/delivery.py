@@ -143,9 +143,13 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "case_tags": MIP_RNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_RNA_ANALYSIS_SAMPLE_TAGS,
     },
-    "microsalt": {
+    "microsalt-qc": {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
+    },
+    "microsalt": {
+        "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
+        "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
     "fastq": {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,

@@ -17,6 +17,10 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+## [22.19.3]
+### Changed
+- microsalt option for cg deliver analysis is now the same as fastq. Old microsalt option is now microsalt-qc 
+
 ## [22.19.2]
 ### Fixed
 - error in post demux process 
