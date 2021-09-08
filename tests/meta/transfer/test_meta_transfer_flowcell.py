@@ -49,24 +49,3 @@ def test_transfer_flowcell(
 
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith("fastq.gz") or hk_file.path.endswith("csv")
-
-
-def test_sample_sheet_path_bcl2fastq():
-    # GIVEN a bcl2fastq demultiplexed flowcell
-    # WHEN constructing the path to the sample sheet to be stored
-    # THEN the correct path should be returned
-    pass
-
-
-def test_sample_sheet_path_dragen():
-    # GIVEN a DRAGEN demultiplexed flowcell
-    # WHEN constructing the path to the sample sheet to be stored
-    # THEN the correct path should be returned
-    pass
-
-
-def test_sample_sheet_path_not_found():
-    # GIVEN any demultiplexed flowcell
-    # WHEN neither a bcl2fastq nor a dragen sample sheet is found
-    # THEN an exception should be raised
-    pass
