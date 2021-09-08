@@ -17,6 +17,10 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+## [22.19.3]
+### Fixed
+- include dragen samplesheet in HK
+
 ## [22.19.2]
 ### Fixed
 - error in post demux process 
