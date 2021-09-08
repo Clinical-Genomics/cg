@@ -17,6 +17,11 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+
+## [22.20.0]
+### Added
+- New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
+
 ## [22.19.2]
 ### Fixed
 - error in post demux process 
@@ -28,10 +33,6 @@ __________ DO NOT TOUCH ___________ -->
 ## [22.19.0]
 ### Added
 - Novaseq Dragen Demultiplexing
-
-## [22.19.0]
-### Added
-- New field, sample_id, in clinical samples json orders for Scout 
 
 ## [22.18.0]
 ### Added
