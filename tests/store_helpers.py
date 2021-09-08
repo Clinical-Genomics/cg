@@ -578,6 +578,19 @@ class StoreHelpers:
         return sample_obj
 
     @staticmethod
+    def add_phenotype_terms_to_sample(
+        store: Store, sample_id: str, phenotype_terms: [str] = ["a phenotype term"]
+    ) -> Optional[models.Sample]:
+        """Function for adding a phenotype term to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.phenotype_terms = phenotype_terms
+        store.commit()
+        return sample_obj
+
+    @staticmethod
     def add_subject_id_to_sample(
         store: Store, sample_id: str, subject_id: str = "a subject_id"
     ) -> Optional[models.Sample]:

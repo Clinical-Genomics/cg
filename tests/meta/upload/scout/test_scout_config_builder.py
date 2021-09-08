@@ -94,6 +94,19 @@ def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.load_config.phenotype_groups is not None
 
 
+def test_include_phenotype_terms(mip_config_builder: MipConfigBuilder):
+    # GIVEN a config builder with some data
+
+    # GIVEN a config without a phenotype terms
+    assert mip_config_builder.load_config.phenotype_terms is None
+
+    # WHEN including the phenotype terms
+    mip_config_builder.include_phenotype_terms()
+
+    # THEN assert that the phenotype terms were added
+    assert mip_config_builder.load_config.phenotype_terms is not None
+
+
 def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):
     # GIVEN a mip config builder with some information
 
@@ -150,7 +163,6 @@ def test_include_mip_sample_subject_id(
     mip_config_builder.build_load_config()
 
     # THEN the subject_id was added to the scout sample
-    print(caplog.text)
     subject_id_found = False
     for sample in mip_config_builder.load_config.samples:
         if sample.sample_id == sample_id:
