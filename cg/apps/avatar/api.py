@@ -30,7 +30,7 @@ class Avatar:
         try_cnt = 0
         filters = "".join(filter_array)
         while not urls and filters:
-            query = f"{adjective} {animal}"
+            query = f"{animal}"
             urls = bing_image_urls(
                 query=query,
                 filters=filters,
@@ -38,13 +38,6 @@ class Avatar:
             )
             if not urls:
                 sleep(secrets.SystemRandom().randint(0, max(len(filter_array) - try_cnt, 1)))
-                query = f"{animal}"
-                urls = bing_image_urls(
-                    query=query,
-                    filters=filters,
-                    verify_status_only=False,
-                )
-
             try_cnt += 1
             filters = "".join(filter_array[: len(filter_array) - try_cnt])
 
