@@ -33,6 +33,7 @@ class Avatar:
             query = f"{animal}"
             urls = bing_image_urls(
                 query=query,
+                limit=5,
                 filters=filters,
                 verify_status_only=False,
             )
