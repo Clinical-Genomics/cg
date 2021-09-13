@@ -17,6 +17,8 @@ from cg.constants import (
 )
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
+from cg.exc import CgError
+
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
@@ -476,6 +478,7 @@ class Sample(Model, PriorityMixin):
     )
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
+    _control = Column(types.SMALLINT, default=0)
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
@@ -510,6 +513,42 @@ class Sample(Model, PriorityMixin):
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    @property
+    def is_control(self) -> str:
+        """Return whether the sample is a control"""
+        return self._control != 0
+
+    @is_control.setter
+    def is_control(self, value: bool):
+        if value is False:
+            self._control = 0
+        else:
+            raise CgError("Bad operation: use is_negative_control = True or is_positive_control = True to set")
+
+    @property
+    def is_negative_control(self) -> str:
+        """Return whether the sample is a negative control"""
+        return self._control < 0
+
+    @is_negative_control.setter
+    def is_negative_control(self, value: bool):
+        if value is True:
+            self._control = -1
+        else:
+            raise CgError("Bad operation: use is_control = False to unset")
+
+    @property
+    def is_positive_control(self) -> str:
+        """Return whether the sample is a positive control"""
+        return self._control > 0
+
+    @is_positive_control.setter
+    def is_positive_control(self, value: bool):
+        if value is True:
+            self._control = 1
+        else:
+            raise CgError("Bad operation: use is_control = False to unset")
 
     @property
     def sequencing_qc(self) -> bool:
