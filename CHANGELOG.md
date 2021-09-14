@@ -22,6 +22,10 @@ __________ DO NOT TOUCH ___________ -->
 ### Added
 - New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
 
+## [22.19.3]
+### Added
+* Action to clean up workflow artifact cache
+
 ## [22.19.2]
 ### Fixed
 - error in post demux process 
