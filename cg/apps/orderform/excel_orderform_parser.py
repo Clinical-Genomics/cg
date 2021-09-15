@@ -22,7 +22,7 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        "1508:24",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
+        "1508:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
         "1541:6",  # Orderform Externally sequenced samples
         "1603:10",  # Microbial WGS
         "1604:10",  # Orderform Ready made libraries (RML)
@@ -212,6 +212,10 @@ class ExcelOrderformParser(OrderformParser):
             return DataDelivery.ANALYSIS_BAM_FILES
         if data_delivery == "fastq-qc":
             return DataDelivery.FASTQ_QC
+        if data_delivery == "fastq-qc-+-analysis-+-cram":
+            return DataDelivery.ANALYSIS_BAM_FILES
+        if data_delivery == "fastq-qc-+-analysis-+-cram-+-scout":
+            return DataDelivery.ANALYSIS_BAM_FILES
 
         try:
             return DataDelivery(data_delivery)
