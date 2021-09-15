@@ -294,4 +294,5 @@ def external(context: CGConfig, ticket_id: int, dry_run: bool):
 def external_hk(context: CGConfig, ticket_id: int, dry_run: bool):
     """Adds external data to housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
+    external_data_api.check_md5sum()
     external_data_api.configure_housekeeper(ticket_id=ticket_id, dry_run=dry_run)

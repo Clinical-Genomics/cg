@@ -4,6 +4,7 @@ import logging
 import os
 from pathlib import Path
 from typing import List, Tuple, Optional
+import hashlib
 
 from housekeeper.store.models import Bundle
 
@@ -28,6 +29,8 @@ class ExternalDataAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.customer = None
+        self.ticket_id = None
 
     def create_log_dir(self, ticket_id: int, dry_run: bool) -> Path:
         timestamp = dt.datetime.now()
@@ -53,25 +56,20 @@ class ExternalDataAPI(MetaAPI):
         cust_id_added_to_path = raw_path % cust_id + "/" + lims_sample_id + "/"
         return cust_id_added_to_path
 
-    def download_sample(
-        self, cust_id: str, ticket_id: int, cust_sample_id: str, lims_sample_id: str, dry_run: bool
-    ) -> int:
-        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
+    def download_sample(self, cust_sample_id: str, lims_sample_id: str, dry_run: bool) -> int:
+        log_dir: Path = self.create_log_dir(dry_run=dry_run)
         source_path: str = self.create_source_path(
-            cust_id=cust_id,
-            ticket_id=ticket_id,
             raw_path=self.caesar_path,
             cust_sample_id=cust_sample_id,
         )
         destination_path: str = self.create_destination_path(
-            cust_id=cust_id,
             raw_path=self.hasta_path,
             lims_sample_id=lims_sample_id,
         )
         commands = RSYNC_COMMAND.format(source_path=source_path, destination_path=destination_path)
         error_function = ERROR_RSYNC_FUNCTION.format()
         sbatch_info = {
-            "job_name": "_".join([str(ticket_id), "rsync_external_data"]),
+            "job_name": "_".join([str(self.ticket_id), "rsync_external_data"]),
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
@@ -84,23 +82,26 @@ class ExternalDataAPI(MetaAPI):
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path = log_dir / "_".join([str(ticket_id), "rsync_external_data.sh"])
+        sbatch_path = log_dir / "_".join([str(self.ticket_id), "rsync_external_data.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         return sbatch_number
 
+    def set_ticket_params(self, ticket_id):
+        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        self.customer = cases[0].customer.internal_id
+        self.ticket_id = ticket_id
+
     def download_ticket(self, ticket_id: int, dry_run: bool) -> None:
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        cust_id = cases[0].customer.internal_id
+        self.set_ticket_params(ticket_id=ticket_id)
         for case in cases:
             links = case.links
             for link in links:
                 lims_sample_id = link.sample.internal_id
                 cust_sample_id = link.sample.name
                 sbatch_number = self.download_sample(
-                    cust_id=cust_id,
-                    ticket_id=ticket_id,
                     cust_sample_id=cust_sample_id,
                     lims_sample_id=lims_sample_id,
                     dry_run=dry_run,
@@ -119,9 +120,9 @@ class ExternalDataAPI(MetaAPI):
                 all_fastqs.append(abs_path)
         return all_fastqs
 
-    def get_all_paths(self, lims_sample_id: str, cust_id: str) -> List[str]:
+    def get_all_paths(self, lims_sample_id: str) -> List[str]:
         fastq_folder: str = self.create_destination_path(
-            cust_id=cust_id, lims_sample_id=lims_sample_id, raw_path=self.hasta_path
+            lims_sample_id=lims_sample_id, raw_path=self.hasta_path
         )
         all_fastq_in_folder: List[str] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
@@ -149,15 +150,13 @@ class ExternalDataAPI(MetaAPI):
         return hk_dict
 
     def configure_housekeeper(self, ticket_id: int, dry_run: bool) -> None:
+        self.set_ticket_params(ticket_id=ticket_id)
         cases = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        cust_id = cases[0].customer.internal_id
         for case in cases:
             links = case.links
             for link in links:
                 lims_sample_id = link.sample.internal_id
-                paths: List[str] = self.get_all_paths(
-                    lims_sample_id=lims_sample_id, cust_id=cust_id
-                )
+                paths: List[str] = self.get_all_paths(lims_sample_id=lims_sample_id)
                 if dry_run:
                     LOG.info(
                         "Would have added %s to housekeeper and linked associated files, but this is dry-run",
@@ -178,4 +177,39 @@ class ExternalDataAPI(MetaAPI):
                     self.housekeeper_api.add_file(
                         path=path, version_obj=last_version, tags=["fastq"]
                     )
-                    self.housekeeper_api.commit()
+                    do_commit = True
+                    if os.path.isfile(path + ".md5"):
+                        do_commit = check_md5sum(fastq_path=path)
+                    else:
+                        # TODO add: "LOG no md5 file found"
+                        LOG.info("No md5 file found for file  %s" % path + ".md5")
+                    if not do_commit:
+                        return
+        self.housekeeper_api.commit()
+
+
+def check_md5sum(fastq_path) -> bool:
+    """Checks if there is and md5 file associated with the fastq-file and if so verifies the cheksum"""
+    with open(fastq_path, "rb") as f:
+        file_hash = hashlib.md5()
+        while chunk := f.read(8192):
+            file_hash.update(chunk)
+    outp_sum = file_hash.hexdigest()
+    with open(fastq_path + ".md5", "r") as md:
+        check_sum = extract_md5sum(md.readline())
+    if check_sum == outp_sum:
+        LOG.info("The md5 file matches the md5sum for file  %s" % fastq_path + ".md5")
+        return True
+    else:
+        LOG.info("The md5 file does not match the md5sum for file  %s" % fastq_path + ".md5")
+        return False
+
+
+def extract_md5sum(first_line: str) -> str:
+    """Searches the line for a string matching the length of an md5sum"""
+    line_list = first_line.split(" ")
+    for element in line_list:
+        if len(element) == 32 and "." not in element:
+            md5sum = element
+            return md5sum
+    return ""

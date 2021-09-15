@@ -65,8 +65,6 @@ def test_download_sample(external_data_api: ExternalDataAPI, mocker):
 
     # WHEN the destination path is created
     sbatch_number = external_data_api.download_sample(
-        cust_id="cust000",
-        ticket_id=123456,
         cust_sample_id="ABC123",
         lims_sample_id="ACC123",
         dry_run=True,
