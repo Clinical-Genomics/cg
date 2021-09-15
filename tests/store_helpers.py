@@ -228,7 +228,7 @@ class StoreHelpers:
         store: Store,
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
-        control: str = "no",
+        control: str = None,
         customer_name: str = None,
         gender: str = "female",
         internal_id: str = None,
