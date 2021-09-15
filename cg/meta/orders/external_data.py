@@ -192,7 +192,9 @@ def check_md5sum(fastq_path) -> bool:
     """Checks if there is and md5 file associated with the fastq-file and if so verifies the cheksum"""
     with open(fastq_path, "rb") as f:
         file_hash = hashlib.md5()
-        while chunk := f.read(8192):
+        chunk = ""
+        while chunk:
+            chunk = f.read(8192)
             file_hash.update(chunk)
     outp_sum = file_hash.hexdigest()
     with open(fastq_path + ".md5", "r") as md:
