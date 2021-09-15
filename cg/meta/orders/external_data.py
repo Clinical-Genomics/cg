@@ -32,10 +32,10 @@ class ExternalDataAPI(MetaAPI):
         self.customer = None
         self.ticket_id = None
 
-    def create_log_dir(self, ticket_id: int, dry_run: bool) -> Path:
+    def create_log_dir(self, dry_run: bool) -> Path:
         timestamp = dt.datetime.now()
         timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-        folder_name = Path("_".join([str(ticket_id), timestamp_str]))
+        folder_name = Path("_".join([str(self.ticket_id), timestamp_str]))
         log_dir = Path(self.base_path) / folder_name
         LOG.info("Creating folder: %s", log_dir)
         if dry_run:
@@ -44,16 +44,14 @@ class ExternalDataAPI(MetaAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def create_source_path(
-        self, cust_id: str, ticket_id: int, raw_path: str, cust_sample_id: str
-    ) -> str:
+    def create_source_path(self, raw_path: str, cust_sample_id: str) -> str:
         cust_id_added_to_path = (
-            raw_path % cust_id + "/" + str(ticket_id) + "/" + cust_sample_id + "/"
+            raw_path % self.customer + "/" + str(self.ticket_id) + "/" + cust_sample_id + "/"
         )
         return cust_id_added_to_path
 
-    def create_destination_path(self, cust_id: str, raw_path: str, lims_sample_id: str) -> str:
-        cust_id_added_to_path = raw_path % cust_id + "/" + lims_sample_id + "/"
+    def create_destination_path(self, raw_path: str, lims_sample_id: str) -> str:
+        cust_id_added_to_path = raw_path % self.customer + "/" + lims_sample_id + "/"
         return cust_id_added_to_path
 
     def download_sample(self, cust_sample_id: str, lims_sample_id: str, dry_run: bool) -> int:
