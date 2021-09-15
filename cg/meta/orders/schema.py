@@ -3,7 +3,6 @@ from collections import Iterable
 from pyschemes import Scheme, validators
 
 from cg.constants import (
-    CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
     PRIORITY_OPTIONS,
     SEX_OPTIONS,
@@ -287,6 +286,7 @@ RML_SAMPLE = {
     "index_sequence": OptionalNone(TypeValidatorNone(str)),
     # "Not required"
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "control": OptionalNone(TypeValidatorNone(str)),
 }
 
 MICROSALT_SAMPLE = {

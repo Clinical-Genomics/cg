@@ -78,6 +78,7 @@ class StatusHandler:
                         {
                             "application": sample["application"],
                             "comment": sample.get("comment"),
+                            "control": sample.get("control"),
                             "data_delivery": sample.get("data_delivery"),
                             "name": sample["name"],
                             "priority": sample["priority"],

@@ -28,6 +28,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert sample["name"] == "sample1"
     assert sample["comment"] == "test comment"
     assert sample["priority"] == "research"
+    assert sample["control"] == "negative"
 
 
 def test_samples_to_status(fastq_order_to_submit):

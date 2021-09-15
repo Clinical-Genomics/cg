@@ -17,15 +17,18 @@ from sqlalchemy.dialects import mysql
 
 
 # revision identifiers, used by Alembic.
-revision = 'c081458ff180'
-down_revision = '7e344b9438bf'
+revision = "c081458ff180"
+down_revision = "7e344b9438bf"
 branch_labels = None
 depends_on = None
 
+control_options = ("no", "negative", "positive")
+control_enum = mysql.ENUM(*control_options)
+
 
 def upgrade():
-    op.add_column("sample", Column("_control", mysql.SMALLINT, nullable=True, default=0))
+    op.add_column("sample", Column("control", control_enum, nullable=True))
 
 
 def downgrade():
-    op.drop_column("sample", "_control")
+    op.drop_column("sample", "control")
