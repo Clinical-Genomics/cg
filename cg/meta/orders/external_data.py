@@ -171,6 +171,7 @@ class ExternalDataAPI(MetaAPI):
                     last_version = bundle_result[1]
                     self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
                 for path in paths:
+                    print(path)
                     LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
                     self.housekeeper_api.add_file(
                         path=path, version_obj=last_version, tags=["fastq"]
@@ -179,7 +180,6 @@ class ExternalDataAPI(MetaAPI):
                     if os.path.isfile(path + ".md5"):
                         do_commit = check_md5sum(fastq_path=path)
                     else:
-                        # TODO add: "LOG no md5 file found"
                         LOG.info("No md5 file found for file  %s" % path + ".md5")
                     if not do_commit:
                         return
