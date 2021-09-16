@@ -169,7 +169,7 @@ class ExternalDataAPI(MetaAPI):
                         bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
                     )
                     last_version = bundle_result[1]
-                    self.housekeeper_api.add(bundle_result[0], bundle_result[1])
+                    # self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
                 for path in paths:
                     LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
                     self.housekeeper_api.add_file(
