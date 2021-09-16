@@ -197,12 +197,12 @@ def check_md5sum(fastq_path) -> bool:
     outp_sum = file_hash.hexdigest()
     with open(fastq_path + ".md5", "r") as md:
         check_sum = extract_md5sum(md.readline())
-    print([outp_sum, check_sum])
     if check_sum == outp_sum:
-        LOG.info("The md5 file matches the md5sum for file  %s" % fastq_path + ".md5")
+        LOG.info("The md5 file matches the md5sum for file  %s" % fastq_path)
         return True
     else:
-        LOG.info("The md5 file does not match the md5sum for file  %s" % fastq_path + ".md5")
+        LOG.info("The md5 file does not match the md5sum for file  %s" % fastq_path)
+        LOG.info("No cases will be added to housekeeper.")
         return False
 
 
