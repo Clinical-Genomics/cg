@@ -8,6 +8,7 @@ from tests.cli.workflow.mip.conftest import fixture_mip_case_ids
 from tests.cli.workflow.mip.conftest import fixture_mip_case_id
 from tests.apps.mip.conftest import tb_api
 from cg.meta.orders.external_data import ExternalDataAPI
+from cg.meta.orders.external_data import check_md5sum
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -17,7 +18,8 @@ def test_create_log_dir(caplog, external_data_api: ExternalDataAPI):
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    log_dir = external_data_api.create_log_dir(ticket_id=999999, dry_run=True)
+    external_data_api.ticket_id = 999999
+    log_dir = external_data_api.create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
@@ -30,9 +32,9 @@ def test_create_source_path(external_data_api: ExternalDataAPI):
     """Test generating the source path"""
 
     # WHEN the source path is created
-    source_path = external_data_api.create_source_path(
-        ticket_id=999999, raw_path="/path/%s", cust_sample_id="ABC123", cust_id="cust000"
-    )
+    external_data_api.ticket_id = 999999
+    external_data_api.customer = "cust000"
+    source_path = external_data_api.create_source_path(raw_path="/path/%s", cust_sample_id="ABC123")
 
     # THEN the source path is
     assert source_path == "/path/cust000/999999/ABC123/"
@@ -42,8 +44,9 @@ def test_create_destination_path(external_data_api: ExternalDataAPI):
     """Test generating the destination path"""
 
     # WHEN the source path is created
+    external_data_api.customer = "cust000"
     destination_path = external_data_api.create_destination_path(
-        raw_path="/path/%s", lims_sample_id="ACC123", cust_id="cust000"
+        raw_path="/path/%s", lims_sample_id="ACC123"
     )
 
     # THEN the source path is
@@ -115,3 +118,14 @@ def test_configure_housekeeper(
 
     # THEN it is announced that files would have been added
     assert "Would have" in caplog.text
+
+
+def test_checksum(fastq_file: Path):
+    # GIVEN a fastq file with corresponding md5 file
+
+    # THEN a file with a correct md5 sum should return true
+    assert check_md5sum(str(fastq_file))
+    # THEN a file with an incorrect md5 sum should return false
+    other_path = fastq_file.parts[:-1]
+    other_path = "/".join(other_path) + "/fastq_run_R1_001.fastq.gz"
+    assert not check_md5sum(other_path)

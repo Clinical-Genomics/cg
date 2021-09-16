@@ -190,13 +190,14 @@ def check_md5sum(fastq_path) -> bool:
     """Checks if there is and md5 file associated with the fastq-file and if so verifies the cheksum"""
     with open(fastq_path, "rb") as f:
         file_hash = hashlib.md5()
-        chunk = ""
+        chunk = f.read(8192)
         while chunk:
-            chunk = f.read(8192)
             file_hash.update(chunk)
+            chunk = f.read(8192)
     outp_sum = file_hash.hexdigest()
     with open(fastq_path + ".md5", "r") as md:
         check_sum = extract_md5sum(md.readline())
+    print([outp_sum, check_sum])
     if check_sum == outp_sum:
         LOG.info("The md5 file matches the md5sum for file  %s" % fastq_path + ".md5")
         return True
@@ -209,6 +210,7 @@ def extract_md5sum(first_line: str) -> str:
     """Searches the line for a string matching the length of an md5sum"""
     line_list = first_line.split(" ")
     for element in line_list:
+        element = element.strip()
         if len(element) == 32 and "." not in element:
             md5sum = element
             return md5sum
