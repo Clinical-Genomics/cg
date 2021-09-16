@@ -199,6 +199,12 @@ class ExternalDataAPI(MetaAPI):
                     if not do_commit:
                         return
         self.housekeeper_api.commit()
+        self.set_to_analyze(cases=cases)
+
+    def set_to_analyze(self, cases):
+        for case_obj in cases:
+            case_obj.action = "analyze"
+            self.status_db.commit()
 
 
 def check_md5sum(fastq_path) -> bool:
