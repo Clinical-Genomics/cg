@@ -162,6 +162,7 @@ class ExternalDataAPI(MetaAPI):
                     )
                     return
                 last_version = self.housekeeper_api.last_version(bundle=lims_sample_id)
+
                 if not last_version:
                     LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
                     hk_dict: dict = self.create_dict(name=lims_sample_id)
@@ -169,8 +170,22 @@ class ExternalDataAPI(MetaAPI):
                         bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
                     )
                     last_version = bundle_result[1]
-                    # self.housekeeper_api.add_commit(bundle_result[0], bundle_result[1])
+                else:
+                    files = [
+                        tmp.path
+                        for tmp in self.housekeeper_api.get_files(
+                            bundle=lims_sample_id, version=last_version.id
+                        )
+                    ]
+
                 for path in paths:
+                    if path in files:
+                        LOG.info(
+                            "Path %s is already linkned to bundle %s in housekeeper"
+                            % (path, lims_sample_id)
+                        )
+                        continue
+
                     LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
                     self.housekeeper_api.add_file(
                         path=path, version_obj=last_version, tags=["fastq"]
@@ -213,4 +228,5 @@ def extract_md5sum(first_line: str) -> str:
         if len(element) == 32 and "." not in element:
             md5sum = element
             return md5sum
+    LOG.info("No valid md5sum found in the .md5 file.")
     return ""
