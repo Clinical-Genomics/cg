@@ -170,18 +170,19 @@ class ExternalDataAPI(MetaAPI):
                         bundle_name=lims_sample_id, data_dict=hk_dict, dry_run=dry_run
                     )
                     last_version = bundle_result[1]
+                    files = []
                 else:
                     files = [
                         tmp.path
                         for tmp in self.housekeeper_api.get_files(
-                            bundle=lims_sample_id, version=last_version.id
+                            bundle=lims_sample_id, tags=["fastq"], version=last_version.id
                         )
                     ]
 
                 for path in paths:
                     if path in files:
                         LOG.info(
-                            "Path %s is already linkned to bundle %s in housekeeper"
+                            "Path %s is already linked to bundle %s in housekeeper"
                             % (path, lims_sample_id)
                         )
                         continue
