@@ -25,7 +25,7 @@ COMBOS = {
     "Horsel": ("Horsel", "141217", "141201"),
 }
 
-CONTROL_OPTIONS = ("no", "negative", "positive")
+CONTROL_OPTIONS = ("", "negative", "positive")
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 

@@ -22,7 +22,7 @@ down_revision = "7e344b9438bf"
 branch_labels = None
 depends_on = None
 
-control_options = ("no", "negative", "positive")
+control_options = ("", "negative", "positive")
 control_enum = mysql.ENUM(*control_options)
 
 
