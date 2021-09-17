@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.20.0]
+### Added
+- Mark a NIPT/Fluffy sample as control
+
 ## [22.19.5]
 ### Fixed
 - improve avatar search
