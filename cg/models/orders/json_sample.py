@@ -1,5 +1,5 @@
 import typing
-from typing import List, Optional
+from typing import Optional
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
