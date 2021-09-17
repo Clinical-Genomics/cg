@@ -17,6 +17,11 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+
+## [22.19.5]
+### Fixed
+- improve avatar search
+
 ## [22.19.4]
 ### Fixed
 - include dragen samplesheet in HK
