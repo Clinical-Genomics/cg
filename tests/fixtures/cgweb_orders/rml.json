@@ -42,7 +42,7 @@
       "comment": "test comment",
       "concentration": "5",
       "concentration_sample": "6",
-      "control": "no",
+      "control": "",
       "data_analysis": "fluffy",
       "data_delivery": "nipt-viewer",
       "index": "IDT DupSeq 10 bp Set B",
