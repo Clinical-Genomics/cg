@@ -144,7 +144,7 @@ def report_deliver(context: CGConfig, case_id: str, analysis_type: str, dry_run:
         LOG.error(f"Could not create report file: {e.message}")
         raise click.Abort()
     except Exception as e:
-        LOG.error(f"Could not run analysis: {e}")
+        LOG.error(f"Could not create report file: {e}")
         raise click.Abort()
 
 
