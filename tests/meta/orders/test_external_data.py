@@ -121,7 +121,7 @@ def test_configure_housekeeper(
 
 
 def test_checksum(fastq_file: Path):
-    # GIVEN a fastq file with corresponding md5 file
+    # GIVEN a fastq file with corresponding correct md5 file and a fastq file with a corresponding incorrect md5 file
 
     # THEN a file with a correct md5 sum should return true
     assert check_md5sum(str(fastq_file))

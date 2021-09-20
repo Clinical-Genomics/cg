@@ -17,6 +17,12 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+## [22.20.2]
+### Added
+- cg add external-hk now sets action to analyse for all cases.
+### Changed
+- cg add external-hk now checks included md5sum files.
+
 ## [22.19.2]
 ### Fixed
 - error in post demux process 

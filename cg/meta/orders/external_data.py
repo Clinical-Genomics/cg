@@ -205,6 +205,7 @@ class ExternalDataAPI(MetaAPI):
         for case_obj in cases:
             case_obj.action = "analyze"
             self.status_db.commit()
+        LOG.info("Setting all cases to analyze.")
 
 
 def check_md5sum(fastq_path) -> bool:
