@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.20.0]
+### Added
+- New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
+
 ## [22.19.5]
 ### Fixed
 - improve avatar search
