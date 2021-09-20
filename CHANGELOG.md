@@ -22,6 +22,14 @@ __________ DO NOT TOUCH ___________ -->
 ### Added
 - New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
 
+## [22.19.5]
+### Fixed
+- improve avatar search
+
+## [22.19.4]
+### Fixed
+- include dragen samplesheet in HK
+
 ## [22.19.3]
 ### Added
 * Action to clean up workflow artifact cache
