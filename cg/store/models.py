@@ -2,6 +2,7 @@ import datetime as dt
 from typing import List, Optional
 
 import alchy
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 
 from cg.constants import (
     CASE_ACTIONS,
@@ -16,7 +17,6 @@ from cg.constants import (
 )
 
 from cg.constants.constants import CONTROL_OPTIONS
-from cg.exc import CgError
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
