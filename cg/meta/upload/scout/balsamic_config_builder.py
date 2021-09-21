@@ -43,7 +43,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         """Build a sample with balsamic specific information"""
         config_sample = ScoutBalsamicIndividual()
 
-        self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
+        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
         if BalsamicAnalysisAPI.get_sample_type(db_sample.sample) == "tumor":
             config_sample.phenotype = "affected"
             config_sample.sample_id = "TUMOR"
@@ -62,7 +62,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def build_load_config(self) -> None:
         LOG.info("Build load config for balsamic case")
-        self.add_mandatory_info_to_load_config()
+        self.add_common_info_to_load_config()
         self.load_config.human_genome_build = "37"
         self.load_config.rank_score_threshold = -100
 

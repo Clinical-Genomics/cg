@@ -66,12 +66,14 @@ MIP_VALIDATION_CASES = [
     "modernmule",  # DNA rare disease positive control
     "moralcattle",  # RNA rare disease positive control
     "onemite",  # DNA rare disease positive control
+    "opencow",  # DNA rare disease positive control
     "proudcougar",  # DNA rare disease positive control
     "rightmacaw",  # DNA rare disease positive control
     "safeguinea",  # DNA rare disease positive control
     "sharpparrot",  # RNA rare disease positive control
     "sharppigeon",  # DNA rare disease positive control
     "sharpwhale",  # DNA rare disease positive control
+    "stillant",  # DNA rare disease positive control
     "smoothboa",  # RNA rare disease positive control
     "strongbison",  # DNA rare disease positive control
     "tenderoriole",  # DNA rare disease positive control
