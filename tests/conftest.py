@@ -449,9 +449,9 @@ def rml_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def mip_json_orderform() -> dict:
-    """Load an example json scout order."""
-    return json.load(open("tests/fixtures/orderforms/mip-json.json"))
+def mip_json_orderform(orderforms: Path) -> dict:
+    """Load an example of json scout order."""
+    return json.load(open(orderforms / "mip-json.json"))
 
 
 @pytest.fixture(name="madeline_output")

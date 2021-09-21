@@ -17,18 +17,18 @@ class ChromographImages(BaseModel):
 
 
 class ScoutIndividual(BaseModel):
-    sample_id: str = None
-    father: Optional[str] = None
-    mother: Optional[str] = None
-    sample_name: Optional[str] = None
-    sex: Literal["male", "female", "unknown"] = None
-    phenotype: Literal["affected", "unaffected", "unknown"] = None
-    capture_kit: Optional[str] = None
     alignment_path: Optional[str] = None
     analysis_type: Literal["wgs", "wes", "mixed", "unknown", "panel", "external"] = None
-    confirmed_sex: Optional[bool] = None
+    capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
-
+    confirmed_sex: Optional[bool] = None
+    father: Optional[str] = None
+    mother: Optional[str] = None
+    phenotype: Literal["affected", "unaffected", "unknown"] = None
+    sample_id: str = None
+    sample_name: Optional[str] = None
+    sex: Literal["male", "female", "unknown"] = None
+    subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
     @validator("sample_id", "sex", "analysis_type")
@@ -65,6 +65,7 @@ class ScoutLoadConfig(BaseModel):
     family_name: Optional[str] = None
     synopsis: Optional[str] = None
     phenotype_terms: Optional[List[str]] = None
+    phenotype_groups: Optional[List[str]] = None
     gene_panels: Optional[List[str]] = None
     default_gene_panels: List[str] = []
     cohorts: Optional[List[str]] = None

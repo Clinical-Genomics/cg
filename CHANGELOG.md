@@ -22,6 +22,14 @@ __________ DO NOT TOUCH ___________ -->
 ### Added
 - Mark a NIPT/Fluffy sample as control
 
+## [22.19.8]
+### Added
+- Case opencow and stillant to MIP validation cases
+
+## [22.19.7]
+### Added
+- New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
+
 ## [22.19.5]
 ### Fixed
 - improve avatar search

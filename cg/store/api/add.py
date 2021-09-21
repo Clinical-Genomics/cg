@@ -157,7 +157,7 @@ class AddHandler(BaseHandler):
         panels: List[str],
         cohorts: List[str] = None,
         priority: str = "standard",
-        synopsis: List[str] = None,
+        synopsis: str = None,
     ) -> models.Family:
         """Build a new Family record."""
 

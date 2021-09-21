@@ -372,5 +372,4 @@ def orderform():
             message = str(error)
         return abort(make_response(jsonify(message=message), 400))
     parsed_order: Orderform = order_parser.generate_orderform()
-
     return jsonify(**parsed_order.dict())

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
@@ -14,7 +14,7 @@ class JsonSample(OrderSample):
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: Optional[str]
     quantity: Optional[str]
-    synopsis: Optional[List[str]]
+    synopsis: Optional[str]
     well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]
 
     @validator("priority", pre=True)

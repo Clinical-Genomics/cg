@@ -130,8 +130,10 @@ MIP_SAMPLE = {
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(str),
+    "subject_id": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 BALSAMIC_SAMPLE = {
@@ -168,8 +170,10 @@ BALSAMIC_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "subject_id": OptionalNone(str),
+    "synopsis": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 MIP_RNA_SAMPLE = {
@@ -200,8 +204,10 @@ MIP_RNA_SAMPLE = {
     "time_point": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "subject_id": OptionalNone(str),
+    "synopsis": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 EXTERNAL_SAMPLE = {
@@ -221,15 +227,12 @@ EXTERNAL_SAMPLE = {
     "source": OptionalNone(TypeValidatorNone(str)),
     # "Required if data analysis in Scout"
     "panels": ListValidator(str, min_items=0),
-    # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
     "status": OptionalNone(validators.Any(STATUS_OPTIONS)),
     # "Required if samples are part of trio/family"
     "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
     "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-    # todo: find out if "Other relations" is removed in current OF
     # "Not Required"
     "tumour": OptionalNone(bool, False),
-    # todo: find out if "Gel picture" is "lost in translation", implement in OP or remove from OF
     "extraction_method": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
 }
@@ -243,8 +246,6 @@ FASTQ_SAMPLE = {
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-    # todo: implement in OP or remove from OF
-    # 'family_name': RegexValidator(NAME_PATTERN),
     "volume": str,
     "source": str,
     "tumour": bool,
