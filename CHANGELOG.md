@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.20.1]
+### Added
+- Case opencow and stillant to MIP validation cases
+
 ## [22.20.0]
 ### Added
 - New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
