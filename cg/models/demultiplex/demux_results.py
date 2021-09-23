@@ -126,17 +126,7 @@ class DemuxResults:
     @property
     def demux_sample_sheet_path(self) -> Path:
         """Return the path to sample sheet in demuxed flowcell dir"""
-        demux_sample_sheet_path = {
-            "bcl2fastq": self.bcl2fastq_demux_sheet_path,
-            "dragen": self.dragen_demux_sheet_path,
-        }
-        return demux_sample_sheet_path[self.bcl_converter]()
-
-    def bcl2fastq_demux_sheet_path(self) -> Path:
         return self.results_dir / self.flowcell.sample_sheet_path.name
-
-    def dragen_demux_sheet_path(self) -> Path:
-        return self.results_dir / "Reports" / self.flowcell.sample_sheet_path.name
 
     @property
     def copy_complete_path(self) -> Path:
