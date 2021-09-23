@@ -135,11 +135,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_name_index = None
         sample_id_index = None
         project_index = None
+        sample_id_column_names = ["SampleID", "Sample_ID"]
         for row in csv_reader:
-            if "SampleID" in row and not sample_id_index:
+            if any([name in row for name in sample_id_column_names]) and not sample_id_index:
                 sample_name_index = row.index("SampleName")
-                sample_id_index = row.index("SampleID")
-                project_index = row.index("Project")
+                sample_id_index = (
+                    row.index("SampleID") if "SampleID" in row else row.index("Sample_ID")
+                )
+                project_index = (
+                    row.index("Sample_Project") if "Sample_Project" in row else row.index("Project")
+                )
                 row.append("Library_nM")
                 row.append("SequencingDate")
                 csv_writer.writerow(row)
