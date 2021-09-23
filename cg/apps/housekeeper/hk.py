@@ -78,6 +78,34 @@ class HousekeeperAPI:
 
         return file_obj
 
+    def delete_files(
+        self, dry_run: bool = False, bundle: str = None, tags: List[str] = None, version: int = None
+    ) -> None:
+        """Delete files from database and disk (if included)"""
+        files: Iterable[File] = self.files(bundle=bundle, tags=tags, version=version)
+        for file in files:
+            file_obj_path = Path(file.full_path)
+            if (
+                not dry_run
+                and file.is_included
+                and (file_obj_path.exists() or file_obj_path.is_symlink())
+            ):
+                file_obj_path.unlink()
+            if not dry_run:
+                file.delete()
+                self._store.commit()
+                LOG.info("%s deleted", file.full_path)
+            else:
+                LOG.info("Would have deleted: %s", file.full_path)
+
+    def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
+        """Check if there are files for a bundle, tags, and/or version"""
+        files: Iterable[File] = self.files(bundle=bundle, tags=tags, version=version)
+        if not files:
+            return False
+        else:
+            return True
+
     def add_file(
         self, path, version_obj: models.Version, tags: list, to_archive: bool = False
     ) -> models.File:
@@ -99,7 +127,7 @@ class HousekeeperAPI:
 
     def files(
         self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
-    ) -> Query:
+    ) -> Iterable[File]:
         """Fetch files"""
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
