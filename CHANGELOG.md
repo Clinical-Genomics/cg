@@ -19,7 +19,7 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________ -->
 
 
-## [22.20.1]
+## [22.21.0]
 ### Fixed
 - Compatability of fluffy and new headers in dragen samplesheets
 
