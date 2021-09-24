@@ -18,6 +18,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.21.1]
+### Fixed
+- Accept synopsis both as list and as string in ordering json
 
 ## [22.21.0]
 ### Fixed
