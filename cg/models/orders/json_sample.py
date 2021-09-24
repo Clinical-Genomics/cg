@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
@@ -15,6 +15,12 @@ class JsonSample(OrderSample):
     quantity: Optional[str]
     synopsis: Optional[str]
     well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]
+
+    @validator("synopsis", pre=True)
+    def join_list(cls, value: Any):
+        if isinstance(value, list):
+            return "".join(value)
+        return value
 
     @validator("priority", pre=True)
     def make_lower(cls, value: str):
