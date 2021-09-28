@@ -539,66 +539,6 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
         )
 
 
-def test_store_external(orders_api, base_store, external_status_data):
-    # GIVEN a basic store with no samples or nothing in it + external order
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-
-    # WHEN storing the order
-    new_families = orders_api.store_cases(
-        customer=external_status_data["customer"],
-        order=external_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket=123456,
-        cases=external_status_data["families"],
-    )
-
-    # THEN it should create and link samples and the case
-    case_obj = base_store.families().first()
-    assert len(new_families) == 1
-    new_case = new_families[0]
-    assert new_case == case_obj
-    assert new_case.name == "fam2"
-    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
-    assert new_case.data_delivery == str(DataDelivery.SCOUT)
-    assert set(new_case.panels) == {"CTD", "CILM"}
-    assert new_case.priority_human == "priority"
-
-    assert len(new_case.links) == 2
-    new_link = new_case.links[0]
-    assert new_link.status == "affected"
-    assert new_link.sample.name == "sample1"
-    assert new_link.sample.sex == "male"
-    assert new_link.sample.capture_kit == "Agilent Sureselect V5"
-    assert new_link.sample.application_version.application.tag == "EXXCUSR000"
-    assert isinstance(new_case.links[0].sample.comment, str)
-
-    assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_case.links:
-        assert len(link.sample.deliveries) == 1
-
-
-def test_store_external_bad_apptag(orders_api, base_store, external_status_data):
-    # GIVEN a basic store with no samples or nothing in it + external order
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-
-    for family in external_status_data["families"]:
-        for sample in family["samples"]:
-            sample["application"] = "nonexistingtag"
-
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        orders_api.store_cases(
-            customer=external_status_data["customer"],
-            order=external_status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=123456,
-            cases=external_status_data["families"],
-        )
-
-
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
@@ -655,7 +595,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     new_case = new_families[0]
     assert new_case.name == "family1"
     assert new_case.data_analysis == str(Pipeline.BALSAMIC)
-    assert new_case.data_delivery == str(DataDelivery.SCOUT)
+    assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == "standard"
 

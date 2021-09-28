@@ -14,7 +14,6 @@ from cg.utils.StrEnum import StrEnum
 
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
-    EXTERNAL: str = "external"
     FASTQ: str = str(Pipeline.FASTQ)
     FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"
@@ -210,33 +209,6 @@ MIP_RNA_SAMPLE = {
     "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
-EXTERNAL_SAMPLE = {
-    # Orderform 1541
-    # Order portal specific
-    "internal_id": OptionalNone(TypeValidatorNone(str)),
-    "data_analysis": str,
-    "data_delivery": OptionalNone(TypeValidatorNone(str)),
-    # "required for new samples"
-    "name": validators.RegexValidator(NAME_PATTERN),
-    "capture_kit": OptionalNone(TypeValidatorNone(str)),
-    "application": str,
-    "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-    "family_name": validators.RegexValidator(NAME_PATTERN),
-    "case_internal_id": OptionalNone(TypeValidatorNone(str)),
-    "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
-    "source": OptionalNone(TypeValidatorNone(str)),
-    # "Required if data analysis in Scout"
-    "panels": ListValidator(str, min_items=0),
-    "status": OptionalNone(validators.Any(STATUS_OPTIONS)),
-    # "Required if samples are part of trio/family"
-    "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-    "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-    # "Not Required"
-    "tumour": OptionalNone(bool, False),
-    "extraction_method": OptionalNone(TypeValidatorNone(str)),
-    "comment": OptionalNone(TypeValidatorNone(str)),
-}
-
 FASTQ_SAMPLE = {
     # Orderform 1508
     # "required"
@@ -373,9 +345,6 @@ SARSCOV2_SAMPLE = {
 }
 
 ORDER_SCHEMES = {
-    OrderType.EXTERNAL: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(EXTERNAL_SAMPLE, min_items=1)}
-    ),
     OrderType.MIP_DNA: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
     OrderType.BALSAMIC: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(BALSAMIC_SAMPLE, min_items=1)}

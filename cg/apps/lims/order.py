@@ -111,9 +111,9 @@ class OrderHandler:
     def prepare(cls, samples):
         """Convert API input to LIMS input data."""
         lims_containers = []
-        tubes, plates = cls.group_containers(samples)
-        # "96 well plate" = container type "1"; Tube = container type "2"
-        for container_type, containers in [("1", plates), ("2", tubes)]:
+        tubes, plates, no_container = cls.group_containers(samples)
+        # "96 well plate" = container type "1"; Tube = container type "2"; "No container" = container type "3"
+        for container_type, containers in [("1", plates), ("2", tubes), ("3", no_container)]:
             for container_name, samples in containers.items():
                 new_container = {"name": container_name, "type": container_type, "samples": []}
                 # check that positions in plate are unique
@@ -158,6 +158,7 @@ class OrderHandler:
         """Group samples by containers."""
         tubes = {}
         plates = {}
+        no_container = {}
         for sample_data in samples:
             if sample_data["container"] == "Tube":
                 # detected tube: name after sample unless specified
@@ -170,6 +171,13 @@ class OrderHandler:
                 if sample_data["container_name"] not in plates:
                     plates[sample_data["container_name"]] = []
                 plates[sample_data["container_name"]].append(sample_data)
+            elif sample_data["container"] == "No container":
+                # detected no-container: name after sample unless specified
+                # TODO: find intuitive solution, "No container" is not a "Tube"!
+                container_name = sample_data.get("container_name") or sample_data["name"]
+                if container_name in tubes:
+                    raise OrderError(f"{container_name}: conflicting sample/container name")
+                tubes[container_name] = [sample_data]
             else:
                 raise ValueError(f"unknown container type: {sample_data['container']}")
-        return tubes, plates
+        return tubes, plates, no_container

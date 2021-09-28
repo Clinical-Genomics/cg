@@ -18,13 +18,6 @@ def balsamic_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def external_orderform(orderforms: Path) -> str:
-    """Orderform fixture for external samples"""
-    _file = orderforms / "1541.6.external.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
 def fastq_orderform(orderforms: Path):
     """Orderform fixture for fastq samples"""
     _file = orderforms / "1508.25.fastq.xlsx"

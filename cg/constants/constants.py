@@ -1,7 +1,7 @@
 """Constants for cg"""
 from cgmodels.cg.constants import Pipeline, StrEnum
 
-CONTAINER_OPTIONS = ("Tube", "96 well plate")
+CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 CAPTUREKIT_OPTIONS = (
     "Agilent Sureselect CRE",
@@ -34,11 +34,13 @@ FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS_FILES: str = "analysis"
     ANALYSIS_BAM_FILES: str = "analysis-bam"
+    ANALYSIS_FILES: str = "analysis"
     FASTQ: str = "fastq"
-    NIPT_VIEWER: str = "nipt-viewer"
     FASTQ_QC: str = "fastq_qc"
+    FASTQ_QC_ANALYSIS_CRAM: str = "fastq_qc-analysis-cram"
+    FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
+    NIPT_VIEWER: str = "nipt-viewer"
     SCOUT: str = "scout"
 
 
