@@ -5,6 +5,7 @@ import pytest
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
+from cg.store import models
 
 
 def test_pools_to_status(rml_order_to_submit):
@@ -28,6 +29,7 @@ def test_pools_to_status(rml_order_to_submit):
     assert sample["name"] == "sample1"
     assert sample["comment"] == "test comment"
     assert sample["priority"] == "research"
+    assert sample["control"] == "negative"
 
 
 def test_samples_to_status(fastq_order_to_submit):
@@ -133,7 +135,7 @@ def test_families_to_status(mip_order_to_submit):
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == "standard"
     assert family["cohorts"] == {"Other"}
-    assert family["synopsis"] == {"Här kommer det att komma en väldigt lång text med för synopsis."}
+    assert family["synopsis"] == "Här kommer det att komma en väldigt lång text med för synopsis."
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
 
@@ -141,9 +143,11 @@ def test_families_to_status(mip_order_to_submit):
     assert first_sample["age_at_sampling"] == "17.18192"
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGTPCFC030"
+    assert first_sample["phenotype_groups"] == ["Phenotype-group"]
     assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
+    assert first_sample["subject_id"] == "sample1"
     assert first_sample["mother"] == "sample2"
     assert first_sample["father"] == "sample3"
 
@@ -165,13 +169,16 @@ def test_store_rml(orders_api, base_store, rml_status_data):
         ticket=1234348,
         pools=rml_status_data["pools"],
     )
+
     # THEN it should update the database with new pools
     assert len(new_pools) == 2
 
     assert base_store.pools().count() == base_store.families().count()
     assert base_store.samples().count() == 4
-    new_pool = base_store.pools().first()
 
+    assert base_store.samples().filter_by(control="negative").count() == 1
+
+    new_pool = base_store.pools().first()
     assert new_pool == new_pools[1]
 
     assert new_pool.name == "pool-2"
@@ -462,10 +469,10 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_case.data_analysis == str(Pipeline.MIP_DNA)
     assert new_case.data_delivery == str(DataDelivery.SCOUT)
     assert set(new_case.cohorts) == {"Other"}
-    assert set(new_case.synopsis) == {
-        "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
-    }
-
+    assert (
+        new_case.synopsis
+        == "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
+    )
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
     assert new_link.father.name == "sample3"
@@ -475,7 +482,9 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
 
+    assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
+    assert new_link.sample.subject_id == "sample1"
 
     assert new_link.sample.age_at_sampling == 17.18192
 

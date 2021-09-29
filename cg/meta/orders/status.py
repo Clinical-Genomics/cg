@@ -78,6 +78,7 @@ class StatusHandler:
                         {
                             "application": sample["application"],
                             "comment": sample.get("comment"),
+                            "control": sample.get("control"),
                             "data_delivery": sample.get("data_delivery"),
                             "name": sample["name"],
                             "priority": sample["priority"],
@@ -160,13 +161,7 @@ class StatusHandler:
                 cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
             }
 
-            synopses: Set[str] = {
-                synopsis
-                for sample in case_samples
-                for synopsis in sample.get("synopsis", [])
-                if synopsis
-            }
-
+            synopsis = cls.get_single_value(case_name, case_samples, "synopsis")
             case_internal_id: str = cls.get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
@@ -198,15 +193,17 @@ class StatusHandler:
                         "internal_id": sample.get("internal_id"),
                         "mother": sample.get("mother"),
                         "name": sample["name"],
+                        "phenotype_groups": list(sample.get("phenotype_groups", "")),
                         "phenotype_terms": list(sample.get("phenotype_terms", "")),
                         "sex": sample["sex"],
                         "status": sample.get("status"),
+                        "subject_id": sample.get("subject_id"),
                         "time_point": sample.get("time_point"),
                         "tumour": sample.get("tumour", False),
                     }
                     for sample in case_samples
                 ],
-                "synopsis": synopses,
+                "synopsis": synopsis,
             }
 
             status_data["families"].append(case)
@@ -261,9 +258,11 @@ class StatusHandler:
                         name=sample["name"],
                         order=order,
                         ordered=ordered,
+                        phenotype_groups=sample["phenotype_groups"],
                         phenotype_terms=sample["phenotype_terms"],
                         priority=case["priority"],
                         sex=sample["sex"],
+                        subject_id=sample["subject_id"],
                         ticket=ticket,
                         time_point=sample["time_point"],
                         tumour=sample["tumour"],
@@ -523,17 +522,18 @@ class StatusHandler:
                 self.status.add_commit(case_obj)
 
             new_pool = self.status.add_pool(
+                application_version=application_version,
                 customer=customer_obj,
                 name=pool["name"],
                 order=order,
                 ordered=ordered,
                 ticket=ticket,
-                application_version=application_version,
             )
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
                     comment=sample["comment"],
+                    control=sample.get("control"),
                     customer=customer_obj,
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
@@ -550,4 +550,5 @@ class StatusHandler:
             self.status.add(new_delivery)
             new_pools.append(new_pool)
         self.status.add_commit(new_pools)
+
         return new_pools
