@@ -132,7 +132,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Reads the fluffy samplesheet *.csv file as found in Housekeeper.
         Edits column 'SampleName' to include customer name for sample.
-
+        Edits column 'Sample_Project or Project' to include customer sample starlims id.
+        Adds columns Library_nM, SequencingDate, Control and populates with orderform values
         """
 
         samplesheet_df = pd.read_csv(
