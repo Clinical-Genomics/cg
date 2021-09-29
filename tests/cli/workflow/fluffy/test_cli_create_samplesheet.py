@@ -84,6 +84,10 @@ def test_create_samplesheet_success(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 
+    # GIVEN every sample in SampleSheet has control status ""
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_control_status")
+    FluffyAnalysisAPI.get_sample_sequenced_date.return_value = ""
+
     # WHEN running command to create samplesheet
     result = cli_runner.invoke(create_samplesheet, [fluffy_case_id_existing], obj=fluffy_context)
     # THEN log text is output
