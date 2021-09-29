@@ -129,6 +129,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
     ) -> None:
+        """
+        Reads the fluffy samplesheet *.csv file as found in Housekeeper.
+        Edits column 'SampleName' to include customer name for sample.
+
+        """
+
         samplesheet_df = pd.read_csv(
             samplesheet_housekeeper_path, index_col=None, header=0, skiprows=1
         )
@@ -137,6 +143,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
         sample_project_column_alias = (
             "Sample_Project" if "Sample_Project" in samplesheet_df.columns else "Project"
+        )
+        samplesheet_df["SampleName"] = samplesheet_df[sample_id_column_alias].apply(
+            lambda x: self.get_sample_name_from_lims_id(lims_id=x)
         )
         samplesheet_df["Library_nM"] = samplesheet_df[sample_id_column_alias].apply(
             lambda x: self.get_concentrations_from_lims(sample_id=x)
