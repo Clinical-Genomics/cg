@@ -122,9 +122,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         if sequenced_at:
             return sequenced_at.date()
 
-    def get_sample_control_status(self, sample_id: str) -> str:
+    def get_sample_control_status(self, sample_id: str) -> bool:
         sample_obj: models.Sample = self.status_db.sample(sample_id)
-        return sample_obj.control
+        return bool(sample_obj.control)
 
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
@@ -157,7 +157,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         samplesheet_df[sample_project_column_alias] = samplesheet_df[sample_id_column_alias].apply(
             lambda x: self.get_sample_starlims_id(sample_id=x)
         )
-        samplesheet_df["Control"] = samplesheet_df[sample_id_column_alias].apply(
+        samplesheet_df["Exclude"] = samplesheet_df[sample_id_column_alias].apply(
             lambda x: self.get_sample_control_status(sample_id=x)
         )
         samplesheet_df.to_csv(
