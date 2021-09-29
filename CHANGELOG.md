@@ -19,15 +19,15 @@ __________ DO NOT TOUCH ___________
 __________ DO NOT TOUCH ___________ -->
 
 
-## [22.22.0]
+## [22.21.0]
 ### Added
 - Mark a NIPT/Fluffy sample as control
 
-## [22.21.1]
+## [22.20.1]
 ### Fixed
 - Accept synopsis both as list and as string in ordering json
 
-## [22.21.0]
+## [22.20.0]
 ### Fixed
 - Compatability of fluffy and new headers in dragen samplesheets
 
