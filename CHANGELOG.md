@@ -18,11 +18,20 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
-## [22.20.0]
+
+## [22.22.0]
 ### Added
 - Mark a NIPT/Fluffy sample as control
 
-## [22.19.8]
+## [22.21.1]
+### Fixed
+- Accept synopsis both as list and as string in ordering json
+
+## [22.21.0]
+### Fixed
+- Compatability of fluffy and new headers in dragen samplesheets
+
+## [22.20.1]
 ### Added
 - Case opencow and stillant to MIP validation cases
 
