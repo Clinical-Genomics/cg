@@ -135,13 +135,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_id_column_alias = (
             "Sample_ID" if "Sample_ID" in samplesheet_df.columns else "SampleID"
         )
+        sample_project_column_alias = (
+            "Sample_Project" if "Sample_Project" in samplesheet_df.columns else "Project"
+        )
         samplesheet_df["Library_nM"] = samplesheet_df[sample_id_column_alias].apply(
             lambda x: self.get_concentrations_from_lims(sample_id=x)
         )
         samplesheet_df["SequencingDate"] = samplesheet_df[sample_id_column_alias].apply(
             lambda x: self.get_sample_sequenced_date(sample_id=x)
         )
-        samplesheet_df["Sample_Project"] = samplesheet_df[sample_id_column_alias].apply(
+        samplesheet_df[sample_project_column_alias] = samplesheet_df[sample_id_column_alias].apply(
             lambda x: self.get_sample_starlims_id(sample_id=x)
         )
         samplesheet_df["Control"] = samplesheet_df[sample_id_column_alias].apply(
