@@ -24,6 +24,9 @@ COMBOS = {
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
+
+CONTROL_OPTIONS = ("", "negative", "positive")
+
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"

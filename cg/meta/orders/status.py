@@ -78,6 +78,7 @@ class StatusHandler:
                         {
                             "application": sample["application"],
                             "comment": sample.get("comment"),
+                            "control": sample.get("control"),
                             "data_delivery": sample.get("data_delivery"),
                             "name": sample["name"],
                             "priority": sample["priority"],
@@ -521,17 +522,18 @@ class StatusHandler:
                 self.status.add_commit(case_obj)
 
             new_pool = self.status.add_pool(
+                application_version=application_version,
                 customer=customer_obj,
                 name=pool["name"],
                 order=order,
                 ordered=ordered,
                 ticket=ticket,
-                application_version=application_version,
             )
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
                     comment=sample["comment"],
+                    control=sample.get("control"),
                     customer=customer_obj,
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
@@ -548,4 +550,5 @@ class StatusHandler:
             self.status.add(new_delivery)
             new_pools.append(new_pool)
         self.status.add_commit(new_pools)
+
         return new_pools
