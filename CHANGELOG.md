@@ -20,6 +20,10 @@ __________ DO NOT TOUCH ___________ -->
 ## [22.22.0]
 ### Added
 - Fluffy samplesheet add control field
+- 
+## [22.21.1]
+### Fixed
+- Balsamic delivery report exception text
 
 ## [22.21.0]
 ### Added
