@@ -18,6 +18,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.21.1]
+### Fixed
+- Balsamic delivery report exception text
 
 ## [22.21.0]
 ### Added
