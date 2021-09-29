@@ -533,7 +533,7 @@ class StatusHandler:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
                     comment=sample["comment"],
-                    control=sample.get("control") or None,
+                    control=sample.get("control"),
                     customer=customer_obj,
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
