@@ -188,7 +188,7 @@ class ExcelOrderformParser(OrderformParser):
                 return DataDelivery.FASTQ_QC
 
             if data_analysis == "fastq":
-                return DataDelivery.FASTQ
+                return DataDelivery.FASTQ_QC
 
         if project_type == OrderType.RML:
             return DataDelivery.FASTQ
