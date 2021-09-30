@@ -308,8 +308,6 @@ class AnalysisAPI(MetaAPI):
         """Get target bed filename from lims"""
         case_obj: models.Family = self.status_db.family(case_id)
         sample_obj: models.Sample = case_obj.links[0].sample
-        if sample_obj.from_sample:
-            sample_obj = self.status_db.sample(internal_id=sample_obj.internal_id)
         target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
         if not target_bed_shortname:
             return target_bed_shortname

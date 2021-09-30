@@ -321,7 +321,7 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ["invoiced_at"]
+    column_exclude_list = ["invoiced_at", "from_sample"]
     column_default_sort = ("created_at", True)
     column_editable_list = [
         "sex",
@@ -339,7 +339,7 @@ class SampleView(BaseView):
         "priority": view_human_priority,
     }
     column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
-    form_excluded_columns = ["is_external", "invoiced_at"]
+    form_excluded_columns = ["is_external", "invoiced_at", "from_sample"]
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):

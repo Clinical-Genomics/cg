@@ -520,7 +520,6 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
     assert new_link.sample.time_point == 1
-    assert new_link.sample.from_sample == "sample1"
 
 
 def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
