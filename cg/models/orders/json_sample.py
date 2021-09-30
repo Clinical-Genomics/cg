@@ -9,6 +9,7 @@ class JsonSample(OrderSample):
     case_id: str = Field(None, alias="family_name")
     concentration: Optional[str]
     concentration_sample: Optional[str]
+    control: Optional[str]
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: Optional[str]

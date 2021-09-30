@@ -17,6 +17,9 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+## [22.22.0]
+### Added
+- Fluffy samplesheet add control field
 
 ## [22.22.0]
 ### Added
@@ -27,9 +30,17 @@ __________ DO NOT TOUCH ___________ -->
 
 ## [22.21.1]
 ### Fixed
-- Accept synopsis both as list and as string in ordering json
+- Balsamic delivery report exception text
 
 ## [22.21.0]
+### Added
+- Mark a NIPT/Fluffy sample as control
+
+## [22.20.1]
+### Fixed
+- Accept synopsis both as list and as string in ordering json
+
+## [22.20.0]
 ### Fixed
 - Compatability of fluffy and new headers in dragen samplesheets
 
@@ -37,7 +48,7 @@ __________ DO NOT TOUCH ___________ -->
 ### Added
 - Case opencow and stillant to MIP validation cases
 
-## [22.20.0]
+## [22.19.7]
 ### Added
 - New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
 

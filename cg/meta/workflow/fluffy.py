@@ -11,6 +11,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
+import pandas as pd
 
 LOG = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """Get sample concentration from LIMS"""
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
-    def get_sample_starlims_id(self, sample_id: str) -> int:
+    def get_sample_starlims_id(self, sample_id: str) -> str:
         sample_obj: models.Sample = self.status_db.sample(sample_id)
         return sample_obj.order
 
@@ -121,41 +122,49 @@ class FluffyAnalysisAPI(AnalysisAPI):
         if sequenced_at:
             return sequenced_at.date()
 
+    def get_sample_control_status(self, sample_id: str) -> bool:
+        sample_obj: models.Sample = self.status_db.sample(sample_id)
+        return bool(sample_obj.control)
+
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
     ) -> None:
         """
         Reads the fluffy samplesheet *.csv file as found in Housekeeper.
         Edits column 'SampleName' to include customer name for sample.
-        Appends a column 'Library_nM' at the end of the csv with concentration values extracted from LIMS
+        Edits column 'Sample_Project or Project' to include customer sample starlims id.
+        Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
         """
-        csv_reader = csv.reader(open(samplesheet_housekeeper_path, "r"))
-        csv_writer = csv.writer(open(samplesheet_workdir_path, "w"))
 
-        sample_name_index = None
-        sample_id_index = None
-        project_index = None
-        sample_id_column_names = ["SampleID", "Sample_ID"]
-        for row in csv_reader:
-            if any([name in row for name in sample_id_column_names]) and not sample_id_index:
-                sample_name_index = row.index("SampleName")
-                sample_id_index = (
-                    row.index("SampleID") if "SampleID" in row else row.index("Sample_ID")
-                )
-                project_index = (
-                    row.index("Sample_Project") if "Sample_Project" in row else row.index("Project")
-                )
-                row.append("Library_nM")
-                row.append("SequencingDate")
-                csv_writer.writerow(row)
-                continue
-            if sample_id_index:
-                sample_id = row[sample_id_index]
-                row[sample_name_index] = self.get_sample_name_from_lims_id(lims_id=sample_id)
-                row[project_index] = str(self.get_sample_starlims_id(sample_id=sample_id))
-                row.append(str(self.get_concentrations_from_lims(sample_id=sample_id)))
-                row.append(str(self.get_sample_sequenced_date(sample_id=sample_id)))
-                csv_writer.writerow(row)
+        samplesheet_df = pd.read_csv(
+            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=1
+        )
+        sample_id_column_alias = (
+            "Sample_ID" if "Sample_ID" in samplesheet_df.columns else "SampleID"
+        )
+        sample_project_column_alias = (
+            "Sample_Project" if "Sample_Project" in samplesheet_df.columns else "Project"
+        )
+        samplesheet_df["SampleName"] = samplesheet_df[sample_id_column_alias].apply(
+            lambda x: self.get_sample_name_from_lims_id(lims_id=x)
+        )
+        samplesheet_df["Library_nM"] = samplesheet_df[sample_id_column_alias].apply(
+            lambda x: self.get_concentrations_from_lims(sample_id=x)
+        )
+        samplesheet_df["SequencingDate"] = samplesheet_df[sample_id_column_alias].apply(
+            lambda x: self.get_sample_sequenced_date(sample_id=x)
+        )
+        samplesheet_df[sample_project_column_alias] = samplesheet_df[sample_id_column_alias].apply(
+            lambda x: self.get_sample_starlims_id(sample_id=x)
+        )
+        samplesheet_df["Exclude"] = samplesheet_df[sample_id_column_alias].apply(
+            lambda x: self.get_sample_control_status(sample_id=x)
+        )
+        samplesheet_df.to_csv(
+            samplesheet_workdir_path,
+            sep=",",
+            index=False,
+        )
 
     def get_samplesheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """

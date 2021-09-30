@@ -226,17 +226,18 @@ class StoreHelpers:
     def add_sample(
         self,
         store: Store,
-        sample_id: str = None,
-        internal_id: str = None,
-        gender: str = "female",
-        is_tumour: bool = False,
-        is_rna: bool = False,
-        is_external: bool = False,
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
+        control: str = None,
         customer_name: str = None,
-        reads: int = None,
+        gender: str = "female",
+        internal_id: str = None,
+        is_external: bool = False,
+        is_rna: bool = False,
+        is_tumour: bool = False,
         loqusdb_id: str = None,
+        reads: int = None,
+        sample_id: str = None,
         ticket: int = None,
         **kwargs,
     ) -> models.Sample:
@@ -253,6 +254,7 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
+            control=control,
             name=sample_name,
             sex=gender,
             tumour=is_tumour,
