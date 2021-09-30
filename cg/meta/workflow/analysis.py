@@ -61,7 +61,7 @@ class AnalysisAPI(MetaAPI):
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
-        elif not case_obj.links:
+        if not case_obj.links:
             LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
         LOG.info("Case %s exists in status db", case_id)
