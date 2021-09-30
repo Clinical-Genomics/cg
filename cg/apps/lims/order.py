@@ -173,7 +173,6 @@ class OrderHandler:
                 plates[sample_data["container_name"]].append(sample_data)
             elif sample_data["container"] == "No container":
                 # detected no-container: name after sample unless specified
-                # TODO: find intuitive solution, "No container" is not a "Tube"!
                 container_name = sample_data.get("container_name") or sample_data["name"]
                 if container_name in tubes:
                     raise OrderError(f"{container_name}: conflicting sample/container name")
