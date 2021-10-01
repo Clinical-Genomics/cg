@@ -160,15 +160,13 @@ class StatusHandler:
             cohorts: Set[str] = {
                 cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
             }
-
-            synopsis = cls.get_single_value(case_name, case_samples, "synopsis", value_default='')
+            synopsis: str = ', '.join(set(sample.get("synopsis", "") for sample in case_samples))
             case_internal_id: str = cls.get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
-
             panels: Set[str] = {
                 panel for sample in case_samples for panel in sample.get("panels", []) if panel
             }
