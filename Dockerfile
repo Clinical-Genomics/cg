@@ -36,4 +36,10 @@ CMD gunicorn \
     --bind=$GUNICORN_BIND  \
     --threads=$GUNICORN_THREADS \
     --timeout=$GUNICORN_TIMEOUT \
+    --proxy-protocol \
+    --forwarded-allow-ips="10.0.2.100,127.0.0.1" \
+    --log-syslog \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level="debug" \
     cg.server.auto:app
