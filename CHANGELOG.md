@@ -18,6 +18,13 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.23.0]
+### Added
+- Support Orderform 1508:25, replaces Orderform 1541:6
+- New Balsamic delivery types 
+  - fastq-qc + analysis + cram
+  - fastq-qc + analysis + cram + Scout
+
 ## [22.22.2]
 ### Fixed
 - Synopsis from old and new samples are combined
@@ -30,13 +37,6 @@ __________ DO NOT TOUCH ___________ -->
 ## [22.22.0]
 ### Added
 - Fluffy samplesheet add control field
-
-## [22.22.0]
-### Added
-- Support Orderform 1508:25, replaces Orderform 1541:6
-- New Balsamic delivery types 
-  - fastq-qc + analysis + cram
-  - fastq-qc + analysis + cram + Scout
 
 ## [22.21.1]
 ### Fixed
