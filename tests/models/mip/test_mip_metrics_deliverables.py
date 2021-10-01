@@ -1,12 +1,13 @@
 """Test MIP metrics deliverables"""
 
 from cg.models.mip.mip_metrics_deliverables import (
-    MetricsDeliverables,
     DuplicateReads,
-    ParsedMetrics,
     GenderCheck,
-    MeanInsertSize,
     MappedReads,
+    MeanInsertSize,
+    MedianTargetCoverage,
+    MetricsDeliverables,
+    ParsedMetrics,
     get_sample_id_metric,
 )
 
@@ -82,7 +83,7 @@ def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
 
 def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
     """
-    Tests set predicted sex
+    Tests set mean insert size
     """
     # GIVEN a dictionary with the some metrics
 
@@ -98,6 +99,24 @@ def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
     assert isinstance(mean_insert_size, MeanInsertSize)
 
 
+def test_mip_metrics_set_meadian_target_coverage(mip_metrics_deliverables_raw: dict):
+    """
+    Tests set median target coverage
+    """
+    # GIVEN a dictionary with the some metrics
+
+    # WHEN instantiating a MetricsDeliverables object
+    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+
+    # THEN assert that mean insert size was set
+    assert metrics_object.median_target_coverage
+
+    median_target_coverage: MedianTargetCoverage = metrics_object.median_target_coverage.pop()
+
+    # THEN assert that it was successfully created
+    assert isinstance(median_target_coverage, MedianTargetCoverage)
+    
+    
 def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     """
     Tests set predicted sex

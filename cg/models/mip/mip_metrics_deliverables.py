@@ -1,6 +1,6 @@
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, Field, validator
 
 from cg.constants.gender import Gender
 
@@ -66,6 +66,13 @@ class MeanInsertSize(BaseModel):
         return int(value)
 
 
+class MedianTargetCoverage(BaseModel):
+    """Definition of median target coverage"""
+
+    sample_id: str
+    value: int
+
+
 class ParsedMetrics(BaseModel):
     """Defines parsed metrics"""
 
@@ -73,6 +80,7 @@ class ParsedMetrics(BaseModel):
     duplicate_reads: float
     mapped_reads: float
     mean_insert_size: int
+    median_target_coverage: int
     predicted_sex: str = Gender.UNKNOWN
 
 
@@ -85,6 +93,7 @@ class MetricsDeliverables(BaseModel):
     mapped_reads: Optional[List[MappedReads]]
     mean_insert_size: Optional[List[MeanInsertSize]]
     predicted_sex: Optional[List[GenderCheck]]
+    median_target_coverage: Optional[List[MedianTargetCoverage]]
     sample_id_metrics: Optional[List[ParsedMetrics]]
 
     @validator("sample_ids", always=True)
@@ -136,6 +145,18 @@ class MetricsDeliverables(BaseModel):
                 mean_insert_size.append(MeanInsertSize(sample_id=metric.id, value=metric.value))
         return mean_insert_size
 
+    @validator("median_target_coverage", always=True)
+    def set_median_target_coverage(cls, _, values: dict) -> List[MedianTargetCoverage]:
+        """Set median target coverage"""
+        median_target_coverage: List = []
+        raw_metrics: List = values.get("metrics_")
+        for metric in raw_metrics:
+            if metric.name == "MEDIAN_TARGET_COVERAGE":
+                median_target_coverage.append(
+                    MedianTargetCoverage(sample_id=metric.id, value=metric.value)
+                )
+        return median_target_coverage
+
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
         """Set predicted sex"""
@@ -155,6 +176,7 @@ class MetricsDeliverables(BaseModel):
             "duplicate_reads": values.get("duplicate_reads"),
             "mapped_reads": values.get("mapped_reads"),
             "mean_insert_size": values.get("mean_insert_size"),
+            "median_target_coverage": values.get("median_target_coverage"),
             "predicted_sex": values.get("predicted_sex"),
         }
         for sample_id in sample_ids:

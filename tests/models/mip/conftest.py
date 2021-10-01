@@ -156,6 +156,20 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
             {
                 "id": "an_id",
                 "input": "some_input",
+                "name": "MEDIAN_TARGET_COVERAGE",
+                "step": "collecthsmetrics",
+                "value": "29",
+            },
+            {
+                "id": "another_id",
+                "input": "some_input",
+                "name": "MEDIAN_TARGET_COVERAGE",
+                "step": "collecthsmetrics",
+                "value": "28",
+            },
+            {
+                "id": "an_id",
+                "input": "some_input",
                 "name": "gender",
                 "step": "chanjo_sexcheck",
                 "value": "female",
