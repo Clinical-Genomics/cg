@@ -9,7 +9,7 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
     """Get metric for a sample_id from metric object"""
     for metric in metric_objs:
         if sample_id == metric.sample_id:
-            return metric.value
+            return metric
 
 
 class MetricsBase(BaseModel):
@@ -27,6 +27,7 @@ class DuplicateReads(BaseModel):
     """Definition of duplicate reads metric"""
 
     sample_id: str
+    step: str
     value: float
 
     @validator("value", always=True)
@@ -39,6 +40,7 @@ class GenderCheck(BaseModel):
     """Definition of gender check metric"""
 
     sample_id: str
+    step: str
     value: str
 
 
@@ -46,6 +48,7 @@ class MappedReads(BaseModel):
     """Definition of mapped reads metric"""
 
     sample_id: str
+    step: str
     value: float
 
     @validator("value", always=True)
@@ -58,6 +61,7 @@ class MeanInsertSize(BaseModel):
     """Definition of insert size metric"""
 
     sample_id: str
+    step: str
     value: float
 
     @validator("value", always=True)
@@ -71,9 +75,13 @@ class ParsedMetrics(BaseModel):
 
     sample_id: str
     duplicate_reads: float
+    duplicate_reads_step: str
     mapped_reads: float
+    mapped_reads_step: str
     mean_insert_size: int
+    mean_insert_size_step: str
     predicted_sex: str = Gender.UNKNOWN
+    predicted_sex_step: str
 
 
 class MetricsDeliverables(BaseModel):
@@ -90,8 +98,8 @@ class MetricsDeliverables(BaseModel):
     @validator("sample_ids", always=True)
     def set_sample_ids(cls, _, values: dict) -> set:
         """Set sample_ids gathered from all metrics"""
-        sample_ids: List = []
-        raw_metrics: List = values.get("metrics_")
+        sample_ids: list = []
+        raw_metrics: list = values.get("metrics_")
         for metric in raw_metrics:
             sample_ids.append(metric.id)
         return set(sample_ids)
@@ -99,51 +107,61 @@ class MetricsDeliverables(BaseModel):
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
         """Set duplicate_reads"""
-        duplicate_reads: List = []
-        raw_metrics: List = values.get("metrics_")
+        duplicate_reads: list = []
+        raw_metrics: list = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name == "fraction_duplicates":
-                duplicate_reads.append(DuplicateReads(sample_id=metric.id, value=metric.value))
+                duplicate_reads.append(
+                    DuplicateReads(step=metric.step, sample_id=metric.id, value=metric.value)
+                )
         return duplicate_reads
 
     @validator("mapped_reads", always=True)
     def set_mapped_reads(cls, _, values: dict) -> List[MappedReads]:
         """Set mapped reads"""
         sample_ids: set = values.get("sample_ids")
-        mapped_reads: List = []
+        mapped_reads: list = []
         total_sequences: dict = {}
         reads_mapped: dict = {}
-        raw_metrics: List = values.get("metrics_")
+        raw_metrics: list = values.get("metrics_")
+        metric_step: str = ""
         for metric in raw_metrics:
             if metric.name == "raw_total_sequences":
                 raw_total_sequences = total_sequences.get(metric.id, 0)
                 total_sequences[metric.id] = int(metric.value) + raw_total_sequences
+                metric_step: str = metric.step
             if metric.name == "reads_mapped":
                 raw_reads_mapped = reads_mapped.get(metric.id, 0)
                 reads_mapped[metric.id] = int(metric.value) + raw_reads_mapped
         for sample_id in sample_ids:
             fraction_mapped_read = reads_mapped[sample_id] / total_sequences[sample_id]
-            mapped_reads.append(MappedReads(sample_id=sample_id, value=fraction_mapped_read))
+            mapped_reads.append(
+                MappedReads(step=metric_step, sample_id=sample_id, value=fraction_mapped_read)
+            )
         return mapped_reads
 
     @validator("mean_insert_size", always=True)
     def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
         """Set mean insert size"""
-        mean_insert_size: List = []
-        raw_metrics: List = values.get("metrics_")
+        mean_insert_size: list = []
+        raw_metrics: list = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name == "MEAN_INSERT_SIZE":
-                mean_insert_size.append(MeanInsertSize(sample_id=metric.id, value=metric.value))
+                mean_insert_size.append(
+                    MeanInsertSize(step=metric.step, sample_id=metric.id, value=metric.value)
+                )
         return mean_insert_size
 
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
         """Set predicted sex"""
-        predicted_sex: List = []
-        raw_metrics: List = values.get("metrics_")
+        predicted_sex: list = []
+        raw_metrics: list = values.get("metrics_")
         for metric in raw_metrics:
             if metric.name == "gender":
-                predicted_sex.append(GenderCheck(sample_id=metric.id, value=metric.value))
+                predicted_sex.append(
+                    GenderCheck(step=metric.step, sample_id=metric.id, value=metric.value)
+                )
         return predicted_sex
 
     @validator("sample_id_metrics", always=True)
@@ -158,14 +176,14 @@ class MetricsDeliverables(BaseModel):
             "predicted_sex": values.get("predicted_sex"),
         }
         for sample_id in sample_ids:
-            metric_per_sample_id: dict = {}
-            metric_per_sample_id["sample_id"] = sample_id
+            metric_per_sample_id: dict = {"sample_id": sample_id}
             for metric_name, metric_objs in metric_per_sample_id_map.items():
-                metric_value: Any = _get_metric_per_sample_id(
+                sample_metric: Any = _get_metric_per_sample_id(
                     sample_id=sample_id, metric_objs=metric_objs
                 )
-                if metric_value:
-                    metric_per_sample_id[metric_name] = metric_value
+                if sample_metric.value:
+                    metric_per_sample_id[metric_name]: Any = sample_metric.value
+                    metric_per_sample_id[metric_name + "_step"]: str = sample_metric.step
             sample_id_metrics.append(ParsedMetrics(**metric_per_sample_id))
         return sample_id_metrics
 

@@ -61,6 +61,9 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     # THEN assert that value was set
     assert duplicate_read.value == float(expected_duplicate_read["value"]) * 100
 
+    # THEN assert that step was set
+    assert duplicate_read.step == expected_duplicate_read["step"]
+
 
 def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
     """
@@ -137,9 +140,13 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_
         # THEN assert that metrics are set for sample_id
         if sample_id_metric.sample_id == "an_id":
             assert sample_id_metric.duplicate_reads == 0.0748899652117993 * 100
+            assert sample_id_metric.duplicate_reads_step == "markduplicates"
             assert sample_id_metric.mapped_reads == 0.9975489233589259 * 100
+            assert sample_id_metric.mapped_reads_step == "bamstats"
             assert sample_id_metric.mean_insert_size == 422.0
+            assert sample_id_metric.mean_insert_size_step == "collectmultiplemetricsinsertsize"
             assert sample_id_metric.predicted_sex == "female"
+            assert sample_id_metric.predicted_sex_step == "chanjo_sexcheck"
 
 
 def test_get_sample_id_metric(mip_metrics_deliverables_raw: dict):
