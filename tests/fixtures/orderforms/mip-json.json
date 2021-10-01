@@ -29,10 +29,10 @@
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",
-      "source": "other",
+      "source": "blood",
       "status": "affected",
       "subject_id": "2020-12345-67",
-      "synopsis": [""],
+      "synopsis": [],
       "volume": "1",
       "well_position": ""
     },
@@ -65,7 +65,7 @@
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-56789-10",
-      "synopsis": [""],
+      "synopsis": "",
       "volume": "1",
       "well_position": ""
     },
@@ -128,10 +128,10 @@
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",
-      "source": "other",
+      "source": "blood",
       "status": "affected",
       "subject_id": "2020-12131-41",
-      "synopsis": [""],
+      "synopsis": "",
       "volume": "1",
       "well_position": ""
     },
@@ -228,10 +228,10 @@
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",
-      "source": "other",
+      "source": "blood",
       "status": "affected",
       "subject_id": "2020-20212-22",
-      "synopsis": [""],
+      "synopsis": "",
       "volume": "1",
       "well_position": ""
     },
@@ -261,14 +261,12 @@
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",
-      "source": "other",
+      "source": "blood",
       "status": "affected",
       "subject_id": "2020-24252-62",
-      "synopsis": [""],
+      "synopsis": "",
       "volume": "1",
       "well_position": ""
     }
   ]
 }
-
-
