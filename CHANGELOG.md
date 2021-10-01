@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.22.2]
+### Fixed
+- Synopsis from old and new samples are combined
+
 ## [22.22.1]
 ### Added
 - Added required ENV declarations in dockerfile
