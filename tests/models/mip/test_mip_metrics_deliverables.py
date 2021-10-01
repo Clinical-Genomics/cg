@@ -115,8 +115,8 @@ def test_mip_metrics_set_meadian_target_coverage(mip_metrics_deliverables_raw: d
 
     # THEN assert that it was successfully created
     assert isinstance(median_target_coverage, MedianTargetCoverage)
-    
-    
+
+
 def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     """
     Tests set predicted sex
