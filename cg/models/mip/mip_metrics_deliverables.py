@@ -112,7 +112,7 @@ class MetricsDeliverables(BaseModel):
         for metric in raw_metrics:
             if metric.name == "fraction_duplicates":
                 duplicate_reads.append(
-                    DuplicateReads(step=metric.step, sample_id=metric.id, value=metric.value)
+                    DuplicateReads(sample_id=metric.id, step=metric.step, value=metric.value)
                 )
         return duplicate_reads
 
@@ -136,7 +136,7 @@ class MetricsDeliverables(BaseModel):
         for sample_id in sample_ids:
             fraction_mapped_read = reads_mapped[sample_id] / total_sequences[sample_id]
             mapped_reads.append(
-                MappedReads(step=metric_step, sample_id=sample_id, value=fraction_mapped_read)
+                MappedReads(sample_id=sample_id, step=metric_step, value=fraction_mapped_read)
             )
         return mapped_reads
 
@@ -148,7 +148,7 @@ class MetricsDeliverables(BaseModel):
         for metric in raw_metrics:
             if metric.name == "MEAN_INSERT_SIZE":
                 mean_insert_size.append(
-                    MeanInsertSize(step=metric.step, sample_id=metric.id, value=metric.value)
+                    MeanInsertSize(sample_id=metric.id, step=metric.step, value=metric.value)
                 )
         return mean_insert_size
 
@@ -160,7 +160,7 @@ class MetricsDeliverables(BaseModel):
         for metric in raw_metrics:
             if metric.name == "gender":
                 predicted_sex.append(
-                    GenderCheck(step=metric.step, sample_id=metric.id, value=metric.value)
+                    GenderCheck(sample_id=metric.id, step=metric.step, value=metric.value)
                 )
         return predicted_sex
 
