@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.22.3]
+### Added
+- Added median target coverage to mip:s pydantic model
+
 ## [22.22.2]
 ### Fixed
 - Synopsis from old and new samples are combined
