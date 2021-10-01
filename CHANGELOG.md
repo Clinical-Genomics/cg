@@ -17,6 +17,16 @@ __________ DO NOT TOUCH ___________
 ### Fixed
 
 __________ DO NOT TOUCH ___________ -->
+
+## [22.22.2]
+### Fixed
+- Synopsis from old and new samples are combined
+
+## [22.22.1]
+### Added
+- Added required ENV declarations in dockerfile
+- pyyaml dependency required to run app in container
+
 ## [22.22.0]
 ### Added
 - Fluffy samplesheet add control field
