@@ -117,10 +117,7 @@ class ExcelSample(OrderSample):
 
     @validator("data_delivery")
     def convert_data_delivery(cls, value: Optional[str]):
-        value = value.lower()
-        if value == "analysis + bam":
-            return "analysis-bam"
-        return value
+        return value.lower()
 
     @validator("status", "priority")
     def convert_to_lower(cls, value: Optional[str]):
