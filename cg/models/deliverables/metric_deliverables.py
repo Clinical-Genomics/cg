@@ -3,14 +3,14 @@ from typing import Any, List, Optional
 from pydantic import BaseModel, Field, validator
 
 
-def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
+def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> object:
     """Get metric for a sample_id from metric object"""
     for metric in metric_objs:
         if sample_id == metric.sample_id:
             return metric
 
 
-def add_metric(name: str, values: dict) -> List[Any]:
+def add_metric(name: str, values: dict) -> List[object]:
     """Set metric"""
     found_metrics: list = []
     raw_metrics: list = values.get("metrics_")
@@ -25,7 +25,7 @@ def add_metric(name: str, values: dict) -> List[Any]:
     return found_metrics
 
 
-def add_sample_id_metrics(parsed_metric: object, values: dict) -> List[Any]:
+def add_sample_id_metrics(parsed_metric: object, values: dict) -> List[object]:
     """Set parsed sample_id metrics gathered from all metrics"""
     sample_ids: set = values.get("sample_ids")
     sample_id_metrics: list = []

@@ -12,7 +12,7 @@ from cg.models.deliverables.metric_deliverables import (
     add_sample_id_metrics,
 )
 
-SAMPLE_METRICS_TO_PARSE: list[str] = [
+SAMPLE_METRICS_TO_PARSE: List[str] = [
     "duplicate_reads",
     "mapped_reads",
     "mean_insert_size",
