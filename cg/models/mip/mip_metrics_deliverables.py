@@ -8,8 +8,8 @@ from cg.models.deliverables.metric_deliverables import (
     MedianTargetCoverage,
     ParsedMetrics,
     MetricsDeliverables,
-    set_metric,
-    set_sample_id_metrics,
+    add_metric,
+    add_sample_id_metrics,
 )
 
 SAMPLE_METRICS_TO_PARSE: list[str] = [
@@ -91,7 +91,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
         """Set duplicate_reads"""
-        return set_metric(name="fraction_duplicates", values=values)
+        return add_metric(name="fraction_duplicates", values=values)
 
     @validator("mapped_reads", always=True)
     def set_mapped_reads(cls, _, values: dict) -> List[MIPMappedReads]:
@@ -120,22 +120,22 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("mean_insert_size", always=True)
     def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
         """Set mean insert size"""
-        return set_metric(name="MEAN_INSERT_SIZE", values=values)
+        return add_metric(name="MEAN_INSERT_SIZE", values=values)
 
     @validator("median_target_coverage", always=True)
     def set_median_target_coverage(cls, _, values: dict) -> List[MedianTargetCoverage]:
         """Set median target coverage"""
-        return set_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
+        return add_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
 
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
         """Set predicted sex"""
-        return set_metric(name="gender", values=values)
+        return add_metric(name="gender", values=values)
 
     @validator("sample_id_metrics", always=True)
     def set_sample_id_metrics(cls, _, values: dict) -> List[MIPParsedMetrics]:
         """Set parsed sample_id metrics gathered from all metrics"""
-        return set_sample_id_metrics(parsed_metric=MIPParsedMetrics, values=values)
+        return add_sample_id_metrics(parsed_metric=MIPParsedMetrics, values=values)
 
 
 def get_sample_id_metric(
