@@ -5,7 +5,6 @@ from pydantic import validator
 from cg.constants.gender import Gender
 from cg.models.deliverables.metric_deliverables import (
     SampleMetric,
-    DuplicateReads,
     MeanInsertSize,
     MedianTargetCoverage,
     ParsedMetrics,
@@ -28,6 +27,17 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
             return metric
 
 
+class DuplicateReads(SampleMetric):
+    """Definition of duplicate reads metric"""
+
+    value: float
+
+    @validator("value", always=True)
+    def convert_duplicate_read(cls, value) -> float:
+        """Convert raw value from fraction to percent"""
+        return value * 100
+
+
 class GenderCheck(SampleMetric):
     """Definition of gender check metric"""
 
@@ -45,9 +55,22 @@ class MIPMappedReads(SampleMetric):
         return value * 100
 
 
+class MeanInsertSize(SampleMetric):
+    """Definition of insert size metric"""
+
+    value: float
+
+    @validator("value", always=True)
+    def convert_mean_insert_size(cls, value) -> int:
+        """Convert raw value from float to int"""
+        return int(value)
+
+
 class MIPParsedMetrics(ParsedMetrics):
     """Defines parsed metrics"""
 
+    duplicate_reads: float
+    duplicate_reads_step: str
     mapped_reads: float
     mapped_reads_step: str
     predicted_sex: str = Gender.UNKNOWN

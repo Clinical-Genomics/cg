@@ -1,6 +1,6 @@
-from typing import Any, Optional, List
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, Field, validator
 
 
 class MetricsBase(BaseModel):
@@ -19,17 +19,6 @@ class SampleMetric(BaseModel):
 
     sample_id: str
     step: str
-
-
-class DuplicateReads(SampleMetric):
-    """Definition of duplicate reads metric"""
-
-    value: float
-
-    @validator("value", always=True)
-    def convert_duplicate_read(cls, value) -> float:
-        """Convert raw value from fraction to percent"""
-        return value * 100
 
 
 class MeanInsertSize(SampleMetric):
@@ -53,8 +42,6 @@ class ParsedMetrics(BaseModel):
     """Defines parsed metrics"""
 
     sample_id: str
-    duplicate_reads: float
-    duplicate_reads_step: str
     mean_insert_size: int
     mean_insert_size_step: str
     median_target_coverage: int
