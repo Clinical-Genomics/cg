@@ -25,6 +25,10 @@ __________ DO NOT TOUCH ___________ -->
   - fastq-qc + analysis + cram
   - fastq-qc + analysis + cram + Scout
 
+## [22.22.3]
+### Fixed
+- Add proxy-protocol to dockerfile
+
 ## [22.22.2]
 ### Fixed
 - Synopsis from old and new samples are combined
