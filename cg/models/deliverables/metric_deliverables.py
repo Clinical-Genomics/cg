@@ -3,6 +3,48 @@ from typing import Any, List, Optional
 from pydantic import BaseModel, Field, validator
 
 
+def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> object:
+    """Get metric for a sample_id from metric object"""
+    for metric in metric_objs:
+        if sample_id == metric.sample_id:
+            return metric
+
+
+def set_metric(name: str, values: dict) -> List[object]:
+    """Set metric"""
+    found_metrics: list = []
+    raw_metrics: list = values.get("metrics_")
+    metrics_validator: dict = values.get("metric_to_get_")
+    for metric in raw_metrics:
+        if name == metric.name and metric.name in metrics_validator:
+            found_metrics.append(
+                metrics_validator[metric.name](
+                    sample_id=metric.id, step=metric.step, value=metric.value
+                )
+            )
+    return found_metrics
+
+
+def set_sample_id_metrics(parsed_metric: object, values: dict) -> List[object]:
+    """Set parsed sample_id metrics gathered from all metrics"""
+    sample_ids: set = values.get("sample_ids")
+    sample_id_metrics: list = []
+    metric_per_sample_id_map: dict = {}
+    for metric_name in values.get("sample_metric_to_parse"):
+        metric_per_sample_id_map.update({metric_name: values.get(metric_name)})
+    for sample_id in sample_ids:
+        metric_per_sample_id: dict = {"sample_id": sample_id}
+        for metric_name, metric_objs in metric_per_sample_id_map.items():
+            sample_metric: Any = _get_metric_per_sample_id(
+                sample_id=sample_id, metric_objs=metric_objs
+            )
+            if sample_metric.value:
+                metric_per_sample_id[metric_name]: Any = sample_metric.value
+                metric_per_sample_id[metric_name + "_step"]: str = sample_metric.step
+        sample_id_metrics.append(parsed_metric(**metric_per_sample_id))
+    return sample_id_metrics
+
+
 class MetricsBase(BaseModel):
     """Definition for elements in deliverables metrics file"""
 
@@ -53,8 +95,6 @@ class MetricsDeliverables(BaseModel):
 
     metrics_: List[MetricsBase] = Field(..., alias="metrics")
     sample_ids: Optional[set]
-    mean_insert_size: Optional[List[MeanInsertSize]]
-    median_target_coverage: Optional[List[MedianTargetCoverage]]
 
     @validator("sample_ids", always=True)
     def set_sample_ids(cls, _, values: dict) -> set:

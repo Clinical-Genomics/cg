@@ -5,26 +5,20 @@ from pydantic import validator
 from cg.constants.gender import Gender
 from cg.models.deliverables.metric_deliverables import (
     SampleMetric,
-    MeanInsertSize,
     MedianTargetCoverage,
     ParsedMetrics,
     MetricsDeliverables,
+    set_metric,
+    set_sample_id_metrics,
 )
 
-SAMPLE_METRICS_TO_PARSE: list = [
+SAMPLE_METRICS_TO_PARSE: list[str] = [
     "duplicate_reads",
     "mapped_reads",
     "mean_insert_size",
     "median_target_coverage",
     "predicted_sex",
 ]
-
-
-def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
-    """Get metric for a sample_id from metric object"""
-    for metric in metric_objs:
-        if sample_id == metric.sample_id:
-            return metric
 
 
 class DuplicateReads(SampleMetric):
@@ -80,8 +74,16 @@ class MIPParsedMetrics(ParsedMetrics):
 class MIPMetricsDeliverables(MetricsDeliverables):
     """Specification for a metric MIP deliverables file"""
 
+    metric_to_get_: dict[str, Any] = {
+        "fraction_duplicates": DuplicateReads,
+        "MEAN_INSERT_SIZE": MeanInsertSize,
+        "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
+        "gender": GenderCheck,
+    }
     duplicate_reads: Optional[List[DuplicateReads]]
     mapped_reads: Optional[List[MIPMappedReads]]
+    mean_insert_size: Optional[List[MeanInsertSize]]
+    median_target_coverage: Optional[List[MedianTargetCoverage]]
     predicted_sex: Optional[List[GenderCheck]]
     sample_metric_to_parse: list = SAMPLE_METRICS_TO_PARSE
     sample_id_metrics: Optional[List[MIPParsedMetrics]]
@@ -89,14 +91,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
         """Set duplicate_reads"""
-        duplicate_reads: list = []
-        raw_metrics: list = values.get("metrics_")
-        for metric in raw_metrics:
-            if metric.name == "fraction_duplicates":
-                duplicate_reads.append(
-                    DuplicateReads(sample_id=metric.id, step=metric.step, value=metric.value)
-                )
-        return duplicate_reads
+        return set_metric(name="fraction_duplicates", values=values)
 
     @validator("mapped_reads", always=True)
     def set_mapped_reads(cls, _, values: dict) -> List[MIPMappedReads]:
@@ -125,58 +120,22 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     @validator("mean_insert_size", always=True)
     def set_mean_insert_size(cls, _, values: dict) -> List[MeanInsertSize]:
         """Set mean insert size"""
-        mean_insert_size: list = []
-        raw_metrics: list = values.get("metrics_")
-        for metric in raw_metrics:
-            if metric.name == "MEAN_INSERT_SIZE":
-                mean_insert_size.append(
-                    MeanInsertSize(sample_id=metric.id, step=metric.step, value=metric.value)
-                )
-        return mean_insert_size
+        return set_metric(name="MEAN_INSERT_SIZE", values=values)
 
     @validator("median_target_coverage", always=True)
     def set_median_target_coverage(cls, _, values: dict) -> List[MedianTargetCoverage]:
         """Set median target coverage"""
-        median_target_coverage: List = []
-        raw_metrics: List = values.get("metrics_")
-        for metric in raw_metrics:
-            if metric.name == "MEDIAN_TARGET_COVERAGE":
-                median_target_coverage.append(
-                    MedianTargetCoverage(sample_id=metric.id, step=metric.step, value=metric.value)
-                )
-        return median_target_coverage
+        return set_metric(name="MEDIAN_TARGET_COVERAGE", values=values)
 
     @validator("predicted_sex", always=True)
     def set_predicted_sex(cls, _, values: dict) -> List[GenderCheck]:
         """Set predicted sex"""
-        predicted_sex: list = []
-        raw_metrics: list = values.get("metrics_")
-        for metric in raw_metrics:
-            if metric.name == "gender":
-                predicted_sex.append(
-                    GenderCheck(sample_id=metric.id, step=metric.step, value=metric.value)
-                )
-        return predicted_sex
+        return set_metric(name="gender", values=values)
 
     @validator("sample_id_metrics", always=True)
     def set_sample_id_metrics(cls, _, values: dict) -> List[MIPParsedMetrics]:
         """Set parsed sample_id metrics gathered from all metrics"""
-        sample_ids: set = values.get("sample_ids")
-        sample_id_metrics: list = []
-        metric_per_sample_id_map: dict = {}
-        for metric_name in values.get("sample_metric_to_parse"):
-            metric_per_sample_id_map.update({metric_name: values.get(metric_name)})
-        for sample_id in sample_ids:
-            metric_per_sample_id: dict = {"sample_id": sample_id}
-            for metric_name, metric_objs in metric_per_sample_id_map.items():
-                sample_metric: Any = _get_metric_per_sample_id(
-                    sample_id=sample_id, metric_objs=metric_objs
-                )
-                if sample_metric.value:
-                    metric_per_sample_id[metric_name]: Any = sample_metric.value
-                    metric_per_sample_id[metric_name + "_step"]: str = sample_metric.step
-            sample_id_metrics.append(MIPParsedMetrics(**metric_per_sample_id))
-        return sample_id_metrics
+        return set_sample_id_metrics(parsed_metric=MIPParsedMetrics, values=values)
 
 
 def get_sample_id_metric(
