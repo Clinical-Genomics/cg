@@ -4,7 +4,7 @@ import pytest
 
 from cg.constants.priority import SlurmQos
 from cg.models.mip.mip_config import MipBaseConfig
-from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -200,14 +200,14 @@ def fixture_mip_metrics_deliverables_raw() -> dict:
 
 
 @pytest.fixture(name="mip_metrics_deliverables")
-def fixture_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict) -> MetricsDeliverables:
-    return MetricsDeliverables(**mip_metrics_deliverables_raw)
+def fixture_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict) -> MIPMetricsDeliverables:
+    return MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
 
 @pytest.fixture(name="mip_analysis_raw")
 def fixture_mip_analysis_raw(
     case_id: str,
-    mip_metrics_deliverables: MetricsDeliverables,
+    mip_metrics_deliverables: MIPMetricsDeliverables,
     mip_rank_model_version: str,
     mip_sv_rank_model_version: str,
     sample_id,

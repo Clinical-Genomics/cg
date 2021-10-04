@@ -3,26 +3,26 @@
 from cg.models.mip.mip_metrics_deliverables import (
     DuplicateReads,
     GenderCheck,
-    MappedReads,
+    MIPMappedReads,
     MeanInsertSize,
     MedianTargetCoverage,
-    MetricsDeliverables,
-    ParsedMetrics,
+    MIPMetricsDeliverables,
+    MIPParsedMetrics,
     get_sample_id_metric,
 )
 
 
 def test_instantiate_mip_metrics_deliverables(mip_metrics_deliverables_raw: dict):
     """
-    Tests raw data deliverable against a pydantic MetricsDeliverables
+    Tests raw data deliverable against a pydantic MIPMetricsDeliverables
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that it was successfully created
-    assert isinstance(metrics_object, MetricsDeliverables)
+    assert isinstance(metrics_object, MIPMetricsDeliverables)
 
 
 def test_instantiate_mip_metrics_sample_ids(mip_metrics_deliverables_raw: dict):
@@ -31,8 +31,8 @@ def test_instantiate_mip_metrics_sample_ids(mip_metrics_deliverables_raw: dict):
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that sample_ids was successfully created
     assert metrics_object.sample_ids == {"an_id", "another_id"}
@@ -44,8 +44,8 @@ def test_mip_metrics_set_duplicate_reads(mip_metrics_deliverables_raw: dict):
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that read duplicates was set
     assert metrics_object.duplicate_reads
@@ -72,16 +72,16 @@ def test_mip_metrics_set_mapped_reads(mip_metrics_deliverables_raw: dict):
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that mapped reads was set
     assert metrics_object.mapped_reads
 
-    mapped_reads: MappedReads = metrics_object.mapped_reads.pop()
+    mapped_reads: MIPMappedReads = metrics_object.mapped_reads.pop()
 
     # THEN assert that it was successfully created
-    assert isinstance(mapped_reads, MappedReads)
+    assert isinstance(mapped_reads, MIPMappedReads)
 
 
 def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
@@ -90,8 +90,8 @@ def test_mip_metrics_set_mean_insert_size(mip_metrics_deliverables_raw: dict):
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that mean insert size was set
     assert metrics_object.mean_insert_size
@@ -108,8 +108,8 @@ def test_mip_metrics_set_meadian_target_coverage(mip_metrics_deliverables_raw: d
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that mean insert size was set
     assert metrics_object.median_target_coverage
@@ -126,8 +126,8 @@ def test_mip_metrics_set_predicted_sex(mip_metrics_deliverables_raw: dict):
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that predicted sex was set
     assert metrics_object.predicted_sex
@@ -144,8 +144,8 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # THEN assert that sample_id metrics was set
     assert metrics_object.sample_id_metrics
@@ -154,7 +154,7 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_
     for sample_id_metric in metrics_object.sample_id_metrics:
 
         # THEN assert that sample_id metrics was successfully created
-        assert isinstance(sample_id_metric, ParsedMetrics)
+        assert isinstance(sample_id_metric, MIPParsedMetrics)
 
         # THEN assert that metrics are set for sample_id
         if sample_id_metric.sample_id == "an_id":
@@ -174,8 +174,8 @@ def test_get_sample_id_metric(mip_metrics_deliverables_raw: dict):
     """
     # GIVEN a dictionary with the some metrics
 
-    # WHEN instantiating a MetricsDeliverables object
-    metrics_object = MetricsDeliverables(**mip_metrics_deliverables_raw)
+    # WHEN instantiating a MIPMetricsDeliverables object
+    metrics_object = MIPMetricsDeliverables(**mip_metrics_deliverables_raw)
 
     # When getting an sample_id_metric
     sample_id_metric = get_sample_id_metric(

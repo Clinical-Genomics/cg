@@ -1,8 +1,24 @@
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import validator
 
 from cg.constants.gender import Gender
+from cg.models.deliverables.metric_deliverables import (
+    SampleMetric,
+    DuplicateReads,
+    MeanInsertSize,
+    MedianTargetCoverage,
+    ParsedMetrics,
+    MetricsDeliverables,
+)
+
+SAMPLE_METRICS_TO_PARSE: list = [
+    "duplicate_reads",
+    "mapped_reads",
+    "mean_insert_size",
+    "median_target_coverage",
+    "predicted_sex",
+]
 
 
 def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
@@ -12,43 +28,15 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
             return metric
 
 
-class MetricsBase(BaseModel):
-    """Definition for elements in deliverables metrics file"""
-
-    header: Optional[str]
-    id: str
-    input: str
-    name: str
-    step: str
-    value: Any
-
-
-class DuplicateReads(BaseModel):
-    """Definition of duplicate reads metric"""
-
-    sample_id: str
-    step: str
-    value: float
-
-    @validator("value", always=True)
-    def convert_duplicate_read(cls, value) -> float:
-        """Convert raw value from fraction to percent"""
-        return value * 100
-
-
-class GenderCheck(BaseModel):
+class GenderCheck(SampleMetric):
     """Definition of gender check metric"""
 
-    sample_id: str
-    step: str
     value: str
 
 
-class MappedReads(BaseModel):
+class MIPMappedReads(SampleMetric):
     """Definition of mapped reads metric"""
 
-    sample_id: str
-    step: str
     value: float
 
     @validator("value", always=True)
@@ -57,63 +45,23 @@ class MappedReads(BaseModel):
         return value * 100
 
 
-class MeanInsertSize(BaseModel):
-    """Definition of insert size metric"""
-
-    sample_id: str
-    step: str
-    value: float
-
-    @validator("value", always=True)
-    def convert_mean_insert_size(cls, value) -> int:
-        """Convert raw value from float to int"""
-        return int(value)
-
-
-class MedianTargetCoverage(BaseModel):
-    """Definition of median target coverage"""
-
-    sample_id: str
-    step: str
-    value: int
-
-
-class ParsedMetrics(BaseModel):
+class MIPParsedMetrics(ParsedMetrics):
     """Defines parsed metrics"""
 
-    sample_id: str
-    duplicate_reads: float
-    duplicate_reads_step: str
     mapped_reads: float
     mapped_reads_step: str
-    mean_insert_size: int
-    mean_insert_size_step: str
-    median_target_coverage: int
-    median_target_coverage_step: str
     predicted_sex: str = Gender.UNKNOWN
     predicted_sex_step: str
 
 
-class MetricsDeliverables(BaseModel):
-    """Specification for a metric general deliverables file"""
+class MIPMetricsDeliverables(MetricsDeliverables):
+    """Specification for a metric MIP deliverables file"""
 
-    metrics_: List[MetricsBase] = Field(..., alias="metrics")
-    sample_ids: Optional[set]
     duplicate_reads: Optional[List[DuplicateReads]]
-    mapped_reads: Optional[List[MappedReads]]
-    mean_insert_size: Optional[List[MeanInsertSize]]
+    mapped_reads: Optional[List[MIPMappedReads]]
     predicted_sex: Optional[List[GenderCheck]]
-    median_target_coverage: Optional[List[MedianTargetCoverage]]
-    sample_id_metrics: Optional[List[ParsedMetrics]]
-
-    @validator("sample_ids", always=True)
-    def set_sample_ids(cls, _, values: dict) -> set:
-        """Set sample_ids gathered from all metrics"""
-        sample_ids: list = []
-        raw_metrics: list = values.get("metrics_")
-        for metric in raw_metrics:
-            sample_ids.append(metric.id)
-        return set(sample_ids)
+    sample_metric_to_parse: list = SAMPLE_METRICS_TO_PARSE
+    sample_id_metrics: Optional[List[MIPParsedMetrics]]
 
     @validator("duplicate_reads", always=True)
     def set_duplicate_reads(cls, _, values: dict) -> List[DuplicateReads]:
@@ -128,7 +76,7 @@ class MetricsDeliverables(BaseModel):
         return duplicate_reads
 
     @validator("mapped_reads", always=True)
-    def set_mapped_reads(cls, _, values: dict) -> List[MappedReads]:
+    def set_mapped_reads(cls, _, values: dict) -> List[MIPMappedReads]:
         """Set mapped reads"""
         sample_ids: set = values.get("sample_ids")
         mapped_reads: list = []
@@ -147,7 +95,7 @@ class MetricsDeliverables(BaseModel):
         for sample_id in sample_ids:
             fraction_mapped_read = reads_mapped[sample_id] / total_sequences[sample_id]
             mapped_reads.append(
-                MappedReads(sample_id=sample_id, step=metric_step, value=fraction_mapped_read)
+                MIPMappedReads(sample_id=sample_id, step=metric_step, value=fraction_mapped_read)
             )
         return mapped_reads
 
@@ -188,17 +136,13 @@ class MetricsDeliverables(BaseModel):
         return predicted_sex
 
     @validator("sample_id_metrics", always=True)
-    def set_sample_id_metrics(cls, _, values: dict) -> List[ParsedMetrics]:
+    def set_sample_id_metrics(cls, _, values: dict) -> List[MIPParsedMetrics]:
         """Set parsed sample_id metrics gathered from all metrics"""
         sample_ids: set = values.get("sample_ids")
         sample_id_metrics: list = []
-        metric_per_sample_id_map: dict = {
-            "duplicate_reads": values.get("duplicate_reads"),
-            "mapped_reads": values.get("mapped_reads"),
-            "mean_insert_size": values.get("mean_insert_size"),
-            "median_target_coverage": values.get("median_target_coverage"),
-            "predicted_sex": values.get("predicted_sex"),
-        }
+        metric_per_sample_id_map: dict = {}
+        for metric_name in values.get("sample_metric_to_parse"):
+            metric_per_sample_id_map.update({metric_name: values.get(metric_name)})
         for sample_id in sample_ids:
             metric_per_sample_id: dict = {"sample_id": sample_id}
             for metric_name, metric_objs in metric_per_sample_id_map.items():
@@ -208,11 +152,13 @@ class MetricsDeliverables(BaseModel):
                 if sample_metric.value:
                     metric_per_sample_id[metric_name]: Any = sample_metric.value
                     metric_per_sample_id[metric_name + "_step"]: str = sample_metric.step
-            sample_id_metrics.append(ParsedMetrics(**metric_per_sample_id))
+            sample_id_metrics.append(MIPParsedMetrics(**metric_per_sample_id))
         return sample_id_metrics
 
 
-def get_sample_id_metric(sample_id_metrics: List[ParsedMetrics], sample_id: str) -> ParsedMetrics:
+def get_sample_id_metric(
+    sample_id_metrics: List[MIPParsedMetrics], sample_id: str
+) -> MIPParsedMetrics:
     """Get parsed metrics for an sample_id"""
     for sample_id_metric in sample_id_metrics:
         if sample_id == sample_id_metric.sample_id:
