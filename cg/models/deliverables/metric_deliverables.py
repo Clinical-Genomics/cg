@@ -11,7 +11,7 @@ def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
 
 
 def add_metric(name: str, values: dict) -> List[Any]:
-    """Set metric"""
+    """Add metric to list of objects"""
     found_metrics: list = []
     raw_metrics: list = values.get("metrics_")
     metrics_validator: Dict[str, Any] = values.get("metric_to_get_")
@@ -26,7 +26,7 @@ def add_metric(name: str, values: dict) -> List[Any]:
 
 
 def add_sample_id_metrics(parsed_metric: Any, values: dict) -> List[Any]:
-    """Set parsed sample_id metrics gathered from all metrics"""
+    """Add parsed sample_id metrics gathered from all metrics to list"""
     sample_ids: set = values.get("sample_ids")
     sample_id_metrics: list = []
     metric_per_sample_id_map: dict = {}
