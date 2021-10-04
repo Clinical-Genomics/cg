@@ -18,6 +18,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.22.4]
+### Added
+- Added median target coverage to mip:s pydantic model
+- Added step to mips metric deliverables model
+
 ## [22.22.3]
 ### Fixed
 - Add proxy-protocol to dockerfile
