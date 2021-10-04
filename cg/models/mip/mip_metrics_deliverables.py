@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 from pydantic import validator
 
@@ -74,7 +74,7 @@ class MIPParsedMetrics(ParsedMetrics):
 class MIPMetricsDeliverables(MetricsDeliverables):
     """Specification for a metric MIP deliverables file"""
 
-    metric_to_get_: dict[str, Any] = {
+    metric_to_get_: Dict[str, object] = {
         "fraction_duplicates": DuplicateReads,
         "MEAN_INSERT_SIZE": MeanInsertSize,
         "MEDIAN_TARGET_COVERAGE": MedianTargetCoverage,
