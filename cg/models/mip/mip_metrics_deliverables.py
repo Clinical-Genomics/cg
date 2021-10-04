@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Dict
+from typing import List, Optional, Dict
 
 from pydantic import validator
 
@@ -85,7 +85,7 @@ class MIPMetricsDeliverables(MetricsDeliverables):
     mean_insert_size: Optional[List[MeanInsertSize]]
     median_target_coverage: Optional[List[MedianTargetCoverage]]
     predicted_sex: Optional[List[GenderCheck]]
-    sample_metric_to_parse: list = SAMPLE_METRICS_TO_PARSE
+    sample_metric_to_parse: List[str] = SAMPLE_METRICS_TO_PARSE
     sample_id_metrics: Optional[List[MIPParsedMetrics]]
 
     @validator("duplicate_reads", always=True)
