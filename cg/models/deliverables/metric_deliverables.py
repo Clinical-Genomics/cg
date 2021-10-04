@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
 
@@ -14,7 +14,7 @@ def add_metric(name: str, values: dict) -> List[Any]:
     """Set metric"""
     found_metrics: list = []
     raw_metrics: list = values.get("metrics_")
-    metrics_validator: Dict[str, object] = values.get("metric_to_get_")
+    metrics_validator: Dict[str, Any] = values.get("metric_to_get_")
     for metric in raw_metrics:
         if name == metric.name and metric.name in metrics_validator:
             found_metrics.append(
@@ -25,7 +25,7 @@ def add_metric(name: str, values: dict) -> List[Any]:
     return found_metrics
 
 
-def add_sample_id_metrics(parsed_metric: object, values: dict) -> List[Any]:
+def add_sample_id_metrics(parsed_metric: Any, values: dict) -> List[Any]:
     """Set parsed sample_id metrics gathered from all metrics"""
     sample_ids: set = values.get("sample_ids")
     sample_id_metrics: list = []
