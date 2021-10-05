@@ -43,23 +43,29 @@ class StatusHandler:
             application = sample["application"]
             data_analysis = sample["data_analysis"]
             data_delivery = sample.get("data_delivery")
+            priority = sample["priority"]
 
             if pool_name not in pools:
                 pools[pool_name] = {}
                 pools[pool_name]["name"] = pool_name
                 pools[pool_name]["applications"] = set()
+                pools[pool_name]["priorities"] = set()
                 pools[pool_name]["samples"] = []
 
             pools[pool_name]["samples"].append(sample)
             pools[pool_name]["applications"].add(application)
+            pools[pool_name]["priorities"].add(priority)
 
-        # each pool must only have one application type
+        # each pool must only have same of some values
         for pool in pools.values():
 
             applications = pool["applications"]
+            priorities = pool["priorities"]
             pool_name = pool["name"]
-            if len(applications) != 1:
+            if len(applications) > 1:
                 raise OrderError(f"different application in pool: {pool_name} - {applications}")
+            if len(priorities) > 1:
+                raise OrderError(f"different priority in pool: {pool_name} - {priorities}")
 
         for pool in pools.values():
 
@@ -67,6 +73,8 @@ class StatusHandler:
             applications = pool["applications"]
             application = applications.pop()
             pool_samples = pool["samples"]
+            priorities = pool["priorities"]
+            priority = priorities.pop()
 
             status_data["pools"].append(
                 {
@@ -74,14 +82,12 @@ class StatusHandler:
                     "application": application,
                     "data_analysis": data_analysis,
                     "data_delivery": data_delivery,
+                    "priority": priority,
                     "samples": [
                         {
-                            "application": sample["application"],
                             "comment": sample.get("comment"),
                             "control": sample.get("control"),
-                            "data_delivery": sample.get("data_delivery"),
                             "name": sample["name"],
-                            "priority": sample["priority"],
                         }
                         for sample in pool_samples
                     ],
@@ -509,13 +515,17 @@ class StatusHandler:
 
             case_name = f"{ticket}-{pool['name']}"
             case_obj = self.status.find_family(customer=customer_obj, name=case_name)
+            priority = pool["priority"]
+            data_analysis = Pipeline(pool["data_analysis"]),
+            data_delivery = DataDelivery(pool["data_delivery"]),
 
             if not case_obj:
                 case_obj = self.status.add_case(
-                    data_analysis=Pipeline(pool["data_analysis"]),
-                    data_delivery=DataDelivery(pool["data_delivery"]),
+                    data_analysis=data_analysis,
+                    data_delivery=data_delivery,
                     name=case_name,
                     panels=None,
+                    priority=priority,
                 )
                 case_obj.customer = customer_obj
                 self.status.add_commit(case_obj)
@@ -539,7 +549,7 @@ class StatusHandler:
                     no_invoice=True,
                     order=order,
                     ordered=ordered,
-                    priority=sample["priority"],
+                    priority=priority,
                     sex="unknown",
                     ticket=ticket,
                 )
