@@ -123,10 +123,13 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     assert sample_data["volume"] == "1"
 
 
-def test_families_to_status(mip_order_to_submit):
+def test_cases_to_status(mip_order_to_submit):
+
     # GIVEN a scout order with a trio case
+
     # WHEN parsing for status
     data = StatusHandler.cases_to_status(mip_order_to_submit)
+
     # THEN it should pick out the case
     assert len(data["families"]) == 2
     family = data["families"][0]
@@ -153,6 +156,17 @@ def test_families_to_status(mip_order_to_submit):
 
     # ... second sample has a comment
     assert isinstance(family["samples"][1]["comment"], str)
+
+
+def test_cases_to_status_synopsis(mip_order_to_submit):
+    # GIVEN a scout order with a trio case where synopsis is None
+    for sample in mip_order_to_submit["samples"]:
+        sample["synopsis"] = None
+
+    # WHEN parsing for status
+    StatusHandler.cases_to_status(mip_order_to_submit)
+
+    # THEN No exception should have been raised on synopsis
 
 
 def test_store_rml(orders_api, base_store, rml_status_data):
