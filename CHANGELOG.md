@@ -18,6 +18,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+
+## [22.25.2]
+### Fixed
+- RML priority on pool-case
+
 ## [22.25.1]
 ### Fixed
 - Database migration order
