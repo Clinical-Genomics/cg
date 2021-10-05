@@ -7,6 +7,7 @@ from cg.models.deliverables.metric_deliverables import (
     SampleMetric,
     MedianTargetCoverage,
     ParsedMetrics,
+    MeanInsertSize,
     MetricsDeliverables,
     add_metric,
     add_sample_id_metrics,
@@ -47,17 +48,6 @@ class MIPMappedReads(SampleMetric):
     def convert_mapped_read(cls, value) -> float:
         """Convert raw value from fraction to percent"""
         return value * 100
-
-
-class MeanInsertSize(SampleMetric):
-    """Definition of insert size metric"""
-
-    value: float
-
-    @validator("value", always=True)
-    def convert_mean_insert_size(cls, value) -> int:
-        """Convert raw value from float to int"""
-        return int(value)
 
 
 class MIPParsedMetrics(ParsedMetrics):
