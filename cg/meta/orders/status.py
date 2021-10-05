@@ -160,7 +160,8 @@ class StatusHandler:
             cohorts: Set[str] = {
                 cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
             }
-            synopsis: str = ", ".join(set(sample.get("synopsis", "") for sample in case_samples))
+            synopsis: str = ", ".join(set(sample.get("synopsis") or "" for sample in case_samples))
+
             case_internal_id: str = cls.get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
