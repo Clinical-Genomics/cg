@@ -28,7 +28,7 @@ def test_pools_to_status(rml_order_to_submit):
     sample = pool["samples"][0]
     assert sample["name"] == "sample1"
     assert sample["comment"] == "test comment"
-    assert sample["priority"] == "research"
+    assert pool["priority"] == "research"
     assert sample["control"] == "negative"
 
 

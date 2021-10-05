@@ -511,13 +511,12 @@ class StatusHandler:
                 if application_version is None:
                     raise OrderError(f"Invalid application: {pool['application']}")
 
+            priority = pool["priority"]
             case_name = f"{ticket}-{pool['name']}"
             case_obj = self.status.find_family(customer=customer_obj, name=case_name)
-            priority = pool["priority"]
-            data_analysis = Pipeline(pool["data_analysis"]),
-            data_delivery = DataDelivery(pool["data_delivery"]),
-
             if not case_obj:
+                data_analysis = Pipeline(pool["data_analysis"])
+                data_delivery = DataDelivery(pool["data_delivery"])
                 case_obj = self.status.add_case(
                     data_analysis=data_analysis,
                     data_delivery=data_delivery,
@@ -536,6 +535,7 @@ class StatusHandler:
                 ordered=ordered,
                 ticket=ticket,
             )
+            sex = "unknown"
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
@@ -548,7 +548,7 @@ class StatusHandler:
                     order=order,
                     ordered=ordered,
                     priority=priority,
-                    sex="unknown",
+                    sex=sex,
                     ticket=ticket,
                 )
                 new_samples.append(new_sample)
