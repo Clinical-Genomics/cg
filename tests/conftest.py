@@ -474,12 +474,6 @@ def mip_rna_order_to_submit() -> dict:
 
 
 @pytest.fixture
-def external_order_to_submit() -> dict:
-    """Load an example external order."""
-    return json.load(open("tests/fixtures/cgweb_orders/external.json"))
-
-
-@pytest.fixture
 def fastq_order_to_submit() -> dict:
     """Load an example fastq order."""
     return json.load(open("tests/fixtures/cgweb_orders/fastq.json"))

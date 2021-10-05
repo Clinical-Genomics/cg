@@ -13,7 +13,6 @@
       "data_analysis": "mip-rna",
       "data_delivery": "scout",
       "family_name": "family1",
-      "from_sample": "sample1",
       "name": "sample1-rna-t1",
       "phenotype_groups": [
         ""
@@ -41,7 +40,6 @@
       "data_analysis": "mip-rna",
       "data_delivery": "scout",
       "family_name": "family1",
-      "from_sample": "sample1",
       "name": "sample1-rna-t2",
       "phenotype_groups": [
         ""

@@ -18,16 +18,26 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.25.1]
+### Fixed
+- Database migration order
 
-## [22.22.4]
+## [22.25.0]
+### Added
+- Support Orderform 1508:25, replaces Orderform 1541:6
+- New Balsamic delivery types 
+  - fastq-qc + analysis + cram
+  - fastq-qc + analysis + cram + Scout
+
+## [22.24.1]
 ### Fixed
 - Handle empty values for synopsis in excel orders
 
-## [22.22.3]
+## [22.23.2]
 ### Fixed
 - Add proxy-protocol to dockerfile
 
-## [22.22.2]
+## [22.23.1]
 ### Fixed
 - Synopsis from old and new samples are combined
 
