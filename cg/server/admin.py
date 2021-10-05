@@ -220,10 +220,10 @@ class FamilyView(BaseView):
         markup = ""
         if model.family:
             if model.family.avatar_url:
-                markup += Markup('<img width="24" height="24" src="%s">' % model.family.avatar_url)
+                markup += Markup('<img width="24" height="24" src="%s" />' % model.family.avatar_url)
 
             markup += Markup(
-                "<a href='%s'>%s</a>"
+                " <a href='%s'>%s</a>"
                 % (url_for("family.index_view", search=model.family.internal_id), model.family)
             )
 
