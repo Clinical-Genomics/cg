@@ -18,6 +18,11 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+
+## [22.22.4]
+### Fixed
+- Handle empty values for synopsis in excel orders
+
 ## [22.22.3]
 ### Fixed
 - Add proxy-protocol to dockerfile
