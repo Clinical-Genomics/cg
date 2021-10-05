@@ -1,18 +1,17 @@
 """Add data delivery options
 
 Revision ID: c494649637d5
-Revises: 1c27462b49f6
+Revises: c081458ff180
 Create Date: 2021-09-28 11:14:47.090453
 
 """
 from alembic import op
-import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 
 # revision identifiers, used by Alembic.
 revision = "c494649637d5"
-down_revision = "1c27462b49f6"
+down_revision = "c081458ff180"
 branch_labels = None
 depends_on = None
 
