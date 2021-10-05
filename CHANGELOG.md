@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.25.1]
+### Fixed
+- Database migration order
+
 ## [22.25.0]
 ### Added
 - Support Orderform 1508:25, replaces Orderform 1541:6
