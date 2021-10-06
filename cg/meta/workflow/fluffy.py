@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List, Optional
 from alchy import Query
 from cg.constants import Pipeline
+from cg.constants.priority import SlurmQos
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -223,8 +224,19 @@ class FluffyAnalysisAPI(AnalysisAPI):
             self.get_output_path(case_id=case_id).as_posix(),
             "--analyse",
             "--batch-ref",
+            "--slurm_params",
+            self.get_get_priority_for_case(case_id=case_id).as_posix(),
         ]
         self.process.run_command(command_args, dry_run=dry_run)
+
+    def get_priority_for_case(self, case_id: str) -> str:
+        """Fetch priority for case id"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        if not case_obj.priority or case_obj.priority == 0:
+            return SlurmQos.LOW
+        if case_obj.priority > 1:
+            return SlurmQos.HIGH
+        return SlurmQos.NORMAL
 
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
