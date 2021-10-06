@@ -225,18 +225,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "--analyse",
             "--batch-ref",
             "--slurm_params",
-            self.get_get_priority_for_case(case_id=case_id).as_posix(),
+            self.get_priority_for_case(case_id=case_id),
         ]
         self.process.run_command(command_args, dry_run=dry_run)
-
-    def get_priority_for_case(self, case_id: str) -> str:
-        """Fetch priority for case id"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        if not case_obj.priority or case_obj.priority == 0:
-            return SlurmQos.LOW
-        if case_obj.priority > 1:
-            return SlurmQos.HIGH
-        return SlurmQos.NORMAL
 
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis finished successfully,
