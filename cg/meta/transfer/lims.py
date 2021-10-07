@@ -117,6 +117,14 @@ class TransferLims(object):
             else:
                 samples_in_pool = self.lims.get_samples(projectname=ticket_number)
                 for sample_obj in samples_in_pool:
+                    if sample_obj.udf.get("pool name") is None:
+                        LOG.warning(
+                            "No pool name found for sample %s (name %s, project %s)",
+                            sample_obj.id,
+                            sample_obj.name,
+                            sample_obj.project.name,
+                        )
+                        continue
                     status_date = self._date_functions[status_type](sample_obj.id)
                     if sample_obj.udf["pool name"] == pool_obj.name and status_date is not None:
                         LOG.info(
