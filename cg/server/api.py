@@ -6,6 +6,9 @@ from functools import wraps
 from pathlib import Path
 from typing import List, Optional
 
+from pymysql import IntegrityError, InternalError
+from urllib3.exceptions import MaxRetryError, NewConnectionError
+
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import DuplicateRecordError, OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
@@ -77,10 +80,27 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-    except (DuplicateRecordError, OrderError) as error:
-        return abort(make_response(jsonify(message=error.message), 401))
-    except HTTPError as error:
-        return abort(make_response(jsonify(message=str(error)), 401))
+    except (
+        AttributeError,
+        ConnectionError,
+        DuplicateRecordError,
+        HTTPError,
+        IntegrityError,
+        InternalError,
+        KeyError,
+        MaxRetryError,
+        NewConnectionError,
+        OrderFormError,
+        TimeoutError,
+        TypeError,
+        ValidationError,
+        ValueError,
+    ) as error:
+        if hasattr(error, "message"):
+            message = error.message
+        else:
+            message = str(error)
+        return abort(make_response(jsonify(message=message), 401))
 
     return jsonify(
         project=result["project"], records=[record.to_dict() for record in result["records"]]
