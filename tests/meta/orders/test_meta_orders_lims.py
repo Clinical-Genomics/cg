@@ -37,18 +37,6 @@ def test_to_lims_mip(mip_order_to_submit):
     assert isinstance(samples[1].udfs.comment, str)
 
 
-def test_to_lims_external(external_order_to_submit):
-    # GIVEN an external order for two samples
-    # WHEN parsing the order to format for LIMS
-    samples: List[LimsSample] = build_lims_sample(
-        customer="dummyCust", samples=external_order_to_submit["samples"]
-    )
-    # THEN should "work"
-    assert len(samples) == 2
-    # ... and make up a container for each sample
-    assert samples[0].container == "Tube"
-
-
 def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
 

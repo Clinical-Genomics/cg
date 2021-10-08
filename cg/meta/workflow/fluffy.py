@@ -1,17 +1,17 @@
-import csv
-import datetime as dt
-import logging
-import shutil
+from alchy import Query
 from pathlib import Path
 from typing import List, Optional
-from alchy import Query
+import datetime as dt
+import logging
+import pandas as pd
+import shutil
+
 from cg.constants import Pipeline
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
-import pandas as pd
 
 LOG = logging.getLogger(__name__)
 
@@ -221,8 +221,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
             self.get_workdir_path(case_id=case_id).as_posix(),
             "--out",
             self.get_output_path(case_id=case_id).as_posix(),
-            "analyse",
+            "--analyse",
             "--batch-ref",
+            "--slurm_params",
+            self.get_slurm_param_qos(case_id=case_id),
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
@@ -234,3 +236,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
             for case_object in self.get_running_cases()
             if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
+
+    def get_slurm_param_qos(self, case_id):
+        return f"qos:{self.get_priority_for_case(case_id=case_id)}"

@@ -123,10 +123,6 @@ class OrdersAPI(StatusHandler):
         self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
-    def _submit_external(self, order: dict) -> dict:
-        """Submit a batch of externally sequenced samples for analysis."""
-        return self._process_case_samples(order)
-
     def _submit_case_samples(self, order: dict) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
         result = self._process_case_samples(order)
@@ -277,7 +273,6 @@ class OrdersAPI(StatusHandler):
 
                 if project not in (
                     OrderType.BALSAMIC,
-                    OrderType.EXTERNAL,
                     OrderType.MIP_DNA,
                     OrderType.MIP_RNA,
                 ):

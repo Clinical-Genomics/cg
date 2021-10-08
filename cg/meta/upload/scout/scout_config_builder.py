@@ -60,7 +60,6 @@ class ScoutConfigBuilder:
         config_sample.analysis_type = db_sample.sample.application_version.application.analysis_type
         config_sample.sample_name = db_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
-        print("db_sample.sample.subject_id: ", db_sample.sample.subject_id)
         config_sample.subject_id = db_sample.sample.subject_id
 
         self.include_sample_alignment_file(config_sample=config_sample)
