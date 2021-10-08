@@ -100,6 +100,9 @@ def submit_order(order_type):
             message = error.message
         else:
             message = str(error)
+
+        LOG.error(message)
+
         return abort(make_response(jsonify(message=message), 401))
 
     return jsonify(
