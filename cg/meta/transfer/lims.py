@@ -109,31 +109,12 @@ class TransferLims(object):
         for pool_obj in pools:
             ticket_number = pool_obj.ticket_number
             number_of_samples = self.lims.get_sample_number(projectname=ticket_number)
-
-            if ticket_number is None:
-                LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
-                continue
-            if number_of_samples == 0:
-                LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
+            if not self._is_pool_valid(pool_obj, ticket_number, number_of_samples):
                 continue
 
             samples_in_pool = self.lims.get_samples(projectname=ticket_number)
             for sample_obj in samples_in_pool:
-                if sample_obj.udf.get("pool name") is None:
-                    LOG.warning(
-                        "No pool name found for sample %s (name %s, project %s)",
-                        sample_obj.id,
-                        sample_obj.name,
-                        sample_obj.project.name,
-                    )
-                    continue
-                if sample_obj.udf["pool name"] != pool_obj.name:
-                    LOG.warning(
-                        "Pool name is not matching for sample %s (name %s, project %s)",
-                        sample_obj.id,
-                        sample_obj.name,
-                        sample_obj.project.name,
-                    )
+                if not self._is_sample_valid(pool_obj, sample_obj):
                     continue
                 status_date = self._date_functions[status_type](sample_obj.id)
                 if status_date is None:
@@ -145,8 +126,8 @@ class TransferLims(object):
                     pool_obj.id,
                     status_date,
                 )
-                setattr(pool_obj, f"{status_type.value}_at", status_date)
-                self.status.commit()
+                # setattr(pool_obj, f"{status_type.value}_at", status_date)
+                # self.status.commit()
                 break
 
     def _get_samples_in_step(self, status_type):
@@ -154,3 +135,38 @@ class TransferLims(object):
 
     def _get_all_relevant_samples(self):
         return self.status.samples_not_downsampled()
+
+    @staticmethod
+    def _is_pool_valid(pool_obj, ticket_number, number_of_samples):
+        """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
+
+        if ticket_number is None:
+            LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
+            return False
+        if number_of_samples == 0:
+            LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
+            return False
+        return True
+
+    @staticmethod
+    def _is_sample_valid(pool_obj, sample_obj):
+        """Checks if a sample can have the status date set. A sample needs to have a udf "pool name" that matches the
+        name of the pool object it's part of"""
+        if sample_obj.udf.get("pool name") is None:
+            LOG.warning(
+                "No pool name found for sample %s (sample name %s, project %s)",
+                sample_obj.id,
+                sample_obj.name,
+                sample_obj.project.name,
+            )
+            return False
+
+        if sample_obj.udf["pool name"] != pool_obj.name:
+            LOG.warning(
+                "Pool name is not matching for sample %s (sample name %s, project %s)",
+                sample_obj.id,
+                sample_obj.name,
+                sample_obj.project.name,
+            )
+            return False
+        return True
