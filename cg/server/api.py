@@ -365,11 +365,12 @@ def orderform():
             json_data = json.load(input_file.stream)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
+        parsed_order: Orderform = order_parser.generate_orderform()
+        return jsonify(**parsed_order.dict())
     except (OrderFormError, ValidationError, AttributeError, ValueError) as error:
         if hasattr(error, "message"):
             message = error.message
         else:
             message = str(error)
         return abort(make_response(jsonify(message=message), 400))
-    parsed_order: Orderform = order_parser.generate_orderform()
-    return jsonify(**parsed_order.dict())
+
