@@ -373,4 +373,3 @@ def orderform():
         else:
             message = str(error)
         return abort(make_response(jsonify(message=message), 400))
-
