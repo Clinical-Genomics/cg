@@ -126,8 +126,8 @@ class TransferLims(object):
                     pool_obj.id,
                     status_date,
                 )
-                # setattr(pool_obj, f"{status_type.value}_at", status_date)
-                # self.status.commit()
+                setattr(pool_obj, f"{status_type.value}_at", status_date)
+                self.status.commit()
                 break
 
     def _get_samples_in_step(self, status_type):
