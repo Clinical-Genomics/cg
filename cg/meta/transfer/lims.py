@@ -1,6 +1,8 @@
 import logging
 from enum import Enum
 
+import cg.store.models
+import genologics.entities
 from cg.apps.lims import LimsAPI
 from cg.store import Store
 
@@ -137,7 +139,9 @@ class TransferLims(object):
         return self.status.samples_not_downsampled()
 
     @staticmethod
-    def _is_pool_valid(pool_obj, ticket_number, number_of_samples):
+    def _is_pool_valid(
+        pool_obj: cg.store.models.Pool, ticket_number: int, number_of_samples: int
+    ) -> bool:
         """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
 
         if ticket_number is None:
@@ -149,7 +153,9 @@ class TransferLims(object):
         return True
 
     @staticmethod
-    def _is_sample_valid(pool_obj, sample_obj):
+    def _is_sample_valid(
+        pool_obj: cg.store.models.Pool, sample_obj: genologics.entities.Sample
+    ) -> bool:
         """Checks if a sample can have the status date set. A sample needs to have a udf "pool name" that matches the
         name of the pool object it's part of"""
         if sample_obj.udf.get("pool name") is None:
