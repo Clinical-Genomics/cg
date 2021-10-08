@@ -112,32 +112,42 @@ class TransferLims(object):
 
             if ticket_number is None:
                 LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
-            elif number_of_samples == 0:
+                continue
+            if number_of_samples == 0:
                 LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
-            else:
-                samples_in_pool = self.lims.get_samples(projectname=ticket_number)
-                for sample_obj in samples_in_pool:
-                    if sample_obj.udf.get("pool name") is None:
-                        LOG.warning(
-                            "No pool name found for sample %s (name %s, project %s)",
-                            sample_obj.id,
-                            sample_obj.name,
-                            sample_obj.project.name,
-                        )
-                        continue
-                    status_date = self._date_functions[status_type](sample_obj.id)
-                    if sample_obj.udf["pool name"] == pool_obj.name and status_date is not None:
-                        LOG.info(
-                            "Found %s date for pool id %s: %s",
-                            status_type.value,
-                            pool_obj.id,
-                            status_date,
-                        )
-                        setattr(pool_obj, f"{status_type.value}_at", status_date)
-                        self.status.commit()
-                        break
-                    else:
-                        continue
+                continue
+
+            samples_in_pool = self.lims.get_samples(projectname=ticket_number)
+            for sample_obj in samples_in_pool:
+                if sample_obj.udf.get("pool name") is None:
+                    LOG.warning(
+                        "No pool name found for sample %s (name %s, project %s)",
+                        sample_obj.id,
+                        sample_obj.name,
+                        sample_obj.project.name,
+                    )
+                    continue
+                if sample_obj.udf["pool name"] != pool_obj.name:
+                    LOG.warning(
+                        "Pool name is not matching for sample %s (name %s, project %s)",
+                        sample_obj.id,
+                        sample_obj.name,
+                        sample_obj.project.name,
+                    )
+                    continue
+                status_date = self._date_functions[status_type](sample_obj.id)
+                if status_date is None:
+                    continue
+
+                LOG.info(
+                    "Found %s date for pool id %s: %s",
+                    status_type.value,
+                    pool_obj.id,
+                    status_date,
+                )
+                setattr(pool_obj, f"{status_type.value}_at", status_date)
+                self.status.commit()
+                break
 
     def _get_samples_in_step(self, status_type):
         return self._sample_functions[status_type]()
