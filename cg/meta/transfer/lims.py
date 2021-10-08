@@ -169,10 +169,9 @@ class TransferLims(object):
 
         if sample_obj.udf["pool name"] != pool_obj.name:
             LOG.warning(
-                "Pool name is not matching for sample %s (sample name %s, project %s)",
-                sample_obj.id,
-                sample_obj.name,
-                sample_obj.project.name,
+                "The udf 'pool name' of the sample (%s) does not match the name of the pool (%s))",
+                sample_obj.udf["pool name"],
+                pool_obj.name,
             )
             return False
         return True
