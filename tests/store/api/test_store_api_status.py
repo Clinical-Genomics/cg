@@ -233,6 +233,7 @@ def test_multiple_analyses(analysis_store, helpers):
 
 
 def test_get_customer_id_from_ticket(analysis_store, ticket_nr):
+    """Tests if the function in fact returns the correct customer."""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
@@ -240,7 +241,7 @@ def test_get_customer_id_from_ticket(analysis_store, ticket_nr):
 
 
 def test_set_cases_to_analyze(analysis_store, case_id):
-
+    """Tests if actions of cases are changed to analyze."""
     # Given a store with a case with action None
     action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
 

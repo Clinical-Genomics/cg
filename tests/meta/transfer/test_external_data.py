@@ -1,7 +1,7 @@
 """Tests for the transfer of external data"""
 import logging
 from pathlib import Path
-import os
+from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -104,7 +104,7 @@ def test_check_bundle_fastq_files(
     )
 
     # WHEN when attempting to add two files, one existing and one new
-    files_to_add: list[Path] = external_data_api.check_bundle_fastq_files(
+    files_to_add: List[Path] = external_data_api.check_bundle_fastq_files(
         fastq_paths=[Path("/wow/new/cool/file.fastq.gz"), Path("/boring/old/boomer/file.fastq.gz")],
         lims_sample_id=sample_id,
         last_version=hk_version_obj,
@@ -180,6 +180,7 @@ def test_configure_housekeeper(
 
 
 def test_checksum(fastq_file: Path):
+    """Tests if the function correctly calculates md5sum and returns the correct result."""
     # GIVEN a fastq file with corresponding correct md5 file and a fastq file with a corresponding incorrect md5 file
 
     # THEN a file with a correct md5 sum should return true
@@ -190,6 +191,7 @@ def test_checksum(fastq_file: Path):
 
 
 def test_extract_checksum(fastq_file: Path):
+    """Tests if the function successfully extract the correct md5sum"""
     # Given a file containing an md5sum
     file = Path(str(fastq_file) + ".md5")
     # Then the function should extract it

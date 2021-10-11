@@ -216,7 +216,8 @@ class StatusHandler(BaseHandler):
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
-    def set_cases_to_analyze(self, cases: list[str]):
+    def set_cases_to_analyze(self, cases: List[str]):
+        """sets the action of provided cases to analyze."""
         for internal_id in cases:
             case_obj: models.Family = self.Family.query.filter(
                 models.Family.internal_id == internal_id
