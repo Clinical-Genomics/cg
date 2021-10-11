@@ -1,4 +1,5 @@
 """Tests for the file handlers"""
+import logging
 from typing import Optional
 
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -70,14 +71,40 @@ def test_include_delivery_report_mip(mip_config_builder: MipConfigBuilder):
 def test_include_synopsis(mip_config_builder: MipConfigBuilder):
     # GIVEN a config builder with some data
 
-    # GIVEN a config without a delivery report
+    # GIVEN a config without synopsis
     assert mip_config_builder.load_config.synopsis is None
 
-    # WHEN including the delivery report
-    mip_config_builder.include_synopsis()
+    # WHEN including the synopsis
+    mip_config_builder.build_load_config()
 
-    # THEN assert that the delivery report was added
-    assert mip_config_builder.load_config.synopsis is not None
+    # THEN assert that the synopsis was added
+    assert mip_config_builder.load_config.synopsis
+
+
+def test_include_phenotype_groups(mip_config_builder: MipConfigBuilder):
+    # GIVEN a config builder with some data
+
+    # GIVEN a config without a phenotype groups
+    assert mip_config_builder.load_config.phenotype_groups is None
+
+    # WHEN including the phenotype groups
+    mip_config_builder.include_phenotype_groups()
+
+    # THEN assert that the phenotype groups were added
+    assert mip_config_builder.load_config.phenotype_groups is not None
+
+
+def test_include_phenotype_terms(mip_config_builder: MipConfigBuilder):
+    # GIVEN a config builder with some data
+
+    # GIVEN a config without a phenotype terms
+    assert mip_config_builder.load_config.phenotype_terms is None
+
+    # WHEN including the phenotype terms
+    mip_config_builder.include_phenotype_terms()
+
+    # THEN assert that the phenotype terms were added
+    assert mip_config_builder.load_config.phenotype_terms is not None
 
 
 def test_include_alignment_file_individual(mip_config_builder: MipConfigBuilder, sample_id: str):
@@ -124,6 +151,24 @@ def test_include_mip_sample_files(mip_config_builder: MipConfigBuilder, sample_i
             assert sample.mt_bam is not None
             file_found = True
     assert file_found
+
+
+def test_include_mip_sample_subject_id(
+    mip_config_builder: MipConfigBuilder, sample_id: str, caplog
+):
+    # GIVEN subject_id on the sample
+    caplog.set_level(level=logging.DEBUG)
+
+    # WHEN building the config
+    mip_config_builder.build_load_config()
+
+    # THEN the subject_id was added to the scout sample
+    subject_id_found = False
+    for sample in mip_config_builder.load_config.samples:
+        if sample.sample_id == sample_id:
+            subject_id_found = True
+            assert sample.subject_id is not None
+    assert subject_id_found
 
 
 def test_include_balsamic_case_files(balsamic_config_builder: BalsamicConfigBuilder):

@@ -8,7 +8,6 @@ SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 
 CASE_PROJECT_TYPES = [
     str(OrderType.MIP_DNA),
-    str(OrderType.EXTERNAL),
     str(OrderType.BALSAMIC),
     str(OrderType.MIP_RNA),
 ]

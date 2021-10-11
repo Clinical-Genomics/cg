@@ -22,8 +22,7 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        "1508:24",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
-        "1541:6",  # Orderform Externally sequenced samples
+        "1508:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
         "1603:10",  # Microbial WGS
         "1604:10",  # Orderform Ready made libraries (RML)
         "1605:9",  # Microbial meta genomes
@@ -149,7 +148,6 @@ class ExcelOrderformParser(OrderformParser):
     def get_project_type(self, document_title: str) -> str:
         """Determine the project type and set it to the class."""
         document_number_to_project_type = {
-            "1541": str(OrderType.EXTERNAL),
             "1604": str(OrderType.RML),
             "1603": str(OrderType.MICROSALT),
             "1605": str(OrderType.METAGENOME),
@@ -190,13 +188,10 @@ class ExcelOrderformParser(OrderformParser):
                 return DataDelivery.FASTQ_QC
 
             if data_analysis == "fastq":
-                return DataDelivery.FASTQ
+                return DataDelivery.FASTQ_QC
 
         if project_type == OrderType.RML:
             return DataDelivery.FASTQ
-
-        if project_type == OrderType.EXTERNAL:
-            return DataDelivery.SCOUT
 
         raise OrderFormError(f"Could not determine value for Data Delivery")
 
@@ -208,10 +203,12 @@ class ExcelOrderformParser(OrderformParser):
         if self.is_from_orderform_without_data_delivery(data_delivery):
             return self.default_delivery_type(project_type)
 
-        if data_delivery == "analysis-+-bam":
-            return DataDelivery.ANALYSIS_BAM_FILES
         if data_delivery == "fastq-qc":
             return DataDelivery.FASTQ_QC
+        if data_delivery == "fastq-qc-+-analysis-+-cram":
+            return DataDelivery.FASTQ_QC_ANALYSIS_CRAM
+        if data_delivery == "fastq-qc-+-analysis-+-cram-+-scout":
+            return DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT
 
         try:
             return DataDelivery(data_delivery)

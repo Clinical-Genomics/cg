@@ -115,5 +115,4 @@ def test_mip_rna_sample_is_correct(mip_rna_orderform_sample: dict):
     assert mip_rna_sample.tumour is True
     assert mip_rna_sample.quantity == "4"
     assert mip_rna_sample.comment == "other Elution buffer"
-    assert mip_rna_sample.from_sample == "s1"
     assert mip_rna_sample.time_point == "0"

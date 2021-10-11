@@ -13,21 +13,14 @@ from cg.utils.commands import Process
 @pytest.fixture
 def balsamic_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic samples"""
-    _file = orderforms / "1508.24.balsamic.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
-def external_orderform(orderforms: Path) -> str:
-    """Orderform fixture for external samples"""
-    _file = orderforms / "1541.6.external.xlsx"
+    _file = orderforms / "1508.25.balsamic.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def fastq_orderform(orderforms: Path):
     """Orderform fixture for fastq samples"""
-    _file = orderforms / "1508.24.fastq.xlsx"
+    _file = orderforms / "1508.25.fastq.xlsx"
     return str(_file)
 
 
@@ -41,14 +34,14 @@ def metagenome_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples"""
-    _file = orderforms / "1508.24.mip.xlsx"
+    _file = orderforms / "1508.25.mip.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples"""
-    _file = orderforms / "1508.24.mip_rna.xlsx"
+    _file = orderforms / "1508.25.mip_rna.xlsx"
     return str(_file)
 
 

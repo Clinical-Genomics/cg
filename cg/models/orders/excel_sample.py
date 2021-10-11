@@ -23,7 +23,6 @@ class ExcelSample(OrderSample):
     extraction_method: str = Field(None, alias="UDF/Extraction method")
     father: str = Field(None, alias="UDF/fatherID")
     formalin_fixation_time: str = Field(None, alias="UDF/Formalin Fixation Time")
-    from_sample: str = Field(None, alias="UDF/is_for_sample")
     index: str = Field(None, alias="UDF/Index type")
     index_number: str = Field(None, alias="UDF/Index number")
     lab_code: str = Field(None, alias="UDF/Lab Code")
@@ -49,6 +48,7 @@ class ExcelSample(OrderSample):
     sex: str = Field(None, alias="UDF/Gender")
     source: str = Field(None, alias="UDF/Source")
     status: str = Field(None, alias="UDF/Status")
+    subject_id: str = Field(None, alias="UDF/subjectID")
     time_point: str = Field(None, alias="UDF/time_point")
     tissue_block_size: str = Field(None, alias="UDF/Tissue Block Size")
     tumour: bool = Field(None, alias="UDF/tumor")
@@ -116,11 +116,8 @@ class ExcelSample(OrderSample):
         return value.split(separator)
 
     @validator("data_delivery")
-    def validate_data_delivery(cls, value: Optional[str]):
-        value = value.lower()
-        if value == "analysis + bam":
-            return "analysis-bam"
-        return value
+    def convert_data_delivery(cls, value: Optional[str]):
+        return value.lower()
 
     @validator("status", "priority")
     def convert_to_lower(cls, value: Optional[str]):

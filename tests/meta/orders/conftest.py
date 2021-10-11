@@ -12,7 +12,6 @@ from cg.store import Store
 @pytest.fixture
 def all_orders_to_submit(
     balsamic_order_to_submit,
-    external_order_to_submit,
     fastq_order_to_submit,
     metagenome_order_to_submit,
     microbial_order_to_submit,
@@ -23,7 +22,6 @@ def all_orders_to_submit(
 ):
     return {
         OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit),
-        OrderType.EXTERNAL: OrderIn.parse_obj(external_order_to_submit),
         OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit),
         OrderType.METAGENOME: OrderIn.parse_obj(metagenome_order_to_submit),
         OrderType.MICROSALT: OrderIn.parse_obj(microbial_order_to_submit),
@@ -56,12 +54,6 @@ def mip_status_data(mip_order_to_submit):
 def mip_rna_status_data(mip_rna_order_to_submit):
     """Parse rna order example."""
     return StatusHandler.cases_to_status(mip_rna_order_to_submit)
-
-
-@pytest.fixture
-def external_status_data(external_order_to_submit):
-    """Parse external order example."""
-    return StatusHandler.cases_to_status(external_order_to_submit)
 
 
 @pytest.fixture

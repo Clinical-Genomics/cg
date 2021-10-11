@@ -1,6 +1,7 @@
 # database
 Alchy
 SQLAlchemy<1.4
+pymysql
 
 # cli
 Click<7.0

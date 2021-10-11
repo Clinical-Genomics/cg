@@ -50,14 +50,6 @@ def fixture_minimal_excel_sample() -> dict:
     }
 
 
-@pytest.fixture(name="external_order_parser")
-def fixture_external_order_parser(external_orderform: str) -> ExcelOrderformParser:
-    """Return a orderform parser that have parsed a external orderform in excel format"""
-    order_form_parser = ExcelOrderformParser()
-    order_form_parser.parse_orderform(excel_path=external_orderform)
-    return order_form_parser
-
-
 @pytest.fixture(name="mip_order_parser")
 def fixture_mip_order_parser(mip_orderform: str) -> ExcelOrderformParser:
     """Return a orderform parser that have parsed a mip orderform in excel format"""
