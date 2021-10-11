@@ -117,9 +117,9 @@ class ExternalDataAPI(MetaAPI):
                     % (lims_sample_id, sbatch_number)
                 )
 
-    def get_all_fastq(self, sample_folder: Path) -> list[Path]:
+    def get_all_fastq(self, sample_folder: Path) -> List[Path]:
         """Returns a list of all fastq.gz files in given folder."""
-        all_fastqs: list[Path] = []
+        all_fastqs: List[Path] = []
         for leaf in sample_folder.iterdir():
             abs_path: Path = sample_folder.joinpath(leaf)
             LOG.info("Found file %s inside folder %s" % (str(abs_path), sample_folder))
@@ -127,7 +127,7 @@ class ExternalDataAPI(MetaAPI):
                 all_fastqs.append(abs_path)
         return all_fastqs
 
-    def get_all_paths(self, lims_sample_id: str, customer: str) -> list[Path]:
+    def get_all_paths(self, lims_sample_id: str, customer: str) -> List[Path]:
         """Returns the paths of all fastq files associated to the sample."""
         fastq_folder: Path = self.create_destination_path(
             lims_sample_id=lims_sample_id, customer=customer, raw_path=self.hasta_path
@@ -150,8 +150,8 @@ class ExternalDataAPI(MetaAPI):
         return bundle_result
 
     def check_bundle_fastq_files(
-        self, fastq_paths: list[Path], lims_sample_id: str, last_version: Version
-    ) -> list[Path]:
+        self, fastq_paths: List[Path], lims_sample_id: str, last_version: Version
+    ) -> List[Path]:
         """Checks if any of the fastq files are already added. Returns a list of files that should be added."""
         for file in self.housekeeper_api.get_files(
             bundle=lims_sample_id, tags=["fastq"], version=last_version.id
@@ -165,7 +165,7 @@ class ExternalDataAPI(MetaAPI):
         return fastq_paths
 
     def add_files_to_bundles(
-        self, fastq_paths: list[Path], last_version: Version, lims_sample_id: str
+        self, fastq_paths: List[Path], last_version: Version, lims_sample_id: str
     ) -> bool:
         """Adds the given files to the the hk-bundle if the md5sum matches or no md5sum is provided."""
         for path in fastq_paths:
@@ -184,7 +184,7 @@ class ExternalDataAPI(MetaAPI):
 
     def configure_housekeeper(self, ticket_id: int, dry_run: bool = False) -> None:
         """Creates sample bundles in housekeeper and adds the files corresponding to the ticket to the bundle."""
-        cases: list[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
         for case in cases:
             links = case.links
@@ -200,7 +200,7 @@ class ExternalDataAPI(MetaAPI):
                 last_version: Version = self.housekeeper_api.get_create_version(
                     lims_sample_id=lims_sample_id
                 )
-                fastq_paths_to_add: list[Path] = self.check_bundle_fastq_files(
+                fastq_paths_to_add: List[Path] = self.check_bundle_fastq_files(
                     fastq_paths=paths, lims_sample_id=lims_sample_id, last_version=last_version
                 )
                 if not self.add_files_to_bundles(
