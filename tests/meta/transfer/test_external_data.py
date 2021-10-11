@@ -26,33 +26,45 @@ def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_nr: i
     assert str(log_dir).startswith("/another/path/123456")
 
 
-def test_create_source_path(external_data_api: ExternalDataAPI, ticket_nr: int, customer_id: str):
+def test_create_source_path(
+    external_data_api: ExternalDataAPI, ticket_nr: int, customer_id: str, cust_sample_id: str
+):
     """Test generating the source path"""
 
     # WHEN the source path is created
 
     source_path = external_data_api.create_source_path(
-        raw_path="/path/%s", ticket_id=ticket_nr, customer=customer_id, cust_sample_id="ABC123"
+        raw_path="/path/%s",
+        ticket_id=ticket_nr,
+        customer=customer_id,
+        cust_sample_id=cust_sample_id,
     )
 
     # THEN the source path is
-    assert source_path == Path("/path/cust000/123456/ABC123/")
+    assert source_path == Path("/path/cust000/123456/child/")
 
 
-def test_create_destination_path(external_data_api: ExternalDataAPI, customer_id: str):
+def test_create_destination_path(
+    external_data_api: ExternalDataAPI, customer_id: str, sample_id: str
+):
     """Test generating the destination path"""
 
     # WHEN the source path is created
     destination_path = external_data_api.create_destination_path(
-        raw_path="/path/%s", customer=customer_id, lims_sample_id="ACC123"
+        raw_path="/path/%s", customer=customer_id, lims_sample_id=sample_id
     )
 
     # THEN the source path is
-    assert destination_path == Path("/path/cust000/ACC123/")
+    assert destination_path == Path("/path/cust000/ADM1/")
 
 
 def test_download_sample(
-    external_data_api: ExternalDataAPI, mocker, ticket_nr: int, customer_id: str
+    external_data_api: ExternalDataAPI,
+    mocker,
+    ticket_nr: int,
+    customer_id: str,
+    cust_sample_id: str,
+    sample_id: str,
 ):
     """Test for downloading external data via slurm"""
 
@@ -68,10 +80,10 @@ def test_download_sample(
 
     # WHEN the destination path is created
     sbatch_number = external_data_api.transfer_sample(
-        cust_sample_id="ABC123",
+        cust_sample_id=cust_sample_id,
         ticket_id=ticket_nr,
         cust=customer_id,
-        lims_sample_id="ACC123",
+        lims_sample_id=sample_id,
         dry_run=True,
     )
 
@@ -115,7 +127,7 @@ def test_check_bundle_fastq_files(
 
 
 def test_add_files_to_bundles(
-    external_data_api: ExternalDataAPI, sample_id: str, hk_version_obj, fastq_file
+    external_data_api: ExternalDataAPI, sample_id: str, hk_version_obj, fastq_file: Path
 ):
     """Tests adding files to housekeeper and checking corresponding md5file."""
     # Given a fastq file that has a corresponding .md5 file with correct md5sum.

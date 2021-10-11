@@ -46,15 +46,11 @@ class ExternalDataAPI(MetaAPI):
         self, raw_path: str, ticket_id: int, customer: str, cust_sample_id: str
     ) -> Path:
         """Returns the path to where the sample files are located on caesar"""
-        cust_id_added_to_path: Path = Path(raw_path % customer).joinpath(
-            str(ticket_id), cust_sample_id
-        )
-        return cust_id_added_to_path
+        return Path(raw_path % customer).joinpath(str(ticket_id), cust_sample_id)
 
     def create_destination_path(self, raw_path: str, customer: str, lims_sample_id: str) -> Path:
         """Returns the path to where the files are to be transferred on hasta"""
-        cust_id_added_to_path: Path = Path(raw_path % customer).joinpath(lims_sample_id)
-        return cust_id_added_to_path
+        return Path(raw_path % customer).joinpath(lims_sample_id)
 
     def transfer_sample(
         self, cust_sample_id: str, ticket_id: int, cust: str, lims_sample_id: str, dry_run: bool
