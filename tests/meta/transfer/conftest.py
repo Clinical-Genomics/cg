@@ -8,6 +8,7 @@ from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.flowcell import TransferFlowcell
 from cg.store import Store, models
+from pathlib import Path
 
 
 @pytest.fixture(name="data")
@@ -141,3 +142,18 @@ def lims_api():
 
     _lims_api = MockLims(config="")
     return _lims_api
+
+
+@pytest.fixture(name="external_data_directory")
+def external_data_directory(tmpdir_factory) -> Path:
+    """Fixture that returns a customer folder with fastq.gz files in sample-directories."""
+    cust_folder = tmpdir_factory.mktemp("cust000")
+    Path(cust_folder, "sample1").mkdir(exist_ok=True, parents=True)
+    Path(cust_folder, "sample2").mkdir(exist_ok=True, parents=True)
+    Path(cust_folder, "sample1", "sample1_fastq_1.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, "sample1", "sample1_fastq_2.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, "sample1", "sample1_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+    Path(cust_folder, "sample2", "sample2_fastq_1.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, "sample2", "sample2_fastq_2.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, "sample2", "sample1_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+    return Path(cust_folder)

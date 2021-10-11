@@ -134,7 +134,7 @@ class MockBundle:
         self.id = kwargs.get("id", 1)
         self.name = kwargs.get("name", "yellowhog")
         self.created_at = kwargs.get("created_at", datetime.datetime.now())
-        self.versions = kwargs.get("versions", [MockVersion(bundle=self)])
+        self.versions = kwargs.get("versions", [])
 
     def __repr__(self):
         return f"MockBundle:id={self.id}, name={self.name}, versions={self.versions}"
@@ -233,8 +233,7 @@ class MockHousekeeperAPI:
                 self._file_added = True
                 version_obj.files.append(new_file)
         version_obj.bundle_obj = bundle_obj
-        bundle_obj.versions = version_obj
-
+        bundle_obj.versions.append(version_obj)
         return bundle_obj, version_obj
 
     def _build_tags(self, tag_names: List[str]) -> dict:
@@ -279,6 +278,22 @@ class MockHousekeeperAPI:
     def version(self, *args, **kwargs):
         """Fetch a version"""
         return self._version_obj
+
+    def get_create_version(self, lims_sample_id: str):
+        """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version."""
+        last_version = self.last_version(bundle=lims_sample_id)
+        if not last_version:
+            LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+            bundle_result = self.add_bundle(
+                bundle_data={
+                    "name": lims_sample_id,
+                    "created": datetime.datetime.now(),
+                    "expires": None,
+                    "files": [],
+                }
+            )
+            last_version = bundle_result[1]
+        return last_version
 
     def files(self, *args, **kwargs):
         """
@@ -368,6 +383,10 @@ class MockHousekeeperAPI:
         """Gets the latest version of a bundle"""
         if self._last_version is False:
             return None
+        if len(args) > 0:
+            bundle = self.bundle(args[0])
+            if bundle:
+                return bundle.versions[-1]
         return self._version_obj
 
     def get_root_dir(self):
@@ -403,6 +422,7 @@ class MockHousekeeperAPI:
         if not self.file_exists(path):
             self._files.append(new_file)
         self._file_added = True
+        version_obj.files.append(new_file)
         return new_file
 
     @staticmethod

@@ -1,9 +1,9 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import click
 from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
-from cg.meta.orders.external_data import ExternalDataAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -278,7 +278,7 @@ def relationship(
 def external(context: CGConfig, ticket_id: int, dry_run: bool):
     """Downloads external data from caesar and places it in appropriate folder on hasta"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.download_ticket(ticket_id=ticket_id, dry_run=dry_run)
+    external_data_api.transfer_sample_files_from_caesar(ticket_id=ticket_id, dry_run=dry_run)
 
 
 @add.command("external-hk")

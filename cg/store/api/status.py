@@ -124,6 +124,14 @@ class StatusHandler(BaseHandler):
             models.Sample.ticket_number == ticket_id
         )
 
+    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
+        """Returns the customer related to given ticket."""
+        return (
+            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
+            .first()
+            .customer.internal_id
+        )
+
     def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
         return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
 
@@ -207,6 +215,14 @@ class StatusHandler(BaseHandler):
             cases.append(case_output)
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
+
+    def set_cases_to_analyze(self, cases: list[str]):
+        for internal_id in cases:
+            case_obj: models.Family = self.Family.query.filter(
+                models.Family.internal_id == internal_id
+            ).first()
+            case_obj.action = "analyze"
+            self.commit()
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:

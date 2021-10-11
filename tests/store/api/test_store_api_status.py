@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 
 from cg.constants import Pipeline
+from cg.store.models import Family
 
 
 def test_samples_to_receive_external(sample_store, helpers):
@@ -229,3 +230,25 @@ def test_multiple_analyses(analysis_store, helpers):
     # THEN only the newest analysis should be returned
     assert analysis_newest in analyses
     assert analysis_oldest not in analyses
+
+
+def test_get_customer_id_from_ticket(analysis_store, ticket_nr):
+    # Given a store with a ticket
+
+    # Then the function should return the customer connected to the ticket
+    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == "cust000"
+
+
+def test_set_cases_to_analyze(analysis_store, case_id):
+
+    # Given a store with a case with action None
+    action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
+
+    assert action == None
+
+    # When setting the case to "analyze"
+    analysis_store.set_cases_to_analyze([case_id])
+    new_action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
+
+    # Then the action should be set to analyze
+    assert new_action == "analyze"

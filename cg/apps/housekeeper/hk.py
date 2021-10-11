@@ -187,6 +187,22 @@ class HousekeeperAPI:
             .first()
         )
 
+    def get_create_version(self, lims_sample_id: str) -> models.Version:
+        """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version."""
+        last_version: models.Version = self.last_version(bundle=lims_sample_id)
+        if not last_version:
+            LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+            bundle_result: Tuple[models.Bundle, models.Version] = self.add_bundle(
+                bundle_data={
+                    "name": lims_sample_id,
+                    "created_at": dt.datetime.now(),
+                    "expires_at": None,
+                    "files": [],
+                }
+            )
+            last_version: models.Version = bundle_result[1]
+        return last_version
+
     def new_tag(self, name: str, category: str = None):
         """Create a new tag"""
         return self._store.new_tag(name, category)
