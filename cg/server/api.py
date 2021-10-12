@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import http
 import json
 import logging
 import tempfile
@@ -51,18 +52,18 @@ def before_request():
 
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        return abort(make_response(jsonify(message="no JWT token found on request"), 403))
+        return abort(make_response(jsonify(message="no JWT token found on request"), http.HTTPStatus.UNAUTHORIZED))
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
     except ValueError:
-        return abort(make_response(jsonify(message="outdated login certificate"), 403))
+        return abort(make_response(jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED))
 
     user_obj = db.user(user_data["email"])
     if user_obj is None or not user_obj.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
-        return abort(make_response(jsonify(message=message), 403))
+        return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
     g.current_user = user_obj
 
@@ -81,6 +82,14 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
+    except (  # user misbehaviour
+        OrderFormError,
+        ValidationError,
+        ValueError,
+    ) as error:
+        error_message = error.message if hasattr(error, "message") else str(error)
+        http_error_response = http.HTTPStatus.BAD_REQUEST
+        LOG.error(error_message)
     except (  # system misbehaviour
         AttributeError,
         ConnectionError,
@@ -94,20 +103,14 @@ def submit_order(order_type):
     ) as error:
         LOG.exception(error)
         error_message = error.message if hasattr(error, "message") else str(error)
-    except (  # user misbehaviour
-        OrderFormError,
-        ValidationError,
-        ValueError,
-    ) as error:
-        error_message = error.message if hasattr(error, "message") else str(error)
-        LOG.error(error_message)
+        http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
     else:
         return jsonify(
             project=result["project"], records=[record.to_dict() for record in result["records"]]
         )
     finally:
         if error_message:
-            return abort(make_response(jsonify(message=error_message), 401))
+            return abort(make_response(jsonify(message=error_message), http_error_response))
 
 
 @BLUEPRINT.route("/cases")
@@ -161,9 +164,9 @@ def family(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
     if case_obj is None:
-        return abort(404)
+        return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case_obj.customer not in g.current_user.customers):
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
 
     data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
@@ -174,12 +177,12 @@ def family_in_customer_group(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
     if case_obj is None:
-        return abort(404)
+        return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (
         case_obj.customer.customer_group
         not in set(customer.customer_group for customer in g.current_user.customers)
     ):
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
 
     data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
@@ -189,7 +192,7 @@ def family_in_customer_group(family_id):
 def samples():
     """Fetch samples."""
     if request.args.get("status") and not g.current_user.is_admin:
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
         samples_q = db.samples_to_receive()
     elif request.args.get("status") == "labprep":
@@ -225,9 +228,9 @@ def sample(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
-        return abort(404)
+        return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
@@ -237,12 +240,12 @@ def sample_in_customer_group(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
-        return abort(404)
+        return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (
         sample_obj.customer.customer_group
         not in set(customer.customer_group for customer in g.current_user.customers)
     ):
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
@@ -263,9 +266,9 @@ def pool(pool_id):
     """Fetch a single pool."""
     record = db.pool(pool_id)
     if record is None:
-        return abort(404)
+        return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (record.customer not in g.current_user.customers):
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
     return jsonify(**record.to_dict())
 
 
@@ -282,7 +285,7 @@ def flowcell(flowcell_id):
     """Fetch a single flowcell."""
     record = db.flowcell(flowcell_id)
     if record is None:
-        return abort(404)
+        return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**record.to_dict(samples=True))
 
 
@@ -347,7 +350,7 @@ def options():
 def me():
     """Fetch information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
-        return abort(401)
+        return abort(http.HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
 
@@ -367,7 +370,7 @@ def application(tag):
     """Fetch an application tag."""
     record = db.application(tag)
     if record is None:
-        return abort(make_response(jsonify(message="application not found"), 404))
+        return abort(make_response(jsonify(message="application not found"), http.HTTPStatus.NOT_FOUND))
     return jsonify(**record.to_dict())
 
 
@@ -377,6 +380,7 @@ def orderform():
     input_file = request.files.get("file")
     filename = secure_filename(input_file.filename)
 
+    error_message = None
     try:
         if filename.lower().endswith(".xlsx"):
             temp_dir = Path(tempfile.gettempdir())
@@ -389,10 +393,28 @@ def orderform():
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
+    except (  # user misbehaviour
+            OrderFormError, ValidationError, AttributeError, ValueError
+    ) as error:
+        error_message = error.message if hasattr(error, "message") else str(error)
+        LOG.error(error_message)
+        http_error_response = http.HTTPStatus.BAD_REQUEST
+    except (  # system misbehaviour
+            AttributeError,
+            ConnectionError,
+            HTTPError,
+            IntegrityError,
+            KeyError,
+            NewConnectionError,
+            MaxRetryError,
+            TimeoutError,
+            TypeError,
+    ) as error:
+        LOG.exception(error)
+        error_message = error.message if hasattr(error, "message") else str(error)
+        http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
+    else:
         return jsonify(**parsed_order.dict())
-    except (OrderFormError, ValidationError, AttributeError, ValueError) as error:
-        if hasattr(error, "message"):
-            message = error.message
-        else:
-            message = str(error)
-        return abort(make_response(jsonify(message=message), 400))
+    finally:
+        if error_message:
+            return abort(make_response(jsonify(message=error_message), http_error_response))
