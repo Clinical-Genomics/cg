@@ -406,7 +406,6 @@ def orderform():
         parsed_order: Orderform = order_parser.generate_orderform()
     except (  # user misbehaviour
         AttributeError,
-        JSONDecodeError,
         OrderFormError,
         OverflowError,
         ValidationError,
