@@ -117,9 +117,9 @@ def submit_order(order_type):
         return jsonify(
             project=result["project"], records=[record.to_dict() for record in result["records"]]
         )
-    finally:
-        if error_message:
-            return abort(make_response(jsonify(message=error_message), http_error_response))
+
+    if error_message:
+        return abort(make_response(jsonify(message=error_message), http_error_response))
 
 
 @BLUEPRINT.route("/cases")
@@ -426,6 +426,6 @@ def orderform():
         http_error_response = http.HTTPStatus.INTERNAL_SERVER_ERROR
     else:
         return jsonify(**parsed_order.dict())
-    finally:
-        if error_message:
-            return abort(make_response(jsonify(message=error_message), http_error_response))
+
+    if error_message:
+        return abort(make_response(jsonify(message=error_message), http_error_response))
