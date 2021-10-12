@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
 import http
 import json
 import logging
 import tempfile
 from functools import wraps
+from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
-from pymysql import IntegrityError, InternalError
+from pymysql import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import DuplicateRecordError, OrderError, OrderFormError
+from cg.exc import OrderError, OrderFormError
 from cg.meta.orders import OrdersAPI, OrderType
 from cg.models.orders.order import OrderIn
 from cg.store import models
@@ -52,13 +52,21 @@ def before_request():
 
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        return abort(make_response(jsonify(message="no JWT token found on request"), http.HTTPStatus.UNAUTHORIZED))
+        return abort(
+            make_response(
+                jsonify(message="no JWT token found on request"), http.HTTPStatus.UNAUTHORIZED
+            )
+        )
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
     except ValueError:
-        return abort(make_response(jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED))
+        return abort(
+            make_response(
+                jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED
+            )
+        )
 
     user_obj = db.user(user_data["email"])
     if user_obj is None or not user_obj.order_portal_login:
@@ -83,6 +91,7 @@ def submit_order(order_type):
             user_mail=g.current_user.email,
         )
     except (  # user misbehaviour
+        OrderError,
         OrderFormError,
         ValidationError,
         ValueError,
@@ -370,7 +379,9 @@ def application(tag):
     """Fetch an application tag."""
     record = db.application(tag)
     if record is None:
-        return abort(make_response(jsonify(message="application not found"), http.HTTPStatus.NOT_FOUND))
+        return abort(
+            make_response(jsonify(message="application not found"), http.HTTPStatus.NOT_FOUND)
+        )
     return jsonify(**record.to_dict())
 
 
@@ -394,21 +405,22 @@ def orderform():
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
     except (  # user misbehaviour
-            OrderFormError, ValidationError, AttributeError, ValueError
+        AttributeError,
+        JSONDecodeError,
+        OrderFormError,
+        OverflowError,
+        ValidationError,
+        ValueError,
     ) as error:
         error_message = error.message if hasattr(error, "message") else str(error)
         LOG.error(error_message)
         http_error_response = http.HTTPStatus.BAD_REQUEST
     except (  # system misbehaviour
-            AttributeError,
-            ConnectionError,
-            HTTPError,
-            IntegrityError,
-            KeyError,
-            NewConnectionError,
-            MaxRetryError,
-            TimeoutError,
-            TypeError,
+        NewConnectionError,
+        MaxRetryError,
+        TimeoutError,
+        TypeError,
+        UnicodeDecodeError,
     ) as error:
         LOG.exception(error)
         error_message = error.message if hasattr(error, "message") else str(error)
