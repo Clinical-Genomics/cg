@@ -73,6 +73,7 @@ def submit_order(order_type):
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     post_data: OrderIn = OrderIn.parse_obj(request.get_json())
     LOG.info("processing '%s' order: %s", order_type, post_data)
+    error_message = None
     try:
         result = api.submit(
             project=OrderType(order_type),
@@ -80,34 +81,33 @@ def submit_order(order_type):
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
-    except (
+    except (  # system misbehaviour
         AttributeError,
         ConnectionError,
-        DuplicateRecordError,
         HTTPError,
         IntegrityError,
-        InternalError,
         KeyError,
-        MaxRetryError,
         NewConnectionError,
-        OrderFormError,
+        MaxRetryError,
         TimeoutError,
         TypeError,
+    ) as error:
+        LOG.exception(error)
+        error_message = error.message if hasattr(error, "message") else str(error)
+    except (  # user misbehaviour
+        OrderFormError,
         ValidationError,
         ValueError,
     ) as error:
-        if hasattr(error, "message"):
-            message = error.message
-        else:
-            message = str(error)
-
-        LOG.error(message)
-
-        return abort(make_response(jsonify(message=message), 401))
-
-    return jsonify(
-        project=result["project"], records=[record.to_dict() for record in result["records"]]
-    )
+        error_message = error.message if hasattr(error, "message") else str(error)
+        LOG.error(error_message)
+    else:
+        return jsonify(
+            project=result["project"], records=[record.to_dict() for record in result["records"]]
+        )
+    finally:
+        if error_message:
+            return abort(make_response(jsonify(message=error_message), 401))
 
 
 @BLUEPRINT.route("/cases")
