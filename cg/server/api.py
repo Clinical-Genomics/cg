@@ -420,7 +420,6 @@ def orderform():
         MaxRetryError,
         TimeoutError,
         TypeError,
-        UnicodeDecodeError,
     ) as error:
         LOG.exception(error)
         error_message = error.message if hasattr(error, "message") else str(error)
