@@ -18,6 +18,9 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.25.3]
+### Fixed
+- Show warnings when priorities differ on a case in an order 
 
 ## [22.25.2]
 ### Fixed
