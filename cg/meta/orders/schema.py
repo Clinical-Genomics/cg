@@ -169,7 +169,7 @@ BALSAMIC_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "subject_id": OptionalNone(str),
+    "subject_id": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "synopsis": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
     "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
@@ -342,6 +342,7 @@ SARSCOV2_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     "concentration_sample": OptionalNone(TypeValidatorNone(str)),
     "quantity": OptionalNone(TypeValidatorNone(str)),
+    "control": OptionalNone(TypeValidatorNone(str)),
 }
 
 ORDER_SCHEMES = {

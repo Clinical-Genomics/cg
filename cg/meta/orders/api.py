@@ -321,10 +321,13 @@ class OrdersAPI(StatusHandler):
 
         for sample in samples:
 
-            sample_name: str = sample.get("name")
-
             if self._existing_sample(sample):
                 continue
+
+            if self._is_control_sample(sample):
+                continue
+
+            sample_name: str = sample.get("name")
 
             if self.status.find_samples(customer=customer_obj, name=sample_name).first():
                 raise OrderError(
@@ -334,6 +337,10 @@ class OrdersAPI(StatusHandler):
     @staticmethod
     def _existing_sample(sample: dict) -> bool:
         return sample.get("internal_id") is not None
+
+    @staticmethod
+    def _is_control_sample(sample: dict) -> bool:
+        return sample.get("control") is not None
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
         """Get the submit method to call for the given type of project"""

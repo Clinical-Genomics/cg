@@ -448,3 +448,50 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     )
 
     # THEN no OrderError should be raised on duplicate sample name
+
+
+@pytest.mark.parametrize(
+    "order_type",
+    [OrderType.SARS_COV_2],
+)
+def test_sarscov2_control_submit_duplicate_sample_name(
+    orders_api,
+    sample_store,
+    all_orders_to_submit,
+    order_type,
+    ticket_number: int,
+    user_name: str,
+    user_mail: str,
+    monkeypatch,
+    helpers,
+):
+    # GIVEN we have an order with control samples that is already in the database
+    order_data = all_orders_to_submit[order_type]
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+    }
+    monkeypatch.setattr(
+        PROCESS_LIMS_FUNCTION,
+        lambda **kwargs: (lims_project_data, lims_map),
+    )
+
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    for sample in order_data.samples:
+        sample_name = sample["name"]
+        sample["control"] = "negative"
+        if not store.find_samples(customer=customer_obj, name=sample_name).first():
+            sample_obj = helpers.add_sample(
+                store=store, sample_name=sample_name, customer_internal_id=customer_obj.internal_id
+            )
+            store.add_commit(sample_obj)
+        assert store.find_samples(customer=customer_obj, name=sample_name).first()
+
+    # WHEN calling submit
+    orders_api.submit(
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
+
+    # THEN no OrderError should be raised on duplicate sample name

@@ -134,6 +134,7 @@ class StatusHandler:
                 {
                     "application": sample_data["application"],
                     "collection_date": sample_data.get("collection_date"),
+                    "control": sample_data.get("control"),
                     "comment": sample_data.get("comment"),
                     "data_delivery": sample_data.get("data_delivery"),
                     "internal_id": sample_data.get("internal_id"),
@@ -473,6 +474,7 @@ class StatusHandler:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
                     comment=sample_data["comment"],
+                    control=sample_data.get("control"),
                     customer=customer_obj,
                     data_delivery=sample_data["data_delivery"],
                     internal_id=sample_data["internal_id"],
