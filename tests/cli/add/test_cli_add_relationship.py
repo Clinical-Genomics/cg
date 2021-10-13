@@ -119,7 +119,7 @@ def test_add_relationship_mother(
     disk_store: Store = base_context.status_db
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
-    mother = helpers.add_sample(disk_store, sample_id="mother")
+    mother = helpers.add_sample(disk_store, sample_name="mother")
     mother_id = mother.internal_id
     case = helpers.add_case(disk_store)
     case_id = case.internal_id
@@ -188,7 +188,7 @@ def test_add_relationship_father(
     sample = helpers.add_sample(disk_store)
     sample_id = sample.internal_id
 
-    father = helpers.add_sample(disk_store, sample_id="father", gender="male")
+    father = helpers.add_sample(disk_store, sample_name="father", gender="male")
     father_id = father.internal_id
 
     case = helpers.add_case(disk_store)

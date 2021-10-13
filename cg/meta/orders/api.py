@@ -51,6 +51,9 @@ class OrdersAPI(StatusHandler):
         self._validate_case_names_are_unique(
             samples=order_in.samples, customer_id=order_in.customer
         )
+        self._validate_sample_names_are_available(
+            project=project, samples=order_in.samples, customer_id=order_in.customer
+        )
 
         # detect manual ticket assignment
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
@@ -278,7 +281,7 @@ class OrdersAPI(StatusHandler):
                 ):
                     raise OrderError(
                         f"Only MIP, Balsamic and external orders can have imported "
-                        f"samples: "
+                        f"sample: "
                         f"{sample.get('name')}"
                     )
 
@@ -305,6 +308,32 @@ class OrdersAPI(StatusHandler):
     @staticmethod
     def _existing_case_or_orders_without_explicit_case_name(sample: dict, case_id: str) -> bool:
         return sample.get("case_internal_id") or not case_id
+
+    def _validate_sample_names_are_available(
+        self, project: OrderType, samples: List[dict], customer_id: str
+    ) -> None:
+        """Validate that the names of all samples are unused for all samples"""
+
+        if project is not OrderType.SARS_COV_2:
+            return
+
+        customer_obj: models.Customer = self.status.customer(customer_id)
+
+        for sample in samples:
+
+            sample_name: str = sample.get("name")
+
+            if self._existing_sample(sample):
+                continue
+
+            if self.status.find_samples(customer=customer_obj, name=sample_name).first():
+                raise OrderError(
+                    f"Sample name {sample_name} already in use for customer {customer_id}"
+                )
+
+    @staticmethod
+    def _existing_sample(sample: dict) -> bool:
+        return sample.get("internal_id") is not None
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
         """Get the submit method to call for the given type of project"""

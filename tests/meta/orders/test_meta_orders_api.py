@@ -239,11 +239,22 @@ def test_submit_non_scout_legal_sample_customer(
         )
 
 
+@pytest.mark.parametrize(
+    "order_type",
+    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
+)
 def test_submit_duplicate_sample_case_name(
-    orders_api, mip_order_to_submit, ticket_number: int, user_name: str, user_mail: str, mocker
+    orders_api,
+    order_type: OrderType,
+    all_orders_to_submit,
+    ticket_number: int,
+    user_name: str,
+    user_mail: str,
+    mocker,
 ):
     # GIVEN we have an order with a case that is already in the database
-    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    order_data = all_orders_to_submit[order_type]
+
     store = orders_api.status
     customer_obj = store.customer(order_data.customer)
 
@@ -266,7 +277,7 @@ def test_submit_duplicate_sample_case_name(
     # THEN an OrderError should be raised on duplicate case name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=OrderType.MIP_DNA, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
         )
 
     # Then no new samples should have been created in LIMS
@@ -297,3 +308,143 @@ def test_submit_unique_sample_case_name(
     )
 
     # Then no exception about duplicate names should be thrown
+
+
+@pytest.mark.parametrize(
+    "order_type",
+    [
+        OrderType.BALSAMIC,
+        OrderType.FASTQ,
+        OrderType.METAGENOME,
+        OrderType.MICROSALT,
+        OrderType.MIP_DNA,
+        OrderType.MIP_RNA,
+        OrderType.RML,
+        OrderType.SARS_COV_2,
+    ],
+)
+def test_submit_unique_sample_name(
+    orders_api,
+    all_orders_to_submit,
+    order_type,
+    ticket_number: int,
+    user_name: str,
+    user_mail: str,
+    monkeypatch,
+):
+    # GIVEN we have an order with a sample that is not existing in the database
+    order_data = all_orders_to_submit[order_type]
+    store = orders_api.status
+    assert store.samples().first() is None
+
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+    }
+    monkeypatch.setattr(
+        PROCESS_LIMS_FUNCTION,
+        lambda **kwargs: (lims_project_data, lims_map),
+    )
+
+    # WHEN calling submit
+    orders_api.submit(
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
+
+    # Then no exception about duplicate names should be thrown
+
+
+@pytest.mark.parametrize(
+    "order_type",
+    [OrderType.SARS_COV_2],
+)
+def test_sarscov2_submit_duplicate_sample_name(
+    orders_api,
+    sample_store,
+    all_orders_to_submit,
+    order_type,
+    ticket_number: int,
+    user_name: str,
+    user_mail: str,
+    mocker,
+    helpers,
+):
+    # GIVEN we have an order with samples that is already in the database
+    order_data = all_orders_to_submit[order_type]
+    mocker.patch(PROCESS_LIMS_FUNCTION)
+
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    for sample in order_data.samples:
+        sample_name = sample["name"]
+        if not store.find_samples(customer=customer_obj, name=sample_name).first():
+            sample_obj = helpers.add_sample(
+                store=store, sample_name=sample_name, customer_internal_id=customer_obj.internal_id
+            )
+            store.add_commit(sample_obj)
+        assert store.find_samples(customer=customer_obj, name=sample_name).first()
+
+    # WHEN calling submit
+    # THEN an OrderError should be raised on duplicate sample name
+    with pytest.raises(OrderError):
+        orders_api.submit(
+            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+        )
+
+    # Then no new samples should have been created in LIMS
+    cg.meta.orders.api.process_lims.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "order_type",
+    [
+        OrderType.BALSAMIC,
+        OrderType.FASTQ,
+        OrderType.METAGENOME,
+        OrderType.MICROSALT,
+        OrderType.MIP_DNA,
+        OrderType.MIP_RNA,
+        OrderType.RML,
+    ],
+)
+def test_not_sarscov2_submit_duplicate_sample_name(
+    orders_api,
+    sample_store,
+    all_orders_to_submit,
+    order_type,
+    ticket_number: int,
+    user_name: str,
+    user_mail: str,
+    monkeypatch,
+    helpers,
+):
+    # GIVEN we have an order with samples that is already in the database
+    order_data = all_orders_to_submit[order_type]
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {
+        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+    }
+    monkeypatch.setattr(
+        PROCESS_LIMS_FUNCTION,
+        lambda **kwargs: (lims_project_data, lims_map),
+    )
+
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    for sample in order_data.samples:
+        sample_name = sample["name"]
+        if not store.find_samples(customer=customer_obj, name=sample_name).first():
+            sample_obj = helpers.add_sample(
+                store=store, sample_name=sample_name, customer_internal_id=customer_obj.internal_id
+            )
+            store.add_commit(sample_obj)
+        assert store.find_samples(customer=customer_obj, name=sample_name).first()
+
+    # WHEN calling submit
+    orders_api.submit(
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
+
+    # THEN no OrderError should be raised on duplicate sample name

@@ -131,7 +131,7 @@ def fixture_dna_mip_context(
                 store=_store,
                 sample=mip_case_ids[case_id]["internal_id"],
                 data_analysis=Pipeline.MIP_DNA,
-                customer_name="cust000",
+                customer_internal_id="cust000",
                 application_tag="WGSA",
                 application_type="wgs",
                 gender="unknown",
