@@ -7,6 +7,7 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
+import requests
 from pymysql import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
@@ -60,7 +61,9 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(jwt_token, certs=current_app.config["GOOGLE_OAUTH_CERTS"])
+        user_data = jwt.decode(
+            jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
+        )
     except ValueError:
         return abort(
             make_response(
