@@ -87,7 +87,7 @@ class ScoutAPI:
 
         Args:
             panel_id (str): unique id for the panel
-            version (str): version of the panel. If 'None' latest version will be returned
+            build (str): version of the panel. If 'None' latest version will be returned
 
         Returns:
             panel genes: panel genes list
@@ -221,3 +221,93 @@ class ScoutAPI:
             self.process.run_command(upload_delivery_report_command)
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
+
+    def upload_fusion_report(self, report_path: str, case_id: str, research: bool) -> None:
+        """Load a fusion report into a case in the database
+
+        Args:
+            report_path (string):       Path to delivery report
+            case_id     (string):       Case identifier
+            research    (bool):         Research report
+        Returns:
+            Nothing
+        """
+
+        # This command can be run with
+        # `scout load gene-fusion-report [-r] <case_id> <path/to/research_gene_fusion_report.pdf>`
+        upload_fusion_report_command = ["load", "gene-fusion-report"]
+
+        if research:
+            upload_fusion_report_command.append("-r")
+
+        upload_fusion_report_command.extend([case_id, report_path])
+
+        try:
+            LOG.info("Uploading fusion report %s to case %s", report_path, case_id)
+            self.process.run_command(upload_fusion_report_command)
+        except CalledProcessError:
+            LOG.warning("Something went wrong when uploading fusion report")
+
+    def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id):
+        """Load a splice junctions bed file into a case in the database
+
+        Args:
+            file_path           (string):       Path to delivery report
+            case_id             (string):       Case identifier
+            customer_sample_id  (bool):         Customers sample identifier
+        Returns:
+            updated_case(dict)
+
+        """
+
+        # This command can be run with
+        # `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed
+        #   <path/to/junction_file.bed>`
+        upload_command = [
+            "update",
+            "individual",
+            "-c",
+            case_id,
+            "-n",
+            customer_sample_id,
+            "splice_junctions_bed",
+            file_path,
+        ]
+
+        try:
+            LOG.info("Uploading splice junctions bed file %s to case %s", file_path, case_id)
+            self.process.run_command(upload_command)
+        except CalledProcessError:
+            LOG.warning("Something went wrong when uploading splice junctions bed file")
+
+    def upload_rna_coverage_bigwig(self, file_path: str, case_id: str, customer_sample_id: str):
+        """Load a rna coverage bigwig file into a case in the database
+
+        Args:
+            file_path           (string):       Path to delivery report
+            case_id             (string):       Case identifier
+            customer_sample_id  (bool):         Customers sample identifier
+        Returns:
+            updated_case(dict)
+
+        """
+
+        # This command can be run with
+        # `scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig
+        #         <path/to/coverage_file.bigWig>`
+        upload_command = [
+            "update",
+            "individual",
+            "-c",
+            case_id,
+            "-n",
+            customer_sample_id,
+            "rna_coverage_bigwig",
+            file_path,
+        ]
+
+        try:
+            LOG.info("Uploading rna coverage bigwig file %s to case %s", file_path, case_id)
+            self.process.run_command(upload_command)
+        except CalledProcessError:
+            LOG.warning("Something went wrong when uploading rna coverage bigwig file")
