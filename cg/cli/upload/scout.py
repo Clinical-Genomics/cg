@@ -150,7 +150,7 @@ def upload_rna_to_scout(context: CGConfig, dry_run: bool, case_id: str):
     """Upload variants and case from analysis to Scout."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
-    status_db: Store = context.obj.status_db
+    status_db: Store = context.status_db
 
     if not case_id:
         suggest_cases_to_upload(status_db=status_db)
