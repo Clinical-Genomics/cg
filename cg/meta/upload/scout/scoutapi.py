@@ -116,11 +116,11 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>´
-        tags = ["fusion"]
+        tags = {"fusion"}
         if research:
-            tags.append("research")
+            tags.add("research")
         else:
-            tags.append("clinical")
+            tags.add("clinical")
 
         version_obj = self.housekeeper.last_version(case_id)
         fusion_report: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
@@ -141,7 +141,7 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
-        tags = ["junction", "bed"]
+        tags = {"junction", "bed"}
 
         version_obj = self.housekeeper.last_version(sample_id)
         splice_junctions_bed: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
@@ -162,7 +162,7 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
-        tags = ["coverage", "bigwig"]
+        tags = {"coverage", "bigwig"}
 
         version_obj = self.housekeeper.last_version(sample_id)
         rna_coverage_bigwig: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
@@ -184,6 +184,7 @@ class UploadScoutAPI:
         Returns:
             Nothing
         """
+
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         case_obj = status_db.family(case_id)
