@@ -37,6 +37,7 @@ class UploadScoutAPI:
         self.madeline_api = madeline_api
         self.mip_analysis_api = analysis_api
         self.lims = lims_api
+        self.status_db = analysis_api.status_db
 
     def generate_config(self, analysis_obj: models.Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
