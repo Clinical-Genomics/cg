@@ -184,7 +184,7 @@ class UploadScoutAPI:
         Returns:
             Nothing
         """
-        scout_api: ScoutAPI = self.scout_api
+        scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         case_obj = status_db.family(case_id)
 
@@ -225,7 +225,7 @@ class UploadScoutAPI:
             Nothing
         """
 
-        scout_api: ScoutAPI = self.scout_api
+        scout_api: ScoutAPI = self.scout
         fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
 
         if fusion_report is None:
@@ -255,7 +255,7 @@ class UploadScoutAPI:
             Nothing
         """
 
-        scout_api: ScoutAPI = self.scout_api
+        scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         case_obj = status_db.family(case_id)
 

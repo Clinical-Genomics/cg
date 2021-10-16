@@ -145,12 +145,12 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.command(name="upload-rna-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
-@click.pass_obj
-def upload_rna_to_scout(context: CGConfig, dry_run: bool, case_id: str):
+@click.pass_context
+def upload_rna_to_scout(context, dry_run: bool, case_id: str):
     """Upload variants and case from analysis to Scout."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
-    status_db: Store = context.status_db
+    status_db: Store = context.obj.status_db
 
     if not case_id:
         suggest_cases_to_upload(status_db=status_db)
