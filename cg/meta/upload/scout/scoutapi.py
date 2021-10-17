@@ -135,14 +135,13 @@ class UploadScoutAPI:
 
         Args:
             sample_id   (string):       Sample identifier
-            research    (bool):         Research report
         Returns:
             File in housekeeper (Optional[hk_models.File])
         """
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
-        tags = {"junction", "bed"}
+        tags = {"junction", "bed", sample_id}
 
         version_obj = self.housekeeper.last_version(sample_id)
         splice_junctions_bed: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
@@ -156,14 +155,13 @@ class UploadScoutAPI:
 
         Args:
             sample_id   (string):       Sample identifier
-            research    (bool):         Research report
         Returns:
             File in housekeeper (Optional[hk_models.File])
         """
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
-        tags = {"coverage", "bigwig"}
+        tags = {"coverage", "bigwig", sample_id}
 
         version_obj = self.housekeeper.last_version(sample_id)
         rna_coverage_bigwig: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
