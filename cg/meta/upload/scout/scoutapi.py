@@ -151,7 +151,7 @@ class UploadScoutAPI:
 
         return splice_junctions_bed
 
-    def get_rna_coverage_bigwig(self, case_id, sample_id) -> Optional[hk_models.File]:
+    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
         """Get a rna coverage bigwig file for case in housekeeper
 
         Args:
@@ -194,9 +194,7 @@ class UploadScoutAPI:
             sample_obj = link.sample
             sample_id = sample_obj.internal_id
             sample_name = sample_obj.name
-            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
-                case_id=case_id, sample_id=sample_id
-            )
+            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(case_id=case_id, sample_id=sample_id)
 
             if rna_coverage_bigwig is None:
                 raise FileNotFoundError(
