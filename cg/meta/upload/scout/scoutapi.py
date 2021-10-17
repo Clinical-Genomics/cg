@@ -130,10 +130,11 @@ class UploadScoutAPI:
 
         return fusion_report
 
-    def get_splice_junctions_bed(self, sample_id) -> Optional[hk_models.File]:
+    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
         """Get a splice junctions bed file for case in housekeeper
 
         Args:
+            case_id     (string):       Case identifier
             sample_id   (string):       Sample identifier
         Returns:
             File in housekeeper (Optional[hk_models.File])
@@ -143,17 +144,18 @@ class UploadScoutAPI:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
         tags = {"junction", "bed", sample_id}
 
-        version_obj = self.housekeeper.last_version(sample_id)
+        version_obj = self.housekeeper.last_version(case_id)
         splice_junctions_bed: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
             version_obj=version_obj, tags=tags
         )
 
         return splice_junctions_bed
 
-    def get_rna_coverage_bigwig(self, sample_id) -> Optional[hk_models.File]:
+    def get_rna_coverage_bigwig(self, case_id, sample_id) -> Optional[hk_models.File]:
         """Get a rna coverage bigwig file for case in housekeeper
 
         Args:
+            case_id     (string):       Case identifier
             sample_id   (string):       Sample identifier
         Returns:
             File in housekeeper (Optional[hk_models.File])
@@ -163,7 +165,7 @@ class UploadScoutAPI:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
         tags = {"coverage", "bigwig", sample_id}
 
-        version_obj = self.housekeeper.last_version(sample_id)
+        version_obj = self.housekeeper.last_version(case_id)
         rna_coverage_bigwig: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
             version_obj=version_obj, tags=tags
         )
@@ -192,7 +194,9 @@ class UploadScoutAPI:
             sample_obj = link.sample
             sample_id = sample_obj.internal_id
             sample_name = sample_obj.name
-            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(sample_id)
+            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
+                case_id=case_id, sample_id=sample_id
+            )
 
             if rna_coverage_bigwig is None:
                 raise FileNotFoundError(
@@ -264,7 +268,7 @@ class UploadScoutAPI:
             sample_id = sample_obj.internal_id
             sample_name = sample_obj.name
             splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
-                sample_id
+                case_id=case_id, sample_id=sample_id
             )
 
             if splice_junctions_bed is None:

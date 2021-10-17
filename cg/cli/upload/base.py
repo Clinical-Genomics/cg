@@ -26,8 +26,15 @@ from .genotype import genotypes
 from .gisaid import gisaid
 from .mutacc import process_solved, processed_solved
 from .observations import observations
-from .scout import create_scout_load_config, scout, upload_case_to_scout, upload_fusion_report_to_scout, \
-    upload_splice_junctions_bed_to_scout, upload_rna_coverage_bigwig_to_scout, upload_rna_to_scout
+from .scout import (
+    create_scout_load_config,
+    scout,
+    upload_case_to_scout,
+    upload_fusion_report_to_scout,
+    upload_splice_junctions_bed_to_scout,
+    upload_rna_coverage_bigwig_to_scout,
+    upload_rna_to_scout,
+)
 from .utils import suggest_cases_to_upload
 from .validate import validate
 
