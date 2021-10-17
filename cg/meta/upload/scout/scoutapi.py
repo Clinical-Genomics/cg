@@ -194,7 +194,9 @@ class UploadScoutAPI:
             sample_obj = link.sample
             sample_id = sample_obj.internal_id
             sample_name = sample_obj.name
-            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(case_id=case_id, sample_id=sample_id)
+            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
+                case_id=case_id, sample_id=sample_id
+            )
 
             if rna_coverage_bigwig is None:
                 raise FileNotFoundError(
