@@ -258,6 +258,7 @@ def upload_context(cg_context: CGConfig) -> CGConfig:
         madeline_api=cg_context.madeline_api,
         analysis_api=analysis_api,
         lims_api=cg_context.lims_api,
+        status_db=cg_context.status_db,
     )
 
     return cg_context

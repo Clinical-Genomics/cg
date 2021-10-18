@@ -31,13 +31,14 @@ class UploadScoutAPI:
         lims_api: LimsAPI,
         analysis_api: AnalysisAPI,
         madeline_api: MadelineAPI,
+        status_db: Store,
     ):
         self.housekeeper = hk_api
         self.scout = scout_api
         self.madeline_api = madeline_api
         self.mip_analysis_api = analysis_api
         self.lims = lims_api
-        self.status_db = analysis_api.status_db
+        self.status_db = status_db
 
     def generate_config(self, analysis_obj: models.Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
@@ -123,9 +124,8 @@ class UploadScoutAPI:
         else:
             tags.add("clinical")
 
-        version_obj = self.housekeeper.last_version(case_id)
-        fusion_report: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
-            version_obj=version_obj, tags=tags
+        fusion_report: Optional[hk_models.File] = self.housekeeper.find_file_in_latest_version(
+            case_id=case_id, tags=tags
         )
 
         return fusion_report
@@ -144,10 +144,9 @@ class UploadScoutAPI:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
         tags = {"junction", "bed", sample_id}
 
-        version_obj = self.housekeeper.last_version(case_id)
-        splice_junctions_bed: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
-            version_obj=version_obj, tags=tags
-        )
+        splice_junctions_bed: Optional[
+            hk_models.File
+        ] = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
         return splice_junctions_bed
 
@@ -165,10 +164,9 @@ class UploadScoutAPI:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
         tags = {"coverage", "bigwig", sample_id}
 
-        version_obj = self.housekeeper.last_version(case_id)
-        rna_coverage_bigwig: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
-            version_obj=version_obj, tags=tags
-        )
+        rna_coverage_bigwig: Optional[
+            hk_models.File
+        ] = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
         return rna_coverage_bigwig
 

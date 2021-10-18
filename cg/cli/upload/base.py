@@ -105,6 +105,7 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         madeline_api=config_object.madeline_api,
         analysis_api=analysis_api,
         lims_api=config_object.lims_api,
+        status_db=status_db,
     )
 
     if context.invoked_subcommand is not None:

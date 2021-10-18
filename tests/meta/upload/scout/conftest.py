@@ -271,6 +271,7 @@ def fixture_upload_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: List[dict],
     housekeeper_api: MockHousekeeperAPI,
+    store: Store
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockMipAnalysis()
@@ -282,6 +283,7 @@ def fixture_upload_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
+        status_db=store,
     )
 
 
@@ -291,6 +293,7 @@ def fixture_upload_mip_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: List[dict],
     mip_analysis_hk_api: MockHousekeeperAPI,
+    store: Store
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockMipAnalysis()
@@ -302,6 +305,7 @@ def fixture_upload_mip_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
+        status_db=store,
     )
 
     yield _api
@@ -313,6 +317,7 @@ def fixture_upload_balsamic_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: List[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
+    store: Store
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockMipAnalysis()
@@ -324,6 +329,7 @@ def fixture_upload_balsamic_analysis_scout_api(
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
         lims_api=lims_api,
+        status_db=store,
     )
 
     yield _api

@@ -179,10 +179,9 @@ def upload_fusion_report_to_scout(context: CGConfig, dry_run: bool, research: bo
     Returns:
 
     """
-    LOG.info("----------------- UPLOAD RNA -----------------------")
+    LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
-    scout_upload_api.upload_fusion_report_to_scout(
+    context.meta_apis["scout_upload_api"].upload_fusion_report_to_scout(
         dry_run=dry_run, research=research, case_id=case_id
     )
 
@@ -204,10 +203,11 @@ def upload_splice_junctions_bed_to_scout(context: CGConfig, dry_run: bool, case_
     Returns:
 
     """
-    LOG.info("----------------- UPLOAD RNA SPLICE JUNCTIONS BED -----------------------")
+    LOG.info("----------------- UPLOAD RNA SPLICE JUNCTIONS BED TO SCOUT  -----------------------")
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
-    scout_upload_api.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
+    context.meta_apis["scout_upload_api"].upload_splice_junctions_bed_to_scout(
+        dry_run=dry_run, case_id=case_id
+    )
 
 
 @click.command(name="upload-rna-coverage-bigwig-to-scout")
@@ -227,7 +227,8 @@ def upload_rna_coverage_bigwig_to_scout(context: CGConfig, dry_run: bool, case_i
     Returns:
 
     """
-    LOG.info("----------------- UPLOAD RNA -----------------------")
+    LOG.info("----------------- UPLOAD RNA COVERAGE BIGWIG TO SCOUT -----------------------")
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
-    scout_upload_api.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
+    context.meta_apis["scout_upload_api"].upload_rna_coverage_bigwig_to_scout(
+        case_id=case_id, dry_run=dry_run
+    )
