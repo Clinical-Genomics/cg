@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.util import deprecated
 
 from cg.constants import (
     CASE_ACTIONS,
@@ -309,7 +310,7 @@ class Family(Model, PriorityMixin):
     def latest_sequenced(self) -> Optional[dt.datetime]:
         sequenced_dates = []
         for link in self.links:
-            if link.sample.is_external:
+            if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
             elif link.sample.sequenced_at:
                 sequenced_dates.append(link.sample.sequenced_at)
@@ -319,7 +320,7 @@ class Family(Model, PriorityMixin):
     def all_samples_pass_qc(self) -> bool:
         pass_qc = []
         for link in self.links:
-            if link.sample.is_external or link.sample.sequencing_qc:
+            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
                 pass_qc.append(True)
             else:
                 pass_qc.append(False)
@@ -480,7 +481,7 @@ class Sample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     invoice_id = Column(ForeignKey("invoice.id"))
     invoiced_at = Column(types.DateTime)  # DEPRECATED
-    _is_external = Column('is_external', types.Boolean)  # DEPRECATED
+    _is_external = Column("is_external", types.Boolean)  # DEPRECATED
     is_tumour = Column(types.Boolean, default=False)
     loqusdb_id = Column(types.String(64))
     name = Column(types.String(128), nullable=False)
@@ -507,10 +508,13 @@ class Sample(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def is_external(self) -> bool:
+    @deprecated(
+        version="1.4.0",
+        message="This field is deprecated, use sample.application_version.application.is_external",
+    )
+    def is_external(self):
         """Return if this is an externally sequenced sample."""
-        application = self.application_version.application
-        return self._is_external or application.is_external
+        return self._is_external
 
     @property
     def sequencing_qc(self) -> bool:
