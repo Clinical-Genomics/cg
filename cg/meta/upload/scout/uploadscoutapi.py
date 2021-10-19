@@ -213,7 +213,9 @@ class UploadScoutAPI:
         LOG.info("Uploaded rna coverage bigwig %s", rna_coverage_bigwig.full_path)
         LOG.info("Rna coverage bigwig uploaded successfully to Scout")
 
-    def upload_fusion_report_to_scout(self, dry_run: bool, case_id: str, research: bool = False) -> None:
+    def upload_fusion_report_to_scout(
+        self, dry_run: bool, case_id: str, research: bool = False
+    ) -> None:
         """Upload fusion report file for a case to Scout.
         This can also be run as
         `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`

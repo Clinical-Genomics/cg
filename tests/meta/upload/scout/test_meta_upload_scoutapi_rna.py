@@ -56,36 +56,6 @@ def _create_rna_case_with_sample(
     return case
 
 
-def _existing_case(store: Store, case_id) -> bool:
-    return store.family(internal_id=case_id) is not None
-
-
-def _existing_dna_case(store: Store, dna_case_id: str) -> bool:
-    return _existing_case(store, dna_case_id)
-
-
-def _existing_rna_case(store: Store, rna_case_id: str) -> bool:
-    return _existing_case(store, rna_case_id)
-
-
-def _sample_in_the_rna_case_is_connected_to_a_sample_in_the_dna_case_via_subject_id(
-    store: Store, rna_case_id: str, dna_case_id: str
-):
-    rna_subject_ids = set()
-    for rna_link in store.family(rna_case_id).links:
-        rna_sample: models.Sample = rna_link.sample
-        rna_subject_id = rna_sample.subject_id
-        rna_subject_ids.add(rna_subject_id)
-
-    dna_subject_ids = set()
-    for dna_link in store.family(dna_case_id).links:
-        dna_sample: models.Sample = dna_link.sample
-        dna_subject_id = dna_sample.subject_id
-        dna_subject_ids.add(dna_subject_id)
-
-    return rna_subject_ids.intersection(dna_subject_ids) is not None
-
-
 def _connected_rna_sample_has_junction_bed_in_housekeeper(
     housekeeper: HousekeeperAPI, rna_case_id: str, connected_rna_sample_id: str
 ) -> bool:
@@ -103,13 +73,6 @@ def _connected_rna_sample_has_bigwig_in_housekeeper(
     return connected_rna_sample_id in file.path
 
 
-def _case_has_samples(store: Store, case_id: str) -> bool:
-
-    if store.family(internal_id=case_id).links:
-        return True
-    return False
-
-
 def _connect_sample_in_cases_via_subject_id(store, first_case_id, second_case_id):
     subject_id = "a_subject_id"
 
@@ -124,11 +87,6 @@ def _connect_sample_in_cases_via_subject_id(store, first_case_id, second_case_id
         break
 
     store.commit()
-
-
-def _get_dna_sample_id(store: Store, dna_case_id: str) -> Optional[str]:
-    for link in store.family(internal_id=dna_case_id).links:
-        return link.sample.internal_id
 
 
 def _connected_rna_sample_has_fusion_report_in_housekeeper(housekeeper, rna_case_id):
