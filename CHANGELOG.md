@@ -18,7 +18,7 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
-## [22.25.5]
+## [22.26.0]
 ### Added
 - Added median target coverage to mip:s pydantic model
 - Added step to mips metric deliverables model
