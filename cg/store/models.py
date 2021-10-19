@@ -480,7 +480,7 @@ class Sample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     invoice_id = Column(ForeignKey("invoice.id"))
     invoiced_at = Column(types.DateTime)  # DEPRECATED
-    is_external = Column(types.Boolean, default=False)  # DEPRECATED
+    _is_external = Column('is_external', types.Boolean)  # DEPRECATED
     is_tumour = Column(types.Boolean, default=False)
     loqusdb_id = Column(types.String(64))
     name = Column(types.String(128), nullable=False)
@@ -505,6 +505,12 @@ class Sample(Model, PriorityMixin):
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    @property
+    def is_external(self) -> bool:
+        """Return if this is an externally sequenced sample."""
+        application = self.application_version.application
+        return self._is_external or application.is_external
 
     @property
     def sequencing_qc(self) -> bool:
