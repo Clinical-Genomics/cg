@@ -13,7 +13,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
 from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.report.api import ReportAPI
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig

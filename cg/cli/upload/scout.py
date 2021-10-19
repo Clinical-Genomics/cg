@@ -7,7 +7,7 @@ import click
 import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
@@ -144,29 +144,36 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
 @click.command(name="upload-rna-to-scout")
 @click.option("--dry-run", is_flag=True)
+@click.option("--research", is_flag=True)
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(context, dry_run: bool, case_id: str):
-    """Upload variants and case from analysis to Scout."""
+def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str):
+    """Upload a RNA case's gene fusion report and junction splice files for all samples connect via subject_id
+
+    Args:
+        dry_run     (bool):         Skip uploading
+        case_id     (string):       RNA case identifier
+        research    (bool):         Upload research report instead of clinical
+    Returns:
+
+    """
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
-    status_db: Store = context.obj.status_db
 
-    if not case_id:
-        suggest_cases_to_upload(status_db=status_db)
-        return
-
-    context.invoke(upload_fusion_report_to_scout, case_id=case_id, dry_run=dry_run)
-    context.invoke(upload_splice_junctions_bed_to_scout, case_id=case_id, dry_run=dry_run)
-    context.invoke(upload_rna_coverage_bigwig_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
+    )
+    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
-@click.command(name="upload-fusion-report-to-scout")
+@click.command(name="upload-rna-fusion-report-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("--research", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_fusion_report_to_scout(context: CGConfig, dry_run: bool, research: bool, case_id: str):
+def upload_rna_fusion_report_to_scout(
+    context: CGConfig, dry_run: bool, research: bool, case_id: str
+):
     """Upload fusion report file for a case to Scout.
     This can also be run as
     `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`
@@ -174,61 +181,40 @@ def upload_fusion_report_to_scout(context: CGConfig, dry_run: bool, research: bo
 
     Args:
         dry_run     (bool):         Skip uploading
-        case_id     (string):       Case identifier
+        case_id     (string):       RNA case identifier
         research    (bool):         Upload research report instead of clinical
     Returns:
 
     """
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
 
-    context.meta_apis["scout_upload_api"].upload_fusion_report_to_scout(
+    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
+    scout_upload_api.upload_fusion_report_to_scout(
         dry_run=dry_run, research=research, case_id=case_id
     )
 
 
-@click.command(name="upload-splice-junctions-bed-to-scout")
+@click.command(name="upload-rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
+@click.option("--research", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_splice_junctions_bed_to_scout(context: CGConfig, dry_run: bool, case_id: str):
-    """Upload splice_junctions_bed file for a case to Scout.
-        This command can be executed as:
-        `housekeeper get file -V --tag junction --tag bed <sample_id>;`
-        `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed <path/to/junction_file.bed>;`
+def upload_rna_junctions_to_scout(context: CGConfig, dry_run: bool, case_id: str):
+    """Upload RNA junctions splice files to Scout.
+        This can also be run as
+        `housekeeper get file -V --tag junction --tag bed <sample_id>`
+        `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed <path/to/junction_file.bed>`
+        `housekeeper get file -V --tag coverage --tag bigwig <sample_id>`
+        scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig <path/to/coverage_file.bigWig>
+    `   ```
 
-
-    Args:
-        dry_run     (bool):         Skip uploading
-        case_id     (string):       Case identifier
-    Returns:
-
-    """
-    LOG.info("----------------- UPLOAD RNA SPLICE JUNCTIONS BED TO SCOUT  -----------------------")
-
-    context.meta_apis["scout_upload_api"].upload_splice_junctions_bed_to_scout(
-        dry_run=dry_run, case_id=case_id
-    )
-
-
-@click.command(name="upload-rna-coverage-bigwig-to-scout")
-@click.option("--dry-run", is_flag=True)
-@click.argument("case_id")
-@click.pass_obj
-def upload_rna_coverage_bigwig_to_scout(context: CGConfig, dry_run: bool, case_id: str):
-    """Upload rna_coverage_bigwig file for a case to Scout.
-        This command can be executed as:
-        `housekeeper get file -V --tag coverage --tag bigwig <sample_id>;`
-        `scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig
-        <path/to/coverage_file.bigWig>;`
-
-    Args:
-        dry_run     (bool):         Skip uploading
-        case_id     (string):       Case identifier
-    Returns:
+        Args:
+            dry_run     (bool):         Skip uploading
+            case_id     (string):       RNA case identifier
+        Returns:
 
     """
-    LOG.info("----------------- UPLOAD RNA COVERAGE BIGWIG TO SCOUT -----------------------")
+    LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
-    context.meta_apis["scout_upload_api"].upload_rna_coverage_bigwig_to_scout(
-        case_id=case_id, dry_run=dry_run
-    )
+    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
+    scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)

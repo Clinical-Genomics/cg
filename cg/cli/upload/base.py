@@ -11,7 +11,7 @@ from cg.cli.upload.nipt import nipt
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError, CgError
 from cg.meta.report.api import ReportAPI
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -30,10 +30,9 @@ from .scout import (
     create_scout_load_config,
     scout,
     upload_case_to_scout,
-    upload_fusion_report_to_scout,
-    upload_splice_junctions_bed_to_scout,
-    upload_rna_coverage_bigwig_to_scout,
+    upload_rna_fusion_report_to_scout,
     upload_rna_to_scout,
+    upload_rna_junctions_to_scout,
 )
 from .utils import suggest_cases_to_upload
 from .validate import validate
@@ -170,9 +169,8 @@ upload.add_command(processed_solved)
 upload.add_command(validate)
 upload.add_command(scout)
 upload.add_command(upload_case_to_scout)
-upload.add_command(upload_fusion_report_to_scout)
-upload.add_command(upload_splice_junctions_bed_to_scout)
-upload.add_command(upload_rna_coverage_bigwig_to_scout)
+upload.add_command(upload_rna_fusion_report_to_scout)
+upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
 upload.add_command(create_scout_load_config)
 upload.add_command(observations)

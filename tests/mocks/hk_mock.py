@@ -7,6 +7,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import List, Set
 
+from cg.store import models
+
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
 LOG = logging.getLogger(__name__)
@@ -171,6 +173,14 @@ class MockHousekeeperAPI:
         if tags.intersection(self._missing_tags):
             return None
         return self._files[0]
+
+    def find_file_in_latest_version(self, case_id, tags):
+
+        for file_obj in self._files:
+            tag: models.Tag
+            file_tags = {tag.name for tag in file_obj.tags}
+            if tags.issubset(file_tags):
+                return file_obj
 
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""

@@ -10,7 +10,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
@@ -38,8 +38,8 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
     return lims_family["samples"]
 
 
-@pytest.fixture(scope="function", name="mip_analysis_hk_bundle_data")
-def fixture_mip_analysis_hk_bundle_data(
+@pytest.fixture(scope="function", name="mip_dna_analysis_hk_bundle_data")
+def fixture_mip_dna_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, sample_id: str
 ) -> dict:
     """Get some bundle data for housekeeper"""
@@ -108,6 +108,43 @@ def fixture_mip_analysis_hk_bundle_data(
     return data
 
 
+@pytest.fixture(scope="function", name="mip_rna_analysis_hk_bundle_data")
+def fixture_mip_rna_analysis_hk_bundle_data(
+    case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, sample_id: str
+) -> dict:
+    """Get some bundle data for housekeeper"""
+    data = {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(mip_dna_analysis_dir / f"{case_id}_report.selected.pdf"),
+                "archive": False,
+                "tags": ["fusion", "pdf", "clinical", case_id],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / f"{case_id}_report.pdf"),
+                "archive": False,
+                "tags": ["fusion", "pdf", "research", case_id],
+            },
+            {
+                "path": str(mip_dna_analysis_dir / f"{sample_id}_lanes_1_star_sorted_sj.bigWig"),
+                "archive": False,
+                "tags": ["coverage", "bigwig", "scout", sample_id],
+            },
+            {
+                "path": str(
+                    mip_dna_analysis_dir / f"{sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi"
+                ),
+                "archive": False,
+                "tags": ["bed", "scout", "junction", sample_id],
+            },
+        ],
+    }
+    return data
+
+
 @pytest.fixture(scope="function", name="balsamic_analysis_hk_bundle_data")
 def fixture_balsamic_analysis_hk_bundle_data(
     case_id: str, timestamp: datetime, balsamic_panel_analysis_dir: Path, sample_id: str
@@ -149,19 +186,28 @@ def fixture_balsamic_analysis_hk_version(
     return helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
 
 
-@pytest.fixture(name="mip_analysis_hk_version")
-def fixture_mip_analysis_hk_version(
-    housekeeper_api: MockHousekeeperAPI, mip_analysis_hk_bundle_data: dict, helpers
+@pytest.fixture(name="mip_dna_analysis_hk_version")
+def fixture_mip_dna_analysis_hk_version(
+    housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
-    return helpers.ensure_hk_version(housekeeper_api, mip_analysis_hk_bundle_data)
+    return helpers.ensure_hk_version(housekeeper_api, mip_dna_analysis_hk_bundle_data)
 
 
-@pytest.fixture(name="mip_analysis_hk_api")
-def fixture_mip_analysis_hk_api(
-    housekeeper_api: MockHousekeeperAPI, mip_analysis_hk_bundle_data: dict, helpers
+@pytest.fixture(name="mip_dna_analysis_hk_api")
+def fixture_mip_dna_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, mip_dna_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
-    """Return a housekeeper api populated with some mip analysis files"""
-    helpers.ensure_hk_version(housekeeper_api, mip_analysis_hk_bundle_data)
+    """Return a housekeeper api populated with some mip dna analysis files"""
+    helpers.ensure_hk_version(housekeeper_api, mip_dna_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture(name="mip_rna_analysis_hk_api")
+def fixture_mip_rna_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, mip_rna_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a housekeeper api populated with some mip rna analysis files"""
+    helpers.ensure_hk_version(housekeeper_api, mip_rna_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -175,8 +221,8 @@ def fixture_balsamic_analysis_hk_api(
 
 
 @pytest.fixture(name="mip_file_handler")
-def fixture_mip_file_handler(mip_analysis_hk_version: hk_models.Version) -> MipConfigBuilder:
-    return MipConfigBuilder(hk_version_obj=mip_analysis_hk_version)
+def fixture_mip_file_handler(mip_dna_analysis_hk_version: hk_models.Version) -> MipConfigBuilder:
+    return MipConfigBuilder(hk_version_obj=mip_dna_analysis_hk_version)
 
 
 @pytest.fixture(name="mip_analysis_obj")
@@ -214,14 +260,14 @@ def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analy
 
 @pytest.fixture(name="mip_config_builder")
 def fixture_mip_config_builder(
-    mip_analysis_hk_version: hk_models.Version,
+    mip_dna_analysis_hk_version: hk_models.Version,
     mip_analysis_obj: models.Analysis,
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
 ) -> MipConfigBuilder:
     return MipConfigBuilder(
-        hk_version_obj=mip_analysis_hk_version,
+        hk_version_obj=mip_dna_analysis_hk_version,
         analysis_obj=mip_analysis_obj,
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
@@ -271,7 +317,7 @@ def fixture_upload_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: List[dict],
     housekeeper_api: MockHousekeeperAPI,
-    store: Store
+    store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockMipAnalysis()
@@ -292,15 +338,15 @@ def fixture_upload_mip_analysis_scout_api(
     scout_api: MockScoutAPI,
     madeline_api: MockMadelineAPI,
     lims_samples: List[dict],
-    mip_analysis_hk_api: MockHousekeeperAPI,
-    store: Store
+    mip_dna_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
     _api = UploadScoutAPI(
-        hk_api=mip_analysis_hk_api,
+        hk_api=mip_dna_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,
@@ -317,7 +363,7 @@ def fixture_upload_balsamic_analysis_scout_api(
     madeline_api: MockMadelineAPI,
     lims_samples: List[dict],
     balsamic_analysis_hk_api: MockHousekeeperAPI,
-    store: Store
+    store: Store,
 ) -> UploadScoutAPI:
     """Fixture for upload_scout_api"""
     analysis_mock = MockMipAnalysis()

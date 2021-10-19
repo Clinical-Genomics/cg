@@ -213,7 +213,7 @@ class UploadScoutAPI:
         LOG.info("Uploaded rna coverage bigwig %s", rna_coverage_bigwig.full_path)
         LOG.info("Rna coverage bigwig uploaded successfully to Scout")
 
-    def upload_fusion_report_to_scout(self, dry_run: bool, research: bool, case_id: str) -> None:
+    def upload_fusion_report_to_scout(self, dry_run: bool, case_id: str, research: bool = False) -> None:
         """Upload fusion report file for a case to Scout.
         This can also be run as
         `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`
@@ -241,7 +241,8 @@ class UploadScoutAPI:
             )
 
         LOG.info("Uploaded fusion report %s", fusion_report.full_path)
-        LOG.info("Fusion report uploaded successfully to Scout")
+        report_type = "Research" if research else "Clinical"
+        LOG.info("%s fusion report uploaded successfully to Scout", report_type)
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout.
@@ -285,3 +286,15 @@ class UploadScoutAPI:
 
         LOG.info("Uploaded splice junctions bed file %s", splice_junctions_bed.full_path)
         LOG.info("Splice junctions bed uploaded successfully to Scout")
+
+    def upload_rna_junctions_to_scout(self, dry_run, case_id) -> None:
+        """Upload RNA junctions splice files to Scout.
+
+        Args:
+            dry_run     (bool):         Skip uploading
+            case_id     (string):       RNA case identifier
+        Returns:
+            Nothing
+        """
+        self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
+        self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
