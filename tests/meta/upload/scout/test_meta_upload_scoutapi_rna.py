@@ -42,6 +42,7 @@ def test_upload_rna_junctions_to_scout(
 
 def test_upload_splice_junctions_bed_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
+    dna_sample_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
@@ -64,9 +65,14 @@ def test_upload_splice_junctions_bed_to_scout(
     # THEN the splice junctions file should have been uploaded to the connected sample on the dna case in scout
     assert "Splice junctions bed uploaded successfully to Scout" in caplog.text
 
+    # THEN the customers samples name should have been mentioned in the logging (and used in the upload)
+    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_id).name
+    assert dna_customer_sample_name in caplog.text
+
 
 def test_upload_rna_coverage_bigwig_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
+    dna_sample_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
@@ -88,6 +94,10 @@ def test_upload_rna_coverage_bigwig_to_scout(
 
     # THEN the bigWig file should have been uploaded to the connected sample on the dna case in scout
     assert "Rna coverage bigwig uploaded successfully to Scout" in caplog.text
+
+    # THEN the customers samples name should have been mentioned in the logging (and used in the upload)
+    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_id).name
+    assert dna_customer_sample_name in caplog.text
 
 
 def test_upload_rna_fusion_report_to_scout(

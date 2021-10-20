@@ -201,7 +201,7 @@ class UploadScoutAPI:
                     f"No rna coverage bigwig file was found in housekeeper for {sample_id}"
                 )
 
-            LOG.info("Uploading rna coverage bigwig file %s to scout", sample_id)
+            LOG.info("Uploading rna coverage bigwig file to %s in scout", sample_name)
 
             if not dry_run:
                 scout_api.upload_rna_coverage_bigwig(
@@ -277,7 +277,7 @@ class UploadScoutAPI:
                     f"No splice junctions bed file was found in housekeeper for {sample_id}"
                 )
 
-            LOG.info("Uploading splice junctions bed file %s to scout", sample_id)
+            LOG.info("Uploading splice junctions bed file for %s in scout", sample_name)
 
             if not dry_run:
                 scout_api.upload_splice_junctions_bed(
