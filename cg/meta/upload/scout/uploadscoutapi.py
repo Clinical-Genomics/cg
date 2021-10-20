@@ -289,7 +289,7 @@ class UploadScoutAPI:
         LOG.info("Uploaded splice junctions bed file %s", splice_junctions_bed.full_path)
         LOG.info("Splice junctions bed uploaded successfully to Scout")
 
-    def upload_rna_junctions_to_scout(self, dry_run, case_id) -> None:
+    def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout.
 
         Args:

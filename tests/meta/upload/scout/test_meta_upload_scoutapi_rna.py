@@ -1,7 +1,8 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Optional
+from typing import Optional, Generator
 import pytest
+from _pytest.logging import LogCaptureFixture
 
 from cgmodels.cg.constants import Pipeline
 
@@ -13,7 +14,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_upload_rna_junctions_to_scout(
-    caplog,
+    caplog: Generator[LogCaptureFixture, None, None],
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
@@ -40,11 +41,11 @@ def test_upload_rna_junctions_to_scout(
 
 
 def test_upload_splice_junctions_bed_to_scout(
-    upload_scout_api: UploadScoutAPI,
+    caplog: Generator[LogCaptureFixture, None, None],
+    mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
-    mip_rna_analysis_hk_api: HousekeeperAPI,
-    caplog,
+    upload_scout_api: UploadScoutAPI,
 ):
     """Test that A RNA case's junction splice files for all samples can be loaded via a cg CLI
     command into an already existing DNA case"""
@@ -65,11 +66,11 @@ def test_upload_splice_junctions_bed_to_scout(
 
 
 def test_upload_rna_coverage_bigwig_to_scout(
-    upload_scout_api: UploadScoutAPI,
+    caplog: Generator[LogCaptureFixture, None, None],
+    mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
-    mip_rna_analysis_hk_api: HousekeeperAPI,
-    caplog,
+    upload_scout_api: UploadScoutAPI,
 ):
     """Test that A RNA case's gene fusion report and junction splice files for all samples can be loaded via a cg CLI
     command into an already existing DNA case"""
@@ -90,11 +91,11 @@ def test_upload_rna_coverage_bigwig_to_scout(
 
 
 def test_upload_rna_fusion_report_to_scout(
-    upload_scout_api: UploadScoutAPI,
+    caplog: Generator[LogCaptureFixture, None, None],
+    mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
-    mip_rna_analysis_hk_api: HousekeeperAPI,
-    caplog,
+    upload_scout_api: UploadScoutAPI,
 ):
     """Test that A RNA case's gene fusion report and junction splice files for all samples can be loaded via a cg CLI
     command into an already existing DNA case"""
@@ -115,11 +116,11 @@ def test_upload_rna_fusion_report_to_scout(
 
 
 def test_upload_rna_research_fusion_report_to_scout(
-    upload_scout_api: UploadScoutAPI,
+    caplog: Generator[LogCaptureFixture, None, None],
+    mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
-    mip_rna_analysis_hk_api: HousekeeperAPI,
-    caplog,
+    upload_scout_api: UploadScoutAPI,
 ):
     """Test that A RNA case's gene fusion report and junction splice files for all samples can be loaded via a cg CLI
     command into an already existing DNA case"""
