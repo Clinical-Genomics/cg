@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Set
 
 import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -10,6 +10,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
+from cg.exc import HousekeeperVersionMissingError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models, Store
@@ -143,10 +144,13 @@ class UploadScoutAPI:
         # This command can be executed as:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
         tags: {str} = {"junction", "bed", sample_id}
-
-        splice_junctions_bed: Optional[
-            hk_models.File
-        ] = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
+        splice_junctions_bed: Optional[hk_models.File]
+        try:
+            splice_junctions_bed = self.housekeeper.find_file_in_latest_version(
+                case_id=case_id, tags=tags
+            )
+        except HousekeeperVersionMissingError:
+            LOG.debug("Could not find bundle for case %s", case_id)
 
         return splice_junctions_bed
 
@@ -187,17 +191,29 @@ class UploadScoutAPI:
         """
 
         scout_api: ScoutAPI = self.scout
+        status_db: Store = self.status_db
         fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
 
         if fusion_report is None:
             raise FileNotFoundError(f"No fusion report was found in housekeeper for {case_id}")
 
-        LOG.info("uploading fusion report %s to scout", case_id)
-
-        if not dry_run:
-            scout_api.upload_fusion_report(
-                report_path=fusion_report.full_path, research=research, case_id=case_id
+        rna_case = status_db.family(case_id)
+        for link in rna_case.links:
+            rna_sample: models.Sample = link.sample
+            dna_cases: [models.Family] = self._get_dna_cases(
+                customer=rna_case.customer, subject_id=rna_sample.subject_id
             )
+
+            dna_case: models.Family
+            for dna_case in dna_cases:
+                dna_case_id: str = dna_case.internal_id
+
+                LOG.info("Uploading fusion report to scout for case %s", dna_case_id)
+
+                if not dry_run:
+                    scout_api.upload_fusion_report(
+                        report_path=fusion_report.full_path, research=research, case_id=dna_case_id
+                    )
 
         LOG.info("Uploaded fusion report %s", fusion_report.full_path)
         report_type = "Research" if research else "Clinical"
@@ -221,6 +237,7 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case = status_db.family(case_id)
 
+        link: models.FamilySample
         for link in rna_case.links:
             rna_sample: models.Sample = link.sample
             rna_sample_id: str = rna_sample.internal_id
@@ -233,24 +250,25 @@ class UploadScoutAPI:
                     f"No rna coverage bigwig file was found in housekeeper for {rna_sample_id}"
                 )
 
-            dna_samples: [models.Sample] = status_db.samples(customers=[rna_sample.customer]).filter_by(subject_id=rna_sample.subject_id)
-
-            for dna_sample in dna_samples:
-                dna_sample: models.Sample = dna_sample
+            dna_cases: [models.Family] = self._get_dna_cases(
+                customer=rna_sample.customer, subject_id=rna_sample.subject_id
+            )
+            dna_case: models.Family
+            for dna_case in dna_cases:
+                dna_case_id: str = dna_case.internal_id
+                dna_sample: models.Sample = self._get_sample(
+                    case=dna_case, subject_id=rna_sample.subject_id
+                )
                 dna_sample_name = dna_sample.name
-                for dna_link in dna_sample.links:
-                    dna_link: models.FamilySample = dna_link
-                    dna_case: models.Family = dna_link.family
-                    dna_case_id: str = dna_case.internal_id
 
-                    LOG.info("Uploading rna coverage bigwig file to %s in scout", dna_sample_name)
+                LOG.info("Uploading rna coverage bigwig file to %s in scout", dna_sample_name)
 
-                    if not dry_run:
-                        scout_api.upload_rna_coverage_bigwig(
-                            file_path=rna_coverage_bigwig.full_path,
-                            case_id=dna_case_id,
-                            customer_sample_id=dna_sample_name,
-                        )
+                if not dry_run:
+                    scout_api.upload_rna_coverage_bigwig(
+                        file_path=rna_coverage_bigwig.full_path,
+                        case_id=dna_case_id,
+                        customer_sample_id=dna_sample_name,
+                    )
 
         LOG.info("Uploaded rna coverage bigwig %s", rna_coverage_bigwig.full_path)
         LOG.info("Rna coverage bigwig uploaded successfully to Scout")
@@ -285,24 +303,27 @@ class UploadScoutAPI:
                     f"No splice junctions bed file was found in housekeeper for {rna_sample_id}"
                 )
 
-            dna_samples: [models.Sample] = status_db.samples(customers=[rna_sample.customer]).filter_by(subject_id=rna_sample.subject_id)
+            dna_cases: [models.Family] = self._get_dna_cases(
+                customer=rna_case.customer, subject_id=rna_sample.subject_id
+            )
 
-            for dna_sample in dna_samples:
-                dna_sample: models.Sample = dna_sample
-                dna_sample_name = dna_sample.name
-                for dna_link in dna_sample.links:
-                    dna_link: models.FamilySample = dna_link
-                    dna_case: models.Family = dna_link.family
-                    dna_case_id: str = dna_case.internal_id
+            dna_case: models.Family
+            for dna_case in dna_cases:
+                print(dna_case.data_analysis)
+                dna_case_id: str = dna_case.internal_id
+                dna_sample: models.Sample = self._get_sample(
+                    case=dna_case, subject_id=rna_sample.subject_id
+                )
+                dna_sample_name: str = dna_sample.name
 
-                    LOG.info("Uploading splice junctions bed file for %s in scout", dna_sample_name)
+                LOG.info("Uploading splice junctions bed file for %s in scout", dna_sample_name)
 
-                    if not dry_run:
-                        scout_api.upload_splice_junctions_bed(
-                            file_path=splice_junctions_bed.full_path,
-                            case_id=dna_case_id,
-                            customer_sample_id=dna_sample_name,
-                        )
+                if not dry_run:
+                    scout_api.upload_splice_junctions_bed(
+                        file_path=splice_junctions_bed.full_path,
+                        case_id=dna_case_id,
+                        customer_sample_id=dna_sample_name,
+                    )
 
         LOG.info("Uploaded splice junctions bed file %s", splice_junctions_bed.full_path)
         LOG.info("Splice junctions bed uploaded successfully to Scout")
@@ -318,3 +339,49 @@ class UploadScoutAPI:
         """
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
+
+    def _get_dna_cases(self, customer: models.Customer, subject_id: str) -> Set[models.Family]:
+        """Get DNA cases that has a sample for a subject_id.
+
+        Args:
+            customer     (models.Customer):         Customer owning the cases
+            subject_id   (str):                     Subject id to search for
+        Returns:
+            set containing the matching cases set(models.Family)
+        """
+
+        status_db: Store = self.status_db
+        dna_cases: set[models.Family] = set()
+        subject_id_samples: [models.Sample] = status_db.samples(customers=[customer]).filter_by(
+            subject_id=subject_id
+        )
+        subject_id_sample: models.Sample
+        for subject_id_sample in subject_id_samples:
+
+            subject_id_sample_link: models.FamilySample
+            for subject_id_sample_link in subject_id_sample.links:
+                subject_id_case: models.Family = subject_id_sample_link.family
+
+                if subject_id_case.data_analysis not in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+                    continue
+
+                dna_cases.add(subject_id_case)
+
+        return dna_cases
+
+    @staticmethod
+    def _get_sample(case: models.Family, subject_id: str) -> Optional[models.Sample]:
+        """Get sample of a case for a subject_id.
+
+        Args:
+            case     (models.Family):               Case
+            subject_id   (str):                     Subject id to search for
+        Returns:
+            matching sample (models.Sample)
+        """
+
+        link: models.FamilySample
+        for link in case.links:
+            sample: models.Sample = link.sample
+            if sample.subject_id == subject_id:
+                return sample
