@@ -73,7 +73,7 @@ def fixture_rna_store(
     )
     rna_case.internal_id = rna_case_id
 
-    rna_sample = helpers.add_sample(store=store)
+    rna_sample = helpers.add_sample(store=store, name="rna_sample")
     rna_sample.internal_id = rna_sample_id
     helpers.add_relationship(store=store, sample=rna_sample, case=rna_case)
     store.add_commit(rna_case)
@@ -87,7 +87,7 @@ def fixture_rna_store(
         data_delivery=DataDelivery.SCOUT,
     )
     dna_case.internal_id = dna_case_id
-    dna_sample = helpers.add_sample(store=store)
+    dna_sample = helpers.add_sample(store=store, name="dna_sample")
     dna_sample.internal_id = dna_sample_id
     helpers.add_relationship(store=store, sample=dna_sample, case=dna_case)
     store.add_commit(dna_case)

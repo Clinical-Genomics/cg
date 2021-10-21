@@ -237,13 +237,13 @@ class StoreHelpers:
         is_tumour: bool = False,
         loqusdb_id: str = None,
         reads: int = None,
-        sample_id: str = None,
+        name: str = None,
         ticket: int = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
-        sample_name = sample_id or "sample_test"
+        sample_name = name or "sample_test"
         customer = self.ensure_customer(store, customer_name)
         application_version = self.ensure_application_version(
             store,
@@ -409,7 +409,7 @@ class StoreHelpers:
                 store,
                 customer_name=sample_data["name"],
                 gender=sample_data["sex"],
-                sample_id=sample_data.get("name"),
+                name=sample_data.get("name"),
                 internal_id=sample_id,
                 application_type=app_type,
                 ticket=sample_data["ticket_number"],

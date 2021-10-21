@@ -142,7 +142,7 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
-        tags = {"junction", "bed", sample_id}
+        tags: {str} = {"junction", "bed", sample_id}
 
         splice_junctions_bed: Optional[
             hk_models.File
@@ -162,56 +162,13 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
-        tags = {"coverage", "bigwig", sample_id}
+        tags: {str} = {"coverage", "bigwig", sample_id}
 
         rna_coverage_bigwig: Optional[
             hk_models.File
         ] = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
         return rna_coverage_bigwig
-
-    def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
-        """Upload rna_coverage_bigwig file for a case to Scout.
-            This command can be executed as:
-            `housekeeper get file -V --tag coverage --tag bigwig <sample_id>;`
-            `scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig
-            <path/to/coverage_file.bigWig>;`
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       Case identifier
-        Returns:
-            Nothing
-        """
-
-        scout_api: ScoutAPI = self.scout
-        status_db: Store = self.status_db
-        case_obj = status_db.family(case_id)
-
-        for link in case_obj.links:
-            sample_obj = link.sample
-            sample_id = sample_obj.internal_id
-            sample_name = sample_obj.name
-            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
-                case_id=case_id, sample_id=sample_id
-            )
-
-            if rna_coverage_bigwig is None:
-                raise FileNotFoundError(
-                    f"No rna coverage bigwig file was found in housekeeper for {sample_id}"
-                )
-
-            LOG.info("Uploading rna coverage bigwig file to %s in scout", sample_name)
-
-            if not dry_run:
-                scout_api.upload_rna_coverage_bigwig(
-                    file_path=rna_coverage_bigwig.full_path,
-                    case_id=case_id,
-                    customer_sample_id=sample_name,
-                )
-
-        LOG.info("Uploaded rna coverage bigwig %s", rna_coverage_bigwig.full_path)
-        LOG.info("Rna coverage bigwig uploaded successfully to Scout")
 
     def upload_fusion_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False
@@ -246,6 +203,58 @@ class UploadScoutAPI:
         report_type = "Research" if research else "Clinical"
         LOG.info("%s fusion report uploaded successfully to Scout", report_type)
 
+    def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
+        """Upload rna_coverage_bigwig file for a case to Scout.
+            This command can be executed as:
+            `housekeeper get file -V --tag coverage --tag bigwig <sample_id>;`
+            `scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig
+            <path/to/coverage_file.bigWig>;`
+
+        Args:
+            dry_run     (bool):         Skip uploading
+            case_id     (string):       Case identifier
+        Returns:
+            Nothing
+        """
+
+        scout_api: ScoutAPI = self.scout
+        status_db: Store = self.status_db
+        rna_case = status_db.family(case_id)
+
+        for link in rna_case.links:
+            rna_sample: models.Sample = link.sample
+            rna_sample_id: str = rna_sample.internal_id
+            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
+                case_id=case_id, sample_id=rna_sample_id
+            )
+
+            if rna_coverage_bigwig is None:
+                raise FileNotFoundError(
+                    f"No rna coverage bigwig file was found in housekeeper for {rna_sample_id}"
+                )
+
+            dna_samples: [models.Sample] = status_db.samples(customers=[rna_sample.customer]).filter_by(subject_id=rna_sample.subject_id)
+
+            for dna_sample in dna_samples:
+                dna_sample: models.Sample = dna_sample
+                dna_sample_name = dna_sample.name
+                for dna_link in dna_sample.links:
+                    dna_link: models.FamilySample = dna_link
+                    dna_case: models.Family = dna_link.family
+                    dna_case_id: str = dna_case.internal_id
+
+                    LOG.info("Uploading rna coverage bigwig file to %s in scout", dna_sample_name)
+
+                    if not dry_run:
+                        scout_api.upload_rna_coverage_bigwig(
+                            file_path=rna_coverage_bigwig.full_path,
+                            case_id=dna_case_id,
+                            customer_sample_id=dna_sample_name,
+                        )
+
+        LOG.info("Uploaded rna coverage bigwig %s", rna_coverage_bigwig.full_path)
+        LOG.info("Rna coverage bigwig uploaded successfully to Scout")
+
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout.
             This command can be executed as:
@@ -262,29 +271,38 @@ class UploadScoutAPI:
 
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
-        case_obj = status_db.family(case_id)
+        rna_case = status_db.family(case_id)
 
-        for link in case_obj.links:
-            sample_obj = link.sample
-            sample_id = sample_obj.internal_id
-            sample_name = sample_obj.name
+        for link in rna_case.links:
+            rna_sample = link.sample
+            rna_sample_id = rna_sample.internal_id
             splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
-                case_id=case_id, sample_id=sample_id
+                case_id=case_id, sample_id=rna_sample_id
             )
 
             if splice_junctions_bed is None:
                 raise FileNotFoundError(
-                    f"No splice junctions bed file was found in housekeeper for {sample_id}"
+                    f"No splice junctions bed file was found in housekeeper for {rna_sample_id}"
                 )
 
-            LOG.info("Uploading splice junctions bed file for %s in scout", sample_name)
+            dna_samples: [models.Sample] = status_db.samples(customers=[rna_sample.customer]).filter_by(subject_id=rna_sample.subject_id)
 
-            if not dry_run:
-                scout_api.upload_splice_junctions_bed(
-                    file_path=splice_junctions_bed.full_path,
-                    case_id=case_id,
-                    customer_sample_id=sample_name,
-                )
+            for dna_sample in dna_samples:
+                dna_sample: models.Sample = dna_sample
+                dna_sample_name = dna_sample.name
+                for dna_link in dna_sample.links:
+                    dna_link: models.FamilySample = dna_link
+                    dna_case: models.Family = dna_link.family
+                    dna_case_id: str = dna_case.internal_id
+
+                    LOG.info("Uploading splice junctions bed file for %s in scout", dna_sample_name)
+
+                    if not dry_run:
+                        scout_api.upload_splice_junctions_bed(
+                            file_path=splice_junctions_bed.full_path,
+                            case_id=dna_case_id,
+                            customer_sample_id=dna_sample_name,
+                        )
 
         LOG.info("Uploaded splice junctions bed file %s", splice_junctions_bed.full_path)
         LOG.info("Splice junctions bed uploaded successfully to Scout")
