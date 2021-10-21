@@ -193,6 +193,7 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
+        report_type = "Research" if research else "Clinical"
 
         if fusion_report is None:
             raise FileNotFoundError(f"No fusion report was found in housekeeper for {case_id}")
@@ -200,6 +201,13 @@ class UploadScoutAPI:
         rna_case = status_db.family(case_id)
         for link in rna_case.links:
             rna_sample: models.Sample = link.sample
+            if not rna_sample.subject_id:
+                LOG.debug(
+                    "Skipping RNA sample %s since it is not linked to anything via subject_id",
+                    rna_sample.internal_id,
+                )
+                continue
+
             dna_cases: [models.Family] = self._get_dna_cases(
                 customer=rna_case.customer, subject_id=rna_sample.subject_id
             )
@@ -214,10 +222,8 @@ class UploadScoutAPI:
                     scout_api.upload_fusion_report(
                         report_path=fusion_report.full_path, research=research, case_id=dna_case_id
                     )
-
-        LOG.info("Uploaded fusion report %s", fusion_report.full_path)
-        report_type = "Research" if research else "Clinical"
-        LOG.info("%s fusion report uploaded successfully to Scout", report_type)
+                LOG.info("Uploaded fusion report %s", fusion_report.full_path)
+                LOG.info("%s fusion report uploaded successfully to Scout", report_type)
 
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout.
@@ -238,8 +244,15 @@ class UploadScoutAPI:
         rna_case = status_db.family(case_id)
 
         link: models.FamilySample
+        rna_coverage_bigwig: Optional[hk_models.File] = None
         for link in rna_case.links:
             rna_sample: models.Sample = link.sample
+            if not rna_sample.subject_id:
+                LOG.debug(
+                    "Skipping RNA sample %s since it is not linked to anything via subject_id",
+                    rna_sample.internal_id,
+                )
+                continue
             rna_sample_id: str = rna_sample.internal_id
             rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
@@ -270,8 +283,11 @@ class UploadScoutAPI:
                         customer_sample_id=dna_sample_name,
                     )
 
-        LOG.info("Uploaded rna coverage bigwig %s", rna_coverage_bigwig.full_path)
-        LOG.info("Rna coverage bigwig uploaded successfully to Scout")
+        if rna_coverage_bigwig:
+            LOG.info("Uploaded RNA coverage bigwig %s", rna_coverage_bigwig.full_path)
+            LOG.info("Rna coverage bigwig uploaded successfully to Scout")
+        else:
+            LOG.info("No coverage bigwig file uploaded")
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout.
@@ -291,8 +307,15 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case = status_db.family(case_id)
 
+        splice_junctions_bed: Optional[hk_models.File] = None
         for link in rna_case.links:
             rna_sample = link.sample
+            if not rna_sample.subject_id:
+                LOG.debug(
+                    "Skipping RNA sample %s since it is not linked to anything via subject_id",
+                    rna_sample.internal_id,
+                )
+                continue
             rna_sample_id = rna_sample.internal_id
             splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
@@ -309,7 +332,6 @@ class UploadScoutAPI:
 
             dna_case: models.Family
             for dna_case in dna_cases:
-                print(dna_case.data_analysis)
                 dna_case_id: str = dna_case.internal_id
                 dna_sample: models.Sample = self._get_sample(
                     case=dna_case, subject_id=rna_sample.subject_id
@@ -325,8 +347,11 @@ class UploadScoutAPI:
                         customer_sample_id=dna_sample_name,
                     )
 
-        LOG.info("Uploaded splice junctions bed file %s", splice_junctions_bed.full_path)
-        LOG.info("Splice junctions bed uploaded successfully to Scout")
+        if splice_junctions_bed:
+            LOG.info("Uploaded splice junctions bed file %s", splice_junctions_bed.full_path)
+            LOG.info("Splice junctions bed uploaded successfully to Scout")
+        else:
+            LOG.info("No splice junctions bed file uploaded")
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout.

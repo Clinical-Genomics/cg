@@ -188,34 +188,39 @@ def test_upload_research_rna_fusion_report_to_scout(
     assert rna_customer_sample_name not in caplog.text
 
 
-def test_upload_rna_research_fusion_report_to_scout_no_subject_id(
+def test_upload_rna_fusion_report_to_scout_no_subject_id(
     caplog: Generator[LogCaptureFixture, None, None],
+    dna_sample_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_sample_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that A RNA case's gene fusion report and junction splic"""
+    """Test that A RNA case's gene fusion report"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
     upload_scout_api.status_db = rna_store
     rna_sample: models.Sample = rna_store.sample(internal_id=rna_sample_id)
     rna_sample.subject_id = ""
+    dna_sample: models.Sample = rna_store.sample(internal_id=dna_sample_id)
+    dna_sample.subject_id = ""
     rna_store.commit()
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True, research=True)
+    upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN we should not get a message about uploading
     assert "Uploading fusion report to scout for case" not in caplog.text
+    assert "Uploaded fusion report" not in caplog.text
 
 
 def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     caplog: Generator[LogCaptureFixture, None, None],
+    dna_sample_id: str,
     rna_sample_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -229,6 +234,8 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     upload_scout_api.status_db = rna_store
     rna_sample: models.Sample = rna_store.sample(internal_id=rna_sample_id)
     rna_sample.subject_id = ""
+    dna_sample: models.Sample = rna_store.sample(internal_id=dna_sample_id)
+    dna_sample.subject_id = ""
     rna_store.commit()
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -238,12 +245,13 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN we should not get a message about uploading
-    assert "Uploading rna coverage bigwig file to " not in caplog.text
+    assert "No coverage bigwig file uploaded" in caplog.text
 
 
 def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     caplog: Generator[LogCaptureFixture, None, None],
     rna_sample_id: str,
+    dna_sample_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
@@ -256,6 +264,8 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     upload_scout_api.status_db = rna_store
     rna_sample: models.Sample = rna_store.sample(internal_id=rna_sample_id)
     rna_sample.subject_id = ""
+    dna_sample: models.Sample = rna_store.sample(internal_id=dna_sample_id)
+    dna_sample.subject_id = ""
     rna_store.commit()
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper
@@ -265,4 +275,4 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN we should not get a message about uploading
-    assert "Uploading splice junctions bed file for " not in caplog.text
+    assert "No splice junctions bed file uploaded" in caplog.text
