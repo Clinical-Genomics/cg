@@ -239,6 +239,7 @@ class StoreHelpers:
         reads: int = None,
         name: str = None,
         ticket: int = None,
+        subject_id: str = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
@@ -256,10 +257,11 @@ class StoreHelpers:
         sample = store.add_sample(
             control=control,
             name=sample_name,
-            sex=gender,
-            tumour=is_tumour,
             reads=reads,
+            sex=gender,
+            subject_id=subject_id,
             ticket=ticket,
+            tumour=is_tumour,
         )
 
         sample.application_version_id = application_version_id

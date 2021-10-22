@@ -38,16 +38,52 @@ def fixture_dna_case_id(case_id) -> str:
     return case_id
 
 
-@pytest.fixture(name="rna_sample_id")
-def fixture_rna_sample_id() -> str:
+@pytest.fixture(name="rna_sample_son_id")
+def fixture_rna_sample_son_id() -> str:
     """Return a rna sample id"""
-    return "RNA123"
+    return "rna_son"
 
 
-@pytest.fixture(name="dna_sample_id")
-def fixture_dna_sample_id(sample_id) -> str:
-    """Return a dna sample id"""
-    return sample_id
+@pytest.fixture(name="rna_sample_daughter_id")
+def fixture_rna_sample_daughter_id() -> str:
+    """Return a rna sample id"""
+    return "rna_daughter"
+
+
+@pytest.fixture(name="rna_sample_mother_id")
+def fixture_rna_sample_mother_id() -> str:
+    """Return a rna sample id"""
+    return "rna_mother"
+
+
+@pytest.fixture(name="rna_sample_father_id")
+def fixture_rna_sample_father_id() -> str:
+    """Return a rna sample id"""
+    return "rna_father"
+
+
+@pytest.fixture(name="dna_sample_son_id")
+def fixture_dna_sample_son_id() -> str:
+    """Return a rna sample id"""
+    return "dna_son"
+
+
+@pytest.fixture(name="dna_sample_daughter_id")
+def fixture_dna_sample_daughter_id() -> str:
+    """Return a rna sample id"""
+    return "dna_daughter"
+
+
+@pytest.fixture(name="dna_sample_mother_id")
+def fixture_dna_sample_mother_id() -> str:
+    """Return a rna sample id"""
+    return "dna_mother"
+
+
+@pytest.fixture(name="dna_sample_father_id")
+def fixture_dna_sample_father_id() -> str:
+    """Return a rna sample id"""
+    return "dna_father"
 
 
 @pytest.fixture(name="rna_store")
@@ -56,8 +92,6 @@ def fixture_rna_store(
     helpers: StoreHelpers,
     rna_case_id: str,
     dna_case_id: str,
-    rna_sample_id: str,
-    dna_sample_id: str,
 ) -> Store:
     """Populate store with an rna case that is connected to a dna case via sample.subject_id"""
 
@@ -73,10 +107,37 @@ def fixture_rna_store(
     )
     rna_case.internal_id = rna_case_id
 
-    rna_sample = helpers.add_sample(store=store, name="rna_sample")
-    rna_sample.internal_id = rna_sample_id
-    helpers.add_relationship(store=store, sample=rna_sample, case=rna_case)
-    store.add_commit(rna_case)
+    rna_sample_son = helpers.add_sample(store=store, name="rna_son", subject_id="son")
+    rna_sample_daughter = helpers.add_sample(
+        store=store, name="rna_daughter", subject_id="daughter"
+    )
+    rna_sample_mother = helpers.add_sample(store=store, name="rna_mother", subject_id="mother")
+    rna_sample_father = helpers.add_sample(store=store, name="rna_father", subject_id="father")
+    helpers.add_relationship(
+        store=store,
+        sample=rna_sample_son,
+        case=rna_case,
+        mother=rna_sample_mother,
+        father=rna_sample_father,
+        status="affected",
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=rna_sample_daughter,
+        case=rna_case,
+        mother=rna_sample_mother,
+        father=rna_sample_father,
+        status="unaffected",
+    )
+    helpers.add_relationship(
+        store=store, sample=rna_sample_mother, case=rna_case, status="unaffected"
+    )
+    helpers.add_relationship(
+        store=store, sample=rna_sample_father, case=rna_case, status="affected"
+    )
+
+    for link in rna_case.links:
+        link.sample.internal_id = link.sample.name
 
     # an existing DNA case with related sample
     dna_case = helpers.ensure_case(
@@ -87,26 +148,40 @@ def fixture_rna_store(
         data_delivery=DataDelivery.SCOUT,
     )
     dna_case.internal_id = dna_case_id
-    dna_sample = helpers.add_sample(store=store, name="dna_sample")
-    dna_sample.internal_id = dna_sample_id
-    helpers.add_relationship(store=store, sample=dna_sample, case=dna_case)
-    store.add_commit(dna_case)
 
-    # a sample in the RNA case is connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    subject_id = "a_subject_id"
-
-    for link in rna_case.links:
-        sample: models.Sample = link.sample
-        sample.subject_id = subject_id
-        break
+    dna_sample_son = helpers.add_sample(store=store, name="dna_son", subject_id="son")
+    dna_sample_daughter = helpers.add_sample(
+        store=store, name="dna_daughter", subject_id="daughter"
+    )
+    dna_sample_mother = helpers.add_sample(store=store, name="dna_mother", subject_id="mother")
+    dna_sample_father = helpers.add_sample(store=store, name="dna_father", subject_id="father")
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_son,
+        case=dna_case,
+        mother=dna_sample_mother,
+        father=dna_sample_father,
+        status="affected",
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_daughter,
+        case=dna_case,
+        mother=dna_sample_mother,
+        father=dna_sample_father,
+        status="unaffected",
+    )
+    helpers.add_relationship(
+        store=store, sample=dna_sample_mother, case=dna_case, status="unaffected"
+    )
+    helpers.add_relationship(
+        store=store, sample=dna_sample_father, case=dna_case, status="affected"
+    )
 
     for link in dna_case.links:
-        sample: models.Sample = link.sample
-        sample.subject_id = subject_id
-        break
+        link.sample.internal_id = link.sample.name
 
     store.commit()
-
     return store
 
 
@@ -194,39 +269,58 @@ def fixture_mip_dna_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function", name="mip_rna_analysis_hk_bundle_data")
 def fixture_mip_rna_analysis_hk_bundle_data(
-    rna_case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, rna_sample_id: str
+    rna_case_id: str,
+    timestamp: datetime,
+    mip_dna_analysis_dir: Path,
+    rna_sample_son_id: str,
+    rna_sample_daughter_id: str,
+    rna_sample_mother_id: str,
+    rna_sample_father_id: str,
 ) -> dict:
     """Get some bundle data for housekeeper"""
+
+    files: [dict] = [
+        {
+            "path": str(mip_dna_analysis_dir / f"{rna_case_id}_report.selected.pdf"),
+            "archive": False,
+            "tags": ["fusion", "pdf", "clinical", rna_case_id],
+        },
+        {
+            "path": str(mip_dna_analysis_dir / f"{rna_case_id}_report.pdf"),
+            "archive": False,
+            "tags": ["fusion", "pdf", "research", rna_case_id],
+        },
+    ]
+    for sample_id in [
+        rna_sample_son_id,
+        rna_sample_daughter_id,
+        rna_sample_mother_id,
+        rna_sample_father_id,
+    ]:
+        files.extend(
+            [
+                {
+                    "path": str(
+                        mip_dna_analysis_dir / f"{sample_id}_lanes_1_star_sorted_sj.bigWig"
+                    ),
+                    "archive": False,
+                    "tags": ["coverage", "bigwig", "scout", sample_id],
+                },
+                {
+                    "path": str(
+                        mip_dna_analysis_dir / f"{sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi"
+                    ),
+                    "archive": False,
+                    "tags": ["bed", "scout", "junction", sample_id],
+                },
+            ]
+        )
+
     data = {
         "name": rna_case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [
-            {
-                "path": str(mip_dna_analysis_dir / f"{rna_case_id}_report.selected.pdf"),
-                "archive": False,
-                "tags": ["fusion", "pdf", "clinical", rna_case_id],
-            },
-            {
-                "path": str(mip_dna_analysis_dir / f"{rna_case_id}_report.pdf"),
-                "archive": False,
-                "tags": ["fusion", "pdf", "research", rna_case_id],
-            },
-            {
-                "path": str(
-                    mip_dna_analysis_dir / f"{rna_sample_id}_lanes_1_star_sorted_sj.bigWig"
-                ),
-                "archive": False,
-                "tags": ["coverage", "bigwig", "scout", rna_sample_id],
-            },
-            {
-                "path": str(
-                    mip_dna_analysis_dir / f"{rna_sample_id}_lanes_1234_star_sorted_sj.bed.gz.tbi"
-                ),
-                "archive": False,
-                "tags": ["bed", "scout", "junction", rna_sample_id],
-            },
-        ],
+        "files": files,
     }
     return data
 

@@ -42,10 +42,10 @@ def test_upload_rna_junctions_to_scout(
 
 def test_upload_splice_junctions_bed_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
-    dna_sample_id: str,
+    dna_sample_son_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
-    rna_sample_id: str,
+    rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
@@ -67,20 +67,20 @@ def test_upload_splice_junctions_bed_to_scout(
     assert "Splice junctions bed uploaded successfully to Scout" in caplog.text
 
     # THEN the customers samples name should have been mentioned in the logging (and used in the upload)
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_id).name
+    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_id).name
+    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
     assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_rna_coverage_bigwig_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
-    dna_sample_id: str,
+    dna_sample_son_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
-    rna_sample_id: str,
+    rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
@@ -102,21 +102,21 @@ def test_upload_rna_coverage_bigwig_to_scout(
     assert "Rna coverage bigwig uploaded successfully to Scout" in caplog.text
 
     # THEN the customers dna samples name should have been mentioned in the logging (and used in the upload)
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_id).name
+    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_id).name
+    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
     assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_clinical_rna_fusion_report_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    dna_sample_id: str,
+    dna_sample_son_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
-    rna_sample_id: str,
+    rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
@@ -141,21 +141,21 @@ def test_upload_clinical_rna_fusion_report_to_scout(
     assert dna_case_id in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_id).name
+    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name not in caplog.text
 
     # THEN the customers rna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_id).name
+    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
     assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_research_rna_fusion_report_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    dna_sample_id: str,
+    dna_sample_son_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
-    rna_sample_id: str,
+    rna_sample_son_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
@@ -180,32 +180,31 @@ def test_upload_research_rna_fusion_report_to_scout(
     assert dna_case_id in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_id).name
+    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name not in caplog.text
 
     # THEN the customers rna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_id).name
+    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
     assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_rna_fusion_report_to_scout_no_subject_id(
     caplog: Generator[LogCaptureFixture, None, None],
-    dna_sample_id: str,
+    dna_case_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
-    rna_sample_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
     """Test that A RNA case's gene fusion report"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    upload_scout_api.status_db = rna_store
-    rna_sample: models.Sample = rna_store.sample(internal_id=rna_sample_id)
-    rna_sample.subject_id = ""
-    dna_sample: models.Sample = rna_store.sample(internal_id=dna_sample_id)
-    dna_sample.subject_id = ""
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.subject_id = ""
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.subject_id = ""
     rna_store.commit()
+    upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
 
@@ -220,8 +219,7 @@ def test_upload_rna_fusion_report_to_scout_no_subject_id(
 
 def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     caplog: Generator[LogCaptureFixture, None, None],
-    dna_sample_id: str,
-    rna_sample_id: str,
+    dna_case_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
@@ -231,12 +229,12 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     command into an already existing DNA case"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    upload_scout_api.status_db = rna_store
-    rna_sample: models.Sample = rna_store.sample(internal_id=rna_sample_id)
-    rna_sample.subject_id = ""
-    dna_sample: models.Sample = rna_store.sample(internal_id=dna_sample_id)
-    dna_sample.subject_id = ""
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.subject_id = ""
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.subject_id = ""
     rna_store.commit()
+    upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
 
@@ -250,8 +248,7 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
 
 def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     caplog: Generator[LogCaptureFixture, None, None],
-    rna_sample_id: str,
-    dna_sample_id: str,
+    dna_case_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
@@ -261,12 +258,12 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     command into an already existing DNA case"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    upload_scout_api.status_db = rna_store
-    rna_sample: models.Sample = rna_store.sample(internal_id=rna_sample_id)
-    rna_sample.subject_id = ""
-    dna_sample: models.Sample = rna_store.sample(internal_id=dna_sample_id)
-    dna_sample.subject_id = ""
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.subject_id = ""
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.subject_id = ""
     rna_store.commit()
+    upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper
 
