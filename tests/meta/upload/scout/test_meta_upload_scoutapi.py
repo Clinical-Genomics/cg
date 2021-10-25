@@ -6,6 +6,7 @@ import yaml
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
+from cg.store import models, Store
 
 
 def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
@@ -114,3 +115,31 @@ def test_add_scout_config_to_hk_existing_files(upload_scout_api: UploadScoutAPI,
     with pytest.raises(FileExistsError):
         # THEN assert File exists exception is raised
         upload_scout_api.add_scout_config_to_hk(config_file_path=tmp_file, case_id="dummy")
+
+
+def test_get_dna_cases_mip_dna_case(
+    upload_scout_api: UploadScoutAPI,
+    dna_case_id: str,
+    rna_store: Store,
+    rna_case_id: str,
+    dna_sample_daughter_id: str,
+    rna_sample_daughter_id: str,
+):
+    """Test that we get a case back for a subject id"""
+
+    # GIVEN connected DNA case exist
+    dna_case: models.Family = rna_store.family(internal_id=dna_case_id)
+    rna_case: models.Family = rna_store.family(internal_id=rna_case_id)
+    customer: models.Customer = rna_case.customer
+    rna_subject_id: str = rna_store.sample(internal_id=rna_sample_daughter_id).subject_id
+    dna_subject_id: str = rna_store.sample(internal_id=dna_sample_daughter_id).subject_id
+    assert rna_subject_id == dna_subject_id
+
+    # WHEN calling method
+    cases: set[models.Family] = upload_scout_api._get_dna_cases(
+        customer=customer, subject_id=rna_subject_id
+    )
+
+    # THEN we got the dna case back but not the rna case
+    assert dna_case in cases
+    assert rna_case not in cases

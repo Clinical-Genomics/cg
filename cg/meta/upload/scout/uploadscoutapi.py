@@ -201,7 +201,7 @@ class UploadScoutAPI:
                 f"{report_type} fusion report was not found in housekeeper for {case_id}"
             )
 
-        LOG.debug(f"{report_type} fusion report %s found", fusion_report)
+        LOG.debug(f"{report_type} fusion report %s found", fusion_report.path)
 
         rna_case = status_db.family(case_id)
         for link in rna_case.links:
@@ -393,8 +393,10 @@ class UploadScoutAPI:
         subject_id_samples: [models.Sample] = status_db.samples(customers=[customer]).filter_by(
             subject_id=subject_id
         )
+
         subject_id_sample: models.Sample
         for subject_id_sample in subject_id_samples:
+            subject_id_sample_link: models.FamilySample
 
             subject_id_sample_link: models.FamilySample
             for subject_id_sample_link in subject_id_sample.links:
