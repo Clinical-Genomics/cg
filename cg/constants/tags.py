@@ -7,5 +7,5 @@ HK_FASTQ_TAGS = ["fastq"]
 
 class HkMipAnalysisTag:
     CONFIG: List[str] = ["mip-config"]
-    QC_METRICS: List[str] = ["qc-metrics", "deliverables"]
+    QC_METRICS: List[str] = ["qc-metrics", "deliverable"]
     SAMPLE_INFO: List[str] = ["sample-info"]
