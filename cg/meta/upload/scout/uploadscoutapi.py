@@ -197,7 +197,11 @@ class UploadScoutAPI:
         report_uploaded: bool = False
 
         if fusion_report is None:
-            raise FileNotFoundError(f"No fusion report was found in housekeeper for {case_id}")
+            raise FileNotFoundError(
+                f"{report_type} fusion report was not found in housekeeper for {case_id}"
+            )
+
+        LOG.debug(f"{report_type} fusion report %s found", fusion_report)
 
         rna_case = status_db.family(case_id)
         for link in rna_case.links:
@@ -212,6 +216,9 @@ class UploadScoutAPI:
             dna_cases: [models.Family] = self._get_dna_cases(
                 customer=rna_case.customer, subject_id=rna_sample.subject_id
             )
+
+            if not dna_cases:
+                LOG.debug(f"No DNA-cases linked via subject_id for %s", rna_sample.internal_id)
 
             dna_case: models.Family
             for dna_case in dna_cases:
