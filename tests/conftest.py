@@ -561,13 +561,13 @@ def fixture_bed_file(analysis_dir) -> str:
 
 
 @pytest.fixture(name="helpers")
-def fixture_helpers():
+def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores"""
     return StoreHelpers()
 
 
 @pytest.fixture(name="small_helpers")
-def fixture_small_helpers():
+def fixture_small_helpers() -> SmallHelpers:
     """Return a class with small helper functions"""
     return SmallHelpers()
 

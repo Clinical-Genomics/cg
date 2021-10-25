@@ -229,7 +229,7 @@ class StoreHelpers:
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         control: str = "",
-        customer_name: str = None,
+        customer_id: str = None,
         gender: str = "female",
         internal_id: str = None,
         is_external: bool = False,
@@ -243,9 +243,9 @@ class StoreHelpers:
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
-        customer_name = customer_name or "cust000"
+        customer_id = customer_id or "cust000"
         sample_name = name or "sample_test"
-        customer = self.ensure_customer(store, customer_name)
+        customer = self.ensure_customer(store, customer_id=customer_id)
         application_version = self.ensure_application_version(
             store,
             application_tag=application_tag,
@@ -409,7 +409,6 @@ class StoreHelpers:
             sample_id = sample_data["internal_id"]
             sample_obj = self.add_sample(
                 store,
-                customer_name=sample_data["name"],
                 gender=sample_data["sex"],
                 name=sample_data.get("name"),
                 internal_id=sample_id,

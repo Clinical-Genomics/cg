@@ -295,6 +295,20 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
+    def samples_by_subject_id(self, customer_id: str, subject_id: str) -> [models.Sample]:
+        """Get samples of customer with given subject_id.
+
+        Args:
+            customer_id  (str):               Customer
+            subject_id   (str):               Subject id
+        Returns:
+            matching samples (list of models.Sample)
+        """
+
+        return self.Sample.query.join(models.Customer).filter(
+            models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
+        )
+
     def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query
 

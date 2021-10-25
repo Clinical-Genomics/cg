@@ -10,6 +10,7 @@ from cg.models.orders.order import OrderIn
 from cg.store import models, Store
 from cgmodels.cg.constants import Pipeline
 import cg
+from tests.store_helpers import StoreHelpers
 
 PROCESS_LIMS_FUNCTION = "cg.meta.orders.api.process_lims"
 
@@ -297,3 +298,110 @@ def test_submit_unique_sample_case_name(
     )
 
     # Then no exception about duplicate names should be thrown
+
+
+def test_validate_sex_inconsistent_sex(
+    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+):
+    # GIVEN we have an order with a sample that is already in the database but with different sex
+    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    # add sample with different sex than in order
+    for sample in order_data.samples:
+        sample_obj: models.Sample = helpers.add_sample(
+            store=store,
+            subject_id=sample.get("subject_id"),
+            name=sample.get("name"),
+            gender="male" if sample.get("sex") == "female" else "female",
+            customer_id=customer_obj.internal_id,
+        )
+        store.add_commit(sample_obj)
+        assert sample_obj.sex != sample.get("sex")
+
+    # WHEN calling _validate_sex
+    # THEN an OrderError should be raised on non-matching sex
+    with pytest.raises(OrderError):
+        orders_api._validate_sex(samples=order_data.samples, customer_id=order_data.customer)
+
+
+def test_validate_sex_consistent_sex(
+    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+):
+    # GIVEN we have an order with a sample that is already in the database and with same gender
+    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    # add sample with different sex than in order
+    for sample in order_data.samples:
+        sample_obj: models.Sample = helpers.add_sample(
+            store=store,
+            subject_id=sample.get("subject_id"),
+            name=sample.get("name"),
+            gender=sample.get("sex"),
+            customer_id=customer_obj.internal_id,
+        )
+        store.add_commit(sample_obj)
+        assert sample_obj.sex == sample.get("sex")
+
+    # WHEN calling _validate_sex
+    orders_api._validate_sex(samples=order_data.samples, customer_id=order_data.customer)
+
+    # THEN no OrderError should be raised on non-matching sex
+
+
+def test_validate_sex_unknown_existing_sex(
+    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+):
+    # GIVEN we have an order with a sample that is already in the database and with different gender but the existing is of type "unknown"
+    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    # add sample with different sex than in order
+    for sample in order_data.samples:
+        sample_obj: models.Sample = helpers.add_sample(
+            store=store,
+            subject_id=sample.get("subject_id"),
+            name=sample.get("name"),
+            gender="unknown",
+            customer_id=customer_obj.internal_id,
+        )
+        store.add_commit(sample_obj)
+        assert sample_obj.sex != sample.get("sex")
+
+    # WHEN calling _validate_sex
+    orders_api._validate_sex(samples=order_data.samples, customer_id=order_data.customer)
+
+    # THEN no OrderError should be raised on non-matching sex
+
+
+def test_validate_sex_unknown_new_sex(
+    orders_api: OrdersAPI, mip_order_to_submit: dict, helpers: StoreHelpers
+):
+    # GIVEN we have an order with a sample that is already in the database and with different gender but the new is of type "unknown"
+    order_data = OrderIn.parse_obj(mip_order_to_submit)
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    # add sample with different sex than in order
+    for sample in order_data.samples:
+        sample_obj: models.Sample = helpers.add_sample(
+            store=store,
+            subject_id=sample.get("subject_id"),
+            name=sample.get("name"),
+            gender=sample.get("sex"),
+            customer_id=customer_obj.internal_id,
+        )
+        sample["sex"] = "unknown"
+        store.add_commit(sample_obj)
+
+    for sample in order_data.samples:
+        assert sample_obj.sex != sample.get("sex")
+
+    # WHEN calling _validate_sex
+    orders_api._validate_sex(samples=order_data.samples, customer_id=order_data.customer)
+
+    # THEN no OrderError should be raised on non-matching sex
