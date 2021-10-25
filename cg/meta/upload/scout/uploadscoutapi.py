@@ -193,7 +193,8 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
-        report_type = "Research" if research else "Clinical"
+        report_type: str = "Research" if research else "Clinical"
+        report_uploaded: bool = False
 
         if fusion_report is None:
             raise FileNotFoundError(f"No fusion report was found in housekeeper for {case_id}")
@@ -222,8 +223,13 @@ class UploadScoutAPI:
                     scout_api.upload_fusion_report(
                         report_path=fusion_report.full_path, research=research, case_id=dna_case_id
                     )
+                report_uploaded = True
                 LOG.info("Uploaded fusion report %s", fusion_report.full_path)
-                LOG.info("%s fusion report uploaded successfully to Scout", report_type)
+
+        if report_uploaded:
+            LOG.info("%s fusion report uploaded successfully to Scout", report_type)
+        else:
+            LOG.warning("%s fusion report NOT uploaded to Scout", report_type)
 
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout.
