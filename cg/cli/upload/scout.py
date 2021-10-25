@@ -142,7 +142,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     LOG.info("Case loaded successfully to Scout")
 
 
-@click.command(name="upload-rna-to-scout")
+@click.command(name="rna-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("--research", is_flag=True)
 @click.argument("case_id")
@@ -166,7 +166,7 @@ def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str):
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
-@click.command(name="upload-rna-fusion-report-to-scout")
+@click.command(name="rna-fusion-report-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("--research", is_flag=True)
 @click.argument("case_id")
@@ -194,7 +194,7 @@ def upload_rna_fusion_report_to_scout(
     )
 
 
-@click.command(name="upload-rna-junctions-to-scout")
+@click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
