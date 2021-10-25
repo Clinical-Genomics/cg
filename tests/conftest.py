@@ -449,9 +449,9 @@ def rml_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture
-def mip_json_orderform() -> dict:
-    """Load an example json scout order."""
-    return json.load(open("tests/fixtures/orderforms/mip-json.json"))
+def mip_json_orderform(orderforms: Path) -> dict:
+    """Load an example of json scout order."""
+    return json.load(open(orderforms / "mip-json.json"))
 
 
 @pytest.fixture(name="madeline_output")
@@ -471,12 +471,6 @@ def mip_order_to_submit() -> dict:
 def mip_rna_order_to_submit() -> dict:
     """Load an example rna order."""
     return json.load(open("tests/fixtures/cgweb_orders/mip_rna.json"))
-
-
-@pytest.fixture
-def external_order_to_submit() -> dict:
-    """Load an example external order."""
-    return json.load(open("tests/fixtures/cgweb_orders/external.json"))
 
 
 @pytest.fixture
@@ -1159,7 +1153,7 @@ def fixture_context_config(
             "sender_password": "",
         },
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
+            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",

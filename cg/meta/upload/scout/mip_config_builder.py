@@ -40,7 +40,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         """Create a MIP specific load config for uploading analysis to Scout"""
         LOG.info("Generate load config for mip case")
 
-        self.add_mandatory_info_to_load_config()
+        self.add_common_info_to_load_config()
         mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.family.internal_id
         )
@@ -80,7 +80,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()
-        self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
+        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
         config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
         config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
 

@@ -6,7 +6,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.tags import HkMipAnalysisTag
-from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class UploadGenotypesAPI(object):
 
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
-        qc_metrics: MetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
+        qc_metrics: MIPMetricsDeliverables = self.get_parsed_qc_metrics_data(qc_metrics_file)
         return {
             sample_id_metric.sample_id: sample_id_metric.predicted_sex
             for sample_id_metric in qc_metrics.sample_id_metrics
@@ -80,11 +80,11 @@ class UploadGenotypesAPI(object):
         return Path(hk_qcmetrics.full_path)
 
     @staticmethod
-    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MetricsDeliverables:
+    def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
         """Parse the information from a qc metrics file"""
         with qc_metrics.open() as in_stream:
             qcmetrics_raw = yaml.safe_load(in_stream)
-        return MetricsDeliverables(**qcmetrics_raw)
+        return MIPMetricsDeliverables(**qcmetrics_raw)
 
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""

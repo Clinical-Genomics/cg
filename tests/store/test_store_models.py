@@ -1,4 +1,4 @@
-from cg.store import Store
+from cg.store import Store, models
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):

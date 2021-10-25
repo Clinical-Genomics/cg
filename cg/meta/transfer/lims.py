@@ -1,6 +1,8 @@
 import logging
 from enum import Enum
 
+import cg.store.models
+import genologics.entities
 from cg.apps.lims import LimsAPI
 from cg.store import Store
 
@@ -109,30 +111,68 @@ class TransferLims(object):
         for pool_obj in pools:
             ticket_number = pool_obj.ticket_number
             number_of_samples = self.lims.get_sample_number(projectname=ticket_number)
+            if not self._is_pool_valid(pool_obj, ticket_number, number_of_samples):
+                continue
 
-            if ticket_number is None:
-                LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
-            elif number_of_samples == 0:
-                LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
-            else:
-                samples_in_pool = self.lims.get_samples(projectname=ticket_number)
-                for sample_obj in samples_in_pool:
-                    status_date = self._date_functions[status_type](sample_obj.id)
-                    if sample_obj.udf["pool name"] == pool_obj.name and status_date is not None:
-                        LOG.info(
-                            "Found %s date for pool id %s: %s",
-                            status_type.value,
-                            pool_obj.id,
-                            status_date,
-                        )
-                        setattr(pool_obj, f"{status_type.value}_at", status_date)
-                        self.status.commit()
-                        break
-                    else:
-                        continue
+            samples_in_pool = self.lims.get_samples(projectname=ticket_number)
+            for sample_obj in samples_in_pool:
+                if not self._is_sample_valid(pool_obj, sample_obj):
+                    continue
+                status_date = self._date_functions[status_type](sample_obj.id)
+                if status_date is None:
+                    continue
+
+                LOG.info(
+                    "Found %s date for pool id %s: %s",
+                    status_type.value,
+                    pool_obj.id,
+                    status_date,
+                )
+                setattr(pool_obj, f"{status_type.value}_at", status_date)
+                self.status.commit()
+                break
 
     def _get_samples_in_step(self, status_type):
         return self._sample_functions[status_type]()
 
     def _get_all_relevant_samples(self):
         return self.status.samples_not_downsampled()
+
+    @staticmethod
+    def _is_pool_valid(
+        pool_obj: cg.store.models.Pool, ticket_number: int, number_of_samples: int
+    ) -> bool:
+        """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
+
+        if ticket_number is None:
+            LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
+            return False
+        if number_of_samples == 0:
+            LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
+            return False
+        return True
+
+    @staticmethod
+    def _is_sample_valid(
+        pool_obj: cg.store.models.Pool, sample_obj: genologics.entities.Sample
+    ) -> bool:
+        """Checks if a sample can have the status date set. A sample needs to have a udf "pool name" that matches the
+        name of the pool object it's part of"""
+        if sample_obj.udf.get("pool name") is None:
+            LOG.warning(
+                "No pool name found for sample %s (sample name %s, project %s)",
+                sample_obj.id,
+                sample_obj.name,
+                sample_obj.project.name,
+            )
+            return False
+
+        sample_pool_name = sample_obj.udf["pool name"]
+        if sample_pool_name != pool_obj.name:
+            LOG.warning(
+                "The udf 'pool name' of the sample (%s) does not match the name of the pool (%s))",
+                sample_pool_name,
+                pool_obj.name,
+            )
+            return False
+        return True

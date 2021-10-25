@@ -3,7 +3,6 @@ from collections import Iterable
 from pyschemes import Scheme, validators
 
 from cg.constants import (
-    CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
     PRIORITY_OPTIONS,
     SEX_OPTIONS,
@@ -15,7 +14,6 @@ from cg.utils.StrEnum import StrEnum
 
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
-    EXTERNAL: str = "external"
     FASTQ: str = str(Pipeline.FASTQ)
     FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"
@@ -131,8 +129,10 @@ MIP_SAMPLE = {
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "synopsis": OptionalNone(str),
+    "subject_id": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 BALSAMIC_SAMPLE = {
@@ -169,8 +169,10 @@ BALSAMIC_SAMPLE = {
     "comment": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "subject_id": OptionalNone(str),
+    "synopsis": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 MIP_RNA_SAMPLE = {
@@ -197,42 +199,13 @@ MIP_RNA_SAMPLE = {
     # # "Not Required"
     "quantity": OptionalNone(TypeValidatorNone(str)),
     "comment": OptionalNone(TypeValidatorNone(str)),
-    "from_sample": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
     "time_point": OptionalNone(TypeValidatorNone(str)),
     "age_at_sampling": OptionalNone(TypeValidatorNone(str)),
     "cohorts": OptionalNone(ListValidator(str, min_items=0)),
-    "synopsis": OptionalNone(ListValidator(str, min_items=0)),
+    "subject_id": OptionalNone(validators.RegexValidator(NAME_PATTERN)),
+    "synopsis": OptionalNone(str),
     "phenotype_terms": OptionalNone(ListValidator(str, min_items=0)),
-}
-
-EXTERNAL_SAMPLE = {
-    # Orderform 1541
-    # Order portal specific
-    "internal_id": OptionalNone(TypeValidatorNone(str)),
-    "data_analysis": str,
-    "data_delivery": OptionalNone(TypeValidatorNone(str)),
-    # "required for new samples"
-    "name": validators.RegexValidator(NAME_PATTERN),
-    "capture_kit": OptionalNone(TypeValidatorNone(str)),
-    "application": str,
-    "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-    "family_name": validators.RegexValidator(NAME_PATTERN),
-    "case_internal_id": OptionalNone(TypeValidatorNone(str)),
-    "priority": OptionalNone(validators.Any(PRIORITY_OPTIONS)),
-    "source": OptionalNone(TypeValidatorNone(str)),
-    # "Required if data analysis in Scout"
-    "panels": ListValidator(str, min_items=0),
-    # todo: find out if "Additional Gene List" is "lost in translation", implement in OP or remove from OF
-    "status": OptionalNone(validators.Any(STATUS_OPTIONS)),
-    # "Required if samples are part of trio/family"
-    "mother": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-    "father": OptionalNone(RegexValidatorNone(NAME_PATTERN)),
-    # todo: find out if "Other relations" is removed in current OF
-    # "Not Required"
-    "tumour": OptionalNone(bool, False),
-    # todo: find out if "Gel picture" is "lost in translation", implement in OP or remove from OF
-    "extraction_method": OptionalNone(TypeValidatorNone(str)),
-    "comment": OptionalNone(TypeValidatorNone(str)),
+    "phenotype_groups": OptionalNone(ListValidator(str, min_items=0)),
 }
 
 FASTQ_SAMPLE = {
@@ -244,8 +217,6 @@ FASTQ_SAMPLE = {
     "data_delivery": OptionalNone(TypeValidatorNone(str)),
     "application": str,
     "sex": OptionalNone(validators.Any(SEX_OPTIONS)),
-    # todo: implement in OP or remove from OF
-    # 'family_name': RegexValidator(NAME_PATTERN),
     "volume": str,
     "source": str,
     "tumour": bool,
@@ -287,6 +258,7 @@ RML_SAMPLE = {
     "index_sequence": OptionalNone(TypeValidatorNone(str)),
     # "Not required"
     "comment": OptionalNone(TypeValidatorNone(str)),
+    "control": OptionalNone(TypeValidatorNone(str)),
 }
 
 MICROSALT_SAMPLE = {
@@ -373,9 +345,6 @@ SARSCOV2_SAMPLE = {
 }
 
 ORDER_SCHEMES = {
-    OrderType.EXTERNAL: Scheme(
-        {**BASE_PROJECT, "samples": ListValidator(EXTERNAL_SAMPLE, min_items=1)}
-    ),
     OrderType.MIP_DNA: Scheme({**BASE_PROJECT, "samples": ListValidator(MIP_SAMPLE, min_items=1)}),
     OrderType.BALSAMIC: Scheme(
         {**BASE_PROJECT, "samples": ListValidator(BALSAMIC_SAMPLE, min_items=1)}

@@ -54,7 +54,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
         version_obj=version_obj, sample_ids=sample_ids
     )
 
-    ## THEN housekeeper files should be returned
+    # THEN housekeeper files should be returned
     assert bundle_latest_files
 
 

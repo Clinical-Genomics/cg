@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store import models
 
 
@@ -26,12 +26,12 @@ def test_get_parsed_qc_metrics_data(case_qc_metrics_deliverables: Path):
     # GIVEN a UploadGenotypesAPI and the path to a qc_metrics file with case data
 
     # WHEN fetching the predicted sex
-    metrics_object: MetricsDeliverables = UploadGenotypesAPI.get_parsed_qc_metrics_data(
+    metrics_object: MIPMetricsDeliverables = UploadGenotypesAPI.get_parsed_qc_metrics_data(
         case_qc_metrics_deliverables
     )
 
     # THEN assert that it was successfully created
-    assert isinstance(metrics_object, MetricsDeliverables)
+    assert isinstance(metrics_object, MIPMetricsDeliverables)
 
 
 def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str, timestamp: datetime):
