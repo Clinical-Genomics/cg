@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 import yaml
+from cgmodels.cg.constants import Pipeline
+
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
@@ -117,13 +119,18 @@ def test_add_scout_config_to_hk_existing_files(upload_scout_api: UploadScoutAPI,
         upload_scout_api.add_scout_config_to_hk(config_file_path=tmp_file, case_id="dummy")
 
 
+@pytest.mark.parametrize(
+    "data_analysis",
+    [Pipeline.BALSAMIC, Pipeline.MIP_DNA],
+)
 def test_get_dna_cases_mip_dna_case(
-    upload_scout_api: UploadScoutAPI,
+    data_analysis: Pipeline,
     dna_case_id: str,
-    rna_store: Store,
-    rna_case_id: str,
     dna_sample_daughter_id: str,
+    rna_case_id: str,
     rna_sample_daughter_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
 ):
     """Test that we get a case back for a subject id"""
 
@@ -135,11 +142,11 @@ def test_get_dna_cases_mip_dna_case(
     dna_subject_id: str = rna_store.sample(internal_id=dna_sample_daughter_id).subject_id
     assert rna_subject_id == dna_subject_id
 
-    # WHEN calling method
+    # WHEN calling method _get_dna_cases
     cases: set[models.Family] = upload_scout_api._get_dna_cases(
-        customer=customer, subject_id=rna_subject_id
+        customer_id=customer.internal_id, subject_id=rna_subject_id
     )
 
-    # THEN we got the dna case back but not the rna case
+    # THEN we got the dna case as result but not the rna case
     assert dna_case in cases
     assert rna_case not in cases

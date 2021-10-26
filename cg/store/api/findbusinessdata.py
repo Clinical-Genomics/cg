@@ -299,7 +299,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get samples of customer with given subject_id.
 
         Args:
-            customer_id  (str):               Customer
+            customer_id  (str):               Internal-id of customer
             subject_id   (str):               Subject id
         Returns:
             matching samples (list of models.Sample)

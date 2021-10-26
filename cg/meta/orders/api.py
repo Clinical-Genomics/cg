@@ -322,7 +322,7 @@ class OrdersAPI(StatusHandler):
         return getattr(self, f"_submit_{str(project_type)}")
 
     def _validate_sex(self, samples: [dict], customer_id: str):
-        """Validate that sex is consistent with existing samples, skips samples with unknown sex
+        """Validate that sex is consistent with existing samples, skips samples of unknown sex
 
         Args:
             samples     (list[dict]):   Samples to validate
@@ -336,17 +336,19 @@ class OrdersAPI(StatusHandler):
             subject_id: str = sample.get("subject_id")
             if not subject_id:
                 continue
-            if sample.get("sex") == "unknown":
+            new_gender: str = sample.get("sex")
+            if new_gender == "unknown":
                 continue
             existing_samples: [models.Sample] = self.status.samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
             existing_sample: models.Sample
             for existing_sample in existing_samples:
-                if existing_sample.sex == "unknown":
+                previous_gender = existing_sample.sex
+                if previous_gender == "unknown":
                     continue
 
-                if existing_sample.sex != sample.get("sex"):
+                if previous_gender != new_gender:
                     raise OrderError(
-                        f"Sample gender inconsistency with for subject_id: {subject_id}"
+                        f"Sample gender inconsistency for subject_id: {subject_id}: previous gender {previous_gender}, new gender {new_gender}"
                     )

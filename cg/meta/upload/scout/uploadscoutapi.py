@@ -214,7 +214,7 @@ class UploadScoutAPI:
                 continue
 
             dna_cases: [models.Family] = self._get_dna_cases(
-                customer=rna_case.customer, subject_id=rna_sample.subject_id
+                customer_id=rna_sample.customer.internal_id, subject_id=rna_sample.subject_id
             )
 
             if not dna_cases:
@@ -277,7 +277,7 @@ class UploadScoutAPI:
                 )
 
             dna_cases: [models.Family] = self._get_dna_cases(
-                customer=rna_sample.customer, subject_id=rna_sample.subject_id
+                customer_id=rna_sample.customer.internal_id, subject_id=rna_sample.subject_id
             )
             dna_case: models.Family
             for dna_case in dna_cases:
@@ -340,7 +340,7 @@ class UploadScoutAPI:
                 )
 
             dna_cases: [models.Family] = self._get_dna_cases(
-                customer=rna_case.customer, subject_id=rna_sample.subject_id
+                customer_id=rna_case.customer.internal_id, subject_id=rna_sample.subject_id
             )
 
             dna_case: models.Family
@@ -378,25 +378,23 @@ class UploadScoutAPI:
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-    def _get_dna_cases(self, customer: models.Customer, subject_id: str) -> Set[models.Family]:
+    def _get_dna_cases(self, customer_id: str, subject_id: str) -> Set[models.Family]:
         """Get DNA cases that has a sample for a subject_id.
 
         Args:
-            customer     (models.Customer):         Customer owning the cases
-            subject_id   (str):                     Subject id to search for
+            customer_id  (str):                     Customer-id of customer owning the cases
+            subject_id   (str):                     Subject-id to search for
         Returns:
             set containing the matching cases set(models.Family)
         """
-
         status_db: Store = self.status_db
         dna_cases: set[models.Family] = set()
-        subject_id_samples: [models.Sample] = status_db.samples(customers=[customer]).filter_by(
-            subject_id=subject_id
+        subject_id_samples: [models.Sample] = status_db.samples_by_subject_id(
+            customer_id=customer_id, subject_id=subject_id
         )
 
         subject_id_sample: models.Sample
         for subject_id_sample in subject_id_samples:
-            subject_id_sample_link: models.FamilySample
 
             subject_id_sample_link: models.FamilySample
             for subject_id_sample_link in subject_id_sample.links:
@@ -404,9 +402,7 @@ class UploadScoutAPI:
 
                 if subject_id_case.data_analysis not in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
                     continue
-
                 dna_cases.add(subject_id_case)
-
         return dna_cases
 
     @staticmethod
