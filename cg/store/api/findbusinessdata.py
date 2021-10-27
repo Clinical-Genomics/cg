@@ -1,7 +1,8 @@
 """Handler to find business data objects"""
 import datetime as dt
-from typing import List, Optional
+from typing import List, Optional, Set
 
+from cgmodels.cg.constants import Pipeline
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
@@ -146,6 +147,33 @@ class FindBusinessDataHandler(BaseHandler):
             .filter(models.Family.internal_id == family_id)
             .all()
         )
+
+    def families_by_subject_id(
+        self, customer_id: str, subject_id: str, data_analyses: [Pipeline] = None
+    ) -> Set[models.Family]:
+        """Get cases that has a sample for a subject_id.
+
+        Args:
+            customer_id     (str):                 Customer-id of customer owning the cases
+            subject_id      (str):                 Subject-id to search for
+            data_analyses   (list[Pipeline]):      Optional list of data_analysis values
+        Returns:
+            set containing the matching cases set(models.Family)
+        """
+        cases: set[models.Family] = set()
+        samples: [models.Sample] = self.samples_by_subject_id(
+            customer_id=customer_id, subject_id=subject_id
+        )
+        sample: models.Sample
+        for sample in samples:
+            link: models.FamilySample
+            for link in sample.links:
+                case: models.Family = link.family
+
+                if data_analyses and case.data_analysis not in data_analyses:
+                    continue
+                cases.add(case)
+        return cases
 
     def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
         """Get samples on a given family_id"""

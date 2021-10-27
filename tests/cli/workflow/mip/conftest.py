@@ -125,7 +125,7 @@ def fixture_dna_mip_context(
             case_obj = helpers.add_case(
                 store=_store,
                 internal_id=case_id,
-                case_id=mip_case_ids[case_id]["name"],
+                name=mip_case_ids[case_id]["name"],
             )
             sample = helpers.add_sample(
                 store=_store,

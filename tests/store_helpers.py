@@ -320,7 +320,7 @@ class StoreHelpers:
     def add_case(
         self,
         store: Store,
-        case_id: str = "case_test",
+        name: str = "case_test",
         data_analysis: Pipeline = Pipeline.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
@@ -340,12 +340,12 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not case_obj:
-            case_obj: Optional[models.Family] = store.family(internal_id=case_id)
+            case_obj: Optional[models.Family] = store.family(internal_id=name)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
-                name=case_id,
+                name=name,
                 panels=panels,
             )
         if action:

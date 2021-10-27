@@ -8,6 +8,7 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery
+from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
@@ -36,8 +37,8 @@ def test_upload_rna_junctions_to_scout(
     upload_scout_api.upload_rna_junctions_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN the 2 files should have been uploaded to the connected sample on the dna case in scout
-    assert "Splice junctions bed uploaded successfully to Scout" in caplog.text
-    assert "Rna coverage bigwig uploaded successfully to Scout" in caplog.text
+    assert "Upload splice junctions bed file finished!" in caplog.text
+    assert "Upload RNA coverage bigwig file finished!" in caplog.text
 
 
 def test_upload_splice_junctions_bed_to_scout(
@@ -64,15 +65,11 @@ def test_upload_splice_junctions_bed_to_scout(
     upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN the splice junctions file should have been uploaded to the connected sample on the dna case in scout
-    assert "Splice junctions bed uploaded successfully to Scout" in caplog.text
+    assert "Upload splice junctions bed file finished!" in caplog.text
 
-    # THEN the customers samples name should have been mentioned in the logging (and used in the upload)
+    # THEN the customers dna samples name should have been mentioned in the logging (and used in the upload)
     dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name in caplog.text
-
-    # THEN the customers dna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
-    assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_rna_coverage_bigwig_to_scout(
@@ -99,15 +96,11 @@ def test_upload_rna_coverage_bigwig_to_scout(
     upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN the bigWig file should have been uploaded to the connected sample on the dna case in scout
-    assert "Rna coverage bigwig uploaded successfully to Scout" in caplog.text
+    assert "Upload RNA coverage bigwig file finished!" in caplog.text
 
     # THEN the customers dna samples name should have been mentioned in the logging (and used in the upload)
     dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name in caplog.text
-
-    # THEN the customers dna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
-    assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_clinical_rna_fusion_report_to_scout(
@@ -135,7 +128,7 @@ def test_upload_clinical_rna_fusion_report_to_scout(
     upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
 
     # THEN the fusion report file should have been uploaded to the connected sample on the dna case in scout
-    assert "Clinical fusion report uploaded successfully to Scout" in caplog.text
+    assert "Upload Clinical fusion report finished!" in caplog.text
 
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
     assert dna_case_id in caplog.text
@@ -143,10 +136,6 @@ def test_upload_clinical_rna_fusion_report_to_scout(
     # THEN the customers dna samples name should NOT have been mentioned in the logging
     dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name not in caplog.text
-
-    # THEN the customers rna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
-    assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_research_rna_fusion_report_to_scout(
@@ -174,7 +163,7 @@ def test_upload_research_rna_fusion_report_to_scout(
     upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True, research=True)
 
     # THEN the fusion report file should have been uploaded to the connected sample on the dna case in scout
-    assert "Research fusion report uploaded successfully to Scout" in caplog.text
+    assert "Upload Research fusion report finished!" in caplog.text
 
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
     assert dna_case_id in caplog.text
@@ -182,10 +171,6 @@ def test_upload_research_rna_fusion_report_to_scout(
     # THEN the customers dna samples name should NOT have been mentioned in the logging
     dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
     assert dna_customer_sample_name not in caplog.text
-
-    # THEN the customers rna samples name should NOT have been mentioned in the logging
-    rna_customer_sample_name: str = rna_store.sample(internal_id=rna_sample_son_id).name
-    assert rna_customer_sample_name not in caplog.text
 
 
 def test_upload_rna_fusion_report_to_scout_no_subject_id(
@@ -210,11 +195,9 @@ def test_upload_rna_fusion_report_to_scout_no_subject_id(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
-
-    # THEN we should not get a message about uploading
-    assert "Uploading fusion report to scout for case" not in caplog.text
-    assert "Uploaded fusion report" not in caplog.text
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
 
 
 def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
@@ -240,10 +223,9 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
-
-    # THEN we should not get a message about uploading
-    assert "No coverage bigwig file uploaded" in caplog.text
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
 
 def test_upload_splice_junctions_bed_to_scout_no_subject_id(
@@ -269,7 +251,6 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
-
-    # THEN we should not get a message about uploading
-    assert "No splice junctions bed file uploaded" in caplog.text
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)

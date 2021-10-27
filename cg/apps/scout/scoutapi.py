@@ -9,6 +9,7 @@ from typing import List, Optional
 import yaml
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.exc import ScoutUploadError
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 
@@ -246,7 +247,7 @@ class ScoutAPI:
             LOG.info("Uploading fusion report %s to case %s", report_path, case_id)
             self.process.run_command(upload_fusion_report_command)
         except CalledProcessError:
-            LOG.warning("Something went wrong when uploading fusion report")
+            raise ScoutUploadError("Something went wrong when uploading fusion report")
 
     def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id):
         """Load a splice junctions bed file into a case in the database
@@ -278,7 +279,7 @@ class ScoutAPI:
             LOG.info("Uploading splice junctions bed file %s to case %s", file_path, case_id)
             self.process.run_command(upload_command)
         except CalledProcessError:
-            LOG.warning("Something went wrong when uploading splice junctions bed file")
+            raise ScoutUploadError("Something went wrong when uploading splice junctions bed file")
 
     def upload_rna_coverage_bigwig(self, file_path: str, case_id: str, customer_sample_id: str):
         """Load a rna coverage bigwig file into a case in the database
@@ -310,4 +311,4 @@ class ScoutAPI:
             LOG.info("Uploading rna coverage bigwig file %s to case %s", file_path, case_id)
             self.process.run_command(upload_command)
         except CalledProcessError:
-            LOG.warning("Something went wrong when uploading rna coverage bigwig file")
+            raise ScoutUploadError("Something went wrong when uploading rna coverage bigwig file")
