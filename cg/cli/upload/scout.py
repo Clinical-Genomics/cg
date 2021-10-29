@@ -15,6 +15,7 @@ from cg.store.models import Family
 from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
+from ...exc import CgDataError, ScoutUploadError
 
 LOG = logging.getLogger(__name__)
 
@@ -147,7 +148,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.option("--research", is_flag=True)
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str):
+def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str) -> int:
     """Upload a RNA case's gene fusion report and junction splice files for all samples connect via subject_id
 
     Args:
@@ -160,10 +161,12 @@ def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str):
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    context.invoke(
+    result: int = context.invoke(
         upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
     )
-    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
+    if result == 0:
+        result = context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
+    return result
 
 
 @click.command(name="rna-fusion-report-to-scout")
@@ -173,7 +176,7 @@ def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str):
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
     context: CGConfig, dry_run: bool, research: bool, case_id: str
-):
+) -> int:
     """Upload fusion report file for a case to Scout.
     This can also be run as
     `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`
@@ -189,16 +192,21 @@ def upload_rna_fusion_report_to_scout(
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
-    scout_upload_api.upload_fusion_report_to_scout(
-        dry_run=dry_run, research=research, case_id=case_id
-    )
+    try:
+        scout_upload_api.upload_fusion_report_to_scout(
+            dry_run=dry_run, research=research, case_id=case_id
+        )
+    except (CgDataError, ScoutUploadError) as error:
+        LOG.Error(error.message)
+        return 1
+    return 0
 
 
 @click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_rna_junctions_to_scout(context: CGConfig, dry_run: bool, case_id: str):
+def upload_rna_junctions_to_scout(context: CGConfig, dry_run: bool, case_id: str) -> int:
     """Upload RNA junctions splice files to Scout.
         This can also be run as
         `housekeeper get file -V --tag junction --tag bed <sample_id>`
@@ -216,4 +224,9 @@ def upload_rna_junctions_to_scout(context: CGConfig, dry_run: bool, case_id: str
     LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
-    scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
+    try:
+        scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
+    except (CgDataError, ScoutUploadError) as error:
+        LOG.Error(error.message)
+        return 1
+    return 0
