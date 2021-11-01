@@ -6,13 +6,12 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
 from alchy import Query
-
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
-from cg.exc import HousekeeperVersionMissingError, HousekeeperFileMissingError
+from cg.exc import HousekeeperFileMissingError, HousekeeperVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +68,7 @@ class HousekeeperAPI:
             return
 
         if file_obj.is_included and Path(file_obj.full_path).exists():
-            LOG.info("Deleting file %s form disc", file_obj.full_path)
+            LOG.info("Deleting file %s from disc", file_obj.full_path)
             Path(file_obj.full_path).unlink()
 
         LOG.info("Deleting file %s from housekeeper", file_id)
