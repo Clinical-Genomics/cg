@@ -54,4 +54,4 @@ SEX_OPTIONS = ("male", "female", "unknown")
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
-SARS_COV_REGEX = "\(|\)|\d{2}CS\(|\)|\d{6}"
+SARS_COV_REGEX = "^\d{2}CS\d{6}"
