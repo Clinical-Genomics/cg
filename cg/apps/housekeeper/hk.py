@@ -130,7 +130,7 @@ class HousekeeperAPI:
 
     def get_files(
         self, bundle: str, tags: Optional[list], version: Optional[int] = None
-    ) -> Iterable[models.File]:
+    ) -> Query[models.File]:
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
 

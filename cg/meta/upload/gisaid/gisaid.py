@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import pandas as pd
 
+from cg.constants.constants import SARS_COV_REGEX
 from housekeeper.store.models import File
 import tempfile
 
@@ -56,7 +57,7 @@ class GisaidAPI:
         """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
         completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
         completion_df.drop_duplicates(inplace=True)
-        completion_df = completion_df[completion_df["provnummer"].str.contains("21CS\(|\)|\d{6}")]
+        completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
         return completion_df
 
     def get_gisaid_sample_list(self, case_id: str) -> List[models.Sample]:
@@ -174,9 +175,9 @@ class GisaidAPI:
 
     def create_gisaid_log_file(self, case_id: str) -> None:
         """Path for gisaid bundle log"""
-        gisaid_log_file = self.housekeeper_api.find_file_in_latest_version(
-            case_id=case_id, tags=["gisaid-log", case_id]
-        )
+        gisaid_log_file = self.housekeeper_api.get_files(
+            bundle=case_id, tags=["gisaid-log", case_id]
+        ).first()
         if gisaid_log_file:
             LOG.info("GISAID log exists in latest bundle in Housekeeper")
             return
@@ -224,9 +225,11 @@ class GisaidAPI:
             case_id=case_id, tags=["gisaid-fasta", case_id]
         ).full_path
 
-        gisaid_log_path = self.housekeeper_api.find_file_in_latest_version(
-            case_id=case_id, tags=["gisaid-log", case_id]
-        ).full_path
+        gisaid_log_path = (
+            self.housekeeper_api.get_files(bundle=case_id, tags=["gisaid-log", case_id])
+            .first()
+            .full_path
+        )
 
         self.authenticate_gisaid()
         load_call: list = [
@@ -264,12 +267,12 @@ class GisaidAPI:
     def get_accession_numbers(self, case_id: str) -> Dict[str, str]:
         """Parse accession numbers and sample ids from log file"""
 
-        LOG.info("Parsing accesion numbers from log file")
+        LOG.info("Parsing accession numbers from log file")
         accession_numbers = {}
         log_file = Path(
-            self.housekeeper_api.find_file_in_latest_version(
-                case_id=case_id, tags=["gisaid-log", case_id]
-            ).full_path
+            self.housekeeper_api.get_files(bundle=case_id, tags=["gisaid-log", case_id])
+            .first()
+            .full_path
         )
         if log_file.stat().st_size != 0:
             with open(str(log_file.absolute())) as log_file:
