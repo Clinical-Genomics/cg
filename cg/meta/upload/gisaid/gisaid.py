@@ -179,7 +179,7 @@ class GisaidAPI:
             bundle=case_id, tags=["gisaid-log", case_id]
         ).first()
         if gisaid_log_file:
-            LOG.info("GISAID log exists in latest bundle in Housekeeper")
+            LOG.info("GISAID log exists in case bundle in Housekeeper")
             return
 
         log_file_path = Path(self.gisaid_log_dir, case_id).with_suffix(".log")
