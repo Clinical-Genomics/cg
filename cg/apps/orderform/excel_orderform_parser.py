@@ -28,6 +28,7 @@ class ExcelOrderformParser(OrderformParser):
         "1605:9",  # Microbial meta genomes
         "2184:5",  # Orderform SARS-CoV-2
     ]
+    samples: List[ExcelSample] = []
 
     def check_orderform_version(self, document_title: str) -> None:
         """Raise an error if the orderform is too new or too old for the order portal."""

@@ -1,10 +1,12 @@
-from typing import List, Optional
+from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, constr, conlist
+
+from cg.store import models
 
 
 class OrderIn(BaseModel):
-    name: str
+    name: constr(min_length=2, max_length=models.Sample.order.property.columns[0].type.length)
     comment: Optional[str]
-    customer: str
-    samples: List[dict]
+    customer: constr(min_length=7, max_length=7)
+    samples: conlist(dict, min_items=1)

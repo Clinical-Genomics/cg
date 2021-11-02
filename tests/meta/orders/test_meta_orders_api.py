@@ -14,6 +14,17 @@ import cg
 PROCESS_LIMS_FUNCTION = "cg.meta.orders.api.process_lims"
 
 
+def test_too_long_order_name():
+    # GIVEN order with more than 64 chars name
+    long_name = "A super long order name that is longer than sixty-four characters."
+    assert len(long_name) > 64
+    assert models.Sample.order.property.columns[0].type.length == 64
+    # WHEN placing it in the pydantic order model
+    # THEN an error is raised
+    with pytest.raises(ValueError):
+        OrderIn(name=long_name, customer="", comment="", samples=[])
+
+
 @pytest.mark.parametrize(
     "order_type",
     [

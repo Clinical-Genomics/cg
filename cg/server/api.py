@@ -83,10 +83,11 @@ def before_request():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
-    post_data: OrderIn = OrderIn.parse_obj(request.get_json())
-    LOG.info("processing '%s' order: %s", order_type, post_data)
     error_message = None
     try:
+        post_data: OrderIn = OrderIn.parse_obj(request.get_json())
+        LOG.info("processing '%s' order: %s", order_type, post_data)
+
         result = api.submit(
             project=OrderType(order_type),
             order_in=post_data,

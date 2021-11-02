@@ -13,7 +13,8 @@ class JsonOrderformParser(OrderformParser):
         str(Pipeline.FLUFFY),
         str(Pipeline.BALSAMIC),
     ]
-    NO_VALUE = "no_value"
+    NO_VALUE: str = "no_value"
+    samples: List[JsonSample] = []
 
     def get_project_type(self) -> str:
         """Determine the project type."""
