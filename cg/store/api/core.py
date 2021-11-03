@@ -3,6 +3,7 @@ import logging
 import alchy
 
 from cg.store import models
+from cg.store.api.delete import DeleteDataHandler
 from cg.store.api.findbusinessdata import FindBusinessDataHandler
 from cg.store.api.reset import ResetHandler
 
@@ -15,6 +16,7 @@ LOG = logging.getLogger(__name__)
 
 class CoreHandler(
     AddHandler,
+    DeleteDataHandler,
     FindBasicDataHandler,
     FindBusinessDataHandler,
     ResetHandler,

@@ -1,9 +1,10 @@
-import logging
-from pathlib import Path
-from typing import Iterator, List, Optional
-
 import alchy
+import logging
 import sqlalchemy as sqa
+
+from pathlib import Path
+from typing import Iterator, List
+
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample

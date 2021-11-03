@@ -167,3 +167,12 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         )
 
     return store
+
+
+@pytest.fixture(scope="function", name="flow_cell_store")
+def fixture_flow_cell_store(store: Store, flow_cell_name: str, helpers: StoreHelpers) -> Store:
+    """Populate a store with a novaseq flow cell"""
+
+    helpers.add_flowcell(store=store, flowcell_id=flow_cell_name, sequencer_type="novaseq")
+
+    yield store

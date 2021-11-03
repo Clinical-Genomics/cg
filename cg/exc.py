@@ -18,6 +18,10 @@ class FlowcellError(CgError):
     """Raised when there is a problem with demultiplexing a flowcell"""
 
 
+class WipeDemuxError(CgError):
+    """Raised when there is an issue with wiping a flowcell before start"""
+
+
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis"""
 
