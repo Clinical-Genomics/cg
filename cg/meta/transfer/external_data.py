@@ -98,6 +98,7 @@ class ExternalDataAPI(MetaAPI):
         """Transfers all sample files, related to given ticket, from source to destination"""
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        Path.mkdir(Path(self.hasta_path % cust), exist_ok=True)
         for case in cases:
             links = case.links
             for link in links:
