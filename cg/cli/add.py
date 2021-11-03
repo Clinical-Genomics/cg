@@ -278,7 +278,7 @@ def relationship(
 def external(context: CGConfig, ticket_id: int, dry_run: bool):
     """Downloads external data from caesar and places it in appropriate folder on hasta"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(ticket_id=ticket_id, dry_run=dry_run)
+    external_data_api.transfer_sample_files_from_source(ticket_id=ticket_id, dry_run=dry_run)
 
 
 @add.command("external-hk")

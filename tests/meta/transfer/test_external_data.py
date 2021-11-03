@@ -49,8 +49,8 @@ def test_create_source_path(
 def test_create_destination_path(
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    sample_id: str,
     path_with_format_token: Path,
+    sample_id: str,
 ):
     """Test generating the destination path"""
     # GIVEN a customer and an internal sample id
@@ -98,7 +98,7 @@ def test_download_sample(
 
 
 def test_get_all_fastq(
-    cg_context: CGConfig, external_data_directory, external_data_api: ExternalDataAPI
+    cg_context: CGConfig, external_data_api: ExternalDataAPI, external_data_directory
 ):
     """Test the finding of fastq.gz files in customer directories"""
     # GIVEN a folder containing two folders with both fastq and md5 files
@@ -112,7 +112,7 @@ def test_get_all_fastq(
 
 
 def test_add_files_to_bundles(
-    external_data_api: ExternalDataAPI, hk_version_obj, fastq_file: Path, sample_id: str
+    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version_obj, sample_id: str
 ):
     """Tests adding files to housekeeper"""
     # GIVEN a file to be added
@@ -128,7 +128,7 @@ def test_add_files_to_bundles(
 
 
 def test_add_transfer_to_housekeeper(
-    dna_case, external_data_api: ExternalDataAPI, fastq_file: Path, mocker, case_id, ticket_nr
+    case_id, dna_case, external_data_api: ExternalDataAPI, fastq_file: Path, mocker, ticket_nr
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis

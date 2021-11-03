@@ -57,6 +57,7 @@ class ExternalDataAPI(MetaAPI):
         self, cust: str, cust_sample_id: str, lims_sample_id: str, dry_run: bool, ticket_id: int
     ) -> int:
         """Runs a SLURM job to transfer a sample folder. Returns SLURM jobid of the transfer process"""
+        RSYNC_FILE_POSTFIX: str = "_rsync_external_data.sh"
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         slurm_api: SlurmAPI = SlurmAPI()
         source_path: Path = self.create_source_path(
@@ -75,7 +76,7 @@ class ExternalDataAPI(MetaAPI):
         )
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         sbatch_info = {
-            "job_name": "_".join([str(ticket_id), "rsync_external_data"]),
+            "job_name": "_".join([str(ticket_id), RSYNC_FILE_POSTFIX]),
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
@@ -100,18 +101,16 @@ class ExternalDataAPI(MetaAPI):
         for case in cases:
             links = case.links
             for link in links:
-                lims_sample_id: str = link.sample.internal_id
-                cust_sample_id: str = link.sample.name
                 sbatch_number: int = self.transfer_sample(
                     ticket_id=ticket_id,
                     cust=cust,
-                    cust_sample_id=cust_sample_id,
-                    lims_sample_id=lims_sample_id,
+                    cust_sample_id=link.sample.name,
+                    lims_sample_id=link.sample.internal_id,
                     dry_run=dry_run,
                 )
                 LOG.info(
-                    "Downloading sample %s from caesar by submitting sbatch job %s"
-                    % (lims_sample_id, sbatch_number)
+                    "Transferring sample %s from source by submitting sbatch job %s"
+                    % (link.sample.internal_id, sbatch_number)
                 )
 
     def get_all_fastq(self, sample_folder: Path) -> List[Path]:
@@ -133,7 +132,7 @@ class ExternalDataAPI(MetaAPI):
         return all_fastq_in_folder
 
     def create_hk_bundle(
-        self, bundle_name: str, data_dict: dict, dry_run: bool
+        self, bundle_data: dict, bundle_name: str, dry_run: bool
     ) -> Optional[Tuple[Bundle, Version]]:
         """Creates and returns a housekeeper bundle and the new version"""
         if dry_run:
@@ -142,7 +141,7 @@ class ExternalDataAPI(MetaAPI):
             )
             return
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-            bundle_data=data_dict
+            bundle_data=bundle_data
         )
         return bundle_result
 
@@ -189,9 +188,9 @@ class ExternalDataAPI(MetaAPI):
                 )
                 failed_sums: List[Path] = self.check_fastq_md5sums(fastq_paths_to_add)
                 if len(failed_sums) != 0:
-                    LOG.info("The following files failed their md5sum match:")
-                    LOG.info(*failed_sums)
-                    LOG.info("No cases will be added to housekeeper.")
+                    LOG.info(
+                        "Changes in housekeeper will not be committed and no cases will be added."
+                    )
                     return
                 self.add_files_to_bundles(
                     fastq_paths=fastq_paths_to_add,
