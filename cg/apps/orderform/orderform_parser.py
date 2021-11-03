@@ -22,7 +22,7 @@ class OrderformParser(BaseModel):
     delivery_type: Optional[DataDelivery] = None
     customer_id: constr(min_length=7, max_length=7) = None
     order_comment: Optional[str] = None
-    order_name: str = None
+    order_name: Optional[str] = None
 
     class Config:
         validate_assignment = True
