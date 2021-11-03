@@ -20,7 +20,9 @@ class OrderformParser(BaseModel):
     samples: List[OrderSample] = []
     project_type: Optional[OrderType] = None
     delivery_type: Optional[DataDelivery] = None
-    customer_id: constr(min_length=7, max_length=7) = None
+    customer_id: constr(
+        min_length=1, max_length=models.Customer.internal_id.property.columns[0].type.length
+    ) = None
     order_comment: Optional[str] = None
     order_name: Optional[str] = None
 

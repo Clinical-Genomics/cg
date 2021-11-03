@@ -28,7 +28,7 @@ class JsonOrderformParser(OrderformParser):
         if data_analysis in self.ACCEPTED_DATA_ANALYSES:
             return data_analysis
 
-        raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
+        raise OrderFormError(f"Unsupported data_analysis: {data_analyses} for json data")
 
     @staticmethod
     def project_type_to_order_type(project_type: str) -> str:

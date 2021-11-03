@@ -2,7 +2,9 @@ from enum import Enum
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, NonNegativeInt
+
+from cg.store import models
 
 
 class SexEnum(str, Enum):
@@ -43,49 +45,75 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 class OrderSample(BaseModel):
     age_at_sampling: Optional[str]
-    application: str
+    application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     capture_kit: Optional[CaptureKitEnum]
-    case_id: str
-    cohorts: Optional[List[str]]
-    comment: Optional[str]
+    case_id: constr(max_length=models.Family.internal_id.property.columns[0].type.length)
+    cohorts: Optional[
+        List[constr(max_length=models.Family.cohorts.property.columns[0].type.length)]
+    ]
+    comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
     concentration: Optional[float]
     concentration_sample: Optional[float]
     container: Optional[ContainerEnum]
     container_name: Optional[str]
-    customer: Optional[str]
+    customer: Optional[
+        constr(max_length=models.Customer.internal_id.property.columns[0].type.length)
+    ]
     custom_index: Optional[str]
     data_analysis: Pipeline
     data_delivery: DataDelivery
     elution_buffer: Optional[str]
     extraction_method: Optional[str]
-    family_name: Optional[str]
-    father: Optional[str]
+    family_name: Optional[
+        constr(
+            regex=NAME_PATTERN,
+            min_length=2,
+            max_length=models.Family.name.property.columns[0].type.length,
+        )
+    ]
+    father: Optional[
+        constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
+    ]
     formalin_fixation_time: Optional[int]
     index: str
     index_number: Optional[str]
     index_sequence: Optional[str]
-    internal_id: Optional[str]
-    mother: Optional[str]
-    name: constr(regex=NAME_PATTERN)
+    internal_id: Optional[
+        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
+    ]
+    mother: Optional[
+        constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
+    ]
+    name: constr(
+        regex=NAME_PATTERN,
+        min_length=2,
+        max_length=models.Sample.name.property.columns[0].type.length,
+    )
     organism: Optional[str]
     organism_other: Optional[str]
-    panels: Optional[List[str]]
+    panels: Optional[List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
-    pool: Optional[str]
+    pool: Optional[constr(max_length=models.Pool.name.property.columns[0].type.length)]
     post_formalin_fixation_time: Optional[int]
     priority: PriorityEnum = PriorityEnum.standard
     quantity: Optional[int]
     reagent_label: Optional[str]
-    reference_genome: Optional[str]
+    reference_genome: Optional[
+        constr(max_length=models.Sample.reference_genome.property.columns[0].type.length)
+    ]
     require_qcok: bool = False
     rml_plate_name: Optional[str]
     sex: SexEnum = SexEnum.other
     source: Optional[str]
     status: StatusEnum = StatusEnum.unknown
-    subject_id: Optional[str]
+    subject_id: Optional[
+        constr(
+            regex=NAME_PATTERN, max_length=models.Sample.subject_id.property.columns[0].type.length
+        )
+    ]
     synopsis: Optional[str]
-    time_point: Optional[int]
+    time_point: Optional[NonNegativeInt]
     tissue_block_size: Optional[str]
     tumour: bool = False
     tumour_purity: Optional[int]
