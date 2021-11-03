@@ -48,9 +48,7 @@ class OrderSample(BaseModel):
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     capture_kit: Optional[CaptureKitEnum]
     case_id: constr(max_length=models.Family.internal_id.property.columns[0].type.length)
-    cohorts: Optional[
-        List[constr(max_length=models.Family.cohorts.property.columns[0].type.length)]
-    ]
+    cohorts: Optional[List[str]]
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
     concentration: Optional[float]
     concentration_sample: Optional[float]
