@@ -5,6 +5,7 @@ import pytest
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
+from cg.store import models
 
 
 def test_pools_to_status(rml_order_to_submit):
@@ -27,7 +28,8 @@ def test_pools_to_status(rml_order_to_submit):
     sample = pool["samples"][0]
     assert sample["name"] == "sample1"
     assert sample["comment"] == "test comment"
-    assert sample["priority"] == "research"
+    assert pool["priority"] == "research"
+    assert sample["control"] == "negative"
 
 
 def test_samples_to_status(fastq_order_to_submit):
@@ -121,10 +123,13 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     assert sample_data["volume"] == "1"
 
 
-def test_families_to_status(mip_order_to_submit):
+def test_cases_to_status(mip_order_to_submit):
+
     # GIVEN a scout order with a trio case
+
     # WHEN parsing for status
     data = StatusHandler.cases_to_status(mip_order_to_submit)
+
     # THEN it should pick out the case
     assert len(data["families"]) == 2
     family = data["families"][0]
@@ -153,6 +158,17 @@ def test_families_to_status(mip_order_to_submit):
     assert isinstance(family["samples"][1]["comment"], str)
 
 
+def test_cases_to_status_synopsis(mip_order_to_submit):
+    # GIVEN a scout order with a trio case where synopsis is None
+    for sample in mip_order_to_submit["samples"]:
+        sample["synopsis"] = None
+
+    # WHEN parsing for status
+    StatusHandler.cases_to_status(mip_order_to_submit)
+
+    # THEN No exception should have been raised on synopsis
+
+
 def test_store_rml(orders_api, base_store, rml_status_data):
     # GIVEN a basic store with no samples and a rml order
     assert base_store.pools().count() == 0
@@ -167,13 +183,16 @@ def test_store_rml(orders_api, base_store, rml_status_data):
         ticket=1234348,
         pools=rml_status_data["pools"],
     )
+
     # THEN it should update the database with new pools
     assert len(new_pools) == 2
 
     assert base_store.pools().count() == base_store.families().count()
     assert base_store.samples().count() == 4
-    new_pool = base_store.pools().first()
 
+    assert base_store.samples().filter_by(control="negative").count() == 1
+
+    new_pool = base_store.pools().first()
     assert new_pool == new_pools[1]
 
     assert new_pool.name == "pool-2"
@@ -515,7 +534,6 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
     assert new_link.sample.time_point == 1
-    assert new_link.sample.from_sample == "sample1"
 
 
 def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
@@ -536,66 +554,6 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
             ordered=dt.datetime.now(),
             ticket=123456,
             cases=mip_status_data["families"],
-        )
-
-
-def test_store_external(orders_api, base_store, external_status_data):
-    # GIVEN a basic store with no samples or nothing in it + external order
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-
-    # WHEN storing the order
-    new_families = orders_api.store_cases(
-        customer=external_status_data["customer"],
-        order=external_status_data["order"],
-        ordered=dt.datetime.now(),
-        ticket=123456,
-        cases=external_status_data["families"],
-    )
-
-    # THEN it should create and link samples and the case
-    case_obj = base_store.families().first()
-    assert len(new_families) == 1
-    new_case = new_families[0]
-    assert new_case == case_obj
-    assert new_case.name == "fam2"
-    assert new_case.data_analysis == str(Pipeline.MIP_DNA)
-    assert new_case.data_delivery == str(DataDelivery.SCOUT)
-    assert set(new_case.panels) == {"CTD", "CILM"}
-    assert new_case.priority_human == "priority"
-
-    assert len(new_case.links) == 2
-    new_link = new_case.links[0]
-    assert new_link.status == "affected"
-    assert new_link.sample.name == "sample1"
-    assert new_link.sample.sex == "male"
-    assert new_link.sample.capture_kit == "Agilent Sureselect V5"
-    assert new_link.sample.application_version.application.tag == "EXXCUSR000"
-    assert isinstance(new_case.links[0].sample.comment, str)
-
-    assert base_store.deliveries().count() == base_store.samples().count()
-    for link in new_case.links:
-        assert len(link.sample.deliveries) == 1
-
-
-def test_store_external_bad_apptag(orders_api, base_store, external_status_data):
-    # GIVEN a basic store with no samples or nothing in it + external order
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-
-    for family in external_status_data["families"]:
-        for sample in family["samples"]:
-            sample["application"] = "nonexistingtag"
-
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        orders_api.store_cases(
-            customer=external_status_data["customer"],
-            order=external_status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=123456,
-            cases=external_status_data["families"],
         )
 
 
@@ -655,7 +613,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     new_case = new_families[0]
     assert new_case.name == "family1"
     assert new_case.data_analysis == str(Pipeline.BALSAMIC)
-    assert new_case.data_delivery == str(DataDelivery.SCOUT)
+    assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == "standard"
 

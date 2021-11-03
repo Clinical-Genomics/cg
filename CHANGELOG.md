@@ -18,11 +18,76 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.26.0]
+### Added
+- Added median target coverage to mip:s pydantic model
+- Added step to mips metric deliverables model
+
+## [22.25.4]
+### Fixed
+- cg transfer pool: skip samples without pool name
+
+## [22.25.3]
+### Fixed
+- Show warnings when priorities differ on a case in an order 
+
+## [22.25.2]
+### Fixed
+- RML priority on pool-case
+
+## [22.25.1]
+### Fixed
+- Database migration order
+
+## [22.25.0]
+### Added
+- Support Orderform 1508:25, replaces Orderform 1541:6
+- New Balsamic delivery types 
+  - fastq-qc + analysis + cram
+  - fastq-qc + analysis + cram + Scout
+
+## [22.24.1]
+### Fixed
+- Handle empty values for synopsis in excel orders
+
+## [22.23.2]
+### Fixed
+- Add proxy-protocol to dockerfile
+
+## [22.23.1]
+### Fixed
+- Synopsis from old and new samples are combined
+
+## [22.22.1]
+### Added
+- Added required ENV declarations in dockerfile
+- pyyaml dependency required to run app in container
+
+## [22.22.0]
+### Added
+- Fluffy samplesheet add control field
+
+## [22.21.1]
+### Fixed
+- Balsamic delivery report exception text
+
+## [22.21.0]
+### Added
+- Mark a NIPT/Fluffy sample as control
+
+## [22.20.1]
+### Fixed
+- Accept synopsis both as list and as string in ordering json
+
+## [22.20.0]
+### Fixed
+- Compatability of fluffy and new headers in dragen samplesheets
+
 ## [22.20.1]
 ### Added
 - Case opencow and stillant to MIP validation cases
 
-## [22.20.0]
+## [22.19.7]
 ### Added
 - New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
 

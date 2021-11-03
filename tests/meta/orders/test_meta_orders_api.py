@@ -18,7 +18,6 @@ PROCESS_LIMS_FUNCTION = "cg.meta.orders.api.process_lims"
     "order_type",
     [
         OrderType.BALSAMIC,
-        OrderType.EXTERNAL,
         OrderType.FASTQ,
         OrderType.METAGENOME,
         OrderType.MICROSALT,
@@ -68,7 +67,7 @@ def test_submit(
 
 @pytest.mark.parametrize(
     "order_type",
-    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.EXTERNAL, OrderType.BALSAMIC],
+    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_illegal_sample_customer(
     sample_store,
@@ -118,7 +117,7 @@ def test_submit_illegal_sample_customer(
 
 @pytest.mark.parametrize(
     "order_type",
-    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.EXTERNAL, OrderType.BALSAMIC],
+    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_scout_legal_sample_customer(
     sample_store,

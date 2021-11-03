@@ -9,6 +9,7 @@ import pandas as pd
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import SARS_COV_REGEX
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
@@ -73,7 +74,7 @@ class FOHMUploadAPI:
             ).sort_values(by=["provnummer"])
             self._reports_dataframe.drop_duplicates(inplace=True)
             self._reports_dataframe = self._reports_dataframe[
-                self._reports_dataframe["provnummer"].str.contains("21CS\(|\)|\d{6}")
+                self._reports_dataframe["provnummer"].str.contains(SARS_COV_REGEX)
             ]
         return self._reports_dataframe
 
@@ -86,7 +87,7 @@ class FOHMUploadAPI:
             ).sort_values(by=["taxon"])
             self._pangolin_dataframe.drop_duplicates(inplace=True)
             self._pangolin_dataframe = self.pangolin_dataframe[
-                self._pangolin_dataframe["taxon"].str.contains("21CS\(|\)|\d{6}")
+                self._pangolin_dataframe["taxon"].str.contains(SARS_COV_REGEX)
             ]
         return self._pangolin_dataframe
 

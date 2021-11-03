@@ -16,6 +16,8 @@ from cg.constants import (
     Pipeline,
 )
 
+from cg.constants.constants import CONTROL_OPTIONS
+
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
 
@@ -466,6 +468,7 @@ class Sample(Model, PriorityMixin):
     )
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
+    control = Column(types.Enum(*CONTROL_OPTIONS))
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
