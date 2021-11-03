@@ -3,14 +3,14 @@ from typing import List
 from pydantic import BaseModel
 
 from cg.models.mip.mip_config import MipBaseConfig
-from cg.models.mip.mip_metrics_deliverables import ParsedMetrics, MetricsDeliverables
+from cg.models.mip.mip_metrics_deliverables import MIPParsedMetrics, MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
 class MipAnalysis(BaseModel):
     case: str
     genome_build: str
-    sample_id_metrics: List[ParsedMetrics]
+    sample_id_metrics: List[MIPParsedMetrics]
     mip_version: str
     rank_model_version: str
     sample_ids: List[str]
@@ -30,7 +30,7 @@ def parse_mip_analysis(
         MipAnalysis: parsed MIP analysis data
     """
     mip_config: MipBaseConfig = MipBaseConfig(**mip_config_raw)
-    qc_metrics = MetricsDeliverables(**qc_metrics_raw)
+    qc_metrics = MIPMetricsDeliverables(**qc_metrics_raw)
     sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
 
     return MipAnalysis(

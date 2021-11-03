@@ -308,6 +308,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         case_obj: models.Family = self.status_db.family(case_id)
         sample_obj: models.Sample = case_obj.links[0].sample
+        if sample_obj.from_sample:
+            sample_obj: models.Sample = self.status_db.sample(sample_obj.from_sample)
         capture_kit = self.lims_api.capture_kit(sample_obj.internal_id)
         if capture_kit:
             panel_shortname = self.status_db.bed_version(capture_kit).shortname
