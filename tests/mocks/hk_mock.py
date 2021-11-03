@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Set
+from typing import List, Set, Optional
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -279,14 +279,14 @@ class MockHousekeeperAPI:
         """Fetch a version"""
         return self._version_obj
 
-    def get_create_version(self, lims_sample_id: str):
-        """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version."""
-        last_version = self.last_version(bundle=lims_sample_id)
+    def get_create_version(self, bundle: str):
+        """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version"""
+        last_version = self.last_version(bundle=bundle)
         if not last_version:
-            LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
             bundle_result = self.add_bundle(
                 bundle_data={
-                    "name": lims_sample_id,
+                    "name": bundle,
                     "created": datetime.datetime.now(),
                     "expires": None,
                     "files": [],
@@ -424,6 +424,19 @@ class MockHousekeeperAPI:
         self._file_added = True
         version_obj.files.append(new_file)
         return new_file
+
+    def check_bundle_files(
+        self, bundle_name: str, file_paths: List[Path], last_version, tags: Optional[list] = None
+    ) -> List[Path]:
+        """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
+        for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
+            if Path(file.path) in file_paths:
+                file_paths.remove(Path(file.path))
+                LOG.info(
+                    "Path %s is already linked to bundle %s in housekeeper"
+                    % (file.path, bundle_name)
+                )
+        return file_paths
 
     @staticmethod
     def checksum(path):

@@ -232,15 +232,15 @@ def test_multiple_analyses(analysis_store, helpers):
     assert analysis_oldest not in analyses
 
 
-def test_get_customer_id_from_ticket(analysis_store, ticket_nr):
-    """Tests if the function in fact returns the correct customer."""
+def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_nr):
+    """Tests if the function in fact returns the correct customer"""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == "cust000"
+    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == customer_id
 
 
-def test_set_cases_to_analyze(analysis_store, case_id):
+def test_set_case_action(analysis_store, case_id):
     """Tests if actions of cases are changed to analyze."""
     # Given a store with a case with action None
     action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
@@ -248,7 +248,7 @@ def test_set_cases_to_analyze(analysis_store, case_id):
     assert action == None
 
     # When setting the case to "analyze"
-    analysis_store.set_cases_to_analyze([case_id])
+    analysis_store.set_case_action(case=case_id, action="analyze")
     new_action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
 
     # Then the action should be set to analyze

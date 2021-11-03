@@ -7,14 +7,15 @@ LOG = logging.getLogger(__name__)
 
 def check_md5sum(file_path: Path, md5sum: str) -> bool:
     """Checks if the given md5_sum matches that of the given file"""
+    BYTES_PER_CHUNK: int = 8192
     with open(file_path, "rb") as file:
         file_hash = hashlib.md5()
-        chunk = file.read(8192)
+        chunk = file.read(BYTES_PER_CHUNK)
         while chunk:
             file_hash.update(chunk)
-            chunk = file.read(8192)
-    outp_sum = file_hash.hexdigest()
-    if md5sum == outp_sum:
+            chunk = file.read(BYTES_PER_CHUNK)
+    calculated_md5sum = file_hash.hexdigest()
+    if md5sum == calculated_md5sum:
         return True
     LOG.info("The given md5sum does not match the md5sum for file  %s" % file_path)
     return False

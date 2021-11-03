@@ -139,6 +139,23 @@ class HousekeeperAPI:
         """
         return self._store.files(bundle=bundle, tags=tags, version=version)
 
+    def check_bundle_files(
+        self,
+        bundle_name: str,
+        file_paths: List[Path],
+        last_version: Version,
+        tags: Optional[list] = None,
+    ) -> List[Path]:
+        """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
+        for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
+            if Path(file.path) in file_paths:
+                file_paths.remove(Path(file.path))
+                LOG.info(
+                    "Path %s is already linked to bundle %s in housekeeper"
+                    % (file.path, bundle_name)
+                )
+        return file_paths
+
     @staticmethod
     def get_included_path(
         root_dir: Path, version_obj: models.Version, file_obj: models.File
@@ -187,14 +204,14 @@ class HousekeeperAPI:
             .first()
         )
 
-    def get_create_version(self, lims_sample_id: str) -> models.Version:
-        """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version."""
-        last_version: models.Version = self.last_version(bundle=lims_sample_id)
+    def get_create_version(self, bundle: str) -> models.Version:
+        """Returns the latest version of a bundle if it exists. If not creates a bundle and returns its version"""
+        last_version: models.Version = self.last_version(bundle=bundle)
         if not last_version:
-            LOG.info("Creating bundle for sample %s in housekeeper", lims_sample_id)
+            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
             bundle_result: Tuple[models.Bundle, models.Version] = self.add_bundle(
                 bundle_data={
-                    "name": lims_sample_id,
+                    "name": bundle,
                     "created_at": dt.datetime.now(),
                     "expires_at": None,
                     "files": [],

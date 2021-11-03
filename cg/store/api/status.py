@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
-from cg.constants import PRIORITY_MAP, Pipeline
+from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -125,7 +125,7 @@ class StatusHandler(BaseHandler):
         )
 
     def get_customer_id_from_ticket(self, ticket_id: int) -> str:
-        """Returns the customer related to given ticket."""
+        """Returns the customer related to given ticket"""
         return (
             self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
             .first()
@@ -216,13 +216,17 @@ class StatusHandler(BaseHandler):
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
-    def set_cases_to_analyze(self, cases: List[str]):
-        """sets the action of provided cases to analyze."""
-        for internal_id in cases:
+    def set_case_action(self, action: Optional[str], case: Union[str, List[str]]):
+        """Sets the action of provided cases to None or the given action"""
+        if isinstance(case, str):
+            case: List[str] = [case]
+        if action not in [None, *CASE_ACTIONS]:
+            return
+        for internal_id in case:
             case_obj: models.Family = self.Family.query.filter(
                 models.Family.internal_id == internal_id
             ).first()
-            case_obj.action = "analyze"
+            case_obj.action = action
             self.commit()
 
     @staticmethod

@@ -112,7 +112,7 @@ def transfer_flowcell_api(
 
 @pytest.fixture(scope="function")
 def transfer_lims_api(sample_store: Store) -> TransferLims:
-    """Setup flowcell transfer API."""
+    """Setup flowcell transfer API"""
     yield TransferLims(sample_store, MockLims(config=""))
 
 
@@ -145,15 +145,17 @@ def lims_api():
 
 
 @pytest.fixture(name="external_data_directory")
-def external_data_directory(tmpdir_factory) -> Path:
-    """Fixture that returns a customer folder with fastq.gz files in sample-directories."""
-    cust_folder = tmpdir_factory.mktemp("cust000")
-    Path(cust_folder, "sample1").mkdir(exist_ok=True, parents=True)
-    Path(cust_folder, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(cust_folder, "sample1", "sample1_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample1", "sample1_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample1", "sample1_fastq_2.fastq.gz.md5").touch(exist_ok=True)
-    Path(cust_folder, "sample2", "sample2_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample2", "sample2_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample2", "sample1_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+def external_data_directory(tmpdir_factory, customer_id: str, cust_sample_id: str) -> Path:
+    """Fixture that returns a customer folder with fastq.gz files in sample-directories"""
+    sample1: str = cust_sample_id + "1"
+    sample2: str = cust_sample_id + "2"
+    cust_folder = tmpdir_factory.mktemp(customer_id)
+    Path(cust_folder, sample1).mkdir(exist_ok=True, parents=True)
+    Path(cust_folder, sample2).mkdir(exist_ok=True, parents=True)
+    Path(cust_folder, sample1, sample1 + "_fastq_1.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, sample1, sample1 + "_fastq_2.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, sample1, sample1 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+    Path(cust_folder, sample2, sample2 + "_fastq_1.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, sample2, sample2 + "_fastq_2.fastq.gz").touch(exist_ok=True)
+    Path(cust_folder, sample2, sample2 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
     return Path(cust_folder)

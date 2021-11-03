@@ -1,7 +1,9 @@
 """Test how the api handles files"""
 from pathlib import Path
+from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import HK_FASTQ_TAGS
 
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):
@@ -144,3 +146,27 @@ def test_get_include_file(populated_housekeeper_api, case_id):
     assert included_path.exists() is True
     # THEN assert that the file path has been updated
     assert included_file.path != original_path
+
+
+def test_check_bundle_files(
+    case_id: str,
+    a_date,
+    populated_housekeeper_api,
+    hk_version_obj,
+    fastq_file: Path,
+    sample_id: str,
+    bed_file: Path,
+):
+    """Test to see if the function correctly identifies a file that is present and returns a lis without it"""
+    # GIVEN a housekeeper version with a file
+    version = populated_housekeeper_api.version(bundle=case_id, date=a_date)
+
+    # WHEN when attempting to add two files, one existing and one new
+    files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
+        file_paths=[Path(bed_file), fastq_file],
+        bundle_name=case_id,
+        last_version=version,
+    )
+
+    # Then only the new file should be returned
+    assert files_to_add == [fastq_file]
