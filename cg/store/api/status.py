@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional, Tuple, Union, Literal
+from typing import List, Optional, Tuple
 
 from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
 from cg.store import models
@@ -8,6 +8,7 @@ from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
+from typing_extensions import Literal
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
