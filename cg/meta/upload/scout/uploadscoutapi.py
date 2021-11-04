@@ -212,7 +212,7 @@ class UploadScoutAPI:
                 )
 
             dna_cases: [models.Family] = self.status_db.families_by_subject_id(
-                customer_id=rna_case.customer.internal_id,
+                customer_id=rna_sample.customer.internal_id,
                 subject_id=rna_sample.subject_id,
                 data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
             )
@@ -283,7 +283,7 @@ class UploadScoutAPI:
             LOG.info(f"RNA coverage bigwig file %s found", rna_coverage_bigwig.path)
 
             dna_cases: [models.Family] = self.status_db.families_by_subject_id(
-                customer_id=rna_case.customer.internal_id,
+                customer_id=rna_sample.customer.internal_id,
                 subject_id=rna_sample.subject_id,
                 data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
             )
@@ -354,7 +354,7 @@ class UploadScoutAPI:
             LOG.info(f"Splice junctions bed file %s found", splice_junctions_bed.path)
 
             dna_cases: [models.Family] = self.status_db.families_by_subject_id(
-                customer_id=rna_case.customer.internal_id,
+                customer_id=rna_sample.customer.internal_id,
                 subject_id=rna_sample.subject_id,
                 data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
             )
