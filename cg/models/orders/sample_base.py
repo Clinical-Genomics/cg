@@ -7,10 +7,16 @@ from pydantic import BaseModel, constr, NonNegativeInt
 from cg.store import models
 
 
+class ControlEnum(str, Enum):
+    not_control = ""
+    positive = "positive"
+    negative = "negative"
+
+
 class SexEnum(str, Enum):
     male = "male"
     female = "female"
-    other = "unknown"
+    unknown = "unknown"
 
 
 class PriorityEnum(str, Enum):
@@ -47,13 +53,14 @@ class OrderSample(BaseModel):
     age_at_sampling: Optional[str]
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     capture_kit: Optional[CaptureKitEnum]
-    case_id: constr(max_length=models.Family.internal_id.property.columns[0].type.length)
     cohorts: Optional[List[str]]
+    collection_date: Optional[str]
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
     concentration: Optional[float]
     concentration_sample: Optional[float]
     container: Optional[ContainerEnum]
     container_name: Optional[str]
+    control: Optional[str]
     customer: Optional[
         constr(max_length=models.Customer.internal_id.property.columns[0].type.length)
     ]
@@ -73,12 +80,13 @@ class OrderSample(BaseModel):
         constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
     ]
     formalin_fixation_time: Optional[int]
-    index: str
+    index: Optional[str]
     index_number: Optional[str]
     index_sequence: Optional[str]
     internal_id: Optional[
         constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
     ]
+    lab_code: Optional[str]
     mother: Optional[
         constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
     ]
@@ -89,20 +97,26 @@ class OrderSample(BaseModel):
     )
     organism: Optional[str]
     organism_other: Optional[str]
+    original_lab: Optional[str]
+    original_lab_address: Optional[str]
     panels: Optional[List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
     pool: Optional[constr(max_length=models.Pool.name.property.columns[0].type.length)]
     post_formalin_fixation_time: Optional[int]
+    pre_processing_method: Optional[str]
     priority: PriorityEnum = PriorityEnum.standard
     quantity: Optional[int]
     reagent_label: Optional[str]
     reference_genome: Optional[
         constr(max_length=models.Sample.reference_genome.property.columns[0].type.length)
     ]
+    region: Optional[str]
+    region_code: Optional[str]
     require_qcok: bool = False
     rml_plate_name: Optional[str]
-    sex: SexEnum = SexEnum.other
+    selection_criteria: Optional[str]
+    sex: SexEnum = SexEnum.unknown
     source: Optional[str]
     status: StatusEnum = StatusEnum.unknown
     subject_id: Optional[

@@ -4,6 +4,9 @@ from typing import List, Set
 
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
+from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.sample_base import OrderSample, SexEnum, StatusEnum
+from cg.models.orders.samples import Of1508Sample, FastqSample
 from cg.store import models
 
 
@@ -14,36 +17,36 @@ class StatusHandler:
         self.status = None
 
     @staticmethod
-    def group_cases(samples: List[dict]) -> dict:
+    def group_cases(samples: List[Of1508Sample]) -> dict:
         """Group samples in cases."""
         cases = {}
         for sample in samples:
-            case_id = sample["family_name"]
+            case_id = sample.family_name
             if case_id not in cases:
                 cases[case_id] = []
             cases[case_id].append(sample)
         return cases
 
     @staticmethod
-    def pools_to_status(data: dict) -> dict:
+    def pools_to_status(order: OrderIn) -> dict:
         """Convert input to pools."""
 
         status_data = {
-            "customer": data["customer"],
-            "order": data["name"],
-            "comment": data["comment"],
+            "customer": order.customer,
+            "order": order.name,
+            "comment": order.comment,
             "pools": [],
         }
 
         # group pools
         pools = {}
 
-        for sample in data["samples"]:
-            pool_name = sample["pool"]
-            application = sample["application"]
-            data_analysis = sample["data_analysis"]
-            data_delivery = sample.get("data_delivery")
-            priority = sample["priority"]
+        for sample in order.samples:
+            pool_name = sample.pool
+            application = sample.application
+            data_analysis = sample.data_analysis
+            data_delivery = sample.data_delivery
+            priority = sample.priority
 
             if pool_name not in pools:
                 pools[pool_name] = {}
@@ -85,9 +88,9 @@ class StatusHandler:
                     "priority": priority,
                     "samples": [
                         {
-                            "comment": sample.get("comment"),
-                            "control": sample.get("control"),
-                            "name": sample["name"],
+                            "comment": sample.comment,
+                            "control": sample.control,
+                            "name": sample.name,
                         }
                         for sample in pool_samples
                     ],
@@ -96,77 +99,87 @@ class StatusHandler:
         return status_data
 
     @staticmethod
-    def samples_to_status(data: dict) -> dict:
-        """Convert order input to status for fastq-only/metagenome orders."""
+    def fastq_to_status(order: OrderIn) -> dict:
+        """Convert order input to status for fastq-only orders."""
         status_data = {
-            "customer": data["customer"],
-            "order": data["name"],
+            "customer": order.customer,
+            "order": order.name,
             "samples": [
                 {
-                    "application": sample["application"],
-                    "comment": sample.get("comment"),
-                    "data_analysis": sample["data_analysis"],
-                    "data_delivery": sample.get("data_delivery"),
-                    "internal_id": sample.get("internal_id"),
-                    "name": sample["name"],
-                    "priority": sample["priority"],
-                    "sex": sample.get("sex"),
-                    "status": sample.get("status"),
-                    "tumour": sample.get("tumour") or False,
-                    "volume": sample.get("volume"),
+                    "application": sample.application,
+                    "comment": sample.comment,
+                    "data_analysis": sample.data_analysis,
+                    "data_delivery": sample.data_delivery,
+                    "name": sample.name,
+                    "priority": sample.priority,
+                    "sex": sample.sex,
+                    "tumour": sample.tumour,
+                    "volume": sample.volume,
                 }
-                for sample in data["samples"]
+                for sample in order.samples
             ],
         }
         return status_data
 
     @staticmethod
-    def microbial_samples_to_status(data: dict) -> dict:
+    def metagenome_to_status(order: OrderIn) -> dict:
+        """Convert order input to status for metagenome orders."""
+        status_data = {
+            "customer": order.customer,
+            "order": order.name,
+            "samples": [
+                {
+                    "application": sample.application,
+                    "comment": sample.comment,
+                    "data_analysis": sample.data_analysis,
+                    "data_delivery": sample.data_delivery,
+                    "name": sample.name,
+                    "priority": sample.priority,
+                    "volume": sample.volume,
+                }
+                for sample in order.samples
+            ],
+        }
+        return status_data
+
+    @staticmethod
+    def microbial_samples_to_status(order: OrderIn) -> dict:
         """Convert order input for microbial samples."""
 
         status_data = {
-            "customer": data["customer"],
-            "order": data["name"],
-            "comment": data.get("comment"),
-            "data_analysis": data["samples"][0]["data_analysis"],
-            "data_delivery": data["samples"][0]["data_delivery"],
+            "customer": order.customer,
+            "order": order.name,
+            "comment": order.comment,
+            "data_analysis": order.samples[0].data_analysis,
+            "data_delivery": order.samples[0].data_delivery,
             "samples": [
                 {
-                    "application": sample_data["application"],
-                    "collection_date": sample_data.get("collection_date"),
-                    "comment": sample_data.get("comment"),
-                    "data_delivery": sample_data.get("data_delivery"),
-                    "internal_id": sample_data.get("internal_id"),
-                    "lab_code": sample_data.get("lab_code"),
-                    "name": sample_data["name"],
-                    "organism_id": sample_data["organism"],
-                    "original_lab": sample_data.get("original_lab"),
-                    "original_lab_address": sample_data.get("original_lab_address"),
-                    "pre_processing_method": sample_data.get("pre_processing_method"),
-                    "priority": sample_data["priority"],
-                    "reference_genome": sample_data["reference_genome"],
-                    "region": sample_data.get("region"),
-                    "region_code": sample_data.get("region_code"),
-                    "selection_criteria": sample_data.get("selection_criteria"),
-                    "volume": sample_data.get("volume"),
+                    "application": sample.application,
+                    "comment": sample.comment,
+                    "data_delivery": sample.data_delivery,
+                    "name": sample.name,
+                    "organism_id": sample.organism,
+                    "priority": sample.priority,
+                    "reference_genome": sample.reference_genome,
+                    "volume": sample.volume,
                 }
-                for sample_data in data["samples"]
+                for sample in order.samples
             ],
         }
         return status_data
 
     @classmethod
-    def cases_to_status(cls, data: dict) -> dict:
+    def cases_to_status(cls, order: OrderIn, project: OrderType) -> dict:
         """Convert order input to status interface input."""
-        status_data = {"customer": data["customer"], "order": data["name"], "families": []}
-        cases = cls.group_cases(data["samples"])
+        status_data = {"customer": order.customer, "order": order.name, "families": []}
+        cases = cls.group_cases(order.samples)
 
         for case_name, case_samples in cases.items():
 
             cohorts: Set[str] = {
-                cohort for sample in case_samples for cohort in sample.get("cohorts", []) if cohort
+                cohort for sample in case_samples for cohort in sample.cohorts if cohort
             }
-            synopsis: str = ", ".join(set(sample.get("synopsis") or "" for sample in case_samples))
+            synopsis: str = ", ".join(set(sample.synopsis or "" for sample in case_samples))
 
             case_internal_id: str = cls.get_single_value(
                 case_name, case_samples, "case_internal_id"
@@ -174,9 +187,12 @@ class StatusHandler:
             data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
             priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
-            panels: Set[str] = {
-                panel for sample in case_samples for panel in sample.get("panels", []) if panel
-            }
+
+            panels: Set[str] = set()
+            if project == OrderType.MIP_DNA:
+                panels: Set[str] = {
+                    panel for sample in case_samples for panel in sample.panels if panel
+                }
 
             case = {
                 # Set from first sample until order portal sets this on case level
@@ -189,21 +205,21 @@ class StatusHandler:
                 "panels": list(panels),
                 "samples": [
                     {
-                        "age_at_sampling": sample.get("age_at_sampling"),
-                        "application": sample["application"],
-                        "capture_kit": sample.get("capture_kit"),
-                        "comment": sample.get("comment"),
-                        "father": sample.get("father"),
-                        "internal_id": sample.get("internal_id"),
-                        "mother": sample.get("mother"),
-                        "name": sample["name"],
-                        "phenotype_groups": list(sample.get("phenotype_groups", "")),
-                        "phenotype_terms": list(sample.get("phenotype_terms", "")),
-                        "sex": sample["sex"],
-                        "status": sample.get("status"),
-                        "subject_id": sample.get("subject_id"),
-                        "time_point": sample.get("time_point"),
-                        "tumour": sample.get("tumour", False),
+                        "age_at_sampling": sample.age_at_sampling,
+                        "application": sample.application,
+                        "capture_kit": sample.capture_kit,
+                        "comment": sample.comment,
+                        "father": sample.father,
+                        "internal_id": sample.internal_id,
+                        "mother": sample.mother,
+                        "name": sample.name,
+                        "phenotype_groups": list(sample.phenotype_groups),
+                        "phenotype_terms": list(sample.phenotype_terms),
+                        "sex": sample.sex,
+                        "status": sample.status,
+                        "subject_id": sample.subject_id,
+                        "time_point": sample.time_point if hasattr(sample, "time_point") else None,
+                        "tumour": sample.tumour,
                     }
                     for sample in case_samples
                 ],
@@ -215,7 +231,7 @@ class StatusHandler:
 
     @classmethod
     def get_single_value(cls, case_name, case_samples, value_key, value_default=None):
-        values = set(sample.get(value_key, value_default) for sample in case_samples)
+        values = set(getattr(sample, value_key) or value_default for sample in case_samples)
         if len(values) > 1:
             raise ValueError(f"different sample {value_key} values: {case_name} - {values}")
         single_value = values.pop()
@@ -305,7 +321,7 @@ class StatusHandler:
             self.status.add_commit(new_families)
         return new_families
 
-    def store_samples(
+    def store_metagenome(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
     ) -> List[models.Sample]:
         """Store samples in the status database."""
@@ -318,14 +334,12 @@ class StatusHandler:
             for sample in samples:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
-                    internal_id=sample["internal_id"],
                     name=sample["name"],
                     order=order,
                     ordered=ordered,
                     priority=sample["priority"],
-                    sex=sample["sex"] or "unknown",
+                    sex="unknown",
                     ticket=ticket,
-                    tumour=sample["tumour"],
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample["application"]
@@ -346,7 +360,7 @@ class StatusHandler:
                 self.status.add(new_case)
 
                 new_relationship = self.status.relate_sample(
-                    family=new_case, sample=new_sample, status=sample["status"] or "unknown"
+                    family=new_case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
 
@@ -367,7 +381,6 @@ class StatusHandler:
             for sample in samples:
                 new_sample = self.status.add_sample(
                     name=sample["name"],
-                    internal_id=sample["internal_id"],
                     sex=sample["sex"] or "unknown",
                     order=order,
                     ordered=ordered,
@@ -396,7 +409,7 @@ class StatusHandler:
                 new_case.customer = production_customer
                 self.status.add(new_case)
                 new_relationship = self.status.relate_sample(
-                    family=new_case, sample=new_sample, status=sample["status"] or "unknown"
+                    family=new_case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
@@ -475,7 +488,6 @@ class StatusHandler:
                     comment=sample_data["comment"],
                     customer=customer_obj,
                     data_delivery=sample_data["data_delivery"],
-                    internal_id=sample_data["internal_id"],
                     name=sample_data["name"],
                     order=order,
                     ordered=ordered,
@@ -487,7 +499,6 @@ class StatusHandler:
                 )
 
                 priority = new_sample.priority
-
                 sample_objs.append(new_sample)
                 self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
                 new_samples.append(new_sample)

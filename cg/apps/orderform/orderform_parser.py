@@ -6,7 +6,7 @@ from pydantic import constr, BaseModel
 
 from cg.constants import DataDelivery
 from cg.exc import OrderError, OrderFormError
-from cg.meta.orders import OrderType
+from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
 from cg.store import models
@@ -38,7 +38,7 @@ class OrderformParser(BaseModel):
         LOG.info("Group samples under respective case")
         cases = {}
         for sample in self.samples:
-            case_id = sample.case_id
+            case_id = sample.family_name
             if not case_id:
                 continue
             if case_id not in cases:

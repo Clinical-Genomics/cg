@@ -5,6 +5,7 @@ from typing import Optional
 from cg.apps.osticket import OsTicket
 from cg.exc import TicketCreationError
 from cg.models.orders.order import OrderIn
+from cg.models.orders.samples import Of1508Sample
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -57,24 +58,19 @@ class TicketHandler:
         )
 
         for sample in order.samples:
-            message = self.add_sample_name_to_message(
-                message=message, sample_name=sample.get("name")
-            )
+            message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
             message = self.add_sample_apptag_to_message(
-                message=message, application=sample.get("application")
+                message=message, application=sample.application
             )
-            message = self.add_sample_case_name_to_message(
-                message=message, case_name=sample.get("family_name")
-            )
-            message = self.add_existing_sample_info_to_message(
-                message=message, customer_id=order.customer, internal_id=sample.get("internal_id")
-            )
-            message = self.add_sample_priority_to_message(
-                message=message, priority=sample.get("priority")
-            )
-            message = self.add_sample_comment_to_message(
-                message=message, comment=sample.get("comment")
-            )
+            if isinstance(sample, Of1508Sample):
+                message = self.add_sample_case_name_to_message(
+                    message=message, case_name=sample.family_name
+                )
+                message = self.add_existing_sample_info_to_message(
+                    message=message, customer_id=order.customer, internal_id=sample.internal_id
+                )
+            message = self.add_sample_priority_to_message(message=message, priority=sample.priority)
+            message = self.add_sample_comment_to_message(message=message, comment=sample.comment)
 
         message += self.NEW_LINE
         message = self.add_order_comment_to_message(message=message, comment=order.comment)

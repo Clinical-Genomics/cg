@@ -5,7 +5,7 @@
   "samples": [
     {
       "application": "WGTPCFC030",
-      "capture_kit": "LymphoMATIC",
+      "capture_kit": "other",
       "cohorts": [
         ""
       ],

@@ -13,8 +13,8 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import OrderError, OrderFormError
-from cg.meta.orders import OrdersAPI, OrderType
-from cg.models.orders.order import OrderIn
+from cg.meta.orders import OrdersAPI
+from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
@@ -85,11 +85,12 @@ def submit_order(order_type):
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     error_message = None
     try:
-        post_data: OrderIn = OrderIn.parse_obj(request.get_json())
+        project: OrderType = OrderType(order_type)
+        post_data: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
         LOG.info("processing '%s' order: %s", order_type, post_data)
 
         result = api.submit(
-            project=OrderType(order_type),
+            project=project,
             order_in=post_data,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
