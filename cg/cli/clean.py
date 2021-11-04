@@ -135,19 +135,34 @@ def hk_bundle_files(
     )
     size_cleaned = 0
     for analysis in analyses:
-        hk_bundle_version = housekeeper_api.version(bundle=case_id, date=analysis.created_at)
+        LOG.info(f"Cleaning analysis {analysis}")
+
+        bundle_name = analysis.family.internal_id
+        hk_bundle_version = housekeeper_api.version(bundle=bundle_name, date=analysis.created_at)
         if not hk_bundle_version:
-            LOG.info(f"Version not found for bundle:{case_id}; date {analysis.created_at}")
+            LOG.info(
+                f"Version not found for "
+                f"bundle:{bundle_name}; "
+                f"pipeline: {analysis.pipeline}; "
+                f"date {analysis.created_at}"
+            )
             continue
 
+        LOG.info(
+            f"Version found for "
+            f"bundle:{bundle_name}; "
+            f"pipeline: {analysis.pipeline}; "
+            f"date {analysis.created_at}"
+        )
         version_files: List[hk_models.File] = housekeeper_api.get_files(
             bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
             file_path = Path(version_file.full_path)
             if not file_path.exists():
-                LOG.info(f"File {file_path} not on disk. Dry run: {dry_run}")
+                LOG.info(f"File {file_path} not on disk.")
                 continue
+            LOG.info(f"File {file_path} found on disk.")
             file_size = file_path.stat().st_size
             size_cleaned += file_size
             if dry_run:
