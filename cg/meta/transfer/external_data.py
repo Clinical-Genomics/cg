@@ -30,7 +30,7 @@ class ExternalDataAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self.RSYNC_FILE_POSTFIX: str = "rsync_external_data"
+        self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
     def create_log_dir(self, dry_run: bool, ticket_id: int) -> Path:
         """Creates a directory for log file to be stored"""
@@ -72,11 +72,11 @@ class ExternalDataAPI(MetaAPI):
         )
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         sbatch_info = {
-            "job_name": "_".join([str(ticket_id), self.RSYNC_FILE_POSTFIX]),
+            "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
-            "log_dir": log_dir.as_posix(),
+            "log_dir": str(log_dir / f"{ticket_id}{self.RSYNC_FILE_POSTFIX}"),
             "email": self.mail_user,
             "hours": 24,
             "commands": commands,

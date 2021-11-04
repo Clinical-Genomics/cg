@@ -17,7 +17,7 @@ def check_md5sum(file_path: Path, md5sum: str) -> bool:
     calculated_md5sum = file_hash.hexdigest()
     if md5sum == calculated_md5sum:
         return True
-    LOG.info("The given md5sum does not match the md5sum for file  %s" % file_path)
+    LOG.info("The given md5sum does not match the md5sum for file %s" % file_path)
     return False
 
 
