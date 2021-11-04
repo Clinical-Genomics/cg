@@ -170,6 +170,7 @@ class ExternalDataAPI(MetaAPI):
                     lims_sample_id=lims_sample_id,
                 )
                 LOG.info("The md5 files match the md5sum for sample {}".format(lims_sample_id))
+                LOG.info(*failed_sums)
         if failed_files:
             LOG.info("Changes in housekeeper will not be committed and no cases will be added.")
             return
