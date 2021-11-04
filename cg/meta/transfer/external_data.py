@@ -172,13 +172,12 @@ class ExternalDataAPI(MetaAPI):
                     lims_sample_id=lims_sample_id,
                 )
                 LOG.info("The md5 files match the md5sum for sample {}".format(lims_sample_id))
-                LOG.info(msg=failed_sums)
         if failed_files:
-            LOG.info("Changes in housekeeper will not be committed and no cases will be added.")
+            LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
         if dry_run:
             LOG.info("No changes will be committed since this is a dry-run")
             return
         self.housekeeper_api.commit()
-        case_ids = [case.internal_id for case in cases]
-        map(self.status_db.set_case_action, case_ids, itertools.repeat("analyze"))
+        for case in cases:
+            self.status_db.set_case_action(case_id=case.internal_id, action="analyze")
