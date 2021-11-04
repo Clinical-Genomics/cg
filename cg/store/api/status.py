@@ -572,6 +572,23 @@ class StatusHandler(BaseHandler):
 
         return records
 
+    def analyses_before_date(
+        self,
+        case_id: Optional[str] = None,
+        before: Optional[datetime] = datetime.now(),
+        pipeline: Optional[Pipeline] = None,
+    ) -> Query:
+        """Fetch all analyses older than certain date."""
+        records = self.Analysis.query.join(models.Analysis.family)
+        if case_id:
+            records = records.filter(models.Family.internal_id == case_id)
+        if pipeline:
+            records = records.filter(
+                models.Analysis.pipeline == str(pipeline),
+            )
+        records = records.filter(models.Analysis.started_at <= before)
+        return records
+
     def observations_to_upload(self):
         """Fetch observations that haven't been uploaded."""
 
