@@ -76,7 +76,7 @@ class ExternalDataAPI(MetaAPI):
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
-            "log_dir": str(log_dir / f"{ticket_id}{self.RSYNC_FILE_POSTFIX}"),
+            "log_dir": str(log_dir),
             "email": self.mail_user,
             "hours": 24,
             "commands": commands,
