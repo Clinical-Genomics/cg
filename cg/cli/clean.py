@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable, List, Optional, Literal
+from typing import Iterable, List, Optional
 
 import click
 from cgmodels.cg.constants import Pipeline
