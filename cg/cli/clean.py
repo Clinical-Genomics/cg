@@ -136,13 +136,10 @@ def hk_bundle_files(
     size_cleaned = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
-
         bundle_name = analysis.family.internal_id
-        hk_bundle_version = housekeeper_api.version(
-            bundle=bundle_name, date=datetime(analysis.created_at).date()
-        )
+        hk_bundle_version = housekeeper_api.version(bundle=bundle_name, date=analysis.created_at)
         if not hk_bundle_version:
-            LOG.info(
+            LOG.warning(
                 f"Version not found for "
                 f"bundle:{bundle_name}; "
                 f"pipeline: {analysis.pipeline}; "
