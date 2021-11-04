@@ -127,7 +127,7 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def check_fastq_md5sum(self, fastq_path) -> Path:
+    def check_fastq_md5sum(self, fastq_path) -> Optional[Path]:
         if Path(str(fastq_path) + ".md5").exists():
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
@@ -160,9 +160,11 @@ class ExternalDataAPI(MetaAPI):
                     last_version=last_version,
                     tags=HK_FASTQ_TAGS,
                 )
-                failed_sums: List[Path] = [
-                    self.check_fastq_md5sum(file) for file in fastq_paths_to_add
-                ]
+                failed_sums: List[Path] = []
+                for file in fastq_paths_to_add:
+                    pass_check = self.check_fastq_md5sum(file)
+                    if pass_check:
+                        failed_sums.append(pass_check)
                 failed_files.extend(failed_sums)
                 self.add_files_to_bundles(
                     fastq_paths=fastq_paths_to_add,
