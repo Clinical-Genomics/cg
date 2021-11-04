@@ -11,7 +11,7 @@ from cg.apps.cgstats.db.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION
+from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
@@ -30,7 +30,7 @@ class ExternalDataAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
+        self.RSYNC_FILE_POSTFIX: str = "rsync_external_data"
 
     def create_log_dir(self, dry_run: bool, ticket_id: int) -> Path:
         """Creates a directory for log file to be stored"""
@@ -67,7 +67,7 @@ class ExternalDataAPI(MetaAPI):
             customer=cust,
             lims_sample_id=lims_sample_id,
         )
-        commands: str = RSYNC_COMMAND.format(
+        commands: str = RSYNC_CONTENTS_COMMAND.format(
             source_path=source_path, destination_path=destination_path
         )
         error_function: str = ERROR_RSYNC_FUNCTION.format()
@@ -84,7 +84,7 @@ class ExternalDataAPI(MetaAPI):
         }
         self.slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + "sh")
+        sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
         sbatch_number: int = self.slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
@@ -163,7 +163,7 @@ class ExternalDataAPI(MetaAPI):
                 failed_sums: List[Path] = [
                     self.check_fastq_md5sum(file) for file in fastq_paths_to_add
                 ]
-                failed_files.append(*failed_sums)
+                failed_files.extend(failed_sums)
                 self.add_files_to_bundles(
                     fastq_paths=fastq_paths_to_add,
                     last_version=last_version,
