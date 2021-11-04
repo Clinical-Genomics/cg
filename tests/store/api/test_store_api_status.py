@@ -248,7 +248,7 @@ def test_set_case_action(analysis_store, case_id):
     assert action == None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case=case_id, action="analyze")
+    analysis_store.set_case_action(case_id=case_id, action="analyze")
     new_action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
 
     # Then the action should be set to analyze

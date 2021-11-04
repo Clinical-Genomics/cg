@@ -24,39 +24,36 @@ def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_nr: i
     assert str(log_dir).startswith("/another/path/123456")
 
 
-def test_create_source_path(
+def test_get_source_path(
     cust_sample_id: str,
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    path_with_format_token: Path,
     ticket_nr: int,
 ):
     """Test generating the source path"""
     # GIVEN a ticket number a customer and a customer sample id
 
     # WHEN the function is called and assigned
-    source_path = external_data_api.create_source_path(
-        raw_path=str(path_with_format_token),
+    source_path = external_data_api.get_source_path(
         ticket_id=ticket_nr,
         customer=customer_id,
         cust_sample_id=cust_sample_id,
     )
 
     # THEN the return should be
-    assert source_path == Path("/path/on/hasta/cust000/123456/child/")
+    assert source_path == Path("server.name.se:/path/cust000/on/caesar/123456/child/")
 
 
-def test_create_destination_path(
+def test_get_destination_path(
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    path_with_format_token: Path,
     sample_id: str,
 ):
     """Test generating the destination path"""
     # GIVEN a customer and an internal sample id
     # WHEN the function creates the destination path
-    destination_path = external_data_api.create_destination_path(
-        raw_path=str(path_with_format_token), customer=customer_id, lims_sample_id=sample_id
+    destination_path = external_data_api.get_destination_path(
+        customer=customer_id, lims_sample_id=sample_id
     )
 
     # THEN the destination path should contain the customer_id, ticket_id and sample_id
@@ -78,11 +75,11 @@ def test_download_sample(
     mocker.patch.object(ExternalDataAPI, "create_log_dir")
     ExternalDataAPI.create_log_dir.return_value = apps_dir
 
-    mocker.patch.object(ExternalDataAPI, "create_source_path")
-    ExternalDataAPI.create_source_path.return_value = apps_dir
+    mocker.patch.object(ExternalDataAPI, "get_source_path")
+    ExternalDataAPI.get_source_path.return_value = apps_dir
 
-    mocker.patch.object(ExternalDataAPI, "create_destination_path")
-    ExternalDataAPI.create_destination_path.return_value = apps_dir
+    mocker.patch.object(ExternalDataAPI, "get_destination_path")
+    ExternalDataAPI.get_destination_path.return_value = apps_dir
 
     # WHEN the samples are transferred
     sbatch_number = external_data_api.transfer_sample(

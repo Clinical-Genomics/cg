@@ -426,12 +426,6 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
     return fastq_dir / "dummy_run_R1_001.fastq.gz"
 
 
-@pytest.fixture(name="path_with_format_token")
-def fixture_path_with_format_token() -> Path:
-    """Return a path with a format token"""
-    return Path("/path/on/hasta/%s")
-
-
 # Orderform fixtures
 
 

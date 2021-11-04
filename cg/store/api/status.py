@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Literal
 
 from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
 from cg.store import models
@@ -216,18 +216,13 @@ class StatusHandler(BaseHandler):
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
-    def set_case_action(self, action: Optional[str], case: Union[str, List[str]]):
+    def set_case_action(self, action: Literal[CASE_ACTIONS], case_id: str) -> None:
         """Sets the action of provided cases to None or the given action"""
-        if isinstance(case, str):
-            case: List[str] = [case]
-        if action not in [None, *CASE_ACTIONS]:
-            return
-        for internal_id in case:
-            case_obj: models.Family = self.Family.query.filter(
-                models.Family.internal_id == internal_id
-            ).first()
-            case_obj.action = action
-            self.commit()
+        case_obj: models.Family = self.Family.query.filter(
+            models.Family.internal_id == case_id
+        ).first()
+        case_obj.action = action
+        self.commit()
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
