@@ -5,21 +5,36 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 import click
+from housekeeper.store import models as hk_models
+from tabulate import tabulate
+
+from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
-    rsync_past_run_dirs,
+    fluffy_past_run_dirs,
     mip_past_run_dirs,
     mutant_past_run_dirs,
-    fluffy_past_run_dirs,
+    rsync_past_run_dirs,
 )
+from cg.meta.clean.demultiplexed_flowcells import DemuxedFlowcell
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-from housekeeper.store import models as hk_models
 
+CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
+FLOWCELL_OUTPUT_HEADERS = [
+    "Flowcell name",
+    "Flowcell id",
+    "Correct name?",
+    "Exists in statusdb?",
+    "Status",
+    "Fastq files in HK?",
+    # "Fastq files on disk?",
+    "Check passed?",
+]
 
 
 @click.group()
@@ -149,3 +164,94 @@ def hk_past_files(context: CGConfig, case_id: str, tags: list, yes: bool, dry_ru
                 if file_path.exists():
                     file_path.unlink()
                 LOG.info("File removed")
+
+
+@clean.command("demux-runs-flowcells")
+@click.option("-f", "--failed-only", is_flag=True, help="Shows failed flowcells only")
+@click.option(
+    "-r",
+    "--remove-failed",
+    is_flag=True,
+    help="CAUTION: REMOVES FLOWCELL DIRS FROM DEMULTIPLEXED-RUNS!",
+)
+@click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    help="Runs this command without actually removing " "flowcells!",
+)
+@click.pass_obj
+def demux_runs_flowcells(context: CGConfig, failed_only: bool, remove_failed: bool, dry_run: bool):
+    status_db: Store = context.status_db
+    demux_api: DemultiplexingAPI = context.demultiplex_api
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    checked_flowcells = []
+    for flowcell_dir in demux_api.out_dir.iterdir():
+        flowcell_obj = DemuxedFlowcell(flowcell_dir, status_db, housekeeper_api)
+        flowcell_obj.check_existing_flowcell_directory()
+        checked_flowcells.append(flowcell_obj)
+    failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
+    if failed_only:
+        tabulate_row = [
+            [
+                flowcell.flowcell_name,
+                flowcell.flowcell_id,
+                flowcell.is_correctly_named,
+                flowcell.flowcell_exists_in_status_db,
+                flowcell.flowcell_status,
+                flowcell.fastq_files_exist_in_housekeeper,
+                # flowcell.fastq_files_exist_on_disk,
+                click.style(str(flowcell.passed_check), fg="red"),
+            ]
+            for flowcell in failed_flowcells
+        ]
+    else:
+        tabulate_row = [
+            [
+                flowcell.flowcell_name,
+                flowcell.flowcell_id,
+                flowcell.is_correctly_named,
+                flowcell.flowcell_exists_in_status_db,
+                flowcell.flowcell_status,
+                flowcell.fastq_files_exist_in_housekeeper,
+                # flowcell.fastq_files_exist_on_disk,
+                click.style(str(flowcell.passed_check), fg=CHECK_COLOR[flowcell.passed_check]),
+            ]
+            for flowcell in checked_flowcells
+        ]
+
+    click.echo(
+        tabulate(
+            tabulate_row,
+            headers=FLOWCELL_OUTPUT_HEADERS,
+            tablefmt="fancy_grid",
+            missingval="?",
+        ),
+    )
+    if remove_failed:
+        for flowcell in failed_flowcells:
+            LOG.warning("Removing %s from 'demultiplexed-runs'!", flowcell.flowcell_path)
+            if not dry_run:
+                flowcell.remove_from_demultiplexed_runs()
+
+
+@clean.command("statusdb-flowcells")
+@click.option("-f", "--failed-only", is_flag=True, help="Shows failed flowcells only")
+@click.option(
+    "-r",
+    "--remove-failed",
+    is_flag=True,
+    help="CAUTION: REMOVES FLOWCELL DIRS FROM DEMULTIPLEXED-RUNS!",
+)
+@click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    help="Runs this command without actually removing " "flowcells!",
+)
+@click.pass_obj
+def statusdb_flowcells(context: CGConfig, failed_only: bool, remove_failed: bool, dry_run: bool):
+    """check flowcell statuses in statusdb"""
+    status_db: Store = context.status_db
+    ondisk_flowcells = status_db.flowcells(status="ondisk")
+    click.echo(f"Found {ondisk_flowcells.count()} on disk flowcells!")
