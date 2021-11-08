@@ -171,7 +171,7 @@ def hk_bundle_files(
             if dry_run:
                 continue
 
-            file_path.unlink(missing_ok=True)
+            file_path.unlink()
             housekeeper_api.delete_file(version_file.id)
             housekeeper_api.commit()
             LOG.info(f"Removed file {file_path}. Dry run: {dry_run}")
