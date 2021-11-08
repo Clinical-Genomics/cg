@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Iterable, List, Optional
 
 import click
+from alchy import Query
+
 from cgmodels.cg.constants import Pipeline
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -130,14 +132,16 @@ def hk_bundle_files(
 
     date_threshold: datetime = datetime.now() - timedelta(days=days_old)
 
-    analyses = status_db.analyses_before_date(
+    analyses: Query = status_db.get_analyses_before_date(
         case_id=case_id, before=date_threshold, pipeline=pipeline
     )
     size_cleaned = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
-        bundle_name = analysis.family.internal_id
-        hk_bundle_version = housekeeper_api.version(bundle=bundle_name, date=analysis.started_at)
+        bundle_name: str = analysis.family.internal_id
+        hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
+            bundle=bundle_name, date=analysis.started_at
+        )
         if not hk_bundle_version:
             LOG.warning(
                 f"Version not found for "
@@ -157,7 +161,7 @@ def hk_bundle_files(
             bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
-            file_path = Path(version_file.full_path)
+            file_path: Path = Path(version_file.full_path)
             if not file_path.exists():
                 LOG.info(f"File {file_path} not on disk.")
                 continue
