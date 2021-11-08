@@ -42,6 +42,7 @@ setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi fil
 simple_image_download
 tabulate
 typing_extensions
+wtforms<3.0.0          # wtforms.compat missing in 3.0.0
 
 # apps
 genologics
