@@ -213,39 +213,46 @@ class ScoutAPI:
 
         """
         # This command can be run with `scout load delivery-report <CASE-ID> <REPORT-PATH>`
-        upload_delivery_report_command = ["load", "delivery-report", case_id, report_path]
+        upload_command = ["load", "delivery-report", case_id, report_path]
+
         if update:
-            upload_delivery_report_command.append("--update")
+            upload_command.append("--update")
 
         try:
             LOG.info("Uploading delivery report %s to case %s", report_path, case_id)
-            self.process.run_command(upload_delivery_report_command)
+            self.process.run_command(upload_command)
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
 
-    def upload_fusion_report(self, report_path: str, case_id: str, research: bool) -> None:
+    def upload_fusion_report(
+        self, case_id: str, report_path: str, research: bool, update: bool
+    ) -> None:
         """Load a fusion report into a case in the database
 
         Args:
             report_path (string):       Path to delivery report
             case_id     (string):       Case identifier
             research    (bool):         Research report
+            update      (bool):         If an existing report should be replaced
         Returns:
             Nothing
         """
 
         # This command can be run with
         # `scout load gene-fusion-report [-r] <case_id> <path/to/research_gene_fusion_report.pdf>`
-        upload_fusion_report_command = ["load", "gene-fusion-report"]
+        upload_command = ["load", "gene-fusion-report"]
 
         if research:
-            upload_fusion_report_command.append("-r")
+            upload_command.append("--research")
 
-        upload_fusion_report_command.extend([case_id, report_path])
+        if update:
+            upload_command.append("--update")
+
+        upload_command.extend([case_id, report_path])
 
         try:
             LOG.info("Uploading fusion report %s to case %s", report_path, case_id)
-            self.process.run_command(upload_fusion_report_command)
+            self.process.run_command(upload_command)
         except CalledProcessError:
             raise ScoutUploadError("Something went wrong when uploading fusion report")
 

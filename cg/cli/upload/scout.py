@@ -50,7 +50,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 @click.command(name="create-scout-load-config")
 @click.argument("case-id")
 @click.option("-p", "--print", "print_console", is_flag=True, help="Only print config")
-@click.option("-r", "--re-upload", is_flag=True, help="Delete existing load configs")
+@click.option("-r", "--re-upload", is_flag=True, help="Overwrite existing load configs")
 @click.pass_obj
 def create_scout_load_config(context: CGConfig, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
@@ -145,16 +145,25 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
 @click.command(name="rna-to-scout")
 @click.option("--dry-run", is_flag=True)
-@click.option("--research", is_flag=True)
+@click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
+@click.option(
+    "-u",
+    "--update-fusion-report",
+    is_flag=True,
+    help="re-upload existing fusion report",
+)
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str) -> int:
+def upload_rna_to_scout(
+    context, case_id: str, dry_run: bool, update_fusion_report: bool, research: bool
+) -> int:
     """Upload a RNA case's gene fusion report and junction splice files for all samples connect via subject_id
 
     Args:
-        dry_run     (bool):         Skip uploading
-        case_id     (string):       RNA case identifier
-        research    (bool):         Upload research report instead of clinical
+        case_id                 (string):       RNA case identifier
+        dry_run                 (bool):         Skip uploading
+        research                (bool):         Upload research report instead of clinical
+        update_fusion_report    (bool):         Overwrite existing fusion report
     Returns:
 
     """
@@ -162,7 +171,11 @@ def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str) ->
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
     result: int = context.invoke(
-        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
+        upload_rna_fusion_report_to_scout,
+        case_id=case_id,
+        dry_run=dry_run,
+        research=research,
+        update=update_fusion_report,
     )
     if result == 0:
         result = context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
@@ -171,11 +184,17 @@ def upload_rna_to_scout(context, dry_run: bool, research: bool, case_id: str) ->
 
 @click.command(name="rna-fusion-report-to-scout")
 @click.option("--dry-run", is_flag=True)
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing report",
+)
 @click.option("--research", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
-    context: CGConfig, dry_run: bool, research: bool, case_id: str
+    context: CGConfig, dry_run: bool, case_id: str, update: bool, research: bool
 ) -> int:
     """Upload fusion report file for a case to Scout.
     This can also be run as
@@ -186,6 +205,7 @@ def upload_rna_fusion_report_to_scout(
         dry_run     (bool):         Skip uploading
         case_id     (string):       RNA case identifier
         research    (bool):         Upload research report instead of clinical
+        update      (bool):         Overwrite existing report
     Returns:
 
     """
@@ -194,7 +214,7 @@ def upload_rna_fusion_report_to_scout(
     scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
     try:
         scout_upload_api.upload_fusion_report_to_scout(
-            dry_run=dry_run, research=research, case_id=case_id
+            dry_run=dry_run, research=research, case_id=case_id, update=update
         )
     except (CgDataError, ScoutUploadError) as error:
         LOG.error(error.message)
@@ -204,9 +224,15 @@ def upload_rna_fusion_report_to_scout(
 
 @click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
+@click.option(
+    "-r",
+    "--re-upload",
+    is_flag=True,
+    help="re-upload existing report",
+)
 @click.argument("case_id")
 @click.pass_obj
-def upload_rna_junctions_to_scout(context: CGConfig, dry_run: bool, case_id: str) -> int:
+def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
     """Upload RNA junctions splice files to Scout.
         This can also be run as
         `housekeeper get file -V --tag junction --tag bed <sample_id>`

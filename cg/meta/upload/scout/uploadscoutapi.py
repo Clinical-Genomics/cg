@@ -175,7 +175,7 @@ class UploadScoutAPI:
         return rna_coverage_bigwig
 
     def upload_fusion_report_to_scout(
-        self, dry_run: bool, case_id: str, research: bool = False
+        self, dry_run: bool, case_id: str, research: bool = False, update: bool = False
     ) -> None:
         """Upload fusion report file for a case to Scout.
         This can also be run as
@@ -186,6 +186,7 @@ class UploadScoutAPI:
             dry_run     (bool):         Skip uploading
             case_id     (string):       Case identifier
             research    (bool):         Upload research report instead of clinical
+            update      (bool):         Overwrite existing report
         Returns:
             Nothing
         """
@@ -213,8 +214,8 @@ class UploadScoutAPI:
 
             dna_cases: [models.Family] = self.status_db.families_by_subject_id(
                 customer_id=rna_sample.customer.internal_id,
-                subject_id=rna_sample.subject_id,
                 data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
+                subject_id=rna_sample.subject_id,
             )
 
             if not dna_cases:
@@ -235,9 +236,10 @@ class UploadScoutAPI:
                     continue
 
                 scout_api.upload_fusion_report(
+                    case_id=dna_case_id,
                     report_path=fusion_report.full_path,
                     research=research,
-                    case_id=dna_case_id,
+                    update=update,
                 )
                 LOG.info("Uploaded %s fusion report", report_type)
 
