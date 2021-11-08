@@ -184,13 +184,13 @@ def upload_rna_to_scout(
 
 @click.command(name="rna-fusion-report-to-scout")
 @click.option("--dry-run", is_flag=True)
-@click.option(
-    "-r",
-    "--re-upload",
-    is_flag=True,
-    help="re-upload existing report",
-)
 @click.option("--research", is_flag=True)
+@click.option(
+    "-u",
+    "--update",
+    is_flag=True,
+    help="Overwrite existing report",
+)
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
@@ -224,12 +224,6 @@ def upload_rna_fusion_report_to_scout(
 
 @click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
-@click.option(
-    "-r",
-    "--re-upload",
-    is_flag=True,
-    help="re-upload existing report",
-)
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
