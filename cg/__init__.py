@@ -1,2 +1,4 @@
+import pkg_resources
+
 __title__ = "cg"
-__version__ = "22.28.0"
+__version__ = "22.29.0"
