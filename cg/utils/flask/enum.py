@@ -1,7 +1,6 @@
 from enum import Enum, EnumMeta
 
 from flask_admin.form import Select2Field
-from wtforms import SelectMultipleField
 
 
 class EnumField:
@@ -36,14 +35,6 @@ class EnumField:
 
 
 class SelectEnumField(Select2Field, EnumField):
-    def __init__(
-        self, *args, enum_class: EnumMeta, label_function=EnumField.default_label_function, **kwargs
-    ):
-        kwargs = self.apply_choices(enum_class, label_function, kwargs)
-        super().__init__(*args, **kwargs)
-
-
-class SelectMultipleEnumField(SelectMultipleField, EnumField):
     def __init__(
         self, *args, enum_class: EnumMeta, label_function=EnumField.default_label_function, **kwargs
     ):
