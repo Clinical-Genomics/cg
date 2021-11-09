@@ -145,6 +145,7 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         "RMLP15S425",
     ]
     inactive_apptags = [
+        "RMLP05R800",
         "RMLP15S250",
         "RMLP15S275",
         "RMLP15S300",
@@ -152,12 +153,11 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         "RMLP15S350",
         "RMLP15S375",
         "RMLP15S400",
-        "RMLS05R150",
-        "RMLS05R200",
-        "RMLP05R800",
         "RMLP15S450",
         "RMLP15S475",
         "RMLP15S500",
+        "RMLS05R150",
+        "RMLS05R200",
     ]
 
     for app_tag in active_apptags:
