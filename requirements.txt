@@ -43,7 +43,7 @@ simple_image_download
 tabulate
 typing_extensions
 alive_progress
-wtforms<2.0.0
+wtforms<3.0.0
 
 # apps
 genologics
