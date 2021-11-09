@@ -2,7 +2,6 @@ from enum import Enum, EnumMeta
 
 from flask_admin.form import Select2Field
 from wtforms import SelectMultipleField
-from wtforms.compat import text_type
 
 
 class EnumField:
@@ -33,7 +32,7 @@ class EnumField:
     def coerce(data):
         if isinstance(data, Enum):
             return data.value
-        return text_type(data)
+        return str(data)
 
 
 class SelectEnumField(Select2Field, EnumField):
