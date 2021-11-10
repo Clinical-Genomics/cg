@@ -1,43 +1,22 @@
-import pytest
-
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Generator
 
-from tests.cli.demultiplex.conftest import (
-    fixture_bcl2fastq_demux_results,
-    fixture_demultiplex_configs,
-    fixture_demultiplex_context,
-    fixture_demultiplex_fixtures,
-    fixture_demultiplexed_flowcell,
-    fixture_demultiplexed_flowcell_working_directory,
-    fixture_demultiplexed_flowcells_working_directory,
-    fixture_demultiplexing_api,
-    fixture_demux_results_not_finished_dir,
-    fixture_demux_run_dir,
-    fixture_demultiplexed_runs,
-    fixture_flowcell_full_name,
-    fixture_flowcell_object,
-    fixture_flowcell_full_name,
-    fixture_flowcell_object,
-    fixture_flowcell_runs_working_directory,
-    fixture_sbatch_process,
-)
-from tests.apps.cgstats.conftest import fixture_stats_api, fixture_populated_stats_api
-from tests.store_helpers import StoreHelpers
+import pytest
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.demultiplex.wipe_demultiplex_api import WipeDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
 from cg.store.models import Sample
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def fixture_tmp_demulitplexing_dir(
     demultiplexed_flowcells_working_directory: Path, flowcell_full_name: str
-) -> Path:
+) -> Generator[Path]:
     """Return a tmp directory in demultiplexed-runs"""
     tmp_demulitplexing_dir: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
@@ -45,7 +24,7 @@ def fixture_tmp_demulitplexing_dir(
 
 
 @pytest.fixture(name="tmp_fastq_paths")
-def fixture_temp_fastq_paths(tmp_path: Path) -> List[Path]:
+def fixture_temp_fastq_paths(tmp_path: Path) -> Generator[Path]:
     """Return a list of temporary dummy fastq paths"""
     fastq_1 = tmp_path / "fastq_1.fastq.gz"
     fastq_2 = tmp_path / "fastq_2.fastq.gz"
@@ -54,11 +33,11 @@ def fixture_temp_fastq_paths(tmp_path: Path) -> List[Path]:
     for fastq in fastqs:
         with fastq.open("w+") as fh:
             fh.write("content")
-    yield fastqs
+    return fastqs
 
 
 @pytest.fixture(name="tmp_sample_sheet_path")
-def fixture_tmp_samplesheet_path(tmp_path: Path, flow_cell_name: str) -> Path:
+def fixture_tmp_samplesheet_path(tmp_path: Path, flow_cell_name: str) -> Generator[Path]:
     tmp_sample_sheet_path = tmp_path / "SampleSheet.csv"
 
     with tmp_sample_sheet_path.open("w+") as fh:
@@ -129,7 +108,7 @@ def fixture_sample_level_housekeeper_api(
     sample_id: str,
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
-) -> HousekeeperAPI:
+) -> Generator[HousekeeperAPI]:
     """Yield a mocked housekeeper API, containing a sample bundle with related fastq files"""
     sample_level_housekeeper_api = real_housekeeper_api
     bundle_data = {
@@ -153,7 +132,7 @@ def fixture_flow_cell_name_housekeeper_api(
     sample_id: str,
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
-) -> HousekeeperAPI:
+) -> Generator[HousekeeperAPI]:
     """Yield a mocked housekeeper API, containing a sample bundle with related fastq files"""
     flow_cell_housekeeper_api = real_housekeeper_api
     bundle_data = {
@@ -189,7 +168,7 @@ def fixture_populated_wipe_demux_context(
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     populated_flow_cell_store: Store,
     populated_stats_api: StatsAPI,
-) -> CGConfig:
+) -> Generator[CGConfig]:
     """Yield a populated context to remove flowcells from using the WipeDemuxAPI"""
     populated_wipe_demux_context = cg_context
     populated_wipe_demux_context.cg_stats_api_ = populated_stats_api
@@ -201,7 +180,7 @@ def fixture_populated_wipe_demux_context(
 @pytest.fixture(scope="function", name="active_wipe_demux_context")
 def fixture_active_wipe_demux_context(
     cg_context: CGConfig, active_flow_cell_store: Store
-) -> CGConfig:
+) -> Generator[CGConfig]:
     """Yield a populated context to remove flowcells from using the WipeDemuxAPI"""
     active_wipe_demux_context = cg_context
     active_wipe_demux_context.status_db_ = active_flow_cell_store
@@ -214,7 +193,7 @@ def fixture_populated_wipe_demultiplex_api(
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
     stats_api: StatsAPI,
-) -> WipeDemuxAPI:
+) -> Generator[WipeDemuxAPI]:
     """Yield an initialized populated WipeDemuxAPI"""
     populated_wipe_demultiplex_api: WipeDemuxAPI = WipeDemuxAPI(
         config=populated_wipe_demux_context,
@@ -230,7 +209,7 @@ def fixture_active_wipe_demultiplex_api(
     active_wipe_demux_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
-) -> WipeDemuxAPI:
+) -> Generator[WipeDemuxAPI]:
     """Yield an instantiated WipeDemuxAPI with active samples on a flowcell"""
     active_wipe_demultiplex_api = WipeDemuxAPI(
         config=active_wipe_demux_context,
@@ -246,7 +225,7 @@ def fixture_wipe_demultiplex_api(
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
     stats_api: StatsAPI,
-) -> WipeDemuxAPI:
+) -> Generator[WipeDemuxAPI]:
     """Yield an initialized WipeDemuxAPI"""
     cg_context.cg_stats_api_ = stats_api
     wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(

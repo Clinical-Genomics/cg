@@ -77,7 +77,6 @@ class WipeDemuxAPI:
         """Wipe the presence of a flowcell, based on the flowcell id as a tag, in Housekeeper."""
         if self.housekeeper_api.check_for_files(tags=[self.flow_cell_name]):
             self.housekeeper_api.delete_files(dry_run=self.dry_run, tags=[self.flow_cell_name])
-            return
         else:
             log.info(f"Housekeeper: No files found with tag: {self.flow_cell_name}")
 
