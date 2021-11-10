@@ -174,6 +174,7 @@ def test_check_for_files_no_files(populated_housekeeper_api, mocker):
     # THEN there should not be any files
     assert existing_case_files is False
 
+
 def test_check_bundle_files(
     case_id: str,
     a_date,
@@ -196,4 +197,3 @@ def test_check_bundle_files(
 
     # Then only the new file should be returned
     assert files_to_add == [fastq_file]
-
