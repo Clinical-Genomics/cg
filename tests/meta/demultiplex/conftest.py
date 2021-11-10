@@ -16,7 +16,7 @@ from tests.store_helpers import StoreHelpers
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def fixture_tmp_demulitplexing_dir(
     demultiplexed_flowcells_working_directory: Path, flowcell_full_name: str
-) -> Generator[Path]:
+) -> Generator[Path, None, None]:
     """Return a tmp directory in demultiplexed-runs"""
     tmp_demulitplexing_dir: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
@@ -24,7 +24,7 @@ def fixture_tmp_demulitplexing_dir(
 
 
 @pytest.fixture(name="tmp_fastq_paths")
-def fixture_temp_fastq_paths(tmp_path: Path) -> Generator[Path]:
+def fixture_temp_fastq_paths(tmp_path: Path) -> List[Path]:
     """Return a list of temporary dummy fastq paths"""
     fastq_1 = tmp_path / "fastq_1.fastq.gz"
     fastq_2 = tmp_path / "fastq_2.fastq.gz"
@@ -37,7 +37,9 @@ def fixture_temp_fastq_paths(tmp_path: Path) -> Generator[Path]:
 
 
 @pytest.fixture(name="tmp_sample_sheet_path")
-def fixture_tmp_samplesheet_path(tmp_path: Path, flow_cell_name: str) -> Generator[Path]:
+def fixture_tmp_samplesheet_path(
+    tmp_path: Path, flow_cell_name: str
+) -> Generator[Path, None, None]:
     tmp_sample_sheet_path = tmp_path / "SampleSheet.csv"
 
     with tmp_sample_sheet_path.open("w+") as fh:
@@ -108,7 +110,7 @@ def fixture_sample_level_housekeeper_api(
     sample_id: str,
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
-) -> Generator[HousekeeperAPI]:
+) -> Generator[HousekeeperAPI, None, None]:
     """Yield a mocked housekeeper API, containing a sample bundle with related fastq files"""
     sample_level_housekeeper_api = real_housekeeper_api
     bundle_data = {
