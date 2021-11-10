@@ -1,4 +1,5 @@
 """Test how the api handles versions"""
+import datetime
 
 
 def test_new_version(a_date, housekeeper_api):
@@ -69,3 +70,21 @@ def test_get_last_version(populated_housekeeper_api, later_date, case_id):
 
     # THEN assert that the later_date version is fetched
     assert fetched_version.created_at == later_date
+
+
+def test_get_create_version(populated_housekeeper_api, case_id, bundle_data):
+
+    # Given a populated housekeeper_api with a bundle
+    version_obj = populated_housekeeper_api.bundle(case_id).versions[0]
+
+    # When the case_id is given the function should return its latest version
+    latest_version = populated_housekeeper_api.get_create_version(case_id)
+
+    # Then assert that the versions match
+    assert version_obj == latest_version
+
+    # When a case_id not present in hk is given.
+    latest_version = populated_housekeeper_api.get_create_version("new_case")
+
+    # Then assert the new bundle is created the version is new.
+    assert latest_version.bundle.name == "new_case"

@@ -244,7 +244,7 @@ class StoreHelpers:
         """Utility function to add a sample to use in tests"""
         customer_name = customer_name or "cust000"
         sample_name = sample_id or "sample_test"
-        customer = self.ensure_customer(store, customer_name)
+        customer = self.ensure_customer(store)
         application_version = self.ensure_application_version(
             store,
             application_tag=application_tag,

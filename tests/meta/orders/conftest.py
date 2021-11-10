@@ -1,5 +1,3 @@
-import json
-
 import pytest
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
@@ -9,7 +7,6 @@ from cg.meta.orders.status import StatusHandler
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
-from pathlib import Path
 
 
 @pytest.fixture
@@ -105,18 +102,3 @@ def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
 @pytest.fixture(name="ticket_handler")
 def fixture_ticket_handler(store: Store, osticket: MockOsTicket) -> TicketHandler:
     return TicketHandler(status_db=store, osticket_api=osticket)
-
-
-@pytest.fixture(name="external_data_directory")
-def external_data_directory(tmpdir_factory) -> Path:
-    """Fixture that returns a customer folder with fastq.gz files in sample-directories."""
-    cust_folder = tmpdir_factory.mktemp("cust000")
-    Path(cust_folder, "sample1").mkdir(exist_ok=True, parents=True)
-    Path(cust_folder, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(cust_folder, "sample1", "sample1_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample1", "sample1_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample1", "sample1_fastq_2.fastq.gz.md5").touch(exist_ok=True)
-    Path(cust_folder, "sample2", "sample2_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample2", "sample2_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, "sample2", "sample1_fastq_2.fastq.gz.md5").touch(exist_ok=True)
-    return Path(cust_folder)
