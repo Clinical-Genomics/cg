@@ -61,7 +61,6 @@ class OrderSample(BaseModel):
     family_name: Optional[str]
     father: Optional[str]
     formalin_fixation_time: Optional[int]
-    from_sample: Optional[str]
     index: str
     index_number: Optional[str]
     index_sequence: Optional[str]
@@ -71,6 +70,7 @@ class OrderSample(BaseModel):
     organism: Optional[str]
     organism_other: Optional[str]
     panels: Optional[List[str]]
+    phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
     pool: Optional[str]
     post_formalin_fixation_time: Optional[int]
@@ -83,6 +83,7 @@ class OrderSample(BaseModel):
     sex: SexEnum = SexEnum.other
     source: Optional[str]
     status: StatusEnum = StatusEnum.unknown
+    subject_id: Optional[str]
     synopsis: Optional[str]
     time_point: Optional[int]
     tissue_block_size: Optional[str]

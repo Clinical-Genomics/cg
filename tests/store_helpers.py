@@ -226,17 +226,18 @@ class StoreHelpers:
     def add_sample(
         self,
         store: Store,
-        sample_id: str = None,
-        internal_id: str = None,
-        gender: str = "female",
-        is_tumour: bool = False,
-        is_rna: bool = False,
-        is_external: bool = False,
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
+        control: str = "",
         customer_name: str = None,
-        reads: int = None,
+        gender: str = "female",
+        internal_id: str = None,
+        is_external: bool = False,
+        is_rna: bool = False,
+        is_tumour: bool = False,
         loqusdb_id: str = None,
+        reads: int = None,
+        sample_id: str = None,
         ticket: int = None,
         **kwargs,
     ) -> models.Sample:
@@ -253,6 +254,7 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
+            control=control,
             name=sample_name,
             sex=gender,
             tumour=is_tumour,
@@ -561,6 +563,45 @@ class StoreHelpers:
         if not case_obj:
             LOG.warning("Could not find case")
             return None
-        case_obj._synopsis = synopsis
-        store.add_commit(case_obj)
+        case_obj.synopsis = synopsis
+        store.commit()
         return case_obj
+
+    @staticmethod
+    def add_phenotype_groups_to_sample(
+        store: Store, sample_id: str, phenotype_groups: [str] = ["a phenotype group"]
+    ) -> Optional[models.Sample]:
+        """Function for adding a phenotype group to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.phenotype_groups = phenotype_groups
+        store.commit()
+        return sample_obj
+
+    @staticmethod
+    def add_phenotype_terms_to_sample(
+        store: Store, sample_id: str, phenotype_terms: [str] = ["a phenotype term"]
+    ) -> Optional[models.Sample]:
+        """Function for adding a phenotype term to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.phenotype_terms = phenotype_terms
+        store.commit()
+        return sample_obj
+
+    @staticmethod
+    def add_subject_id_to_sample(
+        store: Store, sample_id: str, subject_id: str = "a subject_id"
+    ) -> Optional[models.Sample]:
+        """Function for adding a subject_id to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.subject_id = subject_id
+        store.commit()
+        return sample_obj
