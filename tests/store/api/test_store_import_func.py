@@ -323,8 +323,8 @@ def test_sync_rml_orderform_inactivate(rml_store: Store, rml_orderform: str, hel
         activate=activate,
         inactivate=inactivate,
         sheet_name="Drop down list",
-        tag_column=7,
-        tag_row=0,
+        tag_column=0,
+        tag_row=1,
     )
 
     # THEN the number of active should be less and the number of inactive more than before

@@ -1,10 +1,14 @@
 """cg module for cleaning databases and files"""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Iterable, List, Optional
 
 import click
+from alchy import Query
+
+from cgmodels.cg.constants import Pipeline
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -106,46 +110,70 @@ def scout_finished_cases(
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
-@clean.command("hk-past-files")
-@click.option("-c", "--case-id", type=str)
-@click.option("-t", "--tags", multiple=True)
-@click.option("-y", "--yes", is_flag=True, help="skip checks")
+@clean.command("hk-bundle-files")
+@click.option("-c", "--case_id", type=str, required=False)
+@click.option("-p", "--pipeline", type=Pipeline, required=False)
+@click.option("-t", "--tags", multiple=True, required=True)
+@click.option("-o", "--days-old", type=int, default=30)
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_obj
-def hk_past_files(context: CGConfig, case_id: str, tags: list, yes: bool, dry_run: bool):
-    """Remove files found in older housekeeper bundles"""
+def hk_bundle_files(
+    context: CGConfig,
+    case_id: Optional[str],
+    tags: list,
+    days_old: Optional[int],
+    pipeline: Optional[Pipeline],
+    dry_run: bool,
+):
+    """Remove files found in housekeeper bundles"""
 
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
-    cases: Iterable[models.Family]
-    if case_id:
-        cases: List[models.Family] = [status_db.family(case_id)]
-    else:
-        cases: Iterable[models.Family] = status_db.families()
-    for case in cases:
-        case_id = case.internal_id
-        last_version: Optional[hk_models.Version] = housekeeper_api.last_version(bundle=case_id)
-        if not last_version:
-            continue
-        last_version_file_paths: List[Path] = [
-            Path(hk_file.full_path)
-            for hk_file in housekeeper_api.get_files(
-                bundle=case_id, tags=None, version=last_version.id
+    date_threshold: datetime = datetime.now() - timedelta(days=days_old)
+
+    analyses: Query = status_db.get_analyses_before_date(
+        case_id=case_id, before=date_threshold, pipeline=pipeline
+    )
+    size_cleaned = 0
+    for analysis in analyses:
+        LOG.info(f"Cleaning analysis {analysis}")
+        bundle_name: str = analysis.family.internal_id
+        hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
+            bundle=bundle_name, date=analysis.started_at
+        )
+        if not hk_bundle_version:
+            LOG.warning(
+                f"Version not found for "
+                f"bundle:{bundle_name}; "
+                f"pipeline: {analysis.pipeline}; "
+                f"date {analysis.started_at}"
             )
-        ]
-        LOG.info("Searching %s bundle for outdated files", case_id)
-        hk_files: List[hk_models.File] = []
-        for tag in tags:
-            hk_files.extend(housekeeper_api.get_files(bundle=case_id, tags=[tag]))
-        for hk_file in hk_files:
-            file_path = Path(hk_file.full_path)
-            if file_path in last_version_file_paths:
+            continue
+
+        LOG.info(
+            f"Version found for "
+            f"bundle:{bundle_name}; "
+            f"pipeline: {analysis.pipeline}; "
+            f"date {analysis.started_at}"
+        )
+        version_files: List[hk_models.File] = housekeeper_api.get_files(
+            bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
+        ).all()
+        for version_file in version_files:
+            file_path: Path = Path(version_file.full_path)
+            if not file_path.exists():
+                LOG.info(f"File {file_path} not on disk.")
                 continue
-            LOG.info("Will remove %s", file_path)
-            if (yes or click.confirm("Do you want to remove this file?")) and not dry_run:
-                hk_file.delete()
-                housekeeper_api.commit()
-                if file_path.exists():
-                    file_path.unlink()
-                LOG.info("File removed")
+            LOG.info(f"File {file_path} found on disk.")
+            file_size = file_path.stat().st_size
+            size_cleaned += file_size
+            if dry_run:
+                continue
+
+            file_path.unlink()
+            housekeeper_api.delete_file(version_file.id)
+            housekeeper_api.commit()
+            LOG.info(f"Removed file {file_path}. Dry run: {dry_run}")
+
+    LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
