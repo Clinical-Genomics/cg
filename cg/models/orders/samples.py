@@ -5,6 +5,7 @@ from pydantic import BaseModel, constr, NonNegativeInt, validator
 from pydantic.typing import Optional
 
 from cg.constants import DataDelivery
+from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     CaptureKitEnum,
     ContainerEnum,
@@ -16,7 +17,7 @@ from cg.models.orders.sample_base import (
 from cg.store import models
 
 
-class BaseSample(BaseModel):
+class OrderInSample(BaseModel):
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
     data_analysis: Pipeline
@@ -27,11 +28,20 @@ class BaseSample(BaseModel):
         max_length=models.Sample.name.property.columns[0].type.length,
     )
     priority: PriorityEnum = PriorityEnum.standard
+    project: OrderType
     require_qcok: bool = False
     volume: str
 
+    def __init__(self, project: OrderType):
+        super().__init__()
+        self.project = project
+        for cls in OrderInSample.__subclasses__():
+            if cls.is_sample_for(project):
+                return cls(project)
+        raise ValueError
 
-class Of1508Sample(BaseSample):
+
+class Of1508Sample(OrderInSample):
     # Orderform 1508
     # Order portal specific
     internal_id: Optional[
@@ -115,7 +125,7 @@ class MipRnaSample(Of1508Sample):
     time_point: Optional[NonNegativeInt]
 
 
-class FastqSample(BaseSample):
+class FastqSample(OrderInSample):
     # Orderform 1508
     # "required"
     container: Optional[ContainerEnum]
@@ -130,7 +140,7 @@ class FastqSample(BaseSample):
     quantity: Optional[int]
 
 
-class RmlSample(BaseSample):
+class RmlSample(OrderInSample):
     # 1604 Orderform Ready made libraries (RML)
     # Order portal specific
     # "This information is required"
@@ -148,7 +158,7 @@ class RmlSample(BaseSample):
     control: Optional[str]
 
 
-class MetagenomeSample(BaseSample):
+class MetagenomeSample(OrderInSample):
     # 1605 Orderform Microbial Metagenomes- 16S
     # "This information is required"
     container: Optional[ContainerEnum]
@@ -163,7 +173,7 @@ class MetagenomeSample(BaseSample):
     extraction_method: Optional[str]
 
 
-class MicrobialSample(BaseSample):
+class MicrobialSample(OrderInSample):
     # 1603 Orderform Microbial WGS
     # "These fields are required"
     organism: str

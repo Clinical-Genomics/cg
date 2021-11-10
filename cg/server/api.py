@@ -86,7 +86,7 @@ def submit_order(order_type):
     error_message = None
     try:
         project: OrderType = OrderType(order_type)
-        post_data: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
+        post_data: OrderIn = OrderIn(project=project).parse_obj(request.get_json())
         LOG.info("processing '%s' order: %s", order_type, post_data)
 
         result = api.submit(

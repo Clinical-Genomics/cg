@@ -21,7 +21,7 @@ from cg.store import Store, models
 from .lims import process_lims
 from .status import StatusHandler
 from .ticket_handler import TicketHandler
-from ...models.orders.samples import MipDnaSample, BaseSample, Of1508Sample, MicrobialSample
+from ...models.orders.samples import MipDnaSample, OrderInSample, Of1508Sample, MicrobialSample
 
 LOG = logging.getLogger(__name__)
 
@@ -260,7 +260,7 @@ class OrdersAPI(StatusHandler):
             sample.verified_organism = is_verified
 
     def _validate_samples_available_to_customer(
-        self, project: OrderType, samples: List[BaseSample], customer_id: str
+        self, project: OrderType, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the customer have access to all samples"""
         if project not in (
@@ -282,7 +282,7 @@ class OrdersAPI(StatusHandler):
                 raise OrderError(f"Sample not available: {sample.name}")
 
     def _validate_case_names_are_unique(
-        self, project: OrderType, samples: List[BaseSample], customer_id: str
+        self, project: OrderType, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
         customer_obj: models.Customer = self.status.customer(customer_id)
