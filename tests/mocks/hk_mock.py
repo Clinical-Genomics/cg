@@ -5,7 +5,10 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Set, Iterable
+
+from typing import Iterable, List, Optional, Set
+
+from cg.store import models
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -134,7 +137,7 @@ class MockBundle:
         self.id = kwargs.get("id", 1)
         self.name = kwargs.get("name", "yellowhog")
         self.created_at = kwargs.get("created_at", datetime.datetime.now())
-        self.versions = kwargs.get("versions", [MockVersion(bundle=self)])
+        self.versions = kwargs.get("versions", [])
 
     def __repr__(self):
         return f"MockBundle:id={self.id}, name={self.name}, versions={self.versions}"
@@ -171,6 +174,14 @@ class MockHousekeeperAPI:
         if tags.intersection(self._missing_tags):
             return None
         return self._files[0]
+
+    def find_file_in_latest_version(self, case_id, tags):
+
+        for file_obj in self._files:
+            tag: models.Tag
+            file_tags = {tag.name for tag in file_obj.tags}
+            if tags.issubset(file_tags):
+                return file_obj
 
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""
@@ -233,8 +244,7 @@ class MockHousekeeperAPI:
                 self._file_added = True
                 version_obj.files.append(new_file)
         version_obj.bundle_obj = bundle_obj
-        bundle_obj.versions = version_obj
-
+        bundle_obj.versions.append(version_obj)
         return bundle_obj, version_obj
 
     def _build_tags(self, tag_names: List[str]) -> dict:
@@ -279,6 +289,22 @@ class MockHousekeeperAPI:
     def version(self, *args, **kwargs):
         """Fetch a version"""
         return self._version_obj
+
+    def get_create_version(self, bundle: str):
+        """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version"""
+        last_version = self.last_version(bundle=bundle)
+        if not last_version:
+            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
+            bundle_result = self.add_bundle(
+                bundle_data={
+                    "name": bundle,
+                    "created": datetime.datetime.now(),
+                    "expires": None,
+                    "files": [],
+                }
+            )
+            last_version = bundle_result[1]
+        return last_version
 
     def files(self, *args, **kwargs):
         """
@@ -368,6 +394,10 @@ class MockHousekeeperAPI:
         """Gets the latest version of a bundle"""
         if self._last_version is False:
             return None
+        if len(args) > 0:
+            bundle = self.bundle(args[0])
+            if bundle:
+                return bundle.versions[-1]
         return self._version_obj
 
     def get_root_dir(self):
@@ -412,7 +442,21 @@ class MockHousekeeperAPI:
         if not self.file_exists(path):
             self._files.append(new_file)
         self._file_added = True
+        version_obj.files.append(new_file)
         return new_file
+
+    def check_bundle_files(
+        self, bundle_name: str, file_paths: List[Path], last_version, tags: Optional[list] = None
+    ) -> List[Path]:
+        """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
+        for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
+            if Path(file.path) in file_paths:
+                file_paths.remove(Path(file.path))
+                LOG.info(
+                    "Path %s is already linked to bundle %s in housekeeper"
+                    % (file.path, bundle_name)
+                )
+        return file_paths
 
     @staticmethod
     def checksum(path):

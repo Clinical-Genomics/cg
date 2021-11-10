@@ -14,20 +14,14 @@ class CgError(Exception):
         self.message = message
 
 
-class FlowcellError(CgError):
-    """Raised when there is a problem with demultiplexing a flowcell"""
+class AccessionNumerMissingError(CgError):
+    """Raised when accession numers are not found in a gisaid cli log"""
 
 
-class WipeDemuxError(CgError):
-    """Raised when there is an issue with wiping a flowcell before start"""
-
-
-class DecompressionNeededError(CgError):
-    """Raised when decompression still needed to start analysis"""
-
-
-class FlowcellsNeededError(CgError):
-    """Raised when fetching flowcells still needed to start analysis"""
+class AnalysisDuplicationError(CgError):
+    """
+    Error related to trying to create analysis object that already exists in status-db.
+    """
 
 
 class AnalysisNotFinishedError(CgError):
@@ -38,63 +32,9 @@ class AnalysisNotFinishedError(CgError):
     """
 
 
-class AnalysisDuplicationError(CgError):
-    """
-    Error related to trying to create analysis object that already exists in status-db.
-    """
-
-
 class AnalysisUploadError(CgError):
     """
     Error related to trying to upload analysis data.
-    """
-
-
-class CgDataError(CgError):
-    """
-    Error related to missing/incomplete data in Status DB
-    """
-
-
-class LimsDataError(CgError):
-    """
-    Error related to missing/incomplete data in LIMS
-    """
-
-
-class DuplicateRecordError(CgError):
-    """
-    Exception related to duplicate records in LoqusDB.
-    """
-
-
-class DuplicateSampleError(CgError):
-    """
-    Exception raised when sample duplicate is found in loqusdb
-    """
-
-
-class CaseNotFoundError(CgError):
-    """
-    Exception raised when a case is not found in loqusdb
-    """
-
-
-class OrderFormError(CgError):
-    """
-    Exception related to the order form
-    """
-
-
-class OrderError(CgError):
-    """
-    Exception related to orders
-    """
-
-
-class TicketCreationError(CgError):
-    """
-    Exception related to ticket creation
     """
 
 
@@ -110,10 +50,20 @@ class BundleAlreadyAddedError(CgError):
     """
 
 
-class PipelineUnknownError(CgError):
+class CaseNotFoundError(CgError):
     """
-    Exception raised when a sample in a case has no data analysis type
+    Exception raised when a case is not found in loqusdb
     """
+
+
+class CgDataError(CgError):
+    """
+    Error related to missing/incomplete data in Status DB
+    """
+
+
+class DecompressionNeededError(CgError):
+    """Raised when decompression still needed to start analysis"""
 
 
 class DeliveryReportError(CgError):
@@ -122,23 +72,42 @@ class DeliveryReportError(CgError):
     """
 
 
-class ValidationError(CgError):
+class DuplicateRecordError(CgError):
     """
-    Exception related to delivery report validation
-    """
-
-
-class MandatoryFilesMissing(CgError):
-    """
-    Exception raised when mandatory files are missing from the deliverables when storing an
-    analysis in Housekeeper.
+    Exception related to duplicate records in LoqusDB.
     """
 
 
-class HousekeeperVersionMissingError(CgError):
+class DuplicateSampleError(CgError):
     """
-    Exception raised when family version is missing in Housekeeper.
+    Exception raised when sample duplicate is found in loqusdb
     """
+
+
+class EmailNotSentError(CgError):
+    """Raised when email not sent"""
+
+
+class FamilyLinkMissingError(CgError):
+    """Raised when faimly link missing for a sample"""
+
+
+class FastaSequenceMissingError(CgError):
+    """
+    Exception raised when expected sequence in fasta file is missing.
+    """
+
+
+class FlowcellError(CgError):
+    """Raised when there is a problem with demultiplexing a flowcell"""
+
+
+class FlowcellsNeededError(CgError):
+    """Raised when fetching flowcells still needed to start analysis"""
+
+
+class GisaidUploadFailedError(CgError):
+    """Raised when gisaid upload fails"""
 
 
 class HousekeeperFileMissingError(CgError):
@@ -151,9 +120,9 @@ class HousekeeperFileMissingError(CgError):
         self.errors = errors
 
 
-class FastaSequenceMissingError(CgError):
+class HousekeeperVersionMissingError(CgError):
     """
-    Exception raised when expected sequence in fasta file is missing.
+    Exception raised when family version is missing in Housekeeper.
     """
 
 
@@ -163,15 +132,38 @@ class InvalidFastaError(CgError):
     """
 
 
-class StoreError(CgError):
+class LimsDataError(CgError):
     """
-    Exception related to storing an analysis
+    Error related to missing/incomplete data in LIMS
+    """
+
+
+class MandatoryFilesMissing(CgError):
+    """
+    Exception raised when mandatory files are missing from the deliverables when storing an
+    analysis in Housekeeper.
     """
 
 
 class MipStartError(CgError):
     """
     Exception raised when MIP fails to start a run
+    """
+
+
+class MultipleFamilyLinksError(CgError):
+    """Raised when only one family was expected but more than one was found"""
+
+
+class OrderError(CgError):
+    """
+    Exception related to orders
+    """
+
+
+class OrderFormError(CgError):
+    """
+    Exception related to the order form
     """
 
 
@@ -185,6 +177,32 @@ class PedigreeConfigError(CgError):
         self.errors = errors
 
 
+class PipelineUnknownError(CgError):
+    """
+    Exception raised when a sample in a case has no data analysis type
+    """
+
+
+class ScoutUploadError(CgError):
+    """Raised when uploading to Scout fails"""
+
+
+class StatinaAPIHTTPError(CgError):
+    """Raised when Statina REST API response code is not 200"""
+
+
+class StoreError(CgError):
+    """
+    Exception related to storing an analysis
+    """
+
+
+class TicketCreationError(CgError):
+    """
+    Exception related to ticket creation
+    """
+
+
 class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
 
@@ -193,25 +211,11 @@ class TrailblazerMissingAnalysisError(CgError):
     """Raised when Trailblazer REST API response code is not 200"""
 
 
-class MultipleFamilyLinksError(CgError):
-    """Raised when only one family was expected but more than one was found"""
+class ValidationError(CgError):
+    """
+    Exception related to delivery report validation
+    """
 
-
-class FamilyLinkMissingError(CgError):
-    """Raised when faimly link missing for a sample"""
-
-
-class AccessionNumerMissingError(CgError):
-    """Raised when accession numers are not found in a gisaid cli log"""
-
-
-class EmailNotSentError(CgError):
-    """Raised when email not sent"""
-
-
-class GisaidUploadFailedError(CgError):
-    """Raised when gisaid upload fails"""
-
-
-class StatinaAPIHTTPError(CgError):
-    """Raised when Statina REST API response code is not 200"""
+    
+class WipeDemuxError(CgError):
+    """Raised when there is an issue with wiping a flowcell before start"""

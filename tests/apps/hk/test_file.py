@@ -1,8 +1,9 @@
 """Test how the api handles files"""
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import HK_FASTQ_TAGS
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
@@ -172,3 +173,27 @@ def test_check_for_files_no_files(populated_housekeeper_api, mocker):
 
     # THEN there should not be any files
     assert existing_case_files is False
+
+def test_check_bundle_files(
+    case_id: str,
+    a_date,
+    populated_housekeeper_api,
+    hk_version_obj,
+    fastq_file: Path,
+    sample_id: str,
+    bed_file: Path,
+):
+    """Test to see if the function correctly identifies a file that is present and returns a lis without it"""
+    # GIVEN a housekeeper version with a file
+    version = populated_housekeeper_api.version(bundle=case_id, date=a_date)
+
+    # WHEN when attempting to add two files, one existing and one new
+    files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
+        file_paths=[Path(bed_file), fastq_file],
+        bundle_name=case_id,
+        last_version=version,
+    )
+
+    # Then only the new file should be returned
+    assert files_to_add == [fastq_file]
+
