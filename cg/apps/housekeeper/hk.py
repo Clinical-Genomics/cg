@@ -100,8 +100,8 @@ class HousekeeperAPI:
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version"""
-        files: Iterable[File] = self.files(bundle=bundle, tags=tags, version=version)
-        if not files:
+        files: Optional[Iterable[File]] = self.files(bundle=bundle, tags=tags, version=version)
+        if not any(files):
             return False
         else:
             return True

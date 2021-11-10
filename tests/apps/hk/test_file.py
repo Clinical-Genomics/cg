@@ -1,5 +1,6 @@
 """Test how the api handles files"""
 from pathlib import Path
+from typing import Iterable
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -162,7 +163,7 @@ def test_check_for_files_with_files(populated_housekeeper_api, case_id, tags):
 def test_check_for_files_no_files(populated_housekeeper_api, mocker):
 
     # GIVEN a housekeeper without any files
-    populated_housekeeper_api.files = mocker.MagicMock(return_value=None)
+    populated_housekeeper_api.files = mocker.MagicMock(return_value=[])
 
     # WHEN checking for files on a bundle in housekeeper
     existing_case_files: bool = populated_housekeeper_api.check_for_files(

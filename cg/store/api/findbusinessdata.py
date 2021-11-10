@@ -17,8 +17,22 @@ class FindBusinessDataHandler(BaseHandler):
         sample: models.Sample = self.sample(internal_id=internal_id)
         if any(
             [
-                self.family(internal_id=family_sample.family_id).action == "analyze"
-                or self.family(internal_id=family_sample.family_id).action == "running"
+                self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "analyze"
+                or self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "running"
                 for family_sample in sample.links
             ]
         ):

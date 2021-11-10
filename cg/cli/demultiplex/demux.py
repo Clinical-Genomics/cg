@@ -6,8 +6,7 @@ import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.constants import EXIT_FAIL
-from cg.exc import FlowcellError, WipeDemuxError
+from cg.exc import FlowcellError
 from cg.meta.demultiplex.wipe_demultiplex_api import WipeDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
@@ -49,7 +48,7 @@ def demultiplex_all(
             config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=sub_dir.name
         )
         wipe_demux_api.set_dry_run(dry_run=dry_run)
-        wipe_demux_api.wipe_flowcell()
+        wipe_demux_api.wipe_flow_cell()
 
         if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
             continue
@@ -85,19 +84,23 @@ def demultiplex_flowcell(
 
     LOG.info("Running cg demultiplex flowcell, using %s.", bcl_converter)
     flowcell_directory: Path = Path(context.demultiplex.run_dir) / flowcell_id
+
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
+    LOG.info(f"SETTING FLOWCELL ID TO {flowcell_id}")
+    LOG.info(f"SETTING OUT DIR TO {demultiplex_api.out_dir}")
+    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+        config=context,
+        demultiplexing_dir=Path(demultiplex_api.out_dir),
+        run_name=flowcell_id,
+    )
+    wipe_demux_api.set_dry_run(dry_run=dry_run)
+    wipe_demux_api.wipe_flow_cell()
 
     try:
         flowcell_obj = Flowcell(flowcell_path=flowcell_directory, bcl_converter=bcl_converter)
     except FlowcellError:
         raise click.Abort
-
-    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-        config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=flowcell_id
-    )
-    wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flowcell()
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
         LOG.warning("Can not start demultiplexing!")
@@ -136,4 +139,4 @@ def prepare_flowcell(context: CGConfig, dry_run: bool, demultiplexing_dir: str, 
         config=context, demultiplexing_dir=demux_path, run_name=flowcell_id
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flowcell()
+    wipe_demux_api.wipe_flow_cell()
