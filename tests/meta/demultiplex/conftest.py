@@ -221,7 +221,6 @@ def fixture_populated_wipe_demultiplex_api(
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         run_name=flowcell_full_name,
     )
-    populated_wipe_demultiplex_api
 
     yield populated_wipe_demultiplex_api
 
