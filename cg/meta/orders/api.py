@@ -40,12 +40,7 @@ class OrdersAPI(StatusHandler):
 
         Main entry point for the class towards interfaces that implements it.
         """
-        self._validate_samples_available_to_customer(
-            project=project, samples=order_in.samples, customer_id=order_in.customer
-        )
-        self._validate_case_names_are_unique(
-            project=project, samples=order_in.samples, customer_id=order_in.customer
-        )
+        self.validate_order(order_in, project)
 
         # detect manual ticket assignment
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
@@ -59,11 +54,20 @@ class OrdersAPI(StatusHandler):
         order_func = self._get_submit_func(project.value)
         return order_func(order_in)
 
+    def validate_order(self, order_in: OrderIn, project: OrderType):
+        self._validate_samples_available_to_customer(
+            project=project, samples=order_in.samples, customer_id=order_in.customer
+        )
+        self._validate_case_names_are_unique(
+            project=project, samples=order_in.samples, customer_id=order_in.customer
+        )
+        self._validate_sex(samples=order_in.samples, customer_id=order_in.customer)
+
     def _submit_fluffy(self, order: OrderIn) -> dict:
         """Submit a batch of ready made libraries for FLUFFY analysis."""
         return self._submit_pools(order)
 
-    def _submit_rml(self, order: dict) -> dict:
+    def _submit_rml(self, order: OrderIn) -> dict:
         """Submit a batch of ready made libraries for sequencing."""
         return self._submit_pools(order)
 
@@ -317,3 +321,35 @@ class OrdersAPI(StatusHandler):
             return getattr(self, "_submit_sars_cov_2")
 
         return getattr(self, f"_submit_{str(project_type)}")
+
+    def _validate_sex(self, samples: [dict], customer_id: str):
+        """Validate that sex is consistent with existing samples, skips samples of unknown sex
+
+        Args:
+            samples     (list[dict]):   Samples to validate
+            customer_id (str):          Customer that the samples belong to
+        Returns:
+            Nothing
+        """
+
+        sample: dict
+        for sample in samples:
+            subject_id: str = sample.subject_id
+            if not subject_id:
+                continue
+            new_gender: str = sample.sex
+            if new_gender == "unknown":
+                continue
+            existing_samples: [models.Sample] = self.status.samples_by_subject_id(
+                customer_id=customer_id, subject_id=subject_id
+            )
+            existing_sample: models.Sample
+            for existing_sample in existing_samples:
+                previous_gender = existing_sample.sex
+                if previous_gender == "unknown":
+                    continue
+
+                if previous_gender != new_gender:
+                    raise OrderError(
+                        f"Sample gender inconsistency for subject_id: {subject_id}: previous gender {previous_gender}, new gender {new_gender}"
+                    )

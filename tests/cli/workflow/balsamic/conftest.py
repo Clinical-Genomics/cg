@@ -321,7 +321,7 @@ def fixture_balsamic_context(
     case_wgs_paired_enough_reads = helpers.add_case(
         store=status_db,
         internal_id="balsamic_case_wgs_paired_enough_reads",
-        case_id="balsamic_case_wgs_paired_enough_reads",
+        name="balsamic_case_wgs_paired_enough_reads",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_paired_tumor_enough_reads = helpers.add_sample(
@@ -355,7 +355,7 @@ def fixture_balsamic_context(
     case_wgs_paired = helpers.add_case(
         store=status_db,
         internal_id="balsamic_case_wgs_paired",
-        case_id="balsamic_case_wgs_paired",
+        name="balsamic_case_wgs_paired",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_paired_tumor = helpers.add_sample(
@@ -381,7 +381,7 @@ def fixture_balsamic_context(
     case_tgs_paired = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_paired",
-        case_id="balsamic_case_tgs_paired",
+        name="balsamic_case_tgs_paired",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_paired_tumor = helpers.add_sample(
@@ -410,7 +410,7 @@ def fixture_balsamic_context(
     case_wgs_single = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wgs_single",
-        case_id="balsamic_case_wgs_single",
+        name="balsamic_case_wgs_single",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_single_tumor = helpers.add_sample(
@@ -427,7 +427,7 @@ def fixture_balsamic_context(
     case_tgs_single = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_single",
-        case_id="balsamic_case_tgs_single",
+        name="balsamic_case_tgs_single",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_single_tumor = helpers.add_sample(
@@ -444,7 +444,7 @@ def fixture_balsamic_context(
     case_tgs_single_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_single_error",
-        case_id="balsamic_case_tgs_single_error",
+        name="balsamic_case_tgs_single_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_single_normal_error = helpers.add_sample(
@@ -465,7 +465,7 @@ def fixture_balsamic_context(
     case_tgs_paired_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_paired_error",
-        case_id="balsamic_case_tgs_paired_error",
+        name="balsamic_case_tgs_paired_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
@@ -512,7 +512,7 @@ def fixture_balsamic_context(
     case_mixed_paired_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_mixed_paired_error",
-        case_id="balsamic_case_mixed_paired_error",
+        name="balsamic_case_mixed_paired_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
@@ -545,7 +545,7 @@ def fixture_balsamic_context(
     case_mixed_wgs_mic_paired_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_mixed_wgs_mic_paired_error",
-        case_id="balsamic_case_mixed_wgs_mic_paired_error",
+        name="balsamic_case_mixed_wgs_mic_paired_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     mixed_sample_case_wgs_mic_paired_tumor_error = helpers.add_sample(
@@ -578,7 +578,7 @@ def fixture_balsamic_context(
     case_mixed_bed_paired_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_mixed_bed_paired_error",
-        case_id="balsamic_case_mixed_bed_paired_error",
+        name="balsamic_case_mixed_bed_paired_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     mixed_sample_case_mixed_bed_paired_tumor_error = helpers.add_sample(
@@ -612,7 +612,7 @@ def fixture_balsamic_context(
     mip_case_wgs_single = helpers.add_case(
         status_db,
         internal_id="mip_case_wgs_single",
-        case_id="mip_case_wgs_single",
+        name="mip_case_wgs_single",
         data_analysis=Pipeline.MIP_DNA,
     )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
@@ -632,7 +632,7 @@ def fixture_balsamic_context(
     case_wgs_paired_two_normal_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wgs_paired_two_normal_error",
-        case_id="balsamic_case_wgs_paired_two_normal_error",
+        name="balsamic_case_wgs_paired_two_normal_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wgs_paired_two_normal_tumor_error = helpers.add_sample(
@@ -679,7 +679,7 @@ def fixture_balsamic_context(
     case_wes_tumor = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wes_tumor",
-        case_id="balsamic_case_wes_tumor",
+        name="balsamic_case_wes_tumor",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wes_tumor = helpers.add_sample(
@@ -696,7 +696,7 @@ def fixture_balsamic_context(
     case_wes_panel_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wes_panel_error",
-        case_id="balsamic_case_wes_panel_error",
+        name="balsamic_case_wes_panel_error",
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_wes_panel_error = helpers.add_sample(
@@ -712,7 +712,7 @@ def fixture_balsamic_context(
     )
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_case(status_db, internal_id="no_sample_case", case_id="no_sample_case")
+    helpers.add_case(status_db, internal_id="no_sample_case", name="no_sample_case")
 
     # Create BED1 version 1
     bed1_name = "BalsamicBed1"
