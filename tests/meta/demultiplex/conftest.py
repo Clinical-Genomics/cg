@@ -132,7 +132,7 @@ def fixture_flow_cell_name_housekeeper_api(
     sample_id: str,
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
-) -> Generator[HousekeeperAPI]:
+) -> Generator[HousekeeperAPI, None, None]:
     """Yield a mocked housekeeper API, containing a sample bundle with related fastq files"""
     flow_cell_housekeeper_api = real_housekeeper_api
     bundle_data = {
@@ -168,7 +168,7 @@ def fixture_populated_wipe_demux_context(
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     populated_flow_cell_store: Store,
     populated_stats_api: StatsAPI,
-) -> Generator[CGConfig]:
+) -> Generator[CGConfig, None, None]:
     """Yield a populated context to remove flowcells from using the WipeDemuxAPI"""
     populated_wipe_demux_context = cg_context
     populated_wipe_demux_context.cg_stats_api_ = populated_stats_api
@@ -180,7 +180,7 @@ def fixture_populated_wipe_demux_context(
 @pytest.fixture(scope="function", name="active_wipe_demux_context")
 def fixture_active_wipe_demux_context(
     cg_context: CGConfig, active_flow_cell_store: Store
-) -> Generator[CGConfig]:
+) -> Generator[CGConfig, None, None]:
     """Yield a populated context to remove flowcells from using the WipeDemuxAPI"""
     active_wipe_demux_context = cg_context
     active_wipe_demux_context.status_db_ = active_flow_cell_store
@@ -193,7 +193,7 @@ def fixture_populated_wipe_demultiplex_api(
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
     stats_api: StatsAPI,
-) -> Generator[WipeDemuxAPI]:
+) -> Generator[WipeDemuxAPI, None, None]:
     """Yield an initialized populated WipeDemuxAPI"""
     populated_wipe_demultiplex_api: WipeDemuxAPI = WipeDemuxAPI(
         config=populated_wipe_demux_context,
@@ -209,7 +209,7 @@ def fixture_active_wipe_demultiplex_api(
     active_wipe_demux_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
-) -> Generator[WipeDemuxAPI]:
+) -> Generator[WipeDemuxAPI, None, None]:
     """Yield an instantiated WipeDemuxAPI with active samples on a flowcell"""
     active_wipe_demultiplex_api = WipeDemuxAPI(
         config=active_wipe_demux_context,
@@ -225,7 +225,7 @@ def fixture_wipe_demultiplex_api(
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
     stats_api: StatsAPI,
-) -> Generator[WipeDemuxAPI]:
+) -> Generator[WipeDemuxAPI, None, None]:
     """Yield an initialized WipeDemuxAPI"""
     cg_context.cg_stats_api_ = stats_api
     wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
