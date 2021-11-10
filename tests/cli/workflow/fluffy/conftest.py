@@ -134,7 +134,7 @@ def fluffy_context(
     example_fluffy_case = helpers.add_case(
         fluffy_analysis_api.status_db,
         internal_id=fluffy_case_id_existing,
-        case_id=fluffy_case_id_existing,
+        name=fluffy_case_id_existing,
         data_analysis=Pipeline.FLUFFY,
     )
     example_fluffy_sample = helpers.add_sample(

@@ -17,7 +17,7 @@ def test_get_inbox_path(cg_context: CGConfig, helpers, mocker):
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id="angrybird",
-        case_id=123456,
+        name=123456,
         data_analysis=Pipeline.SARS_COV_2,
     )
 
@@ -74,7 +74,7 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_toda
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id="angrybird",
-        case_id=123456,
+        name=123456,
         data_analysis=Pipeline.SARS_COV_2,
     )
 
