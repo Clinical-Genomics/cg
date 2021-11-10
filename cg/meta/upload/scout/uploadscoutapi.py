@@ -204,6 +204,7 @@ class UploadScoutAPI:
         LOG.info(f"{report_type} fusion report %s found", fusion_report.path)
 
         rna_case = status_db.family(case_id)
+        upload_dna_cases: Set[models.Family] = set()
         for link in rna_case.links:
             rna_sample: models.Sample = link.sample
             if not rna_sample.subject_id:
@@ -220,28 +221,34 @@ class UploadScoutAPI:
 
             if not dna_cases:
                 raise CgDataError(
-                    "Failed on RNA sample %s since there are no DNA samples linked to it via subject_id"
+                    "Failed to upload on RNA sample %s since there are no DNA samples linked to it via subject_id"
                     % rna_sample.internal_id,
                 )
 
-            dna_case: models.Family
-            for dna_case in dna_cases:
-                dna_case_id: str = dna_case.internal_id
+            upload_dna_cases.update(dna_cases)
 
-                LOG.info(
-                    "Uploading %s fusion report to scout for case %s", report_type, dna_case_id
-                )
+        if not upload_dna_cases:
+            raise CgDataError(
+                "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                % rna_case.internal_id,
+            )
 
-                if dry_run:
-                    continue
+        dna_case: models.Family
+        for dna_case in upload_dna_cases:
+            dna_case_id: str = dna_case.internal_id
 
-                scout_api.upload_fusion_report(
-                    case_id=dna_case_id,
-                    report_path=fusion_report.full_path,
-                    research=research,
-                    update=update,
-                )
-                LOG.info("Uploaded %s fusion report", report_type)
+            LOG.info("Uploading %s fusion report to scout for case %s", report_type, dna_case_id)
+
+            if dry_run:
+                continue
+
+            scout_api.upload_fusion_report(
+                case_id=dna_case_id,
+                report_path=fusion_report.full_path,
+                research=research,
+                update=update,
+            )
+            LOG.info("Uploaded %s fusion report", report_type)
 
         LOG.info("Upload %s fusion report finished!", report_type)
 
