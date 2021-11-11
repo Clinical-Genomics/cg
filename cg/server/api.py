@@ -3,7 +3,6 @@ import json
 import logging
 import tempfile
 from functools import wraps
-from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
@@ -83,10 +82,10 @@ def before_request():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
-    error_message = None
+    error_message: str
     try:
         project: OrderType = OrderType(order_type)
-        post_data: OrderIn = OrderIn(project=project).parse_obj(request.get_json())
+        post_data: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
         LOG.info("processing '%s' order: %s", order_type, post_data)
 
         result = api.submit(
@@ -132,7 +131,6 @@ def cases():
     """Fetch cases."""
     records = db.cases(days=31)
     count = len(records)
-
     return jsonify(cases=records, total=count)
 
 
@@ -396,7 +394,7 @@ def orderform():
     input_file = request.files.get("file")
     filename = secure_filename(input_file.filename)
 
-    error_message = None
+    error_message: str
     try:
         if filename.lower().endswith(".xlsx"):
             temp_dir = Path(tempfile.gettempdir())

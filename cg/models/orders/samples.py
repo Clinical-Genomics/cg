@@ -17,7 +17,13 @@ from cg.models.orders.sample_base import (
 from cg.store import models
 
 
-class OrderInSample(BaseModel):
+class ProjectSample(object):
+    def __init__(self, project):
+        self.project = project
+
+
+class OrderInSample(BaseModel, ProjectSample):
+    _suitable_project: OrderType = None
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
     data_analysis: Pipeline
@@ -28,17 +34,12 @@ class OrderInSample(BaseModel):
         max_length=models.Sample.name.property.columns[0].type.length,
     )
     priority: PriorityEnum = PriorityEnum.standard
-    project: OrderType
     require_qcok: bool = False
     volume: str
 
-    def __init__(self, project: OrderType):
-        super().__init__()
-        self.project = project
-        for cls in OrderInSample.__subclasses__():
-            if cls.is_sample_for(project):
-                return cls(project)
-        raise ValueError
+    @classmethod
+    def is_sample_for(cls, project: OrderType):
+        return project == cls._suitable_project
 
 
 class Of1508Sample(OrderInSample):
@@ -112,20 +113,24 @@ class Of1508Sample(OrderInSample):
 
 
 class MipDnaSample(Of1508Sample):
+    _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
     panels: List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]
     status: StatusEnum
 
 
 class BalsamicSample(Of1508Sample):
-    pass
+    _suitable_project = OrderType.BALSAMIC
 
 
 class MipRnaSample(Of1508Sample):
+    _suitable_project = OrderType.MIP_RNA
     time_point: Optional[NonNegativeInt]
 
 
 class FastqSample(OrderInSample):
+    _suitable_project = OrderType.FASTQ
+
     # Orderform 1508
     # "required"
     container: Optional[ContainerEnum]
@@ -141,6 +146,8 @@ class FastqSample(OrderInSample):
 
 
 class RmlSample(OrderInSample):
+    _suitable_project = OrderType.RML
+
     # 1604 Orderform Ready made libraries (RML)
     # Order portal specific
     # "This information is required"
@@ -158,7 +165,14 @@ class RmlSample(OrderInSample):
     control: Optional[str]
 
 
+class FluffySample(RmlSample):
+    _suitable_project = OrderType.FLUFFY
+    # 1604 Orderform Ready made libraries (RML)
+
+
 class MetagenomeSample(OrderInSample):
+    _suitable_project = OrderType.METAGENOME
+
     # 1605 Orderform Microbial Metagenomes- 16S
     # "This information is required"
     container: Optional[ContainerEnum]
@@ -174,6 +188,7 @@ class MetagenomeSample(OrderInSample):
 
 
 class MicrobialSample(OrderInSample):
+
     # 1603 Orderform Microbial WGS
     # "These fields are required"
     organism: str
@@ -195,10 +210,13 @@ class MicrobialSample(OrderInSample):
 
 
 class MicrosaltSample(MicrobialSample):
-    pass
+    _suitable_project = OrderType.MICROSALT
+    # 1603 Orderform Microbial WGS
 
 
 class SarsCov2Sample(MicrobialSample):
+    _suitable_project = OrderType.SARS_COV_2
+
     # 2184 Orderform SARS-COV-2
     # "These fields are required"
     collection_date: str
@@ -209,3 +227,31 @@ class SarsCov2Sample(MicrobialSample):
     region: str
     region_code: str
     selection_criteria: str
+
+
+def sample_class_for(project: OrderType):
+    """Get the sample class for the specified project
+
+    Args:
+        project     (OrderType):    Project to get sample subclass for
+    Returns:
+        Subclass of OrderInSample
+    """
+
+    def all_subclasses(cls):
+        """Get all subclasses recursively for a class
+
+        Args:
+            cls     (Class):    Class to get all subclasses for
+        Returns:
+            Set of Subclasses of cls
+        """
+        return set(cls.__subclasses__()).union(
+            [s for c in cls.__subclasses__() for s in all_subclasses(c)]
+        )
+
+    for sub_cls in all_subclasses(OrderInSample):
+        if sub_cls.is_sample_for(project):
+            return sub_cls
+
+    raise ValueError

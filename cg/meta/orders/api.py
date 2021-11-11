@@ -21,7 +21,7 @@ from cg.store import Store, models
 from .lims import process_lims
 from .status import StatusHandler
 from .ticket_handler import TicketHandler
-from ...models.orders.samples import MipDnaSample, OrderInSample, Of1508Sample, MicrobialSample
+from ...models.orders.samples import OrderInSample, Of1508Sample, MicrobialSample
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class OrdersAPI(StatusHandler):
         self._validate_case_names_are_unique(
             project=project, samples=order_in.samples, customer_id=order_in.customer
         )
-        self._validate_sex(samples=order_in.samples, customer_id=order_in.customer)
+        self._validate_subject_sex(samples=order_in.samples, customer_id=order_in.customer)
 
     def _submit_fluffy(self, order: OrderIn) -> dict:
         """Submit a batch of ready made libraries for FLUFFY analysis."""
@@ -322,7 +322,7 @@ class OrdersAPI(StatusHandler):
 
         return getattr(self, f"_submit_{str(project_type)}")
 
-    def _validate_sex(self, samples: [dict], customer_id: str):
+    def _validate_subject_sex(self, samples: [Of1508Sample], customer_id: str):
         """Validate that sex is consistent with existing samples, skips samples of unknown sex
 
         Args:
@@ -332,8 +332,11 @@ class OrdersAPI(StatusHandler):
             Nothing
         """
 
-        sample: dict
+        sample: Of1508Sample
         for sample in samples:
+            if not isinstance(sample, Of1508Sample):
+                continue
+
             subject_id: str = sample.subject_id
             if not subject_id:
                 continue
