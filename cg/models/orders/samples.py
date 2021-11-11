@@ -17,12 +17,7 @@ from cg.models.orders.sample_base import (
 from cg.store import models
 
 
-class ProjectSample(object):
-    def __init__(self, project):
-        self.project = project
-
-
-class OrderInSample(BaseModel, ProjectSample):
+class OrderInSample(BaseModel):
     _suitable_project: OrderType = None
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
