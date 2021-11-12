@@ -173,7 +173,7 @@ def test_cases_to_status_synopsis(mip_order_to_submit):
     order = OrderIn.parse_obj(mip_order_to_submit, project=project)
 
     # WHEN parsing for status
-    data = StatusHandler.cases_to_status(order=order, project=project)
+    StatusHandler.cases_to_status(order=order, project=project)
 
     # THEN No exception should have been raised on synopsis
 
