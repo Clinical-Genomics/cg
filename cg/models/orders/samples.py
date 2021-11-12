@@ -241,9 +241,12 @@ def sample_class_for(project: OrderType):
         Returns:
             Set of Subclasses of cls
         """
-        return set(cls.__subclasses__()).union(
-            [s for c in cls.__subclasses__() for s in all_subclasses(c)]
-        )
+        if cls.__subclasses__():
+            return set(cls.__subclasses__()).union(
+                [s for c in cls.__subclasses__() for s in all_subclasses(c)]
+            )
+
+        return []
 
     for sub_cls in all_subclasses(OrderInSample):
         if sub_cls.is_sample_for(project):
