@@ -171,3 +171,11 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         )
 
     return store
+
+
+@pytest.fixture(name="flow_cell_store")
+def fixture_flow_cell_store(base_store: Store, flow_cell_name: str, helpers) -> Store:
+    """Yield a store containing a flow cell object"""
+    flow_cell_store: Store = base_store
+    helpers.add_flowcell(store=flow_cell_store, flowcell_id=flow_cell_name)
+    yield flow_cell_store

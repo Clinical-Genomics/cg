@@ -110,12 +110,15 @@ def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flowcell_dragen: Path,
     demultiplex_context: CGConfig,
+    demultiplexed_flowcells_working_directory: Path,
     caplog,
     mocker,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN that all files are present for dragen demultiplexing
-    flowcell: Flowcell = Flowcell(demultiplex_ready_flowcell_dragen, bcl_converter="dragen")
+    flowcell: Flowcell = Flowcell(
+        flowcell_path=demultiplex_ready_flowcell_dragen, bcl_converter="dragen"
+    )
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)

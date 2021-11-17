@@ -215,3 +215,7 @@ class ValidationError(CgError):
     """
     Exception related to delivery report validation
     """
+
+
+class WipeDemuxError(CgError):
+    """Raised when there is an issue with wiping a flowcell before start"""

@@ -13,6 +13,33 @@ from cg.store.api.base import BaseHandler
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
+    def active_sample(self, internal_id: str) -> bool:
+        """Check if there are any active cases for a sample"""
+        sample: models.Sample = self.sample(internal_id=internal_id)
+        if any(
+            [
+                self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "analyze"
+                or self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "running"
+                for family_sample in sample.links
+            ]
+        ):
+            return True
+        return False
+
     def analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query

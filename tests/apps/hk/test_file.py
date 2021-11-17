@@ -1,9 +1,10 @@
 """Test how the api handles files"""
 from pathlib import Path
-from typing import List
+from typing import Iterable, List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_FASTQ_TAGS
+from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):
@@ -146,6 +147,32 @@ def test_get_include_file(populated_housekeeper_api, case_id):
     assert included_path.exists() is True
     # THEN assert that the file path has been updated
     assert included_file.path != original_path
+
+
+def test_check_for_files_with_files(populated_housekeeper_api, case_id, tags):
+    """Test to check for files in housekeeper and return a respective boolean if found"""
+
+    # GIVEN a populated housekeeper
+
+    # WHEN checking for files on an existing bundle
+    existing_case_files: bool = populated_housekeeper_api.check_for_files(bundle=case_id, tags=tags)
+
+    # THEN there should not exist any case files
+    assert existing_case_files is True
+
+
+def test_check_for_files_no_files(populated_housekeeper_api, mocker):
+
+    # GIVEN a housekeeper without any files
+    populated_housekeeper_api.files = mocker.MagicMock(return_value=[])
+
+    # WHEN checking for files on a bundle in housekeeper
+    existing_case_files: bool = populated_housekeeper_api.check_for_files(
+        bundle="fake_case_id", tags="fake_tags"
+    )
+
+    # THEN there should not be any files
+    assert existing_case_files is False
 
 
 def test_check_bundle_files(

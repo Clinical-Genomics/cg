@@ -24,6 +24,7 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
+
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.limsmock import MockLimsAPI
@@ -95,6 +96,12 @@ def fixture_customer_id() -> str:
 def fixture_ticket_nr() -> int:
     """Return a ticket nr"""
     return 123456
+
+
+@pytest.fixture(name="flow_cell_name")
+def fixture_flowcell_name() -> str:
+    """Return a string for a flowcell"""
+    return "HVKJCDRXX"
 
 
 @pytest.fixture(scope="function", name="analysis_family_single_case")

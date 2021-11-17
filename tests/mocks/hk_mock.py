@@ -5,7 +5,8 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Set, Optional
+
+from typing import Iterable, List, Optional, Set
 
 from cg.store import models
 
@@ -411,6 +412,15 @@ class MockHousekeeperAPI:
             iterable(hk.Models.File)
         """
         return self.files(*args, **kwargs)
+
+    def check_for_files(self, *args, **kwargs) -> bool:
+        """Check if there are files for a bundle, tags, and/or version"""
+        files = self.files(*args, **kwargs)
+
+        if not files:
+            return False
+        else:
+            return True
 
     def add_file(self, path, version_obj, tags, to_archive=False):
         """Add a file to housekeeper."""
