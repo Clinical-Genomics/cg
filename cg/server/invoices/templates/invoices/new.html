@@ -51,6 +51,9 @@
         <th>Created at</th>
         <th>Delivered at</th>
         <th>Price: Stan/Prio/Res/Expr</th>
+          {%if record_type=='Sample'%}
+          <th>Sample Comment</th>
+          {%endif%}
       </tr>
       </thead>
       <tbody id="myTable">
@@ -76,6 +79,9 @@
             {% if record.application_version.price_research %}{{record.application_version.price_research}}{% else %}{% endif %}/
             {% if record.application_version.price_express %}{{record.application_version.price_express}}{% else %}{% endif %}
         </td>
+          {%if record_type=='Sample'%}
+           <td>{{record.comment}}</td>
+          {%endif%}
       </tr>
       {% endfor %}
     </tbody>
