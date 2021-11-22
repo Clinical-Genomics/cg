@@ -60,40 +60,6 @@ def test_get_destination_path(
     assert destination_path == Path("/path/on/hasta/cust000/ADM1/")
 
 
-def test_download_sample(
-    apps_dir: Path,
-    customer_id: str,
-    cust_sample_id: str,
-    external_data_api: ExternalDataAPI,
-    mocker,
-    sample_id: str,
-    ticket_nr: int,
-):
-    """Test for transferring external data via SLURM"""
-
-    # GIVEN paths needed to run rsync
-    mocker.patch.object(ExternalDataAPI, "create_log_dir")
-    ExternalDataAPI.create_log_dir.return_value = apps_dir
-
-    mocker.patch.object(ExternalDataAPI, "get_source_path")
-    ExternalDataAPI.get_source_path.return_value = apps_dir
-
-    mocker.patch.object(ExternalDataAPI, "get_destination_path")
-    ExternalDataAPI.get_destination_path.return_value = apps_dir
-
-    # WHEN the samples are transferred
-    sbatch_number = external_data_api.transfer_sample(
-        cust_sample_id=cust_sample_id,
-        ticket_id=ticket_nr,
-        cust=customer_id,
-        lims_sample_id=sample_id,
-        dry_run=True,
-    )
-
-    # THEN check that an integer was returned
-    assert isinstance(sbatch_number, int)
-
-
 def test_transfer_sample_files_from_source(
     caplog,
     cg_context: CGConfig,

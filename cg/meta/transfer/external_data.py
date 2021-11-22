@@ -58,43 +58,6 @@ class ExternalDataAPI(MetaAPI):
         """Returns the path to where the files are to be transferred"""
         return Path(self.hasta_path % customer, lims_sample_id)
 
-    def transfer_sample(
-        self, cust: str, cust_sample_id: str, lims_sample_id: str, dry_run: bool, ticket_id: int
-    ) -> int:
-        """Runs a SLURM job to transfer a sample folder. Returns SLURM jobid of the transfer process"""
-        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
-        source_path: Path = self.get_source_path(
-            ticket_id=ticket_id,
-            customer=cust,
-            cust_sample_id=cust_sample_id,
-        )
-        destination_path: Path = self.get_destination_path(
-            customer=cust,
-            lims_sample_id=lims_sample_id,
-        )
-        commands: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=source_path, destination_path=destination_path
-        )
-        error_function: str = ERROR_RSYNC_FUNCTION.format()
-        sbatch_info = {
-            "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
-            "account": self.account,
-            "number_tasks": 1,
-            "memory": 1,
-            "log_dir": str(log_dir),
-            "email": self.mail_user,
-            "hours": 24,
-            "commands": commands,
-            "error": error_function,
-        }
-        self.slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
-        sbatch_number: int = self.slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
-        )
-        return sbatch_number
-
     def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int):
         """Transfers all sample files, related to given ticket, from source to destination"""
         samples: List[models.Sample] = self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
@@ -146,7 +109,7 @@ class ExternalDataAPI(MetaAPI):
         )
         LOG.info(msg=[sample.name for sample in available_samples])
         LOG.info(
-            "The transfer the {numb} samples above has begun".format(numb=len(available_samples))
+            "The transfer of the {numb} samples above has begun".format(numb=len(available_samples))
         )
 
     def get_all_fastq(self, sample_folder: Path) -> List[Path]:
