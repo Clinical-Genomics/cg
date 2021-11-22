@@ -45,7 +45,12 @@ class ExternalDataAPI(MetaAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def get_source_path(self, cust_sample_id: str, customer: str, ticket_id: int) -> Path:
+    def get_source_path(
+        self,
+        customer: str,
+        ticket_id: int,
+        cust_sample_id: Optional[str] = "",
+    ) -> Path:
         """Returns the path to where the sample files are fetched from"""
         return Path(self.caesar_path % customer, str(ticket_id), cust_sample_id)
 
@@ -92,23 +97,57 @@ class ExternalDataAPI(MetaAPI):
 
     def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int):
         """Transfers all sample files, related to given ticket, from source to destination"""
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+        samples: List[models.Sample] = self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        available_samples: List[models.Sample] = [
+            sample
+            for sample in samples
+            if sample.name
+            in [
+                sample_folder.parts[-1]
+                for sample_folder in self.get_source_path(
+                    customer=cust, ticket_id=ticket_id
+                ).iterdir()
+            ]
+        ]
+        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
+        error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.hasta_path % cust).mkdir(exist_ok=True)
-        for case in cases:
-            links = case.links
-            for link in links:
-                sbatch_number: int = self.transfer_sample(
-                    ticket_id=ticket_id,
-                    cust=cust,
-                    cust_sample_id=link.sample.name,
-                    lims_sample_id=link.sample.internal_id,
-                    dry_run=dry_run,
+
+        commands = "".join(
+            [
+                RSYNC_CONTENTS_COMMAND.format(
+                    source_path=self.get_source_path(
+                        cust_sample_id=sample.name, customer=cust, ticket_id=ticket_id
+                    ),
+                    destination_path=self.get_destination_path(
+                        customer=cust, lims_sample_id=sample.internal_id
+                    ),
                 )
-                LOG.info(
-                    "Transferring sample %s from source by submitting sbatch job %s"
-                    % (link.sample.internal_id, sbatch_number)
-                )
+                for sample in available_samples
+            ]
+        )
+        sbatch_info = {
+            "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
+            "account": self.account,
+            "number_tasks": 1,
+            "memory": 1,
+            "log_dir": str(log_dir),
+            "email": self.mail_user,
+            "hours": 24,
+            "commands": commands,
+            "error": error_function,
+        }
+        self.slurm_api.set_dry_run(dry_run=dry_run)
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
+        sbatch_number: int = self.slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        LOG.info(msg=[sample.name for sample in available_samples])
+        LOG.info(
+            "The transfer the {numb} samples above has begun".format(numb=len(available_samples))
+        )
 
     def get_all_fastq(self, sample_folder: Path) -> List[Path]:
         """Returns a list of all fastq.gz files in given folder"""

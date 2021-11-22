@@ -94,6 +94,49 @@ def test_download_sample(
     assert isinstance(sbatch_number, int)
 
 
+def test_transfer_sample_files_from_source(
+    caplog,
+    cg_context: CGConfig,
+    customer_id,
+    cust_sample_id,
+    external_data_api: ExternalDataAPI,
+    external_data_directory,
+    helpers,
+    mocker,
+    sample_store,
+    ticket_nr,
+):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a Store with three samples, where only two samples are present in the source folder
+    helpers.add_sample(
+        store=external_data_api.status_db, name=cust_sample_id + "1", ticket=ticket_nr
+    )
+    helpers.add_sample(
+        store=external_data_api.status_db, name=cust_sample_id + "2", ticket=ticket_nr
+    )
+    helpers.add_sample(
+        store=external_data_api.status_db, name=cust_sample_id + "3", ticket=ticket_nr
+    )
+
+    mocker.patch.object(Store, "get_customer_id_from_ticket")
+    Store.get_customer_id_from_ticket.return_value = customer_id
+
+    mocker.patch.object(ExternalDataAPI, "get_source_path")
+    external_data_api.get_source_path.return_value = Path("").joinpath(external_data_directory)
+
+    external_data_api.caesar_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
+    external_data_api.hasta_path = str(Path("").joinpath(*external_data_directory.parts[:-1], "%s"))
+
+    # WHEN the tramsfer is initated
+    external_data_api.transfer_sample_files_from_source(ticket_id=ticket_nr, dry_run=True)
+
+    # THEN only the two samples present in the source directory are inlcuded in the rsync
+    assert all([sample in caplog.text for sample in [cust_sample_id + "1", cust_sample_id + "2"]])
+
+    assert not cust_sample_id + "3" in caplog.text
+
+
 def test_get_all_fastq(
     cg_context: CGConfig, external_data_api: ExternalDataAPI, external_data_directory
 ):
@@ -117,7 +160,9 @@ def test_add_files_to_bundles(
 
     # WHEN the files are added.
     external_data_api.add_files_to_bundles(
-        fastq_paths=to_be_added, last_version=hk_version_obj, lims_sample_id=sample_id
+        fastq_paths=to_be_added,
+        last_version=hk_version_obj,
+        lims_sample_id=sample_id,
     )
 
     # THEN the function should return True and the file should be added.

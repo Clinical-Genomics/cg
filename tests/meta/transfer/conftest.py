@@ -144,18 +144,22 @@ def lims_api():
     return _lims_api
 
 
-@pytest.fixture(name="external_data_directory")
-def external_data_directory(tmpdir_factory, customer_id: str, cust_sample_id: str) -> Path:
+@pytest.fixture(name="external_data_directory", scope="session")
+def external_data_directory(
+    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_nr
+) -> Path:
     """Fixture that returns a customer folder with fastq.gz files in sample-directories"""
     sample1: str = cust_sample_id + "1"
     sample2: str = cust_sample_id + "2"
-    cust_folder = tmpdir_factory.mktemp(customer_id)
-    Path(cust_folder, sample1).mkdir(exist_ok=True, parents=True)
-    Path(cust_folder, sample2).mkdir(exist_ok=True, parents=True)
-    Path(cust_folder, sample1, sample1 + "_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, sample1, sample1 + "_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, sample1, sample1 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
-    Path(cust_folder, sample2, sample2 + "_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, sample2, sample2 + "_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(cust_folder, sample2, sample2 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
-    return Path(cust_folder)
+    cust_folder = tmpdir_factory.mktemp(customer_id, numbered=False)
+    ticket_folder = cust_folder / str(ticket_nr)
+    ticket_folder.mkdir()
+    Path(ticket_folder, sample1).mkdir(exist_ok=True, parents=True)
+    Path(ticket_folder, sample2).mkdir(exist_ok=True, parents=True)
+    Path(ticket_folder, sample1, sample1 + "_fastq_1.fastq.gz").touch(exist_ok=True)
+    Path(ticket_folder, sample1, sample1 + "_fastq_2.fastq.gz").touch(exist_ok=True)
+    Path(ticket_folder, sample1, sample1 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+    Path(ticket_folder, sample2, sample2 + "_fastq_1.fastq.gz").touch(exist_ok=True)
+    Path(ticket_folder, sample2, sample2 + "_fastq_2.fastq.gz").touch(exist_ok=True)
+    Path(ticket_folder, sample2, sample2 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+    return Path(ticket_folder)
