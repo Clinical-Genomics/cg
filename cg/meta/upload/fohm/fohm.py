@@ -189,9 +189,6 @@ class FOHMUploadAPI:
         LOG.info("Creating pangolin reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
         LOG.info(f"Regions in batch: {unique_regionlabs}")
-        self.pangolin_dataframe = self.pangolin_dataframe[
-            self.pangolin_dataframe["taxon"].isin(self.aggregation_dataframe["provnummer"])
-        ]
         for region_lab in unique_regionlabs:
             LOG.info(f"Aggregating data for {region_lab}")
             pangolin_df = self.pangolin_dataframe[
