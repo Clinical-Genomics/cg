@@ -186,8 +186,15 @@ class FOHMUploadAPI:
                 bar()
 
     def create_pangolin_reports(self) -> None:
+        LOG.info("Creating pangolin reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
+        LOG.info(f"Regions in batch: {unique_regionlabs}")
+        self.pangolin_dataframe = self.pangolin_dataframe[
+            self.pangolin_dataframe["taxon"]
+            in list(self.aggregation_dataframe["provnummer"].unique())
+        ]
         for region_lab in unique_regionlabs:
+            LOG.info(f"Aggregating data for {region_lab}")
             pangolin_df = self.pangolin_dataframe[
                 self.aggregation_dataframe["region_lab"] == region_lab
             ]
@@ -206,8 +213,11 @@ class FOHMUploadAPI:
             pangolin_path.chmod(0o0777)
 
     def create_komplettering_reports(self) -> None:
+        LOG.info("Creating komplettering reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
+        LOG.info(f"Regions in batch: {unique_regionlabs}")
         for region_lab in unique_regionlabs:
+            LOG.info(f"Aggregating data for {region_lab}")
             report_df = self.reports_dataframe[
                 self.aggregation_dataframe["region_lab"] == region_lab
             ]
