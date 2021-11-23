@@ -60,3 +60,10 @@ class LimsSample(BaseModel):
     well_position: Optional[str]
     index_sequence: Optional[str]
     udfs: Optional[Udf]
+
+    @classmethod
+    def parse_obj(cls, obj: dict):
+        parsed_obj: LimsSample = super().parse_obj(obj)
+        udf: Udf = Udf.parse_obj(obj)
+        parsed_obj.udfs = udf
+        return parsed_obj
