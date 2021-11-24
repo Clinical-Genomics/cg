@@ -28,7 +28,7 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample.well_position == "A:1"
     assert first_sample.udfs.family_name == "family1"
     assert first_sample.udfs.priority == "standard"
-    assert first_sample.udfs.application == "WGTPCFC030"
+    assert first_sample.udfs.application == "WGSPCFC030"
     assert first_sample.udfs.source == "tissue (fresh frozen)"
     assert first_sample.udfs.quantity == "220"
     assert first_sample.udfs.customer == "cust003"
@@ -139,7 +139,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["name"] == "s1"
     assert {sample.container for sample in samples} == set(["96 well plate"])
     assert first_sample["udfs"]["data_analysis"] == str(Pipeline.BALSAMIC)
-    assert first_sample["udfs"]["application"] == "WGTPCFC030"
+    assert first_sample["udfs"]["application"] == "WGSPCFC030"
     assert first_sample["udfs"]["sex"] == "M"
     assert first_sample["udfs"]["family_name"] == "family1"
     assert first_sample["udfs"]["customer"] == "cust000"

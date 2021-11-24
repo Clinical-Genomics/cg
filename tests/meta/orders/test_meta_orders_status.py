@@ -151,12 +151,12 @@ def test_cases_to_status(mip_order_to_submit):
     first_sample = family["samples"][0]
     assert first_sample["age_at_sampling"] == "17.18192"
     assert first_sample["name"] == "sample1"
-    assert first_sample["application"] == "WGTPCFC030"
+    assert first_sample["application"] == "WGSPCFC030"
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
     assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
-    assert first_sample["subject_id"] == "sample1"
+    assert first_sample["subject_id"] == "subject1"
     assert first_sample["mother"] == "sample2"
     assert first_sample["father"] == "sample3"
 
@@ -501,13 +501,13 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.father.name == "sample3"
     assert new_link.sample.name == "sample1"
     assert new_link.sample.sex == "female"
-    assert new_link.sample.application_version.application.tag == "WGTPCFC030"
+    assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
 
     assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
-    assert new_link.sample.subject_id == "sample1"
+    assert new_link.sample.subject_id == "subject1"
 
     assert new_link.sample.age_at_sampling == 17.18192
 
@@ -630,7 +630,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     new_link = new_case.links[0]
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
-    assert new_link.sample.application_version.application.tag == "WGTPCFC030"
+    assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 
