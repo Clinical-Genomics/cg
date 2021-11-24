@@ -84,9 +84,9 @@ def submit_order(order_type):
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
     error_message: str
     try:
+        LOG.info("processing '%s' order: %s", order_type, request.get_json())
         project: OrderType = OrderType(order_type)
         post_data: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
-        LOG.info("processing '%s' order: %s", order_type, post_data)
 
         result = api.submit(
             project=project,
