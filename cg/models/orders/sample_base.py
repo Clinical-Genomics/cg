@@ -30,14 +30,7 @@ class PriorityEnum(str, Enum):
 class ContainerEnum(str, Enum):
     no_container = "No container"
     plate = "96 well plate"
-
-
-class CaptureKitEnum(str, Enum):
-    agilent_sureselect_cre = "Agilent Sureselect CRE"
-    agilent_sureselect_v5 = "Agilent Sureselect V5"
-    sureselect_focused_exome = "SureSelect Focused Exome"
-    twist_target_hg19_bed = "Twist_Target_hg19.bed"
-    other = "other"
+    tube = "Tube"
 
 
 class StatusEnum(str, Enum):
@@ -52,7 +45,7 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 class OrderSample(BaseModel):
     age_at_sampling: Optional[str]
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
-    capture_kit: Optional[CaptureKitEnum]
+    capture_kit: Optional[str]
     cohorts: Optional[List[str]]
     collection_date: Optional[str]
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]

@@ -7,7 +7,6 @@ from pydantic.typing import Optional
 from cg.constants import DataDelivery
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
-    CaptureKitEnum,
     ContainerEnum,
     NAME_PATTERN,
     PriorityEnum,
@@ -86,7 +85,7 @@ class Of1508Sample(OrderInSample):
         constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
     ]
     # This information is required for panel analysis
-    capture_kit: Optional[CaptureKitEnum]
+    capture_kit: Optional[str]
     # This information is required for panel- or exome analysis
     elution_buffer: Optional[str]
     tumour_purity: Optional[int]
