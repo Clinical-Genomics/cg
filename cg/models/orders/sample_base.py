@@ -28,7 +28,7 @@ class PriorityEnum(str, Enum):
 
 
 class ContainerEnum(str, Enum):
-    tube = "Tube"
+    no_container = "No container"
     plate = "96 well plate"
 
 
