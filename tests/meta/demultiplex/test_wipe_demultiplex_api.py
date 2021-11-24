@@ -186,11 +186,6 @@ def test_wipe_flow_cell_housekeeper_only_sample_level(
         in caplog.text
     )
 
-    # AND you should be notified that there were fastq files removed on sample level
-
-    for file in sample_level_files:
-        assert f"{file.as_posix()} deleted" in caplog.text
-
 
 def test_wipe_flow_cell_housekeeper_flow_cell_name(
     caplog,
@@ -228,12 +223,13 @@ def test_wipe_flow_cell_housekeeper_flow_cell_name(
     # THEN
 
     assert (
-        f"Housekeeper: No files found with tag: {wipe_demultiplex_api.flow_cell_name}"
+        f"WipeDemuxAPI: No files in Housekeeper with tag: {wipe_demultiplex_api.flow_cell_name}"
         not in caplog.text
     )
-    assert f"{sample_sheet_file.as_posix()} deleted" in caplog.text
+
+    assert sample_sheet_file.exists() is False
     for fastq_file in fastq_files:
-        assert f"{fastq_file.as_posix()} deleted" in caplog.text
+        assert fastq_file.exists() is False
 
 
 def test_wipe_flow_cell_statusdb(

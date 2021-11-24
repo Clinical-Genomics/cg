@@ -76,9 +76,9 @@ class WipeDemuxAPI:
     def _wipe_flow_cell_tag_housekeeper(self) -> None:
         """Wipe the presence of a flowcell, based on the flowcell id as a tag, in Housekeeper."""
         if self.housekeeper_api.check_for_files(tags=[self.flow_cell_name]):
-            self.housekeeper_api.delete_files(dry_run=self.dry_run, tags=[self.flow_cell_name])
+            self.housekeeper_api.delete_files(tags=[self.flow_cell_name])
         else:
-            log.info(f"Housekeeper: No files found with tag: {self.flow_cell_name}")
+            log.info(f"WipeDemuxAPI: No files in Housekeeper with tag: {self.flow_cell_name}")
 
     def _wipe_fastq_tags_housekeeper(self) -> None:
         """Wipe the presence of a flowcell, based on samples related to flowcell and the fastq-tags, in Housekeeper."""
@@ -92,9 +92,7 @@ class WipeDemuxAPI:
 
         if samples_to_delete:
             for sample in samples_to_delete:
-                self.housekeeper_api.delete_files(
-                    dry_run=self.dry_run, tags=["fastq"], bundle=sample.internal_id
-                )
+                self.housekeeper_api.delete_files(tags=["fastq"], bundle=sample.internal_id)
         else:
             log.info("Housekeeper: No files for samples connected to the flowcell")
 
