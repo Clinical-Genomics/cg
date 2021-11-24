@@ -15,6 +15,7 @@ class Udf(BaseModel):
     concentration: Optional[str]
     concentration_sample: Optional[str]
     customer: str
+    control: Optional[str]
     data_analysis: Optional[str]
     data_delivery: Optional[str]
     elution_buffer: Optional[str]
