@@ -72,7 +72,7 @@ class FOHMUploadAPI:
             self._reports_dataframe = self.create_joined_dataframe(
                 self.daily_reports_list
             ).sort_values(by=["provnummer"])
-            self._reports_dataframe.drop_duplicates(inplace=True)
+            self._reports_dataframe.drop_duplicates(inplace=True, ignore_index=True)
             self._reports_dataframe = self._reports_dataframe[
                 self._reports_dataframe["provnummer"].str.contains(SARS_COV_REGEX)
             ]
@@ -85,7 +85,7 @@ class FOHMUploadAPI:
             self._pangolin_dataframe = self.create_joined_dataframe(
                 self.daily_pangolin_list
             ).sort_values(by=["taxon"])
-            self._pangolin_dataframe.drop_duplicates(inplace=True)
+            self._pangolin_dataframe.drop_duplicates(inplace=True, ignore_index=True)
             self._pangolin_dataframe = self.pangolin_dataframe[
                 self._pangolin_dataframe["taxon"].str.contains(SARS_COV_REGEX)
             ]
@@ -157,7 +157,7 @@ class FOHMUploadAPI:
         """
 
         self.aggregation_dataframe["internal_id"] = self.aggregation_dataframe["provnummer"].apply(
-            lambda x: self.status_db.samples_by_ids(name=x).first().internal_id
+            lambda x: self.status_db.get_sample_by_name(name=x).internal_id
         )
         self.aggregation_dataframe["region_lab"] = self.aggregation_dataframe["internal_id"].apply(
             lambda x: f"{self.lims_api.get_sample_attribute(lims_id=x, key='region_code').split(' ')[0]}"
@@ -186,8 +186,11 @@ class FOHMUploadAPI:
                 bar()
 
     def create_pangolin_reports(self) -> None:
+        LOG.info("Creating pangolin reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
+        LOG.info(f"Regions in batch: {unique_regionlabs}")
         for region_lab in unique_regionlabs:
+            LOG.info(f"Aggregating data for {region_lab}")
             pangolin_df = self.pangolin_dataframe[
                 self.aggregation_dataframe["region_lab"] == region_lab
             ]
@@ -206,8 +209,11 @@ class FOHMUploadAPI:
             pangolin_path.chmod(0o0777)
 
     def create_komplettering_reports(self) -> None:
+        LOG.info("Creating komplettering reports")
         unique_regionlabs = list(self.aggregation_dataframe["region_lab"].unique())
+        LOG.info(f"Regions in batch: {unique_regionlabs}")
         for region_lab in unique_regionlabs:
+            LOG.info(f"Aggregating data for {region_lab}")
             report_df = self.reports_dataframe[
                 self.aggregation_dataframe["region_lab"] == region_lab
             ]

@@ -18,11 +18,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
-from cg.meta.orders.external_data import ExternalDataAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.observations.observations_input_files import ObservationsInputFiles
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -445,7 +444,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.10.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.11.rml.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -561,13 +560,13 @@ def fixture_bed_file(analysis_dir) -> str:
 
 
 @pytest.fixture(name="helpers")
-def fixture_helpers():
+def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores"""
     return StoreHelpers()
 
 
 @pytest.fixture(name="small_helpers")
-def fixture_small_helpers():
+def fixture_small_helpers() -> SmallHelpers:
     """Return a class with small helper functions"""
     return SmallHelpers()
 
