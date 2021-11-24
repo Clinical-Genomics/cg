@@ -180,14 +180,14 @@ class OrdersAPI(StatusHandler):
 
     def _process_case_samples(self, order: OrderIn, project: OrderType) -> dict:
         """Process samples to be analyzed."""
+        project_data = lims_map = None
+
         # submit new samples to lims
         new_samples = [sample for sample in order.samples if sample.internal_id is None]
         if new_samples:
             project_data, lims_map = process_lims(
                 lims_api=self.lims, lims_order=order, new_samples=new_samples
             )
-        else:
-            project_data = lims_map = None
 
         status_data = self.cases_to_status(order=order, project=project)
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
