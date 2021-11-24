@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import requests
-from pymysql import IntegrityError
+from sqlalchemy.exc import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
