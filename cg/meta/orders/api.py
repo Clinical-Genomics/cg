@@ -132,7 +132,6 @@ class OrdersAPI(StatusHandler):
                 if link_obj.sample.ticket_number == order.ticket
             ]
             self._add_missing_reads(status_samples)
-        self._update_application(order.ticket, result["records"])
         return result
 
     def _submit_mip_dna(self, order: OrderIn) -> dict:
@@ -202,39 +201,6 @@ class OrdersAPI(StatusHandler):
             cases=status_data["families"],
         )
         return {"project": project_data, "records": new_families}
-
-    def _update_application(self, ticket_number: int, families: List[models.Family]) -> None:
-        """Update application for trios if relevant."""
-        reduced_map = {
-            "EXOSXTR100": "EXTSXTR100",
-            "WGSPCFC030": "WGTPCFC030",
-        }
-        for case_obj in families:
-            LOG.debug(f"{case_obj.name}: update application for trios")
-            order_samples = [
-                link_obj.sample
-                for link_obj in case_obj.links
-                if link_obj.sample.ticket_number == ticket_number
-            ]
-            if len(order_samples) >= 3:
-                applications = [
-                    sample_obj.application_version.application for sample_obj in order_samples
-                ]
-                prep_categories = {application.prep_category for application in applications}
-                if len(prep_categories) == 1:
-                    for sample_obj in order_samples:
-                        if not sample_obj.application_version.application.reduced_price:
-                            application_tag = sample_obj.application_version.application.tag
-                            if application_tag in reduced_map:
-                                reduced_tag = reduced_map[application_tag]
-                                LOG.info(
-                                    f"{sample_obj.internal_id}: update application tag - "
-                                    f"{reduced_tag}"
-                                )
-                                reduced_version = self.status.current_application_version(
-                                    reduced_tag
-                                )
-                                sample_obj.application_version = reduced_version
 
     def _add_missing_reads(self, samples: List[models.Sample]):
         """Add expected reads/reads missing."""
