@@ -334,6 +334,7 @@ class StatusHandler:
             for sample in samples:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
+                    internal_id=sample.get("internal_id"),
                     name=sample["name"],
                     order=order,
                     ordered=ordered,
@@ -380,13 +381,14 @@ class StatusHandler:
         with self.status.session.no_autoflush:
             for sample in samples:
                 new_sample = self.status.add_sample(
+                    comment=sample["comment"],
+                    internal_id=sample.get("internal_id"),
                     name=sample["name"],
-                    sex=sample["sex"] or "unknown",
                     order=order,
                     ordered=ordered,
-                    ticket=ticket,
                     priority=sample["priority"],
-                    comment=sample["comment"],
+                    sex=sample["sex"] or "unknown",
+                    ticket=ticket,
                     tumour=sample["tumour"],
                 )
                 new_sample.customer = customer_obj
@@ -488,6 +490,7 @@ class StatusHandler:
                     comment=sample_data["comment"],
                     customer=customer_obj,
                     data_delivery=sample_data["data_delivery"],
+                    internal_id=sample_data.get("internal_id"),
                     name=sample_data["name"],
                     order=order,
                     ordered=ordered,
