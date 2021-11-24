@@ -18,14 +18,14 @@ def test_pools_to_status(rml_order_to_submit):
 
     # THEN it should pick out the general information
     assert data["customer"] == "cust000"
-    assert data["order"] == "ctDNA sequencing - order 9"
+    assert data["order"] == "#123456"
     assert data["comment"] == "order comment"
 
     # ... and information about the pool(s)
     assert len(data["pools"]) == 2
     pool = data["pools"][0]
     assert pool["name"] == "pool-1"
-    assert pool["application"] == "RMLS05R150"
+    assert pool["application"] == "RMLP05R800"
     assert pool["data_analysis"] == str(Pipeline.FLUFFY)
     assert pool["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
     assert len(pool["samples"]) == 2
@@ -205,7 +205,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_pool == new_pools[1]
 
     assert new_pool.name == "pool-2"
-    assert new_pool.application_version.application.tag == "RMLS05R150"
+    assert new_pool.application_version.application.tag == "RMLP05R800"
     assert not hasattr(new_pool, "data_analysis")
 
     # ... and add a delivery
