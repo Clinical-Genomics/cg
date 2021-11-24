@@ -4,7 +4,7 @@
   "comment": "order comment",
   "samples": [
     {
-      "application": "RMLP05R800",
+      "application": "RMLS05R150",
       "comment": "test comment",
       "concentration": "5",
       "concentration_sample": "6",
@@ -20,7 +20,7 @@
       "volume": "30"
     },
     {
-      "application": "RMLP05R800",
+      "application": "RMLS05R150",
       "comment": "",
       "concentration": "5",
       "concentration_sample": "6",
@@ -38,7 +38,7 @@
       "well_position_rml": ""
     },
     {
-      "application": "RMLP05R800",
+      "application": "RMLS05R150",
       "comment": "test comment",
       "concentration": "5",
       "concentration_sample": "6",
@@ -56,7 +56,7 @@
       "well_position_rml": "A:1"
     },
     {
-      "application": "RMLP05R800",
+      "application": "RMLS05R150",
       "comment": "",
       "concentration": "5",
       "concentration_sample": "6",
