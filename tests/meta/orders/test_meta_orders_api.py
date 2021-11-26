@@ -363,7 +363,6 @@ def test_validate_sex_unknown_new_sex(
     # THEN no OrderError should be raised on non-matching sex
 
 
-
 @pytest.mark.parametrize(
     "order_type",
     [
