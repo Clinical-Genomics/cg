@@ -944,7 +944,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RMLS05R150",
+            tag="RMLP05R800",
             category="rml",
             description="Ready-made",
             sequencing_depth=0,
@@ -953,7 +953,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="WGTPCFC030",
+            tag="WGSPCFC030",
             category="wgs",
             description="WGS trio",
             is_accredited=True,
@@ -1065,7 +1065,7 @@ def sample_store(base_store) -> Store:
     ]
     customer = base_store.customers().first()
     external_app = base_store.application("WGXCUSC000").versions[0]
-    wgs_app = base_store.application("WGTPCFC030").versions[0]
+    wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app

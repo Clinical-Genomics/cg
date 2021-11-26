@@ -3,14 +3,15 @@ from typing import List
 from cg.constants import Pipeline
 from cg.meta.orders.lims import build_lims_sample
 from cg.models.lims.sample import LimsSample
+from cg.models.orders.constants import OrderType
+from cg.models.orders.order import OrderIn
 
 
 def test_to_lims_mip(mip_order_to_submit):
     # GIVEN a scout order for a trio
+    order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
     # WHEN parsing the order to format for LIMS import
-    samples: List[LimsSample] = build_lims_sample(
-        customer="cust003", samples=mip_order_to_submit["samples"]
-    )
+    samples: List[LimsSample] = build_lims_sample(customer="cust003", samples=order_data.samples)
 
     # THEN it should list all samples
     assert len(samples) == 4
@@ -27,7 +28,7 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample.well_position == "A:1"
     assert first_sample.udfs.family_name == "family1"
     assert first_sample.udfs.priority == "standard"
-    assert first_sample.udfs.application == "WGTPCFC030"
+    assert first_sample.udfs.application == "WGSPCFC030"
     assert first_sample.udfs.source == "tissue (fresh frozen)"
     assert first_sample.udfs.quantity == "220"
     assert first_sample.udfs.customer == "cust003"
@@ -39,11 +40,10 @@ def test_to_lims_mip(mip_order_to_submit):
 
 def test_to_lims_fastq(fastq_order_to_submit):
     # GIVEN a fastq order for two samples; normal vs. tumour
+    order_data = OrderIn.parse_obj(obj=fastq_order_to_submit, project=OrderType.FASTQ)
 
     # WHEN parsing the order to format for LIMS
-    samples: List[LimsSample] = build_lims_sample(
-        customer="dummyCust", samples=fastq_order_to_submit["samples"]
-    )
+    samples: List[LimsSample] = build_lims_sample(customer="dummyCust", samples=order_data.samples)
 
     # THEN should "work"
     assert len(samples) == 2
@@ -57,11 +57,10 @@ def test_to_lims_fastq(fastq_order_to_submit):
 
 def test_to_lims_rml(rml_order_to_submit):
     # GIVEN a rml order for four samples
+    order_data = OrderIn.parse_obj(obj=rml_order_to_submit, project=OrderType.RML)
 
     # WHEN parsing for LIMS
-    samples: List[LimsSample] = build_lims_sample(
-        customer="dummyCust", samples=rml_order_to_submit["samples"]
-    )
+    samples: List[LimsSample] = build_lims_sample(customer="dummyCust", samples=order_data.samples)
 
     # THEN it should have found the same number of samples
     assert len(samples) == 4
@@ -69,18 +68,17 @@ def test_to_lims_rml(rml_order_to_submit):
     first_sample = samples[0]
     assert first_sample.udfs.pool == "pool-1"
     assert first_sample.udfs.volume == "30"
-    assert first_sample.udfs.concentration == "5"
+    assert first_sample.udfs.concentration == "5.0"
     assert first_sample.udfs.index == "IDT DupSeq 10 bp Set B"
     assert first_sample.udfs.index_number == "1"
 
 
 def test_to_lims_microbial(microbial_order_to_submit):
     # GIVEN a microbial order for three samples
+    order_data = OrderIn.parse_obj(obj=microbial_order_to_submit, project=OrderType.MICROSALT)
 
     # WHEN parsing for LIMS
-    samples: List[LimsSample] = build_lims_sample(
-        customer="cust000", samples=microbial_order_to_submit["samples"]
-    )
+    samples: List[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
     # THEN it should "work"
 
     assert len(samples) == 5
@@ -98,11 +96,10 @@ def test_to_lims_microbial(microbial_order_to_submit):
 
 def test_to_lims_sarscov2(sarscov2_order_to_submit):
     # GIVEN a sarscov2 order for samples
+    order_data = OrderIn.parse_obj(obj=sarscov2_order_to_submit, project=OrderType.SARS_COV_2)
 
     # WHEN parsing for LIMS
-    samples: List[LimsSample] = build_lims_sample(
-        customer="cust000", samples=sarscov2_order_to_submit["samples"]
-    )
+    samples: List[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
 
     # THEN it should have found the same number of samples
     assert len(samples) == 5
@@ -126,10 +123,10 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
 def test_to_lims_balsamic(balsamic_order_to_submit):
 
     # GIVEN a cancer order for a sample
+    order_data = OrderIn.parse_obj(obj=balsamic_order_to_submit, project=OrderType.BALSAMIC)
+
     # WHEN parsing the order to format for LIMS import
-    samples: List[LimsSample] = build_lims_sample(
-        customer="cust000", samples=balsamic_order_to_submit["samples"]
-    )
+    samples: List[LimsSample] = build_lims_sample(customer="cust000", samples=order_data.samples)
     # THEN it should list all samples
 
     assert len(samples) == 1
@@ -142,7 +139,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert first_sample["name"] == "s1"
     assert {sample.container for sample in samples} == set(["96 well plate"])
     assert first_sample["udfs"]["data_analysis"] == str(Pipeline.BALSAMIC)
-    assert first_sample["udfs"]["application"] == "WGTPCFC030"
+    assert first_sample["udfs"]["application"] == "WGSPCFC030"
     assert first_sample["udfs"]["sex"] == "M"
     assert first_sample["udfs"]["family_name"] == "family1"
     assert first_sample["udfs"]["customer"] == "cust000"
@@ -153,7 +150,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit):
     assert container_names == set(["p1"])
     assert first_sample["well_position"] == "A:1"
     assert first_sample["udfs"]["tumour"] is True
-    assert first_sample["udfs"]["capture_kit"] == "LymphoMATIC"
+    assert first_sample["udfs"]["capture_kit"] == "other"
     assert first_sample["udfs"]["tumour_purity"] == "75"
 
     assert first_sample["udfs"]["formalin_fixation_time"] == "1"

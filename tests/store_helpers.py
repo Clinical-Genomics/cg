@@ -400,7 +400,7 @@ class StoreHelpers:
 
         case_obj = self.add_case(store, case_obj=case_obj, customer_id=customer_obj.internal_id)
 
-        app_tag = app_tag or "WGTPCFC030"
+        app_tag = app_tag or "WGSPCFC030"
         app_type = case_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
 

@@ -3,8 +3,8 @@ from typing import List, Set
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderFormError
-from cg.meta.orders import OrderType
 from cg.models.orders.json_sample import JsonSample
+from cg.models.orders.order import OrderType
 
 
 class JsonOrderformParser(OrderformParser):
@@ -13,7 +13,8 @@ class JsonOrderformParser(OrderformParser):
         str(Pipeline.FLUFFY),
         str(Pipeline.BALSAMIC),
     ]
-    NO_VALUE = "no_value"
+    NO_VALUE: str = "no_value"
+    samples: List[JsonSample] = []
 
     def get_project_type(self) -> str:
         """Determine the project type."""
@@ -27,7 +28,7 @@ class JsonOrderformParser(OrderformParser):
         if data_analysis in self.ACCEPTED_DATA_ANALYSES:
             return data_analysis
 
-        raise OrderFormError(f"Unsupported order_data orderform: {data_analyses}")
+        raise OrderFormError(f"Unsupported data_analysis: {data_analyses} for json data")
 
     @staticmethod
     def project_type_to_order_type(project_type: str) -> str:
