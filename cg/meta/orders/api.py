@@ -9,6 +9,7 @@ be validated and if passing all checks be accepted as new samples.
 import datetime as dt
 import logging
 import typing
+from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from cg.apps.lims import LimsAPI
@@ -26,6 +27,25 @@ from ...models.orders.samples import OrderInSample, Of1508Sample, MicrobialSampl
 LOG = logging.getLogger(__name__)
 
 
+class Submitter(ABC):
+
+    @abstractmethod
+    def validate_order(self, order: OrderIn):
+        pass
+
+    @abstractmethod
+    def submit_order(self, order: OrderIn):
+        pass
+
+
+class FluffySubmitter(Submitter):
+    def submit_order(self, order: OrderIn):
+        pass
+
+    def validate_order(self, order: OrderIn):
+        pass
+
+
 class OrdersAPI(StatusHandler):
     """Orders API for accepting new samples into the system."""
 
@@ -40,7 +60,11 @@ class OrdersAPI(StatusHandler):
 
         Main entry point for the class towards interfaces that implements it.
         """
-        self.validate_order(order_in, project)
+        submit_handler = self._get_submit_handler(project)
+        if submit_handler:
+            submit_handler.validate_order(OrderIn)
+        else:
+            self.validate_order(order_in, project)
 
         # detect manual ticket assignment
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
@@ -51,8 +75,20 @@ class OrdersAPI(StatusHandler):
 
         order_in.ticket = ticket_number
 
+        if submit_handler:
+            return submit_handler.submit()
+
         order_func = self._get_submit_func(project.value)
         return order_func(order_in)
+
+    @staticmethod
+    def _get_submit_handler(project: OrderType) -> Submitter:
+        """Factory Method"""
+
+        submitters = {
+            OrderType.FLUFFY: FluffySubmitter,
+        }
+        return None # submitters[project]()
 
     def validate_order(self, order_in: OrderIn, project: OrderType):
         self._validate_samples_available_to_customer(
@@ -292,7 +328,7 @@ class OrdersAPI(StatusHandler):
 
         for sample in samples:
 
-            sample_name: str = sample.get("name")
+            sample_name: str = sample.name
 
             if self._existing_sample(sample):
                 continue
@@ -303,8 +339,8 @@ class OrdersAPI(StatusHandler):
                 )
 
     @staticmethod
-    def _existing_sample(sample: dict) -> bool:
-        return sample.get("internal_id") is not None
+    def _existing_sample(sample: OrderInSample) -> bool:
+        return hasattr(sample, "internal_id") and sample.internal_id is not None
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
         """Get the submit method to call for the given type of project"""

@@ -48,7 +48,7 @@ def test_submit(
     user_mail: str,
     ticket_number: int,
 ):
-    order_data = all_orders_to_submit[order_type]
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
     monkeypatch.setattr(
@@ -89,7 +89,7 @@ def test_submit_illegal_sample_customer(
     user_mail: str,
 ):
 
-    order_data = all_orders_to_submit[order_type]
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
     monkeypatch.setattr(PROCESS_LIMS_FUNCTION, lambda **kwargs: (lims_project_data, lims_map))
@@ -137,7 +137,7 @@ def test_submit_scout_legal_sample_customer(
     ticket_number: int,
 ):
 
-    order_data = all_orders_to_submit[order_type]
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
     monkeypatch.setattr(PROCESS_LIMS_FUNCTION, lambda **kwargs: (lims_project_data, lims_map))
@@ -386,13 +386,13 @@ def test_submit_unique_sample_name(
     monkeypatch,
 ):
     # GIVEN we have an order with a sample that is not existing in the database
-    order_data = all_orders_to_submit[order_type]
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
     assert store.samples().first() is None
 
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
-        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+        sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
     monkeypatch.setattr(
         PROCESS_LIMS_FUNCTION,
@@ -423,17 +423,17 @@ def test_sarscov2_submit_duplicate_sample_name(
     helpers,
 ):
     # GIVEN we have an order with samples that is already in the database
-    order_data = all_orders_to_submit[order_type]
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     mocker.patch(PROCESS_LIMS_FUNCTION)
 
     store = orders_api.status
     customer_obj = store.customer(order_data.customer)
 
     for sample in order_data.samples:
-        sample_name = sample["name"]
+        sample_name = sample.name
         if not store.find_samples(customer=customer_obj, name=sample_name).first():
             sample_obj = helpers.add_sample(
-                store=store, sample_name=sample_name, customer_internal_id=customer_obj.internal_id
+                store=store, name=sample_name, customer_id=customer_obj.internal_id
             )
             store.add_commit(sample_obj)
         assert store.find_samples(customer=customer_obj, name=sample_name).first()
@@ -473,10 +473,10 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     helpers,
 ):
     # GIVEN we have an order with samples that is already in the database
-    order_data = all_orders_to_submit[order_type]
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {
-        sample["name"]: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
+        sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)
     }
     monkeypatch.setattr(
         PROCESS_LIMS_FUNCTION,
@@ -487,10 +487,10 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     customer_obj = store.customer(order_data.customer)
 
     for sample in order_data.samples:
-        sample_name = sample["name"]
+        sample_name = sample.name
         if not store.find_samples(customer=customer_obj, name=sample_name).first():
             sample_obj = helpers.add_sample(
-                store=store, sample_name=sample_name, customer_internal_id=customer_obj.internal_id
+                store=store, name=sample_name, customer_id=customer_obj.internal_id
             )
             store.add_commit(sample_obj)
         assert store.find_samples(customer=customer_obj, name=sample_name).first()
