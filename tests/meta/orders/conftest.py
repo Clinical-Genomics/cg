@@ -23,6 +23,7 @@ def all_orders_to_submit(
     return {
         OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit, project=OrderType.BALSAMIC),
         OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit, project=OrderType.FASTQ),
+        OrderType.FLUFFY: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
         OrderType.METAGENOME: OrderIn.parse_obj(
             metagenome_order_to_submit, project=OrderType.METAGENOME
         ),
