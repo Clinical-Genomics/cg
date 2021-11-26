@@ -105,9 +105,9 @@ class Of1508Sample(OrderInSample):
     ]
     synopsis: Optional[str]
 
-    @validator("tumour_purity", "formalin_fixation_time", "post_formalin_fixation_time", pre=True)
+    @validator("tumour_purity", "formalin_fixation_time", "post_formalin_fixation_time", "quantity", pre=True)
     def str_to_int(cls, v: str) -> Optional[int]:
-        if not v:
+        if v in (None, ""):
             return None
         return int(v)
 
