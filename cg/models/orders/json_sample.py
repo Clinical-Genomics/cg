@@ -6,7 +6,7 @@ from pydantic import Field, constr, validator
 
 
 class JsonSample(OrderSample):
-    case_id: str = Field(None, alias="family_name")
+
     concentration: Optional[str]
     concentration_sample: Optional[str]
     control: Optional[str]

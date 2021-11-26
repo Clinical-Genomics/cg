@@ -18,11 +18,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
-from cg.meta.orders.external_data import ExternalDataAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.observations.observations_input_files import ObservationsInputFiles
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -445,7 +444,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.10.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.11.rml.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -561,13 +560,13 @@ def fixture_bed_file(analysis_dir) -> str:
 
 
 @pytest.fixture(name="helpers")
-def fixture_helpers():
+def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores"""
     return StoreHelpers()
 
 
 @pytest.fixture(name="small_helpers")
-def fixture_small_helpers():
+def fixture_small_helpers() -> SmallHelpers:
     """Return a class with small helper functions"""
     return SmallHelpers()
 
@@ -945,7 +944,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RMLS05R150",
+            tag="RMLP05R800",
             category="rml",
             description="Ready-made",
             sequencing_depth=0,
@@ -954,7 +953,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="WGTPCFC030",
+            tag="WGSPCFC030",
             category="wgs",
             description="WGS trio",
             is_accredited=True,
@@ -1066,7 +1065,7 @@ def sample_store(base_store) -> Store:
     ]
     customer = base_store.customers().first()
     external_app = base_store.application("WGXCUSC000").versions[0]
-    wgs_app = base_store.application("WGTPCFC030").versions[0]
+    wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app

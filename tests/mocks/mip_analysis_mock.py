@@ -1,7 +1,7 @@
 import yaml
 
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.mip.mip_metrics_deliverables import MetricsDeliverables
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
 def create_mip_metrics_deliverables():
@@ -9,7 +9,7 @@ def create_mip_metrics_deliverables():
     metrics_deliverables: dict = yaml.safe_load(
         open("tests/fixtures/apps/mip/case_metrics_deliverables.yaml")
     )
-    return MetricsDeliverables(**metrics_deliverables)
+    return MIPMetricsDeliverables(**metrics_deliverables)
 
 
 class MockMipAnalysis:
@@ -24,7 +24,7 @@ class MockMipAnalysis:
         """Mock get_latest_metadata"""
         # Returns: dict: parsed data
         # Define output dict
-        metrics: MetricsDeliverables = create_mip_metrics_deliverables()
+        metrics: MIPMetricsDeliverables = create_mip_metrics_deliverables()
         return MipAnalysis(
             case=family_id or "yellowhog",
             genome_build="hg19",

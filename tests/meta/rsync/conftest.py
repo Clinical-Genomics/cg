@@ -13,7 +13,7 @@ def fixture_mutant_case(
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id=case_id,
-        case_id=ticket_number,
+        name=ticket_number,
         data_analysis=Pipeline.SARS_COV_2,
     )
     return case
@@ -27,7 +27,7 @@ def fixture_microsalt_case(
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id=case_id,
-        case_id=ticket_number,
+        name=ticket_number,
         data_analysis=Pipeline.MICROSALT,
     )
     return case

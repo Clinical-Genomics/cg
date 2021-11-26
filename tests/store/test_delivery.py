@@ -26,7 +26,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     helpers.add_sample(store, sequenced_at=dt.datetime.now())
     helpers.add_sample(
         store,
-        sample_name="delivered",
+        name="delivered",
         sequenced_at=dt.datetime.now(),
         delivered_at=dt.datetime.now(),
     )
