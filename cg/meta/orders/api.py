@@ -30,20 +30,32 @@ LOG = logging.getLogger(__name__)
 class Submitter(ABC):
 
     @abstractmethod
-    def validate_order(self, order: OrderIn):
+    def validate_order(self, order: OrderIn) -> None:
         pass
 
     @abstractmethod
-    def submit_order(self, order: OrderIn):
+    def submit_order(self, order: OrderIn) -> dict:
         pass
 
 
-class FluffySubmitter(Submitter):
-    def submit_order(self, order: OrderIn):
+class FastqSubmitter(Submitter):
+    def submit_order(self, order: OrderIn) -> dict:
+
+        return self._submit_fastq(order)
+
+    def validate_order(self, order: OrderIn) -> None:
         pass
 
-    def validate_order(self, order: OrderIn):
-        pass
+
+def _get_submit_handler(project: OrderType) -> Submitter:
+    """Factory Method"""
+
+    submitters = {
+        OrderType.FASTQ: FastqSubmitter,
+    }
+    if project in submitters:
+        return submitters[project]()
+    return None
 
 
 class OrdersAPI(StatusHandler):
@@ -60,7 +72,7 @@ class OrdersAPI(StatusHandler):
 
         Main entry point for the class towards interfaces that implements it.
         """
-        submit_handler = self._get_submit_handler(project)
+        submit_handler = _get_submit_handler(project)
         if submit_handler:
             submit_handler.validate_order(OrderIn)
         else:
@@ -76,19 +88,10 @@ class OrdersAPI(StatusHandler):
         order_in.ticket = ticket_number
 
         if submit_handler:
-            return submit_handler.submit()
+            return submit_handler.submit_order(OrderIn)
 
         order_func = self._get_submit_func(project.value)
         return order_func(order_in)
-
-    @staticmethod
-    def _get_submit_handler(project: OrderType) -> Submitter:
-        """Factory Method"""
-
-        submitters = {
-            OrderType.FLUFFY: FluffySubmitter,
-        }
-        return None # submitters[project]()
 
     def validate_order(self, order_in: OrderIn, project: OrderType):
         self._validate_samples_available_to_customer(

@@ -30,6 +30,7 @@ def test_too_long_order_name():
     [
         OrderType.BALSAMIC,
         OrderType.FASTQ,
+        OrderType.FLUFFY,
         OrderType.METAGENOME,
         OrderType.MICROSALT,
         OrderType.MIP_DNA,
