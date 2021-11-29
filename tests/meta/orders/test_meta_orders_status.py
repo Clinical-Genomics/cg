@@ -5,6 +5,7 @@ import pytest
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
+from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.status import StatusHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
@@ -63,7 +64,7 @@ def test_metagenome_to_status(metagenome_order_to_submit):
     order = OrderIn.parse_obj(metagenome_order_to_submit, OrderType.METAGENOME)
 
     # WHEN parsing for status
-    data = StatusHandler.metagenome_to_status(order=order)
+    data = MetagenomeSubmitter.metagenome_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
@@ -583,8 +584,10 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
+    submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_metagenome(
+    new_samples = submitter.store_metagenome(
         customer=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
@@ -604,10 +607,12 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
     for sample in metagenome_status_data["samples"]:
         sample["application"] = "nonexistingtag"
 
+    submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_metagenome(
+        submitter.store_metagenome(
             customer=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),

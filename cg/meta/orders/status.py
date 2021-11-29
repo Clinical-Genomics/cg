@@ -98,29 +98,6 @@ class StatusHandler:
             )
         return status_data
 
-
-
-    @staticmethod
-    def metagenome_to_status(order: OrderIn) -> dict:
-        """Convert order input to status for metagenome orders."""
-        status_data = {
-            "customer": order.customer,
-            "order": order.name,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "data_analysis": sample.data_analysis,
-                    "data_delivery": sample.data_delivery,
-                    "name": sample.name,
-                    "priority": sample.priority,
-                    "volume": sample.volume,
-                }
-                for sample in order.samples
-            ],
-        }
-        return status_data
-
     @staticmethod
     def microbial_samples_to_status(order: OrderIn) -> dict:
         """Convert order input for microbial samples."""
@@ -299,53 +276,6 @@ class StatusHandler:
                     self.status.add(new_link)
             self.status.add_commit(new_families)
         return new_families
-
-    def store_metagenome(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
-    ) -> List[models.Sample]:
-        """Store samples in the status database."""
-        customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
-        new_samples = []
-
-        with self.status.session.no_autoflush:
-            for sample in samples:
-                new_sample = self.status.add_sample(
-                    comment=sample["comment"],
-                    internal_id=sample.get("internal_id"),
-                    name=sample["name"],
-                    order=order,
-                    ordered=ordered,
-                    priority=sample["priority"],
-                    sex="unknown",
-                    ticket=ticket,
-                )
-                new_sample.customer = customer_obj
-                application_tag = sample["application"]
-                application_version = self.status.current_application_version(application_tag)
-                if application_version is None:
-                    raise OrderError(f"Invalid application: {sample['application']}")
-                new_sample.application_version = application_version
-                new_samples.append(new_sample)
-
-                new_case = self.status.add_case(
-                    data_analysis=Pipeline(sample["data_analysis"]),
-                    data_delivery=DataDelivery(sample["data_delivery"]),
-                    name=sample["name"],
-                    panels=None,
-                    priority=sample["priority"],
-                )
-                new_case.customer = customer_obj
-                self.status.add(new_case)
-
-                new_relationship = self.status.relate_sample(
-                    family=new_case, sample=new_sample, status=StatusEnum.unknown
-                )
-                self.status.add(new_relationship)
-
-        self.status.add_commit(new_samples)
-        return new_samples
 
     def store_microbial_samples(
         self,

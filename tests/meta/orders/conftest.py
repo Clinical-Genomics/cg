@@ -4,6 +4,7 @@ from tests.mocks.osticket import MockOsTicket
 
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
+from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.status import StatusHandler
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
@@ -61,7 +62,8 @@ def metagenome_status_data(metagenome_order_to_submit: dict):
     """Parse metagenome order example."""
     project: OrderType = OrderType.METAGENOME
     order: OrderIn = OrderIn.parse_obj(obj=metagenome_order_to_submit, project=project)
-    return StatusHandler.metagenome_to_status(order=order)
+
+    return MetagenomeSubmitter.metagenome_to_status(order=order)
 
 
 @pytest.fixture
