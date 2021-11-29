@@ -4,6 +4,7 @@ import pytest
 
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
+from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.status import StatusHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
@@ -41,7 +42,7 @@ def test_samples_to_status(fastq_order_to_submit):
     order = OrderIn.parse_obj(fastq_order_to_submit, OrderType.FASTQ)
 
     # WHEN parsing for status
-    data = StatusHandler.fastq_to_status(order=order)
+    data = FastqSubmitter.fastq_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
@@ -246,8 +247,10 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
 
+    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_fastq_samples(
+    new_samples = submitter.store_fastq_samples(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
@@ -274,8 +277,10 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
 
+    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_fastq_samples(
+    new_samples = submitter.store_fastq_samples(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
@@ -294,8 +299,10 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
     base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
     fastq_status_data["samples"][0]["tumour"] = False
 
+    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_fastq_samples(
+    new_samples = submitter.store_fastq_samples(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
@@ -314,8 +321,10 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(orders_api, base_store, fastq_s
     base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
     fastq_status_data["samples"][0]["tumour"] = True
 
+    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_fastq_samples(
+    new_samples = submitter.store_fastq_samples(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
@@ -336,8 +345,10 @@ def test_store_fastq_samples_non_wgs_as_fastq(orders_api, base_store, fastq_stat
     for sample in fastq_status_data["samples"]:
         sample["application"] = base_store.applications(category=non_wgs_prep_category)[0].tag
 
+    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_fastq_samples(
+    new_samples = submitter.store_fastq_samples(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
@@ -357,10 +368,12 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
     for sample in fastq_status_data["samples"]:
         sample["application"] = "nonexistingtag"
 
+    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_fastq_samples(
+        submitter.store_fastq_samples(
             customer=fastq_status_data["customer"],
             order=fastq_status_data["order"],
             ordered=dt.datetime.now(),

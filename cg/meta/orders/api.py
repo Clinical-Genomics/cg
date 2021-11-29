@@ -22,6 +22,7 @@ from cg.store import Store, models
 from .lims import process_lims
 from .status import StatusHandler
 from .ticket_handler import TicketHandler
+from ...models.orders.sample_base import StatusEnum
 from ...models.orders.samples import OrderInSample, Of1508Sample, MicrobialSample
 
 LOG = logging.getLogger(__name__)
@@ -29,32 +30,154 @@ LOG = logging.getLogger(__name__)
 
 class Submitter(ABC):
 
+    def __init__(self, lims: LimsAPI, status: Store):
+        self.lims = lims
+        self.status = status
+
     @abstractmethod
     def validate_order(self, order: OrderIn) -> None:
         pass
 
     @abstractmethod
-    def submit_order(self, order: OrderIn) -> dict:
+    def submit_order(self, order: OrderIn, lims: LimsAPI, status: Store) -> dict:
         pass
+
+    @staticmethod
+    def _fill_in_sample_ids(samples: List[dict], lims_map: dict, id_key: str = "internal_id"):
+        """Fill in LIMS sample ids."""
+        for sample in samples:
+            LOG.debug(f"{sample['name']}: link sample to LIMS")
+            if not sample.get(id_key):
+                internal_id = lims_map[sample["name"]]
+                LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
+                sample[id_key] = internal_id
+
+    def _add_missing_reads(self, samples: List[models.Sample]):
+        """Add expected reads/reads missing."""
+        for sample_obj in samples:
+            LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")
+            target_reads = sample_obj.application_version.application.target_reads / 1000000
+            self.lims.update_sample(sample_obj.internal_id, target_reads=target_reads)
 
 
 class FastqSubmitter(Submitter):
-    def submit_order(self, order: OrderIn) -> dict:
-
-        return self._submit_fastq(order)
 
     def validate_order(self, order: OrderIn) -> None:
         pass
 
+    @staticmethod
+    def fastq_to_status(order: OrderIn) -> dict:
+        """Convert order input to status for fastq-only orders."""
+        status_data = {
+            "customer": order.customer,
+            "order": order.name,
+            "samples": [
+                {
+                    "application": sample.application,
+                    "comment": sample.comment,
+                    "data_analysis": sample.data_analysis,
+                    "data_delivery": sample.data_delivery,
+                    "name": sample.name,
+                    "priority": sample.priority,
+                    "sex": sample.sex,
+                    "tumour": sample.tumour,
+                    "volume": sample.volume,
+                }
+                for sample in order.samples
+            ],
+        }
+        return status_data
 
-def _get_submit_handler(project: OrderType) -> Submitter:
+    def submit_order(self, order: OrderIn) -> dict:
+        """Submit a batch of samples for FASTQ delivery."""
+
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, lims_order=order, new_samples=order.samples
+        )
+        status_data = self.fastq_to_status(order)
+        self._fill_in_sample_ids(status_data["samples"], lims_map)
+        new_samples = self.store_fastq_samples(
+            customer=status_data["customer"],
+            order=status_data["order"],
+            ordered=project_data["date"],
+            ticket=order.ticket,
+            samples=status_data["samples"],
+        )
+        self._add_missing_reads(new_samples)
+        return {"project": project_data, "records": new_samples}
+
+    @staticmethod
+    def get_fastq_pipeline(
+        application_version: models.ApplicationVersion, is_tumour: bool
+    ) -> Pipeline:
+        if is_tumour:
+            return Pipeline.FASTQ
+        if application_version.application.prep_category == "wgs":
+            return Pipeline.MIP_DNA
+
+        return Pipeline.FASTQ
+
+    def store_fastq_samples(
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
+    ) -> List[models.Sample]:
+        """Store fastq samples in the status database including family connection and delivery"""
+        production_customer = self.status.customer("cust000")
+        customer_obj = self.status.customer(customer)
+        if customer_obj is None:
+            raise OrderError(f"unknown customer: {customer}")
+        new_samples = []
+
+        with self.status.session.no_autoflush:
+            for sample in samples:
+                new_sample = self.status.add_sample(
+                    comment=sample["comment"],
+                    internal_id=sample.get("internal_id"),
+                    name=sample["name"],
+                    order=order,
+                    ordered=ordered,
+                    priority=sample["priority"],
+                    sex=sample["sex"] or "unknown",
+                    ticket=ticket,
+                    tumour=sample["tumour"],
+                )
+                new_sample.customer = customer_obj
+                application_tag = sample["application"]
+                application_version = self.status.current_application_version(application_tag)
+                if application_version is None:
+                    raise OrderError(f"Invalid application: {sample['application']}")
+                new_sample.application_version = application_version
+                new_samples.append(new_sample)
+                data_analysis: Pipeline = self.get_fastq_pipeline(
+                    application_version, new_sample.is_tumour
+                )
+                new_case = self.status.add_case(
+                    data_analysis=data_analysis,
+                    data_delivery=DataDelivery(sample["data_delivery"]),
+                    name=sample["name"],
+                    panels=["OMIM-AUTO"],
+                    priority="research",
+                )
+                new_case.customer = production_customer
+                self.status.add(new_case)
+                new_relationship = self.status.relate_sample(
+                    family=new_case, sample=new_sample, status=StatusEnum.unknown
+                )
+                self.status.add(new_relationship)
+                new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
+                self.status.add(new_delivery)
+
+        self.status.add_commit(new_samples)
+        return new_samples
+
+
+def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Submitter:
     """Factory Method"""
 
     submitters = {
         OrderType.FASTQ: FastqSubmitter,
     }
     if project in submitters:
-        return submitters[project]()
+        return submitters[project](lims=lims, status=status)
     return None
 
 
@@ -72,9 +195,9 @@ class OrdersAPI(StatusHandler):
 
         Main entry point for the class towards interfaces that implements it.
         """
-        submit_handler = _get_submit_handler(project)
+        submit_handler = _get_submit_handler(project, lims=self.lims, status=self.status)
         if submit_handler:
-            submit_handler.validate_order(OrderIn)
+            submit_handler.validate_order(order=OrderIn)
         else:
             self.validate_order(order_in, project)
 
@@ -88,7 +211,7 @@ class OrdersAPI(StatusHandler):
         order_in.ticket = ticket_number
 
         if submit_handler:
-            return submit_handler.submit_order(OrderIn)
+            return submit_handler.submit_order(order=order_in)
 
         order_func = self._get_submit_func(project.value)
         return order_func(order_in)
@@ -129,23 +252,6 @@ class OrdersAPI(StatusHandler):
             pools=status_data["pools"],
         )
         return {"project": project_data, "records": new_records}
-
-    def _submit_fastq(self, order: OrderIn) -> dict:
-        """Submit a batch of samples for FASTQ delivery."""
-        project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
-        )
-        status_data = self.fastq_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map)
-        new_samples = self.store_fastq_samples(
-            customer=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"],
-            ticket=order.ticket,
-            samples=status_data["samples"],
-        )
-        self._add_missing_reads(new_samples)
-        return {"project": project_data, "records": new_samples}
 
     def _submit_metagenome(self, order: OrderIn) -> dict:
         """Submit a batch of metagenome samples."""

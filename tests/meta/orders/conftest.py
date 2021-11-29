@@ -3,6 +3,7 @@ from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
 
 from cg.meta.orders import OrdersAPI
+from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.status import StatusHandler
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
@@ -52,7 +53,7 @@ def fastq_status_data(fastq_order_to_submit):
     """Parse fastq order example."""
     project: OrderType = OrderType.FASTQ
     order: OrderIn = OrderIn.parse_obj(obj=fastq_order_to_submit, project=project)
-    return StatusHandler.fastq_to_status(order=order)
+    return FastqSubmitter.fastq_to_status(order=order)
 
 
 @pytest.fixture
