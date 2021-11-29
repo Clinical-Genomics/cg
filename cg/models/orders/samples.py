@@ -19,17 +19,13 @@ from cg.store import models
 class OptionalIntValidator:
     @classmethod
     def str_to_int(cls, v: str) -> Optional[int]:
-        if v in (None, ""):
-            return None
-        return int(v)
+        return int(v) if v else None
 
 
 class OptionalFloatValidator:
     @classmethod
     def str_to_float(cls, v: str) -> Optional[float]:
-        if v in (None, ""):
-            return None
-        return float(v)
+        return float(v) if v else None
 
 
 class OrderInSample(BaseModel):
