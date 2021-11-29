@@ -21,6 +21,8 @@ from .fastq_submitter import FastqSubmitter
 
 from .lims import process_lims
 from .metagenome_submitter import MetagenomeSubmitter
+from .microsalt_submitter import MicrosaltSubmitter
+from .sars_cov_2_submitter import SarsCov2Submitter
 from .status import StatusHandler
 from .submitter import Submitter
 from .ticket_handler import TicketHandler
@@ -35,6 +37,8 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
     submitters = {
         OrderType.FASTQ: FastqSubmitter,
         OrderType.METAGENOME: MetagenomeSubmitter,
+        OrderType.MICROSALT: MicrosaltSubmitter,
+        OrderType.SARS_COV_2: SarsCov2Submitter,
     }
     if project in submitters:
         return submitters[project](lims=lims, status=status)
@@ -85,10 +89,6 @@ class OrdersAPI(StatusHandler):
         )
         self._validate_subject_sex(samples=order_in.samples, customer_id=order_in.customer)
 
-        self._validate_sample_names_are_available(
-            project=project, samples=order_in.samples, customer_id=order_in.customer
-        )
-
     def _submit_fluffy(self, order: OrderIn) -> dict:
         """Submit a batch of ready made libraries for FLUFFY analysis."""
         return self._submit_pools(order)
@@ -138,37 +138,6 @@ class OrdersAPI(StatusHandler):
         """Submit a batch of samples for sequencing and analysis."""
         return self._submit_case_samples(order=order, project=OrderType.MIP_RNA)
 
-    def _submit_microsalt(self, order: OrderIn) -> dict:
-        """Submit a batch of microbial samples."""
-        return self._submit_microbial_samples(order)
-
-    def _submit_microbial_samples(self, order: OrderIn):
-        self._fill_in_sample_verified_organism(order.samples)
-        # submit samples to LIMS
-        project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
-        )
-        # prepare order for status database
-        status_data = self.microbial_samples_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
-        # submit samples to Status
-        samples = self.store_microbial_samples(
-            customer=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket=order.ticket,
-            samples=status_data["samples"],
-            comment=status_data["comment"],
-            data_analysis=Pipeline(status_data["data_analysis"]),
-            data_delivery=DataDelivery(status_data["data_delivery"]),
-        )
-        return {"project": project_data, "records": samples}
-
-    def _submit_sars_cov_2(self, order: OrderIn) -> dict:
-        """Submit a batch of sars-cov-2 samples."""
-        # prepare order for status database
-        return self._submit_microbial_samples(order)
-
     def _process_case_samples(self, order: OrderIn, project: OrderType) -> dict:
         """Process samples to be analyzed."""
         project_data = lims_map = None
@@ -210,16 +179,6 @@ class OrdersAPI(StatusHandler):
                 internal_id = lims_map[sample["name"]]
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
-
-    def _fill_in_sample_verified_organism(self, samples: List[MicrobialSample]):
-        for sample in samples:
-            organism_id = sample.organism
-            reference_genome = sample.reference_genome
-            organism = self.status.organism(internal_id=organism_id)
-            is_verified = (
-                organism and organism.reference_genome == reference_genome and organism.verified
-            )
-            sample.verified_organism = is_verified
 
     def _validate_samples_available_to_customer(
         self, project: OrderType, samples: List[OrderInSample], customer_id: str
@@ -267,32 +226,6 @@ class OrdersAPI(StatusHandler):
     @staticmethod
     def _rerun_of_existing_case(sample: Of1508Sample) -> bool:
         return sample.case_internal_id is not None
-
-    def _validate_sample_names_are_available(
-        self, project: OrderType, samples: List[dict], customer_id: str
-    ) -> None:
-        """Validate that the names of all samples are unused for all samples"""
-
-        if project is not OrderType.SARS_COV_2:
-            return
-
-        customer_obj: models.Customer = self.status.customer(customer_id)
-
-        for sample in samples:
-
-            sample_name: str = sample.name
-
-            if self._existing_sample(sample):
-                continue
-
-            if self.status.find_samples(customer=customer_obj, name=sample_name).first():
-                raise OrderError(
-                    f"Sample name {sample_name} already in use for customer {customer_id}"
-                )
-
-    @staticmethod
-    def _existing_sample(sample: OrderInSample) -> bool:
-        return hasattr(sample, "internal_id") and sample.internal_id is not None
 
     def _get_submit_func(self, project_type: OrderType) -> typing.Callable:
         """Get the submit method to call for the given type of project"""

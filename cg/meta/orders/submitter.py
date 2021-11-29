@@ -4,6 +4,7 @@ from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
+from cg.models.orders.samples import OrderInSample
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)

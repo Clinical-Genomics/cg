@@ -6,6 +6,8 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
+from cg.meta.orders.microbial_submitter import MicrobialSubmitter
+from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.status import StatusHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
@@ -80,7 +82,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     order = OrderIn.parse_obj(microbial_order_to_submit, OrderType.MICROSALT)
 
     # WHEN parsing for status
-    data = StatusHandler.microbial_samples_to_status(order=order)
+    data = MicrobialSubmitter.microbial_samples_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
@@ -107,7 +109,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     order = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
     # WHEN parsing for status
-    data = StatusHandler.microbial_samples_to_status(order=order)
+    data = SarsCov2Submitter.microbial_samples_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
@@ -389,8 +391,10 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
     assert base_store.families().count() == 0
     assert base_store.organisms().count() == 1
 
+    submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_microbial_samples(
+    new_samples = submitter.store_microbial_samples(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
@@ -415,8 +419,10 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
 
+    submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_samples = orders_api.store_microbial_samples(
+    submitter.store_microbial_samples(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
@@ -442,10 +448,12 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
     for sample in microbial_status_data["samples"]:
         sample["application"] = "nonexistingtag"
 
+    submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_microbial_samples(
+        submitter.store_microbial_samples(
             customer=microbial_status_data["customer"],
             order=microbial_status_data["order"],
             ordered=dt.datetime.now(),
@@ -461,8 +469,10 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
     # GIVEN a basic store with no samples
     assert base_store.samples().count() == 0
 
+    submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    orders_api.store_microbial_samples(
+    submitter.store_microbial_samples(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),

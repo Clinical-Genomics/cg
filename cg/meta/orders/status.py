@@ -98,32 +98,6 @@ class StatusHandler:
             )
         return status_data
 
-    @staticmethod
-    def microbial_samples_to_status(order: OrderIn) -> dict:
-        """Convert order input for microbial samples."""
-
-        status_data = {
-            "customer": order.customer,
-            "order": order.name,
-            "comment": order.comment,
-            "data_analysis": order.samples[0].data_analysis,
-            "data_delivery": order.samples[0].data_delivery,
-            "samples": [
-                {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "data_delivery": sample.data_delivery,
-                    "name": sample.name,
-                    "organism_id": sample.organism,
-                    "priority": sample.priority,
-                    "reference_genome": sample.reference_genome,
-                    "volume": sample.volume,
-                }
-                for sample in order.samples
-            ],
-        }
-        return status_data
-
     @classmethod
     def cases_to_status(cls, order: OrderIn, project: OrderType) -> dict:
         """Convert order input to status interface input."""
@@ -276,85 +250,6 @@ class StatusHandler:
                     self.status.add(new_link)
             self.status.add_commit(new_families)
         return new_families
-
-    def store_microbial_samples(
-        self,
-        comment: str,
-        customer: str,
-        data_analysis: Pipeline,
-        data_delivery: DataDelivery,
-        order: str,
-        ordered: dt.datetime,
-        samples: List[dict],
-        ticket: int,
-    ) -> [models.Sample]:
-        """Store microbial samples in the status database."""
-
-        sample_objs = []
-
-        customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
-
-        new_samples = []
-
-        with self.status.session.no_autoflush:
-
-            for sample_data in samples:
-                case_obj = self.status.find_family(customer=customer_obj, name=ticket)
-
-                if not case_obj:
-                    case_obj = self.status.add_case(
-                        data_analysis=data_analysis,
-                        data_delivery=data_delivery,
-                        name=ticket,
-                        panels=None,
-                    )
-                    case_obj.customer = customer_obj
-                    self.status.add_commit(case_obj)
-
-                application_tag = sample_data["application"]
-                application_version = self.status.current_application_version(application_tag)
-                if application_version is None:
-                    raise OrderError(f"Invalid application: {sample_data['application']}")
-
-                organism = self.status.organism(sample_data["organism_id"])
-
-                if not organism:
-                    organism = self.status.add_organism(
-                        internal_id=sample_data["organism_id"],
-                        name=sample_data["organism_id"],
-                        reference_genome=sample_data["reference_genome"],
-                    )
-                    self.status.add_commit(organism)
-
-                if comment:
-                    case_obj.comment = f"Order comment: {comment}"
-
-                new_sample = self.status.add_sample(
-                    application_version=application_version,
-                    comment=sample_data["comment"],
-                    customer=customer_obj,
-                    data_delivery=sample_data["data_delivery"],
-                    internal_id=sample_data.get("internal_id"),
-                    name=sample_data["name"],
-                    order=order,
-                    ordered=ordered,
-                    organism=organism,
-                    priority=sample_data["priority"],
-                    reference_genome=sample_data["reference_genome"],
-                    sex="unknown",
-                    ticket=ticket,
-                )
-
-                priority = new_sample.priority
-                sample_objs.append(new_sample)
-                self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
-                new_samples.append(new_sample)
-
-            case_obj.priority = priority
-            self.status.add_commit(new_samples)
-        return sample_objs
 
     def store_rml(
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]
