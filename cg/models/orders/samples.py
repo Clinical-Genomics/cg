@@ -16,6 +16,22 @@ from cg.models.orders.sample_base import (
 from cg.store import models
 
 
+class OptionalIntValidator:
+    @classmethod
+    def str_to_int(cls, v: str) -> Optional[int]:
+        if v in (None, ""):
+            return None
+        return int(v)
+
+
+class OptionalFloatValidator:
+    @classmethod
+    def str_to_float(cls, v: str) -> Optional[float]:
+        if v in (None, ""):
+            return None
+        return float(v)
+
+
 class OrderInSample(BaseModel):
     _suitable_project: OrderType = None
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
@@ -105,11 +121,15 @@ class Of1508Sample(OrderInSample):
     ]
     synopsis: Optional[str]
 
-    @validator("tumour_purity", "formalin_fixation_time", "post_formalin_fixation_time", pre=True)
+    @validator(
+        "tumour_purity",
+        "formalin_fixation_time",
+        "post_formalin_fixation_time",
+        "quantity",
+        pre=True,
+    )
     def str_to_int(cls, v: str) -> Optional[int]:
-        if not v:
-            return None
-        return int(v)
+        return OptionalIntValidator.str_to_int(v=v)
 
 
 class MipDnaSample(Of1508Sample):
@@ -144,6 +164,10 @@ class FastqSample(OrderInSample):
     # "Not Required"
     quantity: Optional[int]
 
+    @validator("quantity", pre=True)
+    def str_to_int(cls, v: str) -> Optional[int]:
+        return OptionalIntValidator.str_to_int(v=v)
+
 
 class RmlSample(OrderInSample):
     _suitable_project = OrderType.RML
@@ -163,6 +187,10 @@ class RmlSample(OrderInSample):
     index_sequence: Optional[str]
     # "Not required"
     control: Optional[str]
+
+    @validator("concentration_sample", pre=True)
+    def str_to_float(cls, v: str) -> Optional[float]:
+        return OptionalFloatValidator.str_to_float(v=v)
 
 
 class FluffySample(RmlSample):
@@ -186,6 +214,14 @@ class MetagenomeSample(OrderInSample):
     quantity: Optional[int]
     extraction_method: Optional[str]
 
+    @validator("quantity", pre=True)
+    def str_to_int(cls, v: str) -> Optional[int]:
+        return OptionalIntValidator.str_to_int(v=v)
+
+    @validator("concentration_sample", pre=True)
+    def str_to_float(cls, v: str) -> Optional[float]:
+        return OptionalFloatValidator.str_to_float(v=v)
+
 
 class MicrobialSample(OrderInSample):
 
@@ -207,6 +243,14 @@ class MicrobialSample(OrderInSample):
     concentration_sample: Optional[float]
     quantity: Optional[int]
     verified_organism: Optional[bool]  # sent to LIMS
+
+    @validator("quantity", pre=True)
+    def str_to_int(cls, v: str) -> Optional[int]:
+        return OptionalIntValidator.str_to_int(v=v)
+
+    @validator("concentration_sample", pre=True)
+    def str_to_float(cls, v: str) -> Optional[float]:
+        return OptionalFloatValidator.str_to_float(v=v)
 
 
 class MicrosaltSample(MicrobialSample):
