@@ -88,7 +88,6 @@ class Of1508Sample(OrderInSample):
     # "required if plate for new samples"
     container_name: Optional[str]
     well_position: Optional[str]
-    status: Optional[StatusEnum]
     # "Required if samples are part of trio/family"
     mother: Optional[
         constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
@@ -131,7 +130,9 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]
+    panels: List[
+        constr(min_length=1, max_length=models.Panel.abbrev.property.columns[0].type.length)
+    ]
     status: StatusEnum
 
 

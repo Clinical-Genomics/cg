@@ -4,8 +4,11 @@ from tests.mocks.osticket import MockOsTicket
 
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
+from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
+from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
+from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
 from cg.meta.orders.status import StatusHandler
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
@@ -47,7 +50,7 @@ def balsamic_status_data(balsamic_order_to_submit: dict):
     """Parse balsamic order example."""
     project: OrderType = OrderType.BALSAMIC
     order: OrderIn = OrderIn.parse_obj(obj=balsamic_order_to_submit, project=project)
-    return StatusHandler.cases_to_status(order=order, project=project)
+    return BalsamicSubmitter.cases_to_status(order=order)
 
 
 @pytest.fixture
@@ -80,7 +83,7 @@ def mip_rna_status_data(mip_rna_order_to_submit: dict):
     """Parse rna order example."""
     project: OrderType = OrderType.MIP_RNA
     order: OrderIn = OrderIn.parse_obj(obj=mip_rna_order_to_submit, project=project)
-    return StatusHandler.cases_to_status(order=order, project=project)
+    return MipRnaSubmitter.cases_to_status(order=order)
 
 
 @pytest.fixture
@@ -88,7 +91,7 @@ def mip_status_data(mip_order_to_submit: dict):
     """Parse scout order example."""
     project: OrderType = OrderType.MIP_DNA
     order: OrderIn = OrderIn.parse_obj(obj=mip_order_to_submit, project=project)
-    return StatusHandler.cases_to_status(order=order, project=project)
+    return MipDnaSubmitter.cases_to_status(order=order)
 
 
 @pytest.fixture

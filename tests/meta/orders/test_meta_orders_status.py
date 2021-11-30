@@ -5,8 +5,11 @@ import pytest
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
+from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
+from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
+from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.status import StatusHandler
 from cg.models.orders.order import OrderIn, OrderType
@@ -138,7 +141,7 @@ def test_cases_to_status(mip_order_to_submit):
     order = OrderIn.parse_obj(mip_order_to_submit, project=project)
 
     # WHEN parsing for status
-    data = StatusHandler.cases_to_status(order=order, project=project)
+    data = MipDnaSubmitter.cases_to_status(order=order)
 
     # THEN it should pick out the case
     assert len(data["families"]) == 2
@@ -177,7 +180,7 @@ def test_cases_to_status_synopsis(mip_order_to_submit):
     order = OrderIn.parse_obj(mip_order_to_submit, project=project)
 
     # WHEN parsing for status
-    StatusHandler.cases_to_status(order=order, project=project)
+    MipDnaSubmitter.cases_to_status(order=order)
 
     # THEN No exception should have been raised on synopsis
 
@@ -495,8 +498,10 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
 
+    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_families = orders_api.store_cases(
+    new_families = submitter.store_cases(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
@@ -547,8 +552,10 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert base_store.families().first() is None
     assert base_store.application(rna_application)
 
+    submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_cases = orders_api.store_cases(
+    new_cases = submitter.store_cases(
         customer=mip_rna_status_data["customer"],
         order=mip_rna_status_data["order"],
         ordered=dt.datetime.now(),
@@ -578,10 +585,12 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
         for sample in family["samples"]:
             sample["application"] = "nonexistingtag"
 
+    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_cases(
+        submitter.store_cases(
             customer=mip_status_data["customer"],
             order=mip_status_data["order"],
             ordered=dt.datetime.now(),
@@ -636,8 +645,10 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
 
+    submitter: BalsamicSubmitter = BalsamicSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_families = orders_api.store_cases(
+    new_families = submitter.store_cases(
         customer=balsamic_status_data["customer"],
         order=balsamic_status_data["order"],
         ordered=dt.datetime.now(),
@@ -670,7 +681,8 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
 def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_status_data):
 
     # GIVEN a stored trio case
-    new_families = orders_api.store_cases(
+    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    new_families = submitter.store_cases(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
@@ -707,7 +719,8 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
 
     mip_status_data["families"] = list(filter(None, mip_status_data["families"]))
 
-    new_families = orders_api.store_cases(
+    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+    new_families = submitter.store_cases(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
