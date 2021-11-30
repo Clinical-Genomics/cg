@@ -11,8 +11,8 @@ from pydantic import parse_obj_as
 from cg.apps.orderform.orderform_parser import OrderformParser
 from cg.constants import DataDelivery
 from cg.exc import OrderFormError
-from cg.meta.orders import OrderType
 from cg.models.orders.excel_sample import ExcelSample
+from cg.models.orders.order import OrderType
 
 LOG = logging.getLogger(__name__)
 
@@ -24,10 +24,11 @@ class ExcelOrderformParser(OrderformParser):
     VALID_ORDERFORMS: List[str] = [
         "1508:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
         "1603:10",  # Microbial WGS
-        "1604:10",  # Orderform Ready made libraries (RML)
+        "1604:11",  # Orderform Ready made libraries (RML)
         "1605:9",  # Microbial meta genomes
         "2184:5",  # Orderform SARS-CoV-2
     ]
+    samples: List[ExcelSample] = []
 
     def check_orderform_version(self, document_title: str) -> None:
         """Raise an error if the orderform is too new or too old for the order portal."""

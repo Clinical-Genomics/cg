@@ -476,7 +476,7 @@ class Sample(Model, PriorityMixin):
     delivered_at = Column(types.DateTime)
     deliveries = orm.relationship(Delivery, backref="sample")
     downsampled_to = Column(types.BigInteger)
-    from_sample = Column(types.String(128))  # DEPRECATED
+    from_sample = Column(types.String(128))
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     invoice_id = Column(ForeignKey("invoice.id"))
