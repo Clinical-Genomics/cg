@@ -244,6 +244,44 @@ def test_submit_duplicate_sample_case_name(
         )
 
 
+@pytest.mark.parametrize(
+    "order_type",
+    [OrderType.FLUFFY],
+)
+def test_submit_duplicate_sample_case_name(
+    all_orders_to_submit: dict,
+    monkeypatch,
+    order_type: OrderType,
+    orders_api: OrdersAPI,
+    ticket_number: int,
+    user_mail: str,
+    user_name: str,
+):
+    # GIVEN we have an order with a case that is already in the database
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    store = orders_api.status
+    customer_obj = store.customer(order_data.customer)
+
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
+    for submitter in SUBMITTERS:
+        monkeypatch.setattr(
+            f"cg.meta.orders.{submitter}.process_lims",
+            lambda **kwargs: (lims_project_data, lims_map),
+        )
+
+    orders_api.submit(
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+    )
+
+    # WHEN calling submit
+    # THEN an OrderError should be raised on duplicate case name
+    with pytest.raises(OrderError):
+        orders_api.submit(
+            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+        )
+
+
 def test_submit_unique_sample_case_name(
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,

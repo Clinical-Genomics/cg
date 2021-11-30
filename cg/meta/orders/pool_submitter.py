@@ -8,10 +8,16 @@ from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
+from cg.models.orders.samples import RmlSample
 from cg.store import models
 
 
 class PoolSubmitter(Submitter):
+    def validate_order(self, order: OrderIn) -> None:
+        self._validate_case_names_are_available(
+            customer_id=order.customer, samples=order.samples, ticket=order.ticket
+        )
+
     def submit_order(self, order: OrderIn) -> dict:
         status_data = self.order_to_status(order)
         project_data, lims_map = process_lims(
@@ -115,7 +121,7 @@ class PoolSubmitter(Submitter):
                     raise OrderError(f"Invalid application: {pool['application']}")
 
             priority = pool["priority"]
-            case_name = f"{ticket}-{pool['name']}"
+            case_name = self._get_case_name(ticket, pool["name"])
             case_obj = self.status.find_family(customer=customer_obj, name=case_name)
             if not case_obj:
                 data_analysis = Pipeline(pool["data_analysis"])
@@ -162,3 +168,22 @@ class PoolSubmitter(Submitter):
         self.status.add_commit(new_pools)
 
         return new_pools
+
+    def _validate_case_names_are_available(
+        self, customer_id: str, samples: List[RmlSample], ticket: int
+    ):
+        """Validate that the names of all pools are unused for all samples"""
+        customer_obj: models.Customer = self.status.customer(customer_id)
+
+        sample: RmlSample
+        for sample in samples:
+            case_name: str = self._get_case_name(pool_name=sample.pool, ticket=ticket)
+
+            if self.status.find_family(customer=customer_obj, name=case_name):
+                raise OrderError(
+                    f"Sample name {case_name} already in use for customer {customer_id}"
+                )
+
+    @staticmethod
+    def _get_case_name(ticket: int, pool_name: str) -> str:
+        return f"{ticket}-{pool_name}"
