@@ -25,7 +25,7 @@ class DemuxedFlowcell:
     ):
         self.path: Path = flowcell_path
         self.name: str = self.path.name
-        self.split_name: List[str] = re.split("_|\.", self.name)
+        self.split_name: List[str] = re.split("[_.]", self.name)
         self.identifier: str = self.split_name[3]
         self.id: str = self.identifier[1:]
         self.status_db: Store = status_db
