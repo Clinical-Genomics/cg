@@ -49,14 +49,14 @@ def test_too_long_order_name():
     ],
 )
 def test_submit(
-    base_store,
-    orders_api: OrdersAPI,
-    all_orders_to_submit,
+    all_orders_to_submit: dict,
+    base_store: Store,
     monkeypatch,
     order_type: OrderType,
-    user_name: str,
-    user_mail: str,
+    orders_api: OrdersAPI,
     ticket_number: int,
+    user_mail: str,
+    user_name: str,
 ):
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
@@ -90,14 +90,14 @@ def test_submit(
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_illegal_sample_customer(
-    sample_store,
-    orders_api,
-    all_orders_to_submit,
+    all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
+    orders_api: OrdersAPI,
+    sample_store: Store,
     ticket_number: int,
-    user_name: str,
     user_mail: str,
+    user_name: str,
 ):
 
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -142,14 +142,14 @@ def test_submit_illegal_sample_customer(
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_scout_legal_sample_customer(
-    sample_store,
-    orders_api,
-    all_orders_to_submit,
+    all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
-    user_name: str,
-    user_mail: str,
+    orders_api: OrdersAPI,
+    sample_store: Store,
     ticket_number: int,
+    user_mail: str,
+    user_name: str,
 ):
 
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -203,13 +203,13 @@ def test_submit_scout_legal_sample_customer(
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_duplicate_sample_case_name(
-    orders_api,
-    order_type: OrderType,
-    all_orders_to_submit,
-    ticket_number: int,
-    user_name: str,
-    user_mail: str,
+    all_orders_to_submit: dict,
     monkeypatch,
+    order_type: OrderType,
+    orders_api: OrdersAPI,
+    ticket_number: int,
+    user_mail: str,
+    user_name: str,
 ):
     # GIVEN we have an order with a case that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -246,7 +246,12 @@ def test_submit_duplicate_sample_case_name(
 
 
 def test_submit_unique_sample_case_name(
-    orders_api, mip_order_to_submit, ticket_number: int, user_name: str, user_mail: str, monkeypatch
+    orders_api: OrdersAPI,
+    mip_order_to_submit: dict,
+    ticket_number: int,
+    user_name: str,
+    user_mail: str,
+    monkeypatch,
 ):
     # GIVEN we have an order with a case that is not existing in the database
     order_data = OrderIn.parse_obj(obj=mip_order_to_submit, project=OrderType.MIP_DNA)
@@ -410,13 +415,13 @@ def test_validate_sex_unknown_new_sex(
     ],
 )
 def test_submit_unique_sample_name(
-    orders_api,
-    all_orders_to_submit,
-    order_type: OrderType,
-    ticket_number: int,
-    user_name: str,
-    user_mail: str,
+    all_orders_to_submit: dict,
     monkeypatch,
+    order_type: OrderType,
+    orders_api: OrdersAPI,
+    ticket_number: int,
+    user_mail: str,
+    user_name: str,
 ):
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -444,15 +449,15 @@ def test_submit_unique_sample_name(
     [OrderType.SARS_COV_2],
 )
 def test_sarscov2_submit_duplicate_sample_name(
+    all_orders_to_submit: dict,
+    helpers: StoreHelpers,
+    monkeypatch,
+    order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    all_orders_to_submit,
-    order_type: OrderType,
     ticket_number: int,
-    user_name: str,
     user_mail: str,
-    monkeypatch,
-    helpers,
+    user_name: str,
 ):
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
@@ -497,15 +502,15 @@ def test_sarscov2_submit_duplicate_sample_name(
     ],
 )
 def test_not_sarscov2_submit_duplicate_sample_name(
+    all_orders_to_submit: dict,
+    helpers: StoreHelpers,
+    monkeypatch,
+    order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    all_orders_to_submit,
-    order_type: OrderType,
     ticket_number: int,
-    user_name: str,
     user_mail: str,
-    monkeypatch,
-    helpers: StoreHelpers,
+    user_name: str,
 ):
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
