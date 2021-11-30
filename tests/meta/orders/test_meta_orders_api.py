@@ -223,7 +223,6 @@ def test_submit_duplicate_sample_case_name(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
-                panels=None,
             )
             case_obj.customer = customer_obj
             store.add_commit(case_obj)
