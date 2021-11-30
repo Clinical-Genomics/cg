@@ -1,20 +1,35 @@
-"""Ordering module"""
 import datetime as dt
-from typing import List, Set
+from typing import List
 
-from cg.constants import DataDelivery, Pipeline
+from cgmodels.cg.constants import Pipeline
+
+from cg.constants import DataDelivery
 from cg.exc import OrderError
-from cg.models.orders.order import OrderIn, OrderType
-from cg.models.orders.sample_base import OrderSample, SexEnum, StatusEnum
-from cg.models.orders.samples import Of1508Sample, FastqSample
+from cg.meta.orders.lims import process_lims
+from cg.meta.orders.submitter import Submitter
+from cg.models.orders.order import OrderIn
 from cg.store import models
 
 
-class StatusHandler:
-    """Handles ordering data for the statusDB"""
+class PoolSubmitter(Submitter):
+    def validate_order(self, order: OrderIn) -> None:
+        pass
 
-    def __init__(self):
-        self.status = None
+    def submit_order(self, order: OrderIn) -> dict:
+        status_data = self.pools_to_status(order)
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, lims_order=order, new_samples=order.samples
+        )
+        samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
+        self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
+        new_records = self.store_rml(
+            customer=status_data["customer"],
+            order=status_data["order"],
+            ordered=project_data["date"],
+            ticket=order.ticket,
+            pools=status_data["pools"],
+        )
+        return {"project": project_data, "records": new_records}
 
     @staticmethod
     def pools_to_status(order: OrderIn) -> dict:

@@ -1,6 +1,9 @@
 import datetime as dt
 
 import pytest
+from cgmodels.cg.constants import Pipeline
+from tests.store_helpers import StoreHelpers
+
 from cg.constants import DataDelivery
 from cg.exc import OrderError
 from cg.meta.orders import OrdersAPI
@@ -8,19 +11,15 @@ from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
 from cg.store import models, Store
-from cgmodels.cg.constants import Pipeline
-import cg
-from tests.store_helpers import StoreHelpers
 
 PROCESS_LIMS_FUNCTION_OLD = "cg.meta.orders.api.process_lims"
 PROCESS_LIMS_FUNCTION = "cg.meta.orders.lims.process_lims"
 SUBMITTERS = [
-    "api",
-    "lims",
     "fastq_submitter",
     "metagenome_submitter",
     "microbial_submitter",
     "case_submitter",
+    "pool_submitter",
 ]
 
 

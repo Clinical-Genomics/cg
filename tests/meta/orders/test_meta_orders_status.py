@@ -10,10 +10,9 @@ from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
+from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
-from cg.meta.orders.status import StatusHandler
 from cg.models.orders.order import OrderIn, OrderType
-from cg.store import models
 
 
 def test_pools_to_status(rml_order_to_submit):
@@ -21,7 +20,7 @@ def test_pools_to_status(rml_order_to_submit):
     order = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
 
     # WHEN parsing for status
-    data = StatusHandler.pools_to_status(order=order)
+    data = RmlSubmitter.pools_to_status(order=order)
 
     # THEN it should pick out the general information
     assert data["customer"] == "cust000"
@@ -191,8 +190,10 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert base_store.families().count() == 0
     assert base_store.samples().count() == 0
 
+    submitter: RmlSubmitter = RmlSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # WHEN storing the order
-    new_pools = orders_api.store_rml(
+    new_pools = submitter.store_rml(
         customer=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
@@ -236,10 +237,12 @@ def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     for pool in rml_status_data["pools"]:
         pool["application"] = "nonexistingtag"
 
+    submitter: RmlSubmitter = RmlSubmitter(lims=orders_api.lims, status=orders_api.status)
+
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_rml(
+        submitter.store_rml(
             customer=rml_status_data["customer"],
             order=rml_status_data["order"],
             ordered=dt.datetime.now(),
@@ -253,7 +256,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert base_store.samples().count() == 0
     assert base_store.families().count() == 0
 
-    submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
+    submitter: FastqSubmitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
     new_samples = submitter.store_fastq_samples(

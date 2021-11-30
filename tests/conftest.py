@@ -6,24 +6,22 @@ import datetime as dt
 import json
 import logging
 import os
-import pytest
 import shutil
-
 from pathlib import Path
 from typing import Generator
 
+import pytest
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
-from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.limsmock import MockLimsAPI
@@ -481,6 +479,12 @@ def fastq_order_to_submit() -> dict:
 @pytest.fixture
 def rml_order_to_submit() -> dict:
     """Load an example rml order."""
+    return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
+
+
+@pytest.fixture
+def fluffy_order_to_submit() -> dict:
+    """Load an example fluffy order."""
     return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
 
 
