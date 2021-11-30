@@ -16,23 +16,23 @@ class PoolSubmitter(Submitter):
         pass
 
     def submit_order(self, order: OrderIn) -> dict:
-        status_data = self.pools_to_status(order)
+        status_data = self.order_to_status(order)
         project_data, lims_map = process_lims(
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
         self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
-        new_records = self.store_rml(
+        new_records = self.store_items_in_status(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
-            pools=status_data["pools"],
+            items=status_data["pools"],
         )
         return {"project": project_data, "records": new_records}
 
     @staticmethod
-    def pools_to_status(order: OrderIn) -> dict:
+    def order_to_status(order: OrderIn) -> dict:
         """Convert input to pools."""
 
         status_data = {
@@ -102,8 +102,8 @@ class PoolSubmitter(Submitter):
             )
         return status_data
 
-    def store_rml(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, pools: List[dict]
+    def store_items_in_status(
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
     ) -> List[models.Pool]:
         """Store pools in the status database."""
         customer_obj = self.status.customer(customer)
@@ -111,7 +111,7 @@ class PoolSubmitter(Submitter):
             raise OrderError(f"unknown customer: {customer}")
         new_pools = []
         new_samples = []
-        for pool in pools:
+        for pool in items:
             with self.status.session.no_autoflush:
                 application_version = self.status.current_application_version(pool["application"])
                 if application_version is None:

@@ -21,20 +21,20 @@ class MetagenomeSubmitter(Submitter):
         project_data, lims_map = process_lims(
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
-        status_data = self.metagenome_to_status(order)
+        status_data = self.order_to_status(order)
         self._fill_in_sample_ids(status_data["samples"], lims_map)
-        new_samples = self.store_metagenome(
+        new_samples = self.store_items_in_status(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
-            samples=status_data["samples"],
+            items=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
     @staticmethod
-    def metagenome_to_status(order: OrderIn) -> dict:
+    def order_to_status(order: OrderIn) -> dict:
         """Convert order input to status for metagenome orders."""
         status_data = {
             "customer": order.customer,
@@ -54,8 +54,8 @@ class MetagenomeSubmitter(Submitter):
         }
         return status_data
 
-    def store_metagenome(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
+    def store_items_in_status(
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
     ) -> List[models.Sample]:
         """Store samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -64,7 +64,7 @@ class MetagenomeSubmitter(Submitter):
         new_samples = []
 
         with self.status.session.no_autoflush:
-            for sample in samples:
+            for sample in items:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),

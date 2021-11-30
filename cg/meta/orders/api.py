@@ -44,7 +44,6 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
     }
     if project in submitters:
         return submitters[project](lims=lims, status=status)
-    return None
 
 
 class OrdersAPI:
@@ -62,8 +61,7 @@ class OrdersAPI:
         Main entry point for the class towards interfaces that implements it.
         """
         submit_handler: Submitter = _get_submit_handler(project, lims=self.lims, status=self.status)
-        if submit_handler:
-            submit_handler.validate_order(order=order_in)
+        submit_handler.validate_order(order=order_in)
 
         # detect manual ticket assignment
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
@@ -73,6 +71,4 @@ class OrdersAPI:
             )
 
         order_in.ticket = ticket_number
-
-        if submit_handler:
-            return submit_handler.submit_order(order=order_in)
+        return submit_handler.submit_order(order=order_in)

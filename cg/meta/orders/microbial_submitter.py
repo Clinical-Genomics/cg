@@ -17,7 +17,7 @@ class MicrobialSubmitter(Submitter):
         pass
 
     @staticmethod
-    def microbial_samples_to_status(order: OrderIn) -> dict:
+    def order_to_status(order: OrderIn) -> dict:
         """Convert order input for microbial samples."""
 
         status_data = {
@@ -49,23 +49,23 @@ class MicrobialSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         # prepare order for status database
-        status_data = self.microbial_samples_to_status(order)
+        status_data = self.order_to_status(order)
         self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
 
         # submit samples to Status
-        samples = self.store_microbial_samples(
+        samples = self.store_items_in_status(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
             ticket=order.ticket,
-            samples=status_data["samples"],
+            items=status_data["samples"],
             comment=status_data["comment"],
             data_analysis=Pipeline(status_data["data_analysis"]),
             data_delivery=DataDelivery(status_data["data_delivery"]),
         )
         return {"project": project_data, "records": samples}
 
-    def store_microbial_samples(
+    def store_items_in_status(
         self,
         comment: str,
         customer: str,
@@ -73,7 +73,7 @@ class MicrobialSubmitter(Submitter):
         data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
-        samples: List[dict],
+        items: List[dict],
         ticket: int,
     ) -> [models.Sample]:
         """Store microbial samples in the status database."""
@@ -88,7 +88,7 @@ class MicrobialSubmitter(Submitter):
 
         with self.status.session.no_autoflush:
 
-            for sample_data in samples:
+            for sample_data in items:
                 case_obj = self.status.find_family(customer=customer_obj, name=ticket)
 
                 if not case_obj:

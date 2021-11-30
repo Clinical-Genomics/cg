@@ -20,7 +20,7 @@ def test_pools_to_status(rml_order_to_submit):
     order = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
 
     # WHEN parsing for status
-    data = RmlSubmitter.pools_to_status(order=order)
+    data = RmlSubmitter.order_to_status(order=order)
 
     # THEN it should pick out the general information
     assert data["customer"] == "cust000"
@@ -47,7 +47,7 @@ def test_samples_to_status(fastq_order_to_submit):
     order = OrderIn.parse_obj(fastq_order_to_submit, OrderType.FASTQ)
 
     # WHEN parsing for status
-    data = FastqSubmitter.fastq_to_status(order=order)
+    data = FastqSubmitter.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
@@ -68,7 +68,7 @@ def test_metagenome_to_status(metagenome_order_to_submit):
     order = OrderIn.parse_obj(metagenome_order_to_submit, OrderType.METAGENOME)
 
     # WHEN parsing for status
-    data = MetagenomeSubmitter.metagenome_to_status(order=order)
+    data = MetagenomeSubmitter.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
@@ -84,7 +84,7 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
     order = OrderIn.parse_obj(microbial_order_to_submit, OrderType.MICROSALT)
 
     # WHEN parsing for status
-    data = MicrobialSubmitter.microbial_samples_to_status(order=order)
+    data = MicrobialSubmitter.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
@@ -111,7 +111,7 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     order = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
     # WHEN parsing for status
-    data = SarsCov2Submitter.microbial_samples_to_status(order=order)
+    data = SarsCov2Submitter.order_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
@@ -140,7 +140,7 @@ def test_cases_to_status(mip_order_to_submit):
     order = OrderIn.parse_obj(mip_order_to_submit, project=project)
 
     # WHEN parsing for status
-    data = MipDnaSubmitter.cases_to_status(order=order)
+    data = MipDnaSubmitter.order_to_status(order=order)
 
     # THEN it should pick out the case
     assert len(data["families"]) == 2
@@ -179,7 +179,7 @@ def test_cases_to_status_synopsis(mip_order_to_submit):
     order = OrderIn.parse_obj(mip_order_to_submit, project=project)
 
     # WHEN parsing for status
-    MipDnaSubmitter.cases_to_status(order=order)
+    MipDnaSubmitter.order_to_status(order=order)
 
     # THEN No exception should have been raised on synopsis
 
@@ -193,12 +193,12 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     submitter: RmlSubmitter = RmlSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_pools = submitter.store_rml(
+    new_pools = submitter.store_items_in_status(
         customer=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        pools=rml_status_data["pools"],
+        items=rml_status_data["pools"],
     )
 
     # THEN it should update the database with new pools
@@ -242,12 +242,12 @@ def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        submitter.store_rml(
+        submitter.store_items_in_status(
             customer=rml_status_data["customer"],
             order=rml_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            pools=rml_status_data["pools"],
+            items=rml_status_data["pools"],
         )
 
 
@@ -259,12 +259,12 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     submitter: FastqSubmitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_fastq_samples(
+    new_samples = submitter.store_items_in_status(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=fastq_status_data["samples"],
+        items=fastq_status_data["samples"],
     )
 
     # THEN it should store the samples and create a case for each sample
@@ -289,12 +289,12 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_fastq_samples(
+    new_samples = submitter.store_items_in_status(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=fastq_status_data["samples"],
+        items=fastq_status_data["samples"],
     )
 
     # THEN the sample sex should be stored
@@ -311,12 +311,12 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_fastq_samples(
+    new_samples = submitter.store_items_in_status(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=fastq_status_data["samples"],
+        items=fastq_status_data["samples"],
     )
 
     # THEN the analysis for the case should be MAF
@@ -333,12 +333,12 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(orders_api, base_store, fastq_s
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_fastq_samples(
+    new_samples = submitter.store_items_in_status(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=fastq_status_data["samples"],
+        items=fastq_status_data["samples"],
     )
 
     # THEN the analysis for the case should be FASTQ
@@ -357,12 +357,12 @@ def test_store_fastq_samples_non_wgs_as_fastq(orders_api, base_store, fastq_stat
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_fastq_samples(
+    new_samples = submitter.store_items_in_status(
         customer=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=fastq_status_data["samples"],
+        items=fastq_status_data["samples"],
     )
 
     # THEN the analysis for the case should be fastq (none)
@@ -382,12 +382,12 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        submitter.store_fastq_samples(
+        submitter.store_items_in_status(
             customer=fastq_status_data["customer"],
             order=fastq_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            samples=fastq_status_data["samples"],
+            items=fastq_status_data["samples"],
         )
 
 
@@ -400,12 +400,12 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data):
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_microbial_samples(
+    new_samples = submitter.store_items_in_status(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=microbial_status_data["samples"],
+        items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
@@ -428,12 +428,12 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    submitter.store_microbial_samples(
+    submitter.store_items_in_status(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=microbial_status_data["samples"],
+        items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
@@ -459,12 +459,12 @@ def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        submitter.store_microbial_samples(
+        submitter.store_items_in_status(
             customer=microbial_status_data["customer"],
             order=microbial_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            samples=microbial_status_data["samples"],
+            items=microbial_status_data["samples"],
             comment="",
             data_analysis=Pipeline.MICROSALT,
             data_delivery=DataDelivery.FASTQ_QC,
@@ -478,12 +478,12 @@ def test_store_microbial_sample_priority(orders_api, base_store, microbial_statu
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    submitter.store_microbial_samples(
+    submitter.store_items_in_status(
         customer=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=microbial_status_data["samples"],
+        items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
         data_delivery=DataDelivery.FASTQ_QC,
@@ -504,12 +504,12 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_families = submitter.store_cases(
+    new_families = submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=123456,
-        cases=mip_status_data["families"],
+        items=mip_status_data["families"],
     )
 
     # THEN it should create and link samples and the case
@@ -558,12 +558,12 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_cases = submitter.store_cases(
+    new_cases = submitter.store_items_in_status(
         customer=mip_rna_status_data["customer"],
         order=mip_rna_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=123456,
-        cases=mip_rna_status_data["families"],
+        items=mip_rna_status_data["families"],
     )
 
     # THEN it should create and link samples and the casing
@@ -593,12 +593,12 @@ def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        submitter.store_cases(
+        submitter.store_items_in_status(
             customer=mip_status_data["customer"],
             order=mip_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=123456,
-            cases=mip_status_data["families"],
+            items=mip_status_data["families"],
         )
 
 
@@ -609,12 +609,12 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
     submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_samples = submitter.store_metagenome(
+    new_samples = submitter.store_items_in_status(
         customer=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        samples=metagenome_status_data["samples"],
+        items=metagenome_status_data["samples"],
     )
 
     # THEN it should store the samples
@@ -634,12 +634,12 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        submitter.store_metagenome(
+        submitter.store_items_in_status(
             customer=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            samples=metagenome_status_data["samples"],
+            items=metagenome_status_data["samples"],
         )
 
 
@@ -651,12 +651,12 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     submitter: BalsamicSubmitter = BalsamicSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_families = submitter.store_cases(
+    new_families = submitter.store_items_in_status(
         customer=balsamic_status_data["customer"],
         order=balsamic_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=123456,
-        cases=balsamic_status_data["families"],
+        items=balsamic_status_data["families"],
     )
 
     # THEN it should create and link samples and the case
@@ -685,12 +685,12 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
 
     # GIVEN a stored trio case
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
-    new_families = submitter.store_cases(
+    new_families = submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=123456,
-        cases=mip_status_data["families"],
+        items=mip_status_data["families"],
     )
 
     new_case = new_families[0]
@@ -723,12 +723,12 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
     mip_status_data["families"] = list(filter(None, mip_status_data["families"]))
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
-    new_families = submitter.store_cases(
+    new_families = submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=123456,
-        cases=mip_status_data["families"],
+        items=mip_status_data["families"],
     )
 
     # THEN there should be no complaints about missing parents

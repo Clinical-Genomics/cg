@@ -110,22 +110,22 @@ class CaseSubmitter(Submitter):
                 lims_api=self.lims, lims_order=order, new_samples=new_samples
             )
 
-        status_data = self.cases_to_status(order=order)
+        status_data = self.order_to_status(order=order)
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
         if lims_map:
             self._fill_in_sample_ids(samples, lims_map)
 
-        new_families = self.store_cases(
+        new_families = self.store_items_in_status(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
             ticket=order.ticket,
-            cases=status_data["families"],
+            items=status_data["families"],
         )
         return {"project": project_data, "records": new_families}
 
     @staticmethod
-    def group_cases(samples: List[Of1508Sample]) -> dict:
+    def _group_cases(samples: List[Of1508Sample]) -> dict:
         """Group samples in cases."""
         cases = {}
         for sample in samples:
@@ -136,7 +136,7 @@ class CaseSubmitter(Submitter):
         return cases
 
     @classmethod
-    def get_single_value(cls, case_name, case_samples, value_key, value_default=None):
+    def _get_single_value(cls, case_name, case_samples, value_key, value_default=None):
         values = set(getattr(sample, value_key) or value_default for sample in case_samples)
         if len(values) > 1:
             raise ValueError(f"different sample {value_key} values: {case_name} - {values}")
@@ -144,10 +144,10 @@ class CaseSubmitter(Submitter):
         return single_value
 
     @classmethod
-    def cases_to_status(cls, order: OrderIn) -> dict:
-        """Convert order input to status interface input."""
+    def order_to_status(cls, order: OrderIn) -> dict:
+        """Converts order input to status interface input for MIP-DNA, MIP-RNA and Balsamic."""
         status_data = {"customer": order.customer, "order": order.name, "families": []}
-        cases = cls.group_cases(order.samples)
+        cases = cls._group_cases(order.samples)
 
         for case_name, case_samples in cases.items():
 
@@ -156,12 +156,12 @@ class CaseSubmitter(Submitter):
             }
             synopsis: str = ", ".join(set(sample.synopsis or "" for sample in case_samples))
 
-            case_internal_id: str = cls.get_single_value(
+            case_internal_id: str = cls._get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
-            data_analysis = cls.get_single_value(case_name, case_samples, "data_analysis")
-            data_delivery = cls.get_single_value(case_name, case_samples, "data_delivery")
-            priority = cls.get_single_value(case_name, case_samples, "priority", "standard")
+            data_analysis = cls._get_single_value(case_name, case_samples, "data_analysis")
+            data_delivery = cls._get_single_value(case_name, case_samples, "data_delivery")
+            priority = cls._get_single_value(case_name, case_samples, "priority", "standard")
 
             # TODO: move to MIP-DNA submitter
             panels: Set[str] = set()
@@ -208,8 +208,8 @@ class CaseSubmitter(Submitter):
             status_data["families"].append(case)
         return status_data
 
-    def store_cases(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, cases: List[dict]
+    def store_items_in_status(
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
 
@@ -217,7 +217,7 @@ class CaseSubmitter(Submitter):
         if customer_obj is None:
             raise OrderError(f"Unknown customer: {customer}")
         new_families = []
-        for case in cases:
+        for case in items:
             case_obj = self.status.family(case["internal_id"])
             if case_obj:
                 case_obj.panels = case["panels"]

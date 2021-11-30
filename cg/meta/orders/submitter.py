@@ -4,8 +4,9 @@ from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
-from cg.models.orders.samples import OrderInSample
 from cg.store import Store, models
+from cg.store.models import Model
+import datetime as dt
 
 LOG = logging.getLogger(__name__)
 
@@ -21,6 +22,17 @@ class Submitter(ABC):
 
     @abstractmethod
     def submit_order(self, order: OrderIn) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def order_to_status(order: OrderIn) -> dict:
+        pass
+
+    @abstractmethod
+    def store_items_in_status(
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+    ) -> List[Model]:
         pass
 
     @staticmethod

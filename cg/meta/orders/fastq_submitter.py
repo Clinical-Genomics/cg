@@ -17,7 +17,7 @@ class FastqSubmitter(Submitter):
         pass
 
     @staticmethod
-    def fastq_to_status(order: OrderIn) -> dict:
+    def order_to_status(order: OrderIn) -> dict:
         """Convert order input to status for fastq-only orders."""
         status_data = {
             "customer": order.customer,
@@ -45,20 +45,20 @@ class FastqSubmitter(Submitter):
         project_data, lims_map = process_lims(
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
-        status_data = self.fastq_to_status(order)
+        status_data = self.order_to_status(order)
         self._fill_in_sample_ids(status_data["samples"], lims_map)
-        new_samples = self.store_fastq_samples(
+        new_samples = self.store_items_in_status(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
-            samples=status_data["samples"],
+            items=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
 
     @staticmethod
-    def get_fastq_pipeline(
+    def _get_fastq_pipeline(
         application_version: models.ApplicationVersion, is_tumour: bool
     ) -> Pipeline:
         if is_tumour:
@@ -68,8 +68,8 @@ class FastqSubmitter(Submitter):
 
         return Pipeline.FASTQ
 
-    def store_fastq_samples(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, samples: List[dict]
+    def store_items_in_status(
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
     ) -> List[models.Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         production_customer = self.status.customer("cust000")
@@ -79,7 +79,7 @@ class FastqSubmitter(Submitter):
         new_samples = []
 
         with self.status.session.no_autoflush:
-            for sample in samples:
+            for sample in items:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),
@@ -98,7 +98,7 @@ class FastqSubmitter(Submitter):
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
-                data_analysis: Pipeline = self.get_fastq_pipeline(
+                data_analysis: Pipeline = self._get_fastq_pipeline(
                     application_version, new_sample.is_tumour
                 )
                 new_case = self.status.add_case(
