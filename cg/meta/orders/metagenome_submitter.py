@@ -1,3 +1,4 @@
+import datetime as dt
 from typing import List
 
 from cgmodels.cg.constants import Pipeline
@@ -9,7 +10,6 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.store import models
-import datetime as dt
 
 
 class MetagenomeSubmitter(Submitter):

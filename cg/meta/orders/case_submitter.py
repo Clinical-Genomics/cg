@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 from typing import List, Set
 
@@ -10,8 +11,6 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 from cg.store import models
-
-import datetime as dt
 
 LOG = logging.getLogger(__name__)
 

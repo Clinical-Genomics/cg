@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 from abc import ABC, abstractmethod
 from typing import List
@@ -6,7 +7,6 @@ from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
 from cg.store import Store, models
 from cg.store.models import Model
-import datetime as dt
 
 LOG = logging.getLogger(__name__)
 

@@ -1,3 +1,4 @@
+import datetime as dt
 from typing import List
 
 from cgmodels.cg.constants import Pipeline
@@ -9,12 +10,29 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.store import models
-import datetime as dt
 
 
 class FastqSubmitter(Submitter):
     def validate_order(self, order: OrderIn) -> None:
         pass
+
+    def submit_order(self, order: OrderIn) -> dict:
+        """Submit a batch of samples for FASTQ delivery."""
+
+        project_data, lims_map = process_lims(
+            lims_api=self.lims, lims_order=order, new_samples=order.samples
+        )
+        status_data = self.order_to_status(order)
+        self._fill_in_sample_ids(status_data["samples"], lims_map)
+        new_samples = self.store_items_in_status(
+            customer=status_data["customer"],
+            order=status_data["order"],
+            ordered=project_data["date"],
+            ticket=order.ticket,
+            items=status_data["samples"],
+        )
+        self._add_missing_reads(new_samples)
+        return {"project": project_data, "records": new_samples}
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
@@ -38,24 +56,6 @@ class FastqSubmitter(Submitter):
             ],
         }
         return status_data
-
-    def submit_order(self, order: OrderIn) -> dict:
-        """Submit a batch of samples for FASTQ delivery."""
-
-        project_data, lims_map = process_lims(
-            lims_api=self.lims, lims_order=order, new_samples=order.samples
-        )
-        status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map)
-        new_samples = self.store_items_in_status(
-            customer=status_data["customer"],
-            order=status_data["order"],
-            ordered=project_data["date"],
-            ticket=order.ticket,
-            items=status_data["samples"],
-        )
-        self._add_missing_reads(new_samples)
-        return {"project": project_data, "records": new_samples}
 
     @staticmethod
     def _get_fastq_pipeline(
