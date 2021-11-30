@@ -28,6 +28,11 @@ class WipeDemuxAPI:
         log.debug("WipeDemuxAPI: API initiated")
 
     @property
+    def demultiplexing_run_path(self) -> Path:
+        """Return the demultiplexing directory path for the given run name"""
+        return self.demultiplexing_dir.joinpath(self.run_name)
+
+    @property
     def flow_cell_name(self) -> str:
         """Parse flowcell name from flowcell run name
 
@@ -40,7 +45,6 @@ class WipeDemuxAPI:
     @property
     def status_db_presence(self) -> bool:
         """Update about the presence of given flowcell in status_db"""
-        log.info(f"WipeDemuxAPI: Checking precence in status_db for: {self.flow_cell_name}")
         presence = (
             self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
         )
@@ -75,24 +79,26 @@ class WipeDemuxAPI:
 
     def _wipe_flow_cell_tag_housekeeper(self) -> None:
         """Wipe the presence of a flowcell, based on the flowcell id as a tag, in Housekeeper."""
-        if self.housekeeper_api.check_for_files(tags=[self.flow_cell_name]):
-            self.housekeeper_api.delete_files(tags=[self.flow_cell_name])
+        if not any(self.housekeeper_api.files(tags=[self.flow_cell_name])):
+            self.housekeeper_api.delete_files(dry_run=self.dry_run, tags=[self.flow_cell_name])
         else:
-            log.info(f"WipeDemuxAPI: No files in Housekeeper with tag: {self.flow_cell_name}")
+            log.info(f"Housekeeper: No files found with tag: {self.flow_cell_name}")
 
     def _wipe_fastq_tags_housekeeper(self) -> None:
         """Wipe the presence of a flowcell, based on samples related to flowcell and the fastq-tags, in Housekeeper."""
         samples_to_delete = []
 
         for sample in self.samples_on_flow_cell:
-            if self.housekeeper_api.check_for_files(bundle=sample.internal_id, tags=["fastq"]):
+            if any(self.housekeeper_api.files(bundle=sample.internal_id, tags=["fastq"])):
                 samples_to_delete.append(sample)
             else:
                 log.info(f"Housekeeper: No fastq-files found in Housekeeper for bundle {sample}")
 
         if samples_to_delete:
             for sample in samples_to_delete:
-                self.housekeeper_api.delete_files(tags=["fastq"], bundle=sample.internal_id)
+                self.housekeeper_api.delete_fastq_and_spring(
+                    bundle=sample.internal_id, demultiplexing_path=self.demultiplexing_dir
+                )
         else:
             log.info("Housekeeper: No files for samples connected to the flowcell")
 

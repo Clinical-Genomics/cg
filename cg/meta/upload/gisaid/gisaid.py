@@ -68,9 +68,7 @@ class GisaidAPI:
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
         completion_df = self.get_completion_dataframe(completion_file=completion_file)
         sample_names = list(completion_df["provnummer"].unique())
-        return [
-            self.status_db.samples_by_ids(name=sample_name).first() for sample_name in sample_names
-        ]
+        return [self.status_db.get_sample_by_name(name=sample_name) for sample_name in sample_names]
 
     def get_gisaid_fasta_path(self, case_id: str) -> Path:
         """Get path to gisaid fasta"""

@@ -69,26 +69,44 @@ class HousekeeperAPI:
             return
 
         if file_obj.is_included and Path(file_obj.full_path).exists():
-            LOG.info("Deleting file %s from disc", file_obj.full_path)
+            LOG.info("Deleting file %s form disc", file_obj.full_path)
             Path(file_obj.full_path).unlink()
 
-        LOG.info("Deleting file %s from housekeeper", file_obj.path)
+        LOG.info("Deleting file %s from housekeeper", file_id)
         file_obj.delete()
         self._store.commit()
 
         return file_obj
 
-    def delete_files(
-        self, bundle: str = None, tags: List[str] = None, version: int = None
-    ) -> Optional[List[models.File]]:
-        """Delete files from database and disk (if included)"""
-        file_iterator: Iterable[File] = self.files(bundle=bundle, tags=tags, version=version)
-        files = []
-        for file in file_iterator:
-            self.delete_file(file_id=file.id)
-            files.append(file)
+    def delete_fastq_and_spring(self, bundle: str, demultiplexing_path: Path) -> None:
+        """
+        Delete a fastq file from housekeeper, specified by run name in the
+        file paths in sample bundle
+        """
 
-        return files
+        fastq_tag = "fastq"
+        fastq_files: Iterable[File] = self.files(bundle=bundle, tags=[fastq_tag])
+
+        spring_tag = "spring"
+        spring_files: Iterable[File] = self.files(bundle=bundle, tags=[spring_tag])
+
+        if not fastq_files:
+            LOG.info(f"Could not find fastq-files for {bundle}")
+            return
+
+        for fastq_file in fastq_files:
+            if demultiplexing_path.as_posix() in fastq_file.path.as_posix():
+                fastq_file.delete()
+                self._store.commit()
+
+        if not spring_files:
+            LOG.info(f"Could not find spring-files for {bundle}")
+            return
+
+        for spring_file in spring_files:
+            if demultiplexing_path.as_posix() in spring_file.path.as_posix():
+                spring_file.delete()
+                self._store.commit()
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version"""

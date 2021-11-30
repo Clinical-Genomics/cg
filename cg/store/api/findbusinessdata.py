@@ -373,6 +373,9 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records.order_by(models.Sample.internal_id.desc())
 
+    def get_sample_by_name(self, name: str) -> models.Sample:
+        return self.Sample.query.filter(models.Sample.name == name).first()
+
     def samples_in_customer_group(
         self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
     ) -> Query:
