@@ -59,16 +59,6 @@ class DemuxedFlowcell:
         except AttributeError:
             return
 
-    def check_flowcell_status_in_status_db(self) -> None:
-        """checks if the flowcell has the status "ondisk in statusdb"""
-        self.status_is_on_disk: bool = self.flowcell_status == "ondisk"
-        if not self.status_is_on_disk:
-            LOG.warning(
-                "Flowcell %s status in statusdb not correct: %s",
-                self.id,
-                self.flowcell_status,
-            )
-
     def check_fastq_files_in_housekeeper(self) -> None:
         """Checks if the flowcell has any fastq files in Housekeeper"""
         self.fastq_files_exist_in_housekeeper = self.hk.files(tags=[self.id, "fastq"]).count() > 0
@@ -108,7 +98,6 @@ class DemuxedFlowcell:
         """performs a series of checks on the flowcell directory"""
         self.check_flowcell_naming()
         self.check_flowcell_exists_in_status_db()
-        self.check_flowcell_status_in_status_db()
         self.check_fastq_files_in_housekeeper()
         self.check_fastq_files_on_disk()
         self.check_all_checks()
