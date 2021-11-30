@@ -202,7 +202,6 @@ def check_demux_runs_flowcells(
             flowcell.id,
             flowcell.is_correctly_named,
             flowcell.exists_in_status_db,
-            # flowcell.flowcell_status,
             flowcell.fastq_files_exist_in_housekeeper,
             flowcell.fastq_files_exist_on_disk,
             click.style(str(flowcell.passed_check), fg=CHECK_COLOR[flowcell.passed_check]),
