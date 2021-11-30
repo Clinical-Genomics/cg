@@ -30,7 +30,6 @@ FLOWCELL_OUTPUT_HEADERS = [
     "Flowcell id",
     "Correct name?",
     "Exists in statusdb?",
-    "Status",
     "Fastq files in HK?",
     "Fastq files on disk?",
     "Check passed?",
@@ -203,7 +202,7 @@ def check_demux_runs_flowcells(
             flowcell.id,
             flowcell.is_correctly_named,
             flowcell.exists_in_status_db,
-            flowcell.flowcell_status,
+            # flowcell.flowcell_status,
             flowcell.fastq_files_exist_in_housekeeper,
             flowcell.fastq_files_exist_on_disk,
             click.style(str(flowcell.passed_check), fg=CHECK_COLOR[flowcell.passed_check]),
@@ -228,80 +227,40 @@ def check_demux_runs_flowcells(
 
 
 @clean.command("check-statusdb-flowcells")
-@click.option("-f", "--failed-only", is_flag=True, help="Shows failed flowcells only")
-@click.option(
-    "-r",
-    "--repair-failed",
-    is_flag=True,
-    help="CAUTION: REPAIRS FLOWCELL STATUS IN STATUSDB!",
-)
 @click.option(
     "-d",
     "--dry-run",
     is_flag=True,
-    help="Runs this command without actually repairing flowcells!",
+    help="Runs this command without actually repairing flowcell statuses!",
 )
 @click.pass_obj
-def check_statusdb_flowcells(
-    context: CGConfig, failed_only: bool, repair_failed: bool, dry_run: bool
-):
-    """check flowcell statuses in statusdb"""
+def check_statusdb_flowcells(context: CGConfig, dry_run: bool):
+    """set correct flowcell statuses in statusdb"""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    def check_ondisk_status():
-        """checks all flowcells with status 'ondisk', sets status to 'removed' if not actually
-        ondisk"""
-        status_ondisk_flowcells = status_db.flowcells(status="ondisk")
-        click.echo(f"Found {status_ondisk_flowcells.count()} on disk flowcells!")
-        physical_ondisk_flowcell_names = [
-            DemuxedFlowcell(flowcell_dir, status_db, housekeeper_api).id
-            for flowcell_dir in demux_api.out_dir.iterdir()
-        ]
-        for flowcell in status_ondisk_flowcells:
-            if flowcell.name in physical_ondisk_flowcell_names:
-                LOG.info("On disk flowcell found: %s", flowcell.name)
-            else:
-                LOG.warning(
-                    "flowcell with status `ondisk` NOT found in %s! Flowcell %s has the wrong status!",
-                    demux_api.out_dir,
-                    flowcell.name,
-                )
-                if not dry_run:
-                    LOG.info(
-                        "Setting status of flowcell %s from %s to 'removed'",
-                        flowcell.name,
-                        flowcell.status,
-                    )
-                    flowcell.status = "removed"
-                    status_db.commit()
-
-    def check_removed_status():
-        """checks all flowcells with status 'removed', sets status to 'ondisk' if actually ondisk"""
-        status_ondisk_flowcells = status_db.flowcells(status="removed")
-        click.echo(f"Found {status_ondisk_flowcells.count()} removed flowcells!")
-        physical_ondisk_flowcell_names = [
-            DemuxedFlowcell(flowcell_dir, status_db, housekeeper_api).id
-            for flowcell_dir in demux_api.out_dir.iterdir()
-        ]
-        for flowcell in status_ondisk_flowcells:
-            if flowcell.name not in physical_ondisk_flowcell_names:
-                LOG.info("Removed flowcell not found on disk: %s", flowcell.name)
-            else:
-                LOG.warning(
-                    "flowcell with status `removed` FOUND in %s! Flowcell %s has the wrong status!",
-                    demux_api.out_dir,
-                    flowcell.name,
-                )
-                if not dry_run:
-                    LOG.info(
-                        "Setting status of flowcell %s from %s to 'ondisk'",
-                        flowcell.name,
-                        flowcell.status,
-                    )
-                    flowcell.status = "ondisk"
-                    status_db.commit()
-
-    check_ondisk_status()
-    check_removed_status()
+    flowcells_in_statusdb = [
+        flowcell for flowcell in status_db.flowcells() if flowcell.status in ["ondisk", "removed"]
+    ]
+    LOG.info("Found %s flowcells in statusdb!", len(flowcells_in_statusdb))
+    physical_ondisk_flowcell_names = [
+        DemuxedFlowcell(flowcell_dir, status_db, housekeeper_api).id
+        for flowcell_dir in demux_api.out_dir.iterdir()
+    ]
+    for flowcell in flowcells_in_statusdb:
+        old_status = flowcell.status
+        if flowcell.name in physical_ondisk_flowcell_names:
+            new_status = "ondisk"
+        else:
+            new_status = "removed"
+        if old_status != new_status:
+            LOG.info(
+                "Setting status of flowcell %s from %s to %s",
+                flowcell.name,
+                old_status,
+                new_status,
+            )
+            if not dry_run:
+                flowcell.status = new_status
+                status_db.commit()
