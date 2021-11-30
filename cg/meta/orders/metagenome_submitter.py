@@ -13,9 +13,6 @@ from cg.store import models
 
 
 class MetagenomeSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        pass
-
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of metagenome samples."""
         project_data, lims_map = process_lims(

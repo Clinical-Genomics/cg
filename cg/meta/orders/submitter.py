@@ -16,7 +16,6 @@ class Submitter(ABC):
         self.lims = lims
         self.status = status
 
-    @abstractmethod
     def validate_order(self, order: OrderIn) -> None:
         pass
 

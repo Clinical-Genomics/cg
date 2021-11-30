@@ -173,10 +173,10 @@ class CaseSubmitter(Submitter):
                 "cohorts": cohorts,
                 "data_analysis": data_analysis,
                 "data_delivery": data_delivery,
-                "name": case_name,
                 "internal_id": case_internal_id,
-                "priority": priority,
+                "name": case_name,
                 "panels": list(panels),  # TODO: move to MIP-DNA submitter
+                "priority": priority,
                 "samples": [
                     {
                         "age_at_sampling": sample.age_at_sampling,
@@ -192,7 +192,7 @@ class CaseSubmitter(Submitter):
                         "sex": sample.sex,
                         "status": sample.status
                         if hasattr(sample, "status")
-                        else None,  # TODO: move to RNA submitter
+                        else None,  # TODO: move to MIP-DNA submitter
                         "subject_id": sample.subject_id,
                         "time_point": sample.time_point
                         if hasattr(sample, "time_point")

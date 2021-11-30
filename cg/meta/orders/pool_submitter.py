@@ -12,9 +12,6 @@ from cg.store import models
 
 
 class PoolSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        pass
-
     def submit_order(self, order: OrderIn) -> dict:
         status_data = self.order_to_status(order)
         project_data, lims_map = process_lims(

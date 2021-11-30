@@ -13,9 +13,6 @@ from cg.store import models
 
 
 class MicrobialSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        pass
-
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
         """Convert order input for microbial samples."""

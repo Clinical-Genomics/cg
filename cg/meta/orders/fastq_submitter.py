@@ -13,9 +13,6 @@ from cg.store import models
 
 
 class FastqSubmitter(Submitter):
-    def validate_order(self, order: OrderIn) -> None:
-        pass
-
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
 
