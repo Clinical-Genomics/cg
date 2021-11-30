@@ -10,7 +10,7 @@
       "father": "",
       "mother": "",
       "status": "affected",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "application_version": "1",
       "family": "F0009604",
       "panels": [
@@ -30,7 +30,7 @@
       "father": "",
       "mother": "",
       "status": "unaffected",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "application_version": "1",
       "family": "F0009604",
       "panels": [
@@ -51,7 +51,7 @@
       "father": "",
       "mother": "",
       "status": "unaffected",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "application_version": "1",
       "family": "F0009604",
       "panels": [

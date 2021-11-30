@@ -21,7 +21,7 @@ from tests.store_helpers import StoreHelpers
 
 def test_mip_config_builder(
     hk_version_obj: hk_models.Version,
-    mip_analysis_obj: models.Analysis,
+    mip_dna_analysis_obj: models.Analysis,
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
     madeline_api: MockMadelineAPI,
@@ -31,7 +31,7 @@ def test_mip_config_builder(
     # WHEN instantiating
     config_builder = MipConfigBuilder(
         hk_version_obj=hk_version_obj,
-        analysis_obj=mip_analysis_obj,
+        analysis_obj=mip_dna_analysis_obj,
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
         madeline_api=madeline_api,

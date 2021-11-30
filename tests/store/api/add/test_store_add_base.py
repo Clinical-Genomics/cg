@@ -94,7 +94,7 @@ def test_add_pool(store: Store):
     store.add_commit(new_customer)
 
     application = store.add_application(
-        tag="RMLS05R150",
+        tag="RMLP05R800",
         category="rml",
         description="Ready-made",
         percent_kth=80,
