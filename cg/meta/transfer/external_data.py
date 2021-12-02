@@ -198,4 +198,4 @@ class ExternalDataAPI(MetaAPI):
             return
         self.housekeeper_api.commit()
         for case in cases_to_start:
-            self.status_db.set_case_action(case_id=case.internal_id, action="analyze")
+            self.status_db.set_case_action(case_id=case["internal_id"], action="analyze")
