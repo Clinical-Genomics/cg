@@ -8,6 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.cli.workflow.conftest import dna_case
+from tests.store.conftest import fixture_sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_nr: int):
@@ -94,9 +95,7 @@ def test_download_sample(
     assert isinstance(sbatch_number, int)
 
 
-def test_get_all_fastq(
-    cg_context: CGConfig, external_data_api: ExternalDataAPI, external_data_directory
-):
+def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directory):
     """Test the finding of fastq.gz files in customer directories"""
     # GIVEN a folder containing two folders with both fastq and md5 files
     for folder in external_data_directory.iterdir():
@@ -106,6 +105,34 @@ def test_get_all_fastq(
         )
         # THEN only fast.gz files are returned
         assert all([tmp.suffixes == [".fastq", ".gz"] for tmp in files])
+
+
+def test_get_transferred_samples(
+    analysis_store_trio,
+    customer_id,
+    external_data_api: ExternalDataAPI,
+    mocker,
+    sample_obj,
+    ticket_nr,
+    tmpdir_factory,
+):
+
+    # GIVEN that the working does not contain any correct folder
+    mocker.patch.object(ExternalDataAPI, "get_destination_path")
+    ExternalDataAPI.get_destination_path.return_value = Path(".")
+    # THEN the function should return an empty list
+    transferred_samples = external_data_api.get_transferred_samples(
+        customer=customer_id, ticket_id=ticket_nr
+    )
+    assert transferred_samples == []
+
+    # GIVEN one such sample exists
+    tmp_dir_path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
+    ExternalDataAPI.get_destination_path.return_value = tmp_dir_path
+    transferred_samples = external_data_api.get_transferred_samples(
+        customer=customer_id, ticket_id=ticket_nr
+    )
+    assert transferred_samples == [sample_obj]
 
 
 def test_add_files_to_bundles(
@@ -125,7 +152,12 @@ def test_add_files_to_bundles(
 
 
 def test_add_transfer_to_housekeeper(
-    case_id, dna_case, external_data_api: ExternalDataAPI, fastq_file: Path, mocker, ticket_nr
+    case_id,
+    dna_case,
+    external_data_api: ExternalDataAPI,
+    fastq_file: Path,
+    mocker,
+    ticket_nr,
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
@@ -134,9 +166,9 @@ def test_add_transfer_to_housekeeper(
     )
     mocker.patch.object(Store, "get_cases_from_ticket")
     Store.get_cases_from_ticket.return_value = cases
-    samples = [fam_sample.sample.internal_id for fam_sample in cases.all()[0].links]
+    samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
 
-    # GIVEN a list of paths
+    # GIVEN a list of paths and only two samples being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
     ExternalDataAPI.get_all_paths.return_value = [fastq_file]
 
@@ -146,21 +178,34 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(MockHousekeeperAPI, "get_files")
     MockHousekeeperAPI.get_files.return_value = []
 
-    # THEN none of the cases should exist in housekeeper
-    assert all([external_data_api.housekeeper_api.bundle(sample) is None for sample in samples])
+    mocker.patch.object(ExternalDataAPI, "get_transferred_samples")
+    ExternalDataAPI.get_transferred_samples.return_value = samples[:-1]
+
+    mocker.patch.object(Store, "cases")
+    Store.cases.return_value = [external_data_api.status_db.family(internal_id="yellowhog")]
+
+    mocker.patch.object(Store, "set_case_action")
+    Store.set_case_action.return_value = None
+
+    # THEN none of the samples should exist in housekeeper
+    assert all(
+        external_data_api.housekeeper_api.bundle(sample.internal_id) is None for sample in samples
+    )
 
     # WHEN the sample bundles are added to housekeeper
     external_data_api.add_transfer_to_housekeeper(ticket_id=ticket_nr)
 
-    # THEN the sample bundles exist in housekeeper and the file has been added to all bundles
-    assert all([external_data_api.housekeeper_api.bundle(sample) is not None for sample in samples])
+    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
+    added_samples = [sample for sample in external_data_api.housekeeper_api.bundles()]
     assert all(
-        [
-            external_data_api.housekeeper_api.bundle(sample).versions[0].files[0].path
-            == str(fastq_file.absolute())
-            for sample in samples
-        ]
+        sample.internal_id in [added_sample.name for added_sample in added_samples]
+        for sample in samples[:-1]
     )
+    assert all(
+        sample.versions[0].files[0].path == str(fastq_file.absolute()) for sample in added_samples
+    )
+    # Then the sample that is not available should not exists
+    assert samples[-1].internal_id not in [added_sample.name for added_sample in added_samples]
 
 
 def test_checksum(fastq_file: Path):

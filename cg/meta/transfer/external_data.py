@@ -17,6 +17,7 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
 from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
 from cg.constants import HK_FASTQ_TAGS
+from tests.store.conftest import fixture_sample_obj
 
 LOG = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class ExternalDataAPI(MetaAPI):
         """Returns the path to where the sample files are fetched from"""
         return Path(self.caesar_path % customer, str(ticket_id), cust_sample_id)
 
-    def get_destination_path(self, customer: str, lims_sample_id: str) -> Path:
+    def get_destination_path(self, customer: str, lims_sample_id: Optional[str] = "") -> Path:
         """Returns the path to where the files are to be transferred"""
         return Path(self.hasta_path % customer, lims_sample_id)
 
@@ -127,7 +128,19 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
+    def get_transferred_samples(self, customer: str, ticket_id: int) -> List[models.Sample]:
+        """Returns the samples from given ticket that are present at the destination path"""
+        customer_folder: Path = self.get_destination_path(customer=customer)
+        transferred_samples: List[models.Sample] = [
+            sample
+            for sample in self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
+            if sample.internal_id
+            in [sample_path.parts[-1] for sample_path in customer_folder.iterdir()]
+        ]
+        return transferred_samples
+
     def check_fastq_md5sum(self, fastq_path) -> Optional[Path]:
+        """Returns the path of the input file if it does not match its md5sum"""
         if Path(str(fastq_path) + ".md5").exists():
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
@@ -142,36 +155,42 @@ class ExternalDataAPI(MetaAPI):
             self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
 
     def add_transfer_to_housekeeper(self, ticket_id: int, dry_run: bool = False) -> None:
-        """Creates sample bundles in housekeeper and adds the files corresponding to the ticket to the bundle"""
+        """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
+        bundle"""
         failed_files: List[Path] = []
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        for case in cases:
-            links = case.links
-            for link in links:
-                lims_sample_id: str = link.sample.internal_id
-                paths: List[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=cust)
-                last_version: Version = self.housekeeper_api.get_create_version(
-                    bundle=lims_sample_id
-                )
-                fastq_paths_to_add: List[Path] = self.housekeeper_api.check_bundle_files(
-                    file_paths=paths,
-                    bundle_name=lims_sample_id,
-                    last_version=last_version,
-                    tags=HK_FASTQ_TAGS,
-                )
-                failed_sums: List[Path] = []
-                for file in fastq_paths_to_add:
-                    pass_check = self.check_fastq_md5sum(file)
-                    if pass_check:
-                        failed_sums.append(pass_check)
-                failed_files.extend(failed_sums)
-                self.add_files_to_bundles(
-                    fastq_paths=fastq_paths_to_add,
-                    last_version=last_version,
-                    lims_sample_id=lims_sample_id,
-                )
-                LOG.info("The md5 files match the md5sum for sample {}".format(lims_sample_id))
+        available_samples: List[models.Sample] = self.get_transferred_samples(
+            customer=cust, ticket_id=ticket_id
+        )
+        cases_to_start = []
+        for sample in available_samples:
+            cases_to_start.extend(
+                self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
+            )
+        cases_to_start = set(cases_to_start)
+
+        for sample in available_samples:
+            lims_sample_id: str = sample.internal_id
+            paths: List[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=cust)
+            last_version: Version = self.housekeeper_api.get_create_version(bundle=lims_sample_id)
+            fastq_paths_to_add: List[Path] = self.housekeeper_api.check_bundle_files(
+                file_paths=paths,
+                bundle_name=lims_sample_id,
+                last_version=last_version,
+                tags=HK_FASTQ_TAGS,
+            )
+            failed_sums: List[Path] = []
+            for file in fastq_paths_to_add:
+                pass_check = self.check_fastq_md5sum(file)
+                if pass_check:
+                    failed_sums.append(pass_check)
+            failed_files.extend(failed_sums)
+            self.add_files_to_bundles(
+                fastq_paths=fastq_paths_to_add,
+                last_version=last_version,
+                lims_sample_id=lims_sample_id,
+            )
+            LOG.info("The md5 files match the md5sum for sample {}".format(lims_sample_id))
         if failed_files:
             LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
@@ -179,5 +198,5 @@ class ExternalDataAPI(MetaAPI):
             LOG.info("No changes will be committed since this is a dry-run")
             return
         self.housekeeper_api.commit()
-        for case in cases:
+        for case in cases_to_start:
             self.status_db.set_case_action(case_id=case.internal_id, action="analyze")
