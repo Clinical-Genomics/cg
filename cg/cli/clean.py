@@ -2,17 +2,15 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import List, Optional
 
 import click
+from alchy import Query
+from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 from tabulate import tabulate
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from alchy import Query
-
-from cgmodels.cg.constants import Pipeline
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -25,7 +23,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.meta.clean.demultiplexed_flowcells import DemuxedFlowcell
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -193,14 +191,8 @@ def hk_bundle_files(
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
-@clean.command("check-demux-runs-flowcells")
+@clean.command("invalid-flowcell-dirs")
 @click.option("-f", "--failed-only", is_flag=True, help="Shows failed flowcells only")
-@click.option(
-    "-r",
-    "--remove-failed",
-    is_flag=True,
-    help="CAUTION: REMOVES FLOWCELL DIRS FROM DEMULTIPLEXED-RUNS!",
-)
 @click.option(
     "-d",
     "--dry-run",
@@ -208,10 +200,8 @@ def hk_bundle_files(
     help="Runs this command without actually removing flowcells!",
 )
 @click.pass_obj
-def check_demux_runs_flowcells(
-    context: CGConfig, failed_only: bool, remove_failed: bool, dry_run: bool
-):
-    """Checks flowcells in demultiplexed-runs"""
+def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dry_run: bool):
+    """Removes invalid flowcell directories from demultiplexed-runs"""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -229,7 +219,7 @@ def check_demux_runs_flowcells(
             flowcell.name,
             flowcell.id,
             flowcell.is_correctly_named,
-            flowcell.exists_in_status_db,
+            flowcell.exists_in_statusdb,
             flowcell.fastq_files_exist_in_housekeeper,
             flowcell.fastq_files_exist_on_disk,
             click.style(str(flowcell.passed_check), fg=CHECK_COLOR[flowcell.passed_check]),
@@ -242,26 +232,29 @@ def check_demux_runs_flowcells(
             tabulate_row,
             headers=FLOWCELL_OUTPUT_HEADERS,
             tablefmt="fancy_grid",
-            missingval="?",
+            missingval="N/A",
         ),
     )
-    if remove_failed:
-        failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
-        for flowcell in failed_flowcells:
+
+    failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
+    for flowcell in failed_flowcells:
+        LOG.warning("Invalid flowcell directory found: %s", flowcell.path)
+        if not dry_run:
             LOG.warning("Removing %s!", flowcell.path)
-            if not dry_run:
-                flowcell.remove_from_demultiplexed_runs()
+            flowcell.remove_from_demultiplexed_runs()
+            if flowcell.fastq_files_exist_in_housekeeper:
+                flowcell.remove_files_from_housekeeper()
 
 
-@clean.command("check-statusdb-flowcells")
+@clean.command("fix-flowcell-status")
 @click.option(
     "-d",
     "--dry-run",
     is_flag=True,
-    help="Runs this command without actually repairing flowcell statuses!",
+    help="Runs this command without actually fixing flowcell statuses!",
 )
 @click.pass_obj
-def check_statusdb_flowcells(context: CGConfig, dry_run: bool):
+def fix_flowcell_status(context: CGConfig, dry_run: bool):
     """set correct flowcell statuses in statusdb"""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
