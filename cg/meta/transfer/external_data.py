@@ -17,7 +17,7 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
 from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
 from cg.constants import HK_FASTQ_TAGS
-from tests.store.conftest import fixture_sample_obj
+
 
 LOG = logging.getLogger(__name__)
 
