@@ -167,7 +167,6 @@ class ExternalDataAPI(MetaAPI):
             cases_to_start.extend(
                 self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
             )
-        cases_to_start = set(cases_to_start)
 
         for sample in available_samples:
             lims_sample_id: str = sample.internal_id
