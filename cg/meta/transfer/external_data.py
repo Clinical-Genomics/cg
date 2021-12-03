@@ -130,12 +130,12 @@ class ExternalDataAPI(MetaAPI):
     def get_available_samples(self, folder: Path, ticket_id: int) -> List[models.Sample]:
         """Returns the samples from given ticket that are present in the provided folder"""
         available_folders: List[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
-        transferred_samples: List[models.Sample] = [
+        available_samples: List[models.Sample] = [
             sample
             for sample in self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
             if sample.internal_id in available_folders or sample.name in available_folders
         ]
-        return transferred_samples
+        return available_samples
 
     def add_files_to_bundles(
         self, fastq_paths: List[Path], last_version: Version, lims_sample_id: str

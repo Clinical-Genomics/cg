@@ -183,20 +183,29 @@ def test_get_available_samples(
     ticket_nr: int,
     tmpdir_factory,
 ):
-    # GIVEN that the root directory does not contain any correct folders
-    # THEN the function should return an empty list
-    transferred_samples = external_data_api.get_available_samples(
-        folder=Path("."), ticket_id=ticket_nr
-    )
-    assert transferred_samples == []
-
     # GIVEN one such sample exists
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
-    ExternalDataAPI.get_destination_path.return_value = tmp_dir_path
-    transferred_samples = external_data_api.get_available_samples(
+    available_samples = external_data_api.get_available_samples(
         folder=tmp_dir_path, ticket_id=ticket_nr
     )
-    assert transferred_samples == [sample_obj]
+    # THEN the function should return a list containing the sample object
+    assert available_samples == [sample_obj]
+
+
+def test_get_available_samples_no_samples_avail(
+    analysis_store_trio,
+    customer_id: str,
+    external_data_api: ExternalDataAPI,
+    ticket_nr: int,
+    tmpdir_factory,
+):
+    # GIVEN that the empty directory created does not contain any correct folders
+    # THEN the function should return an empty list
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket_id=ticket_nr
+    )
+    assert available_samples == []
 
 
 def test_checksum(fastq_file: Path):
