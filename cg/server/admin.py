@@ -324,7 +324,17 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ["age_at_sampling", "from_sample", "invoiced_at", "loqusdb_id", "organism", "_phenotype_groups", "_phenotype_terms", "reference_genome", "time_point"]
+    column_exclude_list = [
+        "age_at_sampling",
+        "from_sample",
+        "invoiced_at",
+        "loqusdb_id",
+        "organism",
+        "_phenotype_groups",
+        "_phenotype_terms",
+        "reference_genome",
+        "time_point",
+    ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
         "sex",
@@ -342,7 +352,15 @@ class SampleView(BaseView):
         "priority": view_human_priority,
     }
     column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
-    form_excluded_columns = ["age_at_sampling", "from_sample", "invoiced_at", "is_external", "_phenotype_groups", "_phenotype_terms", "time_point"]
+    form_excluded_columns = [
+        "age_at_sampling",
+        "from_sample",
+        "invoiced_at",
+        "is_external",
+        "_phenotype_groups",
+        "_phenotype_terms",
+        "time_point",
+    ]
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):
