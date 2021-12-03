@@ -363,7 +363,9 @@ def options():
 def me():
     """Fetch information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
-        LOG.error("%s is not admin and is not connected to any customers, aborting", g.current_user.email)
+        LOG.error(
+            "%s is not admin and is not connected to any customers, aborting", g.current_user.email
+        )
         return abort(http.HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
