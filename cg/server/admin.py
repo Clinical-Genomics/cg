@@ -194,7 +194,7 @@ class FamilyView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
-    column_exclude_list = ["created_at"]
+    column_exclude_list = ["created_at", "_cohorts", "synopsis", "avatar_url"]
     column_filters = [
         "customer.internal_id",
         "priority",
@@ -208,6 +208,7 @@ class FamilyView(BaseView):
         "avatar_url": _list_thumbnail,
     }
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
+    form_excluded_columns = ["cohorts", "synopsis"]
     form_extra_fields = {
         "data_analysis": SelectEnumField(enum_class=Pipeline),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
@@ -323,7 +324,7 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ["invoiced_at"]
+    column_exclude_list = ["age_at_sampling", "from_sample", "invoiced_at", "loqusdb_id", "organism", "_phenotype_groups", "_phenotype_terms", "reference_genome", "time_point"]
     column_default_sort = ("created_at", True)
     column_editable_list = [
         "sex",
@@ -341,7 +342,7 @@ class SampleView(BaseView):
         "priority": view_human_priority,
     }
     column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
-    form_excluded_columns = ["is_external", "invoiced_at"]
+    form_excluded_columns = ["age_at_sampling", "from_sample", "invoiced_at", "is_external", "_phenotype_groups", "_phenotype_terms", "time_point"]
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):
