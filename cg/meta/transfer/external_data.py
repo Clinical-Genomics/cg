@@ -96,9 +96,7 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
-        sbatch_number: int = self.slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
-        )
+        self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(msg=[sample.name for sample in available_samples])
         LOG.info(
             "The transfer of the {numb} samples above has begun".format(numb=len(available_samples))
