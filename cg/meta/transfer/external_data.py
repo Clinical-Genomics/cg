@@ -24,8 +24,8 @@ LOG = logging.getLogger(__name__)
 class ExternalDataAPI(MetaAPI):
     def __init__(self, config: CGConfig):
         super().__init__(config)
-        self.hasta_path: str = config.external.hasta
-        self.caesar_path: str = config.external.caesar
+        self.destination_path: str = config.external.hasta
+        self.source_path: str = config.external.caesar
         self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
@@ -52,32 +52,24 @@ class ExternalDataAPI(MetaAPI):
         cust_sample_id: Optional[str] = "",
     ) -> Path:
         """Returns the path to where the sample files are fetched from"""
-        return Path(self.caesar_path % customer, str(ticket_id), cust_sample_id)
+        return Path(self.source_path % customer, str(ticket_id), cust_sample_id)
 
-    def get_destination_path(self, customer: str, lims_sample_id: str) -> Path:
+    def get_destination_path(self, customer: str, lims_sample_id: Optional[str] = "") -> Path:
         """Returns the path to where the files are to be transferred"""
-        return Path(self.hasta_path % customer, lims_sample_id)
+        return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int):
+    def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
-        samples: List[models.Sample] = self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        available_samples: List[models.Sample] = [
-            sample
-            for sample in samples
-            if sample.name
-            in [
-                sample_folder.parts[-1]
-                for sample_folder in self.get_source_path(
-                    customer=cust, ticket_id=ticket_id
-                ).iterdir()
-            ]
-        ]
+        available_samples: List[models.Sample] = self.get_available_samples(
+            folder=self.get_source_path(customer=cust, ticket_id=ticket_id),
+            ticket_id=ticket_id,
+        )
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
-        Path(self.hasta_path % cust).mkdir(exist_ok=True)
+        Path(self.destination_path % cust).mkdir(exist_ok=True)
 
-        commands = "".join(
+        commands: str = "".join(
             [
                 RSYNC_CONTENTS_COMMAND.format(
                     source_path=self.get_source_path(
@@ -134,6 +126,16 @@ class ExternalDataAPI(MetaAPI):
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
                 return fastq_path
+
+    def get_available_samples(self, folder: Path, ticket_id: int) -> List[models.Sample]:
+        """Returns the samples from given ticket that are present in the provided folder"""
+        available_folders: List[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
+        transferred_samples: List[models.Sample] = [
+            sample
+            for sample in self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
+            if sample.internal_id in available_folders or sample.name in available_folders
+        ]
+        return transferred_samples
 
     def add_files_to_bundles(
         self, fastq_paths: List[Path], last_version: Version, lims_sample_id: str

@@ -8,6 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.cli.workflow.conftest import dna_case
+from tests.store.conftest import fixture_sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_nr: int):
@@ -63,27 +64,25 @@ def test_get_destination_path(
 def test_transfer_sample_files_from_source(
     caplog,
     cg_context: CGConfig,
-    customer_id,
-    cust_sample_id,
+    customer_id: str,
+    cust_sample_id: str,
     external_data_api: ExternalDataAPI,
-    external_data_directory,
+    external_data_directory: Path,
     helpers,
     mocker,
-    sample_store,
-    ticket_nr,
+    sample_store: Store,
+    ticket_nr: int,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN a Store with three samples, where only two samples are present in the source folder
-    helpers.add_sample(
-        store=external_data_api.status_db, name=cust_sample_id + "1", ticket=ticket_nr
-    )
-    helpers.add_sample(
-        store=external_data_api.status_db, name=cust_sample_id + "2", ticket=ticket_nr
-    )
-    helpers.add_sample(
-        store=external_data_api.status_db, name=cust_sample_id + "3", ticket=ticket_nr
-    )
+    sample_name1: str = cust_sample_id + "1"
+    sample_name2: str = cust_sample_id + "2"
+    sample_name3: str = cust_sample_id + "3"
+
+    helpers.add_sample(store=external_data_api.status_db, name=sample_name1, ticket=ticket_nr)
+    helpers.add_sample(store=external_data_api.status_db, name=sample_name2, ticket=ticket_nr)
+    helpers.add_sample(store=external_data_api.status_db, name=sample_name3, ticket=ticket_nr)
 
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
@@ -91,16 +90,18 @@ def test_transfer_sample_files_from_source(
     mocker.patch.object(ExternalDataAPI, "get_source_path")
     external_data_api.get_source_path.return_value = Path("").joinpath(external_data_directory)
 
-    external_data_api.caesar_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
-    external_data_api.hasta_path = str(Path("").joinpath(*external_data_directory.parts[:-1], "%s"))
+    external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
+    external_data_api.destination_path = str(
+        Path("").joinpath(*external_data_directory.parts[:-1], "%s")
+    )
 
-    # WHEN the tramsfer is initated
+    # WHEN the transfer is initiated
     external_data_api.transfer_sample_files_from_source(ticket_id=ticket_nr, dry_run=True)
 
-    # THEN only the two samples present in the source directory are inlcuded in the rsync
-    assert all([sample in caplog.text for sample in [cust_sample_id + "1", cust_sample_id + "2"]])
+    # THEN only the two samples present in the source directory are included in the rsync
+    assert all([sample in caplog.text for sample in [sample_name1, sample_name2]])
 
-    assert not cust_sample_id + "3" in caplog.text
+    assert not sample_name3 in caplog.text
 
 
 def test_get_all_fastq(
@@ -172,6 +173,30 @@ def test_add_transfer_to_housekeeper(
             for sample in samples
         ]
     )
+
+
+def test_get_available_samples(
+    analysis_store_trio,
+    customer_id: str,
+    external_data_api: ExternalDataAPI,
+    sample_obj: models.Sample,
+    ticket_nr: int,
+    tmpdir_factory,
+):
+    # GIVEN that the root directory does not contain any correct folders
+    # THEN the function should return an empty list
+    transferred_samples = external_data_api.get_available_samples(
+        folder=Path("."), ticket_id=ticket_nr
+    )
+    assert transferred_samples == []
+
+    # GIVEN one such sample exists
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
+    ExternalDataAPI.get_destination_path.return_value = tmp_dir_path
+    transferred_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket_id=ticket_nr
+    )
+    assert transferred_samples == [sample_obj]
 
 
 def test_checksum(fastq_file: Path):
