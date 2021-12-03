@@ -73,6 +73,7 @@ def before_request():
     user_obj = db.user(user_data["email"])
     if user_obj is None or not user_obj.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
+        LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
     g.current_user = user_obj
@@ -362,6 +363,7 @@ def options():
 def me():
     """Fetch information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
+        LOG.error("%s is not admin and is not connected to any customers, aborting", g.current_user.email)
         return abort(http.HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
