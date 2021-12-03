@@ -156,7 +156,7 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         "RMLP15S450",
         "RMLP15S475",
         "RMLP15S500",
-        "RMLS05R150",
+        "RMLP05R800",
         "RMLS05R200",
     ]
 

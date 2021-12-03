@@ -8,7 +8,6 @@ from cg.models.orders.sample_base import OrderSample
 class ExcelSample(OrderSample):
     application: str = Field(..., alias="UDF/Sequencing Analysis")
     capture_kit: str = Field(None, alias="UDF/Capture Library version")
-    case_id: str = Field(None, alias="UDF/familyID")
     collection_date: str = Field(None, alias="UDF/Collection Date")
     comment: str = Field(None, alias="UDF/Comment")
     concentration: str = Field(None, alias="UDF/Concentration (nM)")
@@ -21,6 +20,7 @@ class ExcelSample(OrderSample):
     data_delivery: str = Field(None, alias="UDF/Data Delivery")
     elution_buffer: str = Field(None, alias="UDF/Sample Buffer")
     extraction_method: str = Field(None, alias="UDF/Extraction method")
+    family_name: str = Field(None, alias="UDF/familyID")
     father: str = Field(None, alias="UDF/fatherID")
     formalin_fixation_time: str = Field(None, alias="UDF/Formalin Fixation Time")
     index: str = Field(None, alias="UDF/Index type")

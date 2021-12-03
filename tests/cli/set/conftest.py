@@ -3,7 +3,6 @@
 import pytest
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 
 
 @pytest.fixture
