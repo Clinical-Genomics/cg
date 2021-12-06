@@ -329,10 +329,8 @@ class SampleView(BaseView):
         "from_sample",
         "invoiced_at",
         "loqusdb_id",
-        "organism",
         "_phenotype_groups",
         "_phenotype_terms",
-        "reference_genome",
         "time_point",
     ]
     column_default_sort = ("created_at", True)
