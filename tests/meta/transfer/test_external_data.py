@@ -200,11 +200,11 @@ def test_get_available_samples_no_samples_avail(
     tmpdir_factory,
 ):
     # GIVEN that the empty directory created does not contain any correct folders
-    # THEN the function should return an empty list
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
     available_samples = external_data_api.get_available_samples(
         folder=tmp_dir_path, ticket_id=ticket_nr
     )
+    # THEN the function should return an empty list
     assert available_samples == []
 
 
