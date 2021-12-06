@@ -5,23 +5,27 @@ import pytest
 from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.status import StatusHandler
+from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
 
 
 def test_pools_to_status(rml_order_to_submit):
     # GIVEN a rml order with three samples in one pool
+    order = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
+
     # WHEN parsing for status
-    data = StatusHandler.pools_to_status(rml_order_to_submit)
+    data = StatusHandler.pools_to_status(order=order)
+
     # THEN it should pick out the general information
     assert data["customer"] == "cust000"
-    assert data["order"] == "ctDNA sequencing - order 9"
+    assert data["order"] == "#123456"
     assert data["comment"] == "order comment"
 
     # ... and information about the pool(s)
     assert len(data["pools"]) == 2
     pool = data["pools"][0]
     assert pool["name"] == "pool-1"
-    assert pool["application"] == "RMLS05R150"
+    assert pool["application"] == "RMLP05R800"
     assert pool["data_analysis"] == str(Pipeline.FLUFFY)
     assert pool["data_delivery"] == str(DataDelivery.NIPT_VIEWER)
     assert len(pool["samples"]) == 2
@@ -34,8 +38,11 @@ def test_pools_to_status(rml_order_to_submit):
 
 def test_samples_to_status(fastq_order_to_submit):
     # GIVEN fastq order with two samples
+    order = OrderIn.parse_obj(fastq_order_to_submit, OrderType.FASTQ)
+
     # WHEN parsing for status
-    data = StatusHandler.samples_to_status(fastq_order_to_submit)
+    data = StatusHandler.fastq_to_status(order=order)
+
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
     first_sample = data["samples"][0]
@@ -52,8 +59,11 @@ def test_samples_to_status(fastq_order_to_submit):
 def test_metagenome_to_status(metagenome_order_to_submit):
 
     # GIVEN metagenome order with two samples
+    order = OrderIn.parse_obj(metagenome_order_to_submit, OrderType.METAGENOME)
+
     # WHEN parsing for status
-    data = StatusHandler.samples_to_status(metagenome_order_to_submit)
+    data = StatusHandler.metagenome_to_status(order=order)
+
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 2
     first_sample = data["samples"][0]
@@ -65,9 +75,10 @@ def test_metagenome_to_status(metagenome_order_to_submit):
 
 def test_microbial_samples_to_status(microbial_order_to_submit):
     # GIVEN microbial order with three samples
+    order = OrderIn.parse_obj(microbial_order_to_submit, OrderType.MICROSALT)
 
     # WHEN parsing for status
-    data = StatusHandler.microbial_samples_to_status(microbial_order_to_submit)
+    data = StatusHandler.microbial_samples_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
@@ -91,9 +102,10 @@ def test_microbial_samples_to_status(microbial_order_to_submit):
 
 def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     # GIVEN sarscov2 order with three samples
+    order = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
     # WHEN parsing for status
-    data = StatusHandler.microbial_samples_to_status(sarscov2_order_to_submit)
+    data = StatusHandler.microbial_samples_to_status(order=order)
 
     # THEN it should pick out samples and relevant information
     assert len(data["samples"]) == 5
@@ -108,27 +120,21 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
     assert sample_data.get("internal_id") is None
     assert sample_data["priority"] == "research"
     assert sample_data["application"] == "VWGDPTR001"
-    assert sample_data["collection_date"] == "2021-05-05"
     assert sample_data["comment"] == "plate comment"
-    assert sample_data["lab_code"] == "SE110 Växjö"
     assert sample_data["name"] == "all-fields"
     assert sample_data["organism_id"] == "SARS CoV-2"
-    assert sample_data["original_lab"] == "Karolinska University Hospital Solna"
-    assert sample_data["original_lab_address"] == "171 76 Stockholm"
-    assert sample_data["pre_processing_method"] == "COVIDSeq"
     assert sample_data["reference_genome"] == "NC_111"
-    assert sample_data["region"] == "Stockholm"
-    assert sample_data["region_code"] == "01"
-    assert sample_data["selection_criteria"] == "1. Allmän övervakning"
     assert sample_data["volume"] == "1"
 
 
 def test_cases_to_status(mip_order_to_submit):
 
     # GIVEN a scout order with a trio case
+    project: OrderType = OrderType.MIP_DNA
+    order = OrderIn.parse_obj(mip_order_to_submit, project=project)
 
     # WHEN parsing for status
-    data = StatusHandler.cases_to_status(mip_order_to_submit)
+    data = StatusHandler.cases_to_status(order=order, project=project)
 
     # THEN it should pick out the case
     assert len(data["families"]) == 2
@@ -145,12 +151,12 @@ def test_cases_to_status(mip_order_to_submit):
     first_sample = family["samples"][0]
     assert first_sample["age_at_sampling"] == "17.18192"
     assert first_sample["name"] == "sample1"
-    assert first_sample["application"] == "WGTPCFC030"
+    assert first_sample["application"] == "WGSPCFC030"
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
     assert first_sample["phenotype_terms"] == ["HP:0012747", "HP:0025049"]
     assert first_sample["sex"] == "female"
     assert first_sample["status"] == "affected"
-    assert first_sample["subject_id"] == "sample1"
+    assert first_sample["subject_id"] == "subject1"
     assert first_sample["mother"] == "sample2"
     assert first_sample["father"] == "sample3"
 
@@ -163,8 +169,11 @@ def test_cases_to_status_synopsis(mip_order_to_submit):
     for sample in mip_order_to_submit["samples"]:
         sample["synopsis"] = None
 
+    project: OrderType = OrderType.MIP_DNA
+    order = OrderIn.parse_obj(mip_order_to_submit, project=project)
+
     # WHEN parsing for status
-    StatusHandler.cases_to_status(mip_order_to_submit)
+    StatusHandler.cases_to_status(order=order, project=project)
 
     # THEN No exception should have been raised on synopsis
 
@@ -196,7 +205,7 @@ def test_store_rml(orders_api, base_store, rml_status_data):
     assert new_pool == new_pools[1]
 
     assert new_pool.name == "pool-2"
-    assert new_pool.application_version.application.tag == "RMLS05R150"
+    assert new_pool.application_version.application.tag == "RMLP05R800"
     assert not hasattr(new_pool, "data_analysis")
 
     # ... and add a delivery
@@ -492,13 +501,13 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert new_link.father.name == "sample3"
     assert new_link.sample.name == "sample1"
     assert new_link.sample.sex == "female"
-    assert new_link.sample.application_version.application.tag == "WGTPCFC030"
+    assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.is_tumour
     assert isinstance(new_case.links[1].sample.comment, str)
 
     assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
-    assert new_link.sample.subject_id == "sample1"
+    assert new_link.sample.subject_id == "subject1"
 
     assert new_link.sample.age_at_sampling == 17.18192
 
@@ -562,7 +571,7 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
     assert base_store.samples().count() == 0
 
     # WHEN storing the order
-    new_samples = orders_api.store_samples(
+    new_samples = orders_api.store_metagenome(
         customer=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
@@ -585,7 +594,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
     # THEN it should raise OrderError
     with pytest.raises(OrderError):
         # WHEN storing the order
-        orders_api.store_samples(
+        orders_api.store_metagenome(
             customer=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
@@ -621,7 +630,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     new_link = new_case.links[0]
     assert new_link.sample.name == "s1"
     assert new_link.sample.sex == "male"
-    assert new_link.sample.application_version.application.tag == "WGTPCFC030"
+    assert new_link.sample.application_version.application.tag == "WGSPCFC030"
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 

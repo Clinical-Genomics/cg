@@ -3,18 +3,17 @@ import json
 import logging
 import tempfile
 from functools import wraps
-from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Optional
 
 import requests
-from pymysql import IntegrityError
+from sqlalchemy.exc import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.exc import OrderError, OrderFormError
-from cg.meta.orders import OrdersAPI, OrderType
-from cg.models.orders.order import OrderIn
+from cg.meta.orders import OrdersAPI
+from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
@@ -74,6 +73,7 @@ def before_request():
     user_obj = db.user(user_data["email"])
     if user_obj is None or not user_obj.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
+        LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
     g.current_user = user_obj
@@ -83,12 +83,14 @@ def before_request():
 def submit_order(order_type):
     """Submit an order for samples."""
     api = OrdersAPI(lims=lims, status=db, osticket=osticket)
-    post_data: OrderIn = OrderIn.parse_obj(request.get_json())
-    LOG.info("processing '%s' order: %s", order_type, post_data)
-    error_message = None
+    error_message: str
     try:
+        LOG.info("processing '%s' order: %s", order_type, request.get_json())
+        project: OrderType = OrderType(order_type)
+        post_data: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
+
         result = api.submit(
-            project=OrderType(order_type),
+            project=project,
             order_in=post_data,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
@@ -130,7 +132,6 @@ def cases():
     """Fetch cases."""
     records = db.cases(days=31)
     count = len(records)
-
     return jsonify(cases=records, total=count)
 
 
@@ -362,6 +363,9 @@ def options():
 def me():
     """Fetch information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
+        LOG.error(
+            "%s is not admin and is not connected to any customers, aborting", g.current_user.email
+        )
         return abort(http.HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
@@ -394,7 +398,7 @@ def orderform():
     input_file = request.files.get("file")
     filename = secure_filename(input_file.filename)
 
-    error_message = None
+    error_message: str
     try:
         if filename.lower().endswith(".xlsx"):
             temp_dir = Path(tempfile.gettempdir())

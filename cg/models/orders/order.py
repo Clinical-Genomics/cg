@@ -1,10 +1,43 @@
-from typing import List, Optional
+from typing import Optional, Any
+from pydantic import BaseModel, constr, conlist
 
-from pydantic import BaseModel
+from cg.models.orders.constants import OrderType
+from cg.models.orders.samples import (
+    sample_class_for,
+)
+from cg.store import models
 
 
 class OrderIn(BaseModel):
-    name: str
+    name: constr(min_length=2, max_length=models.Sample.order.property.columns[0].type.length)
     comment: Optional[str]
-    customer: str
-    samples: List[dict]
+    customer: constr(
+        min_length=1, max_length=models.Customer.internal_id.property.columns[0].type.length
+    )
+    samples: conlist(Any, min_items=1)
+    ticket: Optional[str]
+
+    @classmethod
+    def parse_obj(cls, obj: dict, project: OrderType):
+        parsed_obj: OrderIn = super().parse_obj(obj)
+        parsed_obj.parse_samples(project=project)
+        return parsed_obj
+
+    def parse_samples(self, project: OrderType):
+        """
+        Parses samples of by the type given by the project
+
+        Parameters:
+            project (OrderType): type of project
+
+        Returns:
+            Nothing
+        """
+        parsed_samples = []
+
+        sample: dict
+        for sample in self.samples:
+            parsed_sample = sample_class_for(project=project).parse_obj(sample)
+            parsed_samples.append(parsed_sample)
+
+        self.samples = parsed_samples

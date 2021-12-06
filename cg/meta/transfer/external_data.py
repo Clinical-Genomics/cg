@@ -25,8 +25,8 @@ LOG = logging.getLogger(__name__)
 class ExternalDataAPI(MetaAPI):
     def __init__(self, config: CGConfig):
         super().__init__(config)
-        self.hasta_path: str = config.external.hasta
-        self.caesar_path: str = config.external.caesar
+        self.destination_path: str = config.external.hasta
+        self.source_path: str = config.external.caesar
         self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
         self.mail_user: str = config.data_delivery.mail_user
@@ -46,32 +46,43 @@ class ExternalDataAPI(MetaAPI):
         log_dir.mkdir(parents=True, exist_ok=False)
         return log_dir
 
-    def get_source_path(self, cust_sample_id: str, customer: str, ticket_id: int) -> Path:
+    def get_source_path(
+        self,
+        customer: str,
+        ticket_id: int,
+        cust_sample_id: Optional[str] = "",
+    ) -> Path:
         """Returns the path to where the sample files are fetched from"""
-        return Path(self.caesar_path % customer, str(ticket_id), cust_sample_id)
+        return Path(self.source_path % customer, str(ticket_id), cust_sample_id)
 
     def get_destination_path(self, customer: str, lims_sample_id: Optional[str] = "") -> Path:
         """Returns the path to where the files are to be transferred"""
-        return Path(self.hasta_path % customer, lims_sample_id)
+        return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample(
-        self, cust: str, cust_sample_id: str, lims_sample_id: str, dry_run: bool, ticket_id: int
-    ) -> int:
-        """Runs a SLURM job to transfer a sample folder. Returns SLURM jobid of the transfer process"""
-        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
-        source_path: Path = self.get_source_path(
+    def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
+        """Transfers all sample files, related to given ticket, from source to destination"""
+        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        available_samples: List[models.Sample] = self.get_available_samples(
+            folder=self.get_source_path(customer=cust, ticket_id=ticket_id),
             ticket_id=ticket_id,
-            customer=cust,
-            cust_sample_id=cust_sample_id,
         )
-        destination_path: Path = self.get_destination_path(
-            customer=cust,
-            lims_sample_id=lims_sample_id,
-        )
-        commands: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=source_path, destination_path=destination_path
-        )
+        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
+        Path(self.destination_path % cust).mkdir(exist_ok=True)
+
+        commands: str = "".join(
+            [
+                RSYNC_CONTENTS_COMMAND.format(
+                    source_path=self.get_source_path(
+                        cust_sample_id=sample.name, customer=cust, ticket_id=ticket_id
+                    ),
+                    destination_path=self.get_destination_path(
+                        customer=cust, lims_sample_id=sample.internal_id
+                    ),
+                )
+                for sample in available_samples
+            ]
+        )
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
             "account": self.account,
@@ -86,30 +97,11 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
-        sbatch_number: int = self.slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+        LOG.info(msg=[sample.name for sample in available_samples])
+        LOG.info(
+            "The transfer of the {numb} samples above has begun".format(numb=len(available_samples))
         )
-        return sbatch_number
-
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int):
-        """Transfers all sample files, related to given ticket, from source to destination"""
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        Path(self.hasta_path % cust).mkdir(exist_ok=True)
-        for case in cases:
-            links = case.links
-            for link in links:
-                sbatch_number: int = self.transfer_sample(
-                    ticket_id=ticket_id,
-                    cust=cust,
-                    cust_sample_id=link.sample.name,
-                    lims_sample_id=link.sample.internal_id,
-                    dry_run=dry_run,
-                )
-                LOG.info(
-                    "Transferring sample %s from source by submitting sbatch job %s"
-                    % (link.sample.internal_id, sbatch_number)
-                )
 
     def get_all_fastq(self, sample_folder: Path) -> List[Path]:
         """Returns a list of all fastq.gz files in given folder"""
@@ -145,6 +137,16 @@ class ExternalDataAPI(MetaAPI):
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
                 return fastq_path
+
+    def get_available_samples(self, folder: Path, ticket_id: int) -> List[models.Sample]:
+        """Returns the samples from given ticket that are present in the provided folder"""
+        available_folders: List[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
+        available_samples: List[models.Sample] = [
+            sample
+            for sample in self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
+            if sample.internal_id in available_folders or sample.name in available_folders
+        ]
+        return available_samples
 
     def add_files_to_bundles(
         self, fastq_paths: List[Path], last_version: Version, lims_sample_id: str
