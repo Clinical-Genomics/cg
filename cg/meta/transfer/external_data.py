@@ -18,7 +18,6 @@ from cg.store import models
 from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
 from cg.constants import HK_FASTQ_TAGS
 
-
 LOG = logging.getLogger(__name__)
 
 

@@ -101,10 +101,10 @@ def test_transfer_sample_files_from_source(
     # THEN only the two samples present in the source directory are included in the rsync
     assert all([sample in caplog.text for sample in [sample_name1, sample_name2]])
 
-    assert not sample_name3 in caplog.text
+    assert sample_name3 not in caplog.text
 
 
-def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directory):
+def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directory: Path):
     """Test the finding of fastq.gz files in customer directories"""
     # GIVEN a folder containing two folders with both fastq and md5 files
     for folder in external_data_directory.iterdir():
