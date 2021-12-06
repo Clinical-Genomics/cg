@@ -44,7 +44,7 @@ def public(route_function):
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), 204)
+        return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
