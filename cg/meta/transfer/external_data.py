@@ -120,17 +120,6 @@ class ExternalDataAPI(MetaAPI):
         all_fastq_in_folder: List[Path] = self.get_all_fastq(sample_folder=fastq_folder)
         return all_fastq_in_folder
 
-    def get_transferred_samples(self, customer: str, ticket_id: int) -> List[models.Sample]:
-        """Returns the samples from given ticket that are present at the destination path"""
-        customer_folder: Path = self.get_destination_path(customer=customer)
-        transferred_samples: List[models.Sample] = [
-            sample
-            for sample in self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
-            if sample.internal_id
-            in [sample_path.parts[-1] for sample_path in customer_folder.iterdir()]
-        ]
-        return transferred_samples
-
     def check_fastq_md5sum(self, fastq_path) -> Optional[Path]:
         """Returns the path of the input file if it does not match its md5sum"""
         if Path(str(fastq_path) + ".md5").exists():
@@ -161,8 +150,8 @@ class ExternalDataAPI(MetaAPI):
         bundle"""
         failed_files: List[Path] = []
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        available_samples: List[models.Sample] = self.get_transferred_samples(
-            customer=cust, ticket_id=ticket_id
+        available_samples: List[models.Sample] = self.get_available_samples(
+            folder=self.get_destination_path(customer=cust), ticket_id=ticket_id
         )
         cases_to_start = []
         for sample in available_samples:

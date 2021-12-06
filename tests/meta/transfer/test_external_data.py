@@ -116,34 +116,6 @@ def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directo
         assert all([tmp.suffixes == [".fastq", ".gz"] for tmp in files])
 
 
-def test_get_transferred_samples(
-    analysis_store_trio,
-    customer_id,
-    external_data_api: ExternalDataAPI,
-    mocker,
-    sample_obj,
-    ticket_nr,
-    tmpdir_factory,
-):
-
-    # GIVEN that the working does not contain any correct folder
-    mocker.patch.object(ExternalDataAPI, "get_destination_path")
-    ExternalDataAPI.get_destination_path.return_value = Path(".")
-    # THEN the function should return an empty list
-    transferred_samples = external_data_api.get_transferred_samples(
-        customer=customer_id, ticket_id=ticket_nr
-    )
-    assert transferred_samples == []
-
-    # GIVEN one such sample exists
-    tmp_dir_path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
-    ExternalDataAPI.get_destination_path.return_value = tmp_dir_path
-    transferred_samples = external_data_api.get_transferred_samples(
-        customer=customer_id, ticket_id=ticket_nr
-    )
-    assert transferred_samples == [sample_obj]
-
-
 def test_add_files_to_bundles(
     external_data_api: ExternalDataAPI, fastq_file: Path, hk_version_obj, sample_id: str
 ):
@@ -189,8 +161,8 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(MockHousekeeperAPI, "get_files")
     MockHousekeeperAPI.get_files.return_value = []
 
-    mocker.patch.object(ExternalDataAPI, "get_transferred_samples")
-    ExternalDataAPI.get_transferred_samples.return_value = samples[:-1]
+    mocker.patch.object(ExternalDataAPI, "get_available_samples")
+    ExternalDataAPI.get_available_samples.return_value = samples[:-1]
 
     mocker.patch.object(Store, "cases")
     Store.cases.return_value = [{"internal_id": "yellowhog"}]
