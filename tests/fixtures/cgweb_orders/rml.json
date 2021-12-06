@@ -1,10 +1,10 @@
 {
-  "name": "ctDNA sequencing - order 9",
+  "name": "#123456",
   "customer": "cust000",
   "comment": "order comment",
   "samples": [
     {
-      "application": "RMLS05R150",
+      "application": "RMLP05R800",
       "comment": "test comment",
       "concentration": "5",
       "concentration_sample": "6",
@@ -20,7 +20,7 @@
       "volume": "30"
     },
     {
-      "application": "RMLS05R150",
+      "application": "RMLP05R800",
       "comment": "",
       "concentration": "5",
       "concentration_sample": "6",
@@ -38,7 +38,7 @@
       "well_position_rml": ""
     },
     {
-      "application": "RMLS05R150",
+      "application": "RMLP05R800",
       "comment": "test comment",
       "concentration": "5",
       "concentration_sample": "6",
@@ -56,7 +56,7 @@
       "well_position_rml": "A:1"
     },
     {
-      "application": "RMLS05R150",
+      "application": "RMLP05R800",
       "comment": "",
       "concentration": "5",
       "concentration_sample": "6",

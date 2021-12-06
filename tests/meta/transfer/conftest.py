@@ -86,7 +86,7 @@ def flowcell_store(base_store: Store, data: dict) -> Store:
     for sample_data in data["samples"]:
         customer_obj: models.Customer = base_store.customers().first()
         application_version: models.ApplicationVersion = base_store.application(
-            "WGTPCFC030"
+            "WGSPCFC030"
         ).versions[0]
         sample: models.Sample = base_store.add_sample(
             name="NA", sex="male", internal_id=sample_data["name"]
