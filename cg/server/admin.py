@@ -326,12 +326,9 @@ class SampleView(BaseView):
 
     column_exclude_list = [
         "age_at_sampling",
-        "from_sample",
         "invoiced_at",
-        "loqusdb_id",
         "_phenotype_groups",
         "_phenotype_terms",
-        "time_point",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
