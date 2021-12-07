@@ -332,12 +332,12 @@ class SampleView(BaseView):
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
-        "sex",
-        "downsampled_to",
-        "sequenced_at",
-        "ticket_number",
-        "is_tumour",
         "comment",
+        "downsampled_to",
+        "is_tumour",
+        "sequenced_at",
+        "sex",
+        "ticket_number",
     ]
     column_filters = ["customer.internal_id", "sex", "application_version.application"]
     column_formatters = {
