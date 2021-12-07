@@ -2,23 +2,32 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from pydantic import constr, BaseModel
+
+from cg.constants import DataDelivery
 from cg.exc import OrderError, OrderFormError
+from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
 
-class OrderformParser:
+class OrderformParser(BaseModel):
     """Class to parse orderforms"""
 
-    def __init__(self):
-        self.samples: List[OrderSample] = []
-        self.project_type: Optional[str] = None
-        self.delivery_type: Optional[str] = None
-        self.customer_id: Optional[str] = None
-        self.order_comment: Optional[str] = None
-        self.order_name: Optional[str] = None
+    samples: List[OrderSample] = []
+    project_type: Optional[OrderType] = None
+    delivery_type: Optional[DataDelivery] = None
+    customer_id: constr(
+        min_length=1, max_length=models.Customer.internal_id.property.columns[0].type.length
+    ) = None
+    order_comment: Optional[str] = None
+    order_name: Optional[str] = None
+
+    class Config:
+        validate_assignment = True
 
     def parse_orderform(self, orderform_file: Path) -> None:
         """Parse the orderform information"""
@@ -29,7 +38,7 @@ class OrderformParser:
         LOG.info("Group samples under respective case")
         cases = {}
         for sample in self.samples:
-            case_id = sample.case_id
+            case_id = sample.family_name
             if not case_id:
                 continue
             if case_id not in cases:
