@@ -194,7 +194,7 @@ class FamilyView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
-    column_exclude_list = ["created_at", "_cohorts", "synopsis", "avatar_url"]
+    column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
         "customer.internal_id",
         "priority",
