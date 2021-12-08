@@ -18,7 +18,6 @@ class Submitter(ABC):
 
     def validate_order(self, order: OrderIn) -> None:
         """Part of Submitter interface, base implementation"""
-        pass
 
     @abstractmethod
     def submit_order(self, order: OrderIn) -> dict:
