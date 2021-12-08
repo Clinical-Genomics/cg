@@ -162,7 +162,6 @@ class CaseSubmitter(Submitter):
             data_delivery = cls._get_single_value(case_name, case_samples, "data_delivery")
             priority = cls._get_single_value(case_name, case_samples, "priority", "standard")
 
-            # TODO: move to MIP-DNA submitter
             panels: Set[str] = set()
             if data_analysis == Pipeline.MIP_DNA:
                 panels: Set[str] = {
@@ -175,7 +174,7 @@ class CaseSubmitter(Submitter):
                 "data_delivery": data_delivery,
                 "internal_id": case_internal_id,
                 "name": case_name,
-                "panels": list(panels),  # TODO: move to MIP-DNA submitter
+                "panels": list(panels),
                 "priority": priority,
                 "samples": [
                     {
@@ -192,11 +191,11 @@ class CaseSubmitter(Submitter):
                         "sex": sample.sex,
                         "status": sample.status
                         if hasattr(sample, "status")
-                        else None,  # TODO: move to MIP-DNA submitter
+                        else None,
                         "subject_id": sample.subject_id,
                         "time_point": sample.time_point
                         if hasattr(sample, "time_point")
-                        else None,  # TODO: move to RNA submitter
+                        else None,
                         "tumour": sample.tumour,
                     }
                     for sample in case_samples
