@@ -59,13 +59,7 @@ def test_submit(
     user_name: str,
 ):
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN an order and an empty store
     assert base_store.samples().first() is None
@@ -85,6 +79,16 @@ def test_submit(
                 assert link_obj.sample.ticket_number == ticket_number
 
 
+def monkeypatch_process_lims(monkeypatch, order_data):
+    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
+    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
+    for submitter in SUBMITTERS:
+        monkeypatch.setattr(
+            f"cg.meta.orders.{submitter}.process_lims",
+            lambda **kwargs: (lims_project_data, lims_map),
+        )
+
+
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
@@ -101,13 +105,7 @@ def test_submit_illegal_sample_customer(
 ):
 
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
@@ -153,13 +151,7 @@ def test_submit_scout_legal_sample_customer(
 ):
 
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
     customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
@@ -228,13 +220,7 @@ def test_submit_duplicate_sample_case_name(
             store.add_commit(case_obj)
         assert store.find_family(customer=customer_obj, name=case_id)
 
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     # WHEN calling submit
     # THEN an OrderError should be raised on duplicate case name
@@ -261,13 +247,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
 
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     orders_api.submit(
         project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
@@ -300,13 +280,7 @@ def test_submit_unique_sample_case_name(
         customer_obj = store.customer(order_data.customer)
         assert not store.find_family(customer=customer_obj, name=case_id)
 
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     # WHEN calling submit
     orders_api.submit(
@@ -464,13 +438,7 @@ def test_submit_unique_sample_name(
     store = orders_api.status
     assert store.samples().first() is None
 
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     # WHEN calling submit
     orders_api.submit(
@@ -497,13 +465,7 @@ def test_sarscov2_submit_duplicate_sample_name(
 ):
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     store = orders_api.status
     customer_obj = store.customer(order_data.customer)
@@ -550,13 +512,7 @@ def test_not_sarscov2_submit_duplicate_sample_name(
 ):
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
-    lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
-    for submitter in SUBMITTERS:
-        monkeypatch.setattr(
-            f"cg.meta.orders.{submitter}.process_lims",
-            lambda **kwargs: (lims_project_data, lims_map),
-        )
+    monkeypatch_process_lims(monkeypatch, order_data)
 
     store = orders_api.status
     customer_obj = store.customer(order_data.customer)
