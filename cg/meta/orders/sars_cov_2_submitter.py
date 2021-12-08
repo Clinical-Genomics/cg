@@ -21,6 +21,11 @@ class SarsCov2Submitter(MicrobialSubmitter):
         for sample in samples:
             sample_name: str = sample.name
 
+            print(f"{sample.control=}")
+
+            if sample.control:
+                continue
+
             if self.status.find_samples(customer=customer_obj, name=sample_name).first():
                 raise OrderError(
                     f"Sample name {sample_name} already in use for customer {customer_id}"
