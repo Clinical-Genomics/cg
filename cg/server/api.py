@@ -44,7 +44,7 @@ def public(route_function):
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), 204)
+        return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
@@ -73,6 +73,7 @@ def before_request():
     user_obj = db.user(user_data["email"])
     if user_obj is None or not user_obj.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
+        LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
     g.current_user = user_obj
@@ -362,6 +363,9 @@ def options():
 def me():
     """Fetch information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
+        LOG.error(
+            "%s is not admin and is not connected to any customers, aborting", g.current_user.email
+        )
         return abort(http.HTTPStatus.FORBIDDEN)
 
     return jsonify(user=g.current_user.to_dict())
@@ -403,7 +407,7 @@ def orderform():
             order_parser = ExcelOrderformParser()
             order_parser.parse_orderform(excel_path=saved_path)
         else:
-            json_data = json.load(input_file.stream)
+            json_data = json.load(input_file.stream, strict=False)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
