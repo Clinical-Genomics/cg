@@ -1,6 +1,7 @@
 """Tests for the transfer of external data"""
 import logging
 from pathlib import Path
+from typing import List
 
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
@@ -114,6 +115,17 @@ def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directo
         )
         # THEN only fast.gz files are returned
         assert all([tmp.suffixes == [".fastq", ".gz"] for tmp in files])
+
+
+def test_get_failed_samples(external_data_api: ExternalDataAPI, fastq_file: Path):
+    bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
+    # GIVEN a list of paths with one fastq_file with a correct md5sum and one with an incorrect md5sum
+    # When the failed samples are extracted
+    failed_samples: List[Path] = external_data_api.get_failed_samples(
+        [fastq_file, bad_md5sum_file_path]
+    )
+    # THEN only the failed samples should be in the list
+    assert failed_samples == [bad_md5sum_file_path]
 
 
 def test_add_files_to_bundles(
