@@ -464,18 +464,7 @@ def test_sarscov2_submit_duplicate_sample_name(
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
-
-    store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
-
-    for sample in order_data.samples:
-        sample_name = sample.name
-        if not store.find_samples(customer=customer_obj, name=sample_name).first():
-            sample_obj = helpers.add_sample(
-                store=store, name=sample_name, customer_id=customer_obj.internal_id
-            )
-            store.add_commit(sample_obj)
-        assert store.find_samples(customer=customer_obj, name=sample_name).first()
+    store_samples_with_names_from_order(orders_api.status, helpers, order_data)
 
     # WHEN calling submit
     # THEN an OrderError should be raised on duplicate sample name
@@ -483,6 +472,17 @@ def test_sarscov2_submit_duplicate_sample_name(
         orders_api.submit(
             project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
         )
+
+
+def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, order_data: OrderIn):
+    customer_obj = store.customer(order_data.customer)
+    for sample in order_data.samples:
+        sample_name = sample.name
+        if not store.find_samples(customer=customer_obj, name=sample_name).first():
+            sample_obj = helpers.add_sample(
+                store=store, name=sample_name, customer_id=customer_obj.internal_id
+            )
+            store.add_commit(sample_obj)
 
 
 @pytest.mark.parametrize(
@@ -511,18 +511,7 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     # GIVEN we have an order with samples that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
-
-    store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
-
-    for sample in order_data.samples:
-        sample_name = sample.name
-        if not store.find_samples(customer=customer_obj, name=sample_name).first():
-            sample_obj = helpers.add_sample(
-                store=store, name=sample_name, customer_id=customer_obj.internal_id
-            )
-            store.add_commit(sample_obj)
-        assert store.find_samples(customer=customer_obj, name=sample_name).first()
+    store_samples_with_names_from_order(orders_api.status, helpers, order_data)
 
     # WHEN calling submit
     orders_api.submit(
