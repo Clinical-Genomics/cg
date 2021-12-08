@@ -245,8 +245,6 @@ def test_submit_fluffy_duplicate_sample_case_name(
 ):
     # GIVEN we have an order with a case that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    store = orders_api.status
-
     monkeypatch_process_lims(monkeypatch, order_data)
 
     orders_api.submit(
