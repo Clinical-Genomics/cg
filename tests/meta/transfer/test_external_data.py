@@ -8,6 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.cli.workflow.conftest import dna_case
+from tests.store.conftest import fixture_sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_nr: int):
@@ -60,38 +61,47 @@ def test_get_destination_path(
     assert destination_path == Path("/path/on/hasta/cust000/ADM1/")
 
 
-def test_download_sample(
-    apps_dir: Path,
+def test_transfer_sample_files_from_source(
+    caplog,
+    cg_context: CGConfig,
     customer_id: str,
     cust_sample_id: str,
     external_data_api: ExternalDataAPI,
+    external_data_directory: Path,
+    helpers,
     mocker,
-    sample_id: str,
+    sample_store: Store,
     ticket_nr: int,
 ):
-    """Test for transferring external data via SLURM"""
+    caplog.set_level(logging.INFO)
 
-    # GIVEN paths needed to run rsync
-    mocker.patch.object(ExternalDataAPI, "create_log_dir")
-    ExternalDataAPI.create_log_dir.return_value = apps_dir
+    # GIVEN a Store with three samples, where only two samples are present in the source folder
+    sample_name1: str = cust_sample_id + "1"
+    sample_name2: str = cust_sample_id + "2"
+    sample_name3: str = cust_sample_id + "3"
+
+    helpers.add_sample(store=external_data_api.status_db, name=sample_name1, ticket=ticket_nr)
+    helpers.add_sample(store=external_data_api.status_db, name=sample_name2, ticket=ticket_nr)
+    helpers.add_sample(store=external_data_api.status_db, name=sample_name3, ticket=ticket_nr)
+
+    mocker.patch.object(Store, "get_customer_id_from_ticket")
+    Store.get_customer_id_from_ticket.return_value = customer_id
 
     mocker.patch.object(ExternalDataAPI, "get_source_path")
-    ExternalDataAPI.get_source_path.return_value = apps_dir
+    external_data_api.get_source_path.return_value = Path("").joinpath(external_data_directory)
 
-    mocker.patch.object(ExternalDataAPI, "get_destination_path")
-    ExternalDataAPI.get_destination_path.return_value = apps_dir
-
-    # WHEN the samples are transferred
-    sbatch_number = external_data_api.transfer_sample(
-        cust_sample_id=cust_sample_id,
-        ticket_id=ticket_nr,
-        cust=customer_id,
-        lims_sample_id=sample_id,
-        dry_run=True,
+    external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
+    external_data_api.destination_path = str(
+        Path("").joinpath(*external_data_directory.parts[:-1], "%s")
     )
 
-    # THEN check that an integer was returned
-    assert isinstance(sbatch_number, int)
+    # WHEN the transfer is initiated
+    external_data_api.transfer_sample_files_from_source(ticket_id=ticket_nr, dry_run=True)
+
+    # THEN only the two samples present in the source directory are included in the rsync
+    assert all([sample in caplog.text for sample in [sample_name1, sample_name2]])
+
+    assert not sample_name3 in caplog.text
 
 
 def test_get_all_fastq(
@@ -117,7 +127,9 @@ def test_add_files_to_bundles(
 
     # WHEN the files are added.
     external_data_api.add_files_to_bundles(
-        fastq_paths=to_be_added, last_version=hk_version_obj, lims_sample_id=sample_id
+        fastq_paths=to_be_added,
+        last_version=hk_version_obj,
+        lims_sample_id=sample_id,
     )
 
     # THEN the function should return True and the file should be added.
@@ -161,6 +173,39 @@ def test_add_transfer_to_housekeeper(
             for sample in samples
         ]
     )
+
+
+def test_get_available_samples(
+    analysis_store_trio,
+    customer_id: str,
+    external_data_api: ExternalDataAPI,
+    sample_obj: models.Sample,
+    ticket_nr: int,
+    tmpdir_factory,
+):
+    # GIVEN one such sample exists
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket_id=ticket_nr
+    )
+    # THEN the function should return a list containing the sample object
+    assert available_samples == [sample_obj]
+
+
+def test_get_available_samples_no_samples_avail(
+    analysis_store_trio,
+    customer_id: str,
+    external_data_api: ExternalDataAPI,
+    ticket_nr: int,
+    tmpdir_factory,
+):
+    # GIVEN that the empty directory created does not contain any correct folders
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket_id=ticket_nr
+    )
+    # THEN the function should return an empty list
+    assert available_samples == []
 
 
 def test_checksum(fastq_file: Path):
