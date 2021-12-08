@@ -1,9 +1,8 @@
 """This script tests the cli methods to add cases to status-db"""
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import Pipeline
 from cg.store import Store
-from cg.constants import PRIORITY_MAP
 
 
 def test_that_many_cases_can_have_one_sample_each(base_store: Store, helpers):
@@ -171,44 +170,6 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers):
     # THEN cases should contain the test case
     assert cases
     assert test_case in cases
-
-
-def test_express_case_with_low_reads(base_store: Store, helpers):
-    """Test that express cases with reads more than 50% of the target reads are among the cases to analyse"""
-
-    # GIVEN a database with a case which has an express sample with half the amount of reads
-    test_case = helpers.add_case(base_store)
-    test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(test_case, test_sample, "unknown")
-    application = test_sample.application_version.application
-    application.target_reads = 40
-    test_sample.reads = 20
-    test_sample.priority = PRIORITY_MAP["express"]
-
-    # WHEN getting cases to analyse
-    sequencing_qc_ok: bool = test_sample.sequencing_qc
-
-    # THEN cases should contain the test case
-    assert sequencing_qc_ok
-
-
-def test_normal_case_with_low_reads(base_store: Store, helpers):
-    """Test that express cases with reads more than 50% of the target reads are among the cases to analyse"""
-
-    # GIVEN a database with a case which has an express sample with half the amount of reads
-    test_case = helpers.add_case(base_store)
-    test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(test_case, test_sample, "unknown")
-    application = test_sample.application_version.application
-    application.target_reads = 40
-    test_sample.reads = 20
-    test_sample.priority = PRIORITY_MAP["standard"]
-
-    # WHEN getting cases to analyse
-    sequencing_qc_ok: bool = test_sample.sequencing_qc
-
-    # THEN cases should contain the test case
-    assert not sequencing_qc_ok
 
 
 def relate_samples(base_store, family, samples):
