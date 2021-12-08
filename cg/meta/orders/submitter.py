@@ -17,6 +17,7 @@ class Submitter(ABC):
         self.status = status
 
     def validate_order(self, order: OrderIn) -> None:
+        """ Part of Submitter interface, base implementation """
         pass
 
     @abstractmethod
