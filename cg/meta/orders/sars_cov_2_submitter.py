@@ -9,6 +9,7 @@ from cg.store import models
 
 class SarsCov2Submitter(MicrobialSubmitter):
     def validate_order(self, order: OrderIn) -> None:
+        super().validate_order(order=order)
         self._validate_sample_names_are_available(samples=order.samples, customer_id=order.customer)
 
     def _validate_sample_names_are_available(
@@ -28,5 +29,5 @@ class SarsCov2Submitter(MicrobialSubmitter):
 
             if self.status.find_samples(customer=customer_obj, name=sample_name).first():
                 raise OrderError(
-                    f"Sample name {sample_name} already in use for customer {customer_id}"
+                    f"Sample name {sample_name} already in use for customer {customer_obj.name}"
                 )

@@ -230,27 +230,6 @@ def test_store_rml(orders_api, base_store, rml_status_data):
         assert link.sample.no_invoice
 
 
-def test_store_rml_bad_apptag(orders_api, base_store, rml_status_data):
-    # GIVEN a basic store with no samples and a rml order
-    assert base_store.pools().count() == 0
-
-    for pool in rml_status_data["pools"]:
-        pool["application"] = "nonexistingtag"
-
-    submitter: RmlSubmitter = RmlSubmitter(lims=orders_api.lims, status=orders_api.status)
-
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        submitter.store_items_in_status(
-            customer=rml_status_data["customer"],
-            order=rml_status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=1234348,
-            items=rml_status_data["pools"],
-        )
-
-
 def test_store_samples(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a fastq order
     assert base_store.samples().count() == 0

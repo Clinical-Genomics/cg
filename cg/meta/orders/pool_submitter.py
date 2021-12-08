@@ -8,12 +8,14 @@ from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
+from cg.models.orders.sample_base import SexEnum
 from cg.models.orders.samples import RmlSample
 from cg.store import models
 
 
 class PoolSubmitter(Submitter):
     def validate_order(self, order: OrderIn) -> None:
+        super().validate_order(order=order)
         self._validate_case_names_are_available(
             customer_id=order.customer, samples=order.samples, ticket=order.ticket
         )
@@ -109,23 +111,18 @@ class PoolSubmitter(Submitter):
         self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
     ) -> List[models.Pool]:
         """Store pools in the status database."""
-        customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
-        new_pools = []
-        new_samples = []
+        customer_obj: models.Customer = self.status.customer(customer)
+        new_pools: List[models.Pool] = []
+        new_samples: List[models.Sample] = []
         for pool in items:
             with self.status.session.no_autoflush:
-                application_version = self.status.current_application_version(pool["application"])
-                if application_version is None:
-                    raise OrderError(f"Invalid application: {pool['application']}")
-
-            priority = pool["priority"]
-            case_name = self._get_case_name(ticket, pool["name"])
-            case_obj = self.status.find_family(customer=customer_obj, name=case_name)
+                application_version: models.ApplicationVersion = self.status.current_application_version(pool["application"])
+            priority: str = pool["priority"]
+            case_name: str = self.create_case_name(ticket=ticket, pool_name=pool["name"])
+            case_obj: models.Family = self.status.find_family(customer=customer_obj, name=case_name)
             if not case_obj:
-                data_analysis = Pipeline(pool["data_analysis"])
-                data_delivery = DataDelivery(pool["data_delivery"])
+                data_analysis: Pipeline = Pipeline(pool["data_analysis"])
+                data_delivery: DataDelivery = DataDelivery(pool["data_delivery"])
                 case_obj = self.status.add_case(
                     data_analysis=data_analysis,
                     data_delivery=data_delivery,
@@ -136,7 +133,7 @@ class PoolSubmitter(Submitter):
                 case_obj.customer = customer_obj
                 self.status.add_commit(case_obj)
 
-            new_pool = self.status.add_pool(
+            new_pool: models.Pool = self.status.add_pool(
                 application_version=application_version,
                 customer=customer_obj,
                 name=pool["name"],
@@ -144,7 +141,7 @@ class PoolSubmitter(Submitter):
                 ordered=ordered,
                 ticket=ticket,
             )
-            sex = "unknown"
+            sex: SexEnum = SexEnum.unknown
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
                     application_version=application_version,
@@ -177,13 +174,13 @@ class PoolSubmitter(Submitter):
 
         sample: RmlSample
         for sample in samples:
-            case_name: str = self._get_case_name(pool_name=sample.pool, ticket=ticket)
+            case_name: str = self.create_case_name(pool_name=sample.pool, ticket=ticket)
 
             if self.status.find_family(customer=customer_obj, name=case_name):
                 raise OrderError(
-                    f"Sample name {case_name} already in use for customer {customer_id}"
+                    f"Case name {case_name} already in use for customer {customer_obj.name}"
                 )
 
     @staticmethod
-    def _get_case_name(ticket: int, pool_name: str) -> str:
+    def create_case_name(ticket: int, pool_name: str) -> str:
         return f"{ticket}-{pool_name}"
