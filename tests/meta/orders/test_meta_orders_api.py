@@ -248,7 +248,7 @@ def test_submit_duplicate_sample_case_name(
     "order_type",
     [OrderType.FLUFFY],
 )
-def test_submit_duplicate_sample_case_name(
+def test_submit_fluffy_duplicate_sample_case_name(
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
@@ -260,7 +260,6 @@ def test_submit_duplicate_sample_case_name(
     # GIVEN we have an order with a case that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
 
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order_data.samples)}
