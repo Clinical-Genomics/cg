@@ -116,7 +116,9 @@ class PoolSubmitter(Submitter):
         new_samples: List[models.Sample] = []
         for pool in items:
             with self.status.session.no_autoflush:
-                application_version: models.ApplicationVersion = self.status.current_application_version(pool["application"])
+                application_version: models.ApplicationVersion = (
+                    self.status.current_application_version(pool["application"])
+                )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket, pool_name=pool["name"])
             case_obj: models.Family = self.status.find_family(customer=customer_obj, name=case_name)

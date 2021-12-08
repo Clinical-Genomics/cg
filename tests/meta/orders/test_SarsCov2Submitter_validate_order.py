@@ -19,7 +19,9 @@ def test_validate_normal_order(sarscov2_order_to_submit: dict, base_store: Store
     # THEN it should be regarded as valid
 
 
-def test_validate_submitted_order(sarscov2_order_to_submit: dict, base_store: Store, helpers: StoreHelpers):
+def test_validate_submitted_order(
+    sarscov2_order_to_submit: dict, base_store: Store, helpers: StoreHelpers
+):
     # GIVEN sarscov2 order with three samples, all in the database
     order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
@@ -33,7 +35,9 @@ def test_validate_submitted_order(sarscov2_order_to_submit: dict, base_store: St
         SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
 
 
-def test_validate_submitted_control_order(sarscov2_order_to_submit: dict, base_store: Store, helpers: StoreHelpers):
+def test_validate_submitted_control_order(
+    sarscov2_order_to_submit: dict, base_store: Store, helpers: StoreHelpers
+):
     # GIVEN sarscov2 order with three control samples, all in the database
     order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 

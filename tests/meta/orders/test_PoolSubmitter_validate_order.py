@@ -26,9 +26,17 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
     order: OrderIn = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
 
     sample: RmlSample
-    customer: models.Customer = helpers.ensure_customer(store=base_store, customer_id=order.customer)
+    customer: models.Customer = helpers.ensure_customer(
+        store=base_store, customer_id=order.customer
+    )
     for sample in order.samples:
-        case = helpers.ensure_case(store=base_store, name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool), customer=customer, data_analysis=Pipeline.FLUFFY, data_delivery=DataDelivery.NIPT_VIEWER)
+        case = helpers.ensure_case(
+            store=base_store,
+            name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool),
+            customer=customer,
+            data_analysis=Pipeline.FLUFFY,
+            data_delivery=DataDelivery.NIPT_VIEWER,
+        )
         base_store.add_commit(case)
 
     # WHEN validating the order
