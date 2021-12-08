@@ -217,49 +217,18 @@ class CaseSubmitter(Submitter):
         for case in items:
             case_obj = self.status.family(case["internal_id"])
             if not case_obj:
-                case_obj = self.status.add_case(
-                    cohorts=case["cohorts"],
-                    data_analysis=Pipeline(case["data_analysis"]),
-                    data_delivery=DataDelivery(case["data_delivery"]),
-                    name=case["name"],
-                    priority=case["priority"],
-                    synopsis=case["synopsis"],
-                )
-                case_obj.customer = customer_obj
+                case_obj = self.create_case(case, customer_obj)
                 new_families.append(case_obj)
 
-            case_obj.panels = case["panels"]
+            self.update_case(case, case_obj)
 
             family_samples = {}
             for sample in case["samples"]:
                 sample_obj = self.status.sample(sample["internal_id"])
                 if not sample_obj:
-                    sample_obj = self.status.add_sample(
-                        age_at_sampling=sample["age_at_sampling"],
-                        capture_kit=sample["capture_kit"],
-                        comment=sample["comment"],
-                        internal_id=sample["internal_id"],
-                        name=sample["name"],
-                        order=order,
-                        ordered=ordered,
-                        phenotype_groups=sample["phenotype_groups"],
-                        phenotype_terms=sample["phenotype_terms"],
-                        priority=case["priority"],
-                        sex=sample["sex"],
-                        subject_id=sample["subject_id"],
-                        ticket=ticket,
-                        time_point=sample["time_point"],
-                        tumour=sample["tumour"],
+                    sample_obj = self.create_sample(
+                        case, customer_obj, order, ordered, sample, ticket
                     )
-                    sample_obj.customer = customer_obj
-                    with self.status.session.no_autoflush:
-                        application_tag = sample["application"]
-                        sample_obj.application_version = self.status.current_application_version(
-                            application_tag
-                        )
-                    self.status.add(sample_obj)
-                    new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)
-                    self.status.add(new_delivery)
 
                 family_samples[sample["name"]] = sample_obj
 
@@ -269,21 +238,74 @@ class CaseSubmitter(Submitter):
                 with self.status.session.no_autoflush:
                     link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
                 if not link_obj:
-                    link_obj = self.status.relate_sample(
-                        family=case_obj,
-                        sample=family_samples[sample["name"]],
-                        status=sample["status"],
-                        mother=mother_obj,
-                        father=father_obj,
+                    link_obj = self.create_link(
+                        case_obj, family_samples, father_obj, mother_obj, sample
                     )
-                    self.status.add(link_obj)
 
-                link_obj.status = sample["status"] or link_obj.status
-                link_obj.mother = mother_obj or link_obj.mother
-                link_obj.father = father_obj or link_obj.father
+                self.update_relationship(father_obj, link_obj, mother_obj, sample)
 
             self.status.add_commit(new_families)
         return new_families
+
+    def update_case(self, case, case_obj):
+        case_obj.panels = case["panels"]
+
+    def update_relationship(self, father_obj, link_obj, mother_obj, sample):
+        link_obj.status = sample["status"] or link_obj.status
+        link_obj.mother = mother_obj or link_obj.mother
+        link_obj.father = father_obj or link_obj.father
+
+    def create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
+        link_obj = self.status.relate_sample(
+            family=case_obj,
+            sample=family_samples[sample["name"]],
+            status=sample["status"],
+            mother=mother_obj,
+            father=father_obj,
+        )
+        self.status.add(link_obj)
+        return link_obj
+
+    def create_sample(self, case, customer_obj, order, ordered, sample, ticket):
+        sample_obj = self.status.add_sample(
+            age_at_sampling=sample["age_at_sampling"],
+            capture_kit=sample["capture_kit"],
+            comment=sample["comment"],
+            internal_id=sample["internal_id"],
+            name=sample["name"],
+            order=order,
+            ordered=ordered,
+            phenotype_groups=sample["phenotype_groups"],
+            phenotype_terms=sample["phenotype_terms"],
+            priority=case["priority"],
+            sex=sample["sex"],
+            subject_id=sample["subject_id"],
+            ticket=ticket,
+            time_point=sample["time_point"],
+            tumour=sample["tumour"],
+        )
+        sample_obj.customer = customer_obj
+        with self.status.session.no_autoflush:
+            application_tag = sample["application"]
+            sample_obj.application_version = self.status.current_application_version(
+                application_tag
+            )
+        self.status.add(sample_obj)
+        new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)
+        self.status.add(new_delivery)
+        return sample_obj
+
+    def create_case(self, case, customer_obj):
+        case_obj = self.status.add_case(
+            cohorts=case["cohorts"],
+            data_analysis=Pipeline(case["data_analysis"]),
+            data_delivery=DataDelivery(case["data_delivery"]),
+            name=case["name"],
+            priority=case["priority"],
+            synopsis=case["synopsis"],
+        )
+        case_obj.customer = customer_obj
+        return case_obj
 
     @staticmethod
     def _rerun_of_existing_case(sample: Of1508Sample) -> bool:
