@@ -407,7 +407,7 @@ def orderform():
             order_parser = ExcelOrderformParser()
             order_parser.parse_orderform(excel_path=saved_path)
         else:
-            json_data = json.load(input_file.stream)
+            json_data = json.load(input_file.stream, strict=False)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
