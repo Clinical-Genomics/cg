@@ -579,29 +579,6 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert new_link.sample.time_point == 1
 
 
-def test_store_families_bad_apptag(orders_api, base_store, mip_status_data):
-    # GIVEN a basic store with no samples or nothing in it + scout order
-    assert base_store.samples().first() is None
-    assert base_store.families().first() is None
-
-    for family in mip_status_data["families"]:
-        for sample in family["samples"]:
-            sample["application"] = "nonexistingtag"
-
-    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
-
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        submitter.store_items_in_status(
-            customer=mip_status_data["customer"],
-            order=mip_status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=123456,
-            items=mip_status_data["families"],
-        )
-
-
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0

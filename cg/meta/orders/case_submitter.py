@@ -213,33 +213,28 @@ class CaseSubmitter(Submitter):
         """Store cases and samples in the status database."""
 
         customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"Unknown customer: {customer}")
         new_families = []
         for case in items:
             case_obj = self.status.family(case["internal_id"])
-            if case_obj:
-                case_obj.panels = case["panels"]
-            else:
+            if not case_obj:
                 case_obj = self.status.add_case(
                     cohorts=case["cohorts"],
                     data_analysis=Pipeline(case["data_analysis"]),
                     data_delivery=DataDelivery(case["data_delivery"]),
                     name=case["name"],
-                    panels=case["panels"],
                     priority=case["priority"],
                     synopsis=case["synopsis"],
                 )
                 case_obj.customer = customer_obj
                 new_families.append(case_obj)
 
+            case_obj.panels = case["panels"]
+
             family_samples = {}
             for sample in case["samples"]:
                 sample_obj = self.status.sample(sample["internal_id"])
-                if sample_obj:
-                    family_samples[sample["name"]] = sample_obj
-                else:
-                    new_sample = self.status.add_sample(
+                if not sample_obj:
+                    sample_obj = self.status.add_sample(
                         age_at_sampling=sample["age_at_sampling"],
                         capture_kit=sample["capture_kit"],
                         comment=sample["comment"],
@@ -256,38 +251,42 @@ class CaseSubmitter(Submitter):
                         time_point=sample["time_point"],
                         tumour=sample["tumour"],
                     )
-                    new_sample.customer = customer_obj
+                    sample_obj.customer = customer_obj
                     with self.status.session.no_autoflush:
                         application_tag = sample["application"]
-                        new_sample.application_version = self.status.current_application_version(
+                        sample_obj.application_version = self.status.current_application_version(
                             application_tag
                         )
-                    if new_sample.application_version is None:
-                        raise OrderError(f"Invalid application: {sample['application']}")
-
-                    family_samples[new_sample.name] = new_sample
-                    self.status.add(new_sample)
-                    new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
+                    self.status.add(sample_obj)
+                    new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)
                     self.status.add(new_delivery)
 
+                print(f'{sample["internal_id"]=}')
+                print(f"{sample_obj.internal_id=}")
+                print(f'{sample["name"]=}')
+                print(f"{sample_obj.name=}")
+
+                family_samples[sample["name"]] = sample_obj
+
             for sample in case["samples"]:
-                mother_obj = family_samples.get(sample["mother"]) if sample.get("mother") else None
-                father_obj = family_samples.get(sample["father"]) if sample.get("father") else None
+                mother_obj = family_samples.get(sample.get("mother"))
+                father_obj = family_samples.get(sample.get("father"))
                 with self.status.session.no_autoflush:
                     link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
-                if link_obj:
-                    link_obj.status = sample["status"] or link_obj.status
-                    link_obj.mother = mother_obj or link_obj.mother
-                    link_obj.father = father_obj or link_obj.father
-                else:
-                    new_link = self.status.relate_sample(
+                if not link_obj:
+                    link_obj = self.status.relate_sample(
                         family=case_obj,
                         sample=family_samples[sample["name"]],
                         status=sample["status"],
                         mother=mother_obj,
                         father=father_obj,
                     )
-                    self.status.add(new_link)
+                    self.status.add(link_obj)
+
+                link_obj.status = sample["status"] or link_obj.status
+                link_obj.mother = mother_obj or link_obj.mother
+                link_obj.father = father_obj or link_obj.father
+
             self.status.add_commit(new_families)
         return new_families
 
