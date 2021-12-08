@@ -261,11 +261,6 @@ class CaseSubmitter(Submitter):
                     new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)
                     self.status.add(new_delivery)
 
-                print(f'{sample["internal_id"]=}')
-                print(f"{sample_obj.internal_id=}")
-                print(f'{sample["name"]=}')
-                print(f"{sample_obj.name=}")
-
                 family_samples[sample["name"]] = sample_obj
 
             for sample in case["samples"]:
