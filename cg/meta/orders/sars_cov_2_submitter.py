@@ -22,8 +22,6 @@ class SarsCov2Submitter(MicrobialSubmitter):
         for sample in samples:
             sample_name: str = sample.name
 
-            print(f"{sample.control=}")
-
             if sample.control:
                 continue
 
