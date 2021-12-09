@@ -78,9 +78,6 @@ class MicrobialSubmitter(Submitter):
         sample_objs = []
 
         customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
-
         new_samples = []
 
         with self.status.session.no_autoflush:
@@ -100,9 +97,6 @@ class MicrobialSubmitter(Submitter):
 
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(application_tag)
-                if application_version is None:
-                    raise OrderError(f"Invalid application: {sample_data['application']}")
-
                 organism = self.status.organism(sample_data["organism_id"])
 
                 if not organism:

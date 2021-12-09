@@ -427,29 +427,6 @@ def test_store_microbial_case_data_analysis_stored(orders_api, base_store, micro
     assert microbial_case.data_delivery == str(DataDelivery.FASTQ_QC)
 
 
-def test_store_microbial_samples_bad_apptag(orders_api, microbial_status_data):
-    # GIVEN a basic store missing the application on the samples
-
-    for sample in microbial_status_data["samples"]:
-        sample["application"] = "nonexistingtag"
-
-    submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
-
-    # THEN it should raise OrderError
-    with pytest.raises(OrderError):
-        # WHEN storing the order
-        submitter.store_items_in_status(
-            customer=microbial_status_data["customer"],
-            order=microbial_status_data["order"],
-            ordered=dt.datetime.now(),
-            ticket=1234348,
-            items=microbial_status_data["samples"],
-            comment="",
-            data_analysis=Pipeline.MICROSALT,
-            data_delivery=DataDelivery.FASTQ_QC,
-        )
-
-
 def test_store_microbial_sample_priority(orders_api, base_store, microbial_status_data):
     # GIVEN a basic store with no samples
     assert base_store.samples().count() == 0
