@@ -159,7 +159,7 @@ class DemuxPostProcessingAPI:
             self.rename_files(demux_results=demux_results)
         self.add_to_cgstats(demux_results=demux_results)
         self.create_cgstats_reports(demux_results=demux_results)
-        if demux_results.bcl_converter == "bcl2fastq":
+        if demux_results.bcl_converter == "bcl2fastq" or demux_results.bcl_converter == "dragen":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
         self.create_copy_complete_file(demux_results=demux_results)
