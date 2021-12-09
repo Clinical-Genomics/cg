@@ -144,13 +144,13 @@ class ExternalDataAPI(MetaAPI):
             LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
             self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
 
-    def get_failed_samples(self, fastq_paths_to_add: List[Path]) -> List[Path]:
-        failed_sums: List[Path] = []
-        for file in fastq_paths_to_add:
-            pass_check = self.check_fastq_md5sum(file)
-            if pass_check:
-                failed_sums.append(pass_check)
-        return failed_sums
+    def get_failed_fastq_paths(self, fastq_paths_to_add: List[Path]) -> List[Path]:
+        failed_sum_paths: List[Path] = []
+        for path in fastq_paths_to_add:
+            failed_path: Optional[Path] = self.check_fastq_md5sum(path)
+            if failed_path:
+                failed_sum_paths.append(failed_path)
+        return failed_sum_paths
 
     def get_fastq_paths_to_add(
         self, customer: str, hk_version: Version, lims_sample_id: str
@@ -177,18 +177,23 @@ class ExternalDataAPI(MetaAPI):
             cases_to_start.extend(
                 self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
             )
-            lims_sample_id: str = sample.internal_id
-            last_version: Version = self.housekeeper_api.get_create_version(bundle=lims_sample_id)
+            last_version: Version = self.housekeeper_api.get_create_version(
+                bundle=sample.internal_id
+            )
             fastq_paths_to_add: List[Path] = self.get_fastq_paths_to_add(
                 customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
             )
             self.add_files_to_bundles(
                 fastq_paths=fastq_paths_to_add,
                 last_version=last_version,
-                lims_sample_id=lims_sample_id,
+                lims_sample_id=sample.internal_id,
             )
-            failed_paths.extend(self.get_failed_samples(fastq_paths_to_add=fastq_paths_to_add))
+            failed_paths.extend(self.get_failed_fastq_paths(fastq_paths_to_add=fastq_paths_to_add))
         if failed_paths:
+            LOG.info(
+                "The following samples did not match the given md5sum: "
+                + ", ".join([str(path) for path in failed_paths])
+            )
             LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
         if dry_run:

@@ -117,15 +117,15 @@ def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directo
         assert all([tmp.suffixes == [".fastq", ".gz"] for tmp in files])
 
 
-def test_get_failed_samples(external_data_api: ExternalDataAPI, fastq_file: Path):
+def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: Path):
     bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
     # GIVEN a list of paths with one fastq_file with a correct md5sum and one with an incorrect md5sum
-    # When the failed samples are extracted
-    failed_samples: List[Path] = external_data_api.get_failed_samples(
+    # When the failed paths are extracted
+    failed_paths: List[Path] = external_data_api.get_failed_fastq_paths(
         [fastq_file, bad_md5sum_file_path]
     )
-    # THEN only the failed samples should be in the list
-    assert failed_samples == [bad_md5sum_file_path]
+    # THEN only the path to the failed file should be in the list
+    assert failed_paths == [bad_md5sum_file_path]
 
 
 def test_add_files_to_bundles(
