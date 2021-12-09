@@ -6,6 +6,7 @@ import alchy
 import sqlalchemy as sqa
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models
+from cg.constants import FlowcellQ30Threshold
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
 
 LOG = logging.getLogger(__name__)
@@ -39,11 +40,16 @@ class StatsAPI(alchy.Manager):
             curated_sample_name: str = self.get_curated_sample_name(sample_obj.samplename)
             sample_data = {"name": curated_sample_name, "reads": 0, "fastqs": []}
             for fc_data in self.sample_reads(sample_obj):
-                if fc_data.type == "hiseqga" and fc_data.q30 >= 80:
+                if fc_data.type == "hiseqga" and fc_data.q30 >= FlowcellQ30Threshold.READ_LENGTH_50:
                     sample_data["reads"] += fc_data.reads
-                elif fc_data.type == "hiseqx" and fc_data.q30 >= 75:
+                elif (
+                    fc_data.type == "hiseqx" and fc_data.q30 >= FlowcellQ30Threshold.READ_LENGTH_150
+                ):
                     sample_data["reads"] += fc_data.reads
-                elif fc_data.type == "novaseq" and fc_data.q30 >= 75:
+                elif (
+                    fc_data.type == "novaseq"
+                    and fc_data.q30 >= FlowcellQ30Threshold.READ_LENGTH_150
+                ):
                     sample_data["reads"] += fc_data.reads
                 else:
                     LOG.warning(
