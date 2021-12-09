@@ -25,7 +25,7 @@ def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
     )
     family.customer = customer
     base_store.add(family)
-    application_version = base_store.application("WGTPCFC030").versions[0]
+    application_version = base_store.application("WGSPCFC030").versions[0]
     for sample_data in analysis_family["samples"]:
         sample = base_store.add_sample(
             name=sample_data["name"],

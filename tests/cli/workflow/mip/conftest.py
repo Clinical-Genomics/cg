@@ -125,13 +125,13 @@ def fixture_dna_mip_context(
             case_obj = helpers.add_case(
                 store=_store,
                 internal_id=case_id,
-                case_id=mip_case_ids[case_id]["name"],
+                name=mip_case_ids[case_id]["name"],
             )
             sample = helpers.add_sample(
                 store=_store,
                 sample=mip_case_ids[case_id]["internal_id"],
                 data_analysis=Pipeline.MIP_DNA,
-                customer_name="cust000",
+                customer_id="cust000",
                 application_tag="WGSA",
                 application_type="wgs",
                 gender="unknown",
