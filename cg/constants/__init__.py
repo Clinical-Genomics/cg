@@ -15,6 +15,7 @@ from .constants import (
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
     FLOWCELL_STATUS,
+    FlowcellQ30Threshold,
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,

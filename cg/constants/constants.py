@@ -47,6 +47,12 @@ class DataDelivery(StrEnum):
     SCOUT: str = "scout"
 
 
+class FlowcellQ30Threshold(StrEnum):
+    READ_LENGTH_150: int = 85
+    READ_LENGTH_100: int = 85
+    READ_LENGTH_50: int = 90
+
+
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
 SEX_OPTIONS = ("male", "female", "unknown")
