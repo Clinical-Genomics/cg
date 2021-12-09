@@ -241,6 +241,8 @@ class MicrobialSample(OrderInSample):
     quantity: Optional[int]
     verified_organism: Optional[bool]  # sent to LIMS
 
+    control: Optional[str]
+
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> Optional[int]:
         return OptionalIntValidator.str_to_int(v=v)
@@ -268,8 +270,6 @@ class SarsCov2Sample(MicrobialSample):
     region: str
     region_code: str
     selection_criteria: str
-
-    control: Optional[str]
 
 
 def sample_class_for(project: OrderType):

@@ -17,6 +17,7 @@ class MicrobialSubmitter(Submitter):
     def order_to_status(order: OrderIn) -> dict:
         """Convert order input for microbial samples."""
 
+        sample: MicrobialSample
         status_data = {
             "customer": order.customer,
             "order": order.name,
@@ -27,6 +28,7 @@ class MicrobialSubmitter(Submitter):
                 {
                     "application": sample.application,
                     "comment": sample.comment,
+                    "control": sample.control,
                     "data_delivery": sample.data_delivery,
                     "name": sample.name,
                     "organism_id": sample.organism,
@@ -113,6 +115,7 @@ class MicrobialSubmitter(Submitter):
                 new_sample = self.status.add_sample(
                     application_version=application_version,
                     comment=sample_data["comment"],
+                    control=sample_data["control"],
                     customer=customer_obj,
                     data_delivery=sample_data["data_delivery"],
                     internal_id=sample_data.get("internal_id"),
