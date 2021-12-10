@@ -81,7 +81,11 @@ class StatusHandler(BaseHandler):
             .filter(
                 or_(
                     models.Family.action == "analyze",
-                    and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
+                    and_(
+                        models.Application.is_external.isnot(True),
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at.is_(None),
+                    ),
                     and_(
                         models.Family.action.is_(None),
                         models.Analysis.created_at < models.Sample.sequenced_at,
