@@ -71,8 +71,13 @@ class StatusHandler(BaseHandler):
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = list(
             self.Family.query.outerjoin(models.Analysis)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
+            .join(
+                models.Family.links,
+                models.FamilySample.sample,
+                models.ApplicationVersion,
+                models.Application,
+            )
+            .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
             .filter(models.Family.data_analysis == str(pipeline))
             .filter(
                 or_(
@@ -559,7 +564,10 @@ class StatusHandler(BaseHandler):
     @staticmethod
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced in-house."""
-        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
+        return all(
+            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
+            for link in links
+        )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
