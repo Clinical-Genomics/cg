@@ -103,4 +103,7 @@ class UploadObservationsAPI:
     @staticmethod
     def _all_samples(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced inhouse."""
-        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
+        return all(
+            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
+            for link in links
+        )
