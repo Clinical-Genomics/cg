@@ -8,6 +8,7 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
+    fixture_dragen_demux_results,
     fixture_demultiplexed_flowcell,
     fixture_demultiplexed_runs,
     fixture_flowcell_full_name,

@@ -35,6 +35,21 @@ CASE_ACTIONS = ("analyze", "running", "hold")
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
+FLOWCELL_Q30_THRESHOLD = {
+    "hiseqx": 75,
+    "hiseqga": 80,
+    "novaseq": {"151": 85, "101": 85, "51": 90},
+}
+
+PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
+
+SEX_OPTIONS = ("male", "female", "unknown")
+
+STATUS_OPTIONS = ("affected", "unaffected", "unknown")
+ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
+
+SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
+
 
 class DataDelivery(StrEnum):
     ANALYSIS_BAM_FILES: str = "analysis-bam"
@@ -45,16 +60,3 @@ class DataDelivery(StrEnum):
     FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
     NIPT_VIEWER: str = "nipt-viewer"
     SCOUT: str = "scout"
-
-
-FLOWCELL_Q30_THRESHOLD = {"READ_LENGTH_150": 85, "READ_LENGTH_100": 85, "READ_LENGTH_50": 90}
-
-
-PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
-
-SEX_OPTIONS = ("male", "female", "unknown")
-
-STATUS_OPTIONS = ("affected", "unaffected", "unknown")
-ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
-
-SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
