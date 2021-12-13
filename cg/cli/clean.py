@@ -263,7 +263,7 @@ def fix_flowcell_status(context: CGConfig, dry_run: bool):
     flowcells_in_statusdb = [
         flowcell for flowcell in status_db.flowcells() if flowcell.status in ["ondisk", "removed"]
     ]
-    LOG.info("Found %s flowcells in statusdb!", len(flowcells_in_statusdb))
+    LOG.info("Number of ondisk or removed flowcells in statusdb: %s", len(flowcells_in_statusdb))
     physical_ondisk_flowcell_names = [
         DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api).id
         for flowcell_dir in demux_api.out_dir.iterdir()
