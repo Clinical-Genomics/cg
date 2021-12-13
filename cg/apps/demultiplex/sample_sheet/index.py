@@ -118,6 +118,8 @@ def adapt_indexes(
     )
     for sample in samples:
         index1, index2 = sample.index.split("-")
+        index1: str = index1.strip()
+        index2: str = index2.strip()
         index_length = len(index1)
         if expected_index_length == 10 and index_length == 8:
             LOG.debug("Padding indexes")
