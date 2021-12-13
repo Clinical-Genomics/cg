@@ -73,7 +73,7 @@ def fixture_sample_id() -> str:
     return "ADM1"
 
 
-@pytest.fixture(name="cust_sample_id")
+@pytest.fixture(name="cust_sample_id", scope="session")
 def fixture_cust_sample_id() -> str:
     """Returns a customer sample id"""
     return "child"
@@ -85,13 +85,13 @@ def fixture_family_name() -> str:
     return "case"
 
 
-@pytest.fixture(name="customer_id")
+@pytest.fixture(name="customer_id", scope="session")
 def fixture_customer_id() -> str:
     """Return a customer id"""
     return "cust000"
 
 
-@pytest.fixture(name="ticket_nr")
+@pytest.fixture(name="ticket_nr", scope="session")
 def fixture_ticket_nr() -> int:
     """Return a ticket nr"""
     return 123456
