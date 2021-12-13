@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 from cg.apps.lims import LimsAPI
-from cg.models.lims.sample import LimsSample, Udf
+from cg.models.lims.sample import LimsSample
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import OrderInSample
 

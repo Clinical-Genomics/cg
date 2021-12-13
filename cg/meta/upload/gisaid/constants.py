@@ -1,18 +1,19 @@
 AUTHORS = [
     "Jan Albert",
     "Tobias Allander",
-    "Annelie Bjerkner",
     "Sandra Broddesson",
     "Robert Dyrdak",
     "Martin Ekman",
     "Lynda Eneh",
-    "Lina Guerra Blomqvist",
-    "Karolina Ininbergs",
+    "Shambhu Ganeshappa Aralaguppe",
+    "Natalija Gerasimcik",
+    "Karina Hentrich",
     "Tanja Normark",
-    "Isak Sylvin",
-    "Zhibing Yun",
-    "Martina Wahlund",
+    "Henning Onsbring",
+    "Maria Ropat",
+    "Annika Tiveljung Lindell",
     "Valtteri Wirta",
+    "Zhibing Yun",
 ]
 
 HEADERS = [
