@@ -91,7 +91,7 @@ def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxRes
     assert not find.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
 
     # WHEN creating a demux object
-    create.create_demux(
+    demux_object = create.create_demux(
         manager=stats_api,
         demux_results=dragen_demux_results,
         flowcell_id=flowcell.flowcell_id,
@@ -99,4 +99,6 @@ def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxRes
     )
 
     # THEN assert that a demux object was created
-    assert find.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
+    assert find.get_demux_id(
+        flowcell_object_id=flowcell.flowcell_id, base_mask=demux_object.basemask
+    )
