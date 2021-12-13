@@ -44,7 +44,7 @@ def public(route_function):
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), 204)
+        return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
@@ -87,11 +87,11 @@ def submit_order(order_type):
     try:
         LOG.info("processing '%s' order: %s", order_type, request.get_json())
         project: OrderType = OrderType(order_type)
-        post_data: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
+        order_in: OrderIn = OrderIn.parse_obj(request.get_json(), project=project)
 
         result = api.submit(
             project=project,
-            order_in=post_data,
+            order_in=order_in,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
@@ -407,7 +407,7 @@ def orderform():
             order_parser = ExcelOrderformParser()
             order_parser.parse_orderform(excel_path=saved_path)
         else:
-            json_data = json.load(input_file.stream)
+            json_data = json.load(input_file.stream, strict=False)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
