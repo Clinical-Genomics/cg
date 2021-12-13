@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.clean.demultiplexed_flowcells import DemuxedFlowcell
+from cg.meta.clean.demultiplexed_flowcells import DemultiplexedRunsFlowcell
 from cg.store import Store
 from cg.store.models import Flowcell
 
@@ -28,7 +28,7 @@ def test_flowcell_name(
     # GIVEN a flowcell
     flowcell_path = request.getfixturevalue(flowcell_path)
     mock_hk.files.return_value.count.return_value = 1
-    flowcell_obj = DemuxedFlowcell(
+    flowcell_obj = DemultiplexedRunsFlowcell(
         flowcell_path=flowcell_path, status_db=mock_statusdb, housekeeper_api=mock_hk
     )
 
@@ -59,7 +59,7 @@ def test_flowcell_exists_in_statusdb_(
     flowcell_path = request.getfixturevalue(flowcell_path)
     mock_statusdb.flowcell.return_value = statusdb_return_value
     mock_hk.files.return_value.count.return_value = 1
-    flowcell_obj = DemuxedFlowcell(
+    flowcell_obj = DemultiplexedRunsFlowcell(
         flowcell_path=flowcell_path, status_db=mock_statusdb, housekeeper_api=mock_hk
     )
 
@@ -76,7 +76,7 @@ def test_check_fastq_files_exists_in_hk(
 ):
     # GIVEN a flowcell that has fastq files in housekeeper
     mock_hk.files.return_value.count.return_value = 1
-    flowcell_obj = DemuxedFlowcell(correct_flowcell_path, mock_statusdb, mock_hk)
+    flowcell_obj = DemultiplexedRunsFlowcell(correct_flowcell_path, mock_statusdb, mock_hk)
 
     # WHEN checking for fastq files in Housekeeper
 
@@ -91,7 +91,7 @@ def test_check_no_fastq_files_exist_in_hk(
 ):
     # GIVEN a flowcell that has no fastq files in housekeeper
     mock_hk.files.return_value.count.return_value = 0
-    flowcell_obj = DemuxedFlowcell(correct_flowcell_path, mock_statusdb, mock_hk)
+    flowcell_obj = DemultiplexedRunsFlowcell(correct_flowcell_path, mock_statusdb, mock_hk)
 
     # WHEN checking for fastq files in Housekeeper
 

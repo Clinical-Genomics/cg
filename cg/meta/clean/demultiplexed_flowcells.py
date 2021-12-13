@@ -4,7 +4,7 @@ import logging
 import re
 import shutil
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, List
 
 from housekeeper.store import models as hk_models
 
@@ -14,7 +14,7 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class DemuxedFlowcell:
+class DemultiplexedRunsFlowcell:
     """Class to check if a given flowcell in demultiplexed-runs is valid, or can be removed. A
     valid flowcell is named correctly, has the correct status ('ondisk') in statusdb,
     and has fastq files in Housekeeper"""

@@ -21,7 +21,7 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.meta.clean.demultiplexed_flowcells import DemuxedFlowcell
+from cg.meta.clean.demultiplexed_flowcells import DemultiplexedRunsFlowcell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -207,7 +207,7 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     checked_flowcells = []
     for flowcell_dir in demux_api.out_dir.iterdir():
-        flowcell_obj = DemuxedFlowcell(flowcell_dir, status_db, housekeeper_api)
+        flowcell_obj = DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api)
         flowcell_obj.check_existing_flowcell_directory()
         checked_flowcells.append(flowcell_obj)
     if failed_only:
@@ -265,7 +265,7 @@ def fix_flowcell_status(context: CGConfig, dry_run: bool):
     ]
     LOG.info("Found %s flowcells in statusdb!", len(flowcells_in_statusdb))
     physical_ondisk_flowcell_names = [
-        DemuxedFlowcell(flowcell_dir, status_db, housekeeper_api).id
+        DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api).id
         for flowcell_dir in demux_api.out_dir.iterdir()
     ]
     for flowcell in flowcells_in_statusdb:
