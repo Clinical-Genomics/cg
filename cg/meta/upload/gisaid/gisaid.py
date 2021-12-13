@@ -24,6 +24,8 @@ from cg.exc import (
 
 LOG = logging.getLogger(__name__)
 
+UPLOADED_REGEX_MATCH = r"\[\"([A-Za-z0-9_]+)\"\]\}$"
+
 
 class GisaidAPI:
     """Interface with Gisaid cli uppload"""
@@ -281,7 +283,8 @@ class GisaidAPI:
                         log_message = log.get("msg")
                     elif log.get("code") == "validation_error" and "existing_ids" in log.get("msg"):
                         log_message = (
-                            f'{log.get("msg").split(";")[0]}; {re.search("", log.get("msg"))}'
+                            f'{log.get("msg").split(";")[0]}; '
+                            f'{re.findall(UPLOADED_REGEX_MATCH, log.get("msg"))[0]}'
                         )
                     else:
                         continue
