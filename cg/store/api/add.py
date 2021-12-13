@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import List
+from typing import List, Optional
 
 import petname
 from cg.apps.avatar.api import Avatar
@@ -154,10 +154,10 @@ class AddHandler(BaseHandler):
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
         name: str,
-        panels: List[str],
-        cohorts: List[str] = None,
-        priority: str = "standard",
-        synopsis: str = None,
+        panels: Optional[List[str]] = None,
+        cohorts: Optional[List[str]] = None,
+        priority: Optional[str] = "standard",
+        synopsis: Optional[str] = None,
     ) -> models.Family:
         """Build a new Family record."""
 
