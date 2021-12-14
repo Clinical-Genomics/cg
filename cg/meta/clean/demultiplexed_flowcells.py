@@ -105,8 +105,8 @@ class DemultiplexedRunsFlowcell:
                     self.fastq_files_exist_on_disk,
                 ]
             )
-        if self._passed_check:
-            LOG.info("Flowcell %s has passed all checks, setting flag to True!", self.id)
+            if self._passed_check:
+                LOG.info("Flowcell %s has passed all checks, setting flag to True!", self.id)
         return self._passed_check
 
     def check_existing_flowcell_directory(self):
