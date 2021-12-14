@@ -194,7 +194,7 @@ class FamilyView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
-    column_exclude_list = ["created_at"]
+    column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
         "customer.internal_id",
         "priority",
@@ -208,6 +208,12 @@ class FamilyView(BaseView):
         "avatar_url": _list_thumbnail,
     }
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
+    form_excluded_columns = [
+        "analyses",
+        "_cohorts",
+        "links",
+        "synopsis",
+    ]
     form_extra_fields = {
         "data_analysis": SelectEnumField(enum_class=Pipeline),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
@@ -323,15 +329,20 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = ["invoiced_at"]
+    column_exclude_list = [
+        "age_at_sampling",
+        "invoiced_at",
+        "_phenotype_groups",
+        "_phenotype_terms",
+    ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
-        "sex",
-        "downsampled_to",
-        "sequenced_at",
-        "ticket_number",
-        "is_tumour",
         "comment",
+        "downsampled_to",
+        "is_tumour",
+        "sequenced_at",
+        "sex",
+        "ticket_number",
     ]
     column_filters = ["customer.internal_id", "sex", "application_version.application"]
     column_formatters = {
@@ -341,7 +352,19 @@ class SampleView(BaseView):
         "priority": view_human_priority,
     }
     column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
-    form_excluded_columns = ["is_external", "invoiced_at"]
+    form_excluded_columns = [
+        "age_at_sampling",
+        "deliveries",
+        "father_links",
+        "flowcells",
+        "invoiced_at",
+        "invoice",
+        "is_external",
+        "_phenotype_groups",
+        "_phenotype_terms",
+        "links",
+        "mother_links",
+    ]
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):

@@ -3,8 +3,8 @@ from typing import Optional
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants import Pipeline
-from cg.meta.orders import OrderType
 from cg.models.orders.excel_sample import ExcelSample
+from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 
 
