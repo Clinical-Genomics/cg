@@ -6,25 +6,22 @@ import datetime as dt
 import json
 import logging
 import os
-import pytest
 import shutil
-
 from pathlib import Path
 from typing import Generator
 
+import pytest
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
-from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
-
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.limsmock import MockLimsAPI
@@ -74,7 +71,7 @@ def fixture_sample_id() -> str:
     return "ADM1"
 
 
-@pytest.fixture(name="cust_sample_id")
+@pytest.fixture(name="cust_sample_id", scope="session")
 def fixture_cust_sample_id() -> str:
     """Returns a customer sample id"""
     return "child"
@@ -86,22 +83,16 @@ def fixture_family_name() -> str:
     return "case"
 
 
-@pytest.fixture(name="customer_id")
+@pytest.fixture(name="customer_id", scope="session")
 def fixture_customer_id() -> str:
     """Return a customer id"""
     return "cust000"
 
 
-@pytest.fixture(name="ticket_nr")
+@pytest.fixture(name="ticket_nr", scope="session")
 def fixture_ticket_nr() -> int:
     """Return a ticket nr"""
     return 123456
-
-
-@pytest.fixture(name="flow_cell_name")
-def fixture_flowcell_name() -> str:
-    """Return a string for a flowcell"""
-    return "HVKJCDRXX"
 
 
 @pytest.fixture(scope="function", name="analysis_family_single_case")
@@ -492,6 +483,12 @@ def rml_order_to_submit() -> dict:
 
 
 @pytest.fixture
+def fluffy_order_to_submit() -> dict:
+    """Load an example fluffy order."""
+    return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
+
+
+@pytest.fixture
 def metagenome_order_to_submit() -> dict:
     """Load an example metagenome order."""
     return json.load(open("tests/fixtures/cgweb_orders/metagenome.json"))
@@ -657,7 +654,6 @@ def fixture_compress_hk_fastq_bundle(
     compression_object: CompressionData, sample_hk_bundle_no_files: dict
 ) -> dict:
     """Create a complete bundle mock for testing compression
-
     This bundle contains a pair of fastq files.
     """
     hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
@@ -951,7 +947,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RMLS05R150",
+            tag="RMLP05R800",
             category="rml",
             description="Ready-made",
             sequencing_depth=0,
@@ -960,7 +956,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="WGTPCFC030",
+            tag="WGSPCFC030",
             category="wgs",
             description="WGS trio",
             is_accredited=True,
@@ -1072,7 +1068,7 @@ def sample_store(base_store) -> Store:
     ]
     customer = base_store.customers().first()
     external_app = base_store.application("WGXCUSC000").versions[0]
-    wgs_app = base_store.application("WGTPCFC030").versions[0]
+    wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app
