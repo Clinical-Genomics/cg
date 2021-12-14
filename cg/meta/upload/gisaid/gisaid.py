@@ -1,6 +1,7 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 import json
 import logging
+import re
 from pathlib import Path
 from typing import List, Dict, Optional
 import pandas as pd
@@ -22,6 +23,8 @@ from cg.exc import (
 )
 
 LOG = logging.getLogger(__name__)
+
+UPLOADED_REGEX_MATCH = r"\[\"([A-Za-z0-9_]+)\"\]\}$"
 
 
 class GisaidAPI:
@@ -276,9 +279,16 @@ class GisaidAPI:
             with open(str(log_file.absolute())) as log_file:
                 log_data = json.load(log_file)
                 for log in log_data:
-                    if log.get("code") != "epi_isl_id":
+                    if log.get("code") == "epi_isl_id":
+                        log_message = log.get("msg")
+                    elif log.get("code") == "validation_error" and "existing_ids" in log.get("msg"):
+                        log_message = (
+                            f'{log.get("msg").split(";")[0]}; '
+                            f'{re.findall(UPLOADED_REGEX_MATCH, log.get("msg"))[0]}'
+                        )
+                    else:
                         continue
-                    accession_obj = GisaidAccession(log_message=log.get("msg"))
+                    accession_obj = GisaidAccession(log_message=log_message)
                     accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
         return accession_numbers
 
