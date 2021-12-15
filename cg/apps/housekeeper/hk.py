@@ -87,26 +87,28 @@ class HousekeeperAPI:
         fastq_tag = "fastq"
         fastq_files: Iterable[File] = self.files(bundle=bundle, tags=[fastq_tag])
 
-        spring_tag = "spring"
-        spring_files: Iterable[File] = self.files(bundle=bundle, tags=[spring_tag])
-
         if not fastq_files:
             LOG.info(f"Could not find fastq-files for {bundle}")
             return
 
         for fastq_file in fastq_files:
-            if demultiplexing_path.as_posix() in fastq_file.path.as_posix():
+            if demultiplexing_path.as_posix() in fastq_file.path:
                 fastq_file.delete()
                 self._store.commit()
+                LOG.info(f"FASTQ: {fastq_file.path} deleted from Housekeeper")
+
+        spring_tag = "spring"
+        spring_files: Iterable[File] = self.files(bundle=bundle, tags=[spring_tag])
 
         if not spring_files:
             LOG.info(f"Could not find spring-files for {bundle}")
             return
 
         for spring_file in spring_files:
-            if demultiplexing_path.as_posix() in spring_file.path.as_posix():
+            if demultiplexing_path.as_posix() in spring_file.path:
                 spring_file.delete()
                 self._store.commit()
+                LOG.info(f"SPRING: {spring_file.path} deleted from Housekeeper")
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version"""

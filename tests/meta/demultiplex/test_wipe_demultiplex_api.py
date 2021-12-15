@@ -231,7 +231,7 @@ def test_wipe_flow_cell_housekeeper_flow_cell_name(
         f"Housekeeper: No files found with tag: {wipe_demultiplex_api.flow_cell_name}"
         not in caplog.text
     )
-    assert f"{sample_sheet_file.as_posix()} deleted" in caplog.text
+    assert f"Wiped {sample_sheet_file.as_posix()} from housekeeper" in caplog.text
     for fastq_file in fastq_files:
         assert f"{fastq_file.as_posix()} deleted" in caplog.text
 

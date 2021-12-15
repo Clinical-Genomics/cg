@@ -22,8 +22,6 @@ from tests.cli.demultiplex.conftest import (
     fixture_demultiplexing_api,
     fixture_demux_results_not_finished_dir,
     fixture_demux_run_dir,
-    fixture_flowcell_full_name,
-    fixture_flowcell_object,
     fixture_flowcell_runs_working_directory,
     fixture_sbatch_process,
     fixture_stats_api,
@@ -36,6 +34,7 @@ from tests.models.demultiplexing.conftest import (
     fixture_flowcell_object,
     fixture_flowcell_path,
     fixture_flowcell_runs,
+    fixture_flow_cell_name,
 )
 
 
@@ -50,10 +49,10 @@ def fixture_tmp_demulitplexing_dir(
 
 
 @pytest.fixture(name="tmp_fastq_paths")
-def fixture_temp_fastq_paths(tmp_path: Path) -> List[Path]:
+def fixture_temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
     """Return a list of temporary dummy fastq paths"""
-    fastq_1 = tmp_path / "fastq_1.fastq.gz"
-    fastq_2 = tmp_path / "fastq_2.fastq.gz"
+    fastq_1 = tmp_demulitplexing_dir / "fastq_1.fastq.gz"
+    fastq_2 = tmp_demulitplexing_dir / "fastq_2.fastq.gz"
 
     fastqs = [fastq_1, fastq_2]
     for fastq in fastqs:
@@ -63,8 +62,8 @@ def fixture_temp_fastq_paths(tmp_path: Path) -> List[Path]:
 
 
 @pytest.fixture(name="tmp_sample_sheet_path")
-def fixture_tmp_samplesheet_path(tmp_path: Path, flow_cell_name: str) -> Path:
-    tmp_sample_sheet_path = tmp_path / "SampleSheet.csv"
+def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path, flow_cell_name: str) -> Path:
+    tmp_sample_sheet_path = tmp_demulitplexing_dir / "SampleSheet.csv"
 
     with tmp_sample_sheet_path.open("w+") as fh:
         fh.write("content")

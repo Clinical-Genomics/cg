@@ -9,6 +9,8 @@ from cg.store.api.import_func import (
     parse_applications,
     versions_are_same,
 )
+
+from tests.models.demultiplexing.conftest import fixture_flowcell_full_name, fixture_flow_cell_name
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 
 

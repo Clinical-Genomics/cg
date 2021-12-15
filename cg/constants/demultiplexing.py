@@ -44,6 +44,22 @@ OPTION_BCL_CONVERTER = click.option(
     "bcl2fastq.",
 )
 
+OPTION_SKIP_CG_STATS = click.option(
+    "--skip-cg-stats", is_flag=True, help="Skip removal in cg-stats"
+)
+
+OPTION_SKIP_DEMULTIPLEXING_DIR = click.option(
+    "--skip-demultiplexing-dir", is_flag=True, help="Skip removal on server file system"
+)
+
+OPTION_SKIP_HOUSEKEEPER = click.option(
+    "--skip-housekeeper", is_flag=True, help="Skip removal in housekeeper"
+)
+
+OPTION_SKIP_STATUS_DB = click.option(
+    "--skip-status-db", is_flag=True, help="Skip removal in status-db"
+)
+
 FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
 
 DEMUX_STATS_PATH = {

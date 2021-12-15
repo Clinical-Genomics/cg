@@ -5,7 +5,13 @@ import click
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.demultiplexing import (
+    OPTION_BCL_CONVERTER,
+    OPTION_SKIP_HOUSEKEEPER,
+    OPTION_SKIP_CG_STATS,
+    OPTION_SKIP_STATUS_DB,
+    OPTION_SKIP_DEMULTIPLEXING_DIR,
+)
 from cg.exc import FlowcellError
 from cg.meta.demultiplex.wipe_demultiplex_api import WipeDemuxAPI
 from cg.models.cg_config import CGConfig
@@ -18,12 +24,20 @@ LOG = logging.getLogger(__name__)
 @OPTION_BCL_CONVERTER
 @click.option("--flowcells-directory", type=click.Path(exists=True, file_okay=False))
 @click.option("--dry-run", is_flag=True)
+@OPTION_SKIP_CG_STATS
+@OPTION_SKIP_DEMULTIPLEXING_DIR
+@OPTION_SKIP_HOUSEKEEPER
+@OPTION_SKIP_STATUS_DB
 @click.pass_obj
 def demultiplex_all(
     context: CGConfig,
     bcl_converter: str,
     flowcells_directory: click.Path,
     dry_run: bool,
+    skip_cg_stats: bool,
+    skip_demultiplexing_dir: bool,
+    skip_housekeeper: bool,
+    skip_status_db: bool,
 ):
     """Demultiplex all flowcells that are ready under the flowcells_directory"""
     LOG.info("Running cg demultiplex all, using %s.", bcl_converter)
@@ -48,7 +62,12 @@ def demultiplex_all(
             config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=sub_dir.name
         )
         wipe_demux_api.set_dry_run(dry_run=dry_run)
-        wipe_demux_api.wipe_flow_cell()
+        wipe_demux_api.wipe_flow_cell(
+            cg_stats=skip_cg_stats,
+            demultiplexing_dir=skip_demultiplexing_dir,
+            housekeeper=skip_housekeeper,
+            status_db=skip_status_db,
+        )
 
         if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
             continue
@@ -69,13 +88,21 @@ def demultiplex_all(
 @click.command(name="flowcell")
 @click.argument("flowcell-id")
 @OPTION_BCL_CONVERTER
+@OPTION_SKIP_CG_STATS
+@OPTION_SKIP_DEMULTIPLEXING_DIR
+@OPTION_SKIP_HOUSEKEEPER
+@OPTION_SKIP_STATUS_DB
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def demultiplex_flowcell(
     context: CGConfig,
+    dry_run: bool,
     flowcell_id: str,
     bcl_converter: str,
-    dry_run: bool,
+    skip_cg_stats: bool,
+    skip_demultiplexing_dir: bool,
+    skip_housekeeper: bool,
+    skip_status_db: bool,
 ):
     """Demultiplex a flowcell on slurm using CG
 
@@ -95,7 +122,12 @@ def demultiplex_flowcell(
         run_name=flowcell_id,
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flow_cell()
+    wipe_demux_api.wipe_flow_cell(
+        cg_stats=skip_cg_stats,
+        demultiplexing_dir=skip_demultiplexing_dir,
+        housekeeper=skip_housekeeper,
+        status_db=skip_status_db,
+    )
 
     try:
         flowcell_obj = Flowcell(flowcell_path=flowcell_directory, bcl_converter=bcl_converter)
@@ -123,9 +155,22 @@ def demultiplex_flowcell(
 
 @click.command(name="prepare-flowcell")
 @click.option("--dry-run", is_flag=True)
+@OPTION_SKIP_CG_STATS
+@OPTION_SKIP_DEMULTIPLEXING_DIR
+@OPTION_SKIP_HOUSEKEEPER
+@OPTION_SKIP_STATUS_DB
 @click.argument("--demultiplexing-dir")
 @click.argument("--flowcell-id")
-def prepare_flowcell(context: CGConfig, dry_run: bool, demultiplexing_dir: str, flowcell_id: str):
+def prepare_flowcell(
+    context: CGConfig,
+    dry_run: bool,
+    demultiplexing_dir: str,
+    flowcell_id: str,
+    skip_cg_stats: bool,
+    skip_demultiplexing_dir: bool,
+    skip_housekeeper: bool,
+    skip_status_db: bool,
+):
     """Prepare a flowcell before demultiplexing, using the WipeDemuxAPI
 
     Args:
@@ -139,4 +184,9 @@ def prepare_flowcell(context: CGConfig, dry_run: bool, demultiplexing_dir: str, 
         config=context, demultiplexing_dir=demux_path, run_name=flowcell_id
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flow_cell()
+    wipe_demux_api.wipe_flow_cell(
+        cg_stats=skip_cg_stats,
+        demultiplexing_dir=skip_demultiplexing_dir,
+        housekeeper=skip_housekeeper,
+        status_db=skip_status_db,
+    )

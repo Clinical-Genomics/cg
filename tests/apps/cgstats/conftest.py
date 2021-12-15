@@ -11,6 +11,7 @@ from tests.models.demultiplexing.conftest import (
     fixture_demultiplexed_flowcell,
     fixture_demultiplexed_runs,
     fixture_flowcell_full_name,
+    fixture_flow_cell_name,
     fixture_flowcell_object,
     fixture_flowcell_path,
     fixture_flowcell_runs,

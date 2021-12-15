@@ -2,7 +2,7 @@ import logging
 
 from pathlib import Path
 from shutil import rmtree
-from typing import List, Optional
+from typing import Iterable, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.cgstats.stats import StatsAPI
@@ -10,12 +10,13 @@ from cg.exc import WipeDemuxError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Sample, Flowcell
+from housekeeper.store.models import File
 
 log = logging.getLogger(__name__)
 
 
 class WipeDemuxAPI:
-    """Class to handle wiping out a flowcell before restart/start"""
+    """Class to handle wiping out a flow cell before restart/start"""
 
     def __init__(self, config: CGConfig, demultiplexing_dir: Path, run_name: str):
         self.dry_run: bool = True
@@ -34,9 +35,9 @@ class WipeDemuxAPI:
 
     @property
     def flow_cell_name(self) -> str:
-        """Parse flowcell name from flowcell run name
+        """Parse flow cell name from flowcell run name
 
-        This will assume that the flowcell naming convention is used.
+        This will assume that the flow cell naming convention is used.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
         Example: 201203_A00689_0200_AHVKJCDRXX
         """
@@ -44,7 +45,7 @@ class WipeDemuxAPI:
 
     @property
     def status_db_presence(self) -> bool:
-        """Update about the presence of given flowcell in status_db"""
+        """Update about the presence of given flow cell in status_db"""
         presence = (
             self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
         )
@@ -59,7 +60,7 @@ class WipeDemuxAPI:
         self.dry_run = dry_run
 
     def _set_samples_on_flow_cell(self) -> None:
-        """Set a list of samples related to a flowcell in status-db"""
+        """Set a list of samples related to a flow cell in status-db"""
         self.samples_on_flow_cell: List[Sample] = (
             self.status_db.query(Flowcell)
             .filter(Flowcell.name == self.flow_cell_name)
@@ -68,7 +69,7 @@ class WipeDemuxAPI:
         )
 
     def active_samples_on_flow_cell(self) -> Optional[List[str]]:
-        """Check if there are any active cases related to samples of a flowcell"""
+        """Check if there are any active cases related to samples of a flow cell"""
         active_samples_on_flow_cell = [
             sample.internal_id
             for sample in self.samples_on_flow_cell
@@ -77,41 +78,36 @@ class WipeDemuxAPI:
         if active_samples_on_flow_cell:
             return active_samples_on_flow_cell
 
-    def _wipe_flow_cell_tag_housekeeper(self) -> None:
-        """Wipe the presence of a flowcell, based on the flowcell id as a tag, in Housekeeper."""
-        if not any(self.housekeeper_api.files(tags=[self.flow_cell_name])):
-            self.housekeeper_api.delete_files(dry_run=self.dry_run, tags=[self.flow_cell_name])
+    def _wipe_sample_sheet_housekeeper(self) -> None:
+        """Wipe the presence of all sample sheets related to a flow cell in Housekeeper."""
+        sample_sheet_files: Iterable[File] = self.housekeeper_api.files(
+            tags=[self.flow_cell_name, "samplesheet"]
+        )
+        if any(sample_sheet_files):
+            for file in sample_sheet_files:
+                self.housekeeper_api.delete_file(file_id=file.id)
+                log.info(f"Housekeeper: Wiped {file.path} from housekeeper")
         else:
             log.info(f"Housekeeper: No files found with tag: {self.flow_cell_name}")
 
-    def _wipe_fastq_tags_housekeeper(self) -> None:
-        """Wipe the presence of a flowcell, based on samples related to flowcell and the fastq-tags, in Housekeeper."""
-        samples_to_delete = []
+    def _wipe_fastq_and_spring_housekeeper(self) -> None:
+        """Wipe the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
         for sample in self.samples_on_flow_cell:
-            if any(self.housekeeper_api.files(bundle=sample.internal_id, tags=["fastq"])):
-                samples_to_delete.append(sample)
-            else:
-                log.info(f"Housekeeper: No fastq-files found in Housekeeper for bundle {sample}")
-
-        if samples_to_delete:
-            for sample in samples_to_delete:
-                self.housekeeper_api.delete_fastq_and_spring(
-                    bundle=sample.internal_id, demultiplexing_path=self.demultiplexing_dir
-                )
-        else:
-            log.info("Housekeeper: No files for samples connected to the flowcell")
+            self.housekeeper_api.delete_fastq_and_spring(
+                bundle=sample.internal_id, demultiplexing_path=self.demultiplexing_run_path
+            )
 
     def wipe_flow_cell_housekeeper(self) -> None:
-        """Wipe any presence of a flowcell in housekeeper. Including Sample sheets AND fastq-files"""
+        """Wipe any presence of a flow cell in housekeeper. Including Sample sheets AND fastq-files"""
 
-        log.info(f"Housekeeper: Wiping files with tag {self.flow_cell_name}")
-        self._wipe_flow_cell_tag_housekeeper()
-        log.info(f"Housekeeper: Wiping files on sample bundles with fastq-tag")
-        self._wipe_fastq_tags_housekeeper()
+        log.info(f"Housekeeper: Wiping sample sheet files with tag {self.flow_cell_name}")
+        self._wipe_sample_sheet_housekeeper()
+        log.info(f"Housekeeper: Wiping fastq and spring files related to flowcell")
+        self._wipe_fastq_and_spring_housekeeper()
 
     def wipe_flow_cell_statusdb(self) -> None:
-        """Wipe any prescense of a flowcell in status-db"""
+        """Wipe any presence of a flow cell in status-db"""
         if self.dry_run:
             log.info(f"StatusDB: Would remove {self.flow_cell_name}")
         else:
@@ -119,7 +115,7 @@ class WipeDemuxAPI:
             self.status_db.delete_flowcell(flowcell_name=self.flow_cell_name)
 
     def wipe_flow_cell_cgstats(self) -> None:
-        """Wipe ay presence of a flowcell in cgstats"""
+        """Wipe ay presence of a flow cell in cgstats"""
         from cg.apps.cgstats.crud.delete import delete_flowcell
 
         if self.dry_run:
@@ -128,7 +124,7 @@ class WipeDemuxAPI:
             delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
 
     def wipe_flow_cell_demultiplex_dir(self) -> None:
-        """Remove demultiplexing directory set by DemultiplexingAPI"""
+        """Wipe demultiplexing directory on the server"""
         out_dir: Path = self.demultiplexing_dir.joinpath(self.run_name.name)
         if out_dir.exists():
             if self.dry_run:
@@ -139,7 +135,9 @@ class WipeDemuxAPI:
         else:
             log.info(f"Hasta: No target demultiplexing directory {out_dir.as_posix()}")
 
-    def wipe_flow_cell(self) -> None:
+    def wipe_flow_cell(
+        self, cg_stats: bool, demultiplexing_dir: bool, housekeeper: bool, status_db: bool
+    ) -> None:
         """Master command to completely wipe the presence of a flowcell in all services"""
         if self.status_db_presence:
             self._set_samples_on_flow_cell()
@@ -152,7 +150,11 @@ class WipeDemuxAPI:
                 )
                 raise WipeDemuxError
         else:
-            self.wipe_flow_cell_cgstats()
-            self.wipe_flow_cell_demultiplex_dir()
-            self.wipe_flow_cell_housekeeper()
-            self.wipe_flow_cell_statusdb()
+            if cg_stats:
+                self.wipe_flow_cell_cgstats()
+            elif demultiplexing_dir:
+                self.wipe_flow_cell_demultiplex_dir()
+            elif housekeeper:
+                self.wipe_flow_cell_housekeeper()
+            elif status_db:
+                self.wipe_flow_cell_statusdb()

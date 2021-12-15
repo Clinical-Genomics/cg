@@ -519,13 +519,14 @@ class StoreHelpers:
         flowcell_id: str = "flowcell_test",
         archived_at: datetime = None,
         samples: list = None,
+        sequencer_type: str = "hiseqx",
         status: str = None,
     ) -> models.Flowcell:
         """Utility function to set a flowcell to use in tests"""
         flowcell_obj = store.add_flowcell(
             name=flowcell_id,
             sequencer="dummy_sequencer",
-            sequencer_type="hiseqx",
+            sequencer_type=sequencer_type,
             date=datetime.now(),
         )
         flowcell_obj.archived_at = archived_at
