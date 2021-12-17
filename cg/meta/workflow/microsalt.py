@@ -155,7 +155,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         method_sequencing = self.lims_api.get_sequencing_method(sample_id)
         if method_sequencing:
             method_sequencing, _ = method_sequencing.split(" ", 1)
-        priority = "research" if sample_obj.priority == 0 else "standard"
+        priority = "research" if sample_obj.priority_int == 0 else "standard"
 
         return {
             "CG_ID_project": self.get_project(sample_id),

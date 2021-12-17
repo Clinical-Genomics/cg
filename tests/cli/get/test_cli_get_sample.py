@@ -15,7 +15,7 @@ def test_get_sample_bad_sample(cli_runner: CliRunner, base_context: CGConfig):
     name = "dummy_name"
     result = cli_runner.invoke(get, ["sample", name], obj=base_context)
 
-    # THEN then it should warn about missing sample id instead of getting a sample
+    # THEN it should warn about missing sample id instead of getting a sample
     # it will not fail since the API accepts multiple samples
     assert result.exit_code == 0
 
@@ -32,7 +32,7 @@ def test_get_sample_required(
     # WHEN getting a sample
     result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert sample_id in result.output
 
@@ -52,7 +52,7 @@ def test_get_samples_required(
     # WHEN getting a sample
     result = cli_runner.invoke(get, ["sample", sample_id1, sample_id2], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert sample_id1 in result.output
     assert sample_id2 in result.output
@@ -74,7 +74,7 @@ def test_get_sample_output(
     # WHEN getting a sample
     result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert sample_id in result.output
     assert name in result.output
@@ -97,7 +97,7 @@ def test_get_sample_external_false(
     # WHEN getting a sample
     result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert is_external_false in result.output
     assert is_external_true not in result.output
@@ -116,7 +116,7 @@ def test_get_sample_external_true(
     # WHEN getting a sample
     result = cli_runner.invoke(get, ["sample", sample_id], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert is_external_true in result.output
     assert is_external_false not in result.output

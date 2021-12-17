@@ -5,9 +5,11 @@ from typing import List, Optional
 import petname
 from cg.apps.avatar.api import Avatar
 
-from cg.constants import PRIORITY_MAP, DataDelivery, Pipeline
+from cg.constants import DataDelivery, Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
+
+from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -122,7 +124,7 @@ class AddHandler(BaseHandler):
         internal_id: str = None,
         order: str = None,
         ordered: dt.datetime = None,
-        priority: str = None,
+        priority: Priority = None,
         received: dt.datetime = None,
         ticket: int = None,
         tumour: bool = False,
@@ -131,8 +133,7 @@ class AddHandler(BaseHandler):
         """Build a new Sample record."""
 
         internal_id = internal_id or self.generate_unique_petname()
-        priority_human = priority or ("research" if downsampled_to else "standard")
-        priority_db = PRIORITY_MAP[priority_human]
+        priority = priority or ("research" if downsampled_to else "standard")
         return self.Sample(
             comment=comment,
             control=control,
@@ -142,7 +143,7 @@ class AddHandler(BaseHandler):
             name=name,
             order=order,
             ordered_at=ordered or dt.datetime.now(),
-            priority=priority_db,
+            priority=priority,
             received_at=received,
             sex=sex,
             ticket_number=ticket,
@@ -156,7 +157,7 @@ class AddHandler(BaseHandler):
         name: str,
         panels: Optional[List[str]] = None,
         cohorts: Optional[List[str]] = None,
-        priority: Optional[str] = "standard",
+        priority: Optional[Priority] = Priority.standard,
         synopsis: Optional[str] = None,
     ) -> models.Family:
         """Build a new Family record."""
@@ -182,7 +183,6 @@ class AddHandler(BaseHandler):
                 "Could not fetch case avatar url for case: %s, Error: %s", internal_id, str(e)
             )
 
-        priority_db = PRIORITY_MAP[priority]
         new_case = self.Family(
             avatar_url=avatar_url,
             cohorts=cohorts,
@@ -191,7 +191,7 @@ class AddHandler(BaseHandler):
             internal_id=internal_id,
             name=name,
             panels=panels,
-            priority=priority_db,
+            priority=priority,
             synopsis=synopsis,
         )
         return new_case

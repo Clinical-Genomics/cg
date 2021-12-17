@@ -4,10 +4,12 @@ from typing import Optional, Tuple
 import click
 
 from cg.apps.avatar.api import Avatar
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, DataDelivery, Pipeline
+from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
+
+from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +33,9 @@ LOG = logging.getLogger(__name__)
     help="Update case data delivery",
 )
 @click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
-@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
+@click.option(
+    "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
+)
 @click.argument("family_id")
 @click.pass_obj
 def family(
@@ -40,7 +44,7 @@ def family(
     avatar_url: Optional[str],
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
-    priority: Optional[str],
+    priority: Optional[Priority],
     panels: Optional[Tuple[str]],
     family_id: str,
     customer_id: Optional[str],
@@ -84,7 +88,7 @@ def family(
         LOG.info(f"Update panels: {', '.join(case_obj.panels)} -> {', '.join(panels)}")
         case_obj.panels = panels
     if priority:
-        LOG.info(f"update priority: {case_obj.priority_human} -> {priority}")
-        case_obj.priority_human = priority
+        LOG.info(f"update priority: {case_obj.priority} -> {priority}")
+        case_obj.priority = priority
 
     status_db.commit()
