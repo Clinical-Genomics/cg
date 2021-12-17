@@ -1,7 +1,7 @@
 """This script tests the cli methods to add cases to status-db"""
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import Pipeline
 from cg.store import Store
 
 
@@ -61,6 +61,22 @@ def test_external_sample_to_re_analyse(base_store: Store, helpers):
     # THEN cases should contain the test case
     assert cases
     assert test_analysis.family in cases
+
+
+def test_new_external_case_not_in_result(base_store: Store, helpers):
+    """Test that a case with one sample that has specified data_analysis does show up"""
+
+    # GIVEN a database with a case with one sequenced samples for MIP analysis
+    pipeline = Pipeline.BALSAMIC
+    test_sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
+    test_case = helpers.add_case(base_store, data_analysis=pipeline)
+    base_store.relate_sample(test_case, test_sample, "unknown")
+
+    # WHEN getting cases to analyse
+    cases = base_store.cases_to_analyze(pipeline=pipeline)
+
+    # THEN cases should contain the test case
+    assert test_case not in cases
 
 
 def test_case_to_re_analyse(base_store: Store, helpers):

@@ -19,17 +19,13 @@ from cg.store import models
 class OptionalIntValidator:
     @classmethod
     def str_to_int(cls, v: str) -> Optional[int]:
-        if v in (None, ""):
-            return None
-        return int(v)
+        return int(v) if v else None
 
 
 class OptionalFloatValidator:
     @classmethod
     def str_to_float(cls, v: str) -> Optional[float]:
-        if v in (None, ""):
-            return None
-        return float(v)
+        return float(v) if v else None
 
 
 class OrderInSample(BaseModel):
@@ -92,7 +88,6 @@ class Of1508Sample(OrderInSample):
     # "required if plate for new samples"
     container_name: Optional[str]
     well_position: Optional[str]
-    status: Optional[StatusEnum]
     # "Required if samples are part of trio/family"
     mother: Optional[
         constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
@@ -135,7 +130,9 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]
+    panels: List[
+        constr(min_length=1, max_length=models.Panel.abbrev.property.columns[0].type.length)
+    ]
     status: StatusEnum
 
 
@@ -243,6 +240,8 @@ class MicrobialSample(OrderInSample):
     concentration_sample: Optional[float]
     quantity: Optional[int]
     verified_organism: Optional[bool]  # sent to LIMS
+
+    control: Optional[str]
 
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> Optional[int]:
