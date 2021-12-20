@@ -24,7 +24,7 @@ class BaseView(ModelView):
 def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
-    return Markup("%s (%i)" % (model.priority.name, model.priority_int)) if model else ""
+    return Markup("%s" % model.priority.name) if model else ""
 
 
 def view_family_sample_link(unused1, unused2, model, unused3):
