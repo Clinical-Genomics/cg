@@ -65,6 +65,7 @@ def switch_priority_int_to_enum(session, table_name, model):
 
     print("Copy priority text to new enum column")
     for record in session.query(model):
+        print(record.priority, end="->", flush=True)
         record.priority_enum = priority_int_to_text(record.priority)
         print(record.priority_enum, end=" ", flush=True)
 
@@ -113,7 +114,7 @@ def switch_priority_enum_to_int(session, table_name, model):
     print(f"Column priority_int added to {table_name}")
 
     for record in session.query(model):
-        print(record.priority, end=" ", flush=True)
+        print(record.priority, end="->", flush=True)
         record.priority_int = priority_text_to_int(record.priority)
         print(record.priority_int, end=" ", flush=True)
 
