@@ -88,7 +88,7 @@ def family(
         LOG.info(f"Update panels: {', '.join(case_obj.panels)} -> {', '.join(panels)}")
         case_obj.panels = panels
     if priority:
-        LOG.info(f"update priority: {case_obj.priority} -> {priority}")
+        LOG.info(f"Update priority: {case_obj.priority.name} -> {priority.name}")
         case_obj.priority = priority
 
     status_db.commit()
