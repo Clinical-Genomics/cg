@@ -41,7 +41,7 @@ def fixture_incorrect_flowcell_path_too_long(
     demultiplexed_flowcells_working_directory, incorrect_flowcell_too_long
 ) -> Path:
     """Full path to an incorrectly named flowcell directory in demultiplexed-runs"""
-    return Path(demultiplexed_flowcells_working_directory / incorrect_flowcell_too_long)
+    return Path(demultiplexed_flowcells_working_directory, incorrect_flowcell_too_long)
 
 
 @pytest.fixture(name="incorrect_flowcell_path_extension")
