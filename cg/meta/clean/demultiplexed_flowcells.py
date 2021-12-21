@@ -54,7 +54,6 @@ class DemultiplexedRunsFlowcell:
             self._is_correctly_named: bool = self.split_name[-1] == self.identifier
             if not self._is_correctly_named:
                 LOG.warning("Flowcell name not correctly named!: %s", self.path)
-                return self._is_correctly_named
         return self._is_correctly_named
 
     @property
