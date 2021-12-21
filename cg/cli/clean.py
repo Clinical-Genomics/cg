@@ -21,15 +21,15 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.meta.clean.demultiplexed_flowcells import DemultiplexedRunsFlowcell
+from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
 FLOW_CELL_OUTPUT_HEADERS = [
-    "Flowcell name",
-    "Flowcell id",
+    "Flow cell name",
+    "Flow cell id",
     "Correct name?",
     "Exists in statusdb?",
     "Fastq files in HK?",
@@ -191,43 +191,45 @@ def hk_bundle_files(
     LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)}GB. Dry run: {dry_run}")
 
 
-@clean.command("invalid-flowcell-dirs")
-@click.option("-f", "--failed-only", is_flag=True, help="Shows failed flowcells only")
+@clean.command("invalid-flow-cell-dirs")
+@click.option("-f", "--failed-only", is_flag=True, help="Shows failed flow cells only")
 @click.option(
     "-d",
     "--dry-run",
     is_flag=True,
-    help="Runs this command without actually removing flowcells!",
+    help="Runs this command without actually removing flow cells!",
 )
 @click.pass_obj
-def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dry_run: bool):
-    """Removes invalid flowcell directories from demultiplexed-runs"""
+def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, dry_run: bool):
+    """Removes invalid flow cell directories from demultiplexed-runs"""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    checked_flowcells: List[DemultiplexedRunsFlowcell] = []
-    for flowcell_dir in demux_api.out_dir.iterdir():
-        LOG.info(f"Checking {flowcell_dir}:")
-        flowcell_obj: DemultiplexedRunsFlowcell = DemultiplexedRunsFlowcell(
-            flowcell_dir, status_db, housekeeper_api
+    checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
+    for flow_cell_dir in demux_api.out_dir.iterdir():
+        LOG.info(f"Checking {flow_cell_dir}:")
+        flow_cell_obj: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
+            flow_cell_dir, status_db, housekeeper_api
         )
-        flowcell_obj.check_existing_flowcell_directory()
-        checked_flowcells.append(flowcell_obj)
-    failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
-    flowcells_to_present: List[DemultiplexedRunsFlowcell] = (
-        failed_flowcells if failed_only else checked_flowcells
+        flow_cell_obj.check_existing_flow_cell_directory()
+        checked_flow_cells.append(flow_cell_obj)
+    failed_flow_cells = [
+        flow_cell for flow_cell in checked_flow_cells if not flow_cell.passed_check
+    ]
+    flow_cells_to_present: List[DemultiplexedRunsFlowCell] = (
+        failed_flow_cells if failed_only else checked_flow_cells
     )
     tabulate_row = [
         [
-            flowcell.name,
-            flowcell.id,
-            flowcell.is_correctly_named,
-            flowcell.exists_in_statusdb,
-            flowcell.fastq_files_exist_in_housekeeper,
-            flowcell.fastq_files_exist_on_disk,
-            click.style(str(flowcell.passed_check), fg=CHECK_COLOR[flowcell.passed_check]),
+            flow_cell.name,
+            flow_cell.id,
+            flow_cell.is_correctly_named,
+            flow_cell.exists_in_statusdb,
+            flow_cell.fastq_files_exist_in_housekeeper,
+            flow_cell.fastq_files_exist_on_disk,
+            click.style(str(flow_cell.passed_check), fg=CHECK_COLOR[flow_cell.passed_check]),
         ]
-        for flowcell in flowcells_to_present
+        for flow_cell in flow_cells_to_present
     ]
 
     click.echo(
@@ -239,50 +241,52 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
         ),
     )
 
-    for flowcell in failed_flowcells:
-        LOG.warning("Invalid flowcell directory found: %s", flowcell.path)
+    for flow_cell in failed_flow_cells:
+        LOG.warning("Invalid flow cell directory found: %s", flow_cell.path)
         if dry_run:
             continue
-        LOG.warning("Removing %s!", flowcell.path)
-        flowcell.remove_failed_flow_cell()
+        LOG.warning("Removing %s!", flow_cell.path)
+        flow_cell.remove_failed_flow_cell()
 
 
-@clean.command("fix-flowcell-status")
+@clean.command("fix-flow-cell-status")
 @click.option(
     "-d",
     "--dry-run",
     is_flag=True,
-    help="Runs this command without actually fixing flowcell statuses!",
+    help="Runs this command without actually fixing flow cell statuses!",
 )
 @click.pass_obj
-def fix_flowcell_status(context: CGConfig, dry_run: bool):
-    """set correct flowcell statuses in statusdb"""
+def fix_flow_cell_status(context: CGConfig, dry_run: bool):
+    """set correct flow cell statuses in statusdb"""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    flowcells_in_statusdb = [
-        flowcell for flowcell in status_db.flowcells() if flowcell.status in ["ondisk", "removed"]
+    flow_cells_in_statusdb = [
+        flow_cell
+        for flow_cell in status_db.flowcells()
+        if flow_cell.status in ["ondisk", "removed"]
     ]
     LOG.info(
-        "Number of flowcells with status 'ondisk' or 'removed'  in statusdb: %s",
-        len(flowcells_in_statusdb),
+        "Number of flow cells with status 'ondisk' or 'removed'  in statusdb: %s",
+        len(flow_cells_in_statusdb),
     )
-    physical_ondisk_flowcell_names = [
-        DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api).id
-        for flowcell_dir in demux_api.out_dir.iterdir()
+    physical_ondisk_flow_cell_names = [
+        DemultiplexedRunsFlowCell(flow_cell_dir, status_db, housekeeper_api).id
+        for flow_cell_dir in demux_api.out_dir.iterdir()
     ]
-    for flowcell in flowcells_in_statusdb:
-        status_db_flow_cell_status = flowcell.status
-        new_status = "ondisk" if flowcell.name in physical_ondisk_flowcell_names else "removed"
+    for flow_cell in flow_cells_in_statusdb:
+        status_db_flow_cell_status = flow_cell.status
+        new_status = "ondisk" if flow_cell.name in physical_ondisk_flow_cell_names else "removed"
         if status_db_flow_cell_status != new_status:
             LOG.info(
-                "Setting status of flowcell %s from %s to %s",
-                flowcell.name,
+                "Setting status of flow cell %s from %s to %s",
+                flow_cell.name,
                 status_db_flow_cell_status,
                 new_status,
             )
             if dry_run:
                 continue
-            flowcell.status = new_status
+            flow_cell.status = new_status
             status_db.commit()
