@@ -22,8 +22,8 @@ def fixture_incorrect_flowcell_extension() -> str:
     return "201203_A00689_0200_AHVKJCDRXX.someextension"
 
 
-@pytest.fixture(name="nonexistent_flowcell")
-def fixture_nonexistent_flowcell() -> str:
+@pytest.fixture(name="incorrect_flow_cell_name")
+def fixture_incorrect_flow_cell_name() -> str:
     """Incorrect flowcell name"""
     return "201203_A00689_0200_AZZZZZZZZZ"
 
@@ -33,7 +33,7 @@ def fixture_correct_flowcell_path(
     demultiplexed_flowcells_working_directory, correct_flowcell
 ) -> Path:
     """Full path to a correctly named flowcell directory in demultiplexed-runs"""
-    return Path(demultiplexed_flowcells_working_directory / correct_flowcell)
+    return Path(demultiplexed_flowcells_working_directory, correct_flowcell)
 
 
 @pytest.fixture(name="incorrect_flowcell_path_too_long")
@@ -41,7 +41,7 @@ def fixture_incorrect_flowcell_path_too_long(
     demultiplexed_flowcells_working_directory, incorrect_flowcell_too_long
 ) -> Path:
     """Full path to an incorrectly named flowcell directory in demultiplexed-runs"""
-    return Path(demultiplexed_flowcells_working_directory / incorrect_flowcell_too_long)
+    return Path(demultiplexed_flowcells_working_directory, incorrect_flowcell_too_long)
 
 
 @pytest.fixture(name="incorrect_flowcell_path_extension")
