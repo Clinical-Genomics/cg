@@ -205,7 +205,7 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    checked_flowcells = []
+    checked_flowcells: List[DemultiplexedRunsFlowcell] = []
     for flowcell_dir in demux_api.out_dir.iterdir():
         LOG.info(f"Checking {flowcell_dir}:")
         flowcell_obj: DemultiplexedRunsFlowcell = DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api)
