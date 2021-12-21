@@ -239,11 +239,12 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
 
     for flowcell in failed_flowcells:
         LOG.warning("Invalid flowcell directory found: %s", flowcell.path)
-        if not dry_run:
-            LOG.warning("Removing %s!", flowcell.path)
-            flowcell.remove_from_demultiplexed_runs()
-            if flowcell.fastq_files_exist_in_housekeeper and flowcell.is_correctly_named:
-                flowcell.remove_files_from_housekeeper()
+        if dry_run:
+            continue
+        LOG.warning("Removing %s!", flowcell.path)
+        flowcell.remove_from_demultiplexed_runs()
+        if flowcell.fastq_files_exist_in_housekeeper and flowcell.is_correctly_named:
+            flowcell.remove_files_from_housekeeper()
 
 
 @clean.command("fix-flowcell-status")
