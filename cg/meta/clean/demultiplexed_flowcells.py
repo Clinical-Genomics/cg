@@ -131,3 +131,9 @@ class DemultiplexedRunsFlowcell:
         shutil.rmtree(self.path, ignore_errors=True)
         if self.exists_in_statusdb and self.is_correctly_named:
             self.status_db.flowcell(self.id).status = "removed"
+
+    def remove_failed_flow_cell(self):
+        """Performs the two removal actions for failed flowcells"""
+        self.remove_from_demultiplexed_runs()
+        if self.fastq_files_exist_in_housekeeper and self.is_correctly_named:
+            self.remove_files_from_housekeeper()
