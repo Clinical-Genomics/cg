@@ -273,7 +273,7 @@ def fix_flowcell_status(context: CGConfig, dry_run: bool):
         for flowcell_dir in demux_api.out_dir.iterdir()
     ]
     for flowcell in flowcells_in_statusdb:
-        old_status = flowcell.status
+        status_db_flow_cell_status = flowcell.status
         new_status = "ondisk" if flowcell.name in physical_ondisk_flowcell_names else "removed"
         if old_status != new_status:
             LOG.info(
