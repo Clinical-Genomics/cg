@@ -29,7 +29,7 @@ from cg.store import Store
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
 FLOW_CELL_OUTPUT_HEADERS = [
-    "Flow cell name",
+    "Flow cell run name",
     "Flow cell id",
     "Correct name?",
     "Exists in statusdb?",
@@ -221,7 +221,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     )
     tabulate_row = [
         [
-            flow_cell.name,
+            flow_cell.run_name,
             flow_cell.id,
             flow_cell.is_correctly_named,
             flow_cell.exists_in_statusdb,
@@ -280,13 +280,13 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
         status_db_flow_cell_status = flow_cell.status
         new_status = (
             FlowCellStatus.ONDISK
-            if flow_cell.name in physical_ondisk_flow_cell_names
+            if flow_cell.run_name in physical_ondisk_flow_cell_names
             else FlowCellStatus.REMOVED
         )
         if status_db_flow_cell_status != new_status:
             LOG.info(
                 "Setting status of flow cell %s from %s to %s",
-                flow_cell.name,
+                flow_cell.run_name,
                 status_db_flow_cell_status,
                 new_status,
             )
@@ -294,17 +294,3 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
                 continue
             flow_cell.status = new_status
             status_db.commit()
-
-
-# @clean.command("test-flowcell-strenum")
-# # @click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
-# @click.option(
-#     "-s",
-#     "--status",
-#     type=click.Choice([status for status in FlowCellStatus]),
-#     default=FlowCellStatus.ONDISK,
-# )
-# @click.pass_obj
-# def test_flowcell_strenum(context: CGConfig, status: Optional[str]):
-#     """ """
-#     click.echo(status)

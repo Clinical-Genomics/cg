@@ -29,8 +29,8 @@ class DemultiplexedRunsFlowCell:
         self.status_db: Store = status_db
         self.hk: HousekeeperAPI = housekeeper_api
         self.path: Path = flow_cell_path
-        self.name: str = self.path.name
-        self.split_name: List[str] = re.split("[_.]", self.name)
+        self.run_name: str = self.path.name
+        self.split_name: List[str] = re.split("[_.]", self.run_name)
         self.identifier: str = self.split_name[3]
         self.id: str = self.identifier[1:]
         self._hk_fastq_files = None
