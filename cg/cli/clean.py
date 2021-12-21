@@ -274,10 +274,7 @@ def fix_flowcell_status(context: CGConfig, dry_run: bool):
     ]
     for flowcell in flowcells_in_statusdb:
         old_status = flowcell.status
-        if flowcell.name in physical_ondisk_flowcell_names:
-            new_status = "ondisk"
-        else:
-            new_status = "removed"
+        new_status = "ondisk" if flowcell.name in physical_ondisk_flowcell_names else "removed"
         if old_status != new_status:
             LOG.info(
                 "Setting status of flowcell %s from %s to %s",
