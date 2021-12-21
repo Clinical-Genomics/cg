@@ -22,8 +22,8 @@ def fixture_incorrect_flowcell_extension() -> str:
     return "201203_A00689_0200_AHVKJCDRXX.someextension"
 
 
-@pytest.fixture(name="nonexistent_flowcell")
-def fixture_nonexistent_flowcell() -> str:
+@pytest.fixture(name="incorrect_flow_cell_name")
+def fixture_incorrect_flow_cell_name() -> str:
     """Incorrect flowcell name"""
     return "201203_A00689_0200_AZZZZZZZZZ"
 
