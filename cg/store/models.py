@@ -289,7 +289,7 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
-    # priority = Column(types.Integer, default=1, nullable=False)
+
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
 
@@ -502,7 +502,7 @@ class Sample(Model, PriorityMixin):
     _phenotype_groups = Column(types.Text)
     _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
-    # priority = Column(types.Integer, default=1, nullable=False)
+
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
     received_at = Column(types.DateTime)
