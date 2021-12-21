@@ -208,7 +208,9 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
     checked_flowcells: List[DemultiplexedRunsFlowcell] = []
     for flowcell_dir in demux_api.out_dir.iterdir():
         LOG.info(f"Checking {flowcell_dir}:")
-        flowcell_obj: DemultiplexedRunsFlowcell = DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api)
+        flowcell_obj: DemultiplexedRunsFlowcell = DemultiplexedRunsFlowcell(
+            flowcell_dir, status_db, housekeeper_api
+        )
         flowcell_obj.check_existing_flowcell_directory()
         checked_flowcells.append(flowcell_obj)
     failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
@@ -231,7 +233,7 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
     click.echo(
         tabulate(
             tabulate_row,
-            headers=FLOWCELL_OUTPUT_HEADERS,
+            headers=FLOW_CELL_OUTPUT_HEADERS,
             tablefmt="fancy_grid",
             missingval="N/A",
         ),
@@ -275,11 +277,11 @@ def fix_flowcell_status(context: CGConfig, dry_run: bool):
     for flowcell in flowcells_in_statusdb:
         status_db_flow_cell_status = flowcell.status
         new_status = "ondisk" if flowcell.name in physical_ondisk_flowcell_names else "removed"
-        if old_status != new_status:
+        if status_db_flow_cell_status != new_status:
             LOG.info(
                 "Setting status of flowcell %s from %s to %s",
                 flowcell.name,
-                old_status,
+                status_db_flow_cell_status,
                 new_status,
             )
             if dry_run:
