@@ -65,4 +65,5 @@ class FlowCellStatus(StrEnum):
 
 
 class HousekeeperTags(StrEnum):
+    FASTQ: str = "fastq"
     SAMPLESHEET: str = "samplesheet"

@@ -1,4 +1,4 @@
-"""Module that handles data and information regarding flow cells and flow cell directories. used to
+"""Module that handles data and information regarding flow cells and flow cell directories. Used to
 inspect and clean flow cell directories in demultiplexed runs """
 import logging
 import re
@@ -44,12 +44,14 @@ class DemultiplexedRunsFlowCell:
     def hk_fastq_files(self) -> Iterable[hk_models.File]:
         """All fastq files in Housekeeper for a particular flow cell"""
         if not self._hk_fastq_files:
-            self._hk_fastq_files = self.hk.files(tags=[self.id, "fastq"])
+            self._hk_fastq_files: Iterable[hk_models.File] = self.hk.files(
+                tags=[self.id, HousekeeperTags.FASTQ]
+            )
         return self._hk_fastq_files
 
     @property
     def is_correctly_named(self) -> bool:
-        """checks if the flow cell directory is correctly named: it should end with the flow cell
+        """Checks if the flow cell directory is correctly named: it should end with the flow cell
         id"""
         if self._is_correctly_named is None:
             self._is_correctly_named: bool = self.split_name[-1] == self.identifier
@@ -59,7 +61,7 @@ class DemultiplexedRunsFlowCell:
 
     @property
     def exists_in_statusdb(self) -> bool:
-        """checks if flow cell exists in statusdb"""
+        """Checks if flow cell exists in statusdb"""
         if self._exists_in_statusdb is None:
             self._exists_in_statusdb: bool = self.status_db.flowcell(self.id) is not None
             if not self._exists_in_statusdb:
@@ -95,8 +97,9 @@ class DemultiplexedRunsFlowCell:
 
     @property
     def passed_check(self) -> bool:
-        """indicates if all checks have passed"""
+        """Indicates if all checks have passed"""
         if self._passed_check is None:
+            LOG.info(f"Checking {self.path}:")
             self._passed_check = all(
                 [
                     self.is_correctly_named,
@@ -105,18 +108,14 @@ class DemultiplexedRunsFlowCell:
                     self.fastq_files_exist_on_disk,
                 ]
             )
-            if self._passed_check:
-                LOG.info("Flow cell %s has passed all checks, setting flag to True!", self.id)
-        return self._passed_check
-
-    def check_existing_flow_cell_directory(self):
-        """performs a series of checks on the flow cell directory"""
-        if not self.passed_check:
             LOG.info(
+                "Flow cell %s has passed all checks, setting flag to True!", self.id
+            ) if self._passed_check else LOG.info(
                 "Flow cell %s failed one or more tests, setting flag to %s!",
                 self.id,
                 self.passed_check,
             )
+        return self._passed_check
 
     def remove_files_from_housekeeper(self):
         """Remove fastq files and the sample sheet from Housekeeper when deleting a flow cell from

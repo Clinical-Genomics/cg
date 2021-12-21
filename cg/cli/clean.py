@@ -208,13 +208,12 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
     for flow_cell_dir in demux_api.out_dir.iterdir():
-        LOG.info(f"Checking {flow_cell_dir}:")
         flow_cell_obj: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_dir, status_db, housekeeper_api
         )
-        flow_cell_obj.check_existing_flow_cell_directory()
         checked_flow_cells.append(flow_cell_obj)
-    failed_flow_cells = [
+
+    failed_flow_cells: List[DemultiplexedRunsFlowCell] = [
         flow_cell for flow_cell in checked_flow_cells if not flow_cell.passed_check
     ]
     flow_cells_to_present: List[DemultiplexedRunsFlowCell] = (
@@ -295,3 +294,17 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
                 continue
             flow_cell.status = new_status
             status_db.commit()
+
+
+# @clean.command("test-flowcell-strenum")
+# # @click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
+# @click.option(
+#     "-s",
+#     "--status",
+#     type=click.Choice([status for status in FlowCellStatus]),
+#     default=FlowCellStatus.ONDISK,
+# )
+# @click.pass_obj
+# def test_flowcell_strenum(context: CGConfig, status: Optional[str]):
+#     """ """
+#     click.echo(status)
