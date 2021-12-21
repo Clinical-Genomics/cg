@@ -211,10 +211,9 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
         flowcell_obj = DemultiplexedRunsFlowcell(flowcell_dir, status_db, housekeeper_api)
         flowcell_obj.check_existing_flowcell_directory()
         checked_flowcells.append(flowcell_obj)
-    if failed_only:
-        checked_flowcells = [
-            flowcell for flowcell in checked_flowcells if not flowcell.passed_check
-        ]
+    failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
+    
+    flowcells_to_present: List[List] = failed_flowcells if failed_only else checked_flowcells     
     tabulate_row = [
         [
             flowcell.name,
