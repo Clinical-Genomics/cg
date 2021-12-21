@@ -212,8 +212,9 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
         flowcell_obj.check_existing_flowcell_directory()
         checked_flowcells.append(flowcell_obj)
     failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
-    
-    flowcells_to_present: List[List] = failed_flowcells if failed_only else checked_flowcells     
+    flowcells_to_present: List[DemultiplexedRunsFlowcell] = (
+        failed_flowcells if failed_only else checked_flowcells
+    )
     tabulate_row = [
         [
             flowcell.name,
@@ -224,7 +225,7 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
             flowcell.fastq_files_exist_on_disk,
             click.style(str(flowcell.passed_check), fg=CHECK_COLOR[flowcell.passed_check]),
         ]
-        for flowcell in checked_flowcells
+        for flowcell in flowcells_to_present
     ]
 
     click.echo(
