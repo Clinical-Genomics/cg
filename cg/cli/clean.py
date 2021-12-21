@@ -21,6 +21,7 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rsync_past_run_dirs,
 )
+from cg.constants import FlowCellStatus
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -266,10 +267,10 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     flow_cells_in_statusdb = [
         flow_cell
         for flow_cell in status_db.flowcells()
-        if flow_cell.status in ["ondisk", "removed"]
+        if flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
     ]
     LOG.info(
-        "Number of flow cells with status 'ondisk' or 'removed'  in statusdb: %s",
+        "Number of flow cells with status 'ondisk' or 'removed' in statusdb: %s",
         len(flow_cells_in_statusdb),
     )
     physical_ondisk_flow_cell_names = [
@@ -278,7 +279,11 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     ]
     for flow_cell in flow_cells_in_statusdb:
         status_db_flow_cell_status = flow_cell.status
-        new_status = "ondisk" if flow_cell.name in physical_ondisk_flow_cell_names else "removed"
+        new_status = (
+            FlowCellStatus.ONDISK
+            if flow_cell.name in physical_ondisk_flow_cell_names
+            else FlowCellStatus.REMOVED
+        )
         if status_db_flow_cell_status != new_status:
             LOG.info(
                 "Setting status of flow cell %s from %s to %s",

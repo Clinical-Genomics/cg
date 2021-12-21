@@ -36,6 +36,14 @@ CASE_ACTIONS = ("analyze", "running", "hold")
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
 
+class FlowCellStatus(StrEnum):
+    ONDISK: str = ("ondisk",)
+    REMOVED: str = ("removed",)
+    REQUESTED: str = ("requested",)
+    PROCESSING: str = ("processing",)
+    RETRIEVED: str = "retrieved"
+
+
 class DataDelivery(StrEnum):
     ANALYSIS_BAM_FILES: str = "analysis-bam"
     ANALYSIS_FILES: str = "analysis"
@@ -55,3 +63,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
+
+
+class HousekeeperTags(StrEnum):
+    SAMPLESHEET: str = "samplesheet"

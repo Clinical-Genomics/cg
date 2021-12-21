@@ -9,6 +9,7 @@ from typing import Iterable, List
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -122,7 +123,7 @@ class DemultiplexedRunsFlowCell:
         demultiplexed-runs"""
         for fastq_file in self.hk_fastq_files:
             self.hk.delete_file(fastq_file.id)
-        sample_sheets = self.hk.files(tags=[self.id, "samplesheet"])
+        sample_sheets = self.hk.files(tags=[self.id, HousekeeperTags.SAMPLESHEET])
         for sample_sheet in sample_sheets:
             self.hk.delete_file(sample_sheet.id)
 
@@ -130,7 +131,7 @@ class DemultiplexedRunsFlowCell:
         """Removes a flow cell directory completely from demultiplexed-runs"""
         shutil.rmtree(self.path, ignore_errors=True)
         if self.exists_in_statusdb and self.is_correctly_named:
-            self.status_db.flowcell(self.id).status = "removed"
+            self.status_db.flowcell(self.id).status = FlowCellStatus.REMOVED
 
     def remove_failed_flow_cell(self):
         """Performs the two removal actions for failed flow cells"""
