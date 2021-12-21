@@ -236,7 +236,6 @@ def remove_invalid_flowcell_directories(context: CGConfig, failed_only: bool, dr
         ),
     )
 
-    failed_flowcells = [flowcell for flowcell in checked_flowcells if not flowcell.passed_check]
     for flowcell in failed_flowcells:
         LOG.warning("Invalid flowcell directory found: %s", flowcell.path)
         if not dry_run:
