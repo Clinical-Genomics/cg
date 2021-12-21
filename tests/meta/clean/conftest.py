@@ -49,12 +49,12 @@ def fixture_incorrect_flowcell_path_extension(
     demultiplexed_flowcells_working_directory, incorrect_flowcell_extension
 ) -> Path:
     """Full path to an incorrectly named flowcell directory in demultiplexed-runs"""
-    return Path(demultiplexed_flowcells_working_directory / incorrect_flowcell_extension)
+    return Path(demultiplexed_flowcells_working_directory, incorrect_flowcell_extension)
 
 
 @pytest.fixture(name="nonexistent_flowcell_path")
 def fixture_nonexistent_flowcell_path(
-    demultiplexed_flowcells_working_directory, nonexistent_flowcell
+    demultiplexed_flowcells_working_directory, incorrect_flow_cell_name
 ) -> Path:
     """Full path to an incorrectly named flowcell directory in demultiplexed-runs"""
-    return Path(demultiplexed_flowcells_working_directory / nonexistent_flowcell)
+    return Path(demultiplexed_flowcells_working_directory, incorrect_flow_cell_name)
