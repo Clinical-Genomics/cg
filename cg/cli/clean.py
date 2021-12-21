@@ -282,6 +282,7 @@ def fix_flowcell_status(context: CGConfig, dry_run: bool):
                 old_status,
                 new_status,
             )
-            if not dry_run:
-                flowcell.status = new_status
-                status_db.commit()
+            if dry_run:
+                continue
+            flowcell.status = new_status
+            status_db.commit()
