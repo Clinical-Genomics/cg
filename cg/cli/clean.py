@@ -27,7 +27,7 @@ from cg.store import Store
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
-FLOWCELL_OUTPUT_HEADERS = [
+FLOW_CELL_OUTPUT_HEADERS = [
     "Flowcell name",
     "Flowcell id",
     "Correct name?",
