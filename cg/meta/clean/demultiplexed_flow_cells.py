@@ -12,13 +12,20 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.store import Store
 
+FLOW_CELL_IDENTIFIER_POSITION = 3
 LOG = logging.getLogger(__name__)
 
 
 class DemultiplexedRunsFlowCell:
     """Class to check if a given flow cell in demultiplexed-runs is valid, or can be removed. A
     valid flow cell is named correctly, has the correct status ('ondisk') in statusdb,
-    and has fastq files in Housekeeper"""
+    and has fastq files in Housekeeper.
+
+    A flow cell that is correctly named has four segments divided by underscores:
+    <run_date>_<sequencer>_<run_number>_<identifier>. The identifier consists of the position of
+    the flow cell on the sequencer in the first position (either A or B), and the flow cell id in
+    the rest of the identifier. Flow cell id is the naming convention used in statusdb and other
+    systems"""
 
     def __init__(
         self,
@@ -31,7 +38,7 @@ class DemultiplexedRunsFlowCell:
         self.path: Path = flow_cell_path
         self.run_name: str = self.path.name
         self.split_name: List[str] = re.split("[_.]", self.run_name)
-        self.identifier: str = self.split_name[3]
+        self.identifier: str = self.split_name[FLOW_CELL_IDENTIFIER_POSITION]
         self.id: str = self.identifier[1:]
         self._hk_fastq_files = None
         self._is_correctly_named = None
