@@ -2,13 +2,14 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Query
+from typing_extensions import Literal
+
 from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import Query
-from typing_extensions import Literal
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -81,7 +82,11 @@ class StatusHandler(BaseHandler):
             .filter(
                 or_(
                     models.Family.action == "analyze",
-                    and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
+                    and_(
+                        models.Application.is_external.isnot(True),
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at.is_(None),
+                    ),
                     and_(
                         models.Family.action.is_(None),
                         models.Analysis.created_at < models.Sample.sequenced_at,

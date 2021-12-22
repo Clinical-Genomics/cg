@@ -654,6 +654,7 @@ def fixture_compress_hk_fastq_bundle(
     compression_object: CompressionData, sample_hk_bundle_no_files: dict
 ) -> dict:
     """Create a complete bundle mock for testing compression
+
     This bundle contains a pair of fastq files.
     """
     hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)

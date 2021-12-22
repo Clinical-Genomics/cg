@@ -520,7 +520,11 @@ class Sample(Model, PriorityMixin):
     def sequencing_qc(self) -> bool:
         """Return sequencing qc passed or failed."""
         application = self.application_version.application
-        return self.reads > application.expected_reads
+        if self.priority < PRIORITY_MAP["express"]:
+            return self.reads > application.expected_reads
+        # Express priority and higher needs to be analyzed regardless at a lower threshold for primary analysis
+        one_half_of_target_reads = application.target_reads / 2
+        return self.reads >= one_half_of_target_reads
 
     @property
     def phenotype_groups(self) -> List[str]:

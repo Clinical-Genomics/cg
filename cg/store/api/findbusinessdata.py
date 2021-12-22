@@ -225,7 +225,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
 
-    def find_sample(self, customer: models.Customer, name: str) -> Query:
+    def find_samples(self, customer: models.Customer, name: str) -> Query:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
