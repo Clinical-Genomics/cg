@@ -139,7 +139,7 @@ class HousekeeperAPI:
 
     def files(
         self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
-    ) -> Iterable[File]:
+    ) -> Query:
         """Fetch files"""
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
