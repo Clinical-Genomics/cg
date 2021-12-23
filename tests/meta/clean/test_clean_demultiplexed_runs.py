@@ -32,7 +32,6 @@ def test_flow_cell_name(
         flow_cell_path=flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
-        # spring_file_paths=spring_file_paths_in_housekeeper,
     )
 
     # WHEN checking the name of the flow cell
