@@ -136,7 +136,11 @@ class WipeDemuxAPI:
             log.info(f"Hasta: No target demultiplexing directory {out_dir.as_posix()}")
 
     def wipe_flow_cell(
-        self, cg_stats: bool, demultiplexing_dir: bool, housekeeper: bool, status_db: bool
+        self,
+        skip_cg_stats: bool = False,
+        skip_demultiplexing_dir: bool = False,
+        skip_housekeeper: bool = False,
+        skip_status_db: bool = False,
     ) -> None:
         """Master command to completely wipe the presence of a flowcell in all services"""
         if self.status_db_presence:
@@ -150,11 +154,11 @@ class WipeDemuxAPI:
                 )
                 raise WipeDemuxError
         else:
-            if cg_stats:
+            if not skip_cg_stats:
                 self.wipe_flow_cell_cgstats()
-            elif demultiplexing_dir:
+            if not skip_demultiplexing_dir:
                 self.wipe_flow_cell_demultiplex_dir()
-            elif housekeeper:
+            if not skip_housekeeper:
                 self.wipe_flow_cell_housekeeper()
-            elif status_db:
+            if not skip_status_db:
                 self.wipe_flow_cell_statusdb()
