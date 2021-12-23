@@ -164,8 +164,8 @@ class DemultiplexedRunsFlowCell:
         return self._passed_check
 
     def remove_files_from_housekeeper(self):
-        """Remove spring files, fastq files and the sample sheet from Housekeeper when deleting a
-        flow cell from demultiplexed-runs"""
+        """Remove fastq files and the sample sheet from Housekeeper when deleting a flow cell
+        from demultiplexed-runs"""
         if self.fastq_files_exist_in_housekeeper:
             for fastq_file in self.hk_fastq_files:
                 LOG.info(f"Removing {fastq_file} from Housekeeper.")
@@ -173,11 +173,7 @@ class DemultiplexedRunsFlowCell:
             sample_sheets = self.hk.files(tags=[self.id, HousekeeperTags.SAMPLESHEET])
             for sample_sheet in sample_sheets:
                 LOG.info(f"Removing {sample_sheet} from Housekeeper.")
-                # self.hk.delete_file(sample_sheet.id)
-        if self.spring_files_exist_in_housekeeper:
-            for spring_file in self.hk_spring_files:
-                LOG.info(f"Removing {spring_file} from Housekeeper.")
-                self.hk.delete_file(spring_file.id)
+                self.hk.delete_file(sample_sheet.id)
 
     def remove_from_demultiplexed_runs(self):
         """Removes a flow cell directory completely from demultiplexed-runs"""
