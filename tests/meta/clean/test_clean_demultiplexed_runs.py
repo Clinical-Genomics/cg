@@ -29,7 +29,10 @@ def test_flow_cell_name(
     flow_cell_path = request.getfixturevalue(flow_cell_path)
     mock_hk.files.return_value.count.return_value = 1
     flow_cell_obj = DemultiplexedRunsFlowCell(
-        flow_cell_path=flow_cell_path, status_db=mock_statusdb, housekeeper_api=mock_hk
+        flow_cell_path=flow_cell_path,
+        status_db=mock_statusdb,
+        housekeeper_api=mock_hk,
+        # spring_file_paths=spring_file_paths_in_housekeeper,
     )
 
     # WHEN checking the name of the flow cell
@@ -60,7 +63,9 @@ def test_flow_cell_exists_in_statusdb_(
     mock_statusdb.flowcell.return_value = statusdb_return_value
     mock_hk.files.return_value.count.return_value = 1
     flow_cell_obj = DemultiplexedRunsFlowCell(
-        flow_cell_path=flow_cell_path, status_db=mock_statusdb, housekeeper_api=mock_hk
+        flow_cell_path=flow_cell_path,
+        status_db=mock_statusdb,
+        housekeeper_api=mock_hk,
     )
 
     # WHEN checking if the flow cell exists in statusdb

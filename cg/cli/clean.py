@@ -21,7 +21,7 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rsync_past_run_dirs,
 )
-from cg.constants import FlowCellStatus
+from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -34,6 +34,8 @@ FLOW_CELL_OUTPUT_HEADERS = [
     "Correct name?",
     "Exists in statusdb?",
     "Fastq files in HK?",
+    "Spring files in HK?",
+    "Any files in HK?",
     "Fastq files on disk?",
     "Check passed?",
 ]
@@ -207,9 +209,12 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
+    spring_file_paths_in_housekeeper: Optional[List[str]] = [
+        spring_file.path for spring_file in housekeeper_api.files(tags=[HousekeeperTags.SPRING])
+    ]
     for flow_cell_dir in demux_api.out_dir.iterdir():
         flow_cell_obj: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
-            flow_cell_dir, status_db, housekeeper_api
+            flow_cell_dir, status_db, housekeeper_api, spring_file_paths_in_housekeeper
         )
         checked_flow_cells.append(flow_cell_obj)
 
@@ -226,6 +231,8 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             flow_cell.is_correctly_named,
             flow_cell.exists_in_statusdb,
             flow_cell.fastq_files_exist_in_housekeeper,
+            flow_cell.spring_files_exist_in_housekeeper,
+            flow_cell.files_exist_in_housekeeper,
             flow_cell.fastq_files_exist_on_disk,
             click.style(str(flow_cell.passed_check), fg=CHECK_COLOR[flow_cell.passed_check]),
         ]
@@ -273,7 +280,11 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
         len(flow_cells_in_statusdb),
     )
     physical_ondisk_flow_cell_names = [
-        DemultiplexedRunsFlowCell(flow_cell_dir, status_db, housekeeper_api).id
+        DemultiplexedRunsFlowCell(
+            flow_cell_dir,
+            status_db,
+            housekeeper_api,
+        ).id
         for flow_cell_dir in demux_api.out_dir.iterdir()
     ]
     for flow_cell in flow_cells_in_statusdb:
