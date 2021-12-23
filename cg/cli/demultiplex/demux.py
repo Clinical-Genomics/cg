@@ -118,19 +118,19 @@ def demultiplex_flowcell(
     )
 
 
-@click.command(name="prepare-flowcell")
+@click.command(name="wipe-flow-cell")
 @click.option("--dry-run", is_flag=True)
 @click.option("--skip-cg-stats", is_flag=True, help="Skip removal in cg-stats")
 @click.option("--skip-demultiplexing-dir", is_flag=True, help="Skip removal on server file system")
 @click.option("--skip-housekeeper", is_flag=True, help="Skip removal in housekeeper")
 @click.option("--skip-status-db", is_flag=True, help="Skip removal in status-db")
 @click.argument("--demultiplexing-dir")
-@click.argument("--flowcell-id")
-def prepare_flowcell(
+@click.argument("--flow-cell-id")
+def wipe_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: str,
-    flowcell_id: str,
+    flow_cell_id: str,
     skip_cg_stats: bool,
     skip_demultiplexing_dir: bool,
     skip_housekeeper: bool,
@@ -146,7 +146,7 @@ def prepare_flowcell(
     demux_path: Path = Path(demultiplexing_dir)
 
     wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-        config=context, demultiplexing_dir=demux_path, run_name=flowcell_id
+        config=context, demultiplexing_dir=demux_path, run_name=flow_cell_id
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
     wipe_demux_api.wipe_flow_cell(
