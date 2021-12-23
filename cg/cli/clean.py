@@ -36,7 +36,7 @@ FLOW_CELL_OUTPUT_HEADERS = [
     "Fastq files in HK?",
     "Spring files in HK?",
     "Any files in HK?",
-    "Fastq files on disk?",
+    "Files on disk?",
     "Check passed?",
 ]
 
@@ -233,7 +233,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             flow_cell.fastq_files_exist_in_housekeeper,
             flow_cell.spring_files_exist_in_housekeeper,
             flow_cell.files_exist_in_housekeeper,
-            flow_cell.fastq_files_exist_on_disk,
+            flow_cell.files_exist_on_disk,
             click.style(str(flow_cell.passed_check), fg=CHECK_COLOR[flow_cell.passed_check]),
         ]
         for flow_cell in flow_cells_to_present

@@ -49,7 +49,7 @@ class DemultiplexedRunsFlowCell:
         self._fastq_files_exist_in_housekeeper = None
         self._spring_files_exist_in_housekeeper = None
         self._files_exist_in_housekeeper = None
-        self._fastq_files_exist_on_disk = None
+        self._files_exist_on_disk = None
         self._passed_check = None
 
     @property
@@ -124,22 +124,29 @@ class DemultiplexedRunsFlowCell:
         return self._files_exist_in_housekeeper
 
     @property
-    def fastq_files_exist_on_disk(self) -> bool:
-        """Checks if the fastq files that are in Housekeeper are actually present on disk"""
-        if self._fastq_files_exist_on_disk is None:
-            if not self.fastq_files_exist_in_housekeeper:
+    def files_exist_on_disk(self) -> bool:
+        """Checks if the spring or fastq files that are in Housekeeper are actually present on
+        disk"""
+        if self._files_exist_on_disk is None:
+            if not self.files_exist_in_housekeeper:
                 LOG.warning(
-                    "Flow cell %s has no fastq files in Housekeeper, skipping disk check", self.id
+                    "Flow cell %s has no fastq files or spring files in Housekeeper, skipping "
+                    "disk check",
+                    self.id,
                 )
-                self._fastq_files_exist_on_disk = False
             else:
-                self._fastq_files_exist_on_disk: bool = all(
-                    [Path(fastq_file.path).exists() for fastq_file in self.hk_fastq_files]
-                )
-                if not self._fastq_files_exist_on_disk:
-                    LOG.warning("Flow cell %s has no fastq files on disk!", self.id)
+                if self._fastq_files_exist_in_housekeeper:
+                    self._files_exist_on_disk: bool = all(
+                        [Path(fastq_file.path).exists() for fastq_file in self.hk_fastq_files]
+                    )
+                if self._spring_files_exist_in_housekeeper:
+                    self._files_exist_on_disk: bool = all(
+                        [Path(spring_file).exists() for spring_file in self.hk_spring_files]
+                    )
+                if not self._files_exist_on_disk:
+                    LOG.warning("Flow cell %s has no fastq files or spring files on disk!", self.id)
 
-        return self._fastq_files_exist_on_disk
+        return self._files_exist_on_disk
 
     @property
     def passed_check(self) -> bool:
@@ -151,7 +158,7 @@ class DemultiplexedRunsFlowCell:
                     self.is_correctly_named,
                     self.exists_in_statusdb,
                     self.files_exist_in_housekeeper,
-                    self.fastq_files_exist_on_disk,
+                    self.files_exist_on_disk,
                 ]
             )
             LOG.info(
