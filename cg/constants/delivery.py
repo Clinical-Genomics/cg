@@ -28,6 +28,8 @@ BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"ascatngs", "vcf-sv-research", "filtered"},
     {"ascatngs", "vcf-sv-research-index", "filtered"},
     {"ascatngs", "visualization"},
+    {"cnvkit", "vcf-sv-research", "filtered"},
+    {"cnvkit", "vcf-sv-research-index", "filtered"},
     {"cnvkit", "visualization"},
     {"cnvkit", "visualization", "diagram"},
     {"multiqc-html"},
