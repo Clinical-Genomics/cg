@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 from typing import Iterable, List, Optional
 
+from alchy import Query
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -32,12 +33,14 @@ class DemultiplexedRunsFlowCell:
         flow_cell_path: Path,
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
-        spring_file_paths: Optional[List[str]] = None,
+        fastq_files: Optional[Query] = None,
+        spring_files: Optional[Query] = None,
     ):
         self.path: Path = flow_cell_path
         self.status_db: Store = status_db
         self.hk: HousekeeperAPI = housekeeper_api
-        self.spring_file_paths: Optional[List[str]] = spring_file_paths
+        self.all_fastq_files: Optional[Query] = fastq_files
+        self.all_spring_files: Optional[Query] = spring_files
         self.run_name: str = self.path.name
         self.split_name: List[str] = re.split("[_.]", self.run_name)
         self.identifier: str = self.split_name[FLOW_CELL_IDENTIFIER_POSITION]
@@ -53,22 +56,21 @@ class DemultiplexedRunsFlowCell:
         self._passed_check = None
 
     @property
-    def hk_fastq_files(self) -> Iterable[hk_models.File]:
+    def hk_fastq_files(self) -> list:
         """All fastq files in Housekeeper for a particular flow cell"""
-        if not self._hk_fastq_files:
-            self._hk_fastq_files: Iterable[hk_models.File] = self.hk.files(
-                tags=[self.id, HousekeeperTags.FASTQ]
-            )
+        if self._hk_fastq_files is None:
+            self._hk_fastq_files = [
+                fastq_file for fastq_file in self.all_fastq_files if self.id in fastq_file.path
+            ]
         return self._hk_fastq_files
 
     @property
-    def hk_spring_files(self) -> List[hk_models.File]:
+    def hk_spring_files(self) -> list:
         """All spring files in Housekeeper for a particular flow cell"""
-        if not self._hk_spring_files:
-            self._hk_spring_files = []
-            for spring_file_path in self.spring_file_paths:
-                if self.id in spring_file_path:
-                    self._hk_spring_files.append(spring_file_path)
+        if self._hk_spring_files is None:
+            self._hk_spring_files = [
+                spring_file for spring_file in self.all_spring_files if self.id in spring_file.path
+            ]
         return self._hk_spring_files
 
     @property
@@ -94,7 +96,7 @@ class DemultiplexedRunsFlowCell:
     def fastq_files_exist_in_housekeeper(self) -> bool:
         """Checks if the flow cell has any fastq files in Housekeeper"""
         if self._fastq_files_exist_in_housekeeper is None:
-            self._fastq_files_exist_in_housekeeper: bool = self.hk_fastq_files.count() > 0
+            self._fastq_files_exist_in_housekeeper: bool = len(self.hk_fastq_files) > 0
             if not self._fastq_files_exist_in_housekeeper:
                 LOG.warning("Flow cell %s does not have any fastq files in Housekeeper!", self.id)
         return self._fastq_files_exist_in_housekeeper
@@ -103,9 +105,7 @@ class DemultiplexedRunsFlowCell:
     def spring_files_exist_in_housekeeper(self) -> bool:
         """Checks if the flow cell has any spring files in Housekeeper"""
         if self._spring_files_exist_in_housekeeper is None:
-            self._spring_files_exist_in_housekeeper: bool = any(
-                [self.id in path for path in self.spring_file_paths]
-            )
+            self._spring_files_exist_in_housekeeper: bool = len(self.hk_spring_files) > 0
             if not self._spring_files_exist_in_housekeeper:
                 LOG.warning("Flow cell %s does not have any spring files in Housekeeper!", self.id)
         return self._spring_files_exist_in_housekeeper
@@ -135,13 +135,13 @@ class DemultiplexedRunsFlowCell:
                     self.id,
                 )
             else:
-                if self._fastq_files_exist_in_housekeeper:
+                if self.fastq_files_exist_in_housekeeper:
                     self._files_exist_on_disk: bool = all(
                         [Path(fastq_file.path).exists() for fastq_file in self.hk_fastq_files]
                     )
-                if self._spring_files_exist_in_housekeeper:
+                if self.spring_files_exist_in_housekeeper:
                     self._files_exist_on_disk: bool = all(
-                        [Path(spring_file).exists() for spring_file in self.hk_spring_files]
+                        [Path(spring_file.path).exists() for spring_file in self.hk_spring_files]
                     )
                 if not self._files_exist_on_disk:
                     LOG.warning("Flow cell %s has no fastq files or spring files on disk!", self.id)
@@ -171,8 +171,8 @@ class DemultiplexedRunsFlowCell:
         return self._passed_check
 
     def remove_files_from_housekeeper(self):
-        """Remove fastq files and the sample sheet from Housekeeper when deleting a flow cell
-        from demultiplexed-runs"""
+        """Remove fastq files and the sample sheet from Housekeeper when deleting a
+        flow cell from demultiplexed-runs"""
         if self.fastq_files_exist_in_housekeeper:
             for fastq_file in self.hk_fastq_files:
                 LOG.info(f"Removing {fastq_file} from Housekeeper.")
@@ -181,12 +181,14 @@ class DemultiplexedRunsFlowCell:
             for sample_sheet in sample_sheets:
                 LOG.info(f"Removing {sample_sheet} from Housekeeper.")
                 self.hk.delete_file(sample_sheet.id)
+        self.hk.commit()
 
     def remove_from_demultiplexed_runs(self):
         """Removes a flow cell directory completely from demultiplexed-runs"""
         shutil.rmtree(self.path, ignore_errors=True)
         if self.exists_in_statusdb and self.is_correctly_named:
             self.status_db.flowcell(self.id).status = FlowCellStatus.REMOVED
+        self.status_db.commit()
 
     def remove_failed_flow_cell(self):
         """Performs the two removal actions for failed flow cells"""
