@@ -15,9 +15,6 @@ SKIP_MISSING = [
 ]
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
-    {"cnvkit", "filtered", "sv-vcf"},
-    {"cnvkit", "filtered", "sv-vcf-index"},
-    {"cnvkit", "regions"},
     {"vcf-snv-clinical"},
     {"vcf-snv-clinical-index"},
     {"vardict", "deliver"},
@@ -32,6 +29,7 @@ BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"cnvkit", "vcf-sv-research-index", "filtered"},
     {"cnvkit", "visualization"},
     {"cnvkit", "visualization", "diagram"},
+    {"cnvkit", "regions"},
     {"multiqc-html"},
 ]
 
