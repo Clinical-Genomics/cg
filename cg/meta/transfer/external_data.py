@@ -166,6 +166,7 @@ class ExternalDataAPI(MetaAPI):
         if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
             sample and force
         ):
+            print("Korrekt")
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif sample_folder.is_dir():
             shutil.rmtree(path=sample_folder)
