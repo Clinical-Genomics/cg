@@ -2,13 +2,14 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Query
+from typing_extensions import Literal
+
 from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import Query
-from typing_extensions import Literal
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -70,13 +71,22 @@ class StatusHandler(BaseHandler):
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = list(
             self.Family.query.outerjoin(models.Analysis)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
+            .join(
+                models.Family.links,
+                models.FamilySample.sample,
+                models.ApplicationVersion,
+                models.Application,
+            )
+            .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
             .filter(models.Family.data_analysis == str(pipeline))
             .filter(
                 or_(
                     models.Family.action == "analyze",
-                    and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
+                    and_(
+                        models.Application.is_external.isnot(True),
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at.is_(None),
+                    ),
                     and_(
                         models.Family.action.is_(None),
                         models.Analysis.created_at < models.Sample.sequenced_at,
@@ -558,7 +568,10 @@ class StatusHandler(BaseHandler):
     @staticmethod
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced in-house."""
-        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
+        return all(
+            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
+            for link in links
+        )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
