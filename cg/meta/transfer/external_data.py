@@ -2,6 +2,7 @@
 import datetime as dt
 import itertools
 import logging
+import shutil
 from pathlib import Path
 from typing import List, Tuple, Optional
 
@@ -164,6 +165,8 @@ class ExternalDataAPI(MetaAPI):
         ).first()
         if sample and force:
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
+        elif sample_folder.is_dir():
+            shutil.rmtree(path=sample_folder)
         else:
             sample_folder.unlink()
 
