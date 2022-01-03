@@ -156,14 +156,16 @@ class ExternalDataAPI(MetaAPI):
         )
         return fastq_paths_to_add
 
-    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path):
+    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
         """Changes the name of the folder to the internal_id. If force is true replaces any previous folder"""
         customer: models.Customer = self.status_db.customer(internal_id=cust_name)
         customer_folder: Path = sample_folder.parent
         sample: models.Sample = self.status_db.find_samples(
             customer=customer, name=str(sample_folder)
         ).first()
-        if sample and force:
+        if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
+            sample and force
+        ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif sample_folder.is_dir():
             shutil.rmtree(path=sample_folder)
