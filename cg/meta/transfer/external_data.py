@@ -69,18 +69,9 @@ class ExternalDataAPI(MetaAPI):
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % cust).mkdir(exist_ok=True)
 
-        commands: str = "".join(
-            [
-                RSYNC_CONTENTS_COMMAND.format(
-                    source_path=self.get_source_path(
-                        cust_sample_id=sample.name, customer=cust, ticket_id=ticket_id
-                    ),
-                    destination_path=self.get_destination_path(
-                        customer=cust, lims_sample_id=sample.internal_id
-                    ),
-                )
-                for sample in available_samples
-            ]
+        command: str = RSYNC_CONTENTS_COMMAND.format(
+            source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
+            destination_path=self.get_destination_path(customer=cust),
         )
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
@@ -90,7 +81,7 @@ class ExternalDataAPI(MetaAPI):
             "log_dir": str(log_dir),
             "email": self.mail_user,
             "hours": 24,
-            "commands": commands,
+            "commands": command,
             "error": error_function,
         }
         self.slurm_api.set_dry_run(dry_run=dry_run)
@@ -164,13 +155,30 @@ class ExternalDataAPI(MetaAPI):
         )
         return fastq_paths_to_add
 
-    def add_transfer_to_housekeeper(self, ticket_id: int, dry_run: bool = False) -> None:
+    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path):
+        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder"""
+        customer: models.Customer = self.status_db.customer(internal_id=cust_name)
+        customer_folder: Path = sample_folder.parent
+        sample: models.Sample = self.status_db.find_samples(
+            customer=customer, name=str(sample_folder)
+        ).first()
+        if sample and force:
+            sample_folder.rename(customer_folder.joinpath(sample.internal_id))
+        else:
+            sample_folder.unlink()
+
+    def add_transfer_to_housekeeper(
+        self, ticket_id: int, dry_run: bool = False, force: bool = False
+    ) -> None:
         """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
         bundle"""
         failed_paths: List[Path] = []
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        destination_folder_path: Path = self.get_destination_path(customer=cust)
+        for sample_folder in destination_folder_path.iterdir():
+            self.curate_sample_folder(sample_folder, force=force)
         available_samples: List[models.Sample] = self.get_available_samples(
-            folder=self.get_destination_path(customer=cust), ticket_id=ticket_id
+            folder=destination_folder_path
         )
         cases_to_start: list[dict] = []
         for sample in available_samples:
