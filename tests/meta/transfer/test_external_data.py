@@ -89,7 +89,7 @@ def test_transfer_sample_files_from_source(
     Store.get_customer_id_from_ticket.return_value = customer_id
 
     mocker.patch.object(ExternalDataAPI, "get_source_path")
-    external_data_api.get_source_path.return_value = Path("").joinpath(external_data_directory)
+    external_data_api.get_source_path.return_value = external_data_directory
 
     external_data_api.source_path = str(Path("").joinpath(*external_data_directory.parts[:-2]))
     external_data_api.destination_path = str(
@@ -100,9 +100,8 @@ def test_transfer_sample_files_from_source(
     external_data_api.transfer_sample_files_from_source(ticket_id=ticket_nr, dry_run=True)
 
     # THEN only the two samples present in the source directory are included in the rsync
-    assert all([sample in caplog.text for sample in [sample_name1, sample_name2]])
 
-    assert sample_name3 not in caplog.text
+    assert str(external_data_directory) in caplog.text
 
 
 def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directory: Path):
