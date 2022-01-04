@@ -11,6 +11,7 @@ from housekeeper.store.models import Bundle
 from cg.apps.cgstats.db.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.exc import CgDataError
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
 from cg.models.cg_config import CGConfig
@@ -163,18 +164,14 @@ class ExternalDataAPI(MetaAPI):
         sample: models.Sample = self.status_db.find_samples(
             customer=customer, name=sample_folder.name
         ).first()
-        print(sample)
-        print(sample_folder)
-        print(customer_folder.joinpath(sample.internal_id).exists())
-
         if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
             sample and force
         ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
-        elif sample_folder.is_dir():
-            shutil.rmtree(path=sample_folder)
-        else:
-            sample_folder.unlink()
+        elif not sample and not self.status_db.sample(sample_folder.name):
+            raise CgDataError(
+                message=f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
+            )
 
     def add_transfer_to_housekeeper(
         self, ticket_id: int, dry_run: bool = False, force: bool = False
