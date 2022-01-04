@@ -169,9 +169,9 @@ class ExternalDataAPI(MetaAPI):
         ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif not sample and not self.status_db.sample(sample_folder.name):
-            raise CgDataError(
-                message=f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
-            )
+            message = f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
+            LOG.error(msg=message)
+            raise CgDataError(message=message)
 
     def add_transfer_to_housekeeper(
         self, ticket_id: int, dry_run: bool = False, force: bool = False
