@@ -146,6 +146,12 @@ def test_add_files_to_bundles(
     assert str(fastq_file.absolute()) in [idx.path for idx in hk_version_obj.files]
 
 
+def test_curate_sample_folder(
+    external_data_api: ExternalDataAPI,
+):
+    pass
+
+
 def test_add_transfer_to_housekeeper(
     case_id,
     dna_case,
@@ -174,7 +180,7 @@ def test_add_transfer_to_housekeeper(
     MockHousekeeperAPI.get_files.return_value = []
 
     mocker.patch.object(Path, "iterdir")
-    Path.iterdir.return_value = None
+    Path.iterdir.return_value = []
 
     mocker.patch.object(ExternalDataAPI, "get_available_samples")
     ExternalDataAPI.get_available_samples.return_value = samples[:-1]
