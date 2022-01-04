@@ -63,10 +63,6 @@ class ExternalDataAPI(MetaAPI):
     def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        available_samples: List[models.Sample] = self.get_available_samples(
-            folder=self.get_source_path(customer=cust, ticket_id=ticket_id),
-            ticket_id=ticket_id,
-        )
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % cust).mkdir(exist_ok=True)
@@ -90,9 +86,10 @@ class ExternalDataAPI(MetaAPI):
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-        LOG.info(msg=[sample.name for sample in available_samples])
         LOG.info(
-            "The transfer of the {numb} samples above has begun".format(numb=len(available_samples))
+            "The folder {src_path} is now being rsynced to hasta".format(
+                src_path=self.get_source_path()
+            )
         )
 
     def get_all_fastq(self, sample_folder: Path) -> List[Path]:
