@@ -88,7 +88,7 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(
             "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self.get_source_path()
+                src_path=self.get_source_path(customer=cust, ticket_id=ticket_id)
             )
         )
 
