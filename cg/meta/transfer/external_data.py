@@ -171,7 +171,7 @@ class ExternalDataAPI(MetaAPI):
         elif not sample and not self.status_db.sample(sample_folder.name):
             message = f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             LOG.error(msg=message)
-            raise CgDataError(message=message)
+            raise CgDataError(message)
 
     def add_transfer_to_housekeeper(
         self, ticket_id: int, dry_run: bool = False, force: bool = False

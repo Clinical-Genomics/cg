@@ -173,6 +173,9 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(MockHousekeeperAPI, "get_files")
     MockHousekeeperAPI.get_files.return_value = []
 
+    mocker.patch.object(Path, "iterdir")
+    Path.iterdir.return_value = None
+
     mocker.patch.object(ExternalDataAPI, "get_available_samples")
     ExternalDataAPI.get_available_samples.return_value = samples[:-1]
 
