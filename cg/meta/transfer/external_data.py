@@ -169,10 +169,7 @@ class ExternalDataAPI(MetaAPI):
         ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
         elif not sample and not self.status_db.sample(sample_folder.name):
-            message = f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
-            LOG.error(msg=message)
-            raise Exception(message)
-            raise CgDataError(
+            raise Exception(
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             )
 
