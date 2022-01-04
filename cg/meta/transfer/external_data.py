@@ -163,7 +163,10 @@ class ExternalDataAPI(MetaAPI):
         sample: models.Sample = self.status_db.find_samples(
             customer=customer, name=sample_folder.name
         ).first()
-        print((sample, customer_folder.joinpath(sample.internal_id).exists(), force))
+        print(sample)
+        print(sample_folder)
+        print(customer_folder.joinpath(sample.internal_id).exists())
+
         if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
             sample and force
         ):
