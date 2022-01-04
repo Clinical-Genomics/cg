@@ -173,6 +173,9 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(MockHousekeeperAPI, "get_files")
     MockHousekeeperAPI.get_files.return_value = []
 
+    mocker.patch.object(Path, "iterdir")
+    Path.iterdir.return_value = []
+
     mocker.patch.object(ExternalDataAPI, "get_available_samples")
     ExternalDataAPI.get_available_samples.return_value = samples[:-1]
 
@@ -218,6 +221,21 @@ def test_get_available_samples(
     )
     # THEN the function should return a list containing the sample object
     assert available_samples == [sample_obj]
+
+
+def test_curate_sample_folder(
+    case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
+):
+    cases = external_data_api.status_db.query(models.Family).filter(
+        models.Family.internal_id == case_id
+    )
+    sample: models.Sample = cases.first().links[0].sample
+    tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
+    external_data_api.curate_sample_folder(
+        cust_name=customer_id, sample_folder=tmp_folder, force=False
+    )
+    assert (tmp_folder.parent / sample.internal_id).exists()
+    assert not tmp_folder.exists()
 
 
 def test_get_available_samples_no_samples_avail(

@@ -290,8 +290,11 @@ def external(context: CGConfig, ticket_id: int, dry_run: bool):
     required=True,
 )
 @click.option("--dry-run", is_flag=True)
+@click.option(
+    "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
+)
 @click.pass_obj
-def external_hk(context: CGConfig, ticket_id: int, dry_run: bool):
+def external_hk(context: CGConfig, ticket_id: int, dry_run: bool, force):
     """Adds external data to housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket_id=ticket_id)
+    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket_id=ticket_id, force=force)
