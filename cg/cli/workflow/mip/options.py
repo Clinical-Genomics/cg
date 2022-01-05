@@ -8,6 +8,9 @@ PRIORITY_OPTION = click.option(
     "--priority",
     type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH]),
 )
+START_AFTER_PROGRAM = click.option(
+    "-sa", "--start-after", help="Start mip after this program.", type=str
+)
 START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="Start mip from this program.", type=str
 )

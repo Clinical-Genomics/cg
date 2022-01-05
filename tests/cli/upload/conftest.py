@@ -13,7 +13,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
 from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.report.api import ReportAPI
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -53,7 +53,7 @@ def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestam
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
 def fixture_upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics: Path, bcf_file: Path
+    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gt process"""
     return {
@@ -62,7 +62,7 @@ def fixture_upload_genotypes_hk_bundle(
         "expires": datetime.now(),
         "files": [
             {
-                "path": str(case_qc_metrics),
+                "path": str(case_qc_metrics_deliverables),
                 "archive": False,
                 "tags": [HkMipAnalysisTag.QC_METRICS],
             },
@@ -156,7 +156,6 @@ def fixture_upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_confi
 class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
@@ -166,7 +165,6 @@ class MockScoutApi(ScoutAPI):
 class MockReportApi(ReportAPI):
     def __init__(self):
         """docstring for __init__"""
-        pass
 
     def create_delivery_report(self, *args, **kwargs):
         """docstring for create_delivery_report"""
@@ -260,6 +258,7 @@ def upload_context(cg_context: CGConfig) -> CGConfig:
         madeline_api=cg_context.madeline_api,
         analysis_api=analysis_api,
         lims_api=cg_context.lims_api,
+        status_db=cg_context.status_db,
     )
 
     return cg_context

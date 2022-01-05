@@ -25,7 +25,7 @@ def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
     )
     family.customer = customer
     base_store.add(family)
-    application_version = base_store.application("WGTPCFC030").versions[0]
+    application_version = base_store.application("WGSPCFC030").versions[0]
     for sample_data in analysis_family["samples"]:
         sample = base_store.add_sample(
             name=sample_data["name"],
@@ -77,7 +77,7 @@ def fixture_mip_hk_store(
                 "tags": ["sampleinfo"],
             },
             {
-                "path": "tests/fixtures/apps/mip/case_qc_metrics.yaml",
+                "path": "tests/fixtures/apps/mip/case_metrics_deliverables.yaml",
                 "archive": False,
                 "tags": [HkMipAnalysisTag.QC_METRICS],
             },
@@ -111,7 +111,7 @@ def fixture_mip_hk_store(
                 "tags": ["sampleinfo"],
             },
             {
-                "path": "tests/fixtures/apps/mip/dna/store/empty_case_qc_metrics.yaml",
+                "path": "tests/fixtures/apps/mip/dna/store/empty_case_metrics_deliverables.yaml",
                 "archive": False,
                 "tags": [HkMipAnalysisTag.QC_METRICS],
             },

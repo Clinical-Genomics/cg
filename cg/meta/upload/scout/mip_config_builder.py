@@ -9,6 +9,7 @@ from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.store import models
 from housekeeper.store import models as hk_models
@@ -39,16 +40,16 @@ class MipConfigBuilder(ScoutConfigBuilder):
         """Create a MIP specific load config for uploading analysis to Scout"""
         LOG.info("Generate load config for mip case")
 
-        self.add_mandatory_info_to_load_config()
-        mip_analysis_data: dict = self.mip_analysis_api.get_latest_metadata(
+        self.add_common_info_to_load_config()
+        mip_analysis_data: MipAnalysis = self.mip_analysis_api.get_latest_metadata(
             self.analysis_obj.family.internal_id
         )
         self.load_config.human_genome_build = (
-            "38" if "38" in mip_analysis_data.get("genome_build", "") else "37"
+            "38" if "38" in mip_analysis_data.genome_build else "37"
         )
         self.load_config.rank_score_threshold = rank_score_threshold
-        self.load_config.rank_model_version = mip_analysis_data.get("rank_model_version")
-        self.load_config.sv_rank_model_version = mip_analysis_data.get("sv_rank_model_version")
+        self.load_config.rank_model_version = mip_analysis_data.rank_model_version
+        self.load_config.sv_rank_model_version = mip_analysis_data.sv_rank_model_version
 
         self.load_config.gene_panels = (
             self.mip_analysis_api.convert_panels(
@@ -79,7 +80,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()
-        self.add_mandatory_sample_info(config_sample=config_sample, db_sample=db_sample)
+        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
         config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
         config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
 

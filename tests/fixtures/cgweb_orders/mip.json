@@ -1,11 +1,11 @@
 {
-  "name": "MIP order",
+  "name": "#123456",
   "customer": "cust000",
   "comment": "",
   "samples": [
     {
       "age_at_sampling": "17.18192",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "cohorts":["Other"],
       "comment": "comment",
       "container": "96 well plate",
@@ -19,20 +19,22 @@
       "panels": [
         "IEM"
       ],
+      "phenotype_groups":["Phenotype-group"],
       "phenotype_terms":["HP:0012747","HP:0025049"],
       "priority": "standard",
       "quantity": "220",
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "status": "affected",
-      "synopsis":["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "subject_id": "subject1",
+      "synopsis":"H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis.",
       "tumour": true,
       "volume": "1",
       "well_position": "A:1"
     },
     {
       "age_at_sampling": "2.0",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "cohorts": [
         ""
       ],
@@ -46,7 +48,8 @@
       "panels": [
         "IEM"
       ],
-            "synopsis": [
+      "synopsis":"H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis.",
+      "phenotype_groups": [
         ""
       ],
       "phenotype_terms": [
@@ -57,13 +60,14 @@
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "status": "affected",
+      "subject_id": "subject2",
       "tumour": false,
       "volume": "2",
       "well_position": "B:1"
     },
     {
       "age_at_sampling": "3.0",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "cohorts": [
         ""
       ],
@@ -76,6 +80,9 @@
       "panels": [
         "IEM"
       ],
+      "phenotype_groups": [
+        ""
+      ],
       "phenotype_terms": [
         ""
       ],
@@ -84,16 +91,15 @@
       "sex": "male",
       "source": "tissue (fresh frozen)",
       "status": "affected",
-      "synopsis": [
-        ""
-      ],
+      "subject_id": "subject3",
+      "synopsis":"H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis.",
       "tumour": false,
       "volume": "3",
       "well_position": "C:1"
     },
     {
       "age_at_sampling": "4.0",
-      "application": "WGTPCFC030",
+      "application": "WGSPCFC030",
       "cohorts": [
         ""
       ],
@@ -106,6 +112,9 @@
       "panels": [
         "IEM"
       ],
+      "phenotype_groups": [
+        ""
+      ],
       "phenotype_terms": [
         ""
       ],
@@ -114,9 +123,7 @@
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "status": "affected",
-      "synopsis": [
-        ""
-      ],
+      "synopsis": "",
       "tumour": false,
       "volume": "4",
       "well_position": "D:1"

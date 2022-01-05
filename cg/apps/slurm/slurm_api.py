@@ -3,7 +3,11 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from cg.apps.slurm.sbatch import SBATCH_BODY_TEMPLATE, SBATCH_HEADER_TEMPLATE
+from cg.apps.slurm.sbatch import (
+    DRAGEN_SBATCH_HEADER_TEMPLATE,
+    SBATCH_BODY_TEMPLATE,
+    SBATCH_HEADER_TEMPLATE,
+)
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 
@@ -22,7 +26,14 @@ class SlurmAPI:
     @staticmethod
     def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
         """Take a parameters object and generate a string with sbatch information"""
-        sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters=sbatch_parameters)
+        if hasattr(sbatch_parameters, "partition"):
+            sbatch_header: str = SlurmAPI.generate_dragen_sbatch_header(
+                sbatch_parameters=sbatch_parameters
+            )
+        else:
+            sbatch_header: str = SlurmAPI.generate_sbatch_header(
+                sbatch_parameters=sbatch_parameters
+            )
         sbatch_body: str = SlurmAPI.generate_sbatch_body(
             commands=sbatch_parameters.commands, error_function=sbatch_parameters.error
         )
@@ -31,6 +42,10 @@ class SlurmAPI:
     @staticmethod
     def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
         return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
+
+    @staticmethod
+    def generate_dragen_sbatch_header(sbatch_parameters: Sbatch) -> str:
+        return DRAGEN_SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.dict())
 
     @staticmethod
     def generate_sbatch_body(commands: str, error_function: Optional[str] = None) -> str:

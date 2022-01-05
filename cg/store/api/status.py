@@ -2,12 +2,14 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
-from cg.constants import PRIORITY_MAP, Pipeline
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Query
+from typing_extensions import Literal
+
+from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import Query
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -69,13 +71,22 @@ class StatusHandler(BaseHandler):
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         families_query = list(
             self.Family.query.outerjoin(models.Analysis)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(or_(models.Sample.is_external, models.Sample.sequenced_at.isnot(None)))
+            .join(
+                models.Family.links,
+                models.FamilySample.sample,
+                models.ApplicationVersion,
+                models.Application,
+            )
+            .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
             .filter(models.Family.data_analysis == str(pipeline))
             .filter(
                 or_(
                     models.Family.action == "analyze",
-                    and_(models.Family.action.is_(None), models.Analysis.created_at.is_(None)),
+                    and_(
+                        models.Application.is_external.isnot(True),
+                        models.Family.action.is_(None),
+                        models.Analysis.created_at.is_(None),
+                    ),
                     and_(
                         models.Family.action.is_(None),
                         models.Analysis.created_at < models.Sample.sequenced_at,
@@ -122,6 +133,14 @@ class StatusHandler(BaseHandler):
     def get_cases_from_ticket(self, ticket_id: int) -> Query:
         return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
             models.Sample.ticket_number == ticket_id
+        )
+
+    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
+        """Returns the customer related to given ticket"""
+        return (
+            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
+            .first()
+            .customer.internal_id
         )
 
     def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
@@ -207,6 +226,14 @@ class StatusHandler(BaseHandler):
             cases.append(case_output)
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
+
+    def set_case_action(self, action: Literal[CASE_ACTIONS], case_id: str) -> None:
+        """Sets the action of provided cases to None or the given action"""
+        case_obj: models.Family = self.Family.query.filter(
+            models.Family.internal_id == case_id
+        ).first()
+        case_obj.action = action
+        self.commit()
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
@@ -541,7 +568,10 @@ class StatusHandler(BaseHandler):
     @staticmethod
     def _all_samples_have_sequence_data(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced in-house."""
-        return all((link.sample.sequenced_at or link.sample.is_external) for link in links)
+        return all(
+            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
+            for link in links
+        )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
@@ -570,6 +600,23 @@ class StatusHandler(BaseHandler):
                 models.Analysis.pipeline == str(pipeline),
             )
 
+        return records
+
+    def get_analyses_before_date(
+        self,
+        case_id: Optional[str] = None,
+        before: Optional[datetime] = datetime.now(),
+        pipeline: Optional[Pipeline] = None,
+    ) -> Query:
+        """Fetch all analyses older than certain date"""
+        records = self.Analysis.query.join(models.Analysis.family)
+        if case_id:
+            records = records.filter(models.Family.internal_id == case_id)
+        if pipeline:
+            records = records.filter(
+                models.Analysis.pipeline == str(pipeline),
+            )
+        records = records.filter(models.Analysis.started_at <= before)
         return records
 
     def observations_to_upload(self):

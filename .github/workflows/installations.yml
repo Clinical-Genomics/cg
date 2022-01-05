@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: [3.7]
 
     steps:
 
@@ -32,7 +32,7 @@ jobs:
         pip --version
       env:
         PYTHON_VERSION: ${{ matrix.python-version}}
-        OLD_VERSION: 3.6
+        OLD_VERSION: 3.7
 
     - name: Production Dependencies
       run: |

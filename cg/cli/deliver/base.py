@@ -15,6 +15,16 @@ from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
+DRY_RUN = click.option("--dry-run", is_flag=True)
+DELIVERY_TYPE = click.option(
+    "-d",
+    "--delivery-type",
+    multiple=True,
+    type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
+    required=True,
+)
+TICKET_ID_ARG = click.argument("ticket_id", type=int, required=True)
+
 
 @click.group()
 def deliver():
@@ -23,18 +33,18 @@ def deliver():
 
 
 @deliver.command(name="analysis")
+@DRY_RUN
+@DELIVERY_TYPE
 @click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
     "-t", "--ticket-id", type=int, help="Deliver the files for ALL cases connected to a ticket"
 )
-@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
-@click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
     case_id: Optional[str],
     ticket_id: Optional[int],
-    delivery_type: str,
+    delivery_type: List[str],
     dry_run: bool,
 ):
     """Deliver analysis files to customer inbox
@@ -52,35 +62,36 @@ def deliver_analysis(
         return
 
     status_db: Store = context.status_db
-    deliver_api = DeliverAPI(
-        store=status_db,
-        hk_api=context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
-        project_base_path=Path(inbox),
-        delivery_type=delivery_type,
-    )
-    deliver_api.set_dry_run(dry_run)
-    cases: List[models.Family] = []
-    if case_id:
-        case_obj: models.Family = status_db.family(case_id)
-        if not case_obj:
-            LOG.warning("Could not find case %s", case_id)
-            return
-        cases.append(case_obj)
-    else:
-        cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        if not cases:
-            LOG.warning("Could not find cases for ticket_id %s", ticket_id)
-            return
+    for delivery in delivery_type:
+        deliver_api = DeliverAPI(
+            store=status_db,
+            hk_api=context.housekeeper_api,
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"],
+            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
+            project_base_path=Path(inbox),
+            delivery_type=delivery,
+        )
+        deliver_api.set_dry_run(dry_run)
+        cases: List[models.Family] = []
+        if case_id:
+            case_obj: models.Family = status_db.family(case_id)
+            if not case_obj:
+                LOG.warning("Could not find case %s", case_id)
+                return
+            cases.append(case_obj)
+        else:
+            cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+            if not cases:
+                LOG.warning("Could not find cases for ticket_id %s", ticket_id)
+                return
 
-    for case_obj in cases:
-        deliver_api.deliver_files(case_obj=case_obj)
+        for case_obj in cases:
+            deliver_api.deliver_files(case_obj=case_obj)
 
 
 @deliver.command(name="rsync")
-@click.argument("ticket_id", type=int, required=True)
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
+@TICKET_ID_ARG
 @click.pass_obj
 def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
@@ -96,8 +107,8 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 
 
 @deliver.command(name="concatenate")
-@click.argument("ticket_id", type=int, required=True)
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
+@TICKET_ID_ARG
 @click.pass_context
 def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
     """The fastq files in the folder generated using "cg deliver analysis"
@@ -109,6 +120,8 @@ def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
 
 
 @deliver.command(name="ticket")
+@DELIVERY_TYPE
+@DRY_RUN
 @click.option(
     "-t",
     "--ticket-id",
@@ -116,13 +129,11 @@ def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
     help="Deliver and rsync the files for ALL cases connected to a ticket",
     required=True,
 )
-@click.option("-d", "--delivery-type", type=click.Choice(PIPELINE_ANALYSIS_OPTIONS), required=True)
-@click.option("--dry-run", is_flag=True)
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
     ticket_id: int,
-    delivery_type: str,
+    delivery_type: List[str],
     dry_run: bool,
 ):
     """Will first collect hard links in the customer inbox then
@@ -143,7 +154,7 @@ def deliver_ticket(
     is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(
         ticket_id=ticket_id
     )
-    if is_concatenation_needed and delivery_type == "fastq":
+    if is_concatenation_needed and "fastq" in delivery_type:
         context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
     deliver_ticket_api.report_missing_samples(ticket_id=ticket_id, dry_run=dry_run)
     context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)

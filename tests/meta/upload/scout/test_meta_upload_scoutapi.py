@@ -3,9 +3,12 @@ from pathlib import Path
 
 import pytest
 import yaml
+from cgmodels.cg.constants import Pipeline
+
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
-from cg.meta.upload.scout.scoutapi import UploadScoutAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
+from cg.store import models, Store
 
 
 def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
