@@ -115,9 +115,13 @@ def run(
         LOG.info("Executed MIP in dry-run mode")
         return
 
-    analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-    analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    LOG.info("%s run started!", analysis_api.pipeline)
+    try:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        LOG.info("%s run started!", analysis_api.pipeline)
+    except CgError as e:
+        LOG.error(e.message)
+        raise click.Abort
 
 
 @click.command()
