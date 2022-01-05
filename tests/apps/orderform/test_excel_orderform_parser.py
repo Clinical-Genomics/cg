@@ -3,8 +3,8 @@ from typing import Optional
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants import Pipeline
-from cg.meta.orders import OrderType
 from cg.models.orders.excel_sample import ExcelSample
+from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import Orderform
 
 
@@ -89,39 +89,6 @@ def test_parse_metagenome_orderform(metagenome_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.METAGENOME
-
-
-def test_parse_external_orderform(external_orderform: str):
-    """Test to parse a external orderform in xlsx format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(external_orderform))
-    # GIVEN a orderform API
-    order_form_parser = ExcelOrderformParser()
-
-    # WHEN parsing the mip orderform
-    order_form_parser.parse_orderform(excel_path=external_orderform)
-
-    # THEN assert that the project type is correct
-    assert order_form_parser.project_type == OrderType.EXTERNAL
-
-
-def test_generate_external_orderform_with_case(external_order_parser: ExcelOrderformParser):
-    """Test to generate a orderform based on parsing of an external orderform"""
-    # GIVEN a external orderform parser
-
-    # WHEN generating the orderform
-    orderform: Orderform = external_order_parser.generate_orderform()
-
-    # THEN assert that the customer id was correct
-    assert external_order_parser.customer_id == "cust002"
-    # THEN asert that there where cases in the order
-    assert len(orderform.cases) > 0
-
-    case_obj = orderform.cases[0]
-    # THEN assert that the case name is as expected
-    assert case_obj.name == "fam2"
-    assert case_obj.priority == "standard"
-    assert set(case_obj.panels) == {"CILM", "CTD"}
 
 
 def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParser):

@@ -6,12 +6,11 @@ import datetime as dt
 import json
 import logging
 import os
-import pytest
 import shutil
-
 from pathlib import Path
 from typing import Generator
 
+import pytest
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -19,11 +18,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
 from cg.meta.rsync import RsyncAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.observations.observations_input_files import ObservationsInputFiles
 from cg.store import Store
-
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.limsmock import MockLimsAPI
@@ -73,19 +71,25 @@ def fixture_sample_id() -> str:
     return "ADM1"
 
 
+@pytest.fixture(name="cust_sample_id", scope="session")
+def fixture_cust_sample_id() -> str:
+    """Returns a customer sample id"""
+    return "child"
+
+
 @pytest.fixture(name="family_name")
 def fixture_family_name() -> str:
     """Return a case name"""
     return "case"
 
 
-@pytest.fixture(name="customer_id")
+@pytest.fixture(name="customer_id", scope="session")
 def fixture_customer_id() -> str:
     """Return a customer id"""
     return "cust000"
 
 
-@pytest.fixture(name="ticket_nr")
+@pytest.fixture(name="ticket_nr", scope="session")
 def fixture_ticket_nr() -> int:
     """Return a ticket nr"""
     return 123456
@@ -237,6 +241,13 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
     """RsyncAPI fixture"""
     _rsync_api: RsyncAPI = RsyncAPI(config=cg_context)
     return _rsync_api
+
+
+@pytest.fixture(name="external_data_api")
+def fixture_external_data_api(cg_context: CGConfig) -> ExternalDataAPI:
+    """ExternalDataAPI fixture"""
+    _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
+    return _external_data_api
 
 
 @pytest.fixture(name="genotype_api")
@@ -407,6 +418,12 @@ def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     return mip_dna_store_files / "yellowhog_clinical_selected.vcf"
 
 
+@pytest.fixture(name="fastq_file")
+def fixture_fastq_file(fastq_dir: Path) -> Path:
+    """Return the path to to a fastq file"""
+    return fastq_dir / "dummy_run_R1_001.fastq.gz"
+
+
 # Orderform fixtures
 
 
@@ -425,13 +442,13 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.10.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.11.rml.xlsx").as_posix()
 
 
 @pytest.fixture
-def mip_json_orderform() -> dict:
-    """Load an example json scout order."""
-    return json.load(open("tests/fixtures/orderforms/mip-json.json"))
+def mip_json_orderform(orderforms: Path) -> dict:
+    """Load an example of json scout order."""
+    return json.load(open(orderforms / "mip-json.json"))
 
 
 @pytest.fixture(name="madeline_output")
@@ -454,12 +471,6 @@ def mip_rna_order_to_submit() -> dict:
 
 
 @pytest.fixture
-def external_order_to_submit() -> dict:
-    """Load an example external order."""
-    return json.load(open("tests/fixtures/cgweb_orders/external.json"))
-
-
-@pytest.fixture
 def fastq_order_to_submit() -> dict:
     """Load an example fastq order."""
     return json.load(open("tests/fixtures/cgweb_orders/fastq.json"))
@@ -468,6 +479,12 @@ def fastq_order_to_submit() -> dict:
 @pytest.fixture
 def rml_order_to_submit() -> dict:
     """Load an example rml order."""
+    return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
+
+
+@pytest.fixture
+def fluffy_order_to_submit() -> dict:
+    """Load an example fluffy order."""
     return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
 
 
@@ -547,13 +564,13 @@ def fixture_bed_file(analysis_dir) -> str:
 
 
 @pytest.fixture(name="helpers")
-def fixture_helpers():
+def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores"""
     return StoreHelpers()
 
 
 @pytest.fixture(name="small_helpers")
-def fixture_small_helpers():
+def fixture_small_helpers() -> SmallHelpers:
     """Return a class with small helper functions"""
     return SmallHelpers()
 
@@ -611,10 +628,10 @@ def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) 
 
 
 @pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample: str, timestamp: dt.datetime) -> dict:
+def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression"""
     return {
-        "name": sample,
+        "name": sample_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [],
@@ -931,7 +948,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="RMLS05R150",
+            tag="RMLP05R800",
             category="rml",
             description="Ready-made",
             sequencing_depth=0,
@@ -940,7 +957,7 @@ def fixture_base_store(store: Store, apptag_rna: str) -> Store:
             target_reads=10,
         ),
         store.add_application(
-            tag="WGTPCFC030",
+            tag="WGSPCFC030",
             category="wgs",
             description="WGS trio",
             is_accredited=True,
@@ -1052,7 +1069,7 @@ def sample_store(base_store) -> Store:
     ]
     customer = base_store.customers().first()
     external_app = base_store.application("WGXCUSC000").versions[0]
-    wgs_app = base_store.application("WGTPCFC030").versions[0]
+    wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app
@@ -1139,7 +1156,7 @@ def fixture_context_config(
             "sender_password": "",
         },
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell_runs",
+            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
@@ -1167,6 +1184,10 @@ def fixture_context_config(
             "base_path": "/another/path",
             "account": "development",
             "mail_user": "an@email.com",
+        },
+        "external": {
+            "hasta": "/path/on/hasta/%s",
+            "caesar": "server.name.se:/path/%s/on/caesar",
         },
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},

@@ -1,5 +1,5 @@
 [Data]
-FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project
+FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Sample_Project
 HWJFTDRXX,1,ACC7534A1,hg19,AATCGTTA,ACGTTATT,342712,N,R1,script,342712
 HWJFTDRXX,1,ACC7534A2,hg19,AATCGGCG,TCAATATT,342712,N,R1,script,342712
 HWJFTDRXX,1,ACC7534A3,hg19,AATCCGTT,AGCATATT,342712,N,R1,script,342712

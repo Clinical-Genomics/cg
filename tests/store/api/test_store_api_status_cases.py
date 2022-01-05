@@ -446,7 +446,7 @@ def test_one_internal_sample(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, is_external=False)
     base_store.relate_sample(new_case, sample, "unknown")
-    assert not sample.is_external
+    assert not sample.application_version.application.is_external
 
     # WHEN getting active cases
     cases = base_store.cases()

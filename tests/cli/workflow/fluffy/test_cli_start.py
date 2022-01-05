@@ -71,6 +71,10 @@ def test_start_available(
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
 
+    # GIVEN every sample in SampleSheet has control status ""
+    mocker.patch.object(FluffyAnalysisAPI, "get_sample_control_status")
+    FluffyAnalysisAPI.get_sample_control_status.return_value = False
+
     # WHEN running command
     result = cli_runner.invoke(start_available, [], obj=fluffy_context)
 

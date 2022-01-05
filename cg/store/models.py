@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.util import deprecated
 
 from cg.constants import (
     CASE_ACTIONS,
@@ -15,7 +16,8 @@ from cg.constants import (
     DataDelivery,
     Pipeline,
 )
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+
+from cg.constants.constants import CONTROL_OPTIONS
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 
@@ -280,7 +282,7 @@ class Family(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
     priority = Column(types.Integer, default=1, nullable=False)
-    _synopsis = Column(types.Text)
+    synopsis = Column(types.Text)
 
     @property
     def cohorts(self) -> List[str]:
@@ -301,15 +303,6 @@ class Family(Model, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
-    def synopsis(self) -> List[str]:
-        """Return a list of synopsis."""
-        return self._synopsis.split(",") if self._synopsis else []
-
-    @synopsis.setter
-    def synopsis(self, synopsis_list: List[str]):
-        self._synopsis = ",".join(synopsis_list) if synopsis_list else None
-
-    @property
     def latest_analyzed(self) -> Optional[dt.datetime]:
         return self.analyses[0].completed_at if self.analyses else None
 
@@ -317,7 +310,7 @@ class Family(Model, PriorityMixin):
     def latest_sequenced(self) -> Optional[dt.datetime]:
         sequenced_dates = []
         for link in self.links:
-            if link.sample.is_external:
+            if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
             elif link.sample.sequenced_at:
                 sequenced_dates.append(link.sample.sequenced_at)
@@ -327,7 +320,7 @@ class Family(Model, PriorityMixin):
     def all_samples_pass_qc(self) -> bool:
         pass_qc = []
         for link in self.links:
-            if link.sample.is_external or link.sample.sequencing_qc:
+            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
                 pass_qc.append(True)
             else:
                 pass_qc.append(False)
@@ -476,6 +469,7 @@ class Sample(Model, PriorityMixin):
     )
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
+    control = Column(types.Enum(*CONTROL_OPTIONS))
     created_at = Column(types.DateTime, default=dt.datetime.now)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
     customer = orm.relationship("Customer", foreign_keys=[customer_id])
@@ -487,7 +481,7 @@ class Sample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     invoice_id = Column(ForeignKey("invoice.id"))
     invoiced_at = Column(types.DateTime)  # DEPRECATED
-    is_external = Column(types.Boolean, default=False)  # DEPRECATED
+    _is_external = Column("is_external", types.Boolean)  # DEPRECATED
     is_tumour = Column(types.Boolean, default=False)
     loqusdb_id = Column(types.String(64))
     name = Column(types.String(128), nullable=False)
@@ -496,6 +490,7 @@ class Sample(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, nullable=False)
     organism_id = Column(ForeignKey("organism.id"))
     organism = orm.relationship("Organism", foreign_keys=[organism_id])
+    _phenotype_groups = Column(types.Text)
     _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
     priority = Column(types.Integer, default=1, nullable=False)
@@ -505,6 +500,7 @@ class Sample(Model, PriorityMixin):
     sequence_start = Column(types.DateTime)
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
+    subject_id = Column(types.String(128))
     ticket_number = Column(types.Integer)
     time_point = Column(types.Integer)
 
@@ -512,10 +508,32 @@ class Sample(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
+    @deprecated(
+        version="1.4.0",
+        message="This field is deprecated, use sample.application_version.application.is_external",
+    )
+    def is_external(self):
+        """Return if this is an externally sequenced sample."""
+        return self._is_external
+
+    @property
     def sequencing_qc(self) -> bool:
         """Return sequencing qc passed or failed."""
         application = self.application_version.application
-        return self.reads > application.expected_reads
+        if self.priority < PRIORITY_MAP["express"]:
+            return self.reads > application.expected_reads
+        # Express priority and higher needs to be analyzed regardless at a lower threshold for primary analysis
+        one_half_of_target_reads = application.target_reads / 2
+        return self.reads >= one_half_of_target_reads
+
+    @property
+    def phenotype_groups(self) -> List[str]:
+        """Return a list of phenotype_groups."""
+        return self._phenotype_groups.split(",") if self._phenotype_groups else []
+
+    @phenotype_groups.setter
+    def phenotype_groups(self, phenotype_term_list: List[str]):
+        self._phenotype_groups = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
     def phenotype_terms(self) -> List[str]:
@@ -531,14 +549,14 @@ class Sample(Model, PriorityMixin):
         """Get the current sample state."""
         if self.delivered_at:
             return f"Delivered {self.delivered_at.date()}"
-        elif self.sequenced_at:
+        if self.sequenced_at:
             return f"Sequenced {self.sequenced_at.date()}"
-        elif self.sequence_start:
+        if self.sequence_start:
             return f"Sequencing {self.sequence_start.date()}"
-        elif self.received_at:
+        if self.received_at:
             return f"Received {self.received_at.date()}"
-        else:
-            return f"Ordered {self.ordered_at.date()}"
+
+        return f"Ordered {self.ordered_at.date()}"
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""

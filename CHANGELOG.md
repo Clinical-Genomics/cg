@@ -4,10 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.0.0/)
 
-Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
+<!-- Please add a new candidate release at the top after changing the latest one. Feel free to copy paste from the "squash and commit" box that gets generated when creating PRs
 
 Try to use the following format:
-
 
 __________ DO NOT TOUCH ___________
 
@@ -17,9 +16,140 @@ __________ DO NOT TOUCH ___________
 ### Changed
 ### Fixed
 
-__________ DO NOT TOUCH ___________
+__________ DO NOT TOUCH ___________ -->
 
-s
+## [22.26.0]
+### Added
+- Added median target coverage to mip:s pydantic model
+- Added step to mips metric deliverables model
+
+## [22.25.4]
+### Fixed
+- cg transfer pool: skip samples without pool name
+
+## [22.25.3]
+### Fixed
+- Show warnings when priorities differ on a case in an order 
+
+## [22.25.2]
+### Fixed
+- RML priority on pool-case
+
+## [22.25.1]
+### Fixed
+- Database migration order
+
+## [22.25.0]
+### Added
+- Support Orderform 1508:25, replaces Orderform 1541:6
+- New Balsamic delivery types 
+  - fastq-qc + analysis + cram
+  - fastq-qc + analysis + cram + Scout
+
+## [22.24.1]
+### Fixed
+- Handle empty values for synopsis in excel orders
+
+## [22.23.2]
+### Fixed
+- Add proxy-protocol to dockerfile
+
+## [22.23.1]
+### Fixed
+- Synopsis from old and new samples are combined
+
+## [22.22.1]
+### Added
+- Added required ENV declarations in dockerfile
+- pyyaml dependency required to run app in container
+
+## [22.22.0]
+### Added
+- Fluffy samplesheet add control field
+
+## [22.21.1]
+### Fixed
+- Balsamic delivery report exception text
+
+## [22.21.0]
+### Added
+- Mark a NIPT/Fluffy sample as control
+
+## [22.20.1]
+### Fixed
+- Accept synopsis both as list and as string in ordering json
+
+## [22.20.0]
+### Fixed
+- Compatability of fluffy and new headers in dragen samplesheets
+
+## [22.20.1]
+### Added
+- Case opencow and stillant to MIP validation cases
+
+## [22.19.7]
+### Added
+- New fields, subject_id, phenotype_groups in clinical samples json orders for Scout 
+
+## [22.19.5]
+### Fixed
+- improve avatar search
+
+## [22.19.4]
+### Fixed
+- include dragen samplesheet in HK
+
+## [22.19.3]
+### Added
+* Action to clean up workflow artifact cache
+
+## [22.19.2]
+### Fixed
+- error in post demux process 
+
+## [22.19.1]
+### Fixed
+- demultiplexed runs project checks
+
+## [22.19.0]
+### Added
+- Novaseq Dragen Demultiplexing
+
+## [22.18.0]
+### Added
+- Display number of samples in order ticket
+
+## [22.17.2]
+### Changed
+- Raised sbatch memory parameter for demultiplexing
+
+## [22.17.1]
+### Fixed
+- Delivery type also works for one type
+
+## [22.17.0]
+### Added
+- Added support for multiple delivery flags for the command cg deliver analysis.
+
+## [22.16.0]
+### Added
+- Function for downloading external data from caesar
+
+## [22.15.0]
+### Changed
+- Methods in mutant config to AM doc number
+
+## [22.14.0]
+### Changed
+
+- Removed balsamic bam and bam index files from cg deliver analysis command
+
+## [22.13.0]
+
+### Added
+
+- MIP command to start after a given step
+
 ## [22.12.0]
 
 ### Added
@@ -50,6 +180,7 @@ s
 ## [22.10.3]
 ### Changed
 - Increased flowcells ondisk cap
+
 
 ## [22.10.2]
 ### Fixed

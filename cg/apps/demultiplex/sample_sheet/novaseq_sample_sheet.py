@@ -7,6 +7,7 @@ from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER, SAMPLE_SHEET_HEADERS
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet
 
@@ -16,29 +17,17 @@ LOG = logging.getLogger(__name__)
 class SampleSheetCreator:
     """Create a raw sample sheet for Novaseq flowcells"""
 
-    SAMPLE_SHEET_HEADERS = [
-        "FCID",
-        "Lane",
-        "SampleID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Project",
-    ]
-
     def __init__(
         self,
         flowcell_id: str,
         lims_samples: List[LimsFlowcellSample],
         run_parameters: RunParameters,
+        bcl_converter: str,
     ):
         self.flowcell_id: str = flowcell_id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
+        self.bcl_converter = bcl_converter
 
     @property
     def valid_indexes(self) -> List[Index]:
@@ -68,6 +57,7 @@ class SampleSheetCreator:
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
+                    bcl_converter=self.bcl_converter,
                 )
                 LOG.debug("Adding dummy sample %s to lane %s", dummy_sample_obj, lane)
                 self.lims_samples.append(dummy_sample_obj)
@@ -86,9 +76,11 @@ class SampleSheetCreator:
 
     @staticmethod
     def convert_sample_to_header_dict(
-        sample: LimsFlowcellSample, sample_sheet_headers: List[str]
+        sample: LimsFlowcellSample,
+        sample_sheet_headers: List[str],
     ) -> List[str]:
-        """Convert a lims sample object to a dict with keys that corresponds to the sample sheet headers"""
+        """Convert a lims sample object to a dict with keys that corresponds to the sample sheet
+        headers"""
         LOG.debug("Use sample sheet header %s", sample_sheet_headers)
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
@@ -96,13 +88,16 @@ class SampleSheetCreator:
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
         LOG.info("Convert samples to string")
-        sample_sheet = ["[Data]", ",".join(self.SAMPLE_SHEET_HEADERS)]
+        sample_sheet = [
+            SAMPLE_SHEET_DATA_HEADER,
+            ",".join(SAMPLE_SHEET_HEADERS[self.bcl_converter]),
+        ]
         for sample in self.lims_samples:
             sample_sheet.append(
                 ",".join(
                     self.convert_sample_to_header_dict(
                         sample=sample,
-                        sample_sheet_headers=self.SAMPLE_SHEET_HEADERS,
+                        sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
                     )
                 )
             )
@@ -125,6 +120,10 @@ class SampleSheetCreator:
         )
         sample_sheet: str = self.convert_to_sample_sheet()
         LOG.info("Validating sample sheet")
-        get_sample_sheet(sample_sheet=sample_sheet, sheet_type="S2")
+        get_sample_sheet(
+            sample_sheet=sample_sheet,
+            sheet_type="S2",
+            bcl_converter=self.bcl_converter,
+        )
         LOG.info("Sample sheet looks fine")
         return sample_sheet

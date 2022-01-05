@@ -61,7 +61,7 @@ class AnalysisAPI(MetaAPI):
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
-        elif not case_obj.links:
+        if not case_obj.links:
             LOG.error("Case %s has no samples in in StatusDB!", case_id)
             raise CgError
         LOG.info("Case %s exists in status db", case_id)
@@ -309,7 +309,7 @@ class AnalysisAPI(MetaAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         sample_obj: models.Sample = case_obj.links[0].sample
         if sample_obj.from_sample:
-            sample_obj = self.status_db.sample(internal_id=sample_obj.internal_id)
+            sample_obj: models.Sample = self.status_db.sample(sample_obj.from_sample)
         target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
         if not target_bed_shortname:
             return target_bed_shortname

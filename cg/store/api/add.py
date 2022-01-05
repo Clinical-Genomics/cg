@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import List
+from typing import List, Optional
 
 import petname
 from cg.apps.avatar.api import Avatar
@@ -116,15 +116,16 @@ class AddHandler(BaseHandler):
         self,
         name: str,
         sex: str,
-        internal_id: str = None,
-        ordered: dt.datetime = None,
-        received: dt.datetime = None,
-        order: str = None,
-        tumour: bool = False,
-        priority: str = None,
-        ticket: int = None,
         comment: str = None,
+        control: str = None,
         downsampled_to: int = None,
+        internal_id: str = None,
+        order: str = None,
+        ordered: dt.datetime = None,
+        priority: str = None,
+        received: dt.datetime = None,
+        ticket: int = None,
+        tumour: bool = False,
         **kwargs,
     ) -> models.Sample:
         """Build a new Sample record."""
@@ -133,17 +134,18 @@ class AddHandler(BaseHandler):
         priority_human = priority or ("research" if downsampled_to else "standard")
         priority_db = PRIORITY_MAP[priority_human]
         return self.Sample(
-            name=name,
-            internal_id=internal_id,
-            received_at=received,
-            sex=sex,
-            order=order,
+            comment=comment,
+            control=control,
             downsampled_to=downsampled_to,
+            internal_id=internal_id,
             is_tumour=tumour,
+            name=name,
+            order=order,
             ordered_at=ordered or dt.datetime.now(),
             priority=priority_db,
+            received_at=received,
+            sex=sex,
             ticket_number=ticket,
-            comment=comment,
             **kwargs,
         )
 
@@ -152,10 +154,10 @@ class AddHandler(BaseHandler):
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
         name: str,
-        panels: List[str],
-        cohorts: List[str] = None,
-        priority: str = "standard",
-        synopsis: List[str] = None,
+        panels: Optional[List[str]] = None,
+        cohorts: Optional[List[str]] = None,
+        priority: Optional[str] = "standard",
+        synopsis: Optional[str] = None,
     ) -> models.Family:
         """Build a new Family record."""
 

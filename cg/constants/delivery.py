@@ -15,9 +15,6 @@ SKIP_MISSING = [
 ]
 
 BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
-    {"cnvkit", "filtered", "sv-vcf"},
-    {"cnvkit", "filtered", "sv-vcf-index"},
-    {"cnvkit", "regions"},
     {"vcf-snv-clinical"},
     {"vcf-snv-clinical-index"},
     {"vardict", "deliver"},
@@ -25,8 +22,14 @@ BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
     {"vcf-index", "sention", "haplotype-caller", "filtered"},
     {"vcf-sv-clinical", "manta", "filtered"},
     {"vcf-sv-clinical-index", "manta", "filtered"},
+    {"vcf-sv-research", "filtered"},
+    {"vcf-sv-research-index", "filtered"},
+    {"ascatngs", "visualization"},
+    {"cnvkit", "vcf-sv-research", "filtered"},
+    {"cnvkit", "vcf-sv-research-index", "filtered"},
     {"cnvkit", "visualization"},
     {"cnvkit", "visualization", "diagram"},
+    {"cnvkit", "regions"},
     {"multiqc-html"},
 ]
 
@@ -45,8 +48,6 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
     {"cram-index"},
     {"cram", "tumor"},
     {"cram-index", "tumor"},
-    {"bam"},
-    {"bam-index"},
 ]
 
 BALSAMIC_QC_CASE_TAGS = [

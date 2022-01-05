@@ -226,24 +226,26 @@ class StoreHelpers:
     def add_sample(
         self,
         store: Store,
-        sample_id: str = None,
-        internal_id: str = None,
-        gender: str = "female",
-        is_tumour: bool = False,
-        is_rna: bool = False,
-        is_external: bool = False,
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
-        customer_name: str = None,
-        reads: int = None,
+        control: str = "",
+        customer_id: str = None,
+        gender: str = "female",
+        internal_id: str = None,
+        is_external: bool = False,
+        is_rna: bool = False,
+        is_tumour: bool = False,
         loqusdb_id: str = None,
+        reads: int = None,
+        name: str = None,
         ticket: int = None,
+        subject_id: str = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
-        customer_name = customer_name or "cust000"
-        sample_name = sample_id or "sample_test"
-        customer = self.ensure_customer(store, customer_name)
+        customer_id = customer_id or "cust000"
+        sample_name = name or "sample_test"
+        customer = self.ensure_customer(store, customer_id=customer_id)
         application_version = self.ensure_application_version(
             store,
             application_tag=application_tag,
@@ -253,16 +255,17 @@ class StoreHelpers:
         )
         application_version_id = application_version.id
         sample = store.add_sample(
+            control=control,
             name=sample_name,
-            sex=gender,
-            tumour=is_tumour,
             reads=reads,
+            sex=gender,
+            subject_id=subject_id,
             ticket=ticket,
+            tumour=is_tumour,
         )
 
         sample.application_version_id = application_version_id
         sample.customer = customer
-        sample.is_external = is_external
         sample.ordered_at = datetime.now()
 
         if loqusdb_id:
@@ -316,7 +319,7 @@ class StoreHelpers:
     def add_case(
         self,
         store: Store,
-        case_id: str = "case_test",
+        name: str = "case_test",
         data_analysis: Pipeline = Pipeline.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
@@ -336,12 +339,12 @@ class StoreHelpers:
             self.ensure_panel(store, panel_id=panel_name, customer_id=customer_id)
 
         if not case_obj:
-            case_obj: Optional[models.Family] = store.family(internal_id=case_id)
+            case_obj: Optional[models.Family] = store.family(internal_id=name)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
-                name=case_id,
+                name=name,
                 panels=panels,
             )
         if action:
@@ -396,7 +399,7 @@ class StoreHelpers:
 
         case_obj = self.add_case(store, case_obj=case_obj, customer_id=customer_obj.internal_id)
 
-        app_tag = app_tag or "WGTPCFC030"
+        app_tag = app_tag or "WGSPCFC030"
         app_type = case_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
 
@@ -405,9 +408,8 @@ class StoreHelpers:
             sample_id = sample_data["internal_id"]
             sample_obj = self.add_sample(
                 store,
-                customer_name=sample_data["name"],
                 gender=sample_data["sex"],
-                sample_id=sample_data.get("name"),
+                name=sample_data.get("name"),
                 internal_id=sample_id,
                 application_type=app_type,
                 ticket=sample_data["ticket_number"],
@@ -560,6 +562,45 @@ class StoreHelpers:
         if not case_obj:
             LOG.warning("Could not find case")
             return None
-        case_obj._synopsis = synopsis
-        store.add_commit(case_obj)
+        case_obj.synopsis = synopsis
+        store.commit()
         return case_obj
+
+    @staticmethod
+    def add_phenotype_groups_to_sample(
+        store: Store, sample_id: str, phenotype_groups: [str] = ["a phenotype group"]
+    ) -> Optional[models.Sample]:
+        """Function for adding a phenotype group to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.phenotype_groups = phenotype_groups
+        store.commit()
+        return sample_obj
+
+    @staticmethod
+    def add_phenotype_terms_to_sample(
+        store: Store, sample_id: str, phenotype_terms: [str] = ["a phenotype term"]
+    ) -> Optional[models.Sample]:
+        """Function for adding a phenotype term to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.phenotype_terms = phenotype_terms
+        store.commit()
+        return sample_obj
+
+    @staticmethod
+    def add_subject_id_to_sample(
+        store: Store, sample_id: str, subject_id: str = "a subject_id"
+    ) -> Optional[models.Sample]:
+        """Function for adding a subject_id to a sample in the database"""
+        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        if not sample_obj:
+            LOG.warning("Could not find sample")
+            return None
+        sample_obj.subject_id = subject_id
+        store.commit()
+        return sample_obj

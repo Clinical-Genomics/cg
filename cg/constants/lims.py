@@ -4,6 +4,7 @@ PROP2UDF = {
     "capture_kit": "Capture Library version",
     "collection_date": "Collection Date",
     "comment": "Comment",
+    "control": "Control",
     "concentration": "Concentration (nM)",
     "concentration_sample": "Sample Conc.",
     "customer": "customer",
@@ -53,6 +54,10 @@ MASTER_STEPS_UDFS = {
         "Library Preparation (Cov) v1": {
             "method_number": "Method document",
             "method_version": "Document version",
+        },
+        "Library Prep (Dev) v3": {
+            "method_number": "Method Document",
+            "method_version": "Document Version",
         },
         "CG002 - End repair Size selection A-tailing and Adapter ligation (TruSeq PCR-free DNA)": {
             "method_number": "Method document",

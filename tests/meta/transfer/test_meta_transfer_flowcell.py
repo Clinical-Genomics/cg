@@ -4,8 +4,9 @@ import warnings
 from pathlib import Path
 
 import mock
-from cg.store import Store
 from sqlalchemy import exc as sa_exc
+
+from cg.store import Store
 
 
 @mock.patch("pathlib.Path.exists")

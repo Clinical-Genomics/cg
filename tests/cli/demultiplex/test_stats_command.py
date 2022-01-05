@@ -1,12 +1,13 @@
 from pathlib import Path
 
+from click.testing import CliRunner
+
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.stats import StatsAPI
 from cg.cli.demultiplex.add import select_project_cmd
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
-from click.testing import CliRunner
 
 
 def test_select_command(
@@ -22,7 +23,9 @@ def test_select_command(
     full_flowcell_name: str = flowcell_object.flowcell_full_name
     assert find.get_flowcell_id(flowcell_id)
     demux_results = DemuxResults(
-        demux_dir=demux_results_finished_dir / full_flowcell_name, flowcell=flowcell_object
+        demux_dir=demux_results_finished_dir / full_flowcell_name,
+        flowcell=flowcell_object,
+        bcl_converter="bcl2fastq",
     )
 
     # GIVEN a project id
