@@ -18,6 +18,10 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
+## [22.27.0]
+### Changed
+- Read and write permissions stay the same when sending files to caesar
+
 ## [22.26.0]
 ### Added
 - Added median target coverage to mip:s pydantic model
