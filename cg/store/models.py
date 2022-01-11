@@ -530,7 +530,7 @@ class Sample(Model, PriorityMixin):
     def sequencing_qc(self) -> bool:
         """Return sequencing qc passed or failed."""
         application = self.application_version.application
-        if self.priority < Priority["express"]:
+        if self.priority < Priority.express:
             return self.reads > application.expected_reads
         # Express priority and higher needs to be analyzed regardless at a lower threshold for primary analysis
         one_half_of_target_reads = application.target_reads / 2

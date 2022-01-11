@@ -94,7 +94,12 @@ class AddHandler(BaseHandler):
         """Build a new application version record."""
 
         new_record = self.ApplicationVersion(version=version, valid_from=valid_from, **kwargs)
-        for price_key in ["standard", "priority", "express", "research"]:
+        for price_key in [
+            Priority.standard.name,
+            Priority.priority.name,
+            Priority.express.name,
+            Priority.research.name,
+        ]:
             setattr(new_record, f"price_{price_key}", prices[price_key])
         new_record.application = application
         return new_record
@@ -133,7 +138,7 @@ class AddHandler(BaseHandler):
         """Build a new Sample record."""
 
         internal_id = internal_id or self.generate_unique_petname()
-        priority = priority or ("research" if downsampled_to else "standard")
+        priority = priority or (Priority.research if downsampled_to else Priority.standard)
         return self.Sample(
             comment=comment,
             control=control,

@@ -266,7 +266,7 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
-    sample.priority = Priority["express"]
+    sample.priority = Priority.express
 
     # WHEN retrieving the sequencing qc property of a the express sample
     sequencing_qc_ok: bool = sample.sequencing_qc
@@ -285,7 +285,7 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
-    sample.priority = Priority["standard"]
+    sample.priority = Priority.standard
 
     # WHEN retrieving the sequencing qc property of a the normal sample
     sequencing_qc_ok: bool = sample.sequencing_qc
