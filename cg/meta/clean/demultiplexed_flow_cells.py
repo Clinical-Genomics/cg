@@ -4,10 +4,9 @@ import logging
 import re
 import shutil
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import List, Optional
 
 from alchy import Query
-from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, HousekeeperTags
@@ -127,7 +126,6 @@ class DemultiplexedRunsFlowCell:
     def files_exist_on_disk(self) -> bool:
         """Checks if the spring or fastq files that are in Housekeeper are actually present on
         disk"""
-        # breakpoint()
 
         def _check_files_existence(files: list) -> list:
             """checks file existence and handles permission errors"""

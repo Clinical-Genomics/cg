@@ -208,8 +208,13 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
-    fastq_files_in_housekeeper: Query = housekeeper_api.files(tags=[HousekeeperTags.FASTQ])
-    spring_files_in_housekeeper: Query = housekeeper_api.files(tags=[HousekeeperTags.SPRING])
+    search = f"%{demux_api.out_dir}%"
+    fastq_files_in_housekeeper: Query = housekeeper_api.files(tags=[HousekeeperTags.FASTQ]).filter(
+        hk_models.File.path.like(search)
+    )
+    spring_files_in_housekeeper: Query = housekeeper_api.files(
+        tags=[HousekeeperTags.SPRING]
+    ).filter(hk_models.File.path.like(search))
     for flow_cell_dir in demux_api.out_dir.iterdir():
         flow_cell_obj: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_dir,
