@@ -127,6 +127,19 @@ class DemultiplexedRunsFlowCell:
     def files_exist_on_disk(self) -> bool:
         """Checks if the spring or fastq files that are in Housekeeper are actually present on
         disk"""
+        # breakpoint()
+
+        def _check_files_existence(files: list) -> list:
+            """checks file existence and handles permission errors"""
+            files_exist: list = []
+            for file in files:
+                try:
+                    files_exist.append(Path(file.path).exists())
+                except PermissionError:
+                    LOG.warning("Can't check file %, no permission!", file)
+                    continue
+            return files_exist
+
         if self._files_exist_on_disk is None:
             if not self.files_exist_in_housekeeper:
                 LOG.warning(
@@ -136,13 +149,11 @@ class DemultiplexedRunsFlowCell:
                 )
             else:
                 if self.fastq_files_exist_in_housekeeper:
-                    self._files_exist_on_disk: bool = all(
-                        [Path(fastq_file.path).exists() for fastq_file in self.hk_fastq_files]
-                    )
+                    fastq_files_exist_on_disk = _check_files_existence(self.hk_fastq_files)
+                    self._files_exist_on_disk: bool = all(fastq_files_exist_on_disk)
                 if self.spring_files_exist_in_housekeeper:
-                    self._files_exist_on_disk: bool = all(
-                        [Path(spring_file.path).exists() for spring_file in self.hk_spring_files]
-                    )
+                    spring_files_exist_on_disk = _check_files_existence(self.hk_spring_files)
+                    self._files_exist_on_disk: bool = all(spring_files_exist_on_disk)
                 if not self._files_exist_on_disk:
                     LOG.warning("Flow cell %s has no fastq files or spring files on disk!", self.id)
 

@@ -234,7 +234,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             flow_cell.exists_in_statusdb,
             flow_cell.fastq_files_exist_in_housekeeper,
             flow_cell.spring_files_exist_in_housekeeper,
-            flow_cell.files_exist_in_housekeeper,
+            flow_cell.files_exist_on_disk,
             click.style(str(flow_cell.passed_check), fg=CHECK_COLOR[flow_cell.passed_check]),
         ]
         for flow_cell in flow_cells_to_present
