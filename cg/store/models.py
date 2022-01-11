@@ -40,22 +40,22 @@ customer_user = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self):
+    def priority_human(self) -> str:
         """Humanized priority for sample."""
         return self.priority.name
 
     @priority_human.setter
-    def priority_human(self, priority: str):
-        self.priority = Priority[priority]
+    def priority_human(self, priority: str) -> None:
+        self.priority: Priority = Priority[priority]
 
     @property
-    def priority_int(self):
-        """Humanized priority for sample."""
+    def priority_int(self) -> int:
+        """Priority as integer for sample."""
         return self.priority.value
 
     @priority_int.setter
-    def priority_int(self, priority_int: int):
-        self.priority = Priority(priority_int)
+    def priority_int(self, priority_int: int) -> None:
+        self.priority: Priority = Priority(priority_int)
 
     @property
     def high_priority(self):
