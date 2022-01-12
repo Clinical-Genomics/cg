@@ -148,7 +148,7 @@ class DemultiplexedRunsFlowCell:
                 )
             else:
                 if self.fastq_files_exist_in_housekeeper:
-                    fastq_files_exist_on_disk = self._check_files_existence(self.hk_fastq_files)
+                    fastq_files_exist_on_disk: List[bool] = self._check_files_existence(self.hk_fastq_files)
                     self._files_exist_on_disk: bool = all(fastq_files_exist_on_disk)
                 if self.spring_files_exist_in_housekeeper:
                     spring_files_exist_on_disk: List[bool] = self._check_files_existence(self.hk_spring_files)
