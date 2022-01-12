@@ -130,7 +130,7 @@ class DemultiplexedRunsFlowCell:
             try:
                 files_exist.append(Path(file.path).exists())
             except PermissionError:
-                LOG.warning("Can't check file %, no permission!", file)
+                LOG.warning("Can't check file %s, no permission!", file)
                 continue
         return files_exist
 
