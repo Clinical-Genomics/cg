@@ -123,7 +123,7 @@ class DemultiplexedRunsFlowCell:
         return self._files_exist_in_housekeeper
 
     @staticmethod
-    def _check_files_existence(files: list) -> list:
+    def _check_files_existence(files: list) -> List[bool]:
         """checks file existence and handles permission errors"""
         files_exist: List[bool] = []
         for file in files:
