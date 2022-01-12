@@ -125,7 +125,7 @@ class DemultiplexedRunsFlowCell:
     @staticmethod
     def _check_files_existence(files: list) -> list:
         """checks file existence and handles permission errors"""
-        files_exist: list = []
+        files_exist: List[bool] = []
         for file in files:
             try:
                 files_exist.append(Path(file.path).exists())
