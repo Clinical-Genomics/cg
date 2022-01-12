@@ -2,7 +2,7 @@ from typing import Optional, Any
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
-from pydantic import Field, constr, validator
+from pydantic import constr, validator
 
 
 class JsonSample(OrderSample):
@@ -22,10 +22,6 @@ class JsonSample(OrderSample):
         if isinstance(value, list):
             return "".join(value)
         return value
-
-    @validator("priority", pre=True)
-    def make_lower(cls, value: str):
-        return value.lower()
 
     @validator("well_position", pre=True)
     def convert_well(cls, value: str):
