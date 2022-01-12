@@ -124,7 +124,7 @@ class DemultiplexedRunsFlowCell:
 
     @staticmethod
     def _check_files_existence(files: list) -> List[bool]:
-        """checks file existence and handles permission errors"""
+        """Checks file existence and handles permission errors"""
         files_exist: List[bool] = []
         for file in files:
             try:
@@ -151,7 +151,9 @@ class DemultiplexedRunsFlowCell:
                     fastq_files_exist_on_disk = self._check_files_existence(self.hk_fastq_files)
                     self._files_exist_on_disk: bool = all(fastq_files_exist_on_disk)
                 if self.spring_files_exist_in_housekeeper:
-                    spring_files_exist_on_disk: List[bool] = self._check_files_existence(self.hk_spring_files)
+                    spring_files_exist_on_disk: List[bool] = self._check_files_existence(
+                        self.hk_spring_files
+                    )
                     self._files_exist_on_disk: bool = all(spring_files_exist_on_disk)
                 if not self._files_exist_on_disk:
                     LOG.warning("Flow cell %s has no fastq files or spring files on disk!", self.id)
