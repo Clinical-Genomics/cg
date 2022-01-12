@@ -20,6 +20,8 @@ from .constants import (
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
+    FlowCellStatus,
+    HousekeeperTags,
     Pipeline,
 )
 from .gene_panel import MASTER_LIST
