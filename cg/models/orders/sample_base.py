@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from pydantic import BaseModel, constr, NonNegativeInt
+from pydantic import BaseModel, constr, NonNegativeInt, validator
 
 from cg.store import models
 
@@ -24,7 +24,7 @@ class PriorityEnum(str, Enum):
     standard = "standard"
     priority = "priority"
     express = "express"
-    clinical_trials = "clinical trials"
+    clinical_trials = "clinical_trials"
 
 
 class ContainerEnum(str, Enum):
@@ -126,3 +126,7 @@ class OrderSample(BaseModel):
     volume: Optional[str]
     well_position: Optional[str]
     well_position_rml: Optional[str]
+
+    @validator("priority", pre=True)
+    def snake_case(cls, value: str):
+        return value.lower().replace(" ", "_")

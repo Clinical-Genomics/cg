@@ -13,6 +13,8 @@ from cg.constants import Pipeline
 from cg.constants.tb import AnylysisStatus
 from cg.exc import TrailblazerAPIHTTPError
 
+from cg.constants import Priority
+
 LOG = logging.getLogger(__name__)
 
 
@@ -143,7 +145,7 @@ class TrailblazerAPI:
         analysis_type: str,
         config_path: str,
         out_dir: str,
-        priority: str,
+        priority: Priority,
         email: str = None,
         data_analysis: Pipeline = None,
     ) -> TrailblazerAnalysis:

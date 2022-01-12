@@ -16,7 +16,7 @@ def test_get_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: CGConfig
     name = "dummy_name"
     result = cli_runner.invoke(get, ["flowcell", name], obj=base_context)
 
-    # THEN then it should complain in missing flowcell instead of getting a flowcell
+    # THEN it should complain in missing flowcell instead of getting a flowcell
     assert result.exit_code == 1
 
 
@@ -33,7 +33,7 @@ def test_get_flowcell_required(
 
     result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
 
 
@@ -52,7 +52,7 @@ def test_get_flowcell_output(
     # WHEN getting a flowcell
     result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert flowcell_name in result.output
     assert sequencer_type in result.output
@@ -73,7 +73,7 @@ def test_get_flowcell_archived_at_none(
     # WHEN getting a flowcell
     result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert archived_at in result.output
 
@@ -91,7 +91,7 @@ def test_get_flowcell_archived_at_date(
     # WHEN getting a flowcell
     result = cli_runner.invoke(get, ["flowcell", flowcell_name], obj=base_context)
 
-    # THEN then it should have been get
+    # THEN it should have been get
     assert result.exit_code == 0
     assert archived_at_date in result.output
 
