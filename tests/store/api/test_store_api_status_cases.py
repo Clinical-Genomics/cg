@@ -711,7 +711,7 @@ def test_excluded_by_priority(base_store: Store, helpers):
     """Test to that cases can be excluded by priority"""
 
     # GIVEN a database with a case with a priority
-    add_case(helpers, base_store, priority=Priority.research).priority
+    add_case(helpers, base_store, priority=Priority.research)
 
     # WHEN getting active cases by another priority
     cases = base_store.cases(priority=Priority.standard)

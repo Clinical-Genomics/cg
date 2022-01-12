@@ -1,5 +1,5 @@
 """Priority specific constants"""
-from enum import Enum, IntEnum
+from enum import Enum
 
 from cgmodels.cg.constants import StrEnum
 

@@ -8,6 +8,8 @@ from cg.cli.set.base import sample
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
+from cg.constants import Priority
+
 SUCCESS = 0
 
 
@@ -156,7 +158,7 @@ def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store
     # GIVEN a database with a sample
     sample_obj = helpers.add_sample(base_store, gender="female")
     key = "priority"
-    new_value = "express"
+    new_value = Priority.express.name
     assert sample_obj.priority_human != new_value
 
     # WHEN setting key on sample to new_value
@@ -175,7 +177,7 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     # GIVEN a database with a sample
     sample_obj = helpers.add_sample(base_store, gender="female")
     key = "priority"
-    new_value = 2
+    new_value = Priority.express
     assert sample_obj.priority != new_value
 
     # WHEN setting key on sample to new_value
