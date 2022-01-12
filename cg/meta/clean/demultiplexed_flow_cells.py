@@ -4,10 +4,9 @@ import logging
 import re
 import shutil
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import List, Optional
 
 from alchy import Query
-from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, HousekeeperTags
@@ -123,10 +122,23 @@ class DemultiplexedRunsFlowCell:
                 )
         return self._files_exist_in_housekeeper
 
+    @staticmethod
+    def _check_files_existence(files: list) -> List[bool]:
+        """Checks file existence and handles permission errors"""
+        files_exist: List[bool] = []
+        for file in files:
+            try:
+                files_exist.append(Path(file.path).exists())
+            except PermissionError:
+                LOG.warning("Can't check file %s, no permission!", file)
+                continue
+        return files_exist
+
     @property
     def files_exist_on_disk(self) -> bool:
         """Checks if the spring or fastq files that are in Housekeeper are actually present on
         disk"""
+
         if self._files_exist_on_disk is None:
             if not self.files_exist_in_housekeeper:
                 LOG.warning(
@@ -136,13 +148,15 @@ class DemultiplexedRunsFlowCell:
                 )
             else:
                 if self.fastq_files_exist_in_housekeeper:
-                    self._files_exist_on_disk: bool = all(
-                        [Path(fastq_file.path).exists() for fastq_file in self.hk_fastq_files]
+                    fastq_files_exist_on_disk: List[bool] = self._check_files_existence(
+                        self.hk_fastq_files
                     )
+                    self._files_exist_on_disk: bool = all(fastq_files_exist_on_disk)
                 if self.spring_files_exist_in_housekeeper:
-                    self._files_exist_on_disk: bool = all(
-                        [Path(spring_file.path).exists() for spring_file in self.hk_spring_files]
+                    spring_files_exist_on_disk: List[bool] = self._check_files_existence(
+                        self.hk_spring_files
                     )
+                    self._files_exist_on_disk: bool = all(spring_files_exist_on_disk)
                 if not self._files_exist_on_disk:
                     LOG.warning("Flow cell %s has no fastq files or spring files on disk!", self.id)
 
