@@ -183,7 +183,7 @@ class DemultiplexedRunsFlowCell:
             ) if self._passed_check else LOG.info(
                 "Flow cell %s failed one or more tests, setting flag to %s!",
                 self.id,
-                self.passed_check,
+                self._passed_check,
             )
         return self._passed_check
 
