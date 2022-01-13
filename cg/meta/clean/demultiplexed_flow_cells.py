@@ -242,8 +242,8 @@ class DemultiplexedRunsFlowCell:
     def add_sample_sheet_to_housekeeper(self, sample_sheet_path: str):
         """Adds an archive sample sheet to Housekeeper"""
 
-        if self.hk.tag("archived_samplesheet") is None:
-            self.hk.add_commit(self.hk.new_tag("archived_samplesheet"))
+        if self.hk.tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET) is None:
+            self.hk.add_commit(self.hk.new_tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET))
         if self.hk.tag(self.id) is None:
             self.hk.add_commit(self.hk.new_tag(self.id))
 
@@ -260,7 +260,7 @@ class DemultiplexedRunsFlowCell:
             hk_version = hk_bundle.versions[0]
             if self.hk.files(path=sample_sheet_path).first() is None:
                 LOG.info(f"Adding archived samplesheet: {sample_sheet_path}")
-                tags = [self.hk.tag("archived_samplesheet"), self.hk.tag(self.id)]
+                tags = [self.hk.tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET), self.hk.tag(self.id)]
                 new_file = self.hk.new_file(path=sample_sheet_path, tags=tags)
                 hk_version.files.append(new_file)
         self.hk.commit()
