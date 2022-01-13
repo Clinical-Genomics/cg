@@ -31,8 +31,18 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class FlowCellRunDirs(BaseModel):
+    hiseqx: str
+    hiseqga: str
+    novaseq: str
+
+
 class BackupConfig(BaseModel):
     root: Sequencers
+
+
+class CleanConfig(BaseModel):
+    flowcells: FlowCellRunDirs
 
 
 class SlurmConfig(BaseModel):
@@ -194,6 +204,7 @@ class CGConfig(BaseModel):
     cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    clean: CleanConfig = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")

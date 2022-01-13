@@ -22,6 +22,7 @@ from cg.cli.workflow.commands import (
     rsync_past_run_dirs,
 )
 from cg.constants import FlowCellStatus, HousekeeperTags
+from cg.constants.constants import DRY_RUN, Sequencers
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -312,3 +313,37 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
                 continue
             flow_cell.status = new_status
             status_db.commit()
+
+
+@clean.command("remove-old-flow-cell-run-dirs")
+@click.option(
+    "-s",
+    "--sequencer",
+    type=click.Choice([Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.ALL]),
+    default="all",
+    help="Specify the sequencer. Default is to remove flow cells for all sequencers",
+)
+@click.option(
+    "-o",
+    "--days-old",
+    type=int,
+    default=21,
+    help="Specify the age in days of the flow cells to be removed",
+)
+@DRY_RUN
+@click.pass_obj
+def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: int, dry_run: bool):
+    """Removes flowcells from /home/proj/production/flowcells based on the sequencing date and
+    the sequencer type, if specified."""
+    if sequencer == Sequencers.ALL:
+        LOG.info("Checking flowcells for all sequencers!")
+        for sequencer, directory in context.clean.flowcells:
+            LOG.info("Checking directory %s of sequencer %s:", directory, sequencer)
+            for flow_cell_dir in Path(directory).iterdir():
+                LOG.info("Checking flowcell %s", flow_cell_dir)
+    else:
+        LOG.info(
+            "Checking directory %s of sequencer %s:",
+            dict(context.clean.flowcells).get(sequencer),
+            sequencer,
+        )
