@@ -149,6 +149,7 @@ class DemultiplexedRunsFlowCell:
                     "disk check",
                     self.id,
                 )
+                self._files_exist_on_disk = False
             else:
                 if self.fastq_files_exist_in_housekeeper:
                     fastq_files_exist_on_disk: List[bool] = self._check_files_existence(
