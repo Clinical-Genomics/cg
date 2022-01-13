@@ -1,6 +1,7 @@
 """Module that handles data and information regarding flow cells and flow cell directories. Used to
 inspect and clean flow cell directories in demultiplexed runs """
 import logging
+import os
 import re
 import shutil
 from pathlib import Path
@@ -32,9 +33,11 @@ class DemultiplexedRunsFlowCell:
         flow_cell_path: Path,
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
+        sample_sheets_dir: Optional[str] = None,
         fastq_files: Optional[Query] = None,
         spring_files: Optional[Query] = None,
     ):
+        self.sample_sheets_dir: Path = Path(sample_sheets_dir) if sample_sheets_dir else None
         self.path: Path = flow_cell_path
         self.status_db: Store = status_db
         self.hk: HousekeeperAPI = housekeeper_api
@@ -199,6 +202,7 @@ class DemultiplexedRunsFlowCell:
 
     def remove_from_demultiplexed_runs(self):
         """Removes a flow cell directory completely from demultiplexed-runs"""
+        self.archive_sample_sheet()
         shutil.rmtree(self.path, ignore_errors=True)
         if self.exists_in_statusdb and self.is_correctly_named:
             self.status_db.flowcell(self.id).status = FlowCellStatus.REMOVED
@@ -209,3 +213,54 @@ class DemultiplexedRunsFlowCell:
         self.remove_from_demultiplexed_runs()
         if self.files_exist_in_housekeeper and self.is_correctly_named:
             self.remove_files_from_housekeeper()
+
+    def archive_sample_sheet(self):
+        """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
+        Housekeeper with an appropriate tag"""
+
+        LOG.info("Archiving sample sheet for flow cell %s", self.id)
+
+        try:
+            os.makedirs(self.sample_sheets_dir / self.run_name)
+            LOG.info("Sample sheet directory created for flow cell directory %s", self.run_name)
+        except FileExistsError:
+            LOG.info(
+                "Sample sheet directory for flow cell directory %s already exists!", self.run_name
+            )
+
+        original_sample_sheet: Path = self.path / "SampleSheet.csv"
+        archived_sample_sheet: Path = self.sample_sheets_dir / self.run_name / "SampleSheet.csv"
+
+        try:
+            shutil.move(original_sample_sheet, archived_sample_sheet)
+            if self.exists_in_statusdb and self.is_correctly_named:
+                self.add_sample_sheet_to_housekeeper(str(archived_sample_sheet))
+            self.hk.commit()
+        except FileNotFoundError:
+            LOG.warning("No sample sheet found in flow cell directory %s!", self.run_name)
+
+    def add_sample_sheet_to_housekeeper(self, sample_sheet_path: str):
+        """Adds an archive sample sheet to Housekeeper"""
+
+        if self.hk.tag("archived_samplesheet") is None:
+            self.hk.add_commit(self.hk.new_tag("archived_samplesheet"))
+        if self.hk.tag(self.id) is None:
+            self.hk.add_commit(self.hk.new_tag(self.id))
+
+        hk_bundle = self.hk.bundle(self.id)
+        if hk_bundle is None:
+            hk_bundle = self.hk.new_bundle(name=self.id)
+            self.hk.add_commit(hk_bundle)
+            new_version = self.hk.new_version(created_at=hk_bundle.created_at)
+            hk_bundle.versions.append(new_version)
+            self.hk.commit()
+            LOG.info("New bundle created for flow cell %s", self.id)
+
+        with self.hk.session_no_autoflush():
+            hk_version = hk_bundle.versions[0]
+            if self.hk.files(path=sample_sheet_path).first() is None:
+                LOG.info(f"Adding archived samplesheet: {sample_sheet_path}")
+                tags = [self.hk.tag("archived_samplesheet"), self.hk.tag(self.id)]
+                new_file = self.hk.new_file(path=sample_sheet_path, tags=tags)
+                hk_version.files.append(new_file)
+        self.hk.commit()

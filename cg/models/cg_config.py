@@ -35,6 +35,14 @@ class BackupConfig(BaseModel):
     root: Sequencers
 
 
+class CleanDirs(BaseModel):
+    sample_sheets: str
+
+
+class CleanConfig(BaseModel):
+    flow_cells: CleanDirs
+
+
 class SlurmConfig(BaseModel):
     account: str
     mail_user: EmailStr
@@ -194,6 +202,7 @@ class CGConfig(BaseModel):
     cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    clean: CleanConfig = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
