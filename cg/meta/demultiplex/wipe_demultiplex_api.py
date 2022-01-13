@@ -1,7 +1,8 @@
 import logging
+import shutil
 
+from glob import glob
 from pathlib import Path
-from shutil import rmtree
 from typing import Iterable, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -49,10 +50,25 @@ class WipeDemuxAPI:
         presence = (
             self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
         )
-        if presence:
-            return True
-        else:
-            return False
+        return bool(presence)
+
+    def wipe_demux_init_files(self):
+        """Wipe previous traces of slurm job ids"""
+        slurm_job_id_file_path: Path = self.run_name / "slurm_job_ids.yaml"
+        demux_script_file_path: Path = self.run_name / "demux-novaseq.sh"
+        error_log_path, log_path = glob(f"{self.run_name}/{self.flow_cell_name}_demultiplex.std*")
+        demux_init_files: List[Path] = [
+            slurm_job_id_file_path,
+            demux_script_file_path,
+            Path(error_log_path),
+            Path(log_path),
+        ]
+        for init_file in demux_init_files:
+            if init_file.is_file():
+                log.info(f"WipeDemuxAPI: Removing slurm_job_id_file_path")
+                slurm_job_id_file_path.unlink()
+            else:
+                log.info(f"WipeDemuxAPI: Did not find {init_file}")
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run flag for API"""
@@ -103,7 +119,9 @@ class WipeDemuxAPI:
 
         log.info(f"Housekeeper: Wiping sample sheet files with tag {self.flow_cell_name}")
         self._wipe_sample_sheet_housekeeper()
-        log.info(f"Housekeeper: Wiping fastq and spring files related to flowcell")
+        log.info(
+            f"Housekeeper: Wiping fastq and spring files related to flowcell {self.flow_cell_name}"
+        )
         self._wipe_fastq_and_spring_housekeeper()
 
     def wipe_flow_cell_statusdb(self) -> None:
@@ -131,7 +149,7 @@ class WipeDemuxAPI:
                 log.info(f"Hasta: Would remove the following directory {out_dir.as_posix()}")
             else:
                 log.info(f"Hasta: Removing flow cell directory {out_dir.as_posix()}")
-                rmtree(path=out_dir)
+                shutil.rmtree(path=out_dir, ignore_errors=False)
         else:
             log.info(f"Hasta: No target demultiplexing directory {out_dir.as_posix()}")
 

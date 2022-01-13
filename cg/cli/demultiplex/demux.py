@@ -41,12 +41,6 @@ def demultiplex_all(
         except FlowcellError:
             continue
 
-        wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-            config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=sub_dir.name
-        )
-        wipe_demux_api.set_dry_run(dry_run=dry_run)
-        wipe_demux_api.wipe_flow_cell()
-
         if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
             continue
 
@@ -57,6 +51,13 @@ def demultiplex_all(
             )
             if not dry_run:
                 continue
+
+        wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+            config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=sub_dir.name
+        )
+        wipe_demux_api.set_dry_run(dry_run=dry_run)
+        wipe_demux_api.wipe_flow_cell()
+
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
         demultiplex_api.add_to_trailblazer(
             tb_api=tb_api, slurm_job_id=slurm_job_id, flowcell=flowcell_obj
@@ -86,13 +87,6 @@ def demultiplex_flowcell(
     demultiplex_api.set_dry_run(dry_run=dry_run)
     LOG.info(f"SETTING FLOWCELL ID TO {flowcell_id}")
     LOG.info(f"SETTING OUT DIR TO {demultiplex_api.out_dir}")
-    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-        config=context,
-        demultiplexing_dir=Path(demultiplex_api.out_dir),
-        run_name=flowcell_id,
-    )
-    wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flow_cell()
 
     try:
         flowcell_obj = Flowcell(flowcell_path=flowcell_directory, bcl_converter=bcl_converter)
@@ -110,6 +104,14 @@ def demultiplex_flowcell(
         )
         if not dry_run:
             raise click.Abort
+
+    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+        config=context,
+        demultiplexing_dir=Path(demultiplex_api.out_dir),
+        run_name=flowcell_id,
+    )
+    wipe_demux_api.set_dry_run(dry_run=dry_run)
+    wipe_demux_api.wipe_flow_cell()
 
     slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
     tb_api: TrailblazerAPI = context.trailblazer_api

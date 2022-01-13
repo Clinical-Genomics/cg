@@ -170,7 +170,6 @@ def test_demultiplex_all(
 
 def test_start_demultiplexing_when_already_completed(
     cli_runner: testing.CliRunner,
-    # demultiplex_ready_flowcell_dragen: Path,
     demultiplex_ready_flowcell: Path,
     demultiplex_context: CGConfig,
     caplog,
@@ -197,3 +196,7 @@ def test_start_demultiplexing_when_already_completed(
     assert result.exit_code == 0
     # THEN assert it was communicated that demultiplexing was completed
     assert f"Demultiplexing is already completed for flowcell {flowcell.flowcell_id}"
+
+
+def test_wipe_flow_cell_cgstats():
+    """"""
