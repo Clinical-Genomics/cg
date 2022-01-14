@@ -258,7 +258,8 @@ class DemultiplexedRunsFlowCell:
             LOG.info("New bundle created for flow cell %s", self.id)
 
         with self.hk.session_no_autoflush():
-            hk_version = hk_bundle.versions[0]
+            breakpoint()
+            hk_version = self.hk.last_version(bundle=hk_bundle.name)
             if self.hk.files(path=sample_sheet_path).first() is None:
                 LOG.info(f"Adding archived samplesheet: {sample_sheet_path}")
                 tags = [self.hk.tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET), self.hk.tag(self.id)]
