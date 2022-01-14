@@ -219,26 +219,28 @@ class DemultiplexedRunsFlowCell:
         """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
         Housekeeper with an appropriate tag"""
 
-        LOG.info("Archiving sample sheet for flow cell %s", self.id)
+        if self.is_correctly_named:
+            LOG.info("Archiving sample sheet for flow cell %s", self.run_name)
 
-        try:
-            os.makedirs(self.sample_sheets_dir / self.run_name)
-            LOG.info("Sample sheet directory created for flow cell directory %s", self.run_name)
-        except FileExistsError:
-            LOG.info(
-                "Sample sheet directory for flow cell directory %s already exists!", self.run_name
-            )
+            original_sample_sheet: Path = self.path / "SampleSheet.csv"
+            archived_sample_sheet: Path = self.sample_sheets_dir / self.run_name / "SampleSheet.csv"
 
-        original_sample_sheet: Path = self.path / "SampleSheet.csv"
-        archived_sample_sheet: Path = self.sample_sheets_dir / self.run_name / "SampleSheet.csv"
+            try:
+                os.makedirs(self.sample_sheets_dir / self.run_name)
+                LOG.info("Sample sheet directory created for flow cell directory %s", self.run_name)
+            except FileExistsError:
+                LOG.info(
+                    "Sample sheet directory for flow cell directory %s already exists!",
+                    self.run_name,
+                )
 
-        try:
-            shutil.move(original_sample_sheet, archived_sample_sheet)
-            if self.exists_in_statusdb and self.is_correctly_named:
+            try:
+                shutil.move(original_sample_sheet, archived_sample_sheet)
                 self.add_sample_sheet_to_housekeeper(str(archived_sample_sheet))
-            self.hk.commit()
-        except FileNotFoundError:
-            LOG.warning("No sample sheet found in flow cell directory %s!", self.run_name)
+                self.hk.commit()
+            except FileNotFoundError:
+                LOG.warning("No sample sheet found in flow cell directory %s!", self.run_name)
+                shutil.rmtree(self.sample_sheets_dir / self.run_name, ignore_errors=True)
 
     def add_sample_sheet_to_housekeeper(self, sample_sheet_path: str):
         """Adds an archive sample sheet to Housekeeper"""
