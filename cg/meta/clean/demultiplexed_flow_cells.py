@@ -67,7 +67,7 @@ class DemultiplexedRunsFlowCell:
         self._demultiplexing_ongoing = None
 
     @property
-    def sequencer_type(self) -> str:
+    def sequencer_type(self) -> Optional[str]:
         """The type of sequencer a flow cell has been sequenced on"""
         if self._sequencer_type is None:
             return sequencer_types.get(self.sequencer_serial_number, "other")
