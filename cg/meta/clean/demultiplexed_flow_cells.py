@@ -272,7 +272,7 @@ class DemultiplexedRunsFlowCell:
             self.hk.commit()
         except FileNotFoundError:
             LOG.warning("No sample sheet found in flow cell directory %s!", self.run_name)
-            shutil.rmtree(self.sample_sheets_dir / self.run_name, ignore_errors=True)
+            shutil.rmtree(sample_sheet_run_dir, ignore_errors=True)
 
     def add_sample_sheet_to_housekeeper(self, sample_sheet_path: Path):
         """Adds an archive sample sheet to Housekeeper"""
