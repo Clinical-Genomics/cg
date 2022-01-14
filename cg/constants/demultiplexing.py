@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import click
+from cgmodels.cg.constants import StrEnum
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
@@ -61,3 +62,10 @@ DEMUX_STATS_PATH = {
 }
 
 DRAGEN_PASSED_FILTER_PCT = 100.00000
+
+
+class DemultiplexingDirsAndFiles(StrEnum):
+    """Demultiplexing related dirs and files"""
+
+    SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
+    UNALIGNED_DIR_NAME: str = "Unaligned"

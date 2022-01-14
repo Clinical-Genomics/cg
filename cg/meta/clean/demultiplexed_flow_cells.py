@@ -1,7 +1,6 @@
 """Module that handles data and information regarding flow cells and flow cell directories. Used to
 inspect and clean flow cell directories in demultiplexed runs """
 import logging
-import os
 import re
 import shutil
 from pathlib import Path
@@ -11,10 +10,13 @@ from alchy import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, HousekeeperTags
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.store import Store
 
 FLOW_CELL_IDENTIFIER_POSITION = 3
 LOG = logging.getLogger(__name__)
+SEQUENCER_IDENTIFIER_POSITION = 1
 
 
 class DemultiplexedRunsFlowCell:
@@ -46,6 +48,7 @@ class DemultiplexedRunsFlowCell:
         self.run_name: str = self.path.name
         self.split_name: List[str] = re.split("[_.]", self.run_name)
         self.identifier: str = self.split_name[FLOW_CELL_IDENTIFIER_POSITION]
+        self.sequencer_serial_number: str = self.split_name[SEQUENCER_IDENTIFIER_POSITION]
         self.id: str = self.identifier[1:]
         self._hk_fastq_files = None
         self._hk_spring_files = None
@@ -56,6 +59,13 @@ class DemultiplexedRunsFlowCell:
         self._files_exist_in_housekeeper = None
         self._files_exist_on_disk = None
         self._passed_check = None
+        self._sequencer_type = None
+
+    @property
+    def sequencer_type(self) -> str:
+        """The type of sequencer a flow cell has been sequenced on"""
+        if self._sequencer_type is None:
+            return sequencer_types.get(self.sequencer_serial_number, "other")
 
     @property
     def hk_fastq_files(self) -> list:
@@ -220,33 +230,34 @@ class DemultiplexedRunsFlowCell:
         """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
         Housekeeper with an appropriate tag"""
         LOG.info("Archiving sample sheet for flow cell %s", self.run_name)
-
-        original_sample_sheet: Path = self.path / "SampleSheet.csv"
-        archived_sample_sheet: Path = self.sample_sheets_dir / self.run_name / "SampleSheet.csv"
-
-        try:
-            os.makedirs(self.sample_sheets_dir / self.run_name)
-            LOG.info("Sample sheet directory created for flow cell directory %s", self.run_name)
-        except FileExistsError:
-            LOG.info(
-                "Sample sheet directory for flow cell directory %s already exists!",
-                self.run_name,
+        original_sample_sheet: Path = (
+            Path(
+                self.path,
+                DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+                DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
             )
+            if self.sequencer_type == Sequencers.NOVASEQ
+            else Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+        )
+
+        sample_sheet_run_dir: Path = Path(self.sample_sheets_dir, self.run_name)
+        archived_sample_sheet: Path = Path(
+            sample_sheet_run_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+
+        sample_sheet_run_dir.mkdir(parents=True, exist_ok=True)
+        LOG.info("Sample sheet directory created for flow cell directory %s", self.run_name)
+
         try:
             shutil.move(original_sample_sheet, archived_sample_sheet)
-            self.add_sample_sheet_to_housekeeper(str(archived_sample_sheet))
+            self.add_sample_sheet_to_housekeeper(archived_sample_sheet)
             self.hk.commit()
         except FileNotFoundError:
             LOG.warning("No sample sheet found in flow cell directory %s!", self.run_name)
             shutil.rmtree(self.sample_sheets_dir / self.run_name, ignore_errors=True)
 
-    def add_sample_sheet_to_housekeeper(self, sample_sheet_path: str):
+    def add_sample_sheet_to_housekeeper(self, sample_sheet_path: Path):
         """Adds an archive sample sheet to Housekeeper"""
-
-        if self.hk.tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET) is None:
-            self.hk.add_commit(self.hk.new_tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET))
-        if self.hk.tag(self.id) is None:
-            self.hk.add_commit(self.hk.new_tag(self.id))
 
         hk_bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
@@ -259,9 +270,8 @@ class DemultiplexedRunsFlowCell:
 
         with self.hk.session_no_autoflush():
             hk_version = self.hk.last_version(bundle=hk_bundle.name)
-            if self.hk.files(path=sample_sheet_path).first() is None:
-                LOG.info(f"Adding archived samplesheet: {sample_sheet_path}")
-                tags = [self.hk.tag(HousekeeperTags.ARCHIVED_SAMPLE_SHEET), self.hk.tag(self.id)]
-                new_file = self.hk.new_file(path=sample_sheet_path, tags=tags)
-                hk_version.files.append(new_file)
+            if self.hk.files(path=str(sample_sheet_path)).first() is None:
+                LOG.info(f"Adding archived samplesheet: {str(sample_sheet_path)}")
+                tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
+                self.hk.add_file(path=str(sample_sheet_path), version_obj=hk_version, tags=tags)
         self.hk.commit()

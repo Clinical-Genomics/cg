@@ -209,7 +209,6 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     tb_api: TrailblazerAPI = context.trailblazer_api
-    breakpoint()
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
     search = f"%{demux_api.out_dir}%"
