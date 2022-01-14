@@ -36,7 +36,7 @@ class BackupConfig(BaseModel):
 
 
 class CleanDirs(BaseModel):
-    sample_sheets: str
+    sample_sheets_dir_name: str
 
 
 class CleanConfig(BaseModel):
