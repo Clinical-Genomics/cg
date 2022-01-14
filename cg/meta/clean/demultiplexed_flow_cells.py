@@ -9,9 +9,11 @@ from typing import List, Optional
 from alchy import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FlowCellStatus, HousekeeperTags
+from cg.apps.tb import TrailblazerAPI
+from cg.constants import FlowCellStatus, HousekeeperTags, Pipeline
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
+from cg.constants.tb import AnylysisStatus
 from cg.store import Store
 
 FLOW_CELL_IDENTIFIER_POSITION = 3
@@ -35,6 +37,7 @@ class DemultiplexedRunsFlowCell:
         flow_cell_path: Path,
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
+        trailblazer_api: TrailblazerAPI,
         sample_sheets_dir: Optional[str] = None,
         fastq_files: Optional[Query] = None,
         spring_files: Optional[Query] = None,
@@ -43,6 +46,7 @@ class DemultiplexedRunsFlowCell:
         self.path: Path = flow_cell_path
         self.status_db: Store = status_db
         self.hk: HousekeeperAPI = housekeeper_api
+        self.tb: TrailblazerAPI = trailblazer_api
         self.all_fastq_files: Optional[Query] = fastq_files
         self.all_spring_files: Optional[Query] = spring_files
         self.run_name: str = self.path.name
@@ -60,6 +64,7 @@ class DemultiplexedRunsFlowCell:
         self._files_exist_on_disk = None
         self._passed_check = None
         self._sequencer_type = None
+        self._demultiplexing_ongoing = None
 
     @property
     def sequencer_type(self) -> str:
@@ -177,10 +182,23 @@ class DemultiplexedRunsFlowCell:
         return self._files_exist_on_disk
 
     @property
+    def demultiplexing_ongoing(self):
+        """Checks if demultiplexing is ongoing for a flowcell"""
+        if self._demultiplexing_ongoing is None:
+            latest_demux_status = self.tb.get_latest_analysis_status(case_id=self.id)
+            self._demultiplexing_ongoing = not (
+                latest_demux_status == AnylysisStatus.COMPLETED or latest_demux_status is None
+            )
+        return self._demultiplexing_ongoing
+
+    @property
     def passed_check(self) -> bool:
         """Indicates if all checks have passed"""
         if self._passed_check is None:
-            LOG.info(f"Checking {self.path}:")
+            LOG.info("Checking %s:", self.path)
+            if self.demultiplexing_ongoing:
+                LOG.warning("Demultiplexing not finished for flowcell %s, skipping check!", self.id)
+                return True
             self._passed_check = all(
                 [
                     self.is_correctly_named,
