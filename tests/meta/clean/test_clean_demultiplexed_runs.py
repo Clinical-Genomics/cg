@@ -7,6 +7,7 @@ from unittest import mock
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.store import Store
 from cg.store.models import Flowcell
@@ -20,10 +21,16 @@ from cg.store.models import Flowcell
         ("incorrect_flow_cell_path_extension", False),
     ],
 )
+@mock.patch("cg.apps.tb.api.TrailblazerAPI")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_flow_cell_name(
-    mock_statusdb: Store, mock_hk: HousekeeperAPI, flow_cell_path: Path, result: bool, request
+    mock_statusdb: Store,
+    mock_hk: HousekeeperAPI,
+    mock_tb: TrailblazerAPI,
+    flow_cell_path: Path,
+    result: bool,
+    request,
 ):
     # GIVEN a flow cell
     flow_cell_path = request.getfixturevalue(flow_cell_path)
@@ -32,6 +39,7 @@ def test_flow_cell_name(
         flow_cell_path=flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
+        trailblazer_api=mock_tb,
     )
 
     # WHEN checking the name of the flow cell
@@ -47,11 +55,13 @@ def test_flow_cell_name(
         ("nonexistent_flow_cell_path", None, False),
     ],
 )
+@mock.patch("cg.apps.tb.api.TrailblazerAPI")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_flow_cell_exists_in_statusdb_(
     mock_statusdb: Store,
     mock_hk: HousekeeperAPI,
+    mock_tb: TrailblazerAPI,
     flow_cell_path: Path,
     statusdb_return_value: Optional[Flowcell],
     result: bool,
@@ -65,6 +75,7 @@ def test_flow_cell_exists_in_statusdb_(
         flow_cell_path=flow_cell_path,
         status_db=mock_statusdb,
         housekeeper_api=mock_hk,
+        trailblazer_api=mock_tb,
     )
 
     # WHEN checking if the flow cell exists in statusdb
@@ -73,13 +84,19 @@ def test_flow_cell_exists_in_statusdb_(
     assert flow_cell_obj.exists_in_statusdb == result
 
 
+@mock.patch("cg.apps.tb.api.TrailblazerAPI")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_check_fastq_files_exist_in_hk(
-    mock_statusdb: Store, mock_hk: HousekeeperAPI, correct_flow_cell_path
+    mock_statusdb: Store, mock_hk: HousekeeperAPI, mock_tb: TrailblazerAPI, correct_flow_cell_path
 ):
     # GIVEN a flow cell that has fastq files in housekeeper
-    flow_cell_obj = DemultiplexedRunsFlowCell(correct_flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell_obj = DemultiplexedRunsFlowCell(
+        flow_cell_path=correct_flow_cell_path,
+        status_db=mock_statusdb,
+        housekeeper_api=mock_hk,
+        trailblazer_api=mock_tb,
+    )
     flow_cell_obj._hk_fastq_files = ["file.fastq.gz"]
 
     # WHEN checking for fastq files in Housekeeper
@@ -88,13 +105,19 @@ def test_check_fastq_files_exist_in_hk(
     assert flow_cell_obj.fastq_files_exist_in_housekeeper
 
 
+@mock.patch("cg.apps.tb.api.TrailblazerAPI")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
 def test_check_no_fastq_files_exist_in_hk(
-    mock_statusdb: Store, mock_hk: HousekeeperAPI, correct_flow_cell_path
+    mock_statusdb: Store, mock_hk: HousekeeperAPI, mock_tb: TrailblazerAPI, correct_flow_cell_path
 ):
     # GIVEN a flow cell that has no fastq files in housekeeper
-    flow_cell_obj = DemultiplexedRunsFlowCell(correct_flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell_obj = DemultiplexedRunsFlowCell(
+        flow_cell_path=correct_flow_cell_path,
+        status_db=mock_statusdb,
+        housekeeper_api=mock_hk,
+        trailblazer_api=mock_tb,
+    )
     flow_cell_obj._hk_fastq_files = []
 
     # WHEN checking for fastq files in Housekeeper
