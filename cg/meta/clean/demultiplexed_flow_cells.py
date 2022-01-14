@@ -219,7 +219,6 @@ class DemultiplexedRunsFlowCell:
     def archive_sample_sheet(self):
         """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
         Housekeeper with an appropriate tag"""
-
         LOG.info("Archiving sample sheet for flow cell %s", self.run_name)
 
         original_sample_sheet: Path = self.path / "SampleSheet.csv"
@@ -233,7 +232,6 @@ class DemultiplexedRunsFlowCell:
                 "Sample sheet directory for flow cell directory %s already exists!",
                 self.run_name,
             )
-
         try:
             shutil.move(original_sample_sheet, archived_sample_sheet)
             self.add_sample_sheet_to_housekeeper(str(archived_sample_sheet))
