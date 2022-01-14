@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from alchy import Query
+from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -70,7 +71,8 @@ class DemultiplexedRunsFlowCell:
     def sequencer_type(self) -> Optional[str]:
         """The type of sequencer a flow cell has been sequenced on"""
         if self._sequencer_type is None:
-            return sequencer_types.get(self.sequencer_serial_number, "other")
+            self._sequencer_type = sequencer_types.get(self.sequencer_serial_number, "other")
+        return self._sequencer_type
 
     @property
     def hk_fastq_files(self) -> list:
@@ -277,17 +279,17 @@ class DemultiplexedRunsFlowCell:
     def add_sample_sheet_to_housekeeper(self, sample_sheet_path: Path):
         """Adds an archive sample sheet to Housekeeper"""
 
-        hk_bundle = self.hk.bundle(self.id)
+        hk_bundle: hk_models.Bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
-            hk_bundle = self.hk.new_bundle(name=self.id)
+            hk_bundle: hk_models.Bundle = self.hk.new_bundle(name=self.id)
             self.hk.add_commit(hk_bundle)
-            new_version = self.hk.new_version(created_at=hk_bundle.created_at)
+            new_version: hk_models.Version = self.hk.new_version(created_at=hk_bundle.created_at)
             hk_bundle.versions.append(new_version)
             self.hk.commit()
             LOG.info("New bundle created for flow cell %s", self.id)
 
         with self.hk.session_no_autoflush():
-            hk_version = self.hk.last_version(bundle=hk_bundle.name)
+            hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
             if self.hk.files(path=str(sample_sheet_path)).first() is None:
                 LOG.info(f"Adding archived samplesheet: {str(sample_sheet_path)}")
                 tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
