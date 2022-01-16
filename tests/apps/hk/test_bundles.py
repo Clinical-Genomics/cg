@@ -1,6 +1,8 @@
 """Test how the api handles bundles"""
 from datetime import datetime
 
+import mock.mock
+
 
 def test_new_bundle(housekeeper_api, small_helpers):
     """Test to create a bundle with the housekeeper api"""
@@ -64,3 +66,21 @@ def test_get_bundle(housekeeper_api, minimal_bundle_obj):
     # THEN assert that a bundle was fetched
     assert bundle_obj
     assert bundle_obj.name == bundle_name
+
+
+def test_create_bundle_and_version(housekeeper_api, minimal_bundle_obj, small_helpers):
+    """Test to create a housekeeper bundle and version"""
+
+    # GIVEN a housekeeper api without bundles
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
+    # GIVEN some bundle information
+    bundle_name = "testname"
+
+    # WHEN creating a new bundle and version
+    bundle_obj = housekeeper_api.create_new_bundle_and_version(name=bundle_name)
+
+    # THEN a new bundle with the correct name is created, with a version, and added to the database
+    assert housekeeper_api.bundle(bundle_name) is not None
+    assert bundle_obj.name == bundle_name
+    assert bundle_obj.versions is not None
+    assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 1

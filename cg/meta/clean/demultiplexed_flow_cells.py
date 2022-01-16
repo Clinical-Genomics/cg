@@ -281,12 +281,7 @@ class DemultiplexedRunsFlowCell:
 
         hk_bundle: hk_models.Bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
-            hk_bundle: hk_models.Bundle = self.hk.new_bundle(name=self.id)
-            self.hk.add_commit(hk_bundle)
-            new_version: hk_models.Version = self.hk.new_version(created_at=hk_bundle.created_at)
-            hk_bundle.versions.append(new_version)
-            self.hk.commit()
-            LOG.info("New bundle created for flow cell %s", self.id)
+            self.hk.create_new_bundle_and_version(name=self.id)
 
         with self.hk.session_no_autoflush():
             hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
