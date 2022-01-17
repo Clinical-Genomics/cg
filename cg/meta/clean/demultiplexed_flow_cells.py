@@ -254,7 +254,6 @@ class DemultiplexedRunsFlowCell:
         """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
         Housekeeper with an appropriate tag"""
         LOG.info("Archiving sample sheet for flow cell %s", self.run_name)
-        breakpoint()
         globbed_unaligned_paths: Path.glob = Path(self.path).glob(
             DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME + ASTERISK
         )
