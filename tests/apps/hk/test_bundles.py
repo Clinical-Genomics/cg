@@ -71,7 +71,8 @@ def test_create_bundle_and_version(housekeeper_api, minimal_bundle_obj, small_he
 
     # GIVEN a housekeeper api without bundles
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
-    # GIVEN some bundle information
+
+    # GIVEN a bundle name
     bundle_name = "testname"
 
     # WHEN creating a new bundle and version
