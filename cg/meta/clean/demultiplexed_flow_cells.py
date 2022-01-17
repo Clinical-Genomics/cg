@@ -65,7 +65,7 @@ class DemultiplexedRunsFlowCell:
         self._files_exist_on_disk = None
         self._passed_check = None
         self._sequencer_type = None
-        self._is_demultiplexing_ongoing_or_started = None
+        self._is_demultiplexing_ongoing_or_started_and_not_completed = None
 
     @property
     def sequencer_type(self) -> str:
@@ -99,7 +99,7 @@ class DemultiplexedRunsFlowCell:
         if self._is_correctly_named is None:
             self._is_correctly_named: bool = self.split_name[-1] == self.identifier
             if not self._is_correctly_named:
-                LOG.warning("Flow cell name not correctly named!: %s", self.path)
+                LOG.warning("Flow cell not correctly named!: %s", self.path)
         return self._is_correctly_named
 
     @property
@@ -187,24 +187,24 @@ class DemultiplexedRunsFlowCell:
     def is_demultiplexing_ongoing_or_started_and_not_completed(self) -> bool:
         """Checks demultiplexing status for a flow cell. A flow cell can only be deleted if
         demultiplexing has not started or is not ongoing. Completed flow cells can be deleted"""
-        if self._is_demultiplexing_ongoing_or_started is None:
-            self._is_demultiplexing_ongoing_or_started: bool = (
+        if self._is_demultiplexing_ongoing_or_started_and_not_completed is None:
+            LOG.info("Checking demultiplexing status for flowcell %s:", self.id)
+            self._is_demultiplexing_ongoing_or_started_and_not_completed: bool = (
                 self.tb.has_latest_analysis_started(case_id=self.id)
                 or self.tb.is_latest_analysis_ongoing(case_id=self.id)
             ) and not self.tb.is_latest_analysis_completed(case_id=self.id)
+            if self._is_demultiplexing_ongoing_or_started_and_not_completed:
+                LOG.warning("Demultiplexing not fully completed for flow cell %s!", self.id)
+            else:
+                LOG.info("Demultiplexing fully completed!")
 
-        return self._is_demultiplexing_ongoing_or_started
+        return self._is_demultiplexing_ongoing_or_started_and_not_completed
 
     @property
     def passed_check(self) -> bool:
         """Indicates if all checks have passed"""
         if self._passed_check is None:
             LOG.info("Checking %s:", self.path)
-            if self.is_demultiplexing_ongoing_or_started_and_not_completed:
-                LOG.warning(
-                    "Demultiplexing not finished for flow cell %s, skipping check!", self.id
-                )
-                return True
             self._passed_check = all(
                 [
                     self.is_correctly_named,
