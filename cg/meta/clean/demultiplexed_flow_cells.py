@@ -65,7 +65,7 @@ class DemultiplexedRunsFlowCell:
         self._files_exist_on_disk = None
         self._passed_check = None
         self._sequencer_type = None
-        self._demultiplexing_ongoing = None
+        self._is_demultiplexing_ongoing_or_started = None
 
     @property
     def sequencer_type(self) -> Optional[str]:
@@ -184,21 +184,22 @@ class DemultiplexedRunsFlowCell:
         return self._files_exist_on_disk
 
     @property
-    def demultiplexing_ongoing(self):
-        """Checks if demultiplexing is ongoing for a flowcell"""
-        if self._demultiplexing_ongoing is None:
-            latest_demux_status = self.tb.get_latest_analysis_status(case_id=self.id)
-            self._demultiplexing_ongoing = not (
-                latest_demux_status == AnylysisStatus.COMPLETED or latest_demux_status is None
-            )
-        return self._demultiplexing_ongoing
+    def is_demultiplexing_ongoing_or_started(self):
+        """Checks demultiplexing status for a flow cell. A flow cell can only be deleted if
+        demultiplexing has not started or is not ongoing"""
+        if self._is_demultiplexing_ongoing_or_started is None:
+            self._is_demultiplexing_ongoing_or_started = self.tb.has_latest_analysis_started(
+                case_id=self.id
+            ) or self.tb.is_latest_analysis_ongoing(case_id=self.id)
+
+        return self._is_demultiplexing_ongoing_or_started
 
     @property
     def passed_check(self) -> bool:
         """Indicates if all checks have passed"""
         if self._passed_check is None:
             LOG.info("Checking %s:", self.path)
-            if self.demultiplexing_ongoing:
+            if self.is_demultiplexing_ongoing_or_started:
                 LOG.warning("Demultiplexing not finished for flowcell %s, skipping check!", self.id)
                 return True
             self._passed_check = all(

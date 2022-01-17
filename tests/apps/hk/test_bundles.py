@@ -1,8 +1,6 @@
 """Test how the api handles bundles"""
 from datetime import datetime
 
-import mock.mock
-
 
 def test_new_bundle(housekeeper_api, small_helpers):
     """Test to create a bundle with the housekeeper api"""
