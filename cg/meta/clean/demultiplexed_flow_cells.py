@@ -298,7 +298,3 @@ class DemultiplexedRunsFlowCell:
                 tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
                 self.hk.add_file(path=str(sample_sheet_path), version_obj=hk_version, tags=tags)
         self.hk.commit()
-
-    def perform_checks(self):
-        """hjkbecksbedc"""
-        return self.passed_check
