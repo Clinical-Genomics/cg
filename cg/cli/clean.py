@@ -228,7 +228,10 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             fastq_files_in_housekeeper,
             spring_files_in_housekeeper,
         )
-        checked_flow_cells.append(flow_cell_obj)
+        if not flow_cell_obj.is_demultiplexing_ongoing_or_started_and_not_completed:
+            checked_flow_cells.append(flow_cell_obj)
+        else:
+            LOG.warning("Skipping check!")
 
     failed_flow_cells: List[DemultiplexedRunsFlowCell] = [
         flow_cell for flow_cell in checked_flow_cells if not flow_cell.passed_check
