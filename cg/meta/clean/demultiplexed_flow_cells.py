@@ -183,13 +183,14 @@ class DemultiplexedRunsFlowCell:
         return self._files_exist_on_disk
 
     @property
-    def is_demultiplexing_ongoing_or_started(self):
+    def is_demultiplexing_ongoing_or_started_and_not_completed(self):
         """Checks demultiplexing status for a flow cell. A flow cell can only be deleted if
-        demultiplexing has not started or is not ongoing"""
+        demultiplexing has not started or is not ongoing. Completed flow cells can be deleted"""
         if self._is_demultiplexing_ongoing_or_started is None:
-            self._is_demultiplexing_ongoing_or_started = self.tb.has_latest_analysis_started(
-                case_id=self.id
-            ) or self.tb.is_latest_analysis_ongoing(case_id=self.id)
+            self._is_demultiplexing_ongoing_or_started = (
+                self.tb.has_latest_analysis_started(case_id=self.id)
+                or self.tb.is_latest_analysis_ongoing(case_id=self.id)
+            ) and not self.tb.is_latest_analysis_completed(case_id=self.id)
 
         return self._is_demultiplexing_ongoing_or_started
 
@@ -198,8 +199,10 @@ class DemultiplexedRunsFlowCell:
         """Indicates if all checks have passed"""
         if self._passed_check is None:
             LOG.info("Checking %s:", self.path)
-            if self.is_demultiplexing_ongoing_or_started:
-                LOG.warning("Demultiplexing not finished for flowcell %s, skipping check!", self.id)
+            if self.is_demultiplexing_ongoing_or_started_and_not_completed:
+                LOG.warning(
+                    "Demultiplexing not finished for flow cell %s, skipping check!", self.id
+                )
                 return True
             self._passed_check = all(
                 [
@@ -286,7 +289,7 @@ class DemultiplexedRunsFlowCell:
         with self.hk.session_no_autoflush():
             hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
             if self.hk.files(path=str(sample_sheet_path)).first() is None:
-                LOG.info(f"Adding archived samplesheet: {str(sample_sheet_path)}")
+                LOG.info(f"Adding archived sample sheet: {str(sample_sheet_path)}")
                 tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
                 self.hk.add_file(path=str(sample_sheet_path), version_obj=hk_version, tags=tags)
         self.hk.commit()
