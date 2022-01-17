@@ -67,7 +67,7 @@ class DemultiplexedRunsFlowCell:
         self._is_demultiplexing_ongoing_or_started = None
 
     @property
-    def sequencer_type(self) -> Optional[str]:
+    def sequencer_type(self) -> str:
         """The type of sequencer a flow cell has been sequenced on"""
         if self._sequencer_type is None:
             self._sequencer_type = sequencer_types.get(self.sequencer_serial_number, "other")
@@ -183,11 +183,11 @@ class DemultiplexedRunsFlowCell:
         return self._files_exist_on_disk
 
     @property
-    def is_demultiplexing_ongoing_or_started_and_not_completed(self):
+    def is_demultiplexing_ongoing_or_started_and_not_completed(self) -> bool:
         """Checks demultiplexing status for a flow cell. A flow cell can only be deleted if
         demultiplexing has not started or is not ongoing. Completed flow cells can be deleted"""
         if self._is_demultiplexing_ongoing_or_started is None:
-            self._is_demultiplexing_ongoing_or_started = (
+            self._is_demultiplexing_ongoing_or_started: bool = (
                 self.tb.has_latest_analysis_started(case_id=self.id)
                 or self.tb.is_latest_analysis_ongoing(case_id=self.id)
             ) and not self.tb.is_latest_analysis_completed(case_id=self.id)
