@@ -261,8 +261,6 @@ class DemultiplexedRunsFlowCell:
         unaligned_path = list(globbed_unaligned_paths)[0]
         original_sample_sheet: Path = (
             Path(
-                # self.path,
-                # DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
                 unaligned_path,
                 DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
             )
