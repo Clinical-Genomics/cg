@@ -14,6 +14,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
+from cg.constants.symbols import ASTERISK
 from cg.store import Store
 
 FLOW_CELL_IDENTIFIER_POSITION = 3
@@ -214,7 +215,7 @@ class DemultiplexedRunsFlowCell:
             )
             LOG.info(
                 "Flow cell %s has passed all checks, setting flag to True!", self.id
-            ) if self._passed_check else LOG.info(
+            ) if self._passed_check else LOG.error(
                 "Flow cell %s failed one or more tests, setting flag to %s!",
                 self.id,
                 self._passed_check,
@@ -253,10 +254,16 @@ class DemultiplexedRunsFlowCell:
         """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
         Housekeeper with an appropriate tag"""
         LOG.info("Archiving sample sheet for flow cell %s", self.run_name)
+        breakpoint()
+        globbed_unaligned_paths: Path.glob = Path(self.path).glob(
+            DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME + ASTERISK
+        )
+        unaligned_path = list(globbed_unaligned_paths)[0]
         original_sample_sheet: Path = (
             Path(
-                self.path,
-                DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+                # self.path,
+                # DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+                unaligned_path,
                 DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
             )
             if self.sequencer_type == Sequencers.NOVASEQ
@@ -293,3 +300,7 @@ class DemultiplexedRunsFlowCell:
                 tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
                 self.hk.add_file(path=str(sample_sheet_path), version_obj=hk_version, tags=tags)
         self.hk.commit()
+
+    def perform_checks(self):
+        """hjkbecksbedc"""
+        return self.passed_check
