@@ -11,10 +11,9 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import FlowCellStatus, HousekeeperTags, Pipeline
+from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
-from cg.constants.tb import AnylysisStatus
 from cg.store import Store
 
 FLOW_CELL_IDENTIFIER_POSITION = 3
