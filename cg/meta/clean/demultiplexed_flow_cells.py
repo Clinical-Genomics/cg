@@ -288,7 +288,7 @@ class DemultiplexedRunsFlowCell:
 
         hk_bundle: hk_models.Bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
-            self.hk.create_new_bundle_and_version(name=self.id)
+            hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
 
         with self.hk.session_no_autoflush():
             hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
