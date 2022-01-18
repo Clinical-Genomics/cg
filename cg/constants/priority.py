@@ -1,11 +1,7 @@
 """Priority specific constants"""
+from enum import Enum
+
 from cgmodels.cg.constants import StrEnum
-
-PRIORITY_MAP = {"research": 0, "standard": 1, "priority": 2, "express": 3, "clinical trials": 4}
-
-REV_PRIORITY_MAP = {value: key for key, value in PRIORITY_MAP.items()}
-
-PRIORITY_OPTIONS = list(PRIORITY_MAP.keys())
 
 
 class SlurmQos(StrEnum):
@@ -18,3 +14,16 @@ SLURM_ACCOUNT_TO_QOS = {
     "production": SlurmQos.NORMAL,
     "development": SlurmQos.LOW,
 }
+
+
+class IntEnum(int, Enum):
+    def __str__(self) -> str:
+        return int.__str__(self)
+
+
+class Priority(IntEnum):
+    research: int = 0
+    standard: int = 1
+    priority: int = 2
+    express: int = 3
+    clinical_trials: int = 4

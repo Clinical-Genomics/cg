@@ -25,7 +25,7 @@
       "phenotype_groups": [
         ""
       ],
-      "priority": "Standard",
+      "priority": "research",
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",
@@ -91,7 +91,7 @@
       "phenotype_groups": [
         ""
       ],
-      "priority": "Standard",
+      "priority": "priority",
       "quantity": "200",
       "require_qcok": false,
       "sex": "female",
@@ -124,7 +124,7 @@
       "phenotype_groups": [
         ""
       ],
-      "priority": "Standard",
+      "priority": "express",
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",
@@ -158,7 +158,7 @@
       "phenotype_groups": [
         "Phenotype-group"
       ],
-      "priority": "Standard",
+      "priority": "clinical trials",
       "quantity": "200",
       "require_qcok": false,
       "sex": "female",
@@ -191,7 +191,7 @@
       "phenotype_groups": [
         ""
       ],
-      "priority": "Standard",
+      "priority": "clinical trials",
       "quantity": "200",
       "require_qcok": false,
       "sex": "male",

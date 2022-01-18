@@ -140,7 +140,7 @@ def test_chanjo_api_omim_coverage(chanjo_config_dict, mocker, mock_process):
     api = ChanjoAPI(chanjo_config_dict)
     samples = api.omim_coverage(samples=[{"id": sample_id}])
 
-    # THEN Then this should return a dictionary with mean coverage and mean_completeness
+    # THEN this should return a dictionary with mean coverage and mean_completeness
     # for each sample
     assert samples[sample_id]["mean_coverage"] == mean_coverage
     assert samples[sample_id]["mean_completeness"] == mean_completeness
@@ -169,7 +169,7 @@ def test_chanjo_api_coverage(chanjo_config_dict, mocker, mock_process):
     api = ChanjoAPI(chanjo_config_dict)
     samples = api.sample_coverage(sample_id=sample_id, panel_genes=["123"])
 
-    # THEN Then this should return a dictionary with mean coverage and mean_completeness
+    # THEN this should return a dictionary with mean coverage and mean_completeness
     # the sample
     assert samples["mean_coverage"] == mean_coverage
     assert samples["mean_completeness"] == mean_completeness

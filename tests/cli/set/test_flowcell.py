@@ -16,7 +16,7 @@ def test_set_flowcell_bad_flowcell(cli_runner: CliRunner, base_context: CGConfig
     flowcell_name = "dummy_name"
     result = cli_runner.invoke(flowcell, [flowcell_name], obj=base_context)
 
-    # THEN then it should complain in missing flowcell instead of setting a flowcell
+    # THEN it should complain in missing flowcell instead of setting a flowcell
     assert result.exit_code != SUCCESS
 
 
@@ -31,7 +31,7 @@ def test_set_flowcell_required(
     # WHEN setting a flowcell
     result = cli_runner.invoke(flowcell, [flowcell_name], obj=base_context)
 
-    # THEN then it should have been set
+    # THEN it should have been set
     assert result.exit_code == SUCCESS
 
 
@@ -47,7 +47,7 @@ def test_set_flowcell_status(
     # WHEN setting a flowcell
     result = cli_runner.invoke(flowcell, ["--status", status, flowcell_name], obj=base_context)
 
-    # THEN then it should have been set
+    # THEN it should have been set
     assert result.exit_code == SUCCESS
     assert base_store.Flowcell.query.count() == 1
     assert base_store.Flowcell.query.first().status == status

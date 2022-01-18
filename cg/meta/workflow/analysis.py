@@ -97,9 +97,9 @@ class AnalysisAPI(MetaAPI):
     def get_priority_for_case(self, case_id: str) -> str:
         """Fetch priority for case id"""
         case_obj: models.Family = self.status_db.family(case_id)
-        if not case_obj.priority or case_obj.priority == 0:
+        if not case_obj.priority or case_obj.priority_int == 0:
             return SlurmQos.LOW
-        if case_obj.priority > 1:
+        if case_obj.priority_int > 1:
             return SlurmQos.HIGH
         return SlurmQos.NORMAL
 
