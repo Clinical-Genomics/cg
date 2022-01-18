@@ -25,6 +25,7 @@ from cg.cli.workflow.commands import (
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.constants.constants import DRY_RUN, Sequencers
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
+from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -336,22 +337,35 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     "--days-old",
     type=int,
     default=21,
-    help="Specify the age in days of the flow cells to be removed",
+    help="Specify the age in days of the flow cells to be removed. Default is 21 days.",
 )
 @DRY_RUN
 @click.pass_obj
 def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: int, dry_run: bool):
-    """Removes flowcells from /home/proj/production/flowcells based on the sequencing date and
+    """Removes flow cells from /home/proj/production/flowcells based on the sequencing date and
     the sequencer type, if specified."""
+    status_db: Store = context.status_db
     if sequencer == Sequencers.ALL:
-        LOG.info("Checking flowcells for all sequencers!")
-        for sequencer, directory in context.clean.flowcells:
-            LOG.info("Checking directory %s of sequencer %s:", directory, sequencer)
-            for flow_cell_dir in Path(directory).iterdir():
-                LOG.info("Checking flowcell %s", flow_cell_dir)
+        LOG.info("Checking flow cells for all sequencers!")
+        for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
+            LOG.info("Checking directory %s of sequencer %s:", run_directory, sequencer)
+            for flow_cell_dir in Path(run_directory).iterdir():
+                LOG.info("Checking flow cell %s", flow_cell_dir.name)
+                run_dir_flow_cell = RunDirFlowCell(status_db, flow_cell_dir)
+                if run_dir_flow_cell.age >= days_old:
+                    LOG.info(
+                        "Flow cell %s is %s days old and will be removed",
+                        flow_cell_dir,
+                        run_dir_flow_cell.age,
+                    )
+                    if dry_run:
+                        continue
+                    LOG.info("Removing flow cell run directory %s", run_dir_flow_cell.flow_cell_dir)
+                    run_dir_flow_cell.remove_run_directory()
+                    # TODO: archive sample sheet
     else:
         LOG.info(
             "Checking directory %s of sequencer %s:",
-            dict(context.clean.flowcells).get(sequencer),
+            dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer),
             sequencer,
         )

@@ -31,10 +31,8 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
-class FlowCellRunDirs(BaseModel):
-    hiseqx: str
-    hiseqga: str
-    novaseq: str
+class FlowCellRunDirs(Sequencers):
+    pass
 
 
 class BackupConfig(BaseModel):
@@ -43,14 +41,11 @@ class BackupConfig(BaseModel):
 
 class CleanDirs(BaseModel):
     sample_sheets_dir_name: str
+    flow_cell_run_dirs: FlowCellRunDirs
 
 
 class CleanConfig(BaseModel):
     flow_cells: CleanDirs
-
-
-class CleanConfig(BaseModel):
-    flowcells: FlowCellRunDirs
 
 
 class SlurmConfig(BaseModel):
