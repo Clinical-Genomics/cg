@@ -264,7 +264,7 @@ class DemultiplexedRunsFlowCell:
                 self.run_name,
             )
             return
-        unaligned_path: Path = list(globbed_unaligned_paths_list)[0]
+        unaligned_path: Path = globbed_unaligned_paths_list[0]
         original_sample_sheet: Path = (
             Path(
                 unaligned_path,
