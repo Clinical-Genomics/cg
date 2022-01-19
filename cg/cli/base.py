@@ -15,7 +15,7 @@ from cg.store import Store
 
 from .add import add as add_cmd
 from .backup import backup
-from .clean import clean
+from cg.cli.clean.base import clean
 from .compress.base import compress, decompress
 from .deliver.base import deliver as deliver_cmd
 from .demultiplex.base import demultiplex_cmd_group as demultiplex_cmd

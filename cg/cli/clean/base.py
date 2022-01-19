@@ -25,7 +25,7 @@ from cg.cli.workflow.commands import (
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store import Store, models
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -85,6 +85,71 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
             if not dry_run:
                 file_obj.delete()
                 housekeeper_api.commit()
+
+
+@clean.command("balsamic-trimmed-fastqs")
+@click.option(
+    "--days-old",
+    type=int,
+    default=45,
+    help="Clean trimmed fastq files with analysis dates older then given number of days",
+)
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.pass_context
+def balsamic_trimmed_fastqs(
+    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of solved and archived scout cases"""
+    store: Store = context.obj.status_db
+    bundles: List[str] = []
+    analyses: List[models.Analysis] = store.analyses()
+    cases_added = 0
+    for analysis in analyses:
+        if analysis.pipeline != Pipeline.BALSAMIC:
+            continue
+
+        x_days_ago = datetime.now() - analysis.started_at
+        if x_days_ago.days > days_old:
+            bundles.append(analysis.family.internal_id)
+            cases_added += 1
+    LOG.info("%s cases marked for trimmed fastq removal", cases_added)
+
+    for bundle in bundles:
+        context.invoke(trimmed_fastqs, bundle=bundle, yes=yes, dry_run=dry_run)
+
+
+@clean.command("trimmed-fastqs")
+@click.argument("bundle")
+@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
+@click.pass_obj
+def trimmed_fastqs(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
+    """Clean up alignment files in Housekeeper bundle"""
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    tags = ["balsamic", "trimmed", "fastq"]
+
+    tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=tags))
+
+    if not tag_files:
+        LOG.warning(
+            "Could not find any files ready for cleaning for bundle %s and tags %s", bundle, tags
+        )
+
+    for file_obj in tag_files:
+        if not (yes or click.confirm(_get_confirm_question(bundle, file_obj))):
+            continue
+
+        file_path: Path = Path(file_obj.full_path)
+        if file_obj.is_included and file_path.exists():
+            LOG.info("Unlinking %s", file_path)
+            if not dry_run:
+                file_path.unlink()
+
+        LOG.info("Deleting %s from database", file_path)
+        if not dry_run:
+            file_obj.delete()
+            housekeeper_api.commit()
 
 
 def _get_confirm_question(bundle, file_obj):
