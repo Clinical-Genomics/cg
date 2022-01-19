@@ -60,7 +60,7 @@ class ExternalDataAPI(MetaAPI):
         """Returns the path to where the files are to be transferred"""
         return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
+    def transfer_sample_files_from_source(self, dry_run: bool, nanopore: bool, ticket_id: int) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
@@ -71,6 +71,9 @@ class ExternalDataAPI(MetaAPI):
             source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
             destination_path=self.get_destination_path(customer=cust),
         )
+        if nanopore:
+            command += "/nanopore/"
+
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
             "account": self.account,
