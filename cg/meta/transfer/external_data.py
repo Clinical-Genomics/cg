@@ -74,7 +74,7 @@ class ExternalDataAPI(MetaAPI):
             destination_path=self.get_destination_path(customer=cust),
         )
         if nanopore:
-            command += "/nanopore/"
+            command = "".join([command.strip(), "/nanopore/"])
 
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
