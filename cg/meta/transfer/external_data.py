@@ -176,6 +176,8 @@ class ExternalDataAPI(MetaAPI):
             sample and force
         ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
+        elif sample_folder.name == "nanopore":
+            return
         elif not sample and not self.status_db.sample(sample_folder.name):
             raise Exception(
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
