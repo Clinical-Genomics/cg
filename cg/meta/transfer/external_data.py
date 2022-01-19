@@ -67,14 +67,16 @@ class ExternalDataAPI(MetaAPI):
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
-        Path(self.destination_path % cust).mkdir(exist_ok=True)
+
+        destination_folder: Path = Path(self.destination_path % cust)
+        if nanopore:
+            destination_folder = destination_folder / "nanopore"
+        Path(destination_folder).mkdir(exist_ok=True, parents=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
             source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
-            destination_path=self.get_destination_path(customer=cust),
+            destination_path=destination_folder,
         )
-        if nanopore:
-            command = "".join([command.strip(), "/nanopore/"])
 
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
