@@ -97,10 +97,11 @@ def test_transfer_sample_files_from_source(
     )
 
     # WHEN the transfer is initiated
-    external_data_api.transfer_sample_files_from_source(ticket_id=ticket_nr, dry_run=True)
+    external_data_api.transfer_sample_files_from_source(
+        ticket_id=ticket_nr, dry_run=True, nanopore=False
+    )
 
     # THEN only the two samples present in the source directory are included in the rsync
-
     assert str(external_data_directory) in caplog.text
 
 
