@@ -13,7 +13,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.exc import CgDataError
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
+from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
@@ -71,12 +71,16 @@ class ExternalDataAPI(MetaAPI):
         destination_folder: Path = Path(self.destination_path % cust)
         if nanopore:
             destination_folder = destination_folder / "nanopore"
+            command: str = RSYNC_COMMAND.format(
+                source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
+                destination_path=destination_folder,
+            )
+        else:
+            command: str = RSYNC_CONTENTS_COMMAND.format(
+                source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
+                destination_path=destination_folder,
+            )
         Path(destination_folder).mkdir(exist_ok=True, parents=True)
-
-        command: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
-            destination_path=destination_folder,
-        )
 
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
