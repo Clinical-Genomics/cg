@@ -70,13 +70,13 @@ def test_sequenced_date_from_run_name(
 def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flowcell_path, novaseq_dir):
     # GIVEN a flow cell
     flow_cell_obj = RunDirFlowCell(flowcell_path, mock_statusdb, mock_hk)
-    # that has a sample sheet
+    # GIVEN a sample sheet connected to the flow cell
     flow_cell_obj.sample_sheet_path = (
         novaseq_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
     )
-    # but no bundle
+    # GIVEN there is no bundle for the flow cell
     mock_hk.bundle.return_value = None
-    #  and the sample sheet does not exist in Housekeeper
+    # GIVEN the sample sheet does not exist in Housekeeper
     mock_hk.files.return_value.first.return_value = None
     mock_hk.get_files.return_value.first.return_value.is_included = False
 
