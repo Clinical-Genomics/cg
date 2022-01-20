@@ -9,7 +9,7 @@ from cg.store import Store, models
 SUCCESS = 0
 
 
-@pytest.mark.parametrize("identifier_key", ["ticket_number", "order"])
+@pytest.mark.parametrize("identifier_key", ["order"])
 def test_set_families_by_sample_identifiers(
     cli_runner, base_context: CGConfig, identifier_key, helpers, caplog
 ):
@@ -18,7 +18,7 @@ def test_set_families_by_sample_identifiers(
     sample_obj: models.Sample = helpers.add_sample(base_store)
     sample_obj.ticket_number = 123456
     sample_obj.order = "An order"
-    case: models.Family = helpers.add_case(base_store)
+    case: models.Family = helpers.add_case(base_store, ticket=sample_obj.ticket_number)
     helpers.add_relationship(base_store, sample=sample_obj, case=case)
     identifier_value = getattr(sample_obj, identifier_key)
 

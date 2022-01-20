@@ -93,6 +93,7 @@ class MicrobialSubmitter(Submitter):
                         data_delivery=data_delivery,
                         name=ticket,
                         panels=None,
+                        ticket=ticket,
                     )
                     case_obj.customer = customer_obj
                     self.status.add_commit(case_obj)

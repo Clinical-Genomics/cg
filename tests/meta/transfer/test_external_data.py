@@ -3,12 +3,16 @@ import logging
 from pathlib import Path
 from typing import List
 
+from _pytest.tmpdir import TempdirFactory
+
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.cli.workflow.conftest import dna_case
+
+from tests.store_helpers import StoreHelpers
 from tests.store.conftest import fixture_sample_obj
 
 
@@ -69,7 +73,7 @@ def test_transfer_sample_files_from_source(
     cust_sample_id: str,
     external_data_api: ExternalDataAPI,
     external_data_directory: Path,
-    helpers,
+    helpers: StoreHelpers,
     mocker,
     sample_store: Store,
     ticket_nr: int,
@@ -81,12 +85,17 @@ def test_transfer_sample_files_from_source(
     sample_name2: str = cust_sample_id + "2"
     sample_name3: str = cust_sample_id + "3"
 
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name1, ticket=ticket_nr)
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name2, ticket=ticket_nr)
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name3, ticket=ticket_nr)
-
-    mocker.patch.object(Store, "get_customer_id_from_ticket")
-    Store.get_customer_id_from_ticket.return_value = customer_id
+    customer = helpers.ensure_customer(store=external_data_api.status_db, customer_id=customer_id)
+    case = helpers.ensure_case(store=external_data_api.status_db, name="case", ticket=ticket_nr, customer=customer)
+    samples: [models.Sample] = [
+        helpers.add_sample(store=external_data_api.status_db, name=sample_name1, ticket=ticket_nr,
+                           customer_id=customer_id),
+        helpers.add_sample(store=external_data_api.status_db, name=sample_name2, ticket=ticket_nr,
+                           customer_id=customer_id),
+        helpers.add_sample(store=external_data_api.status_db, name=sample_name3, ticket=ticket_nr,
+                           customer_id=customer_id)]
+    for sample in samples:
+        helpers.add_relationship(store=external_data_api.status_db, sample=sample, case=case)
 
     mocker.patch.object(ExternalDataAPI, "get_source_path")
     external_data_api.get_source_path.return_value = Path("").joinpath(external_data_directory)
@@ -147,12 +156,12 @@ def test_add_files_to_bundles(
 
 
 def test_add_transfer_to_housekeeper(
-    case_id,
-    dna_case,
+    case_id: str,
+    dna_case: models.Family,
     external_data_api: ExternalDataAPI,
     fastq_file: Path,
     mocker,
-    ticket_nr,
+    ticket_nr: int,
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
@@ -162,6 +171,9 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(Store, "get_cases_from_ticket")
     Store.get_cases_from_ticket.return_value = cases
     samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
+
+    mocker.patch.object(Store, "get_customer_id_from_case")
+    Store.get_customer_id_from_sample.return_value = samples[0].customer.internal_id
 
     # GIVEN a list of paths and only two samples being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
@@ -182,15 +194,15 @@ def test_add_transfer_to_housekeeper(
     mocker.patch.object(Store, "set_case_action")
     Store.set_case_action.return_value = None
 
-    # THEN none of the samples should exist in housekeeper
+    # GIVEN none of the samples exists in Housekeeper
     assert all(
         external_data_api.housekeeper_api.bundle(sample.internal_id) is None for sample in samples
     )
 
-    # WHEN the sample bundles are added to housekeeper
+    # WHEN the sample bundles are added to Housekeeper
     external_data_api.add_transfer_to_housekeeper(ticket_id=ticket_nr)
 
-    # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
+    # THEN two sample bundles exist in Housekeeper and the file has been added to those bundles
     added_samples = [sample for sample in external_data_api.housekeeper_api.bundles()]
     assert all(
         sample.internal_id in [added_sample.name for added_sample in added_samples]
@@ -199,23 +211,27 @@ def test_add_transfer_to_housekeeper(
     assert all(
         sample.versions[0].files[0].path == str(fastq_file.absolute()) for sample in added_samples
     )
-    # Then the sample that is not available should not exists
+    # Then the sample that is not available should not have been added to Housekeeper
     assert samples[-1].internal_id not in [added_sample.name for added_sample in added_samples]
 
 
 def test_get_available_samples(
-    analysis_store_trio,
+    analysis_store_trio: Store,
     customer_id: str,
     external_data_api: ExternalDataAPI,
     sample_obj: models.Sample,
     ticket_nr: int,
-    tmpdir_factory,
+    tmpdir_factory: TempdirFactory,
 ):
     # GIVEN one such sample exists
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
+    analysis_store_trio.sample(internal_id=sample_obj.internal_id).links[0].family.ticket_number = ticket_nr
+
+    # WHEN getting available samples
     available_samples = external_data_api.get_available_samples(
         folder=tmp_dir_path, ticket_id=ticket_nr
     )
+
     # THEN the function should return a list containing the sample object
     assert available_samples == [sample_obj]
 

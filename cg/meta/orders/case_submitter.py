@@ -212,7 +212,7 @@ class CaseSubmitter(Submitter):
         for case in items:
             case_obj = self.status.family(case["internal_id"])
             if not case_obj:
-                case_obj = self.create_case(case, customer_obj)
+                case_obj = self.create_case(case, customer_obj, ticket=ticket)
                 new_families.append(case_obj)
 
             self.update_case(case, case_obj)
@@ -290,7 +290,7 @@ class CaseSubmitter(Submitter):
         self.status.add(new_delivery)
         return sample_obj
 
-    def create_case(self, case, customer_obj):
+    def create_case(self, case, customer_obj, ticket: int):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
             data_analysis=Pipeline(case["data_analysis"]),
@@ -298,6 +298,7 @@ class CaseSubmitter(Submitter):
             name=case["name"],
             priority=case["priority"],
             synopsis=case["synopsis"],
+            ticket=ticket,
         )
         case_obj.customer = customer_obj
         return case_obj

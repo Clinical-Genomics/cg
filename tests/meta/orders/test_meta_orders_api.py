@@ -72,10 +72,11 @@ def test_submit(
 
     # THEN the result should contain the ticket number for the order
     for record in result["records"]:
-        if isinstance(record, (models.Pool, models.Sample)):
+        if isinstance(record, (models.Pool, models.Family, models.Sample)):
             assert record.ticket_number == ticket_number
-        elif isinstance(record, models.Family):
+        if isinstance(record, (models.Sample, models.Family)):
             for link_obj in record.links:
+                assert link_obj.family.ticket_number == ticket_number
                 assert link_obj.sample.ticket_number == ticket_number
 
 

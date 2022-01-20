@@ -86,6 +86,7 @@ class MetagenomeSubmitter(Submitter):
                     name=sample["name"],
                     panels=None,
                     priority=sample["priority"],
+                    ticket=ticket,
                 )
                 new_case.customer = customer_obj
                 self.status.add(new_case)

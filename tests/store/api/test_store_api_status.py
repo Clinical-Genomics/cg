@@ -5,6 +5,8 @@ from cg.constants import Pipeline, PRIORITY_MAP
 from cg.store import Store
 from cg.store.models import Application, Family, Sample
 
+from tests.store_helpers import StoreHelpers
+
 
 def test_samples_to_receive_external(sample_store, helpers):
     """Test fetching external sample"""
@@ -233,12 +235,34 @@ def test_multiple_analyses(analysis_store, helpers):
     assert analysis_oldest not in analyses
 
 
-def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_nr):
+def test_get_customer_id_from_ticket(analysis_store: Store, customer_id: str, ticket_nr: int, helpers: StoreHelpers):
     """Tests if the function in fact returns the correct customer"""
-    # Given a store with a ticket
+    # GIVEN we have a case with a ticket-number on it
+    helpers.ensure_customer(store=analysis_store, customer_id=customer_id)
+    helpers.add_case(store=analysis_store, name="case1", ticket=ticket_nr, customer_id=customer_id)
 
-    # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == customer_id
+    # WHEN getting the customer for that ticket
+    # THEN the function should return the customer connected to the ticket
+    assert analysis_store.get_customer_id_from_case(ticket_nr) == customer_id
+
+
+def test_get_samples_from_ticket(analysis_store: Store, helpers: StoreHelpers):
+    """Tests if the function returns the correct samples"""
+    # Given a store with two cases with one sample each from one ticket
+    ticket = 20211222
+    case1 = helpers.add_case(store=analysis_store, name="case1", ticket=ticket)
+    case2 = helpers.add_case(store=analysis_store, name="case2", ticket=ticket)
+    sample_case1 = helpers.add_sample(analysis_store)
+    analysis_store.relate_sample(family=case1, sample=sample_case1, status="unknown")
+    sample_case2 = helpers.add_sample(analysis_store)
+    analysis_store.relate_sample(family=case2, sample=sample_case2, status="unknown")
+
+    # WHEN fetching samples via ticket number
+    samples = analysis_store.get_samples_from_ticket(ticket_id=ticket)
+
+    # Then the function should return the samples connected to the ticket
+    assert sample_case1 in samples
+    assert sample_case2 in samples
 
 
 def test_set_case_action(analysis_store, case_id):

@@ -95,7 +95,7 @@ def fixture_rna_mip_context(
     cg_context.housekeeper_api_ = housekeeper_api
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
     if not cg_context.status_db.family(case_id):
-        helpers.ensure_case_from_dict(
+        helpers.add_case_from_dict(
             cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
         )
     cg_context.meta_apis["analysis_api"] = MipRNAAnalysisAPI(cg_context)

@@ -116,6 +116,7 @@ def delivery_report(
     status-db:
         family
         family.data_analysis        missing on most re-runs
+        family.ticket_number
         customer_name
         applications
         accredited
@@ -123,7 +124,6 @@ def delivery_report(
         samples
         sample.internal_id
         sample.status
-        sample.ticket
         sample.million_read_pairs   for sequenced samples, from demux + ready made libraries (rml), not for external
         sample.prepared_at          not for rml and external
         sample.received_at

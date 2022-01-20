@@ -131,11 +131,9 @@ class StatusHandler(BaseHandler):
         )
 
     def get_cases_from_ticket(self, ticket_id: int) -> Query:
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.ticket_number == ticket_id
-        )
+        return self.Family.query.filter(models.Family.ticket_number == ticket_id)
 
-    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
+    def get_customer_id_from_sample(self, ticket_id: int) -> str:
         """Returns the customer related to given ticket"""
         return (
             self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
@@ -143,8 +141,24 @@ class StatusHandler(BaseHandler):
             .customer.internal_id
         )
 
-    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
-        return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
+    def get_customer_id_from_case(self, ticket_id: int) -> str:
+        """Returns the customer related to given ticket"""
+        return (
+            self.Family.query.filter(models.Family.ticket_number == ticket_id)
+                .first()
+                .customer.internal_id
+        )
+
+    @staticmethod
+    def get_samples_from_ticket(ticket_id: int) -> List[models.Sample]:
+        families = models.Family.query.filter(models.Family.ticket_number == ticket_id).all()
+
+        samples: set[models.Sample] = set()
+        for family in families:
+            for link in family.links:
+                samples.add(link.sample)
+
+        return list(samples)
 
     def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
         flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()

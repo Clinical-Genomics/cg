@@ -147,11 +147,11 @@ def test_render_delivery_report(report_store, report_api):
 def test_create_delivery_report(report_store, report_api):
     # GIVEN initialized ReportAPI
     case_id = "yellowhog"
-    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    analysis_started_at = report_store.family(case_id).analyses[0].started_at
 
     # WHEN rendering a report from that data
     created_report = report_api.create_delivery_report(
-        case_id="yellowhog", analysis_date=anlysis_started_at
+        case_id="yellowhog", analysis_date=analysis_started_at
     )
 
     # THEN a html report with certain data should have been rendered
@@ -198,11 +198,11 @@ def test_get_date_specific_delivery_data(report_store, report_api):
 def test_create_delivery_report_file(report_store, report_api: ReportAPI, tmp_path):
     # GIVEN initialized ReportAPI
     case_id = "yellowhog"
-    anlysis_started_at = report_store.family(case_id).analyses[0].started_at
+    analysis_started_at = report_store.family(case_id).analyses[0].started_at
 
     # WHEN rendering a report from that data
     created_report_file = report_api.create_delivery_report_file(
-        case_id="yellowhog", analysis_date=anlysis_started_at, file_path=tmp_path
+        case_id="yellowhog", analysis_date=analysis_started_at, file_path=tmp_path
     )
 
     # THEN a html report with certain data should have been created on disk

@@ -9,7 +9,7 @@ from cg.store import Store
 SUCCESS = 0
 
 
-@pytest.mark.parametrize("identifier_key", ["ticket_number", "order"])
+@pytest.mark.parametrize("identifier_key", ["order"])
 def test_set_cases_by_sample_identifiers(
     cli_runner, base_context, base_store: Store, identifier_key, helpers, caplog
 ):
@@ -17,7 +17,7 @@ def test_set_cases_by_sample_identifiers(
     sample_obj = helpers.add_sample(base_store)
     sample_obj.ticket_number = 123456
     sample_obj.order = "An order"
-    case = helpers.add_case(base_store)
+    case = helpers.add_case(base_store, ticket=sample_obj.ticket_number)
     helpers.add_relationship(base_store, sample=sample_obj, case=case)
     identifier_value = getattr(sample_obj, identifier_key)
 

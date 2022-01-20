@@ -60,7 +60,7 @@ class ExternalDataAPI(MetaAPI):
 
     def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        cust: str = self.status_db.get_customer_id_from_case(ticket_id=ticket_id)
         available_samples: List[models.Sample] = self.get_available_samples(
             folder=self.get_source_path(customer=cust, ticket_id=ticket_id),
             ticket_id=ticket_id,
@@ -168,7 +168,7 @@ class ExternalDataAPI(MetaAPI):
         """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
         bundle"""
         failed_paths: List[Path] = []
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        cust: str = self.status_db.get_customer_id_from_case(ticket_id=ticket_id)
         available_samples: List[models.Sample] = self.get_available_samples(
             folder=self.get_destination_path(customer=cust), ticket_id=ticket_id
         )

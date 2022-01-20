@@ -131,6 +131,7 @@ class PoolSubmitter(Submitter):
                     name=case_name,
                     panels=None,
                     priority=priority,
+                    ticket=ticket,
                 )
                 case_obj.customer = customer_obj
                 self.status.add_commit(case_obj)

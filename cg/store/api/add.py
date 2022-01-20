@@ -158,6 +158,8 @@ class AddHandler(BaseHandler):
         cohorts: Optional[List[str]] = None,
         priority: Optional[str] = "standard",
         synopsis: Optional[str] = None,
+        ticket: int = None,
+
     ) -> models.Family:
         """Build a new Family record."""
 
@@ -183,7 +185,7 @@ class AddHandler(BaseHandler):
             )
 
         priority_db = PRIORITY_MAP[priority]
-        new_case = self.Family(
+        new_case: models.Family = self.Family(
             avatar_url=avatar_url,
             cohorts=cohorts,
             data_analysis=str(data_analysis),
@@ -193,7 +195,9 @@ class AddHandler(BaseHandler):
             panels=panels,
             priority=priority_db,
             synopsis=synopsis,
+            ticket_number=ticket,
         )
+
         return new_case
 
     def relate_sample(

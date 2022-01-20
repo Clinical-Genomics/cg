@@ -104,6 +104,7 @@ class FastqSubmitter(Submitter):
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
+                    ticket=ticket,
                 )
                 new_case.customer = production_customer
                 self.status.add(new_case)
