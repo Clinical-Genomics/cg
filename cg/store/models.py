@@ -9,8 +9,7 @@ from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    PRIORITY_MAP,
-    REV_PRIORITY_MAP,
+    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
@@ -41,23 +40,32 @@ customer_user = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self):
+    def priority_human(self) -> str:
         """Humanized priority for sample."""
-        return REV_PRIORITY_MAP[self.priority]
+        return self.priority.name
 
     @priority_human.setter
-    def priority_human(self, priority_str: str):
-        self.priority = PRIORITY_MAP.get(priority_str)
+    def priority_human(self, priority: str) -> None:
+        self.priority: Priority = Priority[priority]
+
+    @property
+    def priority_int(self) -> int:
+        """Priority as integer for sample."""
+        return self.priority.value
+
+    @priority_int.setter
+    def priority_int(self, priority_int: int) -> None:
+        self.priority: Priority = Priority(priority_int)
 
     @property
     def high_priority(self):
         """Has high priority?"""
-        return self.priority > 1
+        return self.priority_int > 1
 
     @property
     def low_priority(self):
         """Has low priority?"""
-        return self.priority < 1
+        return self.priority_int < 1
 
 
 class Application(Model):
@@ -281,7 +289,8 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
-    priority = Column(types.Integer, default=1, nullable=False)
+
+    priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
     ticket_number = Column(types.Integer)
 
@@ -494,7 +503,8 @@ class Sample(Model, PriorityMixin):
     _phenotype_groups = Column(types.Text)
     _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
-    priority = Column(types.Integer, default=1, nullable=False)
+
+    priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
     received_at = Column(types.DateTime)
     reference_genome = Column(types.String(255))
@@ -539,7 +549,7 @@ class Sample(Model, PriorityMixin):
     def sequencing_qc(self) -> bool:
         """Return sequencing qc passed or failed."""
         application = self.application_version.application
-        if self.priority < PRIORITY_MAP["express"]:
+        if self.priority < Priority.express:
             return self.reads > application.expected_reads
         # Express priority and higher needs to be analyzed regardless at a lower threshold for primary analysis
         one_half_of_target_reads = application.target_reads / 2

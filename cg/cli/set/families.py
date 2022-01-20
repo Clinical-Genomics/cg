@@ -2,10 +2,12 @@ import logging
 from typing import List, Optional, Set, Tuple
 
 import click
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS
+from cg.constants import CASE_ACTIONS
 from cg.store import Store, models
 
 from .family import family
+from ...constants import Priority
+from ...utils.click.EnumChoice import EnumChoice
 
 CONFIRM = "Continue?"
 
@@ -44,12 +46,14 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[model
 @click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
-@click.option("-p", "--priority", type=click.Choice(PRIORITY_OPTIONS), help="update priority")
+@click.option(
+    "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
+)
 @click.pass_context
 def families(
     context: click.Context,
     action: Optional[str],
-    priority: Optional[str],
+    priority: Optional[Priority],
     panels: Optional[Tuple[str]],
     customer_id: Optional[str],
     identifiers: click.Tuple([str, str]),

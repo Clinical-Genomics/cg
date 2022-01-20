@@ -6,7 +6,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import PRIORITY_MAP, Pipeline, CASE_ACTIONS
+from cg.constants import Pipeline, CASE_ACTIONS
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -46,7 +46,7 @@ class StatusHandler(BaseHandler):
                 models.Application.is_external == False,
                 models.Sample.sequenced_at.is_(None),
             )
-            .order_by(models.Sample.priority.desc(), models.Sample.received_at)
+            .order_by(models.Sample.received_at)
         )
 
     def samples_to_sequence(self) -> Query:
@@ -62,7 +62,7 @@ class StatusHandler(BaseHandler):
                 models.Sample.downsampled_to.is_(None),
                 models.Application.is_external == False,
             )
-            .order_by(models.Sample.priority.desc(), models.Sample.received_at)
+            .order_by(models.Sample.received_at)
         )
 
     def cases_to_analyze(
@@ -93,7 +93,7 @@ class StatusHandler(BaseHandler):
                     ),
                 )
             )
-            .order_by(models.Family.priority.desc(), models.Family.ordered_at)
+            .order_by(models.Family.ordered_at)
         )
         families_query = [
             case_obj
@@ -535,8 +535,7 @@ class StatusHandler(BaseHandler):
         if case_action:
             case_q = case_q.filter(models.Family.action == case_action)
         if priority:
-            priority_db = PRIORITY_MAP[priority]
-            case_q = case_q.filter(models.Family.priority == priority_db)
+            case_q = case_q.filter(models.Family.priority == priority)
         if internal_id:
             case_q = case_q.filter(models.Family.internal_id.ilike(f"%{internal_id}%"))
         if name:

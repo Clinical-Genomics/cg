@@ -12,6 +12,8 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 from cg.store import models
 
+from cg.constants import Priority
+
 LOG = logging.getLogger(__name__)
 
 
@@ -160,7 +162,9 @@ class CaseSubmitter(Submitter):
             )
             data_analysis = cls._get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls._get_single_value(case_name, case_samples, "data_delivery")
-            priority = cls._get_single_value(case_name, case_samples, "priority", "standard")
+            priority = cls._get_single_value(
+                case_name, case_samples, "priority", Priority.standard.name
+            )
 
             panels: Set[str] = set()
             if data_analysis == Pipeline.MIP_DNA:

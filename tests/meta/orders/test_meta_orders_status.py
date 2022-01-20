@@ -14,6 +14,10 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.models.orders.order import OrderIn, OrderType
 
+from cg.models.orders.sample_base import PriorityEnum
+
+from cg.constants import Priority
+
 
 def test_pools_to_status(rml_order_to_submit):
     # GIVEN a rml order with three samples in one pool
@@ -148,7 +152,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert family["name"] == "family1"
     assert family["data_analysis"] == str(Pipeline.MIP_DNA)
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
-    assert family["priority"] == "standard"
+    assert family["priority"] == Priority.standard.name
     assert family["cohorts"] == {"Other"}
     assert family["synopsis"] == "Här kommer det att komma en väldigt lång text med för synopsis."
     assert set(family["panels"]) == {"IEM"}
@@ -473,7 +477,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     new_case = new_families[0]
     assert new_case.name == "family1"
     assert set(new_case.panels) == {"IEM"}
-    assert new_case.priority_human == "standard"
+    assert new_case.priority_human == Priority.standard.name
 
     assert len(new_case.links) == 3
     new_link = new_case.links[0]
@@ -599,7 +603,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert new_case.data_analysis == str(Pipeline.BALSAMIC)
     assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
     assert set(new_case.panels) == set()
-    assert new_case.priority_human == "standard"
+    assert new_case.priority_human == Priority.standard.name
 
     assert len(new_case.links) == 1
     new_link = new_case.links[0]
@@ -629,7 +633,7 @@ def test_store_existing_single_sample_from_trio(orders_api, base_store, mip_stat
     new_case = new_families[0]
     assert new_case.name == "family1"
     assert set(new_case.panels) == {"IEM"}
-    assert new_case.priority_human == "standard"
+    assert new_case.priority_human == Priority.standard.name
 
     assert len(new_case.links) == 3
     new_link = new_case.links[0]

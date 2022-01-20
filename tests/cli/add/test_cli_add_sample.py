@@ -28,7 +28,7 @@ def test_add_sample_bad_customer(cli_runner: CliRunner, base_context: CGConfig):
         obj=base_context,
     )
 
-    # THEN then it should complain about missing customer instead of adding a sample
+    # THEN it should complain about missing customer instead of adding a sample
     assert result.exit_code == 1
     assert disk_store.Sample.query.count() == 0
 
@@ -59,7 +59,7 @@ def test_add_sample_bad_application(
         obj=base_context,
     )
 
-    # THEN then it should complain about missing application instead of adding a sample
+    # THEN it should complain about missing application instead of adding a sample
     assert result.exit_code == 1
     assert disk_store.Sample.query.count() == 0
 
@@ -90,7 +90,7 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Sample.query.count() == 1
     assert disk_store.Sample.query.first().name == name
@@ -126,7 +126,7 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Sample.query.count() == 1
     assert disk_store.Sample.query.first().internal_id == lims_id
@@ -165,7 +165,7 @@ def test_add_sample_order(
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Sample.query.count() == 1
     assert disk_store.Sample.query.first().order == order
@@ -204,7 +204,7 @@ def test_add_sample_downsampled(
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Sample.query.count() == 1
     assert str(disk_store.Sample.query.first().downsampled_to) == downsampled_to
@@ -243,7 +243,7 @@ def test_add_sample_priority(
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Sample.query.count() == 1
     assert disk_store.Sample.query.first().priority_human == priority

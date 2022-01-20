@@ -16,7 +16,7 @@ def test_get_analysis_bad_case(cli_runner: CliRunner, base_context: CGConfig):
     name = "dummy_name"
     result = cli_runner.invoke(get, ["analysis", name], obj=base_context)
 
-    # THEN then it should error about missing case instead of getting a analysis
+    # THEN it should error about missing case instead of getting a analysis
     assert result.exit_code != RETURN_SUCCESS
 
 
@@ -32,7 +32,7 @@ def test_get_analysis_required(
     # WHEN getting a analysis
     result = cli_runner.invoke(get, ["analysis", internal_id], obj=base_context)
 
-    # THEN then it should have been gotten
+    # THEN it should have been gotten
     assert result.exit_code == RETURN_SUCCESS
     assert str(analysis.started_at) in result.output
     assert analysis.pipeline in result.output

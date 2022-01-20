@@ -9,8 +9,8 @@ rsync -rvL {source_path}/ {destination_path}
 """
 
 COVID_RSYNC = """
-rsync -rvL {source_path} {destination_path}
-rsync -rvL {covid_report_path} {covid_destination_path}
+rsync -rvptL {source_path} {destination_path}
+rsync -rvptL --chmod=777 {covid_report_path} {covid_destination_path}
 """
 
 ERROR_RSYNC_FUNCTION = """
