@@ -20,6 +20,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes
     and the rest of CG infrastructure"""
 
+    __BALSAMIC_GENOME_VERSIONS = {"hg19", "hg38", "canfam3"}
     __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
     __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
@@ -155,8 +156,22 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return "tumor"
         return "normal"
 
+    def get_verified_genome_version(self, genome_version: str) -> Optional[str]:
+        """Verifies that the build version of the human reference genome is supported
+        by BALSAMIC.
+
+        Raises BalsamicStartError:
+        - When the specified genome_version is not supported by BALSAMIC
+        """
+        genome_version = genome_version.lower()
+
+        if genome_version not in self.__BALSAMIC_GENOME_VERSIONS:
+            raise BalsamicStartError("Genome version not compatible with BALSAMIC")
+        else:
+            return genome_version
+
     def get_verified_bed(self, sample_data: dict, panel_bed: Path) -> Optional[str]:
-        """ "Takes a dict with samples and attributes.
+        """Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
         where applicable.
@@ -258,6 +273,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_verified_config_case_arguments(
         self,
         case_id: str,
+        genome_version: str,
         panel_bed: str,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
@@ -285,6 +301,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return {
             "case_id": case_id,
+            "genome_version": self.get_verified_genome_version(genome_version=genome_version),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -432,14 +449,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 formatted_options.append(str(val))
         return formatted_options
 
-    def config_case(self, case_id: str, panel_bed: str, dry_run: bool = False) -> None:
+    def config_case(
+        self, case_id: str, genome_version: str, panel_bed: str, dry_run: bool = False
+    ) -> None:
         """Create config file for BALSAMIC analysis"""
-        arguments = self.get_verified_config_case_arguments(case_id=case_id, panel_bed=panel_bed)
+        arguments = self.get_verified_config_case_arguments(
+            case_id=case_id, genome_version=genome_version, panel_bed=panel_bed
+        )
         command = ["config", "case"]
         options = self.__build_command_str(
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
+                "--genome-version": arguments.get("genome_version"),
                 "--case-id": arguments.get("case_id"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),

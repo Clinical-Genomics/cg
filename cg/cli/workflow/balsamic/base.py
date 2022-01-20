@@ -16,6 +16,14 @@ from pydantic import ValidationError
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+OPTION_GENOME_VERSION = click.option(
+    "-g",
+    "--genome_version",
+    default="hg19",
+    type=click.Choice(["hg19", "hg38", "canfam3"]),
+    show_default=True,
+    help="Build version of the human reference genome",
+)
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Print command to console without executing", is_flag=True
 )
@@ -66,17 +74,22 @@ balsamic.add_command(link)
 
 @balsamic.command("config-case")
 @ARGUMENT_CASE_ID
+@OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_DRY
 @click.pass_obj
-def config_case(context: CGConfig, panel_bed: str, case_id: str, dry_run: bool):
+def config_case(
+    context: CGConfig, case_id: str, genome_version: str, panel_bed: str, dry_run: bool
+):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
 
     analysis_api: BalsamicAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.config_case(case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        analysis_api.config_case(
+            case_id=case_id, genome_version=genome_version, panel_bed=panel_bed, dry_run=dry_run
+        )
     except CgError as e:
         LOG.error(f"Could not create config: {e.message}")
         raise click.Abort()
