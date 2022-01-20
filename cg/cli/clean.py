@@ -350,30 +350,37 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
         LOG.info("Checking flow cells for all sequencers!")
         for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
             LOG.info("Checking directory %s of sequencer %s:", run_directory, sequencer)
-            for flow_cell_dir in Path(run_directory).iterdir():
-                LOG.info("Checking flow cell %s", flow_cell_dir.name)
-                run_dir_flow_cell = RunDirFlowCell(flow_cell_dir, status_db, housekeeper_api)
-                if run_dir_flow_cell.age < days_old:
-                    LOG.info(
-                        "Flow cell %s is %s days old and will NOT be removed.",
-                        flow_cell_dir,
-                        run_dir_flow_cell.age,
-                    )
-                    continue
-                LOG.info(
-                    "Flow cell %s is %s days old and will be removed.",
-                    flow_cell_dir,
-                    run_dir_flow_cell.age,
-                )
-                if dry_run:
-                    continue
-                LOG.info("Removing flow cell run directory %s.", run_dir_flow_cell.flow_cell_dir)
-                run_dir_flow_cell.archive_sample_sheet()
-                run_dir_flow_cell.remove_run_directory()
+            clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db)
 
     else:
+        run_directory = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
         LOG.info(
             "Checking directory %s of sequencer %s:",
-            dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer),
+            run_directory,
             sequencer,
         )
+        clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db)
+
+
+def clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db):
+    """Cleans up all flow cell directories in the specified run directory"""
+    for flow_cell_dir in Path(run_directory).iterdir():
+        LOG.info("Checking flow cell %s", flow_cell_dir.name)
+        run_dir_flow_cell = RunDirFlowCell(flow_cell_dir, status_db, housekeeper_api)
+        if run_dir_flow_cell.age < days_old:
+            LOG.info(
+                "Flow cell %s is %s days old and will NOT be removed.",
+                flow_cell_dir,
+                run_dir_flow_cell.age,
+            )
+            continue
+        LOG.info(
+            "Flow cell %s is %s days old and will be removed.",
+            flow_cell_dir,
+            run_dir_flow_cell.age,
+        )
+        if dry_run:
+            continue
+        LOG.info("Removing flow cell run directory %s.", run_dir_flow_cell.flow_cell_dir)
+        run_dir_flow_cell.archive_sample_sheet()
+        run_dir_flow_cell.remove_run_directory()
