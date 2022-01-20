@@ -65,25 +65,25 @@ class RunDirFlowCell:
 
     def remove_run_directory(self):
         """Removes the flow cell run directory"""
-        LOG.debug("REMOVING RUN DIR")
+        LOG.info("Removing run directory %s", self.flow_cell_dir)
         shutil.rmtree(self.flow_cell_dir, ignore_errors=True)
 
     def archive_sample_sheet(self):
         """Archives a sample sheet in housekeeper-bundles"""
-        LOG.debug("ARCHIVING SAMPLE SHEET")
+        LOG.info("Start archiving sample sheet %s", self.sample_sheet_path)
         if not self.sample_sheet_path.exists():
-            LOG.debug("SAMPLE SHEET NOT FOUND")
+            LOG.warning("Sample sheet does not exists!")
             return
-        LOG.debug("SAMPLE SHEET FOUND")
+        LOG.info("Sample sheet found!")
         hk_bundle: hk_models.Bundle = self.hk.bundle(name=self.id)
         if hk_bundle is None:
-            LOG.debug("CREATING BUNDLE")
+            LOG.info("Creating bundle with name %s", self.id)
             hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
 
         with self.hk.session_no_autoflush():
             hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
             if self.hk.files(path=str(self.sample_sheet_path)).first() is None:
-                LOG.info(f"Adding sample sheet to Housekeeper: {str(self.sample_sheet_path)}")
+                LOG.info(f"Adding sample sheet to Housekeeper")
                 tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
                 self.hk.add_file(
                     path=str(self.sample_sheet_path), version_obj=hk_version, tags=tags
@@ -95,8 +95,8 @@ class RunDirFlowCell:
         ).first()
 
         if hk_sample_sheet_file.is_included:
-            LOG.debug("SAMPLE SHEET ALREADY INCLUDED")
+            LOG.info("Sample sheet already included!")
             return
-        LOG.debug("INCLUDING SAMPLE SHEET")
+        LOG.info("Including sample sheet")
         self.hk.include_file(file_obj=hk_sample_sheet_file, version_obj=hk_version)
         self.hk.commit()
