@@ -1,5 +1,5 @@
 """Module that handles deletion of flow cell run directories and their BCL files from
-/home/proj/production/flowcells/<sequencer> """
+flow_cell_run_dir/<sequencer> """
 import logging
 import shutil
 from datetime import datetime, timedelta
@@ -60,7 +60,6 @@ class RunDirFlowCell:
                     self.id,
                 )
                 self._sequenced_date = self.derived_date
-
         return self._sequenced_date
 
     def remove_run_directory(self):
