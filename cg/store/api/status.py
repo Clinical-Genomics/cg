@@ -133,14 +133,6 @@ class StatusHandler(BaseHandler):
     def get_cases_from_ticket(self, ticket_id: int) -> Query:
         return self.Family.query.filter(models.Family.ticket_number == ticket_id)
 
-    def get_customer_id_from_sample(self, ticket_id: int) -> str:
-        """Returns the customer related to given ticket"""
-        return (
-            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
-            .first()
-            .customer.internal_id
-        )
-
     def get_customer_id_from_case(self, ticket_id: int) -> str:
         """Returns the customer related to given ticket"""
         return (

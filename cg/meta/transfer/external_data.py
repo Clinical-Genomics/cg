@@ -1,24 +1,18 @@
 """Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
 import datetime as dt
-import itertools
 import logging
-import shutil
 from pathlib import Path
-from typing import List, Tuple, Optional
-
-from housekeeper.store.models import Bundle
+from typing import List, Optional
 
 from cg.apps.cgstats.db.models import Version
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.exc import CgDataError
+from cg.constants import HK_FASTQ_TAGS
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
+from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
-from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
-from cg.constants import HK_FASTQ_TAGS
 
 LOG = logging.getLogger(__name__)
 
@@ -26,13 +20,13 @@ LOG = logging.getLogger(__name__)
 class ExternalDataAPI(MetaAPI):
     def __init__(self, config: CGConfig):
         super().__init__(config)
-        self.destination_path: str = config.external.hasta
-        self.source_path: str = config.external.caesar
-        self.base_path: str = config.data_delivery.base_path
         self.account: str = config.data_delivery.account
+        self.base_path: str = config.data_delivery.base_path
+        self.destination_path: str = config.external.hasta
         self.mail_user: str = config.data_delivery.mail_user
-        self.slurm_api: SlurmAPI = SlurmAPI()
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
+        self.slurm_api: SlurmAPI = SlurmAPI()
+        self.source_path: str = config.external.caesar
 
     def create_log_dir(self, dry_run: bool, ticket_id: int) -> Path:
         """Creates a directory for log file to be stored"""
@@ -62,14 +56,14 @@ class ExternalDataAPI(MetaAPI):
 
     def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
-        cust: str = self.status_db.get_customer_id_from_case(ticket_id=ticket_id)
+        customer: str = self.status_db.get_customer_id_from_case(ticket_id=ticket_id)
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
-        Path(self.destination_path % cust).mkdir(exist_ok=True)
+        Path(self.destination_path % customer).mkdir(exist_ok=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
-            destination_path=self.get_destination_path(customer=cust),
+            source_path=self.get_source_path(customer=customer, ticket_id=ticket_id),
+            destination_path=self.get_destination_path(customer=customer),
         )
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
@@ -88,11 +82,12 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(
             "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self.get_source_path(customer=cust, ticket_id=ticket_id)
+                src_path=self.get_source_path(customer=customer, ticket_id=ticket_id)
             )
         )
 
-    def get_all_fastq(self, sample_folder: Path) -> List[Path]:
+    @staticmethod
+    def get_all_fastq(sample_folder: Path) -> List[Path]:
         """Returns a list of all fastq.gz files in given folder"""
         all_fastqs: List[Path] = []
         for leaf in sample_folder.glob("*fastq.gz"):
@@ -154,9 +149,9 @@ class ExternalDataAPI(MetaAPI):
         )
         return fastq_paths_to_add
 
-    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
+    def curate_sample_folder(self, customer_name: str, force: bool, sample_folder: Path) -> None:
         """Changes the name of the folder to the internal_id. If force is true replaces any previous folder"""
-        customer: models.Customer = self.status_db.customer(internal_id=cust_name)
+        customer: models.Customer = self.status_db.customer(internal_id=customer_name)
         customer_folder: Path = sample_folder.parent
         sample: models.Sample = self.status_db.find_samples(
             customer=customer, name=sample_folder.name
@@ -176,11 +171,12 @@ class ExternalDataAPI(MetaAPI):
         """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
         bundle"""
         failed_paths: List[Path] = []
-        cust: str = self.status_db.get_customer_id_from_case(ticket_id=ticket_id)
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        destination_folder_path: Path = self.get_destination_path(customer=cust)
+        customer: str = self.status_db.get_customer_id_from_case(ticket_id=ticket_id)
+        destination_folder_path: Path = self.get_destination_path(customer=customer)
         for sample_folder in destination_folder_path.iterdir():
-            self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
+            self.curate_sample_folder(
+                customer_name=customer, sample_folder=sample_folder, force=force
+            )
         available_samples: List[models.Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket_id=ticket_id
         )
@@ -193,7 +189,7 @@ class ExternalDataAPI(MetaAPI):
                 bundle=sample.internal_id
             )
             fastq_paths_to_add: List[Path] = self.get_fastq_paths_to_add(
-                customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
+                customer=customer, hk_version=last_version, lims_sample_id=sample.internal_id
             )
             self.add_files_to_bundles(
                 fastq_paths=fastq_paths_to_add,

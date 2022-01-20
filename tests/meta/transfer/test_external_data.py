@@ -187,7 +187,7 @@ def test_add_transfer_to_housekeeper(
     samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
 
     mocker.patch.object(Store, "get_customer_id_from_case")
-    Store.get_customer_id_from_sample.return_value = samples[0].customer.internal_id
+    Store.get_customer_id_from_case.return_value = samples[0].customer.internal_id
 
     # GIVEN a list of paths and only two samples being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
@@ -264,7 +264,7 @@ def test_curate_sample_folder(
     sample: models.Sample = cases.first().links[0].sample
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
     external_data_api.curate_sample_folder(
-        cust_name=customer_id, sample_folder=tmp_folder, force=False
+        customer_name=customer_id, sample_folder=tmp_folder, force=False
     )
     assert (tmp_folder.parent / sample.internal_id).exists()
     assert not tmp_folder.exists()

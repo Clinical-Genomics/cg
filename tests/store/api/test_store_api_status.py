@@ -235,7 +235,7 @@ def test_multiple_analyses(analysis_store, helpers):
     assert analysis_oldest not in analyses
 
 
-def test_get_customer_id_from_ticket(
+def test_get_customer_id_from_case(
     analysis_store: Store, customer_id: str, ticket_nr: int, helpers: StoreHelpers
 ):
     """Tests if the function in fact returns the correct customer"""
