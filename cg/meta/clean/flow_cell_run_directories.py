@@ -42,7 +42,7 @@ class RunDirFlowCell:
     def age(self) -> int:
         """How long ago a flow cell was sequenced, in days"""
         if self._age is None:
-            LOG.debug("SETTING AGE PROPERTY")
+            LOG.info("Setting age property")
             self._age = (datetime.now() - self.sequenced_date).days
         return self._age
 
@@ -50,12 +50,12 @@ class RunDirFlowCell:
     def sequenced_date(self) -> datetime:
         """The date on which the flow cell was sequenced"""
         if self._sequenced_date is None:
-            LOG.debug("SETTING SEQUENCED DATE PROPERTY")
+            LOG.info("Setting sequenced date property")
             if self.status_db.flowcell(name=self.id):
-                LOG.debug("Found flow cell %s in statusdb, getting sequenced date.", self.id)
+                LOG.info("Found flow cell %s in statusdb, getting sequenced date.", self.id)
                 self._sequenced_date = self.status_db.flowcell(name=self.id).sequenced_at
             else:
-                LOG.debug(
+                LOG.info(
                     "Flow cell %s NOT found in statusdb, deriving sequenced date from run dir name!",
                     self.id,
                 )
