@@ -345,24 +345,32 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
     """Removes flow cells from /home/proj/production/flowcells based on the sequencing date and
     the sequencer type, if specified."""
     status_db: Store = context.status_db
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
     if sequencer == Sequencers.ALL:
         LOG.info("Checking flow cells for all sequencers!")
         for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
             LOG.info("Checking directory %s of sequencer %s:", run_directory, sequencer)
             for flow_cell_dir in Path(run_directory).iterdir():
                 LOG.info("Checking flow cell %s", flow_cell_dir.name)
-                run_dir_flow_cell = RunDirFlowCell(status_db, flow_cell_dir)
-                if run_dir_flow_cell.age >= days_old:
+                run_dir_flow_cell = RunDirFlowCell(flow_cell_dir, status_db, housekeeper_api)
+                if run_dir_flow_cell.age < days_old:
                     LOG.info(
-                        "Flow cell %s is %s days old and will be removed",
+                        "Flow cell %s is %s days old and will NOT be removed.",
                         flow_cell_dir,
                         run_dir_flow_cell.age,
                     )
-                    if dry_run:
-                        continue
-                    LOG.info("Removing flow cell run directory %s", run_dir_flow_cell.flow_cell_dir)
-                    run_dir_flow_cell.remove_run_directory()
-                    # TODO: archive sample sheet
+                    continue
+                LOG.info(
+                    "Flow cell %s is %s days old and will be removed.",
+                    flow_cell_dir,
+                    run_dir_flow_cell.age,
+                )
+                if dry_run:
+                    continue
+                LOG.info("Removing flow cell run directory %s.", run_dir_flow_cell.flow_cell_dir)
+                run_dir_flow_cell.archive_sample_sheet()
+                run_dir_flow_cell.remove_run_directory()
+
     else:
         LOG.info(
             "Checking directory %s of sequencer %s:",
