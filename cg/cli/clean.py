@@ -342,7 +342,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
 @DRY_RUN
 @click.pass_obj
 def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: int, dry_run: bool):
-    """Removes flow cells from /home/proj/production/flowcells based on the sequencing date and
+    """Removes flow cells from flow cell run dir based on the sequencing date and
     the sequencer type, if specified."""
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
