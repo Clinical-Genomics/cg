@@ -86,14 +86,29 @@ def test_transfer_sample_files_from_source(
     sample_name3: str = cust_sample_id + "3"
 
     customer = helpers.ensure_customer(store=external_data_api.status_db, customer_id=customer_id)
-    case = helpers.ensure_case(store=external_data_api.status_db, name="case", ticket=ticket_nr, customer=customer)
+    case = helpers.ensure_case(
+        store=external_data_api.status_db, name="case", ticket=ticket_nr, customer=customer
+    )
     samples: [models.Sample] = [
-        helpers.add_sample(store=external_data_api.status_db, name=sample_name1, ticket=ticket_nr,
-                           customer_id=customer_id),
-        helpers.add_sample(store=external_data_api.status_db, name=sample_name2, ticket=ticket_nr,
-                           customer_id=customer_id),
-        helpers.add_sample(store=external_data_api.status_db, name=sample_name3, ticket=ticket_nr,
-                           customer_id=customer_id)]
+        helpers.add_sample(
+            store=external_data_api.status_db,
+            name=sample_name1,
+            ticket=ticket_nr,
+            customer_id=customer_id,
+        ),
+        helpers.add_sample(
+            store=external_data_api.status_db,
+            name=sample_name2,
+            ticket=ticket_nr,
+            customer_id=customer_id,
+        ),
+        helpers.add_sample(
+            store=external_data_api.status_db,
+            name=sample_name3,
+            ticket=ticket_nr,
+            customer_id=customer_id,
+        ),
+    ]
     for sample in samples:
         helpers.add_relationship(store=external_data_api.status_db, sample=sample, case=case)
 
@@ -225,7 +240,9 @@ def test_get_available_samples(
 ):
     # GIVEN one such sample exists
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
-    analysis_store_trio.sample(internal_id=sample_obj.internal_id).links[0].family.ticket_number = ticket_nr
+    analysis_store_trio.sample(internal_id=sample_obj.internal_id).links[
+        0
+    ].family.ticket_number = ticket_nr
 
     # WHEN getting available samples
     available_samples = external_data_api.get_available_samples(

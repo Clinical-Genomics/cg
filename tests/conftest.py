@@ -766,9 +766,7 @@ def fixture_analysis_store(
     base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
 ):
     """Setup a store instance for testing analysis API."""
-    helpers.add_case_from_dict(
-        base_store, case_info=analysis_family, app_tag=wgs_application_tag
-    )
+    helpers.add_case_from_dict(base_store, case_info=analysis_family, app_tag=wgs_application_tag)
 
     yield base_store
 

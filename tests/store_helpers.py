@@ -413,7 +413,8 @@ class StoreHelpers:
             )
             sample_objs[sample_id] = sample_obj
 
-        case_obj: models.Family = self.add_case(store,
+        case_obj: models.Family = self.add_case(
+            store,
             name=case_info["name"],
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],

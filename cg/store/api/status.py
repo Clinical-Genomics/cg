@@ -145,8 +145,8 @@ class StatusHandler(BaseHandler):
         """Returns the customer related to given ticket"""
         return (
             self.Family.query.filter(models.Family.ticket_number == ticket_id)
-                .first()
-                .customer.internal_id
+            .first()
+            .customer.internal_id
         )
 
     @staticmethod

@@ -159,7 +159,6 @@ class AddHandler(BaseHandler):
         priority: Optional[str] = "standard",
         synopsis: Optional[str] = None,
         ticket: int = None,
-
     ) -> models.Family:
         """Build a new Family record."""
 
