@@ -53,7 +53,7 @@ class RunDirFlowCell:
             LOG.info("Setting sequenced date property")
             if self.status_db.flowcell(name=self.id):
                 LOG.info("Found flow cell %s in statusdb, getting sequenced date.", self.id)
-                self._sequenced_date = self.status_db.flowcell(name=self.id).sequenced_at
+                self._sequenced_date: datetime = self.status_db.flowcell(name=self.id).sequenced_at
             else:
                 LOG.info(
                     "Flow cell %s NOT found in statusdb, deriving sequenced date from run dir name!",
