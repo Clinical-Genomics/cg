@@ -59,7 +59,7 @@ class RunDirFlowCell:
                     "Flow cell %s NOT found in statusdb, deriving sequenced date from run dir name!",
                     self.id,
                 )
-                self._sequenced_date = self.derived_date
+                self._sequenced_date: datetime = self.derived_date
         return self._sequenced_date
 
     def remove_run_directory(self):
