@@ -79,23 +79,32 @@ class RunDirFlowCell:
             LOG.info("Creating bundle with name %s", self.id)
             hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
 
-        with self.hk.session_no_autoflush():
-            hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
-            if self.hk.files(path=str(self.sample_sheet_path)).first() is None:
+        if not self.sample_sheet_already_included():
+            with self.hk.session_no_autoflush():
+                hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
                 LOG.info(f"Adding sample sheet to Housekeeper")
                 tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
                 self.hk.add_file(
                     path=str(self.sample_sheet_path), version_obj=hk_version, tags=tags
                 )
-        self.hk.commit()
+            self.hk.commit()
 
-        hk_sample_sheet_file: hk_models.File = self.hk.get_files(
+            hk_sample_sheet_file: hk_models.File = self.hk.get_files(
+                bundle=self.id, tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET]
+            ).first()
+
+            if hk_sample_sheet_file.is_included:
+                LOG.info("Sample sheet already included!")
+                return
+            LOG.info("Including sample sheet")
+            self.hk.include_file(file_obj=hk_sample_sheet_file, version_obj=hk_version)
+            self.hk.commit()
+
+    def sample_sheet_already_included(self):
+        """Checks if a sample sheet is already included in Housekeeper"""
+        sample_sheet_in_hk: hk_models.File = self.hk.get_files(
             bundle=self.id, tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET]
         ).first()
-
-        if hk_sample_sheet_file.is_included:
-            LOG.info("Sample sheet already included!")
-            return
-        LOG.info("Including sample sheet")
-        self.hk.include_file(file_obj=hk_sample_sheet_file, version_obj=hk_version)
-        self.hk.commit()
+        if not sample_sheet_in_hk:
+            return False
+        return sample_sheet_in_hk.is_included
