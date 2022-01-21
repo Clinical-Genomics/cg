@@ -257,7 +257,14 @@ class DemultiplexedRunsFlowCell:
         globbed_unaligned_paths: Path.glob = Path(self.path).glob(
             DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME + ASTERISK
         )
-        unaligned_path = list(globbed_unaligned_paths)[0]
+        globbed_unaligned_paths_list: list = list(globbed_unaligned_paths)
+        if not globbed_unaligned_paths_list:
+            LOG.warning(
+                "No Unaligned directory found for flow cell %s! No sample sheet to archive!",
+                self.run_name,
+            )
+            return
+        unaligned_path: Path = globbed_unaligned_paths_list[0]
         original_sample_sheet: Path = (
             Path(
                 unaligned_path,
@@ -288,7 +295,7 @@ class DemultiplexedRunsFlowCell:
 
         hk_bundle: hk_models.Bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
-            self.hk.create_new_bundle_and_version(name=self.id)
+            hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
 
         with self.hk.session_no_autoflush():
             hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)

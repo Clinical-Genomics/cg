@@ -231,7 +231,14 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             spring_files_in_housekeeper,
         )
         if not flow_cell_obj.is_demultiplexing_ongoing_or_started_and_not_completed:
+            LOG.info("Found flow cell ready to be checked: %s!", flow_cell_obj.path)
             checked_flow_cells.append(flow_cell_obj)
+            if not flow_cell_obj.passed_check:
+                LOG.warning("Invalid flow cell directory found: %s", flow_cell_obj.path)
+                if dry_run:
+                    continue
+                LOG.warning("Removing %s!", flow_cell_obj.path)
+                flow_cell_obj.remove_failed_flow_cell()
         else:
             LOG.warning("Skipping check!")
 
@@ -263,14 +270,6 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             missingval="N/A",
         ),
     )
-
-    for flow_cell in failed_flow_cells:
-        LOG.warning("Invalid flow cell directory found: %s", flow_cell.path)
-        LOG.warning("Removing %s!", flow_cell.path)
-        if dry_run:
-            continue
-
-        flow_cell.remove_failed_flow_cell()
 
 
 @clean.command("fix-flow-cell-status")
