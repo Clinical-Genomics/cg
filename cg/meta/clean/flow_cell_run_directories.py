@@ -43,7 +43,7 @@ class RunDirFlowCell:
         """How long ago a flow cell was sequenced, in days"""
         if self._age is None:
             LOG.info("Setting age property")
-            self._age = (datetime.now() - self.sequenced_date).days
+            self._age: int = (datetime.now() - self.sequenced_date).days
         return self._age
 
     @property
