@@ -20,8 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 class RunDirFlowCell:
-    """Class to check and remove flow cell run directories. If a flow cell has been sequenced 21
-    days ago or more, it is removed and the sample sheet is archived"""
+    """Class to check and remove flow cell run directories"""
 
     def __init__(self, flow_cell_dir: Path, status_db: Store, housekeeper_api: HousekeeperAPI):
         self.flow_cell_dir: Path = flow_cell_dir
