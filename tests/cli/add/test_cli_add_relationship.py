@@ -22,7 +22,7 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
         add, ["relationship", case_id, sample_id, "-s", status], obj=base_context
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.FamilySample.query.count() == 1
     assert disk_store.FamilySample.query.first().family.internal_id == case_id
@@ -50,7 +50,7 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConf
         obj=base_context,
     )
 
-    # THEN then it should complain on missing sample instead of adding a relationship
+    # THEN it should complain on missing sample instead of adding a relationship
     assert result.exit_code == 1
     assert disk_store.FamilySample.query.count() == 0
 
@@ -77,7 +77,7 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConf
         obj=base_context,
     )
 
-    # THEN then it should complain in missing case instead of adding a relationship
+    # THEN it should complain in missing case instead of adding a relationship
     assert result.exit_code == 1
     assert disk_store.FamilySample.query.count() == 0
 
@@ -106,7 +106,7 @@ def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConf
         obj=base_context,
     )
 
-    # THEN then it should complain on bad status instead of adding a relationship
+    # THEN it should complain on bad status instead of adding a relationship
     assert result.exit_code == 2
     assert disk_store.FamilySample.query.count() == 0
 
@@ -140,7 +140,7 @@ def test_add_relationship_mother(
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.FamilySample.query.count() == 1
     assert disk_store.FamilySample.query.first().mother.internal_id == mother_id
@@ -174,7 +174,7 @@ def test_add_relationship_bad_mother(
         obj=base_context,
     )
 
-    # THEN then it should not be added
+    # THEN it should not be added
     assert result.exit_code == 1
     assert disk_store.FamilySample.query.count() == 0
 
@@ -211,7 +211,7 @@ def test_add_relationship_father(
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.FamilySample.query.count() == 1
     assert disk_store.FamilySample.query.first().father.internal_id == father_id
@@ -247,6 +247,6 @@ def test_add_relationship_bad_father(
         obj=base_context,
     )
 
-    # THEN then it should not be added
+    # THEN it should not be added
     assert result.exit_code == 1
     assert disk_store.FamilySample.query.count() == 0

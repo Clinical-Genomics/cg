@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Set, Optional
+from typing import List, Optional, Set
 
 from cg.store import models
 
@@ -447,6 +447,16 @@ class MockHousekeeperAPI:
                     % (file.path, bundle_name)
                 )
         return file_paths
+
+    def create_new_bundle_and_version(self, name: str):
+        """Create new bundle with version"""
+        new_bundle = self.new_bundle(name=name)
+        self.add_commit(new_bundle)
+        new_version = self.new_version(created_at=new_bundle.created_at)
+        new_bundle.versions.append(new_version)
+        self.commit()
+        LOG.info("New bundle created with name %s", new_bundle.name)
+        return new_bundle
 
     @staticmethod
     def checksum(path):

@@ -43,6 +43,16 @@ class HousekeeperAPI:
         """Fetch bundles"""
         return self._store.bundles()
 
+    def create_new_bundle_and_version(self, name: str) -> models.Bundle:
+        """Create new bundle with version"""
+        new_bundle: models.Bundle = self.new_bundle(name=name)
+        self.add_commit(new_bundle)
+        new_version: models.Version = self.new_version(created_at=new_bundle.created_at)
+        new_bundle.versions.append(new_version)
+        self.commit()
+        LOG.info("New bundle created with name %s", new_bundle.name)
+        return new_bundle
+
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
     ) -> models.File:

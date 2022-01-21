@@ -74,3 +74,4 @@ class HousekeeperTags(StrEnum):
     FASTQ: str = "fastq"
     SAMPLESHEET: str = "samplesheet"
     SPRING: str = "spring"
+    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"

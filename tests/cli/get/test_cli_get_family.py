@@ -16,7 +16,7 @@ def test_get_family_bad_case(cli_runner: CliRunner, base_context: CGConfig):
     name = "dummy_name"
     result = cli_runner.invoke(get, ["family", name], obj=base_context)
 
-    # THEN then it should error about missing case instead of getting a case
+    # THEN it should error about missing case instead of getting a case
     assert result.exit_code != RETURN_SUCCESS
 
 
@@ -32,6 +32,6 @@ def test_get_family_required(
     # WHEN getting a analysis
     result = cli_runner.invoke(get, ["family", internal_id], obj=base_context)
 
-    # THEN then it should have been gotten
+    # THEN it should have been gotten
     assert result.exit_code == RETURN_SUCCESS
     assert internal_id in result.output

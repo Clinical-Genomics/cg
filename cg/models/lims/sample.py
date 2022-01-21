@@ -4,6 +4,8 @@ from typing import Optional
 from pydantic import BaseModel, validator
 from typing_extensions import Literal
 
+from cg.constants import Priority
+
 SEX_MAP = {"male": "M", "female": "F"}
 
 
@@ -32,7 +34,7 @@ class Udf(BaseModel):
     pool: Optional[str]
     post_formalin_fixation_time: Optional[str]
     pre_processing_method: Optional[str]
-    priority: str = "standard"
+    priority: str = Priority.standard.name
     quantity: Optional[str]
     reference_genome: Optional[str]
     region: Optional[str]

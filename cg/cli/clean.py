@@ -14,6 +14,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     fluffy_past_run_dirs,
@@ -207,6 +208,8 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    trailblazer_api: TrailblazerAPI = context.trailblazer_api
+    sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
     search = f"%{demux_api.out_dir}%"
     fastq_files_in_housekeeper: Query = housekeeper_api.files(tags=[HousekeeperTags.FASTQ]).filter(
@@ -220,10 +223,22 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             flow_cell_dir,
             status_db,
             housekeeper_api,
+            trailblazer_api,
+            sample_sheets_dir,
             fastq_files_in_housekeeper,
             spring_files_in_housekeeper,
         )
-        checked_flow_cells.append(flow_cell_obj)
+        if not flow_cell_obj.is_demultiplexing_ongoing_or_started_and_not_completed:
+            LOG.info("Found flow cell ready to be checked: %s!", flow_cell_obj.path)
+            checked_flow_cells.append(flow_cell_obj)
+            if not flow_cell_obj.passed_check:
+                LOG.warning("Invalid flow cell directory found: %s", flow_cell_obj.path)
+                if dry_run:
+                    continue
+                LOG.warning("Removing %s!", flow_cell_obj.path)
+                flow_cell_obj.remove_failed_flow_cell()
+        else:
+            LOG.warning("Skipping check!")
 
     failed_flow_cells: List[DemultiplexedRunsFlowCell] = [
         flow_cell for flow_cell in checked_flow_cells if not flow_cell.passed_check
@@ -253,14 +268,6 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
             missingval="N/A",
         ),
     )
-
-    for flow_cell in failed_flow_cells:
-        LOG.warning("Invalid flow cell directory found: %s", flow_cell.path)
-        LOG.warning("Removing %s!", flow_cell.path)
-        if dry_run:
-            continue
-
-        flow_cell.remove_failed_flow_cell()
 
 
 @clean.command("fix-flow-cell-status")
