@@ -16,16 +16,16 @@ from pydantic import ValidationError
 LOG = logging.getLogger(__name__)
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+OPTION_DRY = click.option(
+    "-d", "--dry-run", help="Print command to console without executing", is_flag=True
+)
 OPTION_GENOME_VERSION = click.option(
     "-g",
-    "--genome_version",
+    "--genome-version",
     default="hg19",
     type=click.Choice(["hg19", "hg38", "canfam3"]),
     show_default=True,
     help="Build version of the human reference genome",
-)
-OPTION_DRY = click.option(
-    "-d", "--dry-run", help="Print command to console without executing", is_flag=True
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",

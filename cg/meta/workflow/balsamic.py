@@ -166,7 +166,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version = genome_version.lower()
 
         if genome_version not in self.__BALSAMIC_GENOME_VERSIONS:
-            raise BalsamicStartError("Genome version not compatible with BALSAMIC")
+            raise BalsamicStartError(
+                f"Genome version {genome_version} is not compatible with BALSAMIC"
+            )
         else:
             return genome_version
 
