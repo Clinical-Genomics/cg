@@ -87,14 +87,8 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flowcell_path, n
     flow_cell_obj.hk.create_new_bundle_and_version.assert_called_once_with(name=flow_cell_obj.id)
 
     # THEN the sample sheet should be be added to Housekeeper
-    flow_cell_obj.hk.add_file.assert_called_once_with(
-        path=str(flow_cell_obj.sample_sheet_path),
-        version_obj=mock_hk.last_version(),
+    flow_cell_obj.hk.add_and_include_file_to_latest_version.assert_called_once_with(
+        case_id=flow_cell_obj.id,
+        file=flow_cell_obj.sample_sheet_path,
         tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET, flow_cell_obj.id],
-    )
-
-    # THEN the sample sheet should be included in Housekeeper
-    flow_cell_obj.hk.include_file.assert_called_once_with(
-        file_obj=mock_hk.get_files.return_value.first.return_value,
-        version_obj=mock_hk.last_version(),
     )
