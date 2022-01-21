@@ -4,7 +4,7 @@ import logging
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from housekeeper.store import models as hk_models
 
@@ -77,34 +77,12 @@ class RunDirFlowCell:
         hk_bundle: hk_models.Bundle = self.hk.bundle(name=self.id)
         if hk_bundle is None:
             LOG.info("Creating bundle with name %s", self.id)
-            hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
-
-        if not self.sample_sheet_already_included():
-            with self.hk.session_no_autoflush():
-                hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
-                LOG.info(f"Adding sample sheet to Housekeeper")
-                tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
-                self.hk.add_file(
-                    path=str(self.sample_sheet_path), version_obj=hk_version, tags=tags
-                )
-            self.hk.commit()
-
-            hk_sample_sheet_file: hk_models.File = self.hk.get_files(
-                bundle=self.id, tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET]
-            ).first()
-
-            if hk_sample_sheet_file.is_included:
-                LOG.info("Sample sheet already included!")
-                return
-            LOG.info("Including sample sheet")
-            self.hk.include_file(file_obj=hk_sample_sheet_file, version_obj=hk_version)
-            self.hk.commit()
-
-    def sample_sheet_already_included(self):
-        """Checks if a sample sheet is already included in Housekeeper"""
-        sample_sheet_in_hk: hk_models.File = self.hk.get_files(
-            bundle=self.id, tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET]
-        ).first()
-        if not sample_sheet_in_hk:
-            return False
-        return sample_sheet_in_hk.is_included
+            self.hk.create_new_bundle_and_version(name=self.id)
+        try:
+            self.hk.add_and_include_file_to_latest_version(
+                case_id=self.id,
+                file=self.sample_sheet_path,
+                tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id],
+            )
+        except FileExistsError:
+            LOG.warning("Sample sheet already included!")
