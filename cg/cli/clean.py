@@ -363,7 +363,8 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
 
 def clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db):
     """Cleans up all flow cell directories in the specified run directory"""
-    for flow_cell_dir in Path(run_directory).iterdir():
+    flow_cell_dirs = [item for item in Path(run_directory).iterdir() if item.is_dir()]
+    for flow_cell_dir in flow_cell_dirs:
         LOG.info("Checking flow cell %s", flow_cell_dir.name)
         run_dir_flow_cell = RunDirFlowCell(flow_cell_dir, status_db, housekeeper_api)
         if run_dir_flow_cell.age < days_old:
