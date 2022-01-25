@@ -512,29 +512,11 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
-    _ticket_number = Column("ticket_number", types.Integer)
+    ticket_number = Column("ticket_number", types.Integer)
     time_point = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
-
-    @property
-    @deprecated(
-        version="22.38.0",
-        message="This field is deprecated, use family.ticket_number",
-    )
-    def ticket_number(self):
-        """Return the number of the ticket where the sample was first submitted."""
-        return self._ticket_number
-
-    @ticket_number.setter
-    @deprecated(
-        version="22.38.0",
-        message="This field is deprecated, use family.ticket_number",
-    )
-    def ticket_number(self, ticket_number: int):
-        """Set the number of the ticket where the sample was first submitted."""
-        self._ticket_number = ticket_number
 
     @property
     @deprecated(
