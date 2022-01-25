@@ -150,27 +150,34 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
+    def get_genome_version(sample_obj: models.Sample) -> str:
+        """Returns build version of the human reference genome"""
+        return sample_obj.genome_version.lower()
+
+    @staticmethod
     def get_sample_type(sample_obj: models.Sample) -> str:
         """Returns tissue type of a sample"""
         if sample_obj.is_tumour:
             return "tumor"
         return "normal"
 
-    def get_verified_genome_version(self, genome_version: str) -> Optional[str]:
-        """Verifies that the build version of the human reference genome is supported
-        by BALSAMIC.
+    def get_verified_genome_version(self, sample_data: dict, genome_version: str) -> Optional[str]:
+        """Takes a dict with samples and attributes and retrieves the build version of the human reference genome if
+        it's supported by BALSAMIC and not provided manually.
 
         Raises BalsamicStartError:
         - When the specified genome_version is not supported by BALSAMIC
         """
-        genome_version = genome_version.lower()
-
-        if genome_version not in self.__BALSAMIC_GENOME_VERSIONS:
-            raise BalsamicStartError(
-                f"Genome version {genome_version} is not compatible with BALSAMIC"
-            )
-        else:
+        if genome_version:
             return genome_version
+        else:
+            genome_version = {v["genome_version"] for k, v in sample_data.items()}
+            if not genome_version.issubset(self.__BALSAMIC_GENOME_VERSIONS):
+                raise BalsamicStartError(
+                    f"Genome version {genome_version} is not supported by BALSAMIC"
+                )
+
+        return genome_version
 
     def get_verified_bed(self, sample_data: dict, panel_bed: Path) -> Optional[str]:
         """Takes a dict with samples and attributes.
@@ -303,7 +310,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return {
             "case_id": case_id,
-            "genome_version": self.get_verified_genome_version(genome_version=genome_version),
+            "genome_version": self.get_verified_genome_version(
+                sample_data=sample_data, genome_version=genome_version
+            ),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -366,12 +375,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("")
 
     def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
-
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
 
         sample_data = {
             link_object.sample.internal_id: {
+                "genome_version": self.get_genome_version(link_object.sample),
                 "tissue_type": self.get_sample_type(link_object.sample),
                 "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),

@@ -22,10 +22,8 @@ OPTION_DRY = click.option(
 OPTION_GENOME_VERSION = click.option(
     "-g",
     "--genome-version",
-    default="hg19",
-    type=click.Choice(["hg19", "hg38", "canfam3"]),
-    show_default=True,
-    help="Build version of the human reference genome",
+    type=click.Choice(["hg19", "hg38", "canfam3"], case_sensitive=False),
+    help="Build version of the human reference genome. Set this option to override fetching of genome version",
 )
 OPTION_PANEL_BED = click.option(
     "--panel-bed",

@@ -476,6 +476,7 @@ class Sample(Model, PriorityMixin):
     application_version = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
+    genome_version = Column(types.String(32))
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     control = Column(types.Enum(*CONTROL_OPTIONS))
