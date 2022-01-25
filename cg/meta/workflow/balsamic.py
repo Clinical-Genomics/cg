@@ -169,7 +169,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         - When the specified genome_version is not supported by BALSAMIC
         """
         if genome_version:
-            return genome_version
+            return genome_version.lower()
         else:
             genome_version = {v["genome_version"] for k, v in sample_data.items()}
             if not genome_version.issubset(self.__BALSAMIC_GENOME_VERSIONS):
