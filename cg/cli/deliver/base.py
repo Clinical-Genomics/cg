@@ -9,6 +9,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -158,3 +159,21 @@ def deliver_ticket(
         context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
     deliver_ticket_api.report_missing_samples(ticket_id=ticket_id, dry_run=dry_run)
     context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)
+
+
+@deliver.command(name="available-fastq")
+@click.option("-d", "--dry-run", help="Simulate process without executing", is_flag=True)
+@click.pass_context
+def deliver_fastq_analysis(context: click.Context, dry_run: bool = False):
+    """Delivers available, non-delivered, cases with Data analysis: Fastq, to caesar"""
+    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+    AnalysisAPI.pipeline = "fastq"
+    cases_to_deliver = analysis_api.get_cases_to_analyze()
+    tickets: set[int] = set()
+    for case in cases_to_deliver:
+        if not dry_run:
+            LOG.info(f"Would have created analysis in statusdb for {case}")
+            analysis_api.upload_bundle_statusdb(case.internal_id)
+        tickets.add(analysis_api.status_db.get_ticket_from_case(case_id=case.internal_id))
+    for ticket in tickets:
+        context.invoke(deliver_ticket, ticket_id=ticket, delivery_type="fastq", dry_run=dry_run)

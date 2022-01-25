@@ -8,8 +8,7 @@ import shutil
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.deliver.base import deliver_analysis
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -265,19 +264,3 @@ def mutant_past_run_dirs(
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
-
-
-@click.command("auto-deliver-fastq")
-@click.pass_context
-def deliver_fastq_analysis(context: click.Context, dry_run: bool = False):
-    """Automatically delivers cases with Data analysis: Fastq, to caesar"""
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
-    AnalysisAPI.pipeline = "fastq"
-    cases_to_deliver = analysis_api.get_cases_to_analyze()
-    tickets: set[int] = set()
-    for case in cases_to_deliver:
-        if not dry_run:
-            analysis_api.upload_bundle_statusdb(case.internal_id)
-        tickets.add(analysis_api.status_db.get_ticket_from_case(case_id=case.internal_id))
-    for ticket in tickets:
-        context.invoke(deliver_analysis, ticket_id=ticket, delivery_type="fastq", dry_run=dry_run)
