@@ -2,12 +2,13 @@
 import datetime as dt
 import logging
 from pathlib import Path
-import requests
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Union
 
+import requests
 from requests import Response
 
 import paramiko
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
@@ -33,6 +34,7 @@ class NiptUploadAPI:
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
 
@@ -41,6 +43,26 @@ class NiptUploadAPI:
 
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
+
+    def target_reads(self, case_id: str) -> float:
+        """Return the target reads of the case"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        application: models.Application = self.status_db.Application.query.filter(
+            models.Application.id == case_obj.links[0].sample.Application.id
+        ).first()
+        return application.target_reads
+
+    def flowcell_passed_qc_value(self, case_id: str) -> bool:
+        """Get average Q30 of NIPT flowcell"""
+        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
+            family_id=case_id
+        )
+        flow_cell_reads_and_q30_summary: Dict[
+            str, Union[int, float]
+        ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
+        return flow_cell_reads_and_q30_summary["q30"] >= 0.90 and flow_cell_reads_and_q30_summary[
+            "reads"
+        ] >= self.target_reads(case_id=case_id)
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""

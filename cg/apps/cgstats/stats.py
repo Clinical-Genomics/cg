@@ -1,9 +1,10 @@
 import logging
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Dict, Iterator, List, Union
 
 import alchy
 import sqlalchemy as sqa
+
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
@@ -105,6 +106,25 @@ class StatsAPI(alchy.Manager):
             .filter(models.Unaligned.sample == sample_obj)
             .group_by(models.Flowcell.flowcellname)
         )
+
+    def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
+        flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
+        sample_count: int = 0
+        q30_list: List[float] = []
+
+        flow_cell_obj = self.Flowcell.query.filter(
+            models.Flowcell.flowcellname == flow_cell_name
+        ).first()
+
+        for sample in self.flowcell_samples(flowcell_obj=flow_cell_obj):
+            sample_count += 1
+            sample_info = self.sample_reads(sample_obj=sample).first()
+            flow_cell_reads_and_q30_summary["reads"] += int(sample_info[3])
+            q30_list.append(float(sample_info[4]))
+
+        flow_cell_reads_and_q30_summary["q30"]: float = sum(q30_list) / sample_count
+
+        return flow_cell_reads_and_q30_summary
 
     @staticmethod
     def sample(sample_name: str) -> models.Sample:

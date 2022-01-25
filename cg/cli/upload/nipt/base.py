@@ -35,11 +35,12 @@ def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bo
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    nipt_upload_api.update_analysis_upload_started_date(case_id)
-    context.invoke(batch, case_id=case_id, dry_run=dry_run)
-    context.invoke(nipt_upload_ftp_case, case_id=case_id, dry_run=dry_run)
-    nipt_upload_api.update_analysis_uploaded_at_date(case_id)
-    LOG.info("%s: analysis uploaded!", case_id)
+    if nipt_upload_api.flowcell_passed_qc_value(case_id=case_id):
+        nipt_upload_api.update_analysis_upload_started_date(case_id)
+        context.invoke(batch, case_id=case_id, dry_run=dry_run)
+        context.invoke(nipt_upload_ftp_case, case_id=case_id, dry_run=dry_run)
+        nipt_upload_api.update_analysis_uploaded_at_date(case_id)
+        LOG.info("%s: analysis uploaded!", case_id)
 
 
 @nipt.command("all")
@@ -58,13 +59,14 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
 
         internal_id = analysis_obj.family.internal_id
 
-        LOG.info("Uploading case: %s", internal_id)
-        try:
-            context.invoke(nipt_upload_case, case_id=internal_id, dry_run=dry_run)
-        except Exception:
-            LOG.error("Uploading case failed: %s", internal_id)
-            LOG.error(traceback.format_exc())
-            all_good = False
+        if nipt_upload_api.flowcell_passed_qc_value(case_id=internal_id):
+            LOG.info("Uploading case: %s", internal_id)
+            try:
+                context.invoke(nipt_upload_case, case_id=internal_id, dry_run=dry_run)
+            except Exception:
+                LOG.error("Uploading case failed: %s", internal_id)
+                LOG.error(traceback.format_exc())
+                all_good = False
 
     if not all_good:
         raise AnalysisUploadError("Some uploads failed")
