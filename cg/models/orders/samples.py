@@ -29,6 +29,10 @@ class OptionalFloatValidator:
 
 
 class OrderInSample(BaseModel):
+    # Order portal specific
+    internal_id: Optional[
+        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
+    ]
     _suitable_project: OrderType = None
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
@@ -62,12 +66,6 @@ class Of1508Sample(OrderInSample):
             max_length=models.Sample.name.property.columns[0].type.length,
         )
     ]
-
-    @validator("name", "source", "volume", "container", "container_name")
-    def required_for_new_samples(cls, value, values, **kwargs):
-        if not value and not values.get("internal_id"):
-            raise ValueError("required for new samples")
-        return value
 
     # customer
     age_at_sampling: Optional[str]
@@ -115,6 +113,12 @@ class Of1508Sample(OrderInSample):
         )
     ]
     synopsis: Optional[str]
+
+    @validator("container", "container_name", "name", "source", "volume")
+    def required_for_new_samples(cls, value, values, **kwargs):
+        if not value and not values.get("internal_id"):
+            raise ValueError("required for new sample '%s'" % (values.get("name")))
+        return value
 
     @validator(
         "tumour_purity",
