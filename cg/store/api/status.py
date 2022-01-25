@@ -143,6 +143,16 @@ class StatusHandler(BaseHandler):
             .customer.internal_id
         )
 
+    def get_ticket_from_case(self, case_id: str):
+        """Returns the ticket to which the majority of the case's samples are related to"""
+        samples = (
+            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.internal_id == case_id)
+            .all()
+        )
+        tickets = [sample.ticket_number for sample in samples]
+        return max(set(tickets), key=tickets.count)
+
     def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
         return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
 
