@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
+from cgmodels.cg.constants import Pipeline
+
 from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
@@ -166,8 +168,7 @@ def deliver_ticket(
 @click.pass_context
 def deliver_fastq_analysis(context: click.Context, dry_run: bool = False):
     """Delivers available, non-delivered, cases with Data analysis: Fastq, to caesar"""
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
-    AnalysisAPI.pipeline = "fastq"
+    analysis_api: AnalysisAPI = AnalysisAPI(config=context.obj, pipeline=Pipeline.FASTQ)
     cases_to_deliver = analysis_api.get_cases_to_analyze()
     tickets: set[int] = set()
     for case in cases_to_deliver:

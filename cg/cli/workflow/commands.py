@@ -1,5 +1,3 @@
-from typing import List
-
 import click
 import datetime as dt
 import logging
