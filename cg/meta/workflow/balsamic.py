@@ -161,21 +161,23 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return "tumor"
         return "normal"
 
-    def get_verified_genome_version(self, sample_data: dict, genome_version: str) -> Optional[str]:
+    def get_verified_genome_version(self, genome_version: str) -> Optional[str]:
         """Takes a dict with samples and attributes and retrieves the build version of the human reference genome if
         it's supported by BALSAMIC and not provided manually.
 
         Raises BalsamicStartError:
         - When the specified genome_version is not supported by BALSAMIC
         """
-        if genome_version:
-            return genome_version.lower()
-        else:
-            genome_version = {v["genome_version"] for k, v in sample_data.items()}
-            if not genome_version.issubset(self.__BALSAMIC_GENOME_VERSIONS):
-                raise BalsamicStartError(
-                    f"Genome version {genome_version} is not supported by BALSAMIC"
-                )
+
+        # TODO
+        # if genome_version:
+        #     return genome_version.lower()
+        # else:
+        #     genome_version = {v["genome_version"] for k, v in sample_data.items()}
+        #     if not genome_version.issubset(self.__BALSAMIC_GENOME_VERSIONS):
+        #         raise BalsamicStartError(
+        #             f"Genome version {genome_version} is not supported by BALSAMIC"
+        #         )
 
         return genome_version
 
@@ -310,9 +312,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return {
             "case_id": case_id,
-            "genome_version": self.get_verified_genome_version(
-                sample_data=sample_data, genome_version=genome_version
-            ),
+            "genome_version": self.get_verified_genome_version(genome_version=genome_version),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -380,7 +380,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         sample_data = {
             link_object.sample.internal_id: {
-                "genome_version": self.get_genome_version(link_object.sample),
                 "tissue_type": self.get_sample_type(link_object.sample),
                 "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),

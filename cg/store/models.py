@@ -307,6 +307,11 @@ class Family(Model, PriorityMixin):
         """Return a list of panels."""
         return self._panels.split(",") if self._panels else []
 
+    @property
+    def genome_version(self) -> str:
+        """Return the genome version"""
+        return self.genome_version if self.genome_version else None
+
     @panels.setter
     def panels(self, panel_list: List[str]):
         self._panels = ",".join(panel_list) if panel_list else None
@@ -476,7 +481,6 @@ class Sample(Model, PriorityMixin):
     application_version = orm.relationship(
         ApplicationVersion, foreign_keys=[application_version_id]
     )
-    genome_version = Column(types.String(32))
     capture_kit = Column(types.String(64))
     comment = Column(types.Text)
     control = Column(types.Enum(*CONTROL_OPTIONS))
