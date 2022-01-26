@@ -103,12 +103,9 @@ def balsamic_trimmed_fastqs(
     """Clean up of solved and archived scout cases"""
     store: Store = context.obj.status_db
     bundles: List[str] = []
-    analyses: List[models.Analysis] = store.analyses()
+    analyses: List[models.Analysis] = store.analyses(pipeline=Pipeline.BALSAMIC)
     cases_added = 0
     for analysis in analyses:
-        if analysis.pipeline != Pipeline.BALSAMIC:
-            continue
-
         x_days_ago = datetime.now() - analysis.started_at
         if x_days_ago.days > days_old:
             bundles.append(analysis.family.internal_id)
