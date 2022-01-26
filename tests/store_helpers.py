@@ -396,7 +396,7 @@ class StoreHelpers:
         app_type = case_info.get("application_type", "wgs")
         self.ensure_application_version(store, application_tag=app_tag)
 
-        ticket: int = None
+        ticket: Optional[int] = None
         sample_objs = {}
         for sample_data in case_info["samples"]:
             sample_id = sample_data["internal_id"]

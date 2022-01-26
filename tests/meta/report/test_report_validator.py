@@ -138,7 +138,6 @@ def test_has_required_data_w_sequence_sample_fields(
     # GIVEN complete delivery data missing only the data we check for value on each non external
     # sample
     case_id = "yellowhog"
-    family = report_store.family(case_id)
     analysis_started_at = report_store.family(case_id).analyses[0].started_at
     delivery_data = report_api._get_delivery_data(
         case_id=case_id, analysis_date=analysis_started_at
