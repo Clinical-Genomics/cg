@@ -25,44 +25,6 @@ branch_labels = None
 depends_on = None
 
 
-class Family(Base):
-    __tablename__ = "family"
-
-    created_at = Column(types.DateTime)
-    id = sa.Column(sa.types.Integer, primary_key=True)
-    internal_id = sa.Column(sa.types.String(32), unique=True, nullable=False)
-    name = sa.Column(sa.types.String(128), nullable=False)
-
-    ticket_number = sa.Column(sa.types.Integer)
-
-
-class FamilySample(Base):
-    __tablename__ = "family_sample"
-    __table_args__ = (sa.UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
-
-    id = sa.Column(sa.types.Integer, primary_key=True)
-    family_id = sa.Column(sa.ForeignKey("family.id", ondelete="CASCADE"), nullable=False)
-    sample_id = sa.Column(sa.ForeignKey("sample.id", ondelete="CASCADE"), nullable=False)
-
-    mother_id = sa.Column(sa.ForeignKey("sample.id"))
-    father_id = sa.Column(sa.ForeignKey("sample.id"))
-
-    family = orm.relationship("Family", backref="links")
-    sample = orm.relationship("Sample", foreign_keys=[sample_id], backref="links")
-    mother = orm.relationship("Sample", foreign_keys=[mother_id], backref="mother_links")
-    father = orm.relationship("Sample", foreign_keys=[father_id], backref="father_links")
-
-
-class Sample(Base):
-    __tablename__ = "sample"
-
-    created_at = Column(types.DateTime)
-    id = sa.Column(sa.types.Integer, primary_key=True)
-    internal_id = sa.Column(sa.types.String(32), nullable=False, unique=True)
-    name = sa.Column(sa.types.String(128), nullable=False)
-    ticket_number = sa.Column(sa.types.Integer)
-
-
 def upgrade():
 
     print("adding ticket column to family", flush=True)
