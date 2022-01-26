@@ -89,7 +89,7 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
                 housekeeper_api.commit()
 
 
-@clean.command("balsamic-trimmed-fastqs")
+@clean.command("balsamic-fastqs")
 @click.option(
     "--days-old",
     type=int,
@@ -99,7 +99,7 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
-def balsamic_trimmed_fastqs(
+def balsamic_fastqs(
     context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of solved and archived scout cases"""
@@ -115,15 +115,15 @@ def balsamic_trimmed_fastqs(
     LOG.info("%s cases marked for trimmed fastq removal", cases_added)
 
     for bundle in bundles:
-        context.invoke(trimmed_fastqs, bundle=bundle, yes=yes, dry_run=dry_run)
+        context.invoke(fastqs, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
-@clean.command("trimmed-fastqs")
+@clean.command("fastqs")
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
 @click.pass_obj
-def trimmed_fastqs(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
+def fastqs(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     tags = ["fastq"]
