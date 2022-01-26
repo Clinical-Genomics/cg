@@ -31,12 +31,17 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class FlowCellRunDirs(Sequencers):
+    pass
+
+
 class BackupConfig(BaseModel):
     root: Sequencers
 
 
 class CleanDirs(BaseModel):
     sample_sheets_dir_name: str
+    flow_cell_run_dirs: FlowCellRunDirs
 
 
 class CleanConfig(BaseModel):
