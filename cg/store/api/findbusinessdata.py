@@ -13,7 +13,9 @@ from cg.store.api.base import BaseHandler
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def analyses(self, *, family: models.Family = None, before: dt.datetime = None, pipeline: Pipeline = None) -> Query:
+    def analyses(
+        self, *, family: models.Family = None, before: dt.datetime = None, pipeline: Pipeline = None
+    ) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query
         if family:
