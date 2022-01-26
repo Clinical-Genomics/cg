@@ -1,4 +1,5 @@
 """Constants for cg"""
+import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
@@ -69,3 +70,19 @@ class HousekeeperTags(StrEnum):
     SAMPLESHEET: str = "samplesheet"
     SPRING: str = "spring"
     ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
+
+
+class Sequencers(StrEnum):
+    HISEQX: str = "hiseqx"
+    HISEQGA: str = "hiseqga"
+    NOVASEQ: str = "novaseq"
+    ALL: str = "all"
+
+
+DRY_RUN = click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Runs the command without making any changes",
+)
