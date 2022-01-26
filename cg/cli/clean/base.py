@@ -124,7 +124,7 @@ def balsamic_trimmed_fastqs(
 def trimmed_fastqs(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    tags = ["balsamic", "trimmed", "fastq"]
+    tags = ["fastq"]
 
     tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=tags))
 
