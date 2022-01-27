@@ -32,10 +32,9 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-
-    panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
     try:
+        analysis_api.verify_case_id_in_statusdb(case_id)
+        panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
         LOG.error(error.message)
@@ -101,7 +100,11 @@ def run(
         ),
     )
 
-    analysis_api.check_analysis_ongoing(case_id=case_id)
+    try:
+        analysis_api.check_analysis_ongoing(case_id=case_id)
+    except CgError as e:
+        LOG.error(e.message)
+        raise click.Abort
     analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
 
     if dry_run:
