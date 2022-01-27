@@ -133,7 +133,7 @@ def scout_finished_cases(
                 bundles.append(case.id)
                 cases_added += 1
         LOG.info("%s cases marked for bam removal", cases_added)
-        if not (yes or click.confirm(_get_confirm_question(bundles))):
+        if not (yes or click.confirm(_get_confirm_question(bundles, "alignment files"))):
             continue
 
     tags = ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]
