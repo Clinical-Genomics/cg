@@ -1,7 +1,10 @@
 from pathlib import Path
 
 import pytest
-from tests.cli.demultiplex.conftest import fixture_demultiplexed_flowcells_working_directory
+
+from tests.cli.demultiplex.conftest import \
+    fixture_demultiplexed_flowcells_working_directory
+from tests.conftest import fixture_demultiplex_fixtures
 
 
 @pytest.fixture(name="correct_flow_cell")
