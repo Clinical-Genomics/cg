@@ -5,11 +5,13 @@ import traceback
 from typing import Optional
 
 import click
+
 from cg.exc import AnalysisUploadError
 from cg.meta.upload.nipt import NiptUploadAPI
 
-from .ftp import ftp, nipt_upload_case as nipt_upload_ftp_case
-from .statina import statina, batch
+from .ftp import ftp
+from .ftp import nipt_upload_case as nipt_upload_ftp_case
+from .statina import batch, statina
 
 LOG = logging.getLogger(__name__)
 
@@ -23,8 +25,9 @@ def nipt():
 @nipt.command("case")
 @click.argument("case_id", required=True)
 @click.option("--dry-run", is_flag=True)
+@click.option("--force", is_flag=True, help="Force upload of case to databases, despite qc")
 @click.pass_context
-def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bool):
+def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bool, force: bool):
     """Upload NIPT result files for a case"""
 
     LOG.info("*** NIPT UPLOAD START ***")
@@ -35,7 +38,7 @@ def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bo
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
 
-    if nipt_upload_api.flowcell_passed_qc_value(case_id=case_id):
+    if force or nipt_upload_api.flowcell_passed_qc_value(case_id=case_id):
         nipt_upload_api.update_analysis_upload_started_date(case_id)
         context.invoke(batch, case_id=case_id, dry_run=dry_run)
         context.invoke(nipt_upload_ftp_case, case_id=case_id, dry_run=dry_run)
