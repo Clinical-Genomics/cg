@@ -98,7 +98,7 @@ def fluffy_fastq_hk_bundle_data(fastq_file_fixture_path, fluffy_sample_lims_id) 
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": fastq_file_fixture_path.as_posix(), "tags": ["fastq"], "archive": False}
+            {"path": fastq_file_fixture_path.as_posix(), "tags": ["fastq", "flowcell"], "archive": False}
         ],
     }
 

@@ -4,12 +4,6 @@ import pytest
 
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
-from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
-
-
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
-    return "201203_A00689_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="flowcell_runs")

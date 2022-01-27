@@ -47,13 +47,14 @@ class NiptUploadAPI:
     def target_reads(self, case_id: str) -> float:
         """Return the target reads of the case"""
         case_obj: models.Family = self.status_db.family(case_id)
-        application: models.Application = self.status_db.Application.query.filter(
-            models.Application.id == case_obj.links[0].sample.Application.id
+        application_version = self.status_db.ApplicationVersion.query.filter(
+            models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
         ).first()
-        return application.target_reads
+
+        return application_version.application.target_reads
 
     def flowcell_passed_qc_value(self, case_id: str) -> bool:
-        """Get average Q30 of NIPT flowcell"""
+        """Check average Q30 and of the latest flowcell related to a case"""
         latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
             family_id=case_id
         )

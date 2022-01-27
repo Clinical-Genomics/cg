@@ -3,13 +3,13 @@ import datetime
 import json
 import logging
 
-from cg.cli.upload.nipt.base import nipt_upload_case, nipt_upload_all
-from cg.meta.upload.nipt import NiptUploadAPI
-from cg.meta.upload.nipt.models import StatinaUploadFiles
-from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
+from cg.cli.upload.nipt.base import nipt_upload_all, nipt_upload_case
+from cg.meta.upload.nipt import NiptUploadAPI
+from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
+from cgmodels.cg.constants import Pipeline
 
 NIPT_CASE_SUCCESS = "*** NIPT UPLOAD START ***"
 NIPT_ALL_SUCCESS = "*** NIPT UPLOAD ALL START ***"
@@ -41,6 +41,7 @@ def test_nipt_statina_upload_case(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
     result = cli_runner.invoke(
         nipt_upload_case, [case_id], obj=upload_context, catch_exceptions=False
     )
@@ -79,6 +80,7 @@ def test_nipt_statina_upload_case_dry_run(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
     result = cli_runner.invoke(nipt_upload_case, [case_id, "--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
@@ -118,6 +120,7 @@ def test_nipt_statina_upload_auto(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
     result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
@@ -157,6 +160,7 @@ def test_nipt_statina_upload_auto_dry_run(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
     result = cli_runner.invoke(nipt_upload_all, ["--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
