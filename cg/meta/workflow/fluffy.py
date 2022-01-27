@@ -188,7 +188,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
-        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
+        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
+            family_id=case_id
+        )
         samplesheet_housekeeper_path = self.get_samplesheet_housekeeper_path(
             flowcell_name=latest_flow_cell.name
         )

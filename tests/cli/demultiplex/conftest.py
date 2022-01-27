@@ -11,19 +11,27 @@ from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
-from tests.apps.cgstats.conftest import (fixture_populated_stats_api,
-                                         fixture_stats_api)
+from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
 from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
-    fixture_demux_run_dir, fixture_demux_run_dir_bcl2fastq,
-    fixture_demux_run_dir_dragen, fixture_lims_novaseq_bcl2fastq_samples,
-    fixture_lims_novaseq_dragen_samples, fixture_lims_novaseq_samples,
-    fixture_lims_novaseq_samples_file, fixture_novaseq_dir,
-    fixture_novaseq_dir_bcl2fastq, fixture_novaseq_dir_dragen,
-    fixture_novaseq_run_parameters, fixture_raw_samples_dir)
+    fixture_demux_run_dir,
+    fixture_demux_run_dir_bcl2fastq,
+    fixture_demux_run_dir_dragen,
+    fixture_lims_novaseq_bcl2fastq_samples,
+    fixture_lims_novaseq_dragen_samples,
+    fixture_lims_novaseq_samples,
+    fixture_lims_novaseq_samples_file,
+    fixture_novaseq_dir,
+    fixture_novaseq_dir_bcl2fastq,
+    fixture_novaseq_dir_dragen,
+    fixture_novaseq_run_parameters,
+    fixture_raw_samples_dir,
+)
 from tests.models.demultiplexing.conftest import (
-    fixture_bcl2fastq_demux_results, fixture_demultiplexed_flowcell,
-    fixture_demultiplexed_runs)
+    fixture_bcl2fastq_demux_results,
+    fixture_demultiplexed_flowcell,
+    fixture_demultiplexed_runs,
+)
 
 LOG = logging.getLogger(__name__)
 
