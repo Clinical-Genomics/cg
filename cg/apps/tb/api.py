@@ -9,11 +9,9 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import Pipeline
-from cg.constants.tb import AnylysisStatus
+from cg.constants import Pipeline, Priority
+from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
-
-from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -22,13 +20,13 @@ class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
     __STARTED_STATUSES = [
-        AnylysisStatus.COMPLETED,
-        AnylysisStatus.FAILED,
-        AnylysisStatus.PENDING,
-        AnylysisStatus.RUNNING,
-        AnylysisStatus.ERROR,
+        AnalysisStatus.COMPLETED,
+        AnalysisStatus.FAILED,
+        AnalysisStatus.PENDING,
+        AnalysisStatus.RUNNING,
+        AnalysisStatus.ERROR,
     ]
-    __ONGOING_STATUSES = [AnylysisStatus.PENDING, AnylysisStatus.RUNNING, AnylysisStatus.ERROR]
+    __ONGOING_STATUSES = [AnalysisStatus.PENDING, AnalysisStatus.RUNNING, AnalysisStatus.ERROR]
 
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
@@ -118,7 +116,7 @@ class TrailblazerAPI:
         return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES
 
     def is_latest_analysis_completed(self, case_id: str) -> bool:
-        return self.get_latest_analysis_status(case_id=case_id) == AnylysisStatus.COMPLETED
+        return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.COMPLETED
 
     def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
         """Raises TrailblazerAPIHTTPError"""
