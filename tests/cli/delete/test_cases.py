@@ -51,6 +51,6 @@ def test_delete_cases_with_dry_run(cli_runner, base_context, base_store: Store, 
         obj=base_context,
     )
 
-    # THEN then it should not have been deleted
+    # THEN it should not have been deleted
     assert "Cases (that will NOT be deleted due to --dry-run):" in caplog.text
     assert case_id in caplog.text

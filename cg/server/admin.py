@@ -21,10 +21,10 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
-def view_human_priority(unused1, unused2, model, unused3):
+def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
-    return Markup("%s" % (model.priority_human)) if model else ""
+    return Markup("%s" % model.priority.name) if model else ""
 
 
 def view_family_sample_link(unused1, unused2, model, unused3):
@@ -204,7 +204,7 @@ class FamilyView(BaseView):
     ]
     column_formatters = {
         "internal_id": view_family_sample_link,
-        "priority": view_human_priority,
+        "priority": view_priority,
         "avatar_url": _list_thumbnail,
     }
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
@@ -344,12 +344,12 @@ class SampleView(BaseView):
         "sex",
         "ticket_number",
     ]
-    column_filters = ["customer.internal_id", "sex", "application_version.application"]
+    column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
         "is_external": is_external_application,
         "internal_id": view_family_sample_link,
         "invoice": InvoiceView.view_invoice_link,
-        "priority": view_human_priority,
+        "priority": view_priority,
     }
     column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
     form_excluded_columns = [
