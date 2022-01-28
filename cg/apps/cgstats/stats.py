@@ -129,8 +129,8 @@ class StatsAPI(alchy.Manager):
         for sample in self.flowcell_samples(flowcell_obj=flow_cell_obj):
             sample_count += 1
             sample_info = self.sample_reads(sample_obj=sample).first()
-            flow_cell_reads_and_q30_summary["reads"] += int(sample_info[3])
-            q30_list.append(float(sample_info[4]))
+            flow_cell_reads_and_q30_summary["reads"] += int(sample_info.reads)
+            q30_list.append(float(sample_info.q30))
 
         flow_cell_reads_and_q30_summary["q30"]: float = sum(q30_list) / sample_count
 

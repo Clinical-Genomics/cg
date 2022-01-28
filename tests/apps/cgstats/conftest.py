@@ -10,20 +10,18 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 from tests.models.demultiplexing.conftest import (
-    fixture_bcl2fastq_demux_results,
-    fixture_demultiplexed_dragen_flow_cell,
-    fixture_demultiplexed_flowcell,
-    fixture_demultiplexed_runs,
-    fixture_flowcell_object,
-    fixture_flowcell_path,
-    fixture_flowcell_runs,
-)
+    fixture_bcl2fastq_demux_results, fixture_demultiplexed_dragen_flow_cell,
+    fixture_demultiplexed_flowcell, fixture_demultiplexed_runs,
+    fixture_dragen_demux_results, fixture_dragen_flow_cell_full_name,
+    fixture_dragen_flow_cell_object, fixture_dragen_flow_cell_path,
+    fixture_flowcell_object, fixture_flowcell_path, fixture_flowcell_runs)
 
 
 class MockDemuxResults:
     """Mock Demux Results"""
 
     def __init__(self, flowcell_full_name: str, sample_sheet_path: Path):
+        self.bcl_converter = "dragen"
         self.conversion_stats_path = Path("Demultiplex_Stats.csv")
         self.demux_host = "hasta"
         self.flowcell: Flowcell = self.mock_flowcell(flowcell_full_name=flowcell_full_name)
@@ -32,12 +30,17 @@ class MockDemuxResults:
         self.run_name = flowcell_full_name
         self.results_dir = Path("results_dir/unaligned")
         self.sample_sheet_path = sample_sheet_path
+        self.run_info = self.RunInfo()
 
     class LogfileParameters(BaseModel):
         id_string: str = "id_string"
         program: str = "dragen"
         command_line: str = "command_line"
         time: datetime = datetime.now()
+
+    class RunInfo(BaseModel):
+        index_length: int = 10
+        read_length: int = 151
 
     def get_logfile_parameters(self) -> LogfileParameters:
         return self.LogfileParameters()
@@ -102,6 +105,7 @@ def fixture_nipt_stats_api(
         manager=nipt_stats_api,
         flowcell_id=flowcell_obj.flowcell_id,
         datasource_id=datasource_obj.datasource_id,
+        demux_results=mock_demux_results,
     )
     sample_obj: stats_models.Sample = create.create_sample(
         manager=nipt_stats_api,
