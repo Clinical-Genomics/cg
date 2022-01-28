@@ -51,6 +51,7 @@ class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     FASTQ: str = "fastq"
     FASTQ_QC: str = "fastq_qc"
+    FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
     FASTQ_QC_ANALYSIS_CRAM: str = "fastq_qc-analysis-cram"
     FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
     NIPT_VIEWER: str = "nipt-viewer"

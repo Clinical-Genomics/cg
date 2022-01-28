@@ -206,6 +206,8 @@ class ExcelOrderformParser(OrderformParser):
 
         if data_delivery == "fastq-qc":
             return DataDelivery.FASTQ_QC
+        if data_delivery == "fastq-qc-+-analysis":
+            return DataDelivery.FASTQ_QC_ANALYSIS
         if data_delivery == "fastq-qc-+-analysis-+-cram":
             return DataDelivery.FASTQ_QC_ANALYSIS_CRAM
         if data_delivery == "fastq-qc-+-analysis-+-cram-+-scout":
