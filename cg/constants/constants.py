@@ -37,11 +37,17 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
+FLOWCELL_Q30_THRESHOLD = {
+    "hiseqx": 75,
+    "hiseqga": 80,
+    "novaseq": {"151": 75, "101": 75, "51": 75},
+}
+
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
-SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
-
 SEX_OPTIONS = ("male", "female", "unknown")
+
+SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
