@@ -53,7 +53,7 @@ class NiptUploadAPI:
 
         return application_version.application.target_reads
 
-    def flowcell_passed_qc_value(self, case_id: str) -> bool:
+    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """Check average Q30 and of the latest flowcell related to a case"""
         latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
             family_id=case_id
@@ -61,9 +61,11 @@ class NiptUploadAPI:
         flow_cell_reads_and_q30_summary: Dict[
             str, Union[int, float]
         ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
-        return flow_cell_reads_and_q30_summary["q30"] >= 0.90 and flow_cell_reads_and_q30_summary[
-            "reads"
-        ] >= self.target_reads(case_id=case_id)
+        return flow_cell_reads_and_q30_summary[
+            "q30"
+        ] >= q30_threshold and flow_cell_reads_and_q30_summary["reads"] >= self.target_reads(
+            case_id=case_id
+        )
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
