@@ -10,19 +10,23 @@ from sqlalchemy.dialects import mysql
 
 
 # revision identifiers, used by Alembic.
-revision = 'c76d655c8edf'
-down_revision = 'f2edbd530656'
+revision = "c76d655c8edf"
+down_revision = "f2edbd530656"
 branch_labels = None
 depends_on = None
 
 
-old_options = ('analysis','analysis-bam','fastq','fastq_qc','fastq_qc-analysis-cram','fastq_qc-analysis-cram-scout','nipt-viewer','scout')
-new_options = sorted(
-    old_options
-    + (
-        "fastq_qc-analysis",
-    )
+old_options = (
+    "analysis",
+    "analysis-bam",
+    "fastq",
+    "fastq_qc",
+    "fastq_qc-analysis-cram",
+    "fastq_qc-analysis-cram-scout",
+    "nipt-viewer",
+    "scout",
 )
+new_options = sorted(old_options + ("fastq_qc-analysis",))
 old_enum = mysql.ENUM(*old_options)
 new_enum = mysql.ENUM(*new_options)
 
