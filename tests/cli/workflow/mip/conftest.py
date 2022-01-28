@@ -11,6 +11,11 @@ from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.fixture(name="mip_dna_fixture_config_path")
+def fixture_mip_dna_fixture_config_path() -> str:
+    return "tests/fixtures/apps/mip/dna/case_config.yaml"
+
+
 @pytest.fixture(name="mip_case_id")
 def fixture_mip_case_id() -> str:
     return "yellowhog"
