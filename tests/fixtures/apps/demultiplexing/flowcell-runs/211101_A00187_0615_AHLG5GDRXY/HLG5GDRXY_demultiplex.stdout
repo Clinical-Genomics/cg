@@ -1,0 +1,42 @@
+Sample sheet being processed by common lib? No
+SampleSheet Settings: 
+  <none>
+
+Command Line: dragen --bcl-conversion-only true --bcl-input-directory /home/proj/production/flowcells/novaseq/runs/211101_A00187_0615_AHLG5GDRXY --output-directory /home/proj/production/demultiplexed-runs/211101_A00187_0615_AHLG5GDRXY/Unaligned --bcl-sampleproject-subdirectories true --force 
+DRAGEN Host Software Version 07.021.572.3.6.3 and Bio-IT Processor Version 0x18101306
+
+Generating run log at /var/log/dragen/dragen_run_1635807029105_55756.log
+
+AutoDetected reference: UNKNOWN
+
+==================================================================
+Downloading ZIP/UNZIP HW bitstream - do not interrupt
+==================================================================
+INFO: /opt/edico/bitstream/07.021.572/0099.bin
+INFO: /opt/edico/bitstream/07.021.572/0030.bin
+....
+.........
+INFO: MEMCs calibrated in 1003ms
+Partial Reconfiguration Complete: Version 18101306
+LICENSE_MSG| Requested streams: zip(x10)
+LICENSE_MSG|   Board 2130048BA01N, CHIPID=0117A66834C0A0C5
+LICENSE_MSG| Allocation:
+LICENSE_MSG|   #0: board 0 stream 0, zip -> zip
+LICENSE_MSG|   #1: board 0 stream 1, zip -> zip
+LICENSE_MSG|   #2: board 0 stream 2, zip -> zip
+LICENSE_MSG|   #3: board 0 stream 3, zip -> zip
+LICENSE_MSG|   #4: board 0 stream 4, zip -> zip
+LICENSE_MSG|   #5: board 0 stream 5, zip -> zip
+LICENSE_MSG|   #6: board 0 stream 6, zip -> zip
+LICENSE_MSG|   #7: board 0 stream 7, zip -> zip
+LICENSE_MSG|   #8: board 0 stream 8, zip -> zip
+LICENSE_MSG|   #9: board 0 stream 9, zip -> zip
+Parallel Tiles: 4. Threads Per Tile: 12
+HW compressors: 10
+SW decompressors: 24
+
+RUN TIME                                                                        Time converting BCL to fastq                                      00:06:04.218   364.22
+RUN TIME                                                                        Time partial reconfiguration                                      00:00:09.951   9.95
+RUN TIME                                                                        Total runtime                                                     00:06:17.613   377.61
+==================================================================
+DRAGEN finished normally
