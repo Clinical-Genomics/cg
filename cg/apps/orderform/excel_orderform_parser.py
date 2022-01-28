@@ -23,7 +23,7 @@ class ExcelOrderformParser(OrderformParser):
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
         "1508:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
-        "1603:10",  # Microbial WGS
+        "1603:11",  # Microbial WGS
         "1604:12",  # Orderform Ready made libraries (RML)
         "1605:9",  # Microbial meta genomes
         "2184:5",  # Orderform SARS-CoV-2
