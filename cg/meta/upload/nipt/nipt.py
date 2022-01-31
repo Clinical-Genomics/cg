@@ -105,14 +105,17 @@ class NiptUploadAPI:
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
+        if self.dry_run:
+            LOG.info(f"Would upload results file to ftp server: {results_file}")
+            return
         transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.sftp_port))
         LOG.info(f"Connecting to SFTP server {self.sftp_host}")
         transport.connect(username=self.sftp_user, password=self.sftp_password)
         sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
         LOG.info(
-            f"Uploading file {str(results_file)} to remote path "
-            f"{self.sftp_remote_path}/{results_file.name}"
+            f"Uploading file {results_file} to remote path {self.sftp_remote_path}/{results_file.name}"
         )
+
         sftp.put(
             localpath=str(results_file),
             remotepath=f"/{self.sftp_remote_path}/{results_file.name}",
