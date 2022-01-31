@@ -14,6 +14,7 @@ class ExcelSample(OrderSample):
     concentration_sample: str = Field(None, alias="UDF/Sample Conc.")
     container: str = Field(None, alias="Container/Type")
     container_name: str = Field(None, alias="Container/Name")
+    control: str = Field(None, alias="UDF/Control")
     custom_index: str = Field(None, alias="UDF/Custom index")
     customer: str = Field(..., alias="UDF/customer")
     data_analysis: str = Field("MIP DNA", alias="UDF/Data Analysis")
