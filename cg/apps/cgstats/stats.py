@@ -119,20 +119,23 @@ class StatsAPI(alchy.Manager):
 
     def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
-        sample_count: int = 0
-        q30_list: List[float] = []
-
-        flow_cell_obj = self.Flowcell.query.filter(
+        flow_cell_obj: models.Flowcell = self.Flowcell.query.filter(
             models.Flowcell.flowcellname == flow_cell_name
         ).first()
 
-        for sample in self.flowcell_samples(flowcell_obj=flow_cell_obj):
-            sample_count += 1
-            sample_info = self.sample_reads(sample_obj=sample).first()
-            flow_cell_reads_and_q30_summary["reads"] += int(sample_info.reads)
-            q30_list.append(float(sample_info.q30))
+        if flow_cell_obj.exists(flowcell_name=flow_cell_name):
+            sample_count: int = 0
+            q30_list: List[float] = []
 
-        flow_cell_reads_and_q30_summary["q30"]: float = sum(q30_list) / sample_count
+            for sample in self.flowcell_samples(flowcell_obj=flow_cell_obj):
+                sample_count += 1
+                sample_info = self.sample_reads(sample_obj=sample).first()
+                flow_cell_reads_and_q30_summary["reads"] += int(sample_info.reads)
+                q30_list.append(float(sample_info.q30))
+
+            flow_cell_reads_and_q30_summary["q30"]: float = sum(q30_list) / sample_count
+        else:
+            LOG.error(f"StatsAPI: Could not find flowcell in database with name: {flow_cell_name}")
 
         return flow_cell_reads_and_q30_summary
 
