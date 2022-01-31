@@ -282,7 +282,7 @@ def test_sync_microbial_orderform_activate(microbial_store: Store, microbial_ord
         activate=activate,
         inactivate=inactivate,
         sheet_name="Drop down list",
-        tag_column=2,
+        tag_column=3,
         tag_row=1,
     )
 

@@ -27,7 +27,7 @@ class Datasource(Model):
     )
 
     def __repr__(self):
-        return u"{self.__class__.__name__}: {self.runname}".format(self=self)
+        return "{self.__class__.__name__}: {self.runname}".format(self=self)
 
     @staticmethod
     def exists(document_path: str) -> Optional[str]:
