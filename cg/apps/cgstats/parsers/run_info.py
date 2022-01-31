@@ -22,3 +22,10 @@ class RunInfo:
     def read_length(self) -> int:
         """Get the read length for this flowcell"""
         return int(self.root.find("Run/Reads/Read").attrib["NumCycles"])
+
+    @property
+    def index_length(self) -> int:
+        """Get the read length of the index used on the flowcell"""
+        for element in self.root.findall("Run/Reads/Read"):
+            if element.attrib["IsIndexedRead"] == "Y":
+                return int(element.attrib["NumCycles"])
