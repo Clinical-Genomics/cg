@@ -6,6 +6,7 @@ import alchy
 import sqlalchemy as sqa
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models
+from cg.constants import FLOWCELL_Q30_THRESHOLD
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
 
 LOG = logging.getLogger(__name__)
@@ -39,25 +40,33 @@ class StatsAPI(alchy.Manager):
             curated_sample_name: str = self.get_curated_sample_name(sample_obj.samplename)
             sample_data = {"name": curated_sample_name, "reads": 0, "fastqs": []}
             for fc_data in self.sample_reads(sample_obj):
-                if fc_data.type == "hiseqga" and fc_data.q30 >= 80:
-                    sample_data["reads"] += fc_data.reads
-                elif fc_data.type == "hiseqx" and fc_data.q30 >= 75:
-                    sample_data["reads"] += fc_data.reads
-                elif fc_data.type == "novaseq" and fc_data.q30 >= 75:
+                read_length: str = ""
+                if fc_data.type == "novaseq":
+                    # Base mask is assumed to have structure of "read_length,index_length,index_length,read_length"
+                    read_length = fc_data.base_mask.split(",")[0]
+                    if fc_data.q30 >= FLOWCELL_Q30_THRESHOLD[fc_data.type][read_length]:
+                        sample_data["reads"] += fc_data.reads
+                elif fc_data.q30 >= FLOWCELL_Q30_THRESHOLD[fc_data.type]:
                     sample_data["reads"] += fc_data.reads
                 else:
+                    q30_threshold: int = (
+                        FLOWCELL_Q30_THRESHOLD[fc_data.type][read_length]
+                        if fc_data.type == "novaseq"
+                        else FLOWCELL_Q30_THRESHOLD[fc_data.type]
+                    )
                     LOG.warning(
                         f"q30 too low for {curated_sample_name} on {fc_data.name}:"
-                        f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%"
+                        f"{fc_data.q30} < {q30_threshold}%"
                     )
                     continue
+
                 for fastq_path in self.fastqs(fc_data.name, sample_obj):
                     if self.is_lane_pooled(
                         flowcell_obj=flowcell_object, lane=fc_data.lane
                     ) and "Undetermined" in str(fastq_path):
                         continue
                     sample_data["fastqs"].append(str(fastq_path))
-            flowcell_samples.append(StatsSample(**sample_data))
+                flowcell_samples.append(StatsSample(**sample_data))
         return flowcell_samples
 
     def flowcell(self, flowcell_name: str) -> StatsFlowcell:
@@ -98,6 +107,7 @@ class StatsAPI(alchy.Manager):
                 models.Flowcell.flowcellname.label("name"),
                 models.Flowcell.hiseqtype.label("type"),
                 models.Unaligned.lane,
+                models.Demux.basemask.label("base_mask"),
                 sqa.func.sum(models.Unaligned.readcounts).label("reads"),
                 sqa.func.min(models.Unaligned.q30_bases_pct).label("q30"),
             )

@@ -52,9 +52,11 @@ def get_flowcell_id(flowcell_name: str) -> Optional[int]:
     return None
 
 
-def get_demux_id(flowcell_object_id: int) -> Optional[int]:
+def get_demux_id(flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
     """Flowcell object id refers to a database object"""
-    demux_id: Optional[int] = models.Demux.exists(flowcell_id=flowcell_object_id, basemask="")
+    demux_id: Optional[int] = models.Demux.exists(
+        flowcell_id=flowcell_object_id, basemask=base_mask
+    )
     if demux_id:
         return demux_id
     return None
