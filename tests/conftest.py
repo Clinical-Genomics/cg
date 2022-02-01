@@ -430,7 +430,7 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return Path(orderforms / "1603.10.microbial.xlsx").as_posix()
+    return Path(orderforms / "1603.11.microbial.xlsx").as_posix()
 
 
 @pytest.fixture

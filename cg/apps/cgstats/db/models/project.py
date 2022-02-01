@@ -16,7 +16,7 @@ class Project(Model):
     samples = orm.relationship("Sample", cascade="all", backref=orm.backref("project"))
 
     def __repr__(self):
-        return u"{self.__class__.__name__}: {self.project_id}".format(self=self)
+        return "{self.__class__.__name__}: {self.project_id}".format(self=self)
 
     @staticmethod
     def exists(project_name: str) -> Optional[int]:

@@ -1,13 +1,9 @@
 """ Test the CLI for mip-dna link"""
-import logging
-
 from cg.cli.workflow.mip_dna.base import link
 
 
-def test_cg_workflow_mip_dna_link(cli_runner, caplog, case_id, dna_mip_context):
-    """Test print the MIP dna case config command to console"""
-
-    caplog.set_level(logging.INFO)
+def test_cg_workflow_mip_dna_link(cli_runner, case_id, dna_mip_context):
+    """Test print the MIP dna link command to console"""
 
     # GIVEN a cli function
 
