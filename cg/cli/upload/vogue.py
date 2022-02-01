@@ -146,14 +146,14 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     load_bioinfo_raw_inputs["samples"] = _get_samples(status_db, case_name)
 
     # Probably get analysis result file through housekeeper ai
-    load_bioinfo_raw_inputs["analysis_result_file"] = _get_multiqc_latest_file(
+    load_bioinfo_raw_inputs["analysis_result_file"] = _get_qc_metrics_latest_file(
         housekeeper_api, case_name
     )
 
     # Probably get analysis_type [multiqc or microsalt or all] from cli
-    # This might automated to some extend by checking if input multiqc json.
-    # This tells us how the result was generated. If it is multiqc it will try to validate keys with
-    # an actual model.
+    # This might automated to some extend by checking if input qc metrics yaml
+    # This tells us how the result was generated. If it is a qc metrics yaml file it will try to validate keys with
+    # an actual model
     load_bioinfo_raw_inputs["analysis_type"] = "multiqc"
 
     # case_name is the input
@@ -219,7 +219,7 @@ def bioinfo_all(
     completed_before: Optional[str],
     dry: bool,
 ):
-    """Load all cases with recent analysis and a multiqc-json to the trending database."""
+    """Load all cases with recent analysis and a QC metrics yaml file to the trending database."""
 
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
@@ -231,23 +231,25 @@ def bioinfo_all(
         if not version_obj:
             continue
 
-        # confirm multiqc.json exists
-        multiqc_file_obj: List[hk_models.File] = list(
+        # confirms that <case_id>_metrics_deliverables.yaml exists
+        qc_metrics_file_obj: List[hk_models.File] = list(
             housekeeper_api.get_files(
-                bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+                bundle=case_name, tags=["qc-metrics", "deliverable"], version=version_obj.id
             )
         )
-        if not multiqc_file_obj:
-            LOG.warning("No multiqc file found in Housekeeper for case %s", case_name)
+        if not qc_metrics_file_obj:
+            LOG.warning("No QC metrics yaml file found in Housekeeper for case %s", case_name)
             continue
 
         # confirm that file exists
-        existing_multiqc_file: str = multiqc_file_obj[0].full_path
-        if not Path(existing_multiqc_file).exists():
-            LOG.warning("The file %s does not exist for case %s", existing_multiqc_file, case_name)
+        existing_qc_metrics_file: str = qc_metrics_file_obj[0].full_path
+        if not Path(existing_qc_metrics_file).exists():
+            LOG.warning(
+                "The file %s does not exist for case %s", existing_qc_metrics_file, case_name
+            )
             continue
 
-        LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
+        LOG.info("Found QC metrics yaml file for %s, %s", case_name, existing_qc_metrics_file)
         try:
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
             if not dry:
@@ -257,22 +259,24 @@ def bioinfo_all(
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 
 
-def _get_multiqc_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:
-    """Get latest multiqc_data.json path for a case_name
+def _get_qc_metrics_latest_file(hk_api: HousekeeperAPI, case_name: str) -> str:
+    """Get latest<case_id>_metrics_deliverables.yaml path for a case_name
     Args:
         case_name(str): onemite
     Returns:
-        multiqc_data_path(str): /path/to/multiqc.json
+        qc_metrics_path(str): /path/to/<case_id>_metrics_deliverables.yaml
     """
     version_obj = hk_api.last_version(case_name)
-    multiqc_json_file = hk_api.get_files(
-        bundle=case_name, tags=["multiqc-json"], version=version_obj.id
+    qc_metrics_file = hk_api.get_files(
+        bundle=case_name, tags=["qc-metrics", "deliverable"], version=version_obj.id
     )
 
-    if len(list(multiqc_json_file)) == 0:
-        raise FileNotFoundError(f"No multiqc.json was found in housekeeper for {case_name}")
+    if len(list(qc_metrics_file)) == 0:
+        raise FileNotFoundError(
+            f"No {case_name}_metrics_deliverables.yaml was found in housekeeper"
+        )
 
-    return multiqc_json_file[0].full_path
+    return qc_metrics_file[0].full_path
 
 
 def _get_samples(store: Store, case_name: str) -> str:
