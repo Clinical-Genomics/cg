@@ -2,12 +2,13 @@
 import datetime as dt
 import logging
 from pathlib import Path
-import requests
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Union
 
+import requests
 from requests import Response
 
 import paramiko
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
@@ -33,6 +34,7 @@ class NiptUploadAPI:
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
+        self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
 
@@ -41,6 +43,29 @@ class NiptUploadAPI:
 
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
+
+    def target_reads(self, case_id: str) -> float:
+        """Return the target reads of the case"""
+        case_obj: models.Family = self.status_db.family(case_id)
+        application_version = self.status_db.ApplicationVersion.query.filter(
+            models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
+        ).first()
+
+        return application_version.application.target_reads
+
+    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
+        """Check average Q30 and of the latest flowcell related to a case"""
+        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
+            family_id=case_id
+        )
+        flow_cell_reads_and_q30_summary: Dict[
+            str, Union[int, float]
+        ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
+        return flow_cell_reads_and_q30_summary[
+            "q30"
+        ] >= q30_threshold and flow_cell_reads_and_q30_summary["reads"] >= self.target_reads(
+            case_id=case_id
+        )
 
     def get_housekeeper_results_file(self, case_id: str, tags: Optional[list] = None) -> str:
         """Get the result file for a NIPT analysis from Housekeeper"""
@@ -80,14 +105,17 @@ class NiptUploadAPI:
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
+        if self.dry_run:
+            LOG.info(f"Would upload results file to ftp server: {results_file}")
+            return
         transport: paramiko.Transport = paramiko.Transport((self.sftp_host, self.sftp_port))
         LOG.info(f"Connecting to SFTP server {self.sftp_host}")
         transport.connect(username=self.sftp_user, password=self.sftp_password)
         sftp: paramiko.SFTPClient = paramiko.SFTPClient.from_transport(transport)
         LOG.info(
-            f"Uploading file {str(results_file)} to remote path "
-            f"{self.sftp_remote_path}/{results_file.name}"
+            f"Uploading file {results_file} to remote path {self.sftp_remote_path}/{results_file.name}"
         )
+
         sftp.put(
             localpath=str(results_file),
             remotepath=f"/{self.sftp_remote_path}/{results_file.name}",

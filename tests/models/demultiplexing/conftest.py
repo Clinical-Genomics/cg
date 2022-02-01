@@ -4,7 +4,6 @@ import pytest
 
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
-from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
 
 
 @pytest.fixture(name="flowcell_runs")
