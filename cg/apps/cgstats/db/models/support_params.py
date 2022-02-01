@@ -22,7 +22,7 @@ class Supportparams(Model):
     time = Column(types.DateTime)
 
     def __repr__(self):
-        return u"{self.__class__.__name__}: {self.document_path}".format(self=self)
+        return "{self.__class__.__name__}: {self.document_path}".format(self=self)
 
     @staticmethod
     def exists(document_path: str) -> Optional[int]:

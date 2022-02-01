@@ -64,8 +64,41 @@ def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
 
     # WHEN creating a demux object
     create.create_demux(
-        manager=stats_api, flowcell_id=flowcell.flowcell_id, datasource_id=data_source.datasource_id
+        manager=stats_api,
+        demux_results=bcl2fastq_demux_results,
+        flowcell_id=flowcell.flowcell_id,
+        datasource_id=data_source.datasource_id,
     )
 
     # THEN assert that a demux object was created
     assert find.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
+
+
+def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxResults):
+    # GIVEN a database with a flowcell and a data source
+    support_parameters: stats_models.Supportparams = create.create_support_parameters(
+        manager=stats_api, demux_results=dragen_demux_results
+    )
+    flowcell: stats_models.Flowcell = create.create_flowcell(
+        manager=stats_api, demux_results=dragen_demux_results
+    )
+    data_source: stats_models.Datasource = create.create_datasource(
+        manager=stats_api,
+        demux_results=dragen_demux_results,
+        support_parameters_id=support_parameters.supportparams_id,
+    )
+    # GIVEN that there is not demux object in the database
+    assert not find.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
+
+    # WHEN creating a demux object
+    demux_object = create.create_demux(
+        manager=stats_api,
+        demux_results=dragen_demux_results,
+        flowcell_id=flowcell.flowcell_id,
+        datasource_id=data_source.datasource_id,
+    )
+
+    # THEN assert that a demux object was created
+    assert find.get_demux_id(
+        flowcell_object_id=flowcell.flowcell_id, base_mask=demux_object.basemask
+    )

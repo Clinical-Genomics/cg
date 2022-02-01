@@ -22,6 +22,7 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
 from .mocks.limsmock import MockLimsAPI
@@ -430,7 +431,7 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return Path(orderforms / "1603.10.microbial.xlsx").as_posix()
+    return Path(orderforms / "1603.11.microbial.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -543,6 +544,31 @@ def fixture_compression_object(
     shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
     shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
     return working_files
+
+
+# Demultiplex fixtures
+
+
+@pytest.fixture(name="demultiplex_fixtures")
+def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
+    """Return the path to the demultiplex fixtures"""
+    return apps_dir / "demultiplexing"
+
+
+@pytest.fixture(name="novaseq_dragen_sample_sheet_path")
+def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a novaseq bcl2fastq sample sheet"""
+    return demultiplex_fixtures / "SampleSheetS2_Dragen.csv"
+
+
+@pytest.fixture(name="flowcell_full_name")
+def fixture_flowcell_full_name() -> str:
+    return "201203_A00689_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(name="flowcell_name")
+def fixture_flowcell_name() -> str:
+    return "HVKJCDRXX"
 
 
 # Unknown file fixtures
