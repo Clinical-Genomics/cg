@@ -50,9 +50,6 @@ def test_clean_hk_bundle_files_dry_run(
     helpers.add_analysis(store=store, case=case, started_at=timestamp, completed_at=timestamp)
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
-    # mocker.patch.object(Path, "exists")
-    # Path.exists.return_value = True
-
     # WHEN running the clean command in dry run mode
     caplog.set_level(logging.INFO)
     result = cli_runner.invoke(

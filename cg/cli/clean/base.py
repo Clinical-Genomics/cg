@@ -46,7 +46,7 @@ FLOW_CELL_OUTPUT_HEADERS = [
 @click.group()
 def clean():
     """Clean up processes"""
-    return
+    pass
 
 
 clean.add_command(balsamic_past_run_dirs)
