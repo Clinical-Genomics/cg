@@ -4,7 +4,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
@@ -20,10 +20,17 @@ LOG = logging.getLogger(__name__)
 class CompressAPI:
     """API for compressing BAM and FASTQ files"""
 
-    def __init__(self, hk_api: HousekeeperAPI, crunchy_api: CrunchyAPI, dry_run: bool = False):
+    def __init__(
+        self,
+        hk_api: HousekeeperAPI,
+        crunchy_api: CrunchyAPI,
+        demux_root: str,
+        dry_run: bool = False,
+    ):
 
         self.hk_api = hk_api
         self.crunchy_api = crunchy_api
+        self.demux_root = Path(demux_root)
         self.dry_run = dry_run
         self.get_cases_to_compress = get_cases_to_compress
 
@@ -32,6 +39,17 @@ class CompressAPI:
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
+
+    def get_flow_cell_name(self, fastq_path: Path) -> str:
+        """
+        Extract the flow cell name from a fastq Path assuming fastq files are kept in their
+        demultipelxed path and the following run_name convention:
+
+            - <date>_<machine>_<run_numbers>_<A|B><flowcell_id>:
+            - Ex: 220128_A00689_0460_BHVN2FDSX2
+        """
+        run_name: str = fastq_path.relative_to(self.demux_root).parts[0]
+        return run_name.split("_")[-1][1:]
 
     def get_latest_version(self, bundle_name: str) -> Optional[housekeeper_models.Version]:
         """Fetch the latest version of a hk bundle"""
@@ -252,7 +270,9 @@ class CompressAPI:
 
     def add_fastq_hk(self, sample_id: str, fastq_first: Path, fastq_second: Path) -> None:
         """Add FASTQ files to housekeeper"""
-        fastq_tags = [sample_id, "fastq"]
+
+        fc_name: str = self.get_flow_cell_name(fastq_path=fastq_first)
+        fastq_tags = [fc_name, "fastq"]
         last_version = self.hk_api.last_version(bundle=sample_id)
         LOG.info(
             "Adds %s, %s to bundle %s with tags %s",

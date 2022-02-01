@@ -4,6 +4,7 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
@@ -17,7 +18,7 @@ class MockCompressAPI(CompressAPI):
 
     def __init__(self):
         """initialize mock"""
-        super().__init__(hk_api=None, crunchy_api=None)
+        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True
@@ -55,10 +56,12 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 @pytest.fixture(name="real_compress_api")
 def fixture_real_compress_api(
-    housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+    demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
 ) -> CompressAPI:
     """Return a compress context"""
-    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=housekeeper_api)
+    _api = CompressAPI(
+        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
+    )
     yield _api
 
 
