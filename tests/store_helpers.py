@@ -232,15 +232,12 @@ class StoreHelpers:
         control: str = "",
         customer_id: str = None,
         gender: str = "female",
-        internal_id: str = None,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
-        loqusdb_id: str = None,
         reads: int = None,
         name: str = None,
         ticket: int = None,
-        subject_id: str = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
@@ -260,7 +257,6 @@ class StoreHelpers:
             name=sample_name,
             reads=reads,
             sex=gender,
-            subject_id=subject_id,
             ticket=ticket,
             tumour=is_tumour,
         )
@@ -269,32 +265,13 @@ class StoreHelpers:
         sample.customer = customer
         sample.ordered_at = datetime.now()
 
-        if loqusdb_id:
-            sample.loqusdb_id = loqusdb_id
-
-        if kwargs.get("delivered_at"):
-            sample.delivered_at = kwargs["delivered_at"]
-
-        if kwargs.get("received_at"):
-            sample.received_at = kwargs["received_at"]
-
-        if kwargs.get("prepared_at"):
-            sample.prepared_at = kwargs["prepared_at"]
-
-        if kwargs.get("sequenced_at"):
-            sample.sequenced_at = kwargs["sequenced_at"]
-
-        if kwargs.get("capture_kit"):
-            sample.capture_kit = kwargs["capture_kit"]
-
-        if kwargs.get("flowcell"):
-            sample.flowcells.append(kwargs["flowcell"])
-
-        if internal_id:
-            sample.internal_id = internal_id
-
-        if kwargs.get("no_invoice"):
-            sample.no_invoice = kwargs["no_invoice"]
+        for key, value in kwargs.items():
+            if key == "flowcell":
+                sample.flowcells.append(kwargs["flowcell"])
+            elif hasattr(sample, key):
+                setattr(sample, key, value)
+            else:
+                raise Exception(f"Unknown sample feature: {key}, {value}")
 
         store.add_commit(sample)
         return sample
