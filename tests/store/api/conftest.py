@@ -1,8 +1,9 @@
+import datetime as dt
 from typing import Iterable, List
 
 import pytest
-from tests.store_helpers import StoreHelpers
 
+from cg.constants import Pipeline
 from cg.store import Store, models
 from cg.store.api.import_func import (
     parse_application_versions,
@@ -10,6 +11,7 @@ from cg.store.api.import_func import (
     versions_are_same,
 )
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
+from tests.store_helpers import StoreHelpers
 
 
 class StoreCheckers:
@@ -171,3 +173,51 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         )
 
     return store
+
+
+@pytest.fixture(name="re_sequenced_sample_store")
+def fixture_re_sequenced_sample_store(
+    store: Store,
+    case_id: str,
+    family_name: str,
+    flowcell_name,
+    sample_id: str,
+    ticket_number: int,
+    helpers,
+) -> Store:
+    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells"""
+    re_sequenced_sample_store: Store = store
+    store_case = helpers.add_case(
+        store=re_sequenced_sample_store,
+        internal_id=case_id,
+        name=family_name,
+        data_analysis=Pipeline.FLUFFY,
+    )
+
+    store_sample = helpers.add_sample(
+        internal_id=sample_id,
+        is_tumour=False,
+        application_type="tgs",
+        reads=1200000000,
+        store=re_sequenced_sample_store,
+        ticket=ticket_number,
+        sequenced_at=dt.datetime.now(),
+    )
+
+    now = dt.datetime.now()
+    one_day_ahead_of_now = now + dt.timedelta(days=1)
+
+    helpers.add_flowcell(
+        store=re_sequenced_sample_store, flowcell_id="HF57HDRXY", samples=[store_sample], date=now
+    )
+
+    helpers.add_flowcell(
+        store=re_sequenced_sample_store,
+        flowcell_id=flowcell_name,
+        samples=[store_sample],
+        date=one_day_ahead_of_now,
+    )
+
+    helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
+
+    return re_sequenced_sample_store
