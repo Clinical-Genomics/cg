@@ -119,7 +119,6 @@ def hk_bundle_files(
 
     date_threshold: datetime = datetime.now() - timedelta(days=days_old)
 
-    LOG.info(f"{case_id}, {date_threshold}, {pipeline}")
     analyses: Query = status_db.get_analyses_before_date(
         case_id=case_id, before=date_threshold, pipeline=pipeline
     )
