@@ -56,52 +56,6 @@ clean.add_command(mutant_past_run_dirs)
 clean.add_command(rsync_past_run_dirs)
 
 
-@clean.command("balsamic-fastqs")
-@click.option(
-    "--older-than",
-    type=int,
-    default=45,
-    help="Clean trimmed fastq files with analysis dates older then given number of days",
-)
-@click.option(
-    "--newer-than",
-    type=int,
-    default=90,
-    help="Clean trimmed fastq files with analysis dates newer then given number of days",
-)
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
-@click.pass_context
-def balsamic_fastqs(
-    context: click.Context,
-    older_than: int,
-    newer_than: int,
-    yes: bool = False,
-    dry_run: bool = False,
-):
-    """Clean up of solved and archived scout cases"""
-    store: Store = context.obj.status_db
-    bundles: List[str] = []
-    analyses: List[models.Analysis] = store.analyses(pipeline=Pipeline.BALSAMIC)
-    cases_added = 0
-    for analysis in analyses:
-        x_days_ago = datetime.now() - analysis.started_at
-        if older_than < x_days_ago.days < newer_than:
-            bundles.append(analysis.family.internal_id)
-            cases_added += 1
-    LOG.info("%s cases marked for trimmed fastq removal", cases_added)
-
-    for bundle in bundles:
-        context.invoke(
-            hk_bundle_files,
-            case_id=bundle,
-            tags=["fastq"],
-            days_old=older_than,
-            yes=yes,
-            dry_run=dry_run,
-        )
-
-
 def _get_confirm_question(bundles, type_of_files):
 
     question = f":remove {type_of_files} from bundles {', '.join(bundles)}"
