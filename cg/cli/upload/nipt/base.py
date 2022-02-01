@@ -78,17 +78,9 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
             LOG.info("Uploading case: %s", internal_id)
             try:
                 context.invoke(nipt_upload_case, case_id=internal_id, dry_run=dry_run)
-            except Exception:
-                LOG.error("Uploading case failed: %s", internal_id)
+            except AnalysisUploadError:
                 LOG.error(traceback.format_exc())
                 all_good = False
-        else:
-            LOG.error("Uploading case failed: %s", internal_id)
-            LOG.error(
-                f"Flowcell did not pass one of the following QC parameters:\n"
-                f"target_reads={nipt_upload_api.target_reads(case_id=internal_id)}, Q30_threshold={Q30_THRESHOLD}"
-            )
-            all_good = False
 
     if not all_good:
         raise AnalysisUploadError("Some uploads failed")
