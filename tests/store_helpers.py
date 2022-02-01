@@ -236,13 +236,12 @@ class StoreHelpers:
         is_rna: bool = False,
         is_tumour: bool = False,
         reads: int = None,
-        name: str = None,
+        name: str = "sample_test",
         ticket: int = None,
         **kwargs,
     ) -> models.Sample:
         """Utility function to add a sample to use in tests"""
         customer_id = customer_id or "cust000"
-        sample_name = name or "sample_test"
         customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         application_version = StoreHelpers.ensure_application_version(
             store=store,
@@ -254,7 +253,7 @@ class StoreHelpers:
         application_version_id = application_version.id
         sample = store.add_sample(
             control=control,
-            name=sample_name,
+            name=name,
             reads=reads,
             sex=gender,
             ticket=ticket,
