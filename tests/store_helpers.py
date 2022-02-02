@@ -270,7 +270,7 @@ class StoreHelpers:
             elif hasattr(sample, key):
                 setattr(sample, key, value)
             else:
-                raise Exception(f"Unknown sample feature: {key}, {value}")
+                raise AttributeError(f"Unknown sample attribute/feature: {key}, {value}")
 
         store.add_commit(sample)
         return sample
