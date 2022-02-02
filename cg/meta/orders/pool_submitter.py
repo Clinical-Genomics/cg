@@ -75,7 +75,7 @@ class PoolSubmitter(Submitter):
             priorities = pool["priorities"]
             pool_name = pool["name"]
             if len(applications) > 1:
-                raise OrderError(f"different application in pool: {pool_name} - {applications}")
+                raise OrderError(f"different applications in pool: {pool_name} - {applications}")
             if len(priorities) > 1:
                 raise OrderError(f"different priority in pool: {pool_name} - {priorities}")
 
