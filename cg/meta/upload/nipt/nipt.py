@@ -191,7 +191,7 @@ class NiptUploadAPI:
         response: Response = requests.post(
             url=self.statina_upload_url,
             headers={"authorization": f"Bearer {token}"},
-            data=statina_files.json(exclude_none=True),
+            data=statina_files.dict(exclude_none=True),
         )
         if not response.ok:
             LOG.error(response.text)
