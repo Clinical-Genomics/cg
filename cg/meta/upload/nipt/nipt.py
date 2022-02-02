@@ -184,7 +184,7 @@ class NiptUploadAPI:
                 data={"username": self.statina_user, "password": self.statina_password},
             )
             .json()
-            .get("access token")
+            .get("access_token")
         )
 
         response: Response = requests.post(
