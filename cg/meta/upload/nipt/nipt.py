@@ -186,7 +186,6 @@ class NiptUploadAPI:
             .json()
             .get("access_token")
         )
-        LOG.info(f"Using auth token: {token}")
 
         response: Response = requests.post(
             url=self.statina_upload_url,
