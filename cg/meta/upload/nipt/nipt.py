@@ -193,6 +193,7 @@ class NiptUploadAPI:
             data=statina_files.json(exclude_none=True),
         )
         if not response.ok:
+            LOG.error(response.text)
             raise StatinaAPIHTTPError(response.text)
 
         LOG.info("nipt output: %s", response.text)
