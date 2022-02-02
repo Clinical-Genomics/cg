@@ -75,7 +75,7 @@ class OrderformParser(BaseModel):
             pool = pools[pool_name]
             if str(pool.application) != application:
                 raise OrderFormError(
-                    f"different application in pool: {pool_name} - {[pools[pool_name].application, application]}"
+                    f"different applications in pool: {pool_name} - {[pools[pool_name].application, application]}"
                 )
             pool.samples.append(sample)
 
