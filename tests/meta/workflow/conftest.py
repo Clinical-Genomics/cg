@@ -7,6 +7,16 @@ from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
 
 
+@pytest.fixture(scope="function", name="send_fastq_api")
+def fixture_send_fastq_api(
+    compress_api: CompressAPI, only_spring_bundle: dict, helpers
+) -> CompressAPI:
+    """Populated compress api fixture with only spring compressed fastq"""
+    helpers.ensure_hk_bundle(compress_api.hk_api, only_spring_bundle)
+
+    return compress_api
+
+
 @pytest.fixture(scope="function", name="populated_compress_spring_api")
 def fixture_populated_compress_spring_api(
     compress_api: CompressAPI, only_spring_bundle: dict, helpers

@@ -4,7 +4,7 @@ import glob
 import logging
 import yaml
 from pathlib import Path
-from typing import List, Dict, Iterable
+from typing import List, Dict, Iterable, Optional
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -141,7 +141,9 @@ class RsyncAPI(MetaAPI):
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
+    def run_rsync_on_slurm(
+        self, ticket_id: int, dry_run: bool, job_name: Optional[str] = None
+    ) -> int:
         self.set_log_dir(ticket_id=ticket_id)
         self.create_log_dir(dry_run=dry_run)
         source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
@@ -170,7 +172,7 @@ class RsyncAPI(MetaAPI):
         else:
             priority = "low"
         sbatch_info = {
-            "job_name": "_".join([str(ticket_id), "rsync"]),
+            "job_name": job_name or "_".join([str(ticket_id), "rsync"]),
             "account": self.account,
             "number_tasks": 1,
             "memory": 1,
