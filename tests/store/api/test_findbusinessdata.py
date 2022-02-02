@@ -2,9 +2,9 @@
 from datetime import datetime
 
 import pytest
-from cgmodels.cg.constants import Pipeline
 
 from cg.store import Store, models
+from cgmodels.cg.constants import Pipeline
 from tests.store_helpers import StoreHelpers
 
 
@@ -64,3 +64,22 @@ def test_families_by_subject_id(
     assert rna_case in all_cases
     assert dna_case in dna_cases
     assert rna_case not in dna_cases
+
+
+def test_get_latest_flow_cell_on_case(
+    re_sequenced_sample_store: Store, case_id: str, flowcell_name: str
+):
+    """Test function to fetch the latest sequenced flowcell on a case"""
+
+    # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
+    latest_flow_cell_obj: models.Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
+        models.Flowcell.name == flowcell_name
+    ).first()
+
+    # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
+    latest_flow_cell_on_case: models.Flowcell = (
+        re_sequenced_sample_store.get_latest_flow_cell_on_case(family_id=case_id)
+    )
+
+    # THEN the fetched flow cell should have the same name as the other
+    assert latest_flow_cell_obj.name == latest_flow_cell_on_case.name
