@@ -7,7 +7,7 @@ from tests.cli.workflow.send_fastq.conftest import fixture_send_fastq_context, f
 
 
 def test_upload_bundle_statusdb(
-    case_id: str, customer_id, mocker, send_fastq_context: CGConfig, ticket_nr: int, tmpdir_factory
+    case_id: str, customer_id, mocker, send_fastq_context, ticket_nr: int, tmpdir_factory
 ):
     """Tests the status_db upload for the SendFastqAnalysisAPI"""
     # GIVEN that a send_fastq_context
@@ -33,7 +33,7 @@ def test_upload_bundle_statusdb(
     assert case_obj.analyses[0].upload_started_at and case_obj.analyses[0].uploaded_at
 
 
-def test_convert_case_priority(case_id: str, send_fastq_context: CGConfig):
+def test_convert_case_priority(case_id: str, send_fastq_context):
     """Tests the conversion from case priority to SlurmQos"""
     # GIVEN a case with priority other than 4
     case_obj: models.Family = send_fastq_context.status_db.family(internal_id=case_id)

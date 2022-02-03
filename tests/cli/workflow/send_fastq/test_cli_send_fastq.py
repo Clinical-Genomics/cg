@@ -4,7 +4,7 @@ from cg.models.cg_config import CGConfig
 from cg.cli.workflow.send_fastq.base import start, start_available, run, send_fastq
 
 
-def test_start_available(caplog, case_id: str, cli_runner, send_fastq_context: CGConfig):
+def test_start_available(caplog, case_id: str, cli_runner, send_fastq_context):
     """Tests the start_available command for the send_fastq workflow"""
     caplog.set_level(logging.INFO)
     # GIVEN a case with no analysis and a send_fastq context
@@ -18,7 +18,7 @@ def test_start_available(caplog, case_id: str, cli_runner, send_fastq_context: C
     assert "Running %s in dry-run mode", case_id in caplog.text
 
 
-def test_send_fastq(caplog, cli_runner, send_fastq_context: CGConfig):
+def test_send_fastq(caplog, cli_runner, send_fastq_context):
     """Tests the send_fastq command without arguments"""
     # GIVEN no arguments passed
 
@@ -31,7 +31,7 @@ def test_send_fastq(caplog, cli_runner, send_fastq_context: CGConfig):
     assert "help" in result.output
 
 
-def test_start(caplog, case_id: str, cli_runner, send_fastq_context: CGConfig):
+def test_start(caplog, case_id: str, cli_runner, send_fastq_context):
     """Tests the start command for the send_fastq workflow"""
     # GIVEN a send_fastq context
     caplog.set_level(logging.INFO)
@@ -43,7 +43,7 @@ def test_start(caplog, case_id: str, cli_runner, send_fastq_context: CGConfig):
     assert "Running %s in dry-run mode", case_id in caplog.text
 
 
-def test_run(caplog, case_id: str, cli_runner, send_fastq_context: CGConfig):
+def test_run(caplog, case_id: str, cli_runner, send_fastq_context):
     """Tests the run command for the send_fastq workflow"""
     # GIVEN a send_fastq context
     caplog.set_level(logging.INFO)
