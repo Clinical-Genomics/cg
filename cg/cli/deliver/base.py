@@ -161,21 +161,3 @@ def deliver_ticket(
         context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
     deliver_ticket_api.report_missing_samples(ticket_id=ticket_id, dry_run=dry_run)
     context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)
-
-
-@deliver.command(name="available-fastq")
-@click.option("-d", "--dry-run", help="Simulate process without executing", is_flag=True)
-@click.pass_context
-def deliver_available_fastq_files(context: click.Context, dry_run: bool = False):
-    """Delivers available, non-delivered, cases with Data analysis: Fastq, to caesar"""
-    analysis_api: AnalysisAPI = AnalysisAPI(config=context.obj, pipeline=Pipeline.FASTQ)
-    cases_to_deliver = analysis_api.get_cases_to_analyze()
-    tickets: set[int] = set()
-    for case in cases_to_deliver:
-        if dry_run:
-            LOG.info(f"Would have created analysis in statusdb for {case}")
-        else:
-            analysis_api.upload_bundle_statusdb(case.internal_id)
-        tickets.add(analysis_api.status_db.get_ticket_from_case(case_id=case.internal_id))
-    for ticket in tickets:
-        context.invoke(deliver_ticket, ticket_id=ticket, delivery_type=["fastq"], dry_run=dry_run)
