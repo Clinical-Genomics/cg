@@ -29,7 +29,10 @@ class NiptUploadAPI:
         self.sftp_user: str = config.fluffy.sftp.user
         self.sftp_password: str = config.fluffy.sftp.password
         self.sftp_host: str = config.fluffy.sftp.host
-        self.statina_host: str = config.statina.host
+        self.statina_user: str = config.statina.user
+        self.statina_password: str = config.statina.key
+        self.statina_auth_url: str = config.statina.api_url + config.statina.auth_path
+        self.statina_upload_url: str = config.statina.api_url + config.statina.upload_path
         self.sftp_port = config.fluffy.sftp.port
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
@@ -175,12 +178,22 @@ class NiptUploadAPI:
     def upload_to_statina_database(self, statina_files: StatinaUploadFiles):
         """Upload nipt data via rest-API."""
 
+        token: str = (
+            requests.post(
+                self.statina_auth_url,
+                data={"username": self.statina_user, "password": self.statina_password},
+            )
+            .json()
+            .get("access_token")
+        )
+
         response: Response = requests.post(
-            url=f"{self.statina_host}/insert/batch",
-            headers={"Content-Type": "application/json"},
+            url=self.statina_upload_url,
+            headers={"authorization": f"Bearer {token}"},
             data=statina_files.json(exclude_none=True),
         )
         if not response.ok:
+            LOG.error(response.text)
             raise StatinaAPIHTTPError(response.text)
 
         LOG.info("nipt output: %s", response.text)
