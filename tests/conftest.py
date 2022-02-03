@@ -19,7 +19,6 @@ from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.meta.workflow.send_fastq import SendFastqAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -249,13 +248,6 @@ def fixture_external_data_api(cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture"""
     _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
     return _external_data_api
-
-
-@pytest.fixture(name="send_fastq_api")
-def fixture_send_fastq_api(cg_context: CGConfig) -> SendFastqAnalysisAPI:
-    """ExternalDataAPI fixture"""
-    _send_fastq_api: SendFastqAnalysisAPI = SendFastqAnalysisAPI(config=cg_context)
-    return _send_fastq_api
 
 
 @pytest.fixture(name="genotype_api")

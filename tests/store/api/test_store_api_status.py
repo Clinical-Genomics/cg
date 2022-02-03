@@ -295,6 +295,7 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
 
 
 def test_get_ticket_from_case(case_id: str, analysis_store_single_case, ticket_nr: int):
+    """Tests if the correct ticket is returned for the given case"""
     # GIVEN a populated store with a case
 
     # WHEN the function is called
