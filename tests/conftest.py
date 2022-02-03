@@ -1202,7 +1202,14 @@ def fixture_context_config(
                 "port": 22,
             },
         },
-        "statina": {"host": "http://localhost:28002"},
+        "statina": {
+            "host": "http://localhost:28002",
+            "user": "user",
+            "key": "key",
+            "api_url": "api_url",
+            "upload_path": "upload_path",
+            "auth_path": "auth_path",
+        },
         "data-delivery": {
             "destination_path": "server.name.se:/some",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",
