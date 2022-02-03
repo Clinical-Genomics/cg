@@ -2,6 +2,8 @@ from cg.constants.priority import SlurmQos
 from cg.meta.workflow.send_fastq import SendFastqAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models, Store
+from tests.cli.workflow.conftest import tb_api
+from tests.cli.workflow.send_fastq.conftest import fixture_send_fastq_context, fixture_fastq_case
 
 
 def test_upload_bundle_statusdb(
