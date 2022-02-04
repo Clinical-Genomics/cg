@@ -179,6 +179,9 @@ class Bed(Model):
 
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
+    description = Column(types.String(256), nullable=False)
+    details = Column(types.Text)
+    limitations = Column(types.Text)
     comment = Column(types.Text)
     is_archived = Column(types.Boolean, default=False)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -197,6 +200,7 @@ class BedVersion(Model):
 
     id = Column(types.Integer, primary_key=True)
     shortname = Column(types.String(64))
+    description = Column(types.String(256), nullable=False)
     version = Column(types.Integer, nullable=False)
     filename = Column(types.String(256), nullable=False)
     checksum = Column(types.String(32))
