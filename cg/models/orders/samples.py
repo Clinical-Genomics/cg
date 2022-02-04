@@ -19,20 +19,20 @@ from cg.store import models
 class OptionalIntValidator:
     @classmethod
     def str_to_int(cls, v: str) -> Optional[int]:
-        if v in (None, ""):
-            return None
-        return int(v)
+        return int(v) if v else None
 
 
 class OptionalFloatValidator:
     @classmethod
     def str_to_float(cls, v: str) -> Optional[float]:
-        if v in (None, ""):
-            return None
-        return float(v)
+        return float(v) if v else None
 
 
 class OrderInSample(BaseModel):
+    # Order portal specific
+    internal_id: Optional[
+        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
+    ]
     _suitable_project: OrderType = None
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
@@ -67,12 +67,6 @@ class Of1508Sample(OrderInSample):
         )
     ]
 
-    @validator("name", "source", "volume", "container", "container_name")
-    def required_for_new_samples(cls, value, values, **kwargs):
-        if not value and not values.get("internal_id"):
-            raise ValueError("required for new samples")
-        return value
-
     # customer
     age_at_sampling: Optional[str]
     # "application": str,
@@ -92,7 +86,6 @@ class Of1508Sample(OrderInSample):
     # "required if plate for new samples"
     container_name: Optional[str]
     well_position: Optional[str]
-    status: Optional[StatusEnum]
     # "Required if samples are part of trio/family"
     mother: Optional[
         constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
@@ -121,6 +114,12 @@ class Of1508Sample(OrderInSample):
     ]
     synopsis: Optional[str]
 
+    @validator("container", "container_name", "name", "source", "volume")
+    def required_for_new_samples(cls, value, values, **kwargs):
+        if not value and not values.get("internal_id"):
+            raise ValueError("required for new sample '%s'" % (values.get("name")))
+        return value
+
     @validator(
         "tumour_purity",
         "formalin_fixation_time",
@@ -135,7 +134,9 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]
+    panels: List[
+        constr(min_length=1, max_length=models.Panel.abbrev.property.columns[0].type.length)
+    ]
     status: StatusEnum
 
 
@@ -243,6 +244,8 @@ class MicrobialSample(OrderInSample):
     concentration_sample: Optional[float]
     quantity: Optional[int]
     verified_organism: Optional[bool]  # sent to LIMS
+
+    control: Optional[str]
 
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> Optional[int]:

@@ -2,12 +2,12 @@
 import datetime as dt
 from typing import List, Optional, Set
 
-from cgmodels.cg.constants import Pipeline
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
 from cg.store import models
 from cg.store.api.base import BaseHandler
+from cgmodels.cg.constants import Pipeline
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -175,6 +175,15 @@ class FindBusinessDataHandler(BaseHandler):
                 cases.add(case)
         return cases
 
+    def get_latest_flow_cell_on_case(self, family_id: str) -> models.Flowcell:
+        """Fetch the latest sequenced flow cell related to a sample on a case"""
+        case_obj: models.Family = self.family(family_id)
+        samples_on_case = case_obj.links
+        flow_cells_on_case: List[models.Flowcell] = samples_on_case[0].sample.flowcells
+        flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
+        # .sort() sorts by ascending order by default
+        return flow_cells_on_case[-1]
+
     def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
         """Get samples on a given family_id"""
         case: models.Family = self.family(internal_id=family_id)
@@ -198,7 +207,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
 
-    def find_sample(self, customer: models.Customer, name: str) -> Query:
+    def find_samples(self, customer: models.Customer, name: str) -> Query:
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 

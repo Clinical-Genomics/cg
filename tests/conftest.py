@@ -6,20 +6,19 @@ import datetime as dt
 import json
 import logging
 import os
-import pytest
 import shutil
-
 from pathlib import Path
 from typing import Generator
 
+import pytest
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
-from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -432,7 +431,7 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return Path(orderforms / "1603.10.microbial.xlsx").as_posix()
+    return Path(orderforms / "1603.11.microbial.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -444,7 +443,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.11.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.12.rml.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -481,6 +480,12 @@ def fastq_order_to_submit() -> dict:
 @pytest.fixture
 def rml_order_to_submit() -> dict:
     """Load an example rml order."""
+    return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
+
+
+@pytest.fixture
+def fluffy_order_to_submit() -> dict:
+    """Load an example fluffy order."""
     return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
 
 
@@ -539,6 +544,31 @@ def fixture_compression_object(
     shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
     shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
     return working_files
+
+
+# Demultiplex fixtures
+
+
+@pytest.fixture(name="demultiplex_fixtures")
+def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
+    """Return the path to the demultiplex fixtures"""
+    return apps_dir / "demultiplexing"
+
+
+@pytest.fixture(name="novaseq_dragen_sample_sheet_path")
+def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a novaseq bcl2fastq sample sheet"""
+    return demultiplex_fixtures / "SampleSheetS2_Dragen.csv"
+
+
+@pytest.fixture(name="flowcell_full_name")
+def fixture_flowcell_full_name() -> str:
+    return "201203_A00689_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(name="flowcell_name")
+def fixture_flowcell_name() -> str:
+    return "HVKJCDRXX"
 
 
 # Unknown file fixtures
@@ -1172,7 +1202,14 @@ def fixture_context_config(
                 "port": 22,
             },
         },
-        "statina": {"host": "http://localhost:28002"},
+        "statina": {
+            "host": "http://localhost:28002",
+            "user": "user",
+            "key": "key",
+            "api_url": "api_url",
+            "upload_path": "upload_path",
+            "auth_path": "auth_path",
+        },
         "data-delivery": {
             "destination_path": "server.name.se:/some",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",

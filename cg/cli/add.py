@@ -2,11 +2,13 @@ import logging
 from typing import Optional, Tuple
 
 import click
-from cg.constants import PRIORITY_OPTIONS, STATUS_OPTIONS, DataDelivery, Pipeline
+from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
+
+from cg.constants import Priority
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +119,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
 @click.option(
     "-p",
     "--priority",
-    type=click.Choice(PRIORITY_OPTIONS),
+    type=EnumChoice(Priority, use_value=False),
     default="standard",
     help="set the priority for the samples",
 )
@@ -131,7 +133,7 @@ def sample(
     sex: str,
     order: Optional[str],
     application: str,
-    priority: str,
+    priority: Priority,
     customer_id: str,
     name: str,
 ):
@@ -161,7 +163,10 @@ def sample(
 
 @add.command()
 @click.option(
-    "--priority", type=click.Choice(PRIORITY_OPTIONS), default="standard", help="analysis priority"
+    "--priority",
+    type=EnumChoice(Priority, use_value=False),
+    default="standard",
+    help="analysis priority",
 )
 @click.option("-p", "--panel", "panels", multiple=True, help="default gene panels")
 @click.option(
@@ -185,7 +190,7 @@ def sample(
 @click.pass_obj
 def family(
     context: CGConfig,
-    priority: str,
+    priority: Priority,
     panels: Tuple[str],
     data_analysis: Pipeline,
     data_delivery: DataDelivery,
@@ -290,8 +295,11 @@ def external(context: CGConfig, ticket_id: int, dry_run: bool):
     required=True,
 )
 @click.option("--dry-run", is_flag=True)
+@click.option(
+    "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
+)
 @click.pass_obj
-def external_hk(context: CGConfig, ticket_id: int, dry_run: bool):
+def external_hk(context: CGConfig, ticket_id: int, dry_run: bool, force):
     """Adds external data to housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket_id=ticket_id)
+    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket_id=ticket_id, force=force)

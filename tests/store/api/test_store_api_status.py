@@ -1,8 +1,9 @@
 """Tests the status part of the cg.store.api"""
 from datetime import datetime, timedelta
 
-from cg.constants import Pipeline
-from cg.store.models import Family
+from cg.constants import Pipeline, Priority
+from cg.store import Store
+from cg.store.models import Application, Family, Sample
 
 
 def test_samples_to_receive_external(sample_store, helpers):
@@ -253,3 +254,41 @@ def test_set_case_action(analysis_store, case_id):
 
     # Then the action should be set to analyze
     assert new_action == "analyze"
+
+
+def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
+    base_store: Store, helpers
+):
+    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC"""
+
+    # GIVEN a database with a case which has an express sample with half the amount of reads
+    sample: Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    application: Application = sample.application_version.application
+    application.target_reads = 40
+    sample.reads = 20
+    sample.priority = Priority.express
+
+    # WHEN retrieving the sequencing qc property of a the express sample
+    sequencing_qc_ok: bool = sample.sequencing_qc
+
+    # THEN the qc property should be True
+    assert sequencing_qc_ok
+
+
+def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
+    base_store: Store, helpers
+):
+    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC"""
+
+    # GIVEN a database with a case which has an normal sample with half the amount of reads
+    sample: Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    application: Application = sample.application_version.application
+    application.target_reads = 40
+    sample.reads = 20
+    sample.priority = Priority.standard
+
+    # WHEN retrieving the sequencing qc property of a the normal sample
+    sequencing_qc_ok: bool = sample.sequencing_qc
+
+    # THEN the qc property should be False
+    assert not sequencing_qc_ok

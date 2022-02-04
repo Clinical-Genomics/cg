@@ -11,6 +11,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 
+from cg.constants import Priority
+
 
 @pytest.fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
@@ -21,7 +23,7 @@ def fixture_analysis_store(base_store: Store, analysis_family: dict) -> Store:
         name=analysis_family["name"],
         panels=analysis_family["panels"],
         internal_id=analysis_family["internal_id"],
-        priority="standard",
+        priority=Priority.standard.name,
     )
     family.customer = customer
     base_store.add(family)

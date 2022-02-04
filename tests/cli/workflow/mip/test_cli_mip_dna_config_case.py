@@ -31,3 +31,20 @@ def test_cg_workflow_mip_dna_config_case(cli_runner, caplog, case_id, dna_mip_co
     # THEN the command should be printed
     assert result.exit_code == 0
     assert f"Config file saved to" in caplog.text
+
+
+def test_cg_workflow_mip_dna_config_case_error(cli_runner, caplog, case_id, dna_mip_context):
+    """Test wrong case_id with MIP dna case config command"""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a cli function
+
+    # WHEN we run a case in dry run mode
+    result = cli_runner.invoke(config_case, ["not_a_case_id"], obj=dna_mip_context)
+
+    # THEN the command should return an exit fail code
+    assert result.exit_code == 1
+
+    # THEN an error should be logged
+    assert f"could not be found in StatusDB" in caplog.text

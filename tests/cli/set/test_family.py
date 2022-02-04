@@ -20,7 +20,7 @@ def test_set_family_without_options(
     # WHEN setting a case
     result = cli_runner.invoke(family, [case_id], obj=base_context)
 
-    # THEN then it should abort
+    # THEN it should abort
     assert result.exit_code != SUCCESS
 
 
@@ -32,7 +32,7 @@ def test_set_family_bad_family(cli_runner, base_context):
     case_id = "dummy_name"
     result = cli_runner.invoke(family, [case_id], obj=base_context)
 
-    # THEN then it should complain on missing case
+    # THEN it should complain on missing case
     assert result.exit_code != SUCCESS
 
 
@@ -47,7 +47,7 @@ def test_set_family_bad_panel(
     case_id = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(family, [case_id, "--panel", panel_id], obj=base_context)
 
-    # THEN then it should complain in missing panel instead of setting a value
+    # THEN it should complain in missing panel instead of setting a value
     assert result.exit_code != SUCCESS
     assert panel_id not in base_store.Family.query.first().panels
 
@@ -64,7 +64,7 @@ def test_set_family_panel(
     # WHEN setting a panel of a case
     result = cli_runner.invoke(family, [case_id, "--panel", panel_id], obj=base_context)
 
-    # THEN then it should set panel on the case
+    # THEN it should set panel on the case
     assert result.exit_code == SUCCESS
     assert panel_id in base_store.Family.query.first().panels
 
@@ -79,10 +79,11 @@ def test_set_family_priority(
     assert base_store.Family.query.first().priority_human != priority
 
     # WHEN setting a case
+    result = cli_runner.invoke(
+        family, [case_id, "--priority", priority], obj=base_context, catch_exceptions=False
+    )
 
-    result = cli_runner.invoke(family, [case_id, "--priority", priority], obj=base_context)
-
-    # THEN then it should have been set
+    # THEN it should have been set
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 1
     assert base_store.Family.query.first().priority_human == priority
@@ -102,7 +103,7 @@ def test_set_family_customer(
         family, [case.internal_id, "--customer-id", customer_id], obj=base_context
     )
 
-    # THEN then it should set customer on the case
+    # THEN it should set customer on the case
     assert result.exit_code == SUCCESS
     assert customer_id == case.customer.internal_id
 
@@ -120,7 +121,7 @@ def test_set_family_bad_data_analysis(
         family, [case_id, "--data-analysis", data_analysis], obj=base_context
     )
 
-    # THEN then it should complain in non valid data_analysis instead of setting a value
+    # THEN it should complain in non valid data_analysis instead of setting a value
     assert result.exit_code != SUCCESS
     assert str(data_analysis) != base_store.Family.query.first().data_analysis
 
@@ -142,7 +143,7 @@ def test_set_family_data_analysis(
         obj=base_context,
     )
 
-    # THEN then it should set data_analysis on the case
+    # THEN it should set data_analysis on the case
     assert result.exit_code == SUCCESS
     assert str(data_analysis) == case_obj.data_analysis
 
@@ -160,7 +161,7 @@ def test_set_family_bad_data_delivery(
         family, [case_id, "--data-delivery", data_delivery], obj=base_context
     )
 
-    # THEN then it should complain in non valid data_delivery instead of setting a value
+    # THEN it should complain in non valid data_delivery instead of setting a value
     assert result.exit_code != SUCCESS
     assert str(data_delivery) != base_store.Family.query.first().data_delivery
 
@@ -182,6 +183,6 @@ def test_set_family_data_delivery(
         obj=base_context,
     )
 
-    # THEN then it should set data_delivery on the case
+    # THEN it should set data_delivery on the case
     assert result.exit_code == SUCCESS
     assert str(data_delivery) == case_obj.data_delivery

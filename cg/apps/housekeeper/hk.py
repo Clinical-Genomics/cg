@@ -6,13 +6,12 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
 from alchy import Query
-
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File, Version
 
-from cg.exc import HousekeeperVersionMissingError, HousekeeperFileMissingError
+from cg.exc import HousekeeperFileMissingError, HousekeeperVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -44,6 +43,16 @@ class HousekeeperAPI:
         """Fetch bundles"""
         return self._store.bundles()
 
+    def create_new_bundle_and_version(self, name: str) -> models.Bundle:
+        """Create new bundle with version"""
+        new_bundle: models.Bundle = self.new_bundle(name=name)
+        self.add_commit(new_bundle)
+        new_version: models.Version = self.new_version(created_at=new_bundle.created_at)
+        new_bundle.versions.append(new_version)
+        self.commit()
+        LOG.info("New bundle created with name %s", new_bundle.name)
+        return new_bundle
+
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
     ) -> models.File:
@@ -69,7 +78,7 @@ class HousekeeperAPI:
             return
 
         if file_obj.is_included and Path(file_obj.full_path).exists():
-            LOG.info("Deleting file %s form disc", file_obj.full_path)
+            LOG.info("Deleting file %s from disc", file_obj.full_path)
             Path(file_obj.full_path).unlink()
 
         LOG.info("Deleting file %s from housekeeper", file_id)

@@ -2,6 +2,7 @@
 import datetime as dt
 import itertools
 import logging
+import shutil
 from pathlib import Path
 from typing import List, Tuple, Optional
 
@@ -10,6 +11,7 @@ from housekeeper.store.models import Bundle
 from cg.apps.cgstats.db.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.exc import CgDataError
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
 from cg.models.cg_config import CGConfig
@@ -61,26 +63,13 @@ class ExternalDataAPI(MetaAPI):
     def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        available_samples: List[models.Sample] = self.get_available_samples(
-            folder=self.get_source_path(customer=cust, ticket_id=ticket_id),
-            ticket_id=ticket_id,
-        )
         log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % cust).mkdir(exist_ok=True)
 
-        commands: str = "".join(
-            [
-                RSYNC_CONTENTS_COMMAND.format(
-                    source_path=self.get_source_path(
-                        cust_sample_id=sample.name, customer=cust, ticket_id=ticket_id
-                    ),
-                    destination_path=self.get_destination_path(
-                        customer=cust, lims_sample_id=sample.internal_id
-                    ),
-                )
-                for sample in available_samples
-            ]
+        command: str = RSYNC_CONTENTS_COMMAND.format(
+            source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
+            destination_path=self.get_destination_path(customer=cust),
         )
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
@@ -90,16 +79,17 @@ class ExternalDataAPI(MetaAPI):
             "log_dir": str(log_dir),
             "email": self.mail_user,
             "hours": 24,
-            "commands": commands,
+            "commands": command,
             "error": error_function,
         }
         self.slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
         sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-        LOG.info(msg=[sample.name for sample in available_samples])
         LOG.info(
-            "The transfer of the {numb} samples above has begun".format(numb=len(available_samples))
+            "The folder {src_path} is now being rsynced to hasta".format(
+                src_path=self.get_source_path(customer=cust, ticket_id=ticket_id)
+            )
         )
 
     def get_all_fastq(self, sample_folder: Path) -> List[Path]:
@@ -120,6 +110,7 @@ class ExternalDataAPI(MetaAPI):
         return all_fastq_in_folder
 
     def check_fastq_md5sum(self, fastq_path) -> Optional[Path]:
+        """Returns the path of the input file if it does not match its md5sum"""
         if Path(str(fastq_path) + ".md5").exists():
             given_md5sum: str = extract_md5sum(md5sum_file=Path(str(fastq_path) + ".md5"))
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
@@ -143,43 +134,82 @@ class ExternalDataAPI(MetaAPI):
             LOG.info("Adding path %s to bundle %s in housekeeper" % (path, lims_sample_id))
             self.housekeeper_api.add_file(path=path, version_obj=last_version, tags=HK_FASTQ_TAGS)
 
-    def add_transfer_to_housekeeper(self, ticket_id: int, dry_run: bool = False) -> None:
-        """Creates sample bundles in housekeeper and adds the files corresponding to the ticket to the bundle"""
-        failed_files: List[Path] = []
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+    def get_failed_fastq_paths(self, fastq_paths_to_add: List[Path]) -> List[Path]:
+        failed_sum_paths: List[Path] = []
+        for path in fastq_paths_to_add:
+            failed_path: Optional[Path] = self.check_fastq_md5sum(path)
+            if failed_path:
+                failed_sum_paths.append(failed_path)
+        return failed_sum_paths
+
+    def get_fastq_paths_to_add(
+        self, customer: str, hk_version: Version, lims_sample_id: str
+    ) -> List[Path]:
+        paths: List[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=customer)
+        fastq_paths_to_add: List[Path] = self.housekeeper_api.check_bundle_files(
+            file_paths=paths,
+            bundle_name=lims_sample_id,
+            last_version=hk_version,
+            tags=HK_FASTQ_TAGS,
+        )
+        return fastq_paths_to_add
+
+    def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
+        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder"""
+        customer: models.Customer = self.status_db.customer(internal_id=cust_name)
+        customer_folder: Path = sample_folder.parent
+        sample: models.Sample = self.status_db.find_samples(
+            customer=customer, name=sample_folder.name
+        ).first()
+        if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
+            sample and force
+        ):
+            sample_folder.rename(customer_folder.joinpath(sample.internal_id))
+        elif not sample and not self.status_db.sample(sample_folder.name):
+            raise Exception(
+                f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
+            )
+
+    def add_transfer_to_housekeeper(
+        self, ticket_id: int, dry_run: bool = False, force: bool = False
+    ) -> None:
+        """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
+        bundle"""
+        failed_paths: List[Path] = []
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        for case in cases:
-            links = case.links
-            for link in links:
-                lims_sample_id: str = link.sample.internal_id
-                paths: List[Path] = self.get_all_paths(lims_sample_id=lims_sample_id, customer=cust)
-                last_version: Version = self.housekeeper_api.get_create_version(
-                    bundle=lims_sample_id
-                )
-                fastq_paths_to_add: List[Path] = self.housekeeper_api.check_bundle_files(
-                    file_paths=paths,
-                    bundle_name=lims_sample_id,
-                    last_version=last_version,
-                    tags=HK_FASTQ_TAGS,
-                )
-                failed_sums: List[Path] = []
-                for file in fastq_paths_to_add:
-                    pass_check = self.check_fastq_md5sum(file)
-                    if pass_check:
-                        failed_sums.append(pass_check)
-                failed_files.extend(failed_sums)
-                self.add_files_to_bundles(
-                    fastq_paths=fastq_paths_to_add,
-                    last_version=last_version,
-                    lims_sample_id=lims_sample_id,
-                )
-                LOG.info("The md5 files match the md5sum for sample {}".format(lims_sample_id))
-        if failed_files:
+        destination_folder_path: Path = self.get_destination_path(customer=cust)
+        for sample_folder in destination_folder_path.iterdir():
+            self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
+        available_samples: List[models.Sample] = self.get_available_samples(
+            folder=destination_folder_path, ticket_id=ticket_id
+        )
+        cases_to_start: list[dict] = []
+        for sample in available_samples:
+            cases_to_start.extend(
+                self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
+            )
+            last_version: Version = self.housekeeper_api.get_create_version(
+                bundle=sample.internal_id
+            )
+            fastq_paths_to_add: List[Path] = self.get_fastq_paths_to_add(
+                customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
+            )
+            self.add_files_to_bundles(
+                fastq_paths=fastq_paths_to_add,
+                last_version=last_version,
+                lims_sample_id=sample.internal_id,
+            )
+            failed_paths.extend(self.get_failed_fastq_paths(fastq_paths_to_add=fastq_paths_to_add))
+        if failed_paths:
+            LOG.info(
+                "The following samples did not match the given md5sum: "
+                + ", ".join([str(path) for path in failed_paths])
+            )
             LOG.info("Changes in housekeeper will not be committed and no cases will be added")
             return
         if dry_run:
             LOG.info("No changes will be committed since this is a dry-run")
             return
         self.housekeeper_api.commit()
-        for case in cases:
-            self.status_db.set_case_action(case_id=case.internal_id, action="analyze")
+        for case in cases_to_start:
+            self.status_db.set_case_action(case_id=case["internal_id"], action="analyze")

@@ -39,7 +39,7 @@ def test_add_family_required(cli_runner: CliRunner, base_context: CGConfig, help
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Family.query.count() == 1
     assert disk_store.Family.query.first().name == name
@@ -77,7 +77,7 @@ def test_add_family_bad_pipeline(
         ],
     )
 
-    # THEN then it should not be added
+    # THEN it should not be added
     assert result.exit_code != 0
     assert disk_store.Family.query.count() == 0
 
@@ -114,7 +114,7 @@ def test_add_family_bad_data_delivery(
         obj=base_context,
     )
 
-    # THEN then it should not be added
+    # THEN it should not be added
     assert result.exit_code != 0
     assert disk_store.Family.query.count() == 0
 
@@ -143,7 +143,7 @@ def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig):
         obj=base_context,
     )
 
-    # THEN then it should complain about missing customer instead of adding a case
+    # THEN it should complain about missing customer instead of adding a case
     assert result.exit_code == 1
     assert disk_store.Family.query.count() == 0
 
@@ -173,7 +173,7 @@ def test_add_family_bad_panel(cli_runner: CliRunner, base_context: CGConfig, hel
         obj=base_context,
     )
 
-    # THEN then it should complain about missing panel instead of adding a case
+    # THEN it should complain about missing panel instead of adding a case
     assert result.exit_code == 1
     assert disk_store.Family.query.count() == 0
 
@@ -208,7 +208,7 @@ def test_add_family_priority(cli_runner: CliRunner, base_context: CGConfig, help
         obj=base_context,
     )
 
-    # THEN then it should be added
+    # THEN it should be added
     assert result.exit_code == 0
     assert disk_store.Family.query.count() == 1
     assert disk_store.Family.query.first().priority_human == priority

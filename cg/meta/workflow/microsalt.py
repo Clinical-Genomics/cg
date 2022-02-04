@@ -23,6 +23,8 @@ from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
 
+from cg.constants import Priority
+
 LOG = logging.getLogger(__name__)
 
 
@@ -155,7 +157,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         method_sequencing = self.lims_api.get_sequencing_method(sample_id)
         if method_sequencing:
             method_sequencing, _ = method_sequencing.split(" ", 1)
-        priority = "research" if sample_obj.priority == 0 else "standard"
+        priority = (
+            Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
+        )
 
         return {
             "CG_ID_project": self.get_project(sample_id),

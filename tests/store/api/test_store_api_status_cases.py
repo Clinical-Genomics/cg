@@ -1,8 +1,10 @@
 """This script tests the cli methods to add families to status-db"""
 from datetime import datetime, timedelta
 
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, DataDelivery, Pipeline
+from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
 from cg.store import Store
+
+from cg.constants import Priority
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
@@ -446,7 +448,7 @@ def test_one_internal_sample(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store, is_external=False)
     base_store.relate_sample(new_case, sample, "unknown")
-    assert not sample.is_external
+    assert not sample.application_version.application.is_external
 
     # WHEN getting active cases
     cases = base_store.cases()
@@ -709,10 +711,10 @@ def test_excluded_by_priority(base_store: Store, helpers):
     """Test to that cases can be excluded by priority"""
 
     # GIVEN a database with a case with a priority
-    add_case(helpers, base_store, priority=PRIORITY_OPTIONS[0])
+    add_case(helpers, base_store, priority=Priority.research)
 
-    # WHEN getting active cases by priority
-    cases = base_store.cases(priority=PRIORITY_OPTIONS[1])
+    # WHEN getting active cases by another priority
+    cases = base_store.cases(priority=Priority.standard)
 
     # THEN cases should not contain this case
     assert not cases
@@ -722,10 +724,10 @@ def test_included_by_priority(base_store: Store, helpers):
     """Test to that cases can be included by priority"""
 
     # GIVEN a database with a case with a priority
-    new_case = add_case(helpers, base_store, priority=PRIORITY_OPTIONS[0])
+    new_case = add_case(helpers, base_store, priority=Priority.research)
 
     # WHEN getting active cases by priority
-    cases = base_store.cases(priority=new_case.action)
+    cases = base_store.cases(priority=new_case.priority)
 
     # THEN cases should only contain this case
     assert cases
@@ -1498,13 +1500,15 @@ def add_case(
     panel = helpers.ensure_panel(disk_store)
     customer = helpers.ensure_customer(disk_store, customer_id)
     case = disk_store.add_case(
-        data_analysis=data_analysis, data_delivery=data_delivery, name=case_id, panels=panel.name
+        data_analysis=data_analysis,
+        data_delivery=data_delivery,
+        name=case_id,
+        panels=panel.name,
+        priority=priority,
     )
     case.customer = customer
     case.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:
         case.action = action
-    if priority:
-        case.priority = priority
     disk_store.add_commit(case)
     return case

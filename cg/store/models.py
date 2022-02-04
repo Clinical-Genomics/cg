@@ -3,13 +3,13 @@ from typing import List, Optional
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.util import deprecated
 
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    PRIORITY_MAP,
-    REV_PRIORITY_MAP,
+    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
@@ -40,23 +40,32 @@ customer_user = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self):
+    def priority_human(self) -> str:
         """Humanized priority for sample."""
-        return REV_PRIORITY_MAP[self.priority]
+        return self.priority.name
 
     @priority_human.setter
-    def priority_human(self, priority_str: str):
-        self.priority = PRIORITY_MAP.get(priority_str)
+    def priority_human(self, priority: str) -> None:
+        self.priority: Priority = Priority[priority]
+
+    @property
+    def priority_int(self) -> int:
+        """Priority as integer for sample."""
+        return self.priority.value
+
+    @priority_int.setter
+    def priority_int(self, priority_int: int) -> None:
+        self.priority: Priority = Priority(priority_int)
 
     @property
     def high_priority(self):
         """Has high priority?"""
-        return self.priority > 1
+        return self.priority_int > 1
 
     @property
     def low_priority(self):
         """Has low priority?"""
-        return self.priority < 1
+        return self.priority_int < 1
 
 
 class Application(Model):
@@ -280,7 +289,8 @@ class Family(Model, PriorityMixin):
     name = Column(types.String(128), nullable=False)
     ordered_at = Column(types.DateTime, default=dt.datetime.now)
     _panels = Column(types.Text)
-    priority = Column(types.Integer, default=1, nullable=False)
+
+    priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
 
     @property
@@ -309,7 +319,7 @@ class Family(Model, PriorityMixin):
     def latest_sequenced(self) -> Optional[dt.datetime]:
         sequenced_dates = []
         for link in self.links:
-            if link.sample.is_external:
+            if link.sample.application_version.application.is_external:
                 sequenced_dates.append(link.sample.ordered_at)
             elif link.sample.sequenced_at:
                 sequenced_dates.append(link.sample.sequenced_at)
@@ -319,7 +329,7 @@ class Family(Model, PriorityMixin):
     def all_samples_pass_qc(self) -> bool:
         pass_qc = []
         for link in self.links:
-            if link.sample.is_external or link.sample.sequencing_qc:
+            if link.sample.application_version.application.is_external or link.sample.sequencing_qc:
                 pass_qc.append(True)
             else:
                 pass_qc.append(False)
@@ -480,7 +490,7 @@ class Sample(Model, PriorityMixin):
     internal_id = Column(types.String(32), nullable=False, unique=True)
     invoice_id = Column(ForeignKey("invoice.id"))
     invoiced_at = Column(types.DateTime)  # DEPRECATED
-    is_external = Column(types.Boolean, default=False)  # DEPRECATED
+    _is_external = Column("is_external", types.Boolean)  # DEPRECATED
     is_tumour = Column(types.Boolean, default=False)
     loqusdb_id = Column(types.String(64))
     name = Column(types.String(128), nullable=False)
@@ -492,7 +502,8 @@ class Sample(Model, PriorityMixin):
     _phenotype_groups = Column(types.Text)
     _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
-    priority = Column(types.Integer, default=1, nullable=False)
+
+    priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     reads = Column(types.BigInteger, default=0)
     received_at = Column(types.DateTime)
     reference_genome = Column(types.String(255))
@@ -507,10 +518,23 @@ class Sample(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
+    @deprecated(
+        version="1.4.0",
+        message="This field is deprecated, use sample.application_version.application.is_external",
+    )
+    def is_external(self):
+        """Return if this is an externally sequenced sample."""
+        return self._is_external
+
+    @property
     def sequencing_qc(self) -> bool:
         """Return sequencing qc passed or failed."""
         application = self.application_version.application
-        return self.reads > application.expected_reads
+        if self.priority < Priority.express:
+            return self.reads > application.expected_reads
+        # Express priority and higher needs to be analyzed regardless at a lower threshold for primary analysis
+        one_half_of_target_reads = application.target_reads / 2
+        return self.reads >= one_half_of_target_reads
 
     @property
     def phenotype_groups(self) -> List[str]:

@@ -22,7 +22,7 @@ def test_delete_case_without_options(
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, obj=base_context)
 
-    # THEN then it should abort
+    # THEN it should abort
     assert result.exit_code != SUCCESS
 
 
@@ -34,7 +34,7 @@ def test_delete_case_bad_case(cli_runner: CliRunner, base_context: CGConfig):
     case_id = "dummy_name"
     result = cli_runner.invoke(delete_case_command, [case_id], obj=base_context)
 
-    # THEN then it should complain on missing case
+    # THEN it should complain on missing case
     assert result.exit_code != SUCCESS
 
 
@@ -50,7 +50,7 @@ def test_delete_case_without_links(
 
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
-    # THEN then it should have been deleted
+    # THEN it should have been deleted
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 0
 
@@ -68,7 +68,7 @@ def test_delete_case_with_analysis(
 
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
-    # THEN then it should not have been deleted
+    # THEN it should not have been deleted
     assert result.exit_code != SUCCESS
     assert base_store.Family.query.count() == 1
 
@@ -93,7 +93,7 @@ def test_delete_case_with_dry_run(
         delete_case_command, [case_id, "--yes", "--dry-run"], obj=base_context
     )
 
-    # THEN then it should not have been deleted
+    # THEN it should not have been deleted
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 1
     assert base_store.FamilySample.query.count() == 1
@@ -117,7 +117,7 @@ def test_delete_case_without_yes(
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id], obj=base_context)
 
-    # THEN then it should not have been deleted
+    # THEN it should not have been deleted
     assert result.exit_code != SUCCESS
     assert base_store.Family.query.count() == 1
 
@@ -137,7 +137,7 @@ def test_delete_case_with_links(cli_runner: CliRunner, base_context: CGConfig, h
     # WHEN deleting a case with links
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
-    # THEN then it should have been deleted
+    # THEN it should have been deleted
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 0
     assert base_store.FamilySample.query.count() == 0
@@ -164,7 +164,7 @@ def test_delete_case_with_links_to_other_case(
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
-    # THEN then the first case should be gone with its link to the sample but not the other or
+    # THEN the first case should be gone with its link to the sample but not the other or
     # the sample
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 1
@@ -195,7 +195,7 @@ def test_delete_case_with_father_links(
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
-    # THEN then the first case should be gone with its link to the sample but not the other or
+    # THEN the first case should be gone with its link to the sample but not the other or
     # the father sample
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 1
@@ -285,7 +285,7 @@ def test_delete_trio_case(cli_runner: CliRunner, base_context: CGConfig, helpers
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
-    # THEN then the trio case should be gone
+    # THEN the trio case should be gone
     assert result.exit_code == SUCCESS
     assert base_store.Family.query.count() == 0
     assert base_store.FamilySample.query.count() == 0
