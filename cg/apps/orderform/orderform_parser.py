@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 from pydantic import constr, BaseModel
 
 from cg.constants import DataDelivery
-from cg.exc import OrderError, OrderFormError
+from cg.exc import OrderFormError
 from cg.models.orders.order import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
@@ -74,8 +74,8 @@ class OrderformParser(BaseModel):
             # each pool must only have one application type
             pool = pools[pool_name]
             if str(pool.application) != application:
-                raise OrderError(
-                    f"different application in pool: {pool_name} - {[pools[pool_name].application, application]}"
+                raise OrderFormError(
+                    f"different applications in pool: {pool_name} - {[pools[pool_name].application, application]}"
                 )
             pool.samples.append(sample)
 
