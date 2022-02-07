@@ -367,7 +367,7 @@ def clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, sta
     for flow_cell_dir in flow_cell_dirs:
         LOG.info("Checking flow cell %s", flow_cell_dir.name)
         run_dir_flow_cell = RunDirFlowCell(flow_cell_dir, status_db, housekeeper_api)
-        if run_dir_flow_cell.is_retrieved_from_pdc:
+        if run_dir_flow_cell.exists_in_statusdb and run_dir_flow_cell.is_retrieved_from_pdc:
             LOG.info(
                 "Skipping removal of flow cell %s, PDC retrieval status is '%s'!",
                 flow_cell_dir,
