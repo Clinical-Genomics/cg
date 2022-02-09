@@ -66,14 +66,16 @@ def run(context: CGConfig, dry_run: bool, case_id: str) -> None:
 @mutant.command("start")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
+@click.option("--force", is_flag=True)
 @click.pass_context
-def start(context: click.Context, dry_run: bool, case_id: str) -> None:
+def start(context: click.Context, dry_run: bool, case_id: str, force: bool) -> None:
     """Start full analysis workflow for a case"""
-    analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
-    are_NTCs_clean: bool = analysis_api.check_if_NTCs_are_clean(case_id=case_id)
-    if not are_NTCs_clean:
-        LOG.error("Analysis won't start, a negative control is contaminated")
-        return
+    if not force:
+        analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
+        are_NTCs_clean: bool = analysis_api.check_if_NTCs_are_clean(case_id=case_id)
+        if not are_NTCs_clean:
+            LOG.error("Analysis won't start, a negative control is contaminated")
+            return
     try:
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, dry_run=dry_run)
