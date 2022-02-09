@@ -27,6 +27,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         LOG.info("Including BALSAMIC specific case level files")
         self.load_config.vcf_cancer = self.fetch_file_from_hk(self.case_tags.snv_vcf)
         self.load_config.vcf_cancer_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
+        self.include_cnv_report()
         self.include_multiqc_report()
         self.include_delivery_report()
 
