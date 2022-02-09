@@ -105,6 +105,27 @@ class MutantAnalysisAPI(AnalysisAPI):
             ),
         )
 
+    def get_internal_NTCs(self, case_id: str) -> List[models.Sample]:
+        """Retrieve a list of lims ids for negative controls created by Clinical Genomics"""
+        case_obj = self.status_db.family(case_id)
+        samples: List[models.Sample] = [link.sample for link in case_obj.links]
+        ticket_id: int = samples[0].ticket_number
+        # 1. ticket_id will lead to samples that all come from the same pool
+        # 2. In the pool from "1." there will be samples from another ticket than ticket_id given as input
+        # 3. Return a list of sample objects from "2."
+
+    def check_if_NTCs_are_clean(self, case_id: str) -> bool:
+        """Returns true if all samples in given list got less than 10k reads"""
+        is_clean = True
+        ntcs: List[models.Sample] = self.get_internal_NTCs(case_id=case_id)
+        if not ntcs:
+            LOG.info("No negative controls found for case: %s", case_id)
+        for ntc in ntcs:
+            if ntc.reads > 10000:
+                is_clean = False
+                return is_clean
+        return is_clean
+
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
