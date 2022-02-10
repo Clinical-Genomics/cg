@@ -24,7 +24,7 @@ class ExcelOrderformParser(OrderformParser):
     VALID_ORDERFORMS: List[str] = [
         "1508:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
         "1603:11",  # Microbial WGS
-        "1604:12",  # Orderform Ready made libraries (RML)
+        "1604:13",  # Orderform Ready made libraries (RML)
         "1605:9",  # Microbial meta genomes
         "2184:5",  # Orderform SARS-CoV-2
     ]
@@ -137,19 +137,9 @@ class ExcelOrderformParser(OrderformParser):
         header_row: List[str] = ExcelOrderformParser.get_header(rows)
         return ExcelOrderformParser.get_raw_samples(rows=rows, header_row=header_row)
 
-    def get_project_type_from_samples(self) -> str:
-        analyses = {sample.data_analysis for sample in self.samples}
-
-        if len(analyses) != 1:
-            raise OrderFormError(f"mixed 'Data Analysis' types: {', '.join(analyses)}")
-
-        analysis = analyses.pop().lower().replace(" ", "-")
-        return "fastq" if analysis == self.NO_ANALYSIS else analysis
-
     def get_project_type(self, document_title: str) -> str:
         """Determine the project type and set it to the class."""
         document_number_to_project_type = {
-            "1604": str(OrderType.RML),
             "1603": str(OrderType.MICROSALT),
             "1605": str(OrderType.METAGENOME),
             "2184": str(OrderType.SARS_COV_2),
@@ -158,8 +148,18 @@ class ExcelOrderformParser(OrderformParser):
             if document_number in document_title:
                 return value
 
+        analysis = self.parse_data_analysis()
+        if "1604" in document_title:
+            if analysis == self.NO_ANALYSIS:
+                return str(OrderType.RML)
+            else:
+                return analysis
+
         if "1508" in document_title:
-            return self.get_project_type_from_samples()
+            if analysis == self.NO_ANALYSIS:
+                return str(OrderType.FASTQ)
+            else:
+                return analysis
 
         raise OrderFormError(f"Undetermined project type in: {document_title}")
 
@@ -176,23 +176,16 @@ class ExcelOrderformParser(OrderformParser):
 
     def default_delivery_type(self, project_type: OrderType) -> str:
         """Returns the default delivery type for a project type"""
-        if project_type == OrderType.FLUFFY:
-            return DataDelivery.NIPT_VIEWER
 
         if project_type == OrderType.METAGENOME:
             return DataDelivery.FASTQ
-
-        if project_type == OrderType.MICROSALT:
+        elif project_type == OrderType.MICROSALT:
             data_analysis: str = self.parse_data_analysis()
 
             if data_analysis == "custom":
                 return DataDelivery.FASTQ_QC
-
-            if data_analysis == "fastq":
+            elif data_analysis == "fastq":
                 return DataDelivery.FASTQ_QC
-
-        if project_type == OrderType.RML:
-            return DataDelivery.FASTQ
 
         raise OrderFormError(f"Could not determine value for Data Delivery")
 
