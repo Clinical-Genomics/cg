@@ -180,11 +180,7 @@ class ExcelOrderformParser(OrderformParser):
         if project_type == OrderType.METAGENOME:
             return DataDelivery.FASTQ
         elif project_type == OrderType.MICROSALT:
-            data_analysis: str = self.parse_data_analysis()
-
-            if data_analysis == "custom":
-                return DataDelivery.FASTQ_QC
-            elif data_analysis == "fastq":
+            if self.parse_data_analysis() in ["custom", "fastq"]:
                 return DataDelivery.FASTQ_QC
 
         raise OrderFormError(f"Could not determine value for Data Delivery")
