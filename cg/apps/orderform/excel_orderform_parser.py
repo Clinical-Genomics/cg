@@ -14,6 +14,8 @@ from cg.exc import OrderFormError
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
 
+from cg.constants.orderforms import Orderform
+
 LOG = logging.getLogger(__name__)
 
 
@@ -22,11 +24,11 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        "1508:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
-        "1603:11",  # Microbial WGS
-        "1604:13",  # Orderform Ready made libraries (RML)
-        "1605:9",  # Microbial meta genomes
-        "2184:5",  # Orderform SARS-CoV-2
+        f"{Orderform.MIP_DNA}:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
+        f"{Orderform.MICROSALT}:11",  # Microbial WGS
+        f"{Orderform.RML}:13",  # Orderform Ready made libraries (RML)
+        f"{Orderform.METAGENOME}:9",  # Microbial meta genomes
+        f"{Orderform.SARS_COV_2}:5",  # Orderform SARS-CoV-2
     ]
     samples: List[ExcelSample] = []
 
@@ -140,26 +142,24 @@ class ExcelOrderformParser(OrderformParser):
     def get_project_type(self, document_title: str) -> str:
         """Determine the project type and set it to the class."""
         document_number_to_project_type = {
-            "1603": str(OrderType.MICROSALT),
-            "1605": str(OrderType.METAGENOME),
-            "2184": str(OrderType.SARS_COV_2),
+            Orderform.MICROSALT: str(OrderType.MICROSALT),
+            Orderform.METAGENOME: str(OrderType.METAGENOME),
+            Orderform.SARS_COV_2: str(OrderType.SARS_COV_2),
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:
                 return value
 
         analysis = self.parse_data_analysis()
-        if "1604" in document_title:
+        if Orderform.RML in document_title:
             if analysis == self.NO_ANALYSIS:
                 return str(OrderType.RML)
-            else:
-                return analysis
+            return analysis
 
-        if "1508" in document_title:
+        if Orderform.MIP_DNA in document_title:
             if analysis == self.NO_ANALYSIS:
                 return str(OrderType.FASTQ)
-            else:
-                return analysis
+            return analysis
 
         raise OrderFormError(f"Undetermined project type in: {document_title}")
 
