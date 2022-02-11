@@ -10,8 +10,6 @@ import pytest
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
-from tests.apps.demultiplex.conftest import fixture_demultiplex_fixtures
-from tests.models.demultiplexing.conftest import fixture_demultiplexed_runs
 
 
 class CompressionData:
@@ -129,12 +127,15 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 @pytest.fixture(scope="function", name="compress_api")
 def fixture_compress_api(
-    demultiplexed_runs: Path, real_crunchy_api: CrunchyAPI, housekeeper_api: HousekeeperAPI
+    demultiplexed_runs: Path,
+    real_crunchy_api: CrunchyAPI,
+    housekeeper_api: HousekeeperAPI,
+    project_dir: Path,
 ):
     """compress api fixture"""
     hk_api = housekeeper_api
     _api = CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=hk_api, demux_root=demultiplexed_runs.as_posix()
+        crunchy_api=real_crunchy_api, hk_api=hk_api, demux_root=project_dir.as_posix()
     )
     yield _api
 

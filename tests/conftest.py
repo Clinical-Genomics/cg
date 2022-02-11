@@ -306,9 +306,9 @@ def fixture_apps_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(name="fastq_dir")
-def fixture_fastq_dir(fixtures_dir: Path) -> Path:
+def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir"""
-    return fixtures_dir / "fastq"
+    return demultiplexed_runs / "fastq"
 
 
 @pytest.fixture(scope="function", name="project_dir")
@@ -553,6 +553,11 @@ def fixture_compression_object(
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixtures"""
     return apps_dir / "demultiplexing"
+
+
+@pytest.fixture(name="demultiplexed_runs")
+def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
+    return demultiplex_fixtures / "demultiplexed-runs"
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
