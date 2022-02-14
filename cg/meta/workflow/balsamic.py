@@ -37,6 +37,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.bed_path = config.bed_path
 
     @property
+    def root(self) -> str:
+        return self.root_dir
+
+    @property
     def threshold_reads(self):
         return True
 

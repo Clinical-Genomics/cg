@@ -3,6 +3,7 @@
 from cgmodels.cg.constants import StrEnum
 
 HK_FASTQ_TAGS = ["fastq"]
+HK_DELIVERY_REPORT_TAG = "delivery-report"
 
 
 class HkMipAnalysisTag(StrEnum):

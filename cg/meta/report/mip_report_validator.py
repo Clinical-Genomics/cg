@@ -40,7 +40,7 @@ REQUIRED_ANALYSIS_SAMPLE_FIELDS = [
 ]
 
 
-class ReportValidator:
+class MipReportValidator:
     """API to validate report data"""
 
     def __init__(self, store: Store):

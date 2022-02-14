@@ -29,6 +29,10 @@ class AnalysisAPI(MetaAPI):
         self._process = None
 
     @property
+    def root(self):
+        raise NotImplementedError
+
+    @property
     def threshold_reads(self):
         """Defines whether the threshold for adequate read count should be passed for all samples
         when determining if the analysis for a case should be automatically started"""
