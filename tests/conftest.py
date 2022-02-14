@@ -389,10 +389,10 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     return analysis_dir / "balsamic"
 
 
-@pytest.fixture(name="balsamic_panel_analysis_dir")
-def fixture_balsamic_panel_analysis_dir(balsamic_analysis_dir: Path) -> Path:
+@pytest.fixture(name="balsamic_wgs_analysis_dir")
+def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    return balsamic_analysis_dir / "tn_panel"
+    return balsamic_analysis_dir / "tn_wgs"
 
 
 @pytest.fixture(name="mip_dna_analysis_dir")
