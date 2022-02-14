@@ -18,9 +18,11 @@ LOG = logging.getLogger(__name__)
 def store_sample(context: CGConfig, sample_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this sample in housekeeper"""
     compress_api: CompressAPI = context.meta_apis["compress_api"]
+    status_db: Store = context.obj.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    was_decompressed: bool = compress_api.add_decompressed_fastq(sample_id)
+    sample_obj = status_db.sample(internal_id=sample_id)
+    was_decompressed: bool = compress_api.add_decompressed_fastq(sample_obj)
     if not was_decompressed:
         LOG.info(f"Skipping sample {sample_id}")
         return 0
