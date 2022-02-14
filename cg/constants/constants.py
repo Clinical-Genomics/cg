@@ -62,7 +62,6 @@ class DataDelivery(StrEnum):
     FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
     NIPT_VIEWER: str = "nipt-viewer"
     SCOUT: str = "scout"
-    STATINA: str = "statina"
 
 
 class FlowCellStatus(StrEnum):
