@@ -72,7 +72,7 @@ def start(context: click.Context, dry_run: bool, case_id: str, force: bool) -> N
     """Start full analysis workflow for a case"""
     if not force:
         analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
-        are_NTCs_clean: bool = analysis_api.check_if_NTCs_are_clean(case_id=case_id)
+        are_NTCs_clean: bool = analysis_api.are_all_negative_controls_clean(case_id=case_id)
         if not are_NTCs_clean:
             LOG.error("Analysis won't start, a negative control is contaminated")
             return

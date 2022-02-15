@@ -49,6 +49,8 @@ SEX_OPTIONS = ("male", "female", "unknown")
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
+SARS_COV_NTC_READ_THRESHOLD = 10000
+
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
