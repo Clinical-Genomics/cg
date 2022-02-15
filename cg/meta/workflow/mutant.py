@@ -10,6 +10,7 @@ from genologics.entities import Sample, Artifact
 from cg.apps.lims import LimsAPI
 from cg.constants import Pipeline
 from cg.constants.constants import SARS_COV_NTC_READ_THRESHOLD
+from cg.constants.lims import MASTER_STEPS_UDFS
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
 from cg.models.cg_config import CGConfig
@@ -117,7 +118,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
         sample: models.Sample = samples[0]
         pools = lims.get_artifacts(samplelimsid=sample.internal_id, type="Analyte",
-                                   process_type='Pooling and Clean-up (Cov) v1')
+                                   process_type=MASTER_STEPS_UDFS['cov_pooling_step'])
         pool: Artifact = LimsAPI.get_latest_artifact(lims_artifacts=pools)
         negative_controls: List[Sample] = LimsAPI.get_controls(lims_artifact=pool)
         return [self.status_db.sample(lims_sample.id) for lims_sample in negative_controls]

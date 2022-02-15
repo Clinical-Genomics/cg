@@ -45,6 +45,7 @@ PROP2UDF = {
 }
 
 MASTER_STEPS_UDFS = {
+    "cov_pooling_step": ['Pooling and Clean-up (Cov) v1'],
     "capture_kit_step": {
         "obsolete_CG002 - Hybridize Library  (SS XT)": "SureSelect capture library/libraries used",
         "Hybridize Library TWIST v1": "Bait Set",
