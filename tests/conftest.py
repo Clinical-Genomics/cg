@@ -389,10 +389,10 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     return analysis_dir / "balsamic"
 
 
-@pytest.fixture(name="balsamic_panel_analysis_dir")
-def fixture_balsamic_panel_analysis_dir(balsamic_analysis_dir: Path) -> Path:
+@pytest.fixture(name="balsamic_wgs_analysis_dir")
+def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    return balsamic_analysis_dir / "tn_panel"
+    return balsamic_analysis_dir / "tn_wgs"
 
 
 @pytest.fixture(name="mip_dna_analysis_dir")
@@ -1207,7 +1207,14 @@ def fixture_context_config(
                 "port": 22,
             },
         },
-        "statina": {"host": "http://localhost:28002"},
+        "statina": {
+            "host": "http://localhost:28002",
+            "user": "user",
+            "key": "key",
+            "api_url": "api_url",
+            "upload_path": "upload_path",
+            "auth_path": "auth_path",
+        },
         "data-delivery": {
             "destination_path": "server.name.se:/some",
             "covid_destination_path": "server.name.se:/another/%s/foldername/",

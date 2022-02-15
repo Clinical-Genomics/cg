@@ -327,7 +327,7 @@ def fixture_mip_rna_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function", name="balsamic_analysis_hk_bundle_data")
 def fixture_balsamic_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, balsamic_panel_analysis_dir: Path, sample_id: str
+    case_id: str, timestamp: datetime, balsamic_wgs_analysis_dir: Path, sample_id: str
 ) -> dict:
     """Get some bundle data for housekeeper"""
     return {
@@ -336,22 +336,27 @@ def fixture_balsamic_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": str(balsamic_panel_analysis_dir / "snv.vcf"),
+                "path": str(balsamic_wgs_analysis_dir / "snv.vcf"),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(balsamic_panel_analysis_dir / "sv.vcf"),
+                "path": str(balsamic_wgs_analysis_dir / "sv.vcf"),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": str(balsamic_panel_analysis_dir / "adm1.cram"),
+                "path": str(balsamic_wgs_analysis_dir / "adm1.cram"),
                 "archive": False,
                 "tags": ["cram", sample_id],
             },
             {
-                "path": str(balsamic_panel_analysis_dir / "coverage_qc_report.pdf"),
+                "path": str(balsamic_wgs_analysis_dir / "ascat.output.pdf"),
+                "archive": False,
+                "tags": ["ascatngs", "visualization", sample_id],
+            },
+            {
+                "path": str(balsamic_wgs_analysis_dir / "coverage_qc_report.pdf"),
                 "archive": False,
                 "tags": ["delivery-report"],
             },
