@@ -200,7 +200,7 @@ def test_nipt_statina_upload_force_failed_case(
         nipt_upload_case, [case_id, "--force"], obj=upload_context, catch_exceptions=False
     )
 
-    # THEN both the nipt ftp and statina upload should start
+    # THEN both the nipt ftp and statina upload should finish successfully
     assert NIPT_CASE_SUCCESS in caplog.text
     assert NIPT_STATINA_SUCCESS in caplog.text
     assert NIPT_FTP_SUCCESS in caplog.text
