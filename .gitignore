@@ -100,6 +100,7 @@ DEVELOP/
 
 # Editor specific files
 .tm_properties
+.vscode
 
 # Local stuff
 .flake8
