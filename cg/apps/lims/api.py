@@ -410,7 +410,7 @@ class LimsAPI(Lims, OrderHandler):
             artifacts.append((date, artifact.id, artifact))
 
         artifacts.sort()
-        date, id, latest_art = artifacts[-1]
+        date, sample_id, latest_art = artifacts[-1]
 
         return latest_art
 
