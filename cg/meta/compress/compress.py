@@ -9,6 +9,7 @@ from typing import List, Optional
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.compression import COMPRESSION_HK_TAGS
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store import models
@@ -234,8 +235,8 @@ class CompressAPI:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file"""
         version_obj = self.hk_api.last_version(sample_id)
 
-        spring_tags = [sample_id, "spring"]
-        spring_metadata_tags = [sample_id, "spring-metadata"]
+        spring_tags = [sample_id, COMPRESSION_HK_TAGS.SPRING]
+        spring_metadata_tags = [sample_id, COMPRESSION_HK_TAGS.SPRING_METADATA]
         LOG.info("Updating FASTQ files in Housekeeper update for %s:", sample_id)
         LOG.info(
             "%s, %s -> %s, with tags %s",
@@ -278,10 +279,10 @@ class CompressAPI:
         """Add FASTQ files to housekeeper"""
 
         if not sample_obj.application_version.application.is_external:
-            fc_name: str = self.get_flow_cell_name(fastq_path=fastq_first)
-            fastq_tags = [fc_name, "fastq"]
+            flow_cell_name: str = self.get_flow_cell_name(fastq_path=fastq_first)
+            fastq_tags = [flow_cell_name, COMPRESSION_HK_TAGS.FASTQ]
         else:
-            fastq_tags = [sample_obj.internal_id, "fastq"]
+            fastq_tags = [sample_obj.internal_id, COMPRESSION_HK_TAGS.FASTQ]
         last_version = self.hk_api.last_version(bundle=sample_obj.internal_id)
         LOG.info(
             "Adds %s, %s to bundle %s with tags %s",

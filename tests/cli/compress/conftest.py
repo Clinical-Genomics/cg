@@ -7,6 +7,7 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.compression import COMPRESSION_HK_TAGS
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -250,8 +251,16 @@ def fixture_spring_bundle(project_dir, timestamp, sample):
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(spring_file), "archive": False, "tags": [sample, "spring"]},
-            {"path": str(spring_meta_file), "archive": False, "tags": [sample, "spring-metadata"]},
+            {
+                "path": str(spring_file),
+                "archive": False,
+                "tags": [sample, COMPRESSION_HK_TAGS.SPRING],
+            },
+            {
+                "path": str(spring_meta_file),
+                "archive": False,
+                "tags": [sample, COMPRESSION_HK_TAGS.SPRING_METADATA],
+            },
         ],
     }
 
@@ -273,11 +282,15 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(wrong_spring_file), "archive": False, "tags": [sample, "spring"]},
+            {
+                "path": str(wrong_spring_file),
+                "archive": False,
+                "tags": [sample, COMPRESSION_HK_TAGS.SPRING],
+            },
             {
                 "path": str(wrong_spring_meta_file),
                 "archive": False,
-                "tags": [sample, "spring-metadata"],
+                "tags": [sample, COMPRESSION_HK_TAGS.SPRING_METADATA],
             },
         ],
     }

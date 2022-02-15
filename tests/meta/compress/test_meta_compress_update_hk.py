@@ -1,11 +1,34 @@
 """Tests for meta compress functionality that updates housekeeper"""
 
+from pathlib import Path
+
 from cg.constants import HK_FASTQ_TAGS
-from cg.meta.compress import files
+from cg.meta.compress import CompressAPI, files
+
+
+def test_get_flow_cell_name(
+    compress_api: CompressAPI, flowcell_name: str, flowcell_full_name: str
+):
+    """Test functionality to extract the flow cell name from a run name given a designated structure"""
+
+    # GIVEN a CompressAPI with a demux_root and a flowcell with a fastq in given demux_root
+    fixture_flow_cell_name: str = flowcell_name
+    fastq_path: Path = compress_api.demux_root.joinpath(Path(flowcell_full_name, 'dummy_fastq.fastq.gz'))
+
+    # WHEN retrieving the the name of the flow cell
+    flow_cell_name: str = compress_api.get_flow_cell_name(fastq_path=fastq_path)
+
+    # THEN the flow cell name retrieved should be identical to the fixture flow cell name used
+    assert flow_cell_name == fixture_flow_cell_name
 
 
 def test_add_fastq_housekeeper(
-    compress_api, real_housekeeper_api, decompress_hk_spring_bundle, compression_files, store, helpers
+    compress_api,
+    real_housekeeper_api,
+    decompress_hk_spring_bundle,
+    compression_files,
+    store,
+    helpers,
 ):
     """Test functionality to add fastq files to housekeeper
 
