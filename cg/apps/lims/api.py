@@ -1,12 +1,13 @@
 """Contains API to communicate with LIMS"""
-import datetime as dt
+
+from datetime import datetime
 import logging
-from typing import Generator, Optional
+from typing import Generator, Optional, List
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
 from dateutil.parser import parse as parse_date
-from genologics.entities import Process, Project, Sample
+from genologics.entities import Process, Project, Sample, Artifact
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
@@ -221,7 +222,7 @@ class LimsAPI(Lims, OrderHandler):
                 yield lims_sample.id
 
     def update_sample(
-        self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
+            self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
     ):
         """Update information about a sample."""
         lims_sample = Sample(self, id=lims_id)
@@ -397,3 +398,23 @@ class LimsAPI(Lims, OrderHandler):
     def get_sample_project(self, sample_id: str) -> str:
         """Get the lims-id for the project of the sample"""
         return self.sample(sample_id).get("project").get("id")
+
+    @staticmethod
+    def get_latest_artifact(lims_artifacts: List[Artifact])-> Artifact:
+        """Returning the artifact with latest parent_process.date_run.
+        If there are many such artifacts only one will be returned."""
+
+        artifacts = []
+        for artifact in lims_artifacts:
+            date = artifact.parent_process.date_run or datetime.today().strftime("%Y-%m-%d")
+            artifacts.append((date, artifact.id, artifact))
+
+        artifacts.sort()
+        date, id, latest_art = artifacts[-1]
+
+        return latest_art
+
+    @staticmethod
+    def get_controls(lims_artifact: Artifact) -> List[Sample]:
+        """Get negative control samples from  a pool"""
+        return [sample for sample in lims_artifact.samples if sample.udf.get('Control') == 'negative']
