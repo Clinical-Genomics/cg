@@ -31,7 +31,7 @@ class CompressAPI:
 
         self.hk_api = hk_api
         self.crunchy_api = crunchy_api
-        self.demux_root = Path(demux_root)
+        self.demux_root: Path = Path(demux_root)
         self.dry_run = dry_run
         self.get_cases_to_compress = get_cases_to_compress
 
