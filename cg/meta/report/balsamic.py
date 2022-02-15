@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.report.report import ReportAPI
+from cg.meta.report.api import ReportAPI
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)

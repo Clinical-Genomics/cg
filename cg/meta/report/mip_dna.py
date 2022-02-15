@@ -8,7 +8,7 @@ from cg.meta.report.mip_report_validator import MipReportValidator
 from cg.exc import DeliveryReportError
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.meta.report.report import ReportAPI
+from cg.meta.report.api import ReportAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 
