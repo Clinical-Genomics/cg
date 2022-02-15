@@ -178,7 +178,7 @@ def test_nipt_statina_upload_auto_dry_run(
     assert result.exit_code == 0
 
 
-def test_nipt_statina_upload_failed_case(
+def test_nipt_statina_upload_force_failed_case(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
     """Tests CLI command to upload a single case"""
@@ -191,12 +191,13 @@ def test_nipt_statina_upload_failed_case(
     assert not analysis_obj.upload_started_at
     assert not analysis_obj.uploaded_at
 
-    # WHEN uploading of a specified NIPT case
+    # WHEN uploading of a specified NIPT case...
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
     mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    # AND the qc fails but it forced to upload
     mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=False)
     result = cli_runner.invoke(
         nipt_upload_case, [case_id, "--force"], obj=upload_context, catch_exceptions=False
