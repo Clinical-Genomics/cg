@@ -5,6 +5,9 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
+from genologics.entities import Sample, Artifact
+
+from cg.apps.lims import LimsAPI
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
@@ -12,15 +15,16 @@ from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store import models
 from cg.utils import Process
+from cg.server.ext import lims
 
 LOG = logging.getLogger(__name__)
 
 
 class MutantAnalysisAPI(AnalysisAPI):
     def __init__(
-        self,
-        config: CGConfig,
-        pipeline: Pipeline = Pipeline.SARS_COV_2,
+            self,
+            config: CGConfig,
+            pipeline: Pipeline = Pipeline.SARS_COV_2,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir = config.mutant.root
@@ -107,17 +111,20 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def get_internal_NTCs(self, case_id: str) -> List[models.Sample]:
         """Retrieve a list of lims ids for negative controls created by Clinical Genomics"""
+
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
-        ticket_id: int = samples[0].ticket_number
-        # 1. ticket_id will lead to samples that all come from the same pool
-        # 2. In the pool from "1." there will be samples from another ticket than ticket_id given as input
-        # 3. Return a list of sample objects from "2."
+        sample: models.Sample = samples[0]
+        pools = lims.get_artifacts(samplelimsid=sample.internal_id, type="Analyte",
+                                   process_type='Pooling and Clean-up (Cov) v1')
+        pool: Artifact = LimsAPI.get_latest_artifact(lims_artifacts=pools)
+        negative_controls: List[Sample] = LimsAPI.get_controls(lims_artifact=pool)
+        return [self.status_db.sample(lims_sample.id) for lims_sample in negative_controls]
 
     def check_if_NTCs_are_clean(self, case_id: str) -> bool:
         """Returns true if all samples in given list got less than 10k reads"""
         is_clean = True
-        ntcs: List[models.Sample] = self.get_internal_NTCs(case_id=case_id)
+        ntcs: List[str] = self.get_internal_NTCs(case_id=case_id)
         if not ntcs:
             LOG.info("No negative controls found for case: %s", case_id)
         for ntc in ntcs:
