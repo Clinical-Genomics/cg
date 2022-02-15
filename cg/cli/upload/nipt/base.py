@@ -38,7 +38,6 @@ def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bo
 
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
-    print(force)
     if force or nipt_upload_api.flowcell_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
