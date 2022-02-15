@@ -176,3 +176,42 @@ def test_nipt_statina_upload_auto_dry_run(
 
     # THEN exit without errors
     assert result.exit_code == 0
+
+
+def test_nipt_statina_upload_failed_case(
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
+):
+    """Tests CLI command to upload a single case"""
+
+    # GIVEN a specified NIPT case that has its analysis stored but is not yet uploaded
+    caplog.set_level(logging.DEBUG)
+
+    analysis_obj = helpers.add_analysis(store=upload_context.status_db)
+    case_id = analysis_obj.family.internal_id
+    assert not analysis_obj.upload_started_at
+    assert not analysis_obj.uploaded_at
+
+    # WHEN uploading of a specified NIPT case
+    mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
+    mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
+    mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
+    mocker.patch.object(NiptUploadAPI, "get_results_file_path")
+    mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=False)
+    result = cli_runner.invoke(
+        nipt_upload_case, [case_id, "--force"], obj=upload_context, catch_exceptions=False
+    )
+
+    # THEN both the nipt ftp and statina upload should start
+    assert NIPT_CASE_SUCCESS in caplog.text
+    assert NIPT_STATINA_SUCCESS in caplog.text
+    assert NIPT_FTP_SUCCESS in caplog.text
+
+    # THEN set analysis.upload_started_at in the database
+    assert analysis_obj.upload_started_at
+
+    # THEN set analysis.uploaded_at in the database
+    assert analysis_obj.uploaded_at
+
+    # THEN exit without errors
+    assert result.exit_code == 0
