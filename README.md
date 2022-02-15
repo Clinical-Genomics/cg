@@ -17,7 +17,7 @@ In this context, `cg` provides the interface between these tools to facilitate a
 
 ### Contributing
 
-Please check out our [guide for contributing to cg](CONTRIBUTING.md)
+Please check out our [guide for contributing to cg](CONTRIBUTING.md).
 
 ## Installation
 
