@@ -6,14 +6,14 @@ from cg.constants import HK_FASTQ_TAGS
 from cg.meta.compress import CompressAPI, files
 
 
-def test_get_flow_cell_name(
-    compress_api: CompressAPI, flowcell_name: str, flowcell_full_name: str
-):
+def test_get_flow_cell_name(compress_api: CompressAPI, flowcell_name: str, flowcell_full_name: str):
     """Test functionality to extract the flow cell name from a run name given a designated structure"""
 
     # GIVEN a CompressAPI with a demux_root and a flowcell with a fastq in given demux_root
     fixture_flow_cell_name: str = flowcell_name
-    fastq_path: Path = compress_api.demux_root.joinpath(Path(flowcell_full_name, 'dummy_fastq.fastq.gz'))
+    fastq_path: Path = compress_api.demux_root.joinpath(
+        Path(flowcell_full_name, "dummy_fastq.fastq.gz")
+    )
 
     # WHEN retrieving the the name of the flow cell
     flow_cell_name: str = compress_api.get_flow_cell_name(fastq_path=fastq_path)
