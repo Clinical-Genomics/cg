@@ -176,8 +176,6 @@ class ExternalDataAPI(MetaAPI):
             sample and force
         ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
-        elif sample_folder.name == "nanopore":
-            return
         elif not sample and not self.status_db.sample(sample_folder.name):
             raise Exception(
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
@@ -192,7 +190,8 @@ class ExternalDataAPI(MetaAPI):
         cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
         destination_folder_path: Path = self.get_destination_path(customer=cust)
         for sample_folder in destination_folder_path.iterdir():
-            self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
+            if not sample_folder.name == "nanopore":
+                self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
         available_samples: List[models.Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket_id=ticket_id
         )
