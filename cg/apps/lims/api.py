@@ -14,6 +14,7 @@ from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
+from ...constants import Priority
 
 requests_cache.install_cache(backend="memory")
 
@@ -192,14 +193,18 @@ class LimsAPI(Lims, OrderHandler):
 
         if len(priorities) == 1:
             family_data["priority"] = priorities.pop()
-        elif "express" in priorities:
-            family_data["priority"] = "express"
-        elif "priority" in priorities:
-            family_data["priority"] = "priority"
-        elif "standard" in priorities:
-            family_data["priority"] = "standard"
-        else:
+        elif len(priorities) < 1:
             raise LimsDataError(f"unable to determine family priority: {priorities}")
+        else:
+            for prio in [
+                Priority.express,
+                Priority.priority,
+                Priority.standard,
+                Priority.clinical_trials,
+            ]:
+                if prio in priorities:
+                    family_data["priority"] = prio.name
+                    break
 
         family_data["panels"] = list(panels)
         return family_data
@@ -304,7 +309,7 @@ class LimsAPI(Lims, OrderHandler):
 
         Parameters:
             dates (list): a list of tuples in the format (date_run, date), sorted by date_run
-            descending
+                descending
 
         Returns:
             The date in the first tuple in dates

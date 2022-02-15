@@ -31,8 +31,21 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class FlowCellRunDirs(Sequencers):
+    pass
+
+
 class BackupConfig(BaseModel):
     root: Sequencers
+
+
+class CleanDirs(BaseModel):
+    sample_sheets_dir_name: str
+    flow_cell_run_dirs: FlowCellRunDirs
+
+
+class CleanConfig(BaseModel):
+    flow_cells: CleanDirs
 
 
 class SlurmConfig(BaseModel):
@@ -60,7 +73,12 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: str
+    host: Optional[str]
+    user: str
+    key: str
+    api_url: str
+    upload_path: str
+    auth_path: str
 
 
 class CommonAppConfig(BaseModel):
@@ -194,6 +212,7 @@ class CGConfig(BaseModel):
     cg_stats_api_: StatsAPI = None
     chanjo: CommonAppConfig = None
     chanjo_api_: ChanjoAPI = None
+    clean: Optional[CleanConfig] = None
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")

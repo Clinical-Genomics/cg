@@ -127,6 +127,10 @@ class ScoutConfigBuilder:
             LOG.debug("Adding cohorts %s", ", ".join(cohorts))
             self.load_config.cohorts = cohorts
 
+    def include_cnv_report(self) -> None:
+        LOG.info("Include CNV report to case")
+        self.load_config.cnv_report = self.fetch_file_from_hk(self.case_tags.cnv_report)
+
     def include_multiqc_report(self) -> None:
         LOG.info("Include MultiQC report to case")
         self.load_config.multiqc = self.fetch_file_from_hk(self.case_tags.multiqc_report)

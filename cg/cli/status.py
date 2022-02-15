@@ -1,12 +1,16 @@
 from typing import Iterable, List
 
 import click
-from cg.constants import CASE_ACTIONS, PRIORITY_OPTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from ansi.colour import fg
 from ansi.colour.fx import reset
 from tabulate import tabulate
+
+from cg.constants import Priority
+
+from cg.utils.click.EnumChoice import EnumChoice
 
 STATUS_OPTIONS = ["pending", "running", "completed", "failed", "error"]
 CASE_HEADERS_LONG = [
@@ -117,7 +121,7 @@ def present_string(a_dict, param, show_negative):
 @click.option("--internal-id", help="search by internal id")
 @click.option("--name", help="search by name given by customer")
 @click.option("--case-action", type=click.Choice(CASE_ACTIONS), help="filter by case action")
-@click.option("--priority", type=click.Choice(PRIORITY_OPTIONS), help="filter by priority")
+@click.option("--priority", type=EnumChoice(Priority, use_value=False), help="filter by priority")
 @click.option("--data-analysis", help="filter on case data_analysis")
 @click.option("--sample-id", help="filter by sample id")
 @click.option("-c", "--customer-id", help="filter by customer")
@@ -380,8 +384,8 @@ def families(context: CGConfig, skip: int):
     status_db: Store = context.status_db
     records: List[models.Family] = status_db.families().offset(skip).limit(30)
     for case_obj in records:
-        color = "red" if case_obj.priority > 1 else "blue"
-        message = f"{case_obj.internal_id} ({case_obj.priority})"
+        color = "red" if case_obj.priority_int > 1 else "blue"
+        message = f"{case_obj.internal_id} ({case_obj.priority_int})"
         if case_obj.analyses:
             message += f" {case_obj.analyses[0].completed_at.date()}"
             color = "green"

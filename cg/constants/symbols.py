@@ -5,5 +5,6 @@ SPACE = " "
 UNDERSCORE = "_"
 PERIOD = "."
 COMMA = ","
+ASTERISK = "*"
 
 NO_PARENT = "0"

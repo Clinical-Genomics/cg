@@ -1,0 +1,5 @@
+[2021-11-01T23:50:26] Running on: cg-dragen.scilifelab.se
+[2021-11-01T23:50:26] dragen --bcl-conversion-only true --bcl-input-directory /home/proj/production/flowcells/novaseq/runs/211101_A00187_0615_AHLG5GDRXY --output-directory /home/proj/production/demultiplexed-runs/211101_A00187_0615_AHLG5GDRXY/Unaligned --bcl-sampleproject-subdirectories true --force   
+touch /home/proj/production/demultiplexed-runs/211101_A00187_0615_AHLG5GDRXY/demuxcomplete.txt
+
+[2021-11-01T23:56:48] Dragen BCL Convert finished!
