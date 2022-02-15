@@ -43,7 +43,7 @@ class CompressAPI:
 
     def get_flow_cell_name(self, fastq_path: Path) -> str:
         """
-        Extract the flow cell name from a fastq Path assuming fastq files are kept in their
+        Extract the flow cell name from a fastq path assuming fastq files are kept in their
         demultipelxed path and the following run_name convention:
 
             - <date>_<machine>_<run_numbers>_<A|B><flowcell_id>:
