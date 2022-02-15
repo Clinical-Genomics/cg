@@ -9,6 +9,7 @@ from genologics.entities import Sample, Artifact
 
 from cg.apps.lims import LimsAPI
 from cg.constants import Pipeline
+from cg.constants.constants import SARS_COV_NTC_READ_THRESHOLD
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
 from cg.models.cg_config import CGConfig
@@ -109,7 +110,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             ),
         )
 
-    def get_internal_NTCs(self, case_id: str) -> List[models.Sample]:
+    def get_internal_negative_controls(self, case_id: str) -> List[models.Sample]:
         """Retrieve a list of lims ids for negative controls created by Clinical Genomics"""
 
         case_obj = self.status_db.family(case_id)
@@ -121,14 +122,14 @@ class MutantAnalysisAPI(AnalysisAPI):
         negative_controls: List[Sample] = LimsAPI.get_controls(lims_artifact=pool)
         return [self.status_db.sample(lims_sample.id) for lims_sample in negative_controls]
 
-    def check_if_NTCs_are_clean(self, case_id: str) -> bool:
+    def are_all_negative_controls_clean(self, case_id: str) -> bool:
         """Returns true if all samples in given list got less than 10k reads"""
         is_clean = True
-        ntcs: List[str] = self.get_internal_NTCs(case_id=case_id)
+        ntcs: List[models.Sample] = self.get_internal_negative_controls(case_id=case_id)
         if not ntcs:
             LOG.info("No negative controls found for case: %s", case_id)
         for ntc in ntcs:
-            if ntc.reads > 10000:
+            if ntc.reads > SARS_COV_NTC_READ_THRESHOLD:
                 is_clean = False
                 return is_clean
         return is_clean
