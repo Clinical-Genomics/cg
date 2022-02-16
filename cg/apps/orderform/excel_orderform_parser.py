@@ -179,7 +179,7 @@ class ExcelOrderformParser(OrderformParser):
 
         if project_type == OrderType.METAGENOME:
             return DataDelivery.FASTQ
-        elif project_type == OrderType.MICROSALT:
+        if project_type == OrderType.MICROSALT:
             if self.parse_data_analysis() in ["custom", "fastq"]:
                 return DataDelivery.FASTQ_QC
 
