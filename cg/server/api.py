@@ -87,7 +87,7 @@ def submit_order(order_type):
     try:
         request_json = request.get_json()
 
-        if order_type.isalnum() and request_json.isalnum():
+        if order_type.isalnum():
             LOG.info("processing '%s' order: %s", order_type, request_json)
         else:
             raise OrderFormError("Could not process order since it contains non-alphanumeric data")
