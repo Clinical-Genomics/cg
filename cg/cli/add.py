@@ -279,7 +279,7 @@ def relationship(
     required=True,
 )
 @click.option("--dry-run", is_flag=True)
-@click.option("--nanopore", is_flag=True)
+@click.option("--nanopore", is_flag=True, help="to transfer nanopore data")
 @click.pass_obj
 def external(context: CGConfig, ticket_id: int, dry_run: bool, nanopore: bool):
     """Downloads external data from caesar and places it in appropriate folder on hasta"""

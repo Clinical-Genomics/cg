@@ -60,15 +60,11 @@ class ExternalDataAPI(MetaAPI):
         """Returns the path to where the files are to be transferred"""
         return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample_files_from_source(
-        self, dry_run: bool, nanopore: bool, ticket_id: int
-    ) -> None:
-        """Transfers all sample files, related to given ticket, from source to destination"""
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
-        error_function: str = ERROR_RSYNC_FUNCTION.format()
-
-        destination_folder: Path = Path(self.destination_path % cust)
+    def generate_command(
+        self, nanopore: bool, destination_folder: Path, cust: str, ticket_id: int
+    ) -> str:
+        """Generates the rsync command, nanopore data can't be organized as illumina
+        data, therefore transferring nanopore data to a separate sub folder"""
         if nanopore:
             destination_folder = destination_folder / "nanopore"
             command: str = RSYNC_COMMAND.format(
@@ -81,6 +77,20 @@ class ExternalDataAPI(MetaAPI):
                 destination_path=destination_folder,
             )
         Path(destination_folder).mkdir(exist_ok=True, parents=True)
+        return command
+
+    def transfer_sample_files_from_source(
+        self, dry_run: bool, nanopore: bool, ticket_id: int
+    ) -> None:
+        """Transfers all sample files, related to given ticket, from source to destination"""
+        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
+        error_function: str = ERROR_RSYNC_FUNCTION.format()
+
+        destination_folder: Path = Path(self.destination_path % cust)
+        command: str = self.generate_command(
+            nanopore=nanopore, destination_folder=destination_folder, cust=cust, ticket_id=ticket_id
+        )
 
         sbatch_info = {
             "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
