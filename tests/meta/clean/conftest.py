@@ -1,7 +1,13 @@
 from pathlib import Path
 
 import pytest
+
+from tests.apps.demultiplex.conftest import fixture_demux_run_dir, fixture_novaseq_dir
 from tests.cli.demultiplex.conftest import fixture_demultiplexed_flowcells_working_directory
+from tests.models.demultiplexing.conftest import (
+    fixture_flowcell_path,
+    fixture_flowcell_runs,
+)
 
 
 @pytest.fixture(name="correct_flow_cell")

@@ -31,12 +31,17 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class FlowCellRunDirs(Sequencers):
+    pass
+
+
 class BackupConfig(BaseModel):
     root: Sequencers
 
 
 class CleanDirs(BaseModel):
     sample_sheets_dir_name: str
+    flow_cell_run_dirs: FlowCellRunDirs
 
 
 class CleanConfig(BaseModel):
@@ -68,7 +73,12 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: str
+    host: Optional[str]
+    user: str
+    key: str
+    api_url: str
+    upload_path: str
+    auth_path: str
 
 
 class CommonAppConfig(BaseModel):

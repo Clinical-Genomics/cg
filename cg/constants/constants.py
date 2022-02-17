@@ -1,4 +1,5 @@
 """Constants for cg"""
+import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
@@ -36,11 +37,17 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
+FLOWCELL_Q30_THRESHOLD = {
+    "hiseqx": 75,
+    "hiseqga": 80,
+    "novaseq": {"151": 75, "101": 75, "51": 75},
+}
+
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
-SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
-
 SEX_OPTIONS = ("male", "female", "unknown")
+
+SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
@@ -50,10 +57,12 @@ class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     FASTQ: str = "fastq"
     FASTQ_QC: str = "fastq_qc"
+    FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
     FASTQ_QC_ANALYSIS_CRAM: str = "fastq_qc-analysis-cram"
     FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
     NIPT_VIEWER: str = "nipt-viewer"
     SCOUT: str = "scout"
+    STATINA: str = "statina"
 
 
 class FlowCellStatus(StrEnum):
@@ -69,3 +78,19 @@ class HousekeeperTags(StrEnum):
     SAMPLESHEET: str = "samplesheet"
     SPRING: str = "spring"
     ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
+
+
+class Sequencers(StrEnum):
+    HISEQX: str = "hiseqx"
+    HISEQGA: str = "hiseqga"
+    NOVASEQ: str = "novaseq"
+    ALL: str = "all"
+
+
+DRY_RUN = click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Runs the command without making any changes",
+)
