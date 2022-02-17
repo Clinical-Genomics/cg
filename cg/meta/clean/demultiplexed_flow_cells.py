@@ -38,7 +38,7 @@ class DemultiplexedRunsFlowCell:
         flow_cell_path: Path,
         status_db: Store,
         housekeeper_api: HousekeeperAPI,
-        trailblazer_api: TrailblazerAPI,
+        trailblazer_api: Optional[TrailblazerAPI] = None,
         sample_sheets_dir: Optional[str] = None,
         fastq_files: Optional[Query] = None,
         spring_files: Optional[Query] = None,

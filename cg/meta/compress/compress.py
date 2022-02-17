@@ -47,7 +47,7 @@ class CompressAPI:
         Extract the flow cell name from a fastq path assuming fastq files are kept in their
         demultipelxed path and the following run_name convention:
 
-            - <date>_<machine>_<run_numbers>_<A|B><flowcell_id>:
+            - <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>:
             - Ex: 220128_A00689_0460_BHVN2FDSX2
         """
         run_name: str = fastq_path.relative_to(self.demux_root).parts[0]
