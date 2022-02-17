@@ -8,7 +8,7 @@ FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 SPRING_SUFFIX = ".spring"
 
 
-class COMPRESSION_HK_TAGS(StrEnum):
+class CompressionHkTags(StrEnum):
     FASTQ: str = "fastq"
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"

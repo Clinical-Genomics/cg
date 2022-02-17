@@ -7,7 +7,7 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import COMPRESSION_HK_TAGS
+from cg.constants.compression import CompressionHkTags
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -254,12 +254,12 @@ def fixture_spring_bundle(project_dir, timestamp, sample):
             {
                 "path": str(spring_file),
                 "archive": False,
-                "tags": [sample, COMPRESSION_HK_TAGS.SPRING],
+                "tags": [sample, CompressionHkTags.SPRING],
             },
             {
                 "path": str(spring_meta_file),
                 "archive": False,
-                "tags": [sample, COMPRESSION_HK_TAGS.SPRING_METADATA],
+                "tags": [sample, CompressionHkTags.SPRING_METADATA],
             },
         ],
     }
@@ -285,12 +285,12 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
             {
                 "path": str(wrong_spring_file),
                 "archive": False,
-                "tags": [sample, COMPRESSION_HK_TAGS.SPRING],
+                "tags": [sample, CompressionHkTags.SPRING],
             },
             {
                 "path": str(wrong_spring_meta_file),
                 "archive": False,
-                "tags": [sample, COMPRESSION_HK_TAGS.SPRING_METADATA],
+                "tags": [sample, CompressionHkTags.SPRING_METADATA],
             },
         ],
     }
