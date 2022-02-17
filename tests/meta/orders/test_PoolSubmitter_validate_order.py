@@ -35,7 +35,7 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
             name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool),
             customer=customer,
             data_analysis=Pipeline.FLUFFY,
-            data_delivery=DataDelivery.NIPT_VIEWER,
+            data_delivery=DataDelivery.STATINA,
         )
         base_store.add_commit(case)
 
