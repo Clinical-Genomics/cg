@@ -39,6 +39,33 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
+    def active_sample(self, internal_id: str) -> bool:
+        """Check if there are any active cases for a sample"""
+        sample: models.Sample = self.sample(internal_id=internal_id)
+        if any(
+            [
+                self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "analyze"
+                or self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "running"
+                for family_sample in sample.links
+            ]
+        ):
+            return True
+        return False
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -85,7 +112,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
+        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
     ) -> Query:
         """Fetch families."""
 
@@ -149,7 +176,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def families_by_subject_id(
-        self, customer_id: str, subject_id: str, data_analyses: [Pipeline] = None
+        self, customer_id: str, subject_id: str, data_analyses: List[Pipeline] = None
     ) -> Set[models.Family]:
         """Get cases that has a sample for a subject_id.
 
@@ -161,7 +188,7 @@ class FindBusinessDataHandler(BaseHandler):
             set containing the matching cases set(models.Family)
         """
         cases: set[models.Family] = set()
-        samples: [models.Sample] = self.samples_by_subject_id(
+        samples: List[models.Sample] = self.samples_by_subject_id(
             customer_id=customer_id, subject_id=subject_id
         )
         sample: models.Sample
@@ -332,7 +359,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_by_subject_id(self, customer_id: str, subject_id: str) -> [models.Sample]:
+    def samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[models.Sample]:
         """Get samples of customer with given subject_id.
 
         Args:

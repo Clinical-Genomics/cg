@@ -11,7 +11,6 @@ from cg.models.cg_config import CGConfig
 from cg.store.api import Store
 from cg.store.models import Sample
 
-from tests.store_helpers import StoreHelpers
 from tests.apps.cgstats.conftest import fixture_populated_stats_api
 from tests.cli.demultiplex.conftest import (
     fixture_demultiplex_configs,
@@ -30,11 +29,9 @@ from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_flowcell,
     fixture_demultiplexed_runs,
-    fixture_flowcell_full_name,
     fixture_flowcell_object,
     fixture_flowcell_path,
     fixture_flowcell_runs,
-    fixture_flow_cell_name,
 )
 
 
@@ -62,7 +59,8 @@ def fixture_temp_fastq_paths(tmp_demulitplexing_dir: Path) -> List[Path]:
 
 
 @pytest.fixture(name="tmp_sample_sheet_path")
-def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path, flow_cell_name: str) -> Path:
+def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
+    """SampleSheet in temporary folder"""
     tmp_sample_sheet_path = tmp_demulitplexing_dir / "SampleSheet.csv"
 
     with tmp_sample_sheet_path.open("w+") as fh:
@@ -70,9 +68,20 @@ def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path, flow_cell_name: s
     return tmp_sample_sheet_path
 
 
+@pytest.fixture(name="tmp_flow_cell_run_path")
+def fixture_tmp_flow_cell_run_path(project_dir: Path, flowcell_full_name: str) -> Path:
+    """Flow cell run directory in temporary folder"""
+
+    tmp_flow_cell_run_path = project_dir / Path("flow_cell_run") / flowcell_full_name
+
+    tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
+
+    return tmp_flow_cell_run_path
+
+
 @pytest.fixture(scope="function", name="populated_flow_cell_store")
 def fixture_populated_flow_cell_store(
-    family_name: str, flow_cell_name: str, helpers: StoreHelpers, sample_id: str, store: Store
+    family_name: str, flowcell_name: str, sample_id: str, store: Store, helpers
 ) -> Store:
     """Populate a store with a novaseq flow cell"""
     populated_flow_cell_store: Store = store
@@ -87,7 +96,7 @@ def fixture_populated_flow_cell_store(
     )
     helpers.add_flowcell(
         store=populated_flow_cell_store,
-        flowcell_id=flow_cell_name,
+        flowcell_id=flowcell_name,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -96,12 +105,7 @@ def fixture_populated_flow_cell_store(
 
 @pytest.fixture(scope="function", name="active_flow_cell_store")
 def fixture_active_flow_cell_store(
-    case_id: str,
-    family_name: str,
-    flow_cell_name: str,
-    helpers: StoreHelpers,
-    sample_id: str,
-    base_store: Store,
+    family_name: str, flowcell_name: str, sample_id: str, base_store: Store, helpers
 ) -> Store:
     """Populate a store with a novaseq flow cell, with active samples on it"""
     active_flow_cell_store: Store = base_store
@@ -116,7 +120,7 @@ def fixture_active_flow_cell_store(
     )
     helpers.add_flowcell(
         store=active_flow_cell_store,
-        flowcell_id=flow_cell_name,
+        flowcell_id=flowcell_name,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -125,12 +129,11 @@ def fixture_active_flow_cell_store(
 
 @pytest.fixture(scope="function", name="sample_level_housekeeper_api")
 def fixture_sample_level_housekeeper_api(
-    flow_cell_name: str,
-    helpers: StoreHelpers,
+    flowcell_name: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: List[Path],
-    tmp_sample_sheet_path: Path,
+    helpers,
 ) -> HousekeeperAPI:
     """Yield a mocked housekeeper API, containing a sample bundle with related fastq files"""
     sample_level_housekeeper_api = real_housekeeper_api
@@ -139,7 +142,7 @@ def fixture_sample_level_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq"], "archive": False}
+            {"path": path.as_posix(), "tags": ["fastq", flowcell_name], "archive": False}
             for path in tmp_fastq_paths
         ],
     }
@@ -149,12 +152,12 @@ def fixture_sample_level_housekeeper_api(
 
 @pytest.fixture(scope="function", name="flow_cell_name_housekeeper_api")
 def fixture_flow_cell_name_housekeeper_api(
-    flow_cell_name: str,
-    helpers: StoreHelpers,
+    flowcell_name: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
+    helpers,
 ) -> HousekeeperAPI:
     """Yield a mocked housekeeper API, containing a sample bundle with related fastq files"""
     flow_cell_housekeeper_api = real_housekeeper_api
@@ -163,18 +166,18 @@ def fixture_flow_cell_name_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", flow_cell_name], "archive": False}
+            {"path": path.as_posix(), "tags": ["fastq", flowcell_name], "archive": False}
             for path in tmp_fastq_paths
         ],
     }
     flow_cell_bundle_data = {
-        "name": flow_cell_name,
+        "name": flowcell_name,
         "created": datetime.now(),
         "version": "1.0",
         "files": [
             {
                 "path": tmp_sample_sheet_path.as_posix(),
-                "tags": ["samplesheet", flow_cell_name],
+                "tags": ["samplesheet", flowcell_name],
                 "archive": False,
             }
         ],
@@ -214,17 +217,14 @@ def fixture_active_wipe_demux_context(
 def fixture_populated_wipe_demultiplex_api(
     populated_wipe_demux_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
-    flowcell_full_name: str,
-    stats_api: StatsAPI,
+    tmp_flow_cell_run_path: Path,
 ) -> WipeDemuxAPI:
     """Yield an initialized populated WipeDemuxAPI"""
-    populated_wipe_demultiplex_api: WipeDemuxAPI = WipeDemuxAPI(
+    return WipeDemuxAPI(
         config=populated_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
-        run_name=flowcell_full_name,
+        run_name=tmp_flow_cell_run_path,
     )
-
-    return populated_wipe_demultiplex_api
 
 
 @pytest.fixture(scope="function", name="active_wipe_demultiplex_api")
@@ -234,12 +234,11 @@ def fixture_active_wipe_demultiplex_api(
     flowcell_full_name: str,
 ) -> WipeDemuxAPI:
     """Yield an instantiated WipeDemuxAPI with active samples on a flowcell"""
-    active_wipe_demultiplex_api = WipeDemuxAPI(
+    return WipeDemuxAPI(
         config=active_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         run_name=flowcell_full_name,
     )
-    return active_wipe_demultiplex_api
 
 
 @pytest.fixture(scope="function", name="wipe_demultiplex_api")
@@ -251,9 +250,33 @@ def fixture_wipe_demultiplex_api(
 ) -> WipeDemuxAPI:
     """Yield an initialized WipeDemuxAPI"""
     cg_context.cg_stats_api_ = stats_api
-    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+    return WipeDemuxAPI(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         run_name=flowcell_full_name,
     )
-    return wipe_demux_api
+
+
+@pytest.fixture(name="demultiplexing_init_files")
+def tmp_demultiplexing_init_files(
+    flowcell_name: str, populated_wipe_demultiplex_api: WipeDemuxAPI
+) -> List[Path]:
+    # TODO: Make these files appear
+    """Return a list of demultiplexing init files present in the run directory"""
+    run_path: Path = populated_wipe_demultiplex_api.run_name
+    slurm_job_id_file_path: Path = run_path / "slurm_job_ids.yaml"
+    demux_script_file_path: Path = run_path / "demux-novaseq.sh"
+    error_log_path: Path = run_path / f"{flowcell_name}_demultiplex.stderr"
+    log_path: Path = run_path / f"{flowcell_name}_demultiplex.stdout"
+
+    demultiplexing_init_files: List[Path] = [
+        slurm_job_id_file_path,
+        demux_script_file_path,
+        error_log_path,
+        log_path,
+    ]
+
+    for file in demultiplexing_init_files:
+        file.touch()
+
+    return demultiplexing_init_files

@@ -516,27 +516,28 @@ class StoreHelpers:
     @staticmethod
     def add_flowcell(
         store: Store,
+        date: datetime = datetime.now(),
         flowcell_id: str = "flowcell_test",
         archived_at: datetime = None,
         samples: list = None,
         sequencer_type: str = "hiseqx",
         status: str = None,
     ) -> models.Flowcell:
-      """Utility function to set a flowcell to use in tests"""
-      flowcell_obj = store.add_flowcell(
-        name=flowcell_id,
-        sequencer="dummy_sequencer",
-        sequencer_type=sequencer_type,
-        date=datetime.now(),
-      )
-      flowcell_obj.archived_at = archived_at
-      if samples:
-        flowcell_obj.samples = samples
-      if status:
-        flowcell_obj.status = status
-      store.add_commit(flowcell_obj)
-      return flowcell_obj
-    
+        """Utility function to set a flowcell to use in tests"""
+        flowcell_obj = store.add_flowcell(
+            name=flowcell_id,
+            sequencer="dummy_sequencer",
+            sequencer_type=sequencer_type,
+            date=date,
+        )
+        flowcell_obj.archived_at = archived_at
+        if samples:
+            flowcell_obj.samples = samples
+        if status:
+            flowcell_obj.status = status
+        store.add_commit(flowcell_obj)
+        return flowcell_obj
+
     @staticmethod
     def add_relationship(
         store: Store,
@@ -568,7 +569,7 @@ class StoreHelpers:
 
     @staticmethod
     def add_phenotype_groups_to_sample(
-        store: Store, sample_id: str, phenotype_groups: [str] = ["a phenotype group"]
+        store: Store, sample_id: str, phenotype_groups: List[str] = ["a phenotype group"]
     ) -> Optional[models.Sample]:
         """Function for adding a phenotype group to a sample in the database"""
         sample_obj: models.Sample = store.sample(internal_id=sample_id)
@@ -581,7 +582,7 @@ class StoreHelpers:
 
     @staticmethod
     def add_phenotype_terms_to_sample(
-        store: Store, sample_id: str, phenotype_terms: [str] = ["a phenotype term"]
+        store: Store, sample_id: str, phenotype_terms: List[str] = ["a phenotype term"]
     ) -> Optional[models.Sample]:
         """Function for adding a phenotype term to a sample in the database"""
         sample_obj: models.Sample = store.sample(internal_id=sample_id)

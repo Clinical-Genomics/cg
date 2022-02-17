@@ -56,7 +56,14 @@ def demultiplex_all(
             config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=sub_dir.name
         )
         wipe_demux_api.set_dry_run(dry_run=dry_run)
-        wipe_demux_api.wipe_flow_cell()
+        wipe_demux_api.wipe_flow_cell(
+            skip_cg_stats=False,
+            skip_demultiplexing_dir=False,
+            skip_run_dir=True,
+            skip_housekeeper=False,
+            skip_init_files=True,
+            skip_status_db=True,
+        )
 
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
         demultiplex_api.add_to_trailblazer(
@@ -90,8 +97,23 @@ def demultiplex_flowcell(
 
     try:
         flowcell_obj = Flowcell(flowcell_path=flowcell_directory, bcl_converter=bcl_converter)
-    except FlowcellError:
-        raise click.Abort
+    except FlowcellError as e:
+        raise click.Abort from e
+
+    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+        config=context,
+        demultiplexing_dir=Path(demultiplex_api.out_dir),
+        run_name=flowcell_id,
+    )
+    wipe_demux_api.set_dry_run(dry_run=dry_run)
+    wipe_demux_api.wipe_flow_cell(
+        skip_cg_stats=False,
+        skip_demultiplexing_dir=False,
+        skip_run_dir=True,
+        skip_housekeeper=False,
+        skip_init_files=False,
+        skip_status_db=True,
+    )
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
         LOG.warning("Can not start demultiplexing!")
@@ -111,7 +133,14 @@ def demultiplex_flowcell(
         run_name=flowcell_id,
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flow_cell()
+    wipe_demux_api.wipe_flow_cell(
+        skip_cg_stats=False,
+        skip_demultiplexing_dir=False,
+        skip_run_dir=True,
+        skip_housekeeper=False,
+        skip_init_files=False,
+        skip_status_db=True,
+    )
 
     slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
     tb_api: TrailblazerAPI = context.trailblazer_api
@@ -124,8 +153,10 @@ def demultiplex_flowcell(
 @click.option("--dry-run", is_flag=True)
 @click.option("--skip-cg-stats", is_flag=True, help="Skip removal in cg-stats")
 @click.option("--skip-demultiplexing-dir", is_flag=True, help="Skip removal on server file system")
+@click.option("--skip-run-dir", is_flag=True, help="Skip removal of run file system")
 @click.option("--skip-housekeeper", is_flag=True, help="Skip removal in housekeeper")
 @click.option("--skip-status-db", is_flag=True, help="Skip removal in status-db")
+@click.option("--skip-init-files", is_flag=True, help="Skip removal of init-files")
 @click.argument("--demultiplexing-dir")
 @click.argument("--flow-cell-id")
 def wipe_flow_cell(
@@ -136,6 +167,8 @@ def wipe_flow_cell(
     skip_cg_stats: bool,
     skip_demultiplexing_dir: bool,
     skip_housekeeper: bool,
+    skip_init_files: bool,
+    skip_run_dir: bool,
     skip_status_db: bool,
 ):
     """Prepare a flowcell before demultiplexing, using the WipeDemuxAPI
@@ -155,5 +188,7 @@ def wipe_flow_cell(
         skip_cg_stats=skip_cg_stats,
         skip_demultiplexing_dir=skip_demultiplexing_dir,
         skip_housekeeper=skip_housekeeper,
+        skip_init_files=skip_init_files,
+        skip_run_dir=skip_run_dir,
         skip_status_db=skip_status_db,
     )
