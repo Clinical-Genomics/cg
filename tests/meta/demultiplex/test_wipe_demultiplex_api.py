@@ -169,7 +169,6 @@ def test_check_active_sample(
 
     # GIVEN a WipeDemuxAPI and a store with active samples related to it
 
-    store: Store = active_flow_cell_store
     wipe_demux_api: WipeDemuxAPI = active_wipe_demultiplex_api
     wipe_demux_api.set_dry_run(dry_run=False)
 
