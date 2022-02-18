@@ -469,7 +469,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--account": self.account,
                 "--mail-user": self.email,
-                "--qos": priority or self.get_priority_for_case(case_id=case_id),
+                "--qos": priority or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }

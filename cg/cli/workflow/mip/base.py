@@ -19,6 +19,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ def run(
 
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
-        priority=priority or analysis_api.get_priority_for_case(case_id),
+        priority=priority or analysis_api.get_slurm_qos_for_case(case_id),
         email=email or environ_email(),
         dryrun=mip_dry_run,
         start_after=start_after,

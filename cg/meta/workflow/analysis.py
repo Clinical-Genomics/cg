@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -94,14 +94,15 @@ class AnalysisAPI(MetaAPI):
         self.status_db.commit()
         return all(status == "ondisk" for status in statuses)
 
-    def get_priority_for_case(self, case_id: str) -> str:
-        """Fetch priority for case id"""
+    def get_priority_for_case(self, case_id: str) -> int:
+        """Get priority from the status db case priority"""
         case_obj: models.Family = self.status_db.family(case_id)
-        if not case_obj.priority or case_obj.priority_int == 0:
-            return SlurmQos.LOW
-        if case_obj.priority_int > 1:
-            return SlurmQos.HIGH
-        return SlurmQos.NORMAL
+        return case_obj.priority.value or 0
+
+    def get_slurm_qos_for_case(self, case_id: str) -> str:
+        """Get Quality of service (SLURM QOS) for the case"""
+        priority: int = self.get_priority_for_case(case_id)
+        return PRIORITY_TO_SLURM_QOS[priority]
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory"""
@@ -193,7 +194,7 @@ class AnalysisAPI(MetaAPI):
             analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
             out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
-            priority=self.get_priority_for_case(case_id=case_id),
+            priority=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
         )
 
