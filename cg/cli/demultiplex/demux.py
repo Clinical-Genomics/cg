@@ -13,11 +13,13 @@ from cg.models.demultiplex.flowcell import Flowcell
 
 LOG = logging.getLogger(__name__)
 
+DRY_RUN = click.option("--dry-run", is_flag=True)
+
 
 @click.command(name="all")
 @OPTION_BCL_CONVERTER
+@DRY_RUN
 @click.option("--flowcells-directory", type=click.Path(exists=True, file_okay=False))
-@click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def demultiplex_all(
     context: CGConfig, bcl_converter: str, flowcells_directory: click.Path, dry_run: bool
@@ -56,7 +58,7 @@ def demultiplex_all(
             config=context,
             demultiplexing_dir=Path(demultiplex_api.out_dir),
             dry_run=dry_run,
-            run_name=sub_dir,
+            run_path=sub_dir,
         )
 
         wipe_demux_api.wipe_flow_cell(
@@ -76,8 +78,8 @@ def demultiplex_all(
 
 @click.command(name="flowcell")
 @click.argument("flowcell-id")
+@DRY_RUN
 @OPTION_BCL_CONVERTER
-@click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def demultiplex_flowcell(
     context: CGConfig,
@@ -107,7 +109,7 @@ def demultiplex_flowcell(
         config=context,
         demultiplexing_dir=Path(demultiplex_api.out_dir),
         dry_run=dry_run,
-        run_name=flowcell_directory.name,
+        run_path=flowcell_directory.name,
     )
 
     wipe_demux_api.wipe_flow_cell(
@@ -139,7 +141,7 @@ def demultiplex_flowcell(
 
 
 @click.command(name="wipe-flow-cell")
-@click.option("--dry-run", is_flag=True)
+@DRY_RUN
 @click.option("--skip-cg-stats", is_flag=True, help="Skip removal in cg-stats")
 @click.option("--skip-demultiplexing-dir", is_flag=True, help="Skip removal on server file system")
 @click.option("--skip-run-dir", is_flag=True, help="Skip removal of run file system")
@@ -152,7 +154,7 @@ def wipe_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: str,
-    run_name: str,
+    run_path: str,
     skip_cg_stats: bool,
     skip_demultiplexing_dir: bool,
     skip_housekeeper: bool,
@@ -163,14 +165,14 @@ def wipe_flow_cell(
     """Prepare a flowcell before demultiplexing, using the WipeDemuxAPI
 
     Args:
-        Run name is the flowcell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+        Run path is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/{FLOWCELL_TYPE}/201203_A00689_0200_AHVKJCDRXX'
         Demultiplexing-dir is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'
     """
 
     demux_path: Path = Path(demultiplexing_dir)
 
     wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-        config=context, demultiplexing_dir=demux_path, run_name=run_name
+        config=context, demultiplexing_dir=demux_path, run_path=run_path
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
     wipe_demux_api.wipe_flow_cell(

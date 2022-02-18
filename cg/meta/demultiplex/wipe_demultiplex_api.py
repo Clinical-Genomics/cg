@@ -19,11 +19,11 @@ log = logging.getLogger(__name__)
 class WipeDemuxAPI:
     """Class to handle wiping out a flow cell before restart/start"""
 
-    def __init__(self, config: CGConfig, demultiplexing_dir: Path, dry_run: bool, run_name: str):
+    def __init__(self, config: CGConfig, demultiplexing_dir: Path, dry_run: bool, run_path: str):
         self.dry_run: bool = self.set_dry_run(dry_run=dry_run)
         self.demultiplexing_dir: Path = demultiplexing_dir
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
-        self.run_name: Path = Path(run_name)
+        self.run_path: Path = Path(run_path)
         self.status_db: Store = config.status_db
         self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
@@ -32,7 +32,7 @@ class WipeDemuxAPI:
     @property
     def demultiplexing_run_path(self) -> Path:
         """Return the demultiplexing directory path for the given run name"""
-        return self.demultiplexing_dir.joinpath(self.run_name)
+        return self.demultiplexing_dir.joinpath(self.run_path)
 
     @property
     def flow_cell_name(self) -> str:
@@ -42,7 +42,7 @@ class WipeDemuxAPI:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
         Example: 201203_A00689_0200_AHVKJCDRXX
         """
-        return self.run_name.name.split("_")[-1][1:]
+        return self.run_path.name.split("_")[-1][1:]
 
     @property
     def status_db_presence(self) -> bool:
@@ -131,7 +131,7 @@ class WipeDemuxAPI:
         skip_run_dir: bool,
     ) -> None:
         """Wipe demultiplexing directory on the server"""
-        out_dir: Path = self.demultiplexing_dir.joinpath(self.run_name.name)
+        out_dir: Path = self.demultiplexing_dir.joinpath(self.run_path.name)
         if not skip_demultiplexing_dir and out_dir.exists():
             if self.dry_run:
                 log.info(
@@ -147,26 +147,26 @@ class WipeDemuxAPI:
                 f"WipeDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {out_dir.as_posix()}"
             )
 
-        if not skip_run_dir and self.run_name.exists():
+        if not skip_run_dir and self.run_path.exists():
             if self.dry_run:
                 log.info(
-                    f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.run_name}"
+                    f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
                 )
             else:
-                log.info(f"WipeDemuxAPI-Hasta: Removing flow cell run directory: {self.run_name}")
-                shutil.rmtree(path=self.run_name, ignore_errors=False)
+                log.info(f"WipeDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
+                shutil.rmtree(path=self.run_path, ignore_errors=False)
         else:
             log.info(
-                f"WipeDemuxAPI-Hasta: Skipped flow cell run directory, or no target: {self.run_name}"
+                f"WipeDemuxAPI-Hasta: Skipped flow cell run directory, or no target: {self.run_path}"
             )
 
     def wipe_demux_init_files(self):
         """Wipe previous traces of slurm job ids"""
-        slurm_job_id_file_path: Path = self.run_name / "slurm_job_ids.yaml"
-        demux_script_file_path: Path = self.run_name / "demux-novaseq.sh"
+        slurm_job_id_file_path: Path = self.run_path / "slurm_job_ids.yaml"
+        demux_script_file_path: Path = self.run_path / "demux-novaseq.sh"
         try:
             error_log_path, log_path = glob(
-                f"{self.run_name}/{self.flow_cell_name}_demultiplex.std*"
+                f"{self.run_path}/{self.flow_cell_name}_demultiplex.std*"
             )
             demux_init_files: List[Path] = [
                 slurm_job_id_file_path,
@@ -175,7 +175,7 @@ class WipeDemuxAPI:
                 Path(log_path),
             ]
         except ValueError:
-            log.info(f"No init demux logs found in: {self.run_name}")
+            log.info(f"No init demux logs found in: {self.run_path}")
             demux_init_files: List[Path] = [
                 slurm_job_id_file_path,
                 demux_script_file_path,

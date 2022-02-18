@@ -124,8 +124,7 @@ class HousekeeperAPI:
         files: Optional[Iterable[File]] = self.files(bundle=bundle, tags=tags, version=version)
         if not any(files):
             return False
-        else:
-            return True
+        return True
 
     def add_file(
         self, path, version_obj: models.Version, tags: list, to_archive: bool = False

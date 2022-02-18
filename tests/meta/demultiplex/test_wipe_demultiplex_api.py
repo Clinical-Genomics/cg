@@ -33,7 +33,7 @@ def test_initiate_wipe_demux_api(
         config=config,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=True,
-        run_name=flowcell_full_name,
+        run_path=flowcell_full_name,
     )
 
     # THEN the API should be correctly initialized
@@ -100,7 +100,7 @@ def test_set_dry_run_wipe_demux_api(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=True,
-        run_name=flowcell_full_name,
+        run_path=flowcell_full_name,
     )
 
     # THEN the dry run parameter should be set to True and it should be logged
@@ -162,9 +162,7 @@ def test_active_samples_on_flow_cell(
     assert sample_id in active_samples_on_flow_cell
 
 
-def test_check_active_sample(
-    active_flow_cell_store: Store, active_wipe_demultiplex_api: WipeDemuxAPI
-):
+def test_check_active_sample(active_wipe_demultiplex_api: WipeDemuxAPI):
     """Test that proper exception is raised when active samples are identified"""
 
     # GIVEN a WipeDemuxAPI and a store with active samples related to it
@@ -204,7 +202,7 @@ def test_wipe_flow_cell_housekeeper_only_sample_level(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_name=flowcell_full_name,
+        run_path=flowcell_full_name,
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
@@ -250,7 +248,7 @@ def test_wipe_flow_cell_housekeeper_flowcell_name(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_name=flowcell_full_name,
+        run_path=flowcell_full_name,
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 

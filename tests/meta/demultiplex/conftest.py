@@ -224,7 +224,7 @@ def fixture_populated_wipe_demultiplex_api(
         config=populated_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_name=tmp_flow_cell_run_path,
+        run_path=tmp_flow_cell_run_path,
     )
 
 
@@ -239,7 +239,7 @@ def fixture_active_wipe_demultiplex_api(
         config=active_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_name=flowcell_full_name,
+        run_path=flowcell_full_name,
     )
 
 
@@ -256,7 +256,7 @@ def fixture_wipe_demultiplex_api(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_name=flowcell_full_name,
+        run_path=flowcell_full_name,
     )
 
 
@@ -266,7 +266,7 @@ def tmp_demultiplexing_init_files(
 ) -> List[Path]:
     # TODO: Make these files appear
     """Return a list of demultiplexing init files present in the run directory"""
-    run_path: Path = populated_wipe_demultiplex_api.run_name
+    run_path: Path = populated_wipe_demultiplex_api.run_path
     slurm_job_id_file_path: Path = run_path / "slurm_job_ids.yaml"
     demux_script_file_path: Path = run_path / "demux-novaseq.sh"
     error_log_path: Path = run_path / f"{flowcell_name}_demultiplex.stderr"
