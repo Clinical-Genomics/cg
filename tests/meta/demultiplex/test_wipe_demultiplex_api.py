@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cg.apps.cgstats.db import models
+from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import WipeDemuxError
 from cg.meta.demultiplex.wipe_demultiplex_api import WipeDemuxAPI
@@ -31,6 +32,7 @@ def test_initiate_wipe_demux_api(
     WipeDemuxAPI(
         config=config,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=True,
         run_name=flowcell_full_name,
     )
 
@@ -78,16 +80,28 @@ def test_get_presence_status_status_db(
     assert populated_presence
 
 
-def test_set_dry_run_wipe_demux_api(caplog, wipe_demultiplex_api: WipeDemuxAPI):
+def test_set_dry_run_wipe_demux_api(
+    caplog,
+    cg_context: CGConfig,
+    demultiplexed_flowcells_working_directory: Path,
+    flowcell_full_name: str,
+    stats_api: StatsAPI,
+):
     """Test to test function to set the API to run in dry run mode"""
 
     caplog.set_level(logging.DEBUG)
+    cg_context.cg_stats_api_ = stats_api
 
     # GIVEN a dry run flag
     dry_run: bool = True
 
     # WHEN setting the dry_run mode on a WipeDemuxAPI
-    wipe_demultiplex_api.set_dry_run(dry_run=dry_run)
+    wipe_demultiplex_api: WipeDemuxAPI = WipeDemuxAPI(
+        config=cg_context,
+        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=True,
+        run_name=flowcell_full_name,
+    )
 
     # THEN the dry run parameter should be set to True and it should be logged
     assert wipe_demultiplex_api.dry_run
@@ -190,10 +204,10 @@ def test_wipe_flow_cell_housekeeper_only_sample_level(
     wipe_demultiplex_api: WipeDemuxAPI = WipeDemuxAPI(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=False,
         run_name=flowcell_full_name,
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
-    wipe_demultiplex_api.set_dry_run(dry_run=False)
 
     # WHEN wiping files in Housekeeper
 
@@ -236,10 +250,10 @@ def test_wipe_flow_cell_housekeeper_flowcell_name(
     wipe_demultiplex_api: WipeDemuxAPI = WipeDemuxAPI(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=False,
         run_name=flowcell_full_name,
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
-    wipe_demultiplex_api.set_dry_run(dry_run=False)
 
     # WHEN
 

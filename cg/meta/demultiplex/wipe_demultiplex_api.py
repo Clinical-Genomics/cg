@@ -19,8 +19,8 @@ log = logging.getLogger(__name__)
 class WipeDemuxAPI:
     """Class to handle wiping out a flow cell before restart/start"""
 
-    def __init__(self, config: CGConfig, demultiplexing_dir: Path, run_name: str):
-        self.dry_run: bool = True
+    def __init__(self, config: CGConfig, demultiplexing_dir: Path, dry_run: bool, run_name: str):
+        self.dry_run: bool = self.set_dry_run(dry_run=dry_run)
         self.demultiplexing_dir: Path = demultiplexing_dir
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.run_name: Path = Path(run_name)
@@ -51,10 +51,11 @@ class WipeDemuxAPI:
             self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
         )
 
-    def set_dry_run(self, dry_run: bool) -> None:
+    @staticmethod
+    def set_dry_run(dry_run: bool) -> bool:
         """Set dry run flag for API"""
         log.debug(f"WipeDemuxAPI: Setting dry run mode to {dry_run}")
-        self.dry_run = dry_run
+        return dry_run
 
     def _set_samples_on_flow_cell(self) -> None:
         """Set a list of samples related to a flow cell in status-db"""
@@ -163,13 +164,22 @@ class WipeDemuxAPI:
         """Wipe previous traces of slurm job ids"""
         slurm_job_id_file_path: Path = self.run_name / "slurm_job_ids.yaml"
         demux_script_file_path: Path = self.run_name / "demux-novaseq.sh"
-        error_log_path, log_path = glob(f"{self.run_name}/{self.flow_cell_name}_demultiplex.std*")
-        demux_init_files: List[Path] = [
-            slurm_job_id_file_path,
-            demux_script_file_path,
-            Path(error_log_path),
-            Path(log_path),
-        ]
+        try:
+            error_log_path, log_path = glob(
+                f"{self.run_name}/{self.flow_cell_name}_demultiplex.std*"
+            )
+            demux_init_files: List[Path] = [
+                slurm_job_id_file_path,
+                demux_script_file_path,
+                Path(error_log_path),
+                Path(log_path),
+            ]
+        except ValueError:
+            log.info(f"No init demux logs found in: {self.run_name}")
+            demux_init_files: List[Path] = [
+                slurm_job_id_file_path,
+                demux_script_file_path,
+            ]
         for init_file in demux_init_files:
             if init_file.is_file():
                 log.info(f"WipeDemuxAPI: Removing {init_file}")
@@ -200,20 +210,17 @@ class WipeDemuxAPI:
         skip_status_db: bool,
     ) -> None:
         """Master command to completely wipe the presence of a flowcell in all services"""
-        try:
-            self.check_active_samples()
-            if not skip_cg_stats:
-                self.wipe_flow_cell_cgstats()
-            if not skip_demultiplexing_dir:
-                self.wipe_flow_cell_hasta(
-                    skip_demultiplexing_dir=skip_demultiplexing_dir,
-                    skip_run_dir=skip_run_dir,
-                )
-            if not skip_init_files and skip_run_dir:
-                self.wipe_demux_init_files()
-            if not skip_housekeeper:
-                self.wipe_flow_cell_housekeeper()
-            if not skip_status_db:
-                self.wipe_flow_cell_statusdb()
-        except WipeDemuxError as e:
-            raise e from e
+        self.check_active_samples()
+        if not skip_cg_stats:
+            self.wipe_flow_cell_cgstats()
+        if not skip_demultiplexing_dir:
+            self.wipe_flow_cell_hasta(
+                skip_demultiplexing_dir=skip_demultiplexing_dir,
+                skip_run_dir=skip_run_dir,
+            )
+        if not skip_init_files and skip_run_dir:
+            self.wipe_demux_init_files()
+        if not skip_housekeeper:
+            self.wipe_flow_cell_housekeeper()
+        if not skip_status_db:
+            self.wipe_flow_cell_statusdb()

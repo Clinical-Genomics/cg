@@ -53,9 +53,12 @@ def demultiplex_all(
                 continue
 
         wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-            config=context, demultiplexing_dir=demultiplex_api.out_dir, run_name=sub_dir.name
+            config=context,
+            demultiplexing_dir=Path(demultiplex_api.out_dir),
+            dry_run=dry_run,
+            run_name=sub_dir,
         )
-        wipe_demux_api.set_dry_run(dry_run=dry_run)
+
         wipe_demux_api.wipe_flow_cell(
             skip_cg_stats=False,
             skip_demultiplexing_dir=False,
@@ -103,9 +106,10 @@ def demultiplex_flowcell(
     wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
         config=context,
         demultiplexing_dir=Path(demultiplex_api.out_dir),
-        run_name=flowcell_id,
+        dry_run=dry_run,
+        run_name=flowcell_directory.name,
     )
-    wipe_demux_api.set_dry_run(dry_run=dry_run)
+
     wipe_demux_api.wipe_flow_cell(
         skip_cg_stats=False,
         skip_demultiplexing_dir=False,
@@ -127,21 +131,6 @@ def demultiplex_flowcell(
         if not dry_run:
             raise click.Abort
 
-    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-        config=context,
-        demultiplexing_dir=Path(demultiplex_api.out_dir),
-        run_name=flowcell_id,
-    )
-    wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flow_cell(
-        skip_cg_stats=False,
-        skip_demultiplexing_dir=False,
-        skip_run_dir=True,
-        skip_housekeeper=False,
-        skip_init_files=False,
-        skip_status_db=True,
-    )
-
     slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
     tb_api: TrailblazerAPI = context.trailblazer_api
     demultiplex_api.add_to_trailblazer(
@@ -158,12 +147,12 @@ def demultiplex_flowcell(
 @click.option("--skip-status-db", is_flag=True, help="Skip removal in status-db")
 @click.option("--skip-init-files", is_flag=True, help="Skip removal of init-files")
 @click.argument("--demultiplexing-dir")
-@click.argument("--flow-cell-id")
+@click.argument("--run-name")
 def wipe_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: str,
-    flow_cell_id: str,
+    run_name: str,
     skip_cg_stats: bool,
     skip_demultiplexing_dir: bool,
     skip_housekeeper: bool,
@@ -174,14 +163,14 @@ def wipe_flow_cell(
     """Prepare a flowcell before demultiplexing, using the WipeDemuxAPI
 
     Args:
-        Flowcell-id is the flowcell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+        Run name is the flowcell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
         Demultiplexing-dir is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'
     """
 
     demux_path: Path = Path(demultiplexing_dir)
 
     wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
-        config=context, demultiplexing_dir=demux_path, run_name=flow_cell_id
+        config=context, demultiplexing_dir=demux_path, run_name=run_name
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)
     wipe_demux_api.wipe_flow_cell(

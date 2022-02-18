@@ -223,6 +223,7 @@ def fixture_populated_wipe_demultiplex_api(
     return WipeDemuxAPI(
         config=populated_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=False,
         run_name=tmp_flow_cell_run_path,
     )
 
@@ -237,6 +238,7 @@ def fixture_active_wipe_demultiplex_api(
     return WipeDemuxAPI(
         config=active_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=False,
         run_name=flowcell_full_name,
     )
 
@@ -253,6 +255,7 @@ def fixture_wipe_demultiplex_api(
     return WipeDemuxAPI(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        dry_run=False,
         run_name=flowcell_full_name,
     )
 
