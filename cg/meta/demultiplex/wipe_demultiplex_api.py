@@ -30,9 +30,9 @@ class WipeDemuxAPI:
         log.debug("WipeDemuxAPI: API initiated")
 
     @property
-    def demultiplexing_run_path(self) -> Path:
+    def demultiplexing_path(self) -> Path:
         """Return the demultiplexing directory path for the given run name"""
-        return self.demultiplexing_dir.joinpath(self.run_path)
+        return self.demultiplexing_dir.joinpath(self.run_path.name)
 
     @property
     def flow_cell_name(self) -> str:
@@ -93,7 +93,7 @@ class WipeDemuxAPI:
 
         for sample in self.samples_on_flow_cell:
             self.housekeeper_api.delete_fastq_and_spring(
-                bundle=sample.internal_id, demultiplexing_path=self.demultiplexing_run_path
+                bundle=sample.internal_id, demultiplexing_path=self.demultiplexing_path
             )
 
     def wipe_flow_cell_housekeeper(self) -> None:
@@ -125,42 +125,37 @@ class WipeDemuxAPI:
         else:
             delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
 
+    def _wipe_demultiplexing_dir_hasta(self) -> None:
+        """Wipe demultiplexing directory on server"""
+        log.info(
+            f"WipeDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_path}"
+        )
+        shutil.rmtree(self.demultiplexing_path, ignore_errors=False)
+
+    def _wipe_run_dir_hasta(self) -> None:
+        """Wipe flow cell run directory on server"""
+        log.info(f"WipeDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
+        shutil.rmtree(path=self.run_path, ignore_errors=False)
+
     def wipe_flow_cell_hasta(
         self,
         skip_demultiplexing_dir: bool,
         skip_run_dir: bool,
     ) -> None:
-        """Wipe demultiplexing directory on the server"""
-        out_dir: Path = self.demultiplexing_dir.joinpath(self.run_path.name)
-        if not skip_demultiplexing_dir and out_dir.exists():
-            if self.dry_run:
-                log.info(
-                    f"WipeDemuxAPI-Hasta: Would have removed the following directory: {out_dir.as_posix()}"
-                )
-            else:
-                log.info(
-                    f"WipeDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {out_dir.as_posix()}"
-                )
-                try:
-                    shutil.rmtree(path=out_dir, ignore_errors=False)
-                except IOError as err:
-                    raise err from err
+        """Wipe a flow cells presence on the server"""
+        if self.dry_run:
+            log.info(
+                f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.demultiplexing_path}\n"
+                f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
+            )
+        if not skip_demultiplexing_dir and self.demultiplexing_path.exists():
+            self._wipe_demultiplexing_dir_hasta()
         else:
             log.info(
-                f"WipeDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {out_dir.as_posix()}"
+                f"WipeDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_dir}"
             )
-
         if not skip_run_dir and self.run_path.exists():
-            if self.dry_run:
-                log.info(
-                    f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
-                )
-            else:
-                log.info(f"WipeDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
-                try:
-                    shutil.rmtree(path=self.run_path, ignore_errors=False)
-                except IOError as err:
-                    raise err from err
+            self._wipe_run_dir_hasta()
         else:
             log.info(
                 f"WipeDemuxAPI-Hasta: Skipped flow cell run directory, or no target: {self.run_path}"
