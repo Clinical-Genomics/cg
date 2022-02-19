@@ -117,7 +117,7 @@ class WipeDemuxAPI:
             self.status_db.delete_flowcell(flowcell_name=self.flow_cell_name)
 
     def wipe_flow_cell_cgstats(self) -> None:
-        """Wipe ay presence of a flow cell in cgstats"""
+        """Wipe any presence of a flow cell in cgstats"""
         from cg.apps.cgstats.crud.delete import delete_flowcell
 
         if self.dry_run:
