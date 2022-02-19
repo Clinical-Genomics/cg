@@ -141,7 +141,10 @@ class WipeDemuxAPI:
                 log.info(
                     f"WipeDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {out_dir.as_posix()}"
                 )
-                shutil.rmtree(path=out_dir, ignore_errors=False)
+                try:
+                    shutil.rmtree(path=out_dir, ignore_errors=False)
+                except IOError as err:
+                    raise err from err
         else:
             log.info(
                 f"WipeDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {out_dir.as_posix()}"
@@ -154,7 +157,10 @@ class WipeDemuxAPI:
                 )
             else:
                 log.info(f"WipeDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
-                shutil.rmtree(path=self.run_path, ignore_errors=False)
+                try:
+                    shutil.rmtree(path=self.run_path, ignore_errors=False)
+                except IOError as err:
+                    raise err from err
         else:
             log.info(
                 f"WipeDemuxAPI-Hasta: Skipped flow cell run directory, or no target: {self.run_path}"
