@@ -217,13 +217,13 @@ class WipeDemuxAPI:
     ) -> None:
         """Master command to completely wipe the presence of a flowcell in all services"""
         self.check_active_samples()
-        if not skip_cg_stats:
-            self.wipe_flow_cell_cgstats()
         if not skip_demultiplexing_dir:
             self.wipe_flow_cell_hasta(
                 skip_demultiplexing_dir=skip_demultiplexing_dir,
                 skip_run_dir=skip_run_dir,
             )
+        if not skip_cg_stats:
+            self.wipe_flow_cell_cgstats()
         if not skip_init_files and skip_run_dir:
             self.wipe_demux_init_files()
         if not skip_housekeeper:
