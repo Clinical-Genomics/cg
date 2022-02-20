@@ -112,7 +112,7 @@ class RsyncAPI(MetaAPI):
             analysis_type="other",
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
-            priority=self.priority,
+            slurm_quality_of_service=self.priority,
             email=self.mail_user,
             data_analysis=Pipeline.RSYNC,
         )

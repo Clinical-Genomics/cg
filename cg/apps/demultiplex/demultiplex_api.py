@@ -201,7 +201,7 @@ class DemultiplexingAPI:
             analysis_type="other",
             config_path=flowcell.trailblazer_config_path.as_posix(),
             out_dir=flowcell.trailblazer_config_path.parent.as_posix(),
-            priority=self.priority,
+            slurm_quality_of_service=self.priority,
             email=self.mail,
             data_analysis=str(Pipeline.DEMULTIPLEX),
         )

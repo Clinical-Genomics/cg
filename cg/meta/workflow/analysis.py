@@ -194,7 +194,7 @@ class AnalysisAPI(MetaAPI):
             analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
             out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
-            priority=self.get_slurm_qos_for_case(case_id=case_id),
+            slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
         )
 
