@@ -6,7 +6,7 @@ from subprocess import CalledProcessError
 from typing import List, Optional, Tuple
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline, Priority
 from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -97,7 +97,7 @@ class AnalysisAPI(MetaAPI):
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
         case_obj: models.Family = self.status_db.family(case_id)
-        return case_obj.priority.value or 0
+        return case_obj.priority.value or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case"""

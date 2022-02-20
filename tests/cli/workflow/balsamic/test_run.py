@@ -134,7 +134,7 @@ def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     caplog.set_level(logging.INFO)
     # GIVEN valid case-id
     case_id = "balsamic_case_wgs_single"
-    priority_key = "--priority"
+    priority_key = "--slurm-quality-of-service"
     priority_value = SlurmQos.HIGH
     # WHEN ensuring case config exists where it should be stored
     Path.mkdir(

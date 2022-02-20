@@ -3,9 +3,9 @@ import click
 from cg.constants.priority import SlurmQos
 
 EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
-PRIORITY_OPTION = click.option(
-    "-p",
-    "--priority",
+QOS_OPTION = click.option(
+    "-qos",
+    "--slurm-quality-of-service",
     type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH]),
 )
 START_AFTER_PROGRAM = click.option(

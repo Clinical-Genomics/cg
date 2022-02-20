@@ -11,7 +11,7 @@ from cg.cli.workflow.mip.options import (
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
     OPTION_SKIP_EVALUATION,
-    PRIORITY_OPTION,
+    QOS_OPTION,
     START_AFTER_PROGRAM,
     START_WITH_PROGRAM,
 )
@@ -64,7 +64,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
 
 
 @click.command()
-@PRIORITY_OPTION
+@QOS_OPTION
 @EMAIL_OPTION
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
@@ -79,7 +79,7 @@ def run(
     dry_run: bool = False,
     email: str = None,
     mip_dry_run: bool = False,
-    priority: str = None,
+    slurm_quality_of_service: str = None,
     skip_evaluation: bool = False,
     start_after: str = None,
     start_with: str = None,
@@ -90,7 +90,7 @@ def run(
 
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
-        priority=priority or analysis_api.get_slurm_qos_for_case(case_id),
+        priority=slurm_quality_of_service or analysis_api.get_slurm_qos_for_case(case_id),
         email=email or environ_email(),
         dryrun=mip_dry_run,
         start_after=start_after,
@@ -131,7 +131,7 @@ def run(
 @OPTION_MIP_DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_SKIP_EVALUATION
-@PRIORITY_OPTION
+@QOS_OPTION
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @click.pass_context
@@ -142,7 +142,7 @@ def start(
     email: str,
     mip_dry_run: bool,
     panel_bed: str,
-    priority: str,
+    slurm_quality_of_service: str,
     skip_evaluation: bool,
     start_after: str,
     start_with: str,
@@ -162,7 +162,7 @@ def start(
         context.invoke(
             run,
             case_id=case_id,
-            priority=priority,
+            slurm_quality_of_service=slurm_quality_of_service,
             email=email,
             start_after=start_after,
             start_with=start_with,
