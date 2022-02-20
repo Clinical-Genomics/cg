@@ -43,15 +43,6 @@ def validate_list(value: list) -> list:
     return ", ".join(validate_empty_field(v) for v in value) if value else NA_FIELD
 
 
-def validate_supported_pipeline(pipeline: Pipeline) -> Pipeline:
-    """Validates if the report generation supports a specific pipeline"""
-
-    if pipeline and pipeline not in REPORT_SUPPORTED_PIPELINES:
-        raise ValueError(f"The pipeline {pipeline} does not support delivery report generation")
-
-    return validate_empty_field(pipeline)
-
-
 def validate_rml_sample(prep_category: str) -> str:
     """Checks if a specific sample is a RML one"""
 
@@ -61,18 +52,21 @@ def validate_rml_sample(prep_category: str) -> str:
     return validate_empty_field(prep_category)
 
 
-def validate_processing_dates(cls, values: dict) -> dict:
-    """Calculates the days it takes to deliver a sample and formats the sample processing timestamps"""
+def validate_supported_pipeline(cls, values: dict) -> dict:
+    """Validates if the report generation supports a specific pipeline"""
 
-    if values.get("received_at") and values.get("delivered_at"):
-        values["processing_days"] = validate_empty_field(
-            (values.get("delivered_at") - values.get("received_at")).days
-        )
+    if values["pipeline"] and values["customer_pipeline"]:
+        # Checks that the requested analysis and the executed one match
+        if values["pipeline"] != values["customer_pipeline"]:
+            raise ValueError(
+                f"The analysis requested by the customer ({values['customer_pipeline']}) does not match the one "
+                f"executed ({values['pipeline']})"
+            )
 
-    for k, v in values.items():
-        if k != "processing_days":
-            values[k] = validate_date(v)
-        else:
-            values[k] = validate_empty_field(v)
+        # Check that the generation of the report supports the data analysis executed on the case
+        if values["pipeline"] not in REPORT_SUPPORTED_PIPELINES:
+            raise ValueError(
+                f"The pipeline {values['pipeline']} does not support delivery report generation"
+            )
 
     return values

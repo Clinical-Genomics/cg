@@ -11,13 +11,12 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
-from cg.models.report.report import ReportModel, CustomerModel, CaseModel
+from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
 from cg.models.report.sample import (
     SampleModel,
     ApplicationModel,
     TimestampModel,
     MethodsModel,
-    DataAnalysisModel,
     MetadataModel,
 )
 from cg.store import models
@@ -96,7 +95,9 @@ class ReportAPI(MetaAPI):
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template = env.get_template(f"{report_data['case']['pipeline']}_report.html")
+        template = env.get_template(
+            f"{report_data['case']['data_analysis']['pipeline']}_report.html"
+        )
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self):
@@ -159,12 +160,12 @@ class ReportAPI(MetaAPI):
 
         return CaseModel(
             name=case.name,
-            pipeline=case.data_analysis,
+            data_analysis=self.get_case_analysis_data(case, analysis),
             panels=case.panels,
-            samples=self.get_samples_data(case, analysis),
+            samples=self.get_samples_data(case),
         )
 
-    def get_samples_data(self, case: models.Family, analysis: models.Analysis) -> List[SampleModel]:
+    def get_samples_data(self, case: models.Family) -> List[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes"""
 
         samples = list()
@@ -184,7 +185,6 @@ class ReportAPI(MetaAPI):
                     tumour=sample.is_tumour,
                     application=self.get_sample_application_data(lims_sample),
                     methods=self.get_sample_methods_data(sample.internal_id),
-                    data_analysis=self.get_sample_analysis_data(analysis),
                     status=case_sample.status,
                     metadata=self.get_metadata(sample, case),
                     timestamp=self.get_sample_timestamp_data(sample),
@@ -232,15 +232,16 @@ class ReportAPI(MetaAPI):
         return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
     @staticmethod
-    def get_sample_analysis_data(analysis: models.Analysis) -> DataAnalysisModel:
-        """Retrieves the pipeline attributes used for the data analysis"""
+    def get_case_analysis_data(case: models.Family, analysis: models.Analysis) -> DataAnalysisModel:
+        """Retrieves the pipeline attributes used for data analysis"""
 
         return DataAnalysisModel(
-            pipeline=analysis.pipeline, pipeline_version=analysis.pipeline_version
+            customer_pipeline=case.data_analysis,
+            pipeline=analysis.pipeline,
+            pipeline_version=analysis.pipeline_version,
         )
 
-    @staticmethod
-    def get_sample_timestamp_data(sample: models.Sample) -> TimestampModel:
+    def get_sample_timestamp_data(self, sample: models.Sample) -> TimestampModel:
         """Retrieves the sample processing dates"""
 
         return TimestampModel(
@@ -249,7 +250,17 @@ class ReportAPI(MetaAPI):
             prepared_at=sample.prepared_at,
             sequenced_at=sample.sequenced_at,
             delivered_at=sample.delivered_at,
+            processing_days=self.get_processing_dates(sample),
         )
+
+    @staticmethod
+    def get_processing_dates(sample: models.Sample) -> int:
+        """Calculates the days it takes to deliver a sample"""
+
+        if sample.received_at and sample.delivered_at:
+            return (sample.delivered_at - sample.received_at).days
+
+        return None
 
     def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
         """Fetches the sample metadata to include in the report"""

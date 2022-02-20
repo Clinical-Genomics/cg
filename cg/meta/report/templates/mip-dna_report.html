@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Clinical Genomics Report - {{ case }}</title>
+    <title>Clinical Genomics Report - {{ case.name }}</title>
 
     {{ css() }}
     {{ custom_css() }}
@@ -20,12 +20,12 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer_name }}, familj {{ case }} : {{ report_version }}
-            {% if previous_report_version != 'N/A' %}
-              ersätter rapport version: {{ previous_report_version }}
+            Leveransrapport {{ customer.name }}, familj {{ case.name }}
+            {% if version != 'N/A' %}
+              : {{ version }}
             {% endif %}
             <br>
-            Skapad: {{ today }}
+            Skapad: {{ date }}
           </li>
         </ul>
 
@@ -44,7 +44,7 @@
             <div class="col">
               <h4>Kundinformation</h4>
               <address>
-                {{ customer_invoice_address|replace('\n', '<br>')|safe }}
+                {{ customer.invoice_address | replace('\n', '<br>') | safe }}
               </address>
             </div>
             {% if accredited %}
@@ -71,25 +71,25 @@
               </tr>
             </thead>
             <tbody>
-              {% for sample in samples %}
+              {% for sample in case.samples %}
                 <tr>
-                <td>{{ sample.name }}* ({{ sample.internal_id }})</td>
-                  <td>{{ sample.ordered_at }}</td>
-                  <td>{{ case }}*</td>
+                <td>{{ sample.name }}* ({{ sample.id }})</td>
+                  <td>{{ sample.timestamp.ordered_at }}</td>
+                  <td>{{ case.name }}*</td>
                   <td>
-                    {{ sample.sex }}*
-                    ( analys:
-                      {% if sample.sex != sample.analysis_sex %}
-                        <span class="text-danger">{{ sample.analysis_sex }}</span>
+                    {{ sample.gender }}*
+                    (analys:
+                      {% if sample.gender != sample.metadata.gender %}
+                        <span class="text-danger">{{ sample.metadata.gender }}</span>)
                       {% else %}
-                        <span class="text-success">{{ sample.analysis_sex }}</span>
-                      {% endif %})
+                        <span class="text-success">{{ sample.metadata.gender }}</span>)
+                      {% endif %}
                   </td>
                   <td>{{ sample.status }}*</td>
                   <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application }}*</td>
-                  <td>{{ sample.data_analysis }}*</td>
+                  <td>{{ sample.application.tag }}*</td>
+                  <td>{{ case.data_analysis.customer_pipeline }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -112,20 +112,20 @@
               </tr>
             </thead>
             <tbody>
-              {% for sample in samples %}
+              {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ sample.received_at }}</td>
-                  <td>{{ sample.prep_method }}</td>
-                  <td>{{ sample.prepared_at }}</td>
-                  <td>{{ sample.capture_kit }}</td>
-                  <td>{{ sample.sequencing_method }}</td>
-                  <td>{{ sample.sequenced_at }}</td>
-                  <td>{{ pipeline }}</td>
+                  <td>{{ sample.timestamp.received_at }}</td>
+                  <td>{{ sample.methods.library_prep }}</td>
+                  <td>{{ sample.timestamp.prepared_at }}</td>
+                  <td>{{ sample.metadata.capture_kit }}</td>
+                  <td>{{ sample.methods.sequencing }}</td>
+                  <td>{{ sample.timestamp.sequenced_at }}</td>
+                  <td>{{ case.data_analysis.pipeline }}</td>
                   <td>
-                    {{ sample.delivered_at }}
-                    {% if sample.processing_time != 'N/A' %}
-                      ({{ sample.processing_time }} dagar)
+                    {{ sample.timestamp.delivered_at }}
+                    {% if sample.timestamp.processing_days != 'N/A' %}
+                      ({{ sample.timestamp.processing_days }} dagar)
                     {% endif %}
                   </td>
                 </tr>
@@ -146,8 +146,8 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ case }}*</td>
-                <td>{{ pipeline_version }}</td>
+                <td>{{ case.name }}*</td>
+                <td>{{ case.data_analysis.pipeline_version }}</td>
                 <td>{{ panels }}</td>
                 <td>{{ genome_build }}</td>
               </tr>

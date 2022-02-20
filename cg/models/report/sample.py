@@ -2,15 +2,13 @@ from datetime import datetime
 from typing import Optional, Union
 
 from cg.constants.gender import Gender
-from cg.constants import Pipeline
-from pydantic import BaseModel, validator, root_validator
+from pydantic import BaseModel, validator
 from cg.models.report.validators import (
     validate_empty_field,
-    validate_processing_dates,
     validate_boolean,
     validate_rml_sample,
-    validate_supported_pipeline,
     validate_float,
+    validate_date,
 )
 
 
@@ -45,24 +43,6 @@ class ApplicationModel(BaseModel):
         always=True,
         allow_reuse=True,
     )(validate_empty_field)
-
-
-class DataAnalysisModel(BaseModel):
-    """
-    Model that describes the pipeline attributes used for the data analysis
-
-    Attributes:
-        pipeline: data analysis pipeline; source: statusDB/analysis/pipeline
-        pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
-    """
-
-    pipeline: Pipeline
-    pipeline_version: Optional[str]
-
-    _pipeline = validator("pipeline", always=True, allow_reuse=True)(validate_supported_pipeline)
-    _pipeline_version = validator("pipeline_version", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
 
 
 class MethodsModel(BaseModel):
@@ -102,7 +82,18 @@ class TimestampModel(BaseModel):
     delivered_at: Union[datetime, str] = None
     processing_days: Union[int, str] = None
 
-    _values = root_validator(allow_reuse=True)(validate_processing_dates)
+    _values = validator(
+        "ordered_at",
+        "received_at",
+        "prepared_at",
+        "sequenced_at",
+        "delivered_at",
+        always=True,
+        allow_reuse=True,
+    )(validate_date)
+    _processing_days = validator("processing_days", always=True, allow_reuse=True)(
+        validate_empty_field
+    )
 
 
 class MetadataModel(BaseModel):
@@ -183,10 +174,8 @@ class SampleModel(BaseModel):
         tumour: whether the sample is a tumour or normal one; BALSAMIC specific; source: StatusDB/sample/is_tumour
         application: analysis application model
         methods: sample processing methods model
-        data_analysis: pipeline attributes
         metadata: sample associated metrics and trending data model
         timestamp: processing timestamp attributes
-
     """
 
     name: str
@@ -198,7 +187,6 @@ class SampleModel(BaseModel):
     tumour: Union[bool, str] = None
     application: ApplicationModel
     methods: MethodsModel
-    data_analysis: DataAnalysisModel
     metadata: MetadataModel
     timestamp: TimestampModel
 

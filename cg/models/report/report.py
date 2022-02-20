@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 from cg.constants import Pipeline
 from cg.models.report.sample import SampleModel
 from cg.models.report.validators import (
     validate_empty_field,
     validate_supported_pipeline,
     validate_list,
+    validate_date,
 )
 
 
@@ -32,24 +33,43 @@ class CustomerModel(BaseModel):
     )
 
 
+class DataAnalysisModel(BaseModel):
+    """
+    Model that describes the pipeline attributes used for the data analysis
+
+    Attributes:
+        customer_pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
+        pipeline: actual pipeline used for analysis; source: statusDB/analysis/pipeline
+        pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
+    """
+
+    customer_pipeline: Pipeline
+    pipeline: Pipeline
+    pipeline_version: Optional[str]
+
+    _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
+    _str_values = validator(
+        "customer_pipeline", "pipeline", "pipeline_version", always=True, allow_reuse=True
+    )(validate_empty_field)
+
+
 class CaseModel(BaseModel):
     """
     Defines the case/family model
 
     Attributes:
         name: case name; source: StatusDB/family/name
-        pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
         panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
         samples: list of samples associated to a case/family
+        data_analysis: pipeline attributes
     """
 
     name: str
-    pipeline: Pipeline
     panels: Union[List[str], str] = None
     samples: List[SampleModel]
+    data_analysis: DataAnalysisModel
 
     _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
-    _pipeline = validator("pipeline", always=True, allow_reuse=True)(validate_supported_pipeline)
     _panels = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
@@ -72,3 +92,4 @@ class ReportModel(BaseModel):
     accredited: bool
 
     _version = validator("version", always=True, allow_reuse=True)(validate_empty_field)
+    _date = validator("date", always=True, allow_reuse=True)(validate_date)
