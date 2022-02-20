@@ -3,13 +3,23 @@
 from datetime import datetime
 import logging
 from pathlib import Path
-from typing import TextIO, Optional
+from typing import TextIO, Optional, List
 
 import housekeeper
+import requests
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
+from cg.models.report.report import ReportModel, CustomerModel, CaseModel
+from cg.models.report.sample import (
+    SampleModel,
+    ApplicationModel,
+    TimestampModel,
+    MethodsModel,
+    DataAnalysisModel,
+    MetadataModel,
+)
 from cg.store import models
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -23,26 +33,20 @@ class ReportAPI(MetaAPI):
         super().__init__(config=config)
         self.analysis_api = analysis_api
 
-    def create_delivery_report(
-        self, case_id: str, analysis_date: datetime, force_report: bool = False
-    ) -> str:
+    def create_delivery_report(self, case_id: str, analysis_date: datetime) -> str:
         """Generates the html contents of a delivery report"""
 
-        report_data = self.get_report_data(
-            case_id=case_id, analysis_date=analysis_date, force_report=force_report
-        )
+        report_data = self.get_report_data(case_id=case_id, analysis_date=analysis_date)
         rendered_report = self.render_delivery_report(report_data)
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool = False
+        self, case_id: str, file_path: Path, analysis_date: datetime
     ) -> TextIO:
         """Generates a temporary file containing a delivery report"""
 
         file_path.mkdir(parents=True, exist_ok=True)
-        delivery_report = self.create_delivery_report(
-            case_id=case_id, analysis_date=analysis_date, force_report=force_report
-        )
+        delivery_report = self.create_delivery_report(case_id=case_id, analysis_date=analysis_date)
 
         report_file_path = Path(file_path / "delivery-report.html")
         with open(report_file_path, "w") as delivery_report_file:
@@ -84,21 +88,15 @@ class ReportAPI(MetaAPI):
 
         return delivery_report_files[0].full_path
 
-    def get_report_data(
-        self, case_id: str, analysis_date: datetime, force_report: bool = False
-    ) -> dict:
-        """Fetches all the data needed to generate a delivery report"""
-
-        raise NotImplementedError
-
-    def render_delivery_report(self, report_data: dict) -> str:
+    @staticmethod
+    def render_delivery_report(report_data: dict) -> str:
         """Renders the report on the Jinja template"""
 
         env = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template = env.get_template(f"{self.analysis_api.pipeline}_report.html")
+        template = env.get_template(f"{report_data['case']['pipeline']}_report.html")
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self):
@@ -106,52 +104,159 @@ class ReportAPI(MetaAPI):
 
         return self.status_db.analyses_to_delivery_report(self.analysis_api.pipeline)[:50]
 
-    def get_genes_from_scout(self, panels: list) -> list:
-        """Extracts panel gene IDs information from Scout"""
+    def get_report_data(self, case_id: str, analysis_date: datetime) -> dict:
+        """Fetches all the data needed to generate a delivery report"""
 
-        panel_genes = list()
-        for panel in panels:
-            panel_genes.extend(self.scout_api.get_genes(panel))
+        case = self.status_db.family(case_id)
+        analysis = self.status_db.analysis(case, analysis_date)
+        case_model = self.get_case_data(case, analysis)
 
-        panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
-        return panel_gene_ids
+        return ReportModel(
+            customer=self.get_customer_data(case),
+            version=self.get_report_version(analysis),
+            date=datetime.today(),
+            case=case_model,
+            accredited=self.get_report_accreditation(case_model.samples),
+        ).dict()
+
+    @staticmethod
+    def get_customer_data(case: models.Family) -> CustomerModel:
+        """Returns customer validated attributes retrieved from status DB"""
+
+        return CustomerModel(
+            name=case.customer.name,
+            id=case.customer.internal_id,
+            invoice_address=case.customer.invoice_address,
+            scout_access=case.customer.scout_access,
+        )
 
     @staticmethod
     def get_report_version(analysis: models.Analysis) -> int:
         """
-        Returns the version of the given analysis. The version of the first analysis is 1. Subsequent reruns
-        increase the version by 1.
+        Returns the version of the given analysis. The version of the first analysis is 1 and subsequent reruns
+        increase it by 1.
         """
 
         version = None
+
         if analysis:
             version = len(analysis.family.analyses) - analysis.family.analyses.index(analysis)
 
         return version
 
     @staticmethod
-    def get_previous_report_version(analysis: models.Analysis) -> int:
-        """Returns the analysis version prior to the given one"""
+    def get_report_accreditation(samples: List[SampleModel]) -> bool:
+        """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
 
-        analysis_version = ReportAPI.get_report_version(analysis)
-        previous_version = None
+        for sample in samples:
+            if not sample.application.accredited:
+                return False
 
-        if analysis_version and analysis_version > 1:
-            previous_version = analysis_version - 1
+        return True
 
-        return previous_version
+    def get_case_data(self, case: models.Family, analysis: models.Analysis) -> CaseModel:
+        """Returns case associated validated attributes"""
+
+        return CaseModel(
+            name=case.name,
+            pipeline=case.data_analysis,
+            panels=case.panels,
+            samples=self.get_samples_data(case, analysis),
+        )
+
+    def get_samples_data(self, case: models.Family, analysis: models.Analysis) -> List[SampleModel]:
+        """Extracts all the samples associated to a specific case and their attributes"""
+
+        samples = list()
+        case_samples = self.status_db.family_samples(case.internal_id)
+
+        for case_sample in case_samples:
+            sample = case_sample.sample
+            lims_sample = self.get_lims_sample(sample.internal_id)
+
+            samples.append(
+                SampleModel(
+                    name=lims_sample.get("name"),
+                    id=sample.internal_id,
+                    ticket=sample.ticket_number,
+                    gender=lims_sample.get("sex"),
+                    source=lims_sample.get("source"),
+                    tumour=sample.is_tumour,
+                    application=self.get_sample_application_data(lims_sample),
+                    methods=self.get_sample_methods_data(sample.internal_id),
+                    data_analysis=self.get_sample_analysis_data(analysis),
+                    status=case_sample.status,
+                    metadata=self.get_metadata(sample, case),
+                    timestamp=self.get_sample_timestamp_data(sample),
+                )
+            )
+
+        return samples
+
+    def get_lims_sample(self, sample_id: str) -> dict:
+        """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful"""
+
+        lims_sample = dict()
+        try:
+            lims_sample = self.lims_api.sample(sample_id)
+        except requests.exceptions.HTTPError as ex:
+            LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
+
+        return lims_sample
+
+    def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
+        """Retrieves the analysis application attributes"""
+
+        application = self.status_db.application(tag=lims_sample.get("application"))
+
+        return ApplicationModel(
+            tag=application.tag,
+            version=lims_sample.get("application_version"),
+            prep_category=application.prep_category,
+            description=application.description,
+            limitations=application.limitations,
+            accredited=application.is_accredited,
+        )
+
+    def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
+        """Fetches sample library preparation and sequencing methods from LIMS"""
+
+        library_prep = None
+        sequencing = None
+        try:
+            library_prep = self.lims_api.get_prep_method(sample_id)
+            sequencing = self.lims_api.get_sequencing_method(sample_id)
+        except requests.exceptions.HTTPError as ex:
+            LOG.info("Could not fetch sample (%s) methods from LIMS: %s", sample_id, ex)
+
+        return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
     @staticmethod
-    def get_days_to_deliver_sample(sample: models.Sample):
-        """Returns the days it takes to deliver a sample"""
+    def get_sample_analysis_data(analysis: models.Analysis) -> DataAnalysisModel:
+        """Retrieves the pipeline attributes used for the data analysis"""
 
-        if sample.received_at and sample.delivered_at:
-            return (sample.delivered_at - sample.received_at).days
+        return DataAnalysisModel(
+            pipeline=analysis.pipeline, pipeline_version=analysis.pipeline_version
+        )
 
-        return None
+    @staticmethod
+    def get_sample_timestamp_data(sample: models.Sample) -> TimestampModel:
+        """Retrieves the sample processing dates"""
 
+        return TimestampModel(
+            ordered_at=sample.ordered_at,
+            received_at=sample.received_at,
+            prepared_at=sample.prepared_at,
+            sequenced_at=sample.sequenced_at,
+            delivered_at=sample.delivered_at,
+        )
 
-'''
+    def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
+        """Fetches the sample metadata to include in the report"""
+
+        raise NotImplementedError
+
+    '''
 
     @staticmethod
     def update_delivery_report_date(
@@ -165,4 +270,4 @@ class ReportAPI(MetaAPI):
         status_api.commit()
 
 
-'''
+    '''

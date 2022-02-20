@@ -1,12 +1,17 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, Union
 
-from cg.constants.constants import ANALYSIS_TYPES
-
-from cg.constants.orderforms import SOURCE_TYPES, CASE_PROJECT_TYPES
-from cg.constants import STATUS_OPTIONS
 from cg.constants.gender import Gender
-from pydantic import BaseModel
+from cg.constants import Pipeline
+from pydantic import BaseModel, validator, root_validator
+from cg.models.report.validators import (
+    validate_empty_field,
+    validate_processing_dates,
+    validate_boolean,
+    validate_rml_sample,
+    validate_supported_pipeline,
+    validate_float,
+)
 
 
 class ApplicationModel(BaseModel):
@@ -14,66 +19,50 @@ class ApplicationModel(BaseModel):
     Analysis application attributes model
 
     Attributes:
-        tag: application identifier
-        version: application version
-        description: analysis description
-        limitations: application limitations
+        tag: application identifier; source: StatusDB/application/tag
+        version: application version; source: LIMS/sample/application_version
+        prep_category: library preparation category; source: StatusDB/application/prep_category
+        description: analysis description; source: StatusDB/application/description
+        limitations: application limitations; source: StatusDB/application/limitations
+        accredited: if the sample associated process is accredited or not; ; source: StatusDB/application/is_accredited
+
     """
 
     tag: str
-    version: int
-    description: str
-    limitations: str
+    version: Union[int, str] = None
+    prep_category: Optional[str]
+    description: Optional[str]
+    limitations: Optional[str]
+    accredited: bool
+
+    _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
+    _values = validator(
+        "tag",
+        "version",
+        "prep_category",
+        "description",
+        "limitations",
+        always=True,
+        allow_reuse=True,
+    )(validate_empty_field)
 
 
 class DataAnalysisModel(BaseModel):
     """
-    Model that describes the pipeline used for the data analysis
+    Model that describes the pipeline attributes used for the data analysis
 
     Attributes:
-        pipeline: data analysis pipeline
-        pipeline_version: pipeline version
-        gender: gender estimated by the pipeline
-        capture_kit: panel bed used for the analysis
-        capture_kit_version: panel bed version
-        type: analysis type carried out; BALSAMIC specific
+        pipeline: data analysis pipeline; source: statusDB/analysis/pipeline
+        pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
     """
 
-    pipeline: CASE_PROJECT_TYPES
-    pipeline_version: str
-    gender: Gender
-    capture_kit: Optional[str] = None
-    capture_kit_version: Optional[str] = None
-    type: Optional[ANALYSIS_TYPES] = None
+    pipeline: Pipeline
+    pipeline_version: Optional[str]
 
-
-class MetricsModel(BaseModel):
-    """
-    Metrics model associated to a specific sample
-
-    Attributes:
-        million_read_pairs: number of million read pairs obtained
-        mapped_reads: percentage of reads aligned to the reference sequence; MIP specific
-        target_coverage: mean coverage of a target region; MIP specific
-        target_bases_10X: percent of targeted bases that are covered to 10X coverage or more; MIP specific
-        target_bases_250X: percent of targeted bases that are covered to 250X coverage or more; BALSAMIC specific
-        target_bases_500X: percent of targeted bases that are covered to 500X coverage or more; BALSAMIC specific
-        duplicates: fraction of mapped sequence that is marked as duplicate
-        median_coverage: median coverage in bases
-        mean_insert_size: mean insert size of the distribution; BALSAMIC specific
-        fold_80: fold 80 base penalty; BALSAMIC specific
-    """
-
-    million_read_pairs: float
-    mapped_reads: Optional[float] = None
-    target_coverage: Optional[float] = None
-    target_bases_10X: Optional[float] = None
-    target_bases_250X: Optional[float] = None
-    target_bases_500X: Optional[float] = None
-    duplicates: float
-    median_coverage: Optional[float] = None
-    mean_insert_size: Optional[float] = None
-    fold_80: Optional[float] = None
+    _pipeline = validator("pipeline", always=True, allow_reuse=True)(validate_supported_pipeline)
+    _pipeline_version = validator("pipeline_version", always=True, allow_reuse=True)(
+        validate_empty_field
+    )
 
 
 class MethodsModel(BaseModel):
@@ -81,12 +70,16 @@ class MethodsModel(BaseModel):
     Model describing the methods used for preparation and sequencing of the samples
 
     Attributes:
-        library_prep: library preparation method
-        sequencing: sequencing procedure
+        library_prep: library preparation method; source: LIMS/sample/prep_method
+        sequencing: sequencing procedure; source: LIMS/sample/sequencing_method
     """
 
-    library_prep: str
-    sequencing: str
+    library_prep: Optional[str]
+    sequencing: Optional[str]
+
+    _values = validator("library_prep", "sequencing", always=True, allow_reuse=True)(
+        validate_empty_field
+    )
 
 
 class TimestampModel(BaseModel):
@@ -94,20 +87,86 @@ class TimestampModel(BaseModel):
     Model describing the processing timestamp of a specific sample
 
     Atributes:
-        ordered_at: order date
-        received_at: arrival date
-        prepared_at: library preparation date
-        sequenced_at: sequencing date
-        delivered_at: delivery date
-        processing_days: days between sample arrival and delivery
+        ordered_at: order date; source: StatusDB/sample/ordered_at
+        received_at: arrival date; source: StatusDB/sample/received_at
+        prepared_at: library preparation date; source: StatusDB/sample/prepared_at
+        sequenced_at: sequencing date; source: StatusDB/sample/sequenced_at
+        delivered_at: delivery date; source: StatusDB/sample/delivered_at
+        processing_days: days between sample arrival and delivery; source: CG workflow
     """
 
-    ordered_at: datetime
-    received_at: datetime
-    prepared_at: datetime
-    sequenced_at: datetime
-    delivered_at: datetime
-    processing_days: int
+    ordered_at: Union[datetime, str] = None
+    received_at: Union[datetime, str] = None
+    prepared_at: Union[datetime, str] = None
+    sequenced_at: Union[datetime, str] = None
+    delivered_at: Union[datetime, str] = None
+    processing_days: Union[int, str] = None
+
+    _values = root_validator(allow_reuse=True)(validate_processing_dates)
+
+
+class MetadataModel(BaseModel):
+    """
+    Metrics and trending data model associated to a specific sample
+
+    Attributes:
+        genome_build: build version of the genome reference
+        capture_kit: panel bed used for the analysis
+        capture_kit_version: panel bed version; BALSAMIC specific
+        analysis_type: analysis type carried out; BALSAMIC specific
+        gender: gender estimated by the pipeline
+        million_read_pairs: number of million read pairs obtained
+        mapped_reads: percentage of reads aligned to the reference sequence; MIP specific
+        duplicates: fraction of mapped sequence that is marked as duplicate
+        target_coverage: mean coverage of a target region; MIP specific
+        target_bases_10X: percent of targeted bases that are covered to 10X coverage or more; MIP specific
+        target_bases_250X: percent of targeted bases that are covered to 250X coverage or more; BALSAMIC specific
+        target_bases_500X: percent of targeted bases that are covered to 500X coverage or more; BALSAMIC specific
+        median_coverage: median coverage in bases
+        mean_insert_size: mean insert size of the distribution; BALSAMIC specific
+        fold_80: fold 80 base penalty; BALSAMIC specific
+    """
+
+    genome_build: Optional[str]
+    capture_kit: Optional[str]
+    capture_kit_version: Optional[str]
+    analysis_type: Optional[str]
+    gender: Optional[str] = Gender.UNKNOWN
+    million_read_pairs: Union[float, str] = None
+    mapped_reads: Union[float, str] = None
+    duplicates: Union[float, str] = None
+    target_coverage: Union[float, str] = None
+    target_bases_10X: Union[float, str] = None
+    target_bases_250X: Union[float, str] = None
+    target_bases_500X: Union[float, str] = None
+    median_coverage: Union[float, str] = None
+    mean_insert_size: Union[float, str] = None
+    fold_80: Union[float, str] = None
+
+    _str_values = validator(
+        "genome_build",
+        "capture_kit",
+        "capture_kit_version",
+        "analysis_type",
+        "gender",
+        always=True,
+        allow_reuse=True,
+    )(validate_empty_field)
+
+    _float_values = validator(
+        "million_read_pairs",
+        "mapped_reads",
+        "duplicates",
+        "target_coverage",
+        "target_bases_10X",
+        "target_bases_250X",
+        "target_bases_500X",
+        "median_coverage",
+        "mean_insert_size",
+        "fold_80",
+        always=True,
+        allow_reuse=True,
+    )(validate_float)
 
 
 class SampleModel(BaseModel):
@@ -115,30 +174,35 @@ class SampleModel(BaseModel):
     Sample attributes model
 
     Attributes:
-        name: sample name
-        id: sample internal ID
-        ticket: ticket number
-        gender: sample gender provided by the customer
-        source: sample type/source
-        tumor: wheter the sample is a tumor or normal one; BALSAMIC specific
-        application: analysis application
+        name: sample name; source: LIMS/sample/name
+        id: sample internal ID; source: StatusDB/sample/internal_id
+        ticket: ticket number; source: StatusDB/sample/ticket_number
+        status: sample status provided by the customer; MIP specific; source: StatusDB/family-sample/status
+        gender: sample gender provided by the customer; source: LIMS/sample/sex
+        source: sample type/source; source: LIMS/sample/source
+        tumour: whether the sample is a tumour or normal one; BALSAMIC specific; source: StatusDB/sample/is_tumour
+        application: analysis application model
+        methods: sample processing methods model
         data_analysis: pipeline attributes
-        metrics: sample metrics of interest
-        status: sample status provided by the customer; MIP specific
-        panels: list of sample specific panels; MIP specific
+        metadata: sample associated metrics and trending data model
         timestamp: processing timestamp attributes
+
     """
 
     name: str
     id: str
-    ticket: int
-    gender: Gender
-    source: SOURCE_TYPES
-    tumor: Optional[bool] = None
+    ticket: Union[int, str]
+    status: Optional[str]
+    gender: Optional[str] = Gender.UNKNOWN
+    source: Optional[str]
+    tumour: Union[bool, str] = None
     application: ApplicationModel
     methods: MethodsModel
     data_analysis: DataAnalysisModel
-    metrics: MetricsModel
-    status: Optional[STATUS_OPTIONS] = None
-    panels: Optional[List[str]] = None
+    metadata: MetadataModel
     timestamp: TimestampModel
+
+    _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)
+    _values = validator(
+        "name", "id", "ticket", "status", "gender", "source", always=True, allow_reuse=True
+    )(validate_empty_field)

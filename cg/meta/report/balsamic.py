@@ -1,9 +1,10 @@
-from datetime import datetime
 import logging
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.api import ReportAPI
 from cg.models.cg_config import CGConfig
+from cg.models.report.sample import MetadataModel
+from cg.store import models
 
 LOG = logging.getLogger(__name__)
 
@@ -15,10 +16,7 @@ class BalsamicReportAPI(ReportAPI):
         super().__init__(config=config, analysis_api=analysis_api)
         self.anaysis_api = analysis_api
 
-    def get_report_data(
-        self, case_id: str, analysis_date: datetime, force_report: bool = False
-    ) -> dict:
-        """Fetches all the data needed to generate a delivery report"""
+    def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
+        """Fetches the sample metadata to include in the report"""
 
-        # TODO
-        return {}
+        raise NotImplementedError

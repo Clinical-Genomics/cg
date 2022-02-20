@@ -1,12 +1,14 @@
-import logging
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Union
 
-from cg.constants.orderforms import CASE_PROJECT_TYPES
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from cg.constants import Pipeline
 from cg.models.report.sample import SampleModel
-
-LOG = logging.getLogger(__name__)
+from cg.models.report.validators import (
+    validate_empty_field,
+    validate_supported_pipeline,
+    validate_list,
+)
 
 
 class CustomerModel(BaseModel):
@@ -14,16 +16,20 @@ class CustomerModel(BaseModel):
     Customer model associated to the delivery report generated
 
     Attributes:
-        name: customer name
-        id: customer internal ID
-        invoice_address: customers invoice address
-        scout_access: whether the customer has access to scout or not
+        name: customer name; source: statusDB/family/customer/name
+        id: customer internal ID; source: statusDB/family/customer/internal_id
+        invoice_address: customers invoice address; source: statusDB/family/customer/invoice_address
+        scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
     name: str
-    id: str
-    invoice_address: str
+    id: Optional[str]
+    invoice_address: Optional[str]
     scout_access: bool
+
+    _values = validator("name", "id", "invoice_address", always=True, allow_reuse=True)(
+        validate_empty_field
+    )
 
 
 class CaseModel(BaseModel):
@@ -31,16 +37,20 @@ class CaseModel(BaseModel):
     Defines the case/family model
 
     Attributes:
-        id: case internal ID
-        genome_build: build version of the genome reference
-        pipeline: data analysis requested by the customer
+        name: case name; source: StatusDB/family/name
+        pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
+        panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
         samples: list of samples associated to a case/family
     """
 
-    id: str
-    genome_build: str
-    pipeline: CASE_PROJECT_TYPES
+    name: str
+    pipeline: Pipeline
+    panels: Union[List[str], str] = None
     samples: List[SampleModel]
+
+    _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
+    _pipeline = validator("pipeline", always=True, allow_reuse=True)(validate_supported_pipeline)
+    _panels = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
 class ReportModel(BaseModel):
@@ -49,14 +59,16 @@ class ReportModel(BaseModel):
 
     Attributes:
         customer: customer attributes
-        version: delivery report version
-        accreditation: shows if the report is accredited or not
-        date: report generation date
+        version: delivery report version; source: StatusDB/analysis/family/analyses(/index)
+        date: report generation date; source: CG runtime
         case: case attributes
+        accredited: whether the report is accredited or not; source: all(StatusDB/application/accredited)
     """
 
     customer: CustomerModel
-    version: str
-    accreditation: bool
-    date: datetime
+    version: Union[int, str] = None
+    date: Union[datetime, str]
     case: CaseModel
+    accredited: bool
+
+    _version = validator("version", always=True, allow_reuse=True)(validate_empty_field)

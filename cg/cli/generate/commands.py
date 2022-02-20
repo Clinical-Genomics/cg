@@ -1,41 +1,36 @@
-import datetime
+from datetime import datetime
 import logging
 import sys
 from pathlib import Path
 from typing import TextIO, Optional
 
 import click
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import DeliveryReportError
 from cg.meta.report.api import ReportAPI
 from cg.models.cg_config import CGConfig
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
-SUCCESS = 0
-FAIL = 1
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
-OPTION_FORCE_REPORT = click.option(
-    "-f", "--force", "force_report", is_flag=True, default=False, help="Overrule report validation"
-)
-OPTION_DRY_RUN = click.option(
-    "-d", "--dry-run", is_flag=True, default=False, help="Print to console instead of executing"
-)
 OPTION_STARTED_AT = click.option(
     "--analysis-started-at",
     help="Retrieve analysis started at a specific date (i.e.  '2020-05-28  12:00:46')",
 )
+OPTION_DRY_RUN = click.option(
+    "-d", "--dry-run", is_flag=True, default=False, help="Print to console instead of executing"
+)
 
 
 @click.command("available-delivery-reports")
-@OPTION_FORCE_REPORT
 @OPTION_DRY_RUN
 @click.pass_context
-def available_delivery_reports(context: click.Context, force_report: bool, dry_run: bool):
+def available_delivery_reports(context: click.Context, dry_run: bool):
     """Generates delivery reports for all cases that need one and stores them in housekeeper"""
 
     report_api: ReportAPI = context.obj.meta_apis["report_api"]
-    exit_code = SUCCESS
+    exit_code = EXIT_SUCCESS
 
     click.echo(click.style("--------------- AVAILABLE_DELIVERY REPORTS ---------------"))
 
@@ -46,7 +41,6 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
             context.invoke(
                 delivery_report,
                 case_id=analysis_obj.family.internal_id,
-                force_report=force_report,
                 dry_run=dry_run,
             )
         except FileNotFoundError as error:
@@ -55,14 +49,14 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
                 case_id,
                 error,
             )
-            exit_code = FAIL
+            exit_code = EXIT_FAIL
         except DeliveryReportError as error:
             LOG.error(
                 "The delivery report generation failed for the case: %s, %s",
                 case_id,
                 error.message,
             )
-            exit_code = FAIL
+            exit_code = EXIT_FAIL
         # except CgError as error:  # TODO
         #    LOG.error(
         #        "Uploading delivery report failed for case: %s, %s",
@@ -82,14 +76,12 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
 
 @click.command("delivery-report")
 @ARGUMENT_CASE_ID
-@OPTION_FORCE_REPORT
 @OPTION_DRY_RUN
 @OPTION_STARTED_AT
 @click.pass_obj
 def delivery_report(
     context: CGConfig,
     case_id: str,
-    force_report: bool,
     dry_run: bool,
     analysis_started_at: str = None,
 ):
@@ -109,17 +101,13 @@ def delivery_report(
 
     # Analysis date retrieval
     if not analysis_started_at:
-        analysis_started_at: datetime.datetime = (
-            report_api.status_db.family(case_id).analyses[0].started_at
-        )
+        analysis_started_at: datetime = report_api.status_db.family(case_id).analyses[0].started_at
 
     LOG.info("Using analysis started at: %s", analysis_started_at)
 
     # Dry run: print HTML report to console
     if dry_run:
-        delivery_report_html: str = report_api.create_delivery_report(
-            case_id, analysis_started_at, force_report
-        )
+        delivery_report_html: str = report_api.create_delivery_report(case_id, analysis_started_at)
         click.echo(delivery_report_html)
         return
 
@@ -127,7 +115,6 @@ def delivery_report(
         case_id,
         file_path=Path(report_api.analysis_api.root, case_id),
         analysis_date=analysis_started_at,
-        force_report=force_report,
     )
 
     hk_report_file: Optional[hk_models.File] = report_api.add_delivery_report_to_hk(

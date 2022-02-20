@@ -51,6 +51,8 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
+REPORT_SUPPORTED_PIPELINES = (Pipeline.BALSAMIC, Pipeline.MIP_DNA)
+
 
 class DataDelivery(StrEnum):
     ANALYSIS_BAM_FILES: str = "analysis-bam"

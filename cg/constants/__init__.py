@@ -19,6 +19,7 @@ from .constants import (
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,
+    REPORT_SUPPORTED_PIPELINES,
     DataDelivery,
     FlowCellStatus,
     HousekeeperTags,
