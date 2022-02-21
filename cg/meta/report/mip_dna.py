@@ -28,7 +28,6 @@ class MipDNAReportAPI(ReportAPI):
         sample_coverage = self.get_sample_coverage(sample, case)
 
         return MetadataModel(
-            genome_build=metadata.genome_build,
             capture_kit=sample.capture_kit,
             gender=parsed_metrics.predicted_sex,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
@@ -58,3 +57,17 @@ class MipDNAReportAPI(ReportAPI):
 
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
+
+    def get_data_analysis_type(self, case: models.Family) -> str:
+        """Retrieves the data analysis type carried out"""
+
+        case_sample = self.status_db.family_samples(case.internal_id)[0].sample
+        lims_sample = self.get_lims_sample(case_sample.internal_id)
+        application = self.status_db.application(tag=lims_sample.get("application"))
+
+        return application.prep_category
+
+    def get_genome_build(self, case: models.Family) -> str:
+        """Returns the build version of the genome reference of a specific case"""
+
+        return self.anaysis_api.get_latest_metadata(case.internal_id).genome_build

@@ -40,7 +40,9 @@ def validate_date(date: datetime) -> str:
 def validate_list(value: list) -> list:
     """Formats a list elements as comma separated individual values"""
 
-    return ", ".join(validate_empty_field(v) for v in value) if value else NA_FIELD
+    return validate_empty_field(
+        ", ".join(validate_empty_field(v) for v in value) if value else NA_FIELD
+    )
 
 
 def validate_rml_sample(prep_category: str) -> str:

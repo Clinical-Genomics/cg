@@ -101,10 +101,8 @@ class MetadataModel(BaseModel):
     Metrics and trending data model associated to a specific sample
 
     Attributes:
-        genome_build: build version of the genome reference
         capture_kit: panel bed used for the analysis
         capture_kit_version: panel bed version; BALSAMIC specific
-        analysis_type: analysis type carried out; BALSAMIC specific
         gender: gender estimated by the pipeline
         million_read_pairs: number of million read pairs obtained
         mapped_reads: percentage of reads aligned to the reference sequence; MIP specific
@@ -118,10 +116,8 @@ class MetadataModel(BaseModel):
         fold_80: fold 80 base penalty; BALSAMIC specific
     """
 
-    genome_build: Optional[str]
     capture_kit: Optional[str]
     capture_kit_version: Optional[str]
-    analysis_type: Optional[str]
     gender: Optional[str] = Gender.UNKNOWN
     million_read_pairs: Union[float, str] = None
     mapped_reads: Union[float, str] = None
@@ -135,13 +131,7 @@ class MetadataModel(BaseModel):
     fold_80: Union[float, str] = None
 
     _str_values = validator(
-        "genome_build",
-        "capture_kit",
-        "capture_kit_version",
-        "analysis_type",
-        "gender",
-        always=True,
-        allow_reuse=True,
+        "capture_kit", "capture_kit_version", "gender", always=True, allow_reuse=True
     )(validate_empty_field)
 
     _float_values = validator(

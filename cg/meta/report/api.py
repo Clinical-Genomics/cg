@@ -161,7 +161,6 @@ class ReportAPI(MetaAPI):
         return CaseModel(
             name=case.name,
             data_analysis=self.get_case_analysis_data(case, analysis),
-            panels=case.panels,
             samples=self.get_samples_data(case),
         )
 
@@ -231,14 +230,18 @@ class ReportAPI(MetaAPI):
 
         return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
-    @staticmethod
-    def get_case_analysis_data(case: models.Family, analysis: models.Analysis) -> DataAnalysisModel:
+    def get_case_analysis_data(
+        self, case: models.Family, analysis: models.Analysis
+    ) -> DataAnalysisModel:
         """Retrieves the pipeline attributes used for data analysis"""
 
         return DataAnalysisModel(
             customer_pipeline=case.data_analysis,
             pipeline=analysis.pipeline,
             pipeline_version=analysis.pipeline_version,
+            type=self.get_data_analysis_type(case),
+            genome_build=self.get_genome_build(case),
+            panels=case.panels,
         )
 
     def get_sample_timestamp_data(self, sample: models.Sample) -> TimestampModel:
@@ -264,6 +267,16 @@ class ReportAPI(MetaAPI):
 
     def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
         """Fetches the sample metadata to include in the report"""
+
+        raise NotImplementedError
+
+    def get_data_analysis_type(self, case: models.Family) -> str:
+        """Retrieves the data analysis type carried out"""
+
+        raise NotImplementedError
+
+    def get_genome_build(self, case: models.Family) -> str:
+        """Returns the build version of the genome reference of a specific case"""
 
         raise NotImplementedError
 

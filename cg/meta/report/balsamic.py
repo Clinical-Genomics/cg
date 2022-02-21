@@ -19,4 +19,17 @@ class BalsamicReportAPI(ReportAPI):
     def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
         """Fetches the sample metadata to include in the report"""
 
-        raise NotImplementedError
+        # TODO
+        pass
+
+    def get_data_analysis_type(self, case: models.Family) -> str:
+        """Retrieves the data analysis type carried out"""
+
+        # TODO
+        pass
+
+    def get_genome_build(self, case: models.Family) -> str:
+        """Returns the build version of the genome reference of a specific case"""
+
+        # TODO
+        pass

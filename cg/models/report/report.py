@@ -41,16 +41,29 @@ class DataAnalysisModel(BaseModel):
         customer_pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
         pipeline: actual pipeline used for analysis; source: statusDB/analysis/pipeline
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
+        type: analysis type carried out; BALSAMIC specific
+        genome_build: build version of the genome reference
+        panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
     """
 
     customer_pipeline: Pipeline
     pipeline: Pipeline
     pipeline_version: Optional[str]
+    type: Optional[str]
+    genome_build: Optional[str]
+    panels: Union[List[str], str] = None
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
     _str_values = validator(
-        "customer_pipeline", "pipeline", "pipeline_version", always=True, allow_reuse=True
+        "customer_pipeline",
+        "pipeline",
+        "pipeline_version",
+        "type",
+        "genome_build",
+        always=True,
+        allow_reuse=True,
     )(validate_empty_field)
+    _panels = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
 class CaseModel(BaseModel):
@@ -59,18 +72,15 @@ class CaseModel(BaseModel):
 
     Attributes:
         name: case name; source: StatusDB/family/name
-        panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
         samples: list of samples associated to a case/family
         data_analysis: pipeline attributes
     """
 
     name: str
-    panels: Union[List[str], str] = None
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
 
     _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
-    _panels = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
 class ReportModel(BaseModel):
