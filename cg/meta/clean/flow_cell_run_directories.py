@@ -34,6 +34,7 @@ class RunDirFlowCell:
         self.id: str = self.identifier[1:]
         self._age: Optional[timedelta] = None
         self._is_retrieved_from_pdc: Optional[bool] = None
+        self._exists_in_statusdb: Optional[bool] = None
         self._sequenced_date: Optional[datetime] = None
         self._flow_cell_status: Optional[str] = None
         self.sample_sheet_path: Path = (
@@ -75,6 +76,13 @@ class RunDirFlowCell:
         if self._flow_cell_status is None:
             self._flow_cell_status = self.status_db.flowcell(name=self.id).status
         return self._flow_cell_status
+
+    @property
+    def exists_in_statusdb(self) -> bool:
+        """The flow cell exists in statusdb"""
+        if self._exists_in_statusdb is None:
+            self._exists_in_statusdb = self.status_db.flowcell(name=self.id) is not None
+        return self._exists_in_statusdb
 
     def remove_run_directory(self):
         """Removes the flow cell run directory"""

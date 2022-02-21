@@ -38,13 +38,12 @@ def nipt_upload_case(context: click.Context, case_id: Optional[str], dry_run: bo
 
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
-
     if force or nipt_upload_api.flowcell_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
         nipt_upload_api.update_analysis_upload_started_date(case_id)
-        context.invoke(batch, case_id=case_id, dry_run=dry_run)
-        context.invoke(nipt_upload_ftp_case, case_id=case_id, dry_run=dry_run)
+        context.invoke(batch, case_id=case_id, force=force, dry_run=dry_run)
+        context.invoke(nipt_upload_ftp_case, case_id=case_id, force=force, dry_run=dry_run)
         nipt_upload_api.update_analysis_uploaded_at_date(case_id)
         LOG.info("%s: analysis uploaded!", case_id)
     else:
