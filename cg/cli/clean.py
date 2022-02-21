@@ -274,6 +274,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
                 file_size = file_path.stat().st_size
                 size_cleaned += file_size
                 if dry_run:
+                    LOG.info("Dry run: %s. Keeping file %s", dry_run, file_path)
                     continue
 
                 file_path.unlink()
