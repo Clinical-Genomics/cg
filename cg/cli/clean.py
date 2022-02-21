@@ -6,10 +6,6 @@ from typing import List, Optional
 
 import click
 from alchy import Query
-from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
-from tabulate import tabulate
-
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scout_export import ScoutExportCase
@@ -27,7 +23,72 @@ from cg.constants.constants import DRY_RUN, Sequencers
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store import Store, models
+from cgmodels.cg.constants import Pipeline
+from housekeeper.store import models as hk_models
+from tabulate import tabulate
+
+PIPELINE_PROTECTED_TAGS = {
+    str(Pipeline.BALSAMIC): [],
+    str(Pipeline.FASTQ): [],
+    str(Pipeline.FLUFFY): [],
+    str(Pipeline.MICROSALT): [
+        ["microsalt-log"],
+        ["config"],
+        ["qc-report", "visualization"],
+        ["typing-report", "visualization"],
+        ["typing-report", "qc-metrics"],
+        ["microsalt-config"],
+        ["assembly"],
+    ],
+    str(Pipeline.MIP_DNA): [
+        ["vcf-snv-clinical"],
+        ["vcf-snv-research"],
+        ["vcf-str"],
+        ["snv-gbcf", "snv-bcf"],
+        ["mip-config"],
+        ["mip-log"],
+        ["mip-analyse", "reference-info"],
+        ["sample-info"],
+        ["qc-metrics"],
+        ["smn-calling"],
+        ["sv-bcf"],
+        ["vcf-sv-clinical"],
+        ["vcf-sv-research"],
+        ["exe-ver"],
+        ["vcf2cytosure"],
+    ],
+    str(Pipeline.MIP_RNA): [
+        ["vcf-snv-clinical"],
+        ["vcf-snv-research"],
+        ["mip-config"],
+        ["mip-log"],
+        ["mip-analyse, reference-info"],
+        ["sample-info"],
+        ["qc-metrics"],
+        ["exe-ver"],
+        ["fusion", "vcf"],
+        ["salmon-quant"],
+    ],
+    str(Pipeline.SARS_COV_2): [
+        ["fohm-delivery", "instrument-properties"],
+        ["fohm-delivery", "pangolin-typing-fohm", "csv"],
+        ["vcf", "vcf-report", "fohm-delivery"],
+        ["mutant-log"],
+        ["metrics"],
+        ["config"],
+        ["mutant-config"],
+        ["software-versions"],
+        ["fohm-delivery", "komplettering", "visualization"],
+        ["fohm-delivery", "pangolin-typing", "csv", "visualization"],
+        ["ks-delivery", "ks-results", "typing-report", "visualization", "csv"],
+        ["ks-delivery", "ks-aux-results", "typing-report", "visualization", "csv"],
+        ["multiqc-json"],
+        ["gisaid-log"],
+        ["gisaid-csv"],
+    ]
+}
+
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -108,7 +169,7 @@ def _get_confirm_question(bundle, file_obj):
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
 def scout_finished_cases(
-    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+        context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of solved and archived scout cases"""
     scout_api: ScoutAPI = context.obj.scout_api
@@ -127,6 +188,106 @@ def scout_finished_cases(
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
+@clean.command("hk-case-bundle-files")
+@click.option(
+    "--days-old",
+    type=int,
+    default=365,
+    help="Clean all files with analysis dates older then given number of days",
+)
+@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@click.pass_context
+def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False):
+    """Clean up all files for all pipelines but those whitelisted"""
+    status_db: Store = context.obj.status_db
+    housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
+    before: datetime = datetime.now() - timedelta(days=days_old)
+
+    size_cleaned = 0
+    pipeline: Pipeline
+    for pipeline in Pipeline:
+
+        LOG.debug(f"{pipeline=}")
+
+        if protected_tags_lists := PIPELINE_PROTECTED_TAGS.get(pipeline):
+            LOG.debug(f"protected tags defined for {pipeline=} {protected_tags_lists=}")
+        else:
+            LOG.debug(f"no protected tags defined for {pipeline=}")
+            continue
+
+        analyses: Query = status_db.get_analyses_before_date(
+            pipeline=pipeline, before=before
+        )
+
+        analysis: models.Analysis
+        for analysis in analyses:
+            LOG.info(f"Cleaning analysis {analysis}")
+            bundle_name: str = analysis.family.internal_id
+            hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
+                bundle=bundle_name, date=analysis.started_at
+            )
+            if not hk_bundle_version:
+                LOG.warning(
+                    f"Version not found for "
+                    f"bundle:{bundle_name}; "
+                    f"pipeline: {analysis.pipeline}; "
+                    f"date {analysis.started_at}"
+                )
+                continue
+
+            LOG.info(
+                f"Version found for "
+                f"bundle:{bundle_name}; "
+                f"pipeline: {analysis.pipeline}; "
+                f"date {analysis.started_at}"
+            )
+            version_files: List[hk_models.File] = housekeeper_api.get_files(
+                bundle=analysis.family.internal_id, version=hk_bundle_version.id
+            ).all()
+
+            version_file: hk_models.File
+            for version_file in version_files:
+                LOG.info(f"File {version_file.full_path} has the tags {version_file.tags}.")
+                version_file_tag: hk_models.Tag
+                version_file_tags: [str] = [tag.name for tag in version_file.tags]
+
+                has_protected_tags: bool = False
+                for protected_tags in protected_tags_lists:
+
+                    if protected_tags_on_file := set(version_file_tags).intersection(
+                            protected_tags):
+                        if protected_tags_on_file == set(protected_tags):
+                            has_protected_tags = True
+                            break
+
+                if has_protected_tags:
+                    LOG.debug(
+                        "File %s has the protected tag(s) %s, skipping.",
+                        version_file.full_path,
+                        protected_tags_on_file,
+                    )
+                    continue
+
+                LOG.info("File %s has no protected tags.", version_file.full_path)
+
+                file_path: Path = Path(version_file.full_path)
+                if not file_path.exists():
+                    LOG.info("File %s not on disk.", file_path)
+                    continue
+                LOG.info(f"File %s found on disk.", file_path)
+                file_size = file_path.stat().st_size
+                size_cleaned += file_size
+                if dry_run:
+                    continue
+
+                file_path.unlink()
+                housekeeper_api.delete_file(version_file.id)
+                housekeeper_api.commit()
+                LOG.info("Removed file %s. Dry run: %s", file_path, dry_run)
+
+        LOG.info("Process freed %s GB. Dry run: %s", round(size_cleaned * 0.0000000001, 2), dry_run)
+
+
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case_id", type=str, required=False)
 @click.option("-p", "--pipeline", type=Pipeline, required=False)
@@ -135,12 +296,12 @@ def scout_finished_cases(
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_obj
 def hk_bundle_files(
-    context: CGConfig,
-    case_id: Optional[str],
-    tags: list,
-    days_old: Optional[int],
-    pipeline: Optional[Pipeline],
-    dry_run: bool,
+        context: CGConfig,
+        case_id: Optional[str],
+        tags: list,
+        days_old: Optional[int],
+        pipeline: Optional[Pipeline],
+        dry_run: bool,
 ):
     """Remove files found in housekeeper bundles"""
 
