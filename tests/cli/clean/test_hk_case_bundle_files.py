@@ -143,7 +143,6 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
             {"path": file_path, "archive": False, "tags": protected_tags},
         ],
     }
-    print(f"{hk_bundle_data=}")
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
     # WHEN running the clean command
