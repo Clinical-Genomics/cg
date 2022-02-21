@@ -15,12 +15,12 @@ class MipDNAReportAPI(ReportAPI):
 
     def __init__(self, config: CGConfig, analysis_api: MipDNAAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
-        self.anaysis_api = analysis_api
+        self.analysis_api = analysis_api
 
     def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report"""
 
-        metadata = self.anaysis_api.get_latest_metadata(case.internal_id)
+        metadata = self.analysis_api.get_latest_metadata(case.internal_id)
         parsed_metrics = get_sample_id_metric(
             sample_id=sample.internal_id,
             sample_id_metrics=metadata.sample_id_metrics,
@@ -28,7 +28,7 @@ class MipDNAReportAPI(ReportAPI):
         sample_coverage = self.get_sample_coverage(sample, case)
 
         return MetadataModel(
-            capture_kit=sample.capture_kit,
+            bait_set=sample.capture_kit,
             gender=parsed_metrics.predicted_sex,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
             mapped_reads=parsed_metrics.mapped_reads,
@@ -65,9 +65,9 @@ class MipDNAReportAPI(ReportAPI):
         lims_sample = self.get_lims_sample(case_sample.internal_id)
         application = self.status_db.application(tag=lims_sample.get("application"))
 
-        return application.prep_category
+        return application.analysis_type
 
     def get_genome_build(self, case: models.Family) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
-        return self.anaysis_api.get_latest_metadata(case.internal_id).genome_build
+        return self.analysis_api.get_latest_metadata(case.internal_id).genome_build

@@ -118,7 +118,7 @@
                   <td>{{ sample.timestamp.received_at }}</td>
                   <td>{{ sample.methods.library_prep }}</td>
                   <td>{{ sample.timestamp.prepared_at }}</td>
-                  <td>{{ sample.metadata.capture_kit }}</td>
+                  <td>{{ sample.metadata.bait_set }}</td>
                   <td>{{ sample.methods.sequencing }}</td>
                   <td>{{ sample.timestamp.sequenced_at }}</td>
                   <td>{{ case.data_analysis.pipeline }}</td>
@@ -157,7 +157,7 @@
 
         <div class="card-block">
           <table class="table table-bordered">
-            <caption>Resultat baserade på valda genpaneler - {{ panels }}.</caption>
+            <caption>Resultat baserade på valda genpaneler - {{ case.data_analysis.panels }}.</caption>
             <thead>
               <tr>
                 <th>Prov</th>
@@ -169,14 +169,14 @@
               </tr>
             </thead>
             <tbody>
-              {% for sample in samples %}
+              {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ sample.million_read_pairs }}</td>
-                  <td>{{ sample.mapped_reads }}</td>
-                  <td>{{ sample.target_coverage }}</td>
-                  <td>{{ sample.target_completeness }}</td>
-                  <td>{{ sample.duplicates }}</td>
+                  <td>{{ sample.metadata.million_read_pairs }}</td>
+                  <td>{{ sample.metadata.mapped_reads }}</td>
+                  <td>{{ sample.metadata.target_coverage }}</td>
+                  <td>{{ sample.metadata.target_bases_10X }}</td>
+                  <td>{{ sample.metadata.duplicates }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -186,24 +186,24 @@
 
         </div>
 
-        {% if scout_access %}
+        {% if customer.scout_access %}
           <p class="card-block">
             Varianter finns uppladdade i Scout:
-            <a href="scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}">scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}</a>
+            <a href="scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a>
           </p>
         {% endif %}
 
-        {% for application in applications %}
+        {% for sample in case.samples %}
           <div class="card-block">
             <h4 class="card-title">
-              Teknisk beskrivning av analysen: {{ application.tag }}
+              Teknisk beskrivning av analysen: {{ sample.application.tag }}
             </h4>
-            <p class="card-text">{{ application.description }}</p>
-            {% if application.limitations %}
+            <p class="card-text">{{ sample.application.description }}</p>
+            {% if sample.application.limitations %}
             <h4 class="card-title">
-              Begränsningar av analysen: {{ application.tag }}
+              Begränsningar av analysen: {{ sample.application.tag }}
             </h4>
-            <p class="card-text">{{ application.limitations }}</p>
+            <p class="card-text">{{ sample.application.limitations }}</p>
             {% endif %}
           </div>
         {% endfor %}

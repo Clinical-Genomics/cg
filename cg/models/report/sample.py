@@ -101,24 +101,24 @@ class MetadataModel(BaseModel):
     Metrics and trending data model associated to a specific sample
 
     Attributes:
-        capture_kit: panel bed used for the analysis
-        capture_kit_version: panel bed version; BALSAMIC specific
-        gender: gender estimated by the pipeline
-        million_read_pairs: number of million read pairs obtained
-        mapped_reads: percentage of reads aligned to the reference sequence; MIP specific
-        duplicates: fraction of mapped sequence that is marked as duplicate
-        target_coverage: mean coverage of a target region; MIP specific
-        target_bases_10X: percent of targeted bases that are covered to 10X coverage or more; MIP specific
-        target_bases_250X: percent of targeted bases that are covered to 250X coverage or more; BALSAMIC specific
-        target_bases_500X: percent of targeted bases that are covered to 500X coverage or more; BALSAMIC specific
-        median_coverage: median coverage in bases
-        mean_insert_size: mean insert size of the distribution; BALSAMIC specific
-        fold_80: fold 80 base penalty; BALSAMIC specific
+        bait_set: panel bed used for the analysis; StatusDB/sample/capture_kit
+        bait_set_version: panel bed version; BALSAMIC specific; source: pipeline workflow
+        gender: gender estimated by the pipeline; source: pipeline workflow
+        million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
+        mapped_reads: percentage of reads aligned to the reference sequence; MIP specific; source: pipeline workflow
+        duplicates: fraction of mapped sequence that is marked as duplicate; source: pipeline workflow
+        target_coverage: mean coverage of a target region; MIP specific; source: pipeline workflow
+        target_bases_10X: percent of targeted bases that are covered to 10X coverage or more; MIP specific; source: pipeline workflow
+        target_bases_250X: percent of targeted bases that are covered to 250X coverage or more; BALSAMIC specific; source: pipeline workflow
+        target_bases_500X: percent of targeted bases that are covered to 500X coverage or more; BALSAMIC specific; source: pipeline workflow
+        median_coverage: median coverage in bases; source: pipeline workflow
+        mean_insert_size: mean insert size of the distribution; BALSAMIC specific; source: pipeline workflow
+        fold_80: fold 80 base penalty; BALSAMIC specific; source: pipeline workflow
     """
 
-    capture_kit: Optional[str]
-    capture_kit_version: Optional[str]
-    gender: Optional[str] = Gender.UNKNOWN
+    bait_set: Optional[str]
+    bait_set_version: Optional[str]
+    gender: Optional[str]
     million_read_pairs: Union[float, str] = None
     mapped_reads: Union[float, str] = None
     duplicates: Union[float, str] = None
@@ -131,7 +131,7 @@ class MetadataModel(BaseModel):
     fold_80: Union[float, str] = None
 
     _str_values = validator(
-        "capture_kit", "capture_kit_version", "gender", always=True, allow_reuse=True
+        "bait_set", "bait_set_version", "gender", always=True, allow_reuse=True
     )(validate_empty_field)
 
     _float_values = validator(

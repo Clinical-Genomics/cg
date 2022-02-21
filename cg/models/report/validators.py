@@ -16,6 +16,12 @@ def validate_empty_field(value: Union[int, str]) -> str:
     return str(value) if value else NA_FIELD
 
 
+def validate_underscore_separated_str(value: str) -> str:
+    """Erases underscores from a string attribute"""
+
+    return value.replace("_", " ") if value else NA_FIELD
+
+
 def validate_boolean(value: Union[bool, str]) -> str:
     """Formats a boolean to include its value in the delivery report"""
 

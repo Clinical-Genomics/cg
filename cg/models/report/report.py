@@ -9,6 +9,7 @@ from cg.models.report.validators import (
     validate_supported_pipeline,
     validate_list,
     validate_date,
+    validate_underscore_separated_str,
 )
 
 
@@ -41,8 +42,8 @@ class DataAnalysisModel(BaseModel):
         customer_pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
         pipeline: actual pipeline used for analysis; source: statusDB/analysis/pipeline
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
-        type: analysis type carried out; BALSAMIC specific
-        genome_build: build version of the genome reference
+        type: analysis type carried out; BALSAMIC specific; source: pipeline workflow
+        genome_build: build version of the genome reference; source: pipeline workflow
         panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
     """
 
@@ -58,11 +59,11 @@ class DataAnalysisModel(BaseModel):
         "customer_pipeline",
         "pipeline",
         "pipeline_version",
-        "type",
         "genome_build",
         always=True,
         allow_reuse=True,
     )(validate_empty_field)
+    _type = validator("type", always=True, allow_reuse=True)(validate_underscore_separated_str)
     _panels = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
