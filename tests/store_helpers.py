@@ -415,6 +415,9 @@ class StoreHelpers:
                 ticket=sample_data["ticket_number"],
                 reads=sample_data["reads"],
                 capture_kit=sample_data["capture_kit"],
+                sequenced_at=sample_data["sequenced_at"]
+                if "sequenced_at" in sample_data.keys()
+                else None,
             )
             sample_objs[sample_id] = sample_obj
 

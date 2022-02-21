@@ -15,7 +15,7 @@ def test_start_available(caplog, case_id: str, cli_runner, send_fastq_context):
     cli_runner.invoke(start_available, ["--dry-run"], obj=send_fastq_context)
 
     # THEN the right case should be found and the run command should be reached
-    assert "Running %s in dry-run mode", case_id in caplog.text
+    assert f"Running {case_id} in dry-run mode" in caplog.text
 
 
 def test_send_fastq(caplog, cli_runner, send_fastq_context):
@@ -40,7 +40,7 @@ def test_start(caplog, case_id: str, cli_runner, send_fastq_context):
     cli_runner.invoke(start, [case_id, "--dry-run"], obj=send_fastq_context)
 
     # THEN the run command should be reached
-    assert "Running %s in dry-run mode", case_id in caplog.text
+    assert f"Running {case_id} in dry-run mode" in caplog.text
 
 
 def test_run(caplog, case_id: str, cli_runner, send_fastq_context):
@@ -52,4 +52,4 @@ def test_run(caplog, case_id: str, cli_runner, send_fastq_context):
     cli_runner.invoke(run, [case_id, "--dry-run"], obj=send_fastq_context)
 
     # THEN the run command should be reached
-    assert "Running %s in dry-run mode", case_id in caplog.text
+    assert f"Running {case_id} in dry-run mode" in caplog.text

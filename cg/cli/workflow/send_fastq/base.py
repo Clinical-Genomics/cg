@@ -94,7 +94,7 @@ def run(
             case_id=case_id,
             analysis_type="fastq",
             config_path=str(analysis_api.rsync_api.trailblazer_config_path),
-            out_dir=analysis_api.rsync_api.log_dir,
+            out_dir=str(analysis_api.rsync_api.log_dir),
             priority=analysis_api.convert_case_priority(case),
             data_analysis=Pipeline.FASTQ,
         )
