@@ -210,7 +210,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
         if protected_tags_lists := PIPELINE_PROTECTED_TAGS.get(pipeline):
             LOG.debug(f"protected tags defined for {pipeline=} {protected_tags_lists=}")
         else:
-            LOG.debug(f"no protected tags defined for {pipeline=}")
+            LOG.debug(f"no protected tags defined for {pipeline=}, skipping")
             continue
 
         analyses: Query = status_db.get_analyses_before_date(pipeline=pipeline, before=before)
@@ -244,7 +244,6 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
             version_file: hk_models.File
             for version_file in version_files:
                 LOG.info(f"File {version_file.full_path} has the tags {version_file.tags}.")
-                version_file_tag: hk_models.Tag
                 version_file_tags: [str] = [tag.name for tag in version_file.tags]
 
                 has_protected_tags: bool = False
