@@ -86,7 +86,7 @@ PIPELINE_PROTECTED_TAGS = {
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],
-    ]
+    ],
 }
 
 
@@ -169,7 +169,7 @@ def _get_confirm_question(bundle, file_obj):
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_context
 def scout_finished_cases(
-        context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of solved and archived scout cases"""
     scout_api: ScoutAPI = context.obj.scout_api
@@ -215,9 +215,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
             LOG.debug(f"no protected tags defined for {pipeline=}")
             continue
 
-        analyses: Query = status_db.get_analyses_before_date(
-            pipeline=pipeline, before=before
-        )
+        analyses: Query = status_db.get_analyses_before_date(pipeline=pipeline, before=before)
 
         analysis: models.Analysis
         for analysis in analyses:
@@ -255,7 +253,8 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
                 for protected_tags in protected_tags_lists:
 
                     if protected_tags_on_file := set(version_file_tags).intersection(
-                            protected_tags):
+                        protected_tags
+                    ):
                         if protected_tags_on_file == set(protected_tags):
                             has_protected_tags = True
                             break
@@ -296,12 +295,12 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
 @click.pass_obj
 def hk_bundle_files(
-        context: CGConfig,
-        case_id: Optional[str],
-        tags: list,
-        days_old: Optional[int],
-        pipeline: Optional[Pipeline],
-        dry_run: bool,
+    context: CGConfig,
+    case_id: Optional[str],
+    tags: list,
+    days_old: Optional[int],
+    pipeline: Optional[Pipeline],
+    dry_run: bool,
 ):
     """Remove files found in housekeeper bundles"""
 

@@ -54,7 +54,10 @@ def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGCon
     # WHEN running the clean command
     caplog.set_level(logging.DEBUG)
     result = cli_runner.invoke(
-        hk_case_bundle_files, ["--days-old", days_ago, "--dry-run"], obj=context, catch_exceptions=False
+        hk_case_bundle_files,
+        ["--days-old", days_ago, "--dry-run"],
+        obj=context,
+        catch_exceptions=False,
     )
 
     # THEN it should be successful
@@ -64,11 +67,11 @@ def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGCon
 
 
 def test_clean_hk_case_files_single_analysis(
-        caplog,
-        cli_runner: CliRunner,
-        cg_context: CGConfig,
-        helpers: StoreHelpers,
-        timestamp: dt.datetime,
+    caplog,
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    timestamp: dt.datetime,
 ):
     # GIVEN we have some analyses to clean
     context: CGConfig = cg_context
@@ -77,8 +80,9 @@ def test_clean_hk_case_files_single_analysis(
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
     pipeline: Pipeline = Pipeline.MIP_DNA
 
-    analysis: models.Analysis = helpers.add_analysis(store=store, started_at=date_days_ago, completed_at=date_days_ago,
-                                                     pipeline=pipeline)
+    analysis: models.Analysis = helpers.add_analysis(
+        store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
+    )
     bundle_name: str = analysis.family.internal_id
 
     # GIVEN a housekeeper api with some alignment files
@@ -110,11 +114,11 @@ def test_clean_hk_case_files_single_analysis(
 
 
 def test_clean_hk_case_files_analysis_with_protected_tag(
-        caplog,
-        cli_runner: CliRunner,
-        cg_context: CGConfig,
-        helpers: StoreHelpers,
-        timestamp: dt.datetime,
+    caplog,
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    timestamp: dt.datetime,
 ):
     # GIVEN we have some analyses to clean
     context: CGConfig = cg_context
@@ -123,8 +127,9 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
     pipeline: Pipeline = Pipeline.MIP_DNA
 
-    analysis: models.Analysis = helpers.add_analysis(store=store, started_at=date_days_ago, completed_at=date_days_ago,
-                                                     pipeline=pipeline)
+    analysis: models.Analysis = helpers.add_analysis(
+        store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
+    )
     bundle_name: str = analysis.family.internal_id
 
     # GIVEN a housekeeper api with some alignment files with protected tags
@@ -144,7 +149,10 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     # WHEN running the clean command
     caplog.set_level(logging.DEBUG)
     result = cli_runner.invoke(
-        hk_case_bundle_files, ["--days-old", days_ago, "--dry-run"], obj=context, catch_exceptions=False
+        hk_case_bundle_files,
+        ["--days-old", days_ago, "--dry-run"],
+        obj=context,
+        catch_exceptions=False,
     )
 
     # THEN it should be successful
