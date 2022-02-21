@@ -207,8 +207,6 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     pipeline: Pipeline
     for pipeline in Pipeline:
 
-        LOG.debug(f"{pipeline=}")
-
         if protected_tags_lists := PIPELINE_PROTECTED_TAGS.get(pipeline):
             LOG.debug(f"protected tags defined for {pipeline=} {protected_tags_lists=}")
         else:
