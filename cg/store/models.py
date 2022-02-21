@@ -536,11 +536,6 @@ class Sample(Model, PriorityMixin):
             return self.reads >= one_half_of_target_reads
         return self.reads > application.expected_reads
 
-    def sequencing_qc(self) -> bool:
-        """Return sequencing qc passed or failed."""
-        application = self.application_version.application
-        return self.reads > application.expected_reads
-
     @property
     def phenotype_groups(self) -> List[str]:
         """Return a list of phenotype_groups."""
