@@ -207,7 +207,8 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     pipeline: Pipeline
     for pipeline in Pipeline:
 
-        if protected_tags_lists := PIPELINE_PROTECTED_TAGS.get(pipeline):
+        protected_tags_lists = PIPELINE_PROTECTED_TAGS.get(pipeline)
+        if protected_tags_lists:
             LOG.debug(f"protected tags defined for {pipeline=} {protected_tags_lists=}")
         else:
             LOG.debug(f"no protected tags defined for {pipeline=}, skipping")
@@ -249,9 +250,8 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
                 has_protected_tags: bool = False
                 for protected_tags in protected_tags_lists:
 
-                    if protected_tags_on_file := set(version_file_tags).intersection(
-                        protected_tags
-                    ):
+                    protected_tags_on_file = set(version_file_tags).intersection(protected_tags)
+                    if protected_tags_on_file:
                         if protected_tags_on_file == set(protected_tags):
                             has_protected_tags = True
                             break
