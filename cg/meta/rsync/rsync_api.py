@@ -70,11 +70,11 @@ class RsyncAPI(MetaAPI):
 
         return before > ctime
 
-    def set_log_dir(self, ticket_id: int) -> None:
+    def set_log_dir(self, folder_prefix: str) -> None:
         if self.log_dir.as_posix() == self.base_path.as_posix():
             timestamp = dt.datetime.now()
             timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-            folder_name = Path("_".join([str(ticket_id), timestamp_str]))
+            folder_name = Path("_".join([folder_prefix, timestamp_str]))
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
@@ -140,6 +140,39 @@ class RsyncAPI(MetaAPI):
             LOG.info("Would have created path %s, but this is a dry run", log_dir)
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
+
+    def run_rsync_single_case(
+        self, case_id: str, dry_run: bool, sample_files_present: bool, case_files_present: bool
+    ) -> int:
+        if not (sample_files_present and case_files_present):
+            LOG.error("Since no file parameter is true, no files will be transferred")
+            raise CgError()
+        source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
+            ticket_id=self.status_db.get_ticket_from_case(case_id=case_id)
+        )
+        self.set_log_dir(folder_prefix=case_id)
+        self.create_log_dir(dry_run=dry_run)
+        folder_list: List[str] = []
+        if sample_files_present:
+            folder_list.extend(
+                [
+                    sample.name
+                    for sample in self.status_db.get_samples_by_family_id(family_id=case_id)
+                ]
+            )
+        if case_files_present:
+            folder_list.append(self.status_db.family(case_id).name)
+        commands: str = "".join(
+            [
+                RSYNC_COMMAND.format(
+                    source_path=source_and_destination_paths["delivery_source_path"] + "/" + folder,
+                    destination_path=source_and_destination_paths[
+                        "rsync_destination_path" + "/" + folder
+                    ],
+                )
+                for folder in folder_list
+            ]
+        )
 
     def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
         self.set_log_dir(ticket_id=ticket_id)
