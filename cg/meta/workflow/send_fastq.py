@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 class SendFastqAnalysisAPI(AnalysisAPI):
     """Minimalist API to integrate automatic fastq delivery in existing architecture"""
 
-    def __init__(self, config: CGConfig, pipeline: Pipeline):
+    def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.FASTQ):
         super().__init__(pipeline, config)
         self.deliver_api: DeliverAPI = DeliverAPI(
             store=self.status_db,

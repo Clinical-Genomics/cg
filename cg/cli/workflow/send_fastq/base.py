@@ -27,7 +27,7 @@ def send_fastq(context: click.Context):
     context.obj.meta_apis["analysis_api"] = SendFastqAnalysisAPI(config=context.obj)
 
 
-@click.command("start-available")
+@send_fastq.command("start-available")
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
@@ -63,7 +63,7 @@ def start(context: click.Context, dry_run: bool, case_id: str) -> None:
         LOG.info("Workflow not ready to run, can continue after decompression")
 
 
-@click.command()
+@send_fastq.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
