@@ -1,17 +1,11 @@
 """Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
 import datetime as dt
-import itertools
 import logging
-import shutil
 from pathlib import Path
-from typing import List, Tuple, Optional
-
-from housekeeper.store.models import Bundle
+from typing import List, Optional
 
 from cg.apps.cgstats.db.models import Version
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.exc import CgDataError
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
 from cg.models.cg_config import CGConfig
@@ -71,7 +65,7 @@ class ExternalDataAPI(MetaAPI):
             source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
             destination_path=self.get_destination_path(customer=cust),
         )
-        sbatch_parameters = Sbatch(
+        sbatch_parameters: Sbatch = Sbatch(
             job_name=str(ticket_id) + self.RSYNC_FILE_POSTFIX,
             account=self.account,
             number_tasks=1,

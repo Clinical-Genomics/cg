@@ -164,7 +164,7 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        sbatch_parameters = Sbatch(
+        sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([str(ticket_id), "rsync"]),
             account=self.account,
             number_tasks=1,

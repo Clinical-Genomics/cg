@@ -230,7 +230,7 @@ class DemultiplexingAPI:
         )
 
         if flowcell.bcl_converter == "bcl2fastq":
-            sbatch_parameters = Sbatch(
+            sbatch_parameters: Sbatch = Sbatch(
                 account=self.slurm_account,
                 commands=commands,
                 email=self.mail,
@@ -243,7 +243,7 @@ class DemultiplexingAPI:
                 quality_of_service=self.slurm_quality_of_service,
             )
         if flowcell.bcl_converter == "dragen":
-            sbatch_parameters = SbatchDragen(
+            sbatch_parameters: SbatchDragen = SbatchDragen(
                 account=self.slurm_account,
                 commands=commands,
                 email=self.mail,

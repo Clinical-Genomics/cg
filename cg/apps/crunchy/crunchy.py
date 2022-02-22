@@ -226,7 +226,7 @@ class CrunchyAPI:
             spring_path=compression_obj.spring_path,
             pending_path=compression_obj.pending_path,
         )
-        sbatch_parameters = Sbatch(
+        sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
             account=self.slurm_account,
             number_tasks=12,
@@ -282,7 +282,7 @@ class CrunchyAPI:
             checksum_first=files_info["fastq_first"].checksum,
             checksum_second=files_info["fastq_second"].checksum,
         )
-        sbatch_parameters = Sbatch(
+        sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
             account=self.slurm_account,
             number_tasks=12,

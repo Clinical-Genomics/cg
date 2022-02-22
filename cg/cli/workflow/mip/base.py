@@ -90,7 +90,8 @@ def run(
 
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
-        priority=slurm_quality_of_service or analysis_api.get_slurm_qos_for_case(case_id),
+        slurm_quality_of_service=slurm_quality_of_service
+        or analysis_api.get_slurm_qos_for_case(case_id),
         email=email or environ_email(),
         dryrun=mip_dry_run,
         start_after=start_after,
