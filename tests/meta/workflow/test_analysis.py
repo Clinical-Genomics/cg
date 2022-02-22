@@ -17,7 +17,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
         (Priority.express, SlurmQos.EXPRESS),
     ],
 )
-def test_get_priority_for_case(mocker, case_id: str, priority, expected_slurm_qos):
+def test_get_slurm_qos_for_case(mocker, case_id: str, priority, expected_slurm_qos):
     """Test qet Quality of service (SLURM QOS) from the case priority"""
 
     # GIVEN a case that has a priority
