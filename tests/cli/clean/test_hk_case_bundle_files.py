@@ -1,19 +1,13 @@
-import logging
 import datetime as dt
+import logging
 
-from cgmodels.cg.constants import Pipeline
-
-from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.clean import hk_case_bundle_files, WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
+from cg.store import Store
+from cg.store import models
+from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
-
-from cg.cli.clean import hk_case_bundle_files, PIPELINE_PROTECTED_TAGS
-
-from cg.store import Store
-
-from cg.store import models
-from housekeeper.store import models as hk_models
 
 
 def test_date_days_ago_zero_days():
@@ -133,7 +127,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     bundle_name: str = analysis.family.internal_id
 
     # GIVEN a housekeeper api with some alignment files with protected tags
-    protected_tags = PIPELINE_PROTECTED_TAGS[pipeline][0]
+    protected_tags = WORKFLOW_PROTECTED_TAGS[pipeline][0]
     file_path = "path/to_file.fastq"
     hk_bundle_data = {
         "name": bundle_name,

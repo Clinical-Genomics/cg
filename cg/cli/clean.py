@@ -28,67 +28,7 @@ from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 from tabulate import tabulate
 
-PIPELINE_PROTECTED_TAGS = {
-    str(Pipeline.BALSAMIC): [],
-    str(Pipeline.FASTQ): [],
-    str(Pipeline.FLUFFY): [],
-    str(Pipeline.MICROSALT): [
-        ["microsalt-log"],
-        ["config"],
-        ["qc-report", "visualization"],
-        ["typing-report", "visualization"],
-        ["typing-report", "qc-metrics"],
-        ["microsalt-config"],
-        ["assembly"],
-    ],
-    str(Pipeline.MIP_DNA): [
-        ["vcf-snv-clinical"],
-        ["vcf-snv-research"],
-        ["vcf-str"],
-        ["snv-gbcf", "snv-bcf"],
-        ["mip-config"],
-        ["mip-log"],
-        ["mip-analyse", "reference-info"],
-        ["sample-info"],
-        ["qc-metrics"],
-        ["smn-calling"],
-        ["sv-bcf"],
-        ["vcf-sv-clinical"],
-        ["vcf-sv-research"],
-        ["exe-ver"],
-        ["vcf2cytosure"],
-    ],
-    str(Pipeline.MIP_RNA): [
-        ["vcf-snv-clinical"],
-        ["vcf-snv-research"],
-        ["mip-config"],
-        ["mip-log"],
-        ["mip-analyse, reference-info"],
-        ["sample-info"],
-        ["qc-metrics"],
-        ["exe-ver"],
-        ["fusion", "vcf"],
-        ["salmon-quant"],
-    ],
-    str(Pipeline.SARS_COV_2): [
-        ["fohm-delivery", "instrument-properties"],
-        ["fohm-delivery", "pangolin-typing-fohm", "csv"],
-        ["vcf", "vcf-report", "fohm-delivery"],
-        ["mutant-log"],
-        ["metrics"],
-        ["config"],
-        ["mutant-config"],
-        ["software-versions"],
-        ["fohm-delivery", "komplettering", "visualization"],
-        ["fohm-delivery", "pangolin-typing", "csv", "visualization"],
-        ["ks-delivery", "ks-results", "typing-report", "visualization", "csv"],
-        ["ks-delivery", "ks-aux-results", "typing-report", "visualization", "csv"],
-        ["multiqc-json"],
-        ["gisaid-log"],
-        ["gisaid-csv"],
-    ],
-}
-
+from cg.constants.tags import WORKFLOW_PROTECTED_TAGS
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -120,7 +60,7 @@ clean.add_command(rsync_past_run_dirs)
 @clean.command("hk-alignment-files")
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
+@DRY_RUN
 @click.pass_obj
 def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
@@ -166,7 +106,7 @@ def _get_confirm_question(bundle, file_obj):
     help="Clean alignment files with analysis dates older then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@DRY_RUN
 @click.pass_context
 def scout_finished_cases(
     context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
@@ -195,7 +135,7 @@ def scout_finished_cases(
     default=365,
     help="Clean all files with analysis dates older then given number of days",
 )
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@DRY_RUN
 @click.pass_context
 def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False):
     """Clean up all files for all pipelines but those whitelisted"""
@@ -207,7 +147,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     pipeline: Pipeline
     for pipeline in Pipeline:
 
-        protected_tags_lists = PIPELINE_PROTECTED_TAGS.get(pipeline)
+        protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
         if protected_tags_lists:
             LOG.debug(f"protected tags defined for {pipeline} {protected_tags_lists}")
         else:
@@ -290,7 +230,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @click.option("-p", "--pipeline", type=Pipeline, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@DRY_RUN
 @click.pass_obj
 def hk_bundle_files(
     context: CGConfig,
@@ -356,12 +296,7 @@ def hk_bundle_files(
 
 @clean.command("invalid-flow-cell-dirs")
 @click.option("-f", "--failed-only", is_flag=True, help="Shows failed flow cells only")
-@click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    help="Runs this command without actually removing flow cells!",
-)
+@DRY_RUN
 @click.pass_obj
 def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, dry_run: bool):
     """Removes invalid flow cell directories from demultiplexed-runs"""
@@ -431,12 +366,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
 
 
 @clean.command("fix-flow-cell-status")
-@click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    help="Runs this command without actually fixing flow cell statuses!",
-)
+@DRY_RUN
 @click.pass_obj
 def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     """set correct flow cell statuses in statusdb"""
