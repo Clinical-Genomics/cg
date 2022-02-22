@@ -4,6 +4,7 @@ from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_FASTQ_TAGS
+from pyparsing import basestring
 
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):
@@ -170,3 +171,19 @@ def test_check_bundle_files(
 
     # Then only the new file should be returned
     assert files_to_add == [fastq_file]
+
+
+def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
+    """Test get tag names on a file"""
+    # GIVEN a housekeeper api with a file
+    file_obj = populated_housekeeper_api.files().first()
+    assert file_obj.tags
+
+    # WHEN fetching tags of a file
+    tag_names = populated_housekeeper_api.get_tag_names_from_file(file_obj)
+
+    # THEN is a list of tag names
+    assert tag_names is not None
+    # THEN type is list of strings
+    assert isinstance(tag_names, list)
+    assert all(isinstance(elem, basestring) for elem in tag_names)

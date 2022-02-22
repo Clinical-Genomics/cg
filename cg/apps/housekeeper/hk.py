@@ -233,15 +233,20 @@ class HousekeeperAPI:
         """Create a new tag"""
         return self._store.new_tag(name, category)
 
-    def add_tag(self, name: str, category: str = None):
+    def add_tag(self, name: str, category: str = None) -> models.Tag:
         """Add a tag to the database"""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
-    def tag(self, name: str):
+    def tag(self, name: str) -> models.Tag:
         """Fetch a tag"""
         return self._store.tag(name)
+
+    @staticmethod
+    def get_tag_names_from_file(file: models.File) -> [str]:
+        """Fetch a tag"""
+        return [tag.name for tag in file.tags]
 
     def include(self, version_obj: models.Version):
         """Call the include version function to import related assets."""
@@ -255,10 +260,6 @@ class HousekeeperAPI:
     def commit(self):
         """Wrap method in Housekeeper Store"""
         return self._store.commit()
-
-    def session_no_autoflush(self):
-        """Wrap property in Housekeeper Store"""
-        return self._store.session.no_autoflush
 
     def get_root_dir(self):
         """Returns the root dir of Housekeeper"""

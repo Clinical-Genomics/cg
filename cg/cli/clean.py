@@ -20,6 +20,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.constants.constants import DRY_RUN, Sequencers
+from cg.constants.tags import WORKFLOW_PROTECTED_TAGS
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
@@ -27,8 +28,6 @@ from cg.store import Store, models
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 from tabulate import tabulate
-
-from cg.constants.tags import WORKFLOW_PROTECTED_TAGS
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -114,7 +113,7 @@ def _get_confirm_question(bundle, file_obj):
 @DRY_RUN
 @click.pass_context
 def scout_finished_cases(
-    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+        context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of solved and archived scout cases"""
     scout_api: ScoutAPI = context.obj.scout_api
@@ -131,6 +130,57 @@ def scout_finished_cases(
 
     for bundle in bundles:
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
+
+
+def has_protected_tags(file: hk_models.File, protected_tags_lists: List[List[str]]) -> bool:
+    """Check if a file has any protected tags"""
+
+    LOG.info(f"File {file.full_path} has the tags {file.tags}")
+    version_file_tags: List[str] = HousekeeperAPI.get_tag_names_from_file(file)
+
+    _has_protected_tags: bool = False
+    for protected_tags in protected_tags_lists:
+
+        protected_tags_on_file = set(version_file_tags).intersection(protected_tags)
+        if protected_tags_on_file:
+            if protected_tags_on_file == set(protected_tags):
+                LOG.debug(
+                    "File %s has the protected tag(s) %s, skipping.",
+                    file.full_path,
+                    protected_tags_on_file,
+                )
+                _has_protected_tags = True
+                break
+
+    if not _has_protected_tags:
+        LOG.info("File %s has no protected tags.", file.full_path)
+    return _has_protected_tags
+
+
+def get_bundle_files(housekeeper_api: HousekeeperAPI, bundle_name: str, started_at: datetime, pipeline: Pipeline) -> \
+List[hk_models.File]:
+    """Get any bundle files for a specific version"""
+    hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
+        bundle=bundle_name, date=started_at
+    )
+    if not hk_bundle_version:
+        LOG.warning(
+            f"Version not found for "
+            f"bundle:{bundle_name}; "
+            f"pipeline: {pipeline}; "
+            f"date {started_at}"
+        )
+        return []
+
+    LOG.info(
+        f"Version found for "
+        f"bundle:{bundle_name}; "
+        f"pipeline: {pipeline}; "
+        f"date {started_at}"
+    )
+    return housekeeper_api.get_files(
+        bundle=bundle_name, version=hk_bundle_version.id
+    ).all()
 
 
 @clean.command("hk-case-bundle-files")
@@ -164,52 +214,15 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
         analysis: models.Analysis
         for analysis in analyses:
             LOG.info(f"Cleaning analysis {analysis}")
-            bundle_name: str = analysis.family.internal_id
-            hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
-                bundle=bundle_name, date=analysis.started_at
-            )
-            if not hk_bundle_version:
-                LOG.warning(
-                    f"Version not found for "
-                    f"bundle:{bundle_name}; "
-                    f"pipeline: {analysis.pipeline}; "
-                    f"date {analysis.started_at}"
-                )
-                continue
-
-            LOG.info(
-                f"Version found for "
-                f"bundle:{bundle_name}; "
-                f"pipeline: {analysis.pipeline}; "
-                f"date {analysis.started_at}"
-            )
-            version_files: List[hk_models.File] = housekeeper_api.get_files(
-                bundle=analysis.family.internal_id, version=hk_bundle_version.id
-            ).all()
+            version_files: List[hk_models.File] = get_bundle_files(housekeeper_api=housekeeper_api,
+                                                                   bundle_name=analysis.family.internal_id,
+                                                                   started_at=analysis.started_at, pipeline=pipeline)
 
             version_file: hk_models.File
             for version_file in version_files:
-                LOG.info(f"File {version_file.full_path} has the tags {version_file.tags}")
-                version_file_tags: List[str] = [tag.name for tag in version_file.tags]
 
-                has_protected_tags: bool = False
-                for protected_tags in protected_tags_lists:
-
-                    protected_tags_on_file = set(version_file_tags).intersection(protected_tags)
-                    if protected_tags_on_file:
-                        if protected_tags_on_file == set(protected_tags):
-                            has_protected_tags = True
-                            break
-
-                if has_protected_tags:
-                    LOG.debug(
-                        "File %s has the protected tag(s) %s, skipping.",
-                        version_file.full_path,
-                        protected_tags_on_file,
-                    )
+                if has_protected_tags(version_file, protected_tags_lists=protected_tags_lists):
                     continue
-
-                LOG.info("File %s has no protected tags.", version_file.full_path)
 
                 file_path: Path = Path(version_file.full_path)
                 if not file_path.exists():
@@ -238,12 +251,12 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @DRY_RUN
 @click.pass_obj
 def hk_bundle_files(
-    context: CGConfig,
-    case_id: Optional[str],
-    tags: list,
-    days_old: Optional[int],
-    pipeline: Optional[Pipeline],
-    dry_run: bool,
+        context: CGConfig,
+        case_id: Optional[str],
+        tags: list,
+        days_old: Optional[int],
+        pipeline: Optional[Pipeline],
+        dry_run: bool,
 ):
     """Remove files found in housekeeper bundles"""
 

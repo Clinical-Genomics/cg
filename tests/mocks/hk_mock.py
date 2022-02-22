@@ -5,8 +5,9 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import List, Optional
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import models
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
@@ -341,10 +342,10 @@ class MockHousekeeperAPI:
         return version_obj
 
     def add_version(
-        self,
-        version_obj: MockVersion = None,
-        created_at: datetime.datetime = None,
-        expires_at: datetime.datetime = None,
+            self,
+            version_obj: MockVersion = None,
+            created_at: datetime.datetime = None,
+            expires_at: datetime.datetime = None,
     ):
         """Create a new bundle version"""
         if not version_obj:
@@ -353,11 +354,11 @@ class MockHousekeeperAPI:
         return version_obj
 
     def new_file(
-        self,
-        path: str,
-        checksum: str = None,
-        to_archive: bool = False,
-        tags: list = [],
+            self,
+            path: str,
+            checksum: str = None,
+            to_archive: bool = False,
+            tags: list = [],
     ):
         """Create a new file"""
         self.update_id_counter()
@@ -436,7 +437,7 @@ class MockHousekeeperAPI:
         return new_file
 
     def check_bundle_files(
-        self, bundle_name: str, file_paths: List[Path], last_version, tags: Optional[list] = None
+            self, bundle_name: str, file_paths: List[Path], last_version, tags: Optional[list] = None
     ) -> List[Path]:
         """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
         for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
@@ -457,6 +458,11 @@ class MockHousekeeperAPI:
         self.commit()
         LOG.info("New bundle created with name %s", new_bundle.name)
         return new_bundle
+
+    @staticmethod
+    def get_tag_names_from_file(file) -> [str]:
+        """Fetch a tag"""
+        return HousekeeperAPI.get_tag_names_from_file(file=file)
 
     @staticmethod
     def checksum(path):
