@@ -203,7 +203,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     before: datetime = datetime.now() - timedelta(days=days_old)
 
-    size_cleaned = 0
+    size_cleaned: int = 0
     pipeline: Pipeline
     for pipeline in Pipeline:
 
