@@ -113,7 +113,7 @@ def _get_confirm_question(bundle, file_obj):
 @DRY_RUN
 @click.pass_context
 def scout_finished_cases(
-        context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
+    context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of solved and archived scout cases"""
     scout_api: ScoutAPI = context.obj.scout_api
@@ -157,8 +157,9 @@ def has_protected_tags(file: hk_models.File, protected_tags_lists: List[List[str
     return _has_protected_tags
 
 
-def get_bundle_files(housekeeper_api: HousekeeperAPI, bundle_name: str, started_at: datetime, pipeline: Pipeline) -> \
-List[hk_models.File]:
+def get_bundle_files(
+    housekeeper_api: HousekeeperAPI, bundle_name: str, started_at: datetime, pipeline: Pipeline
+) -> List[hk_models.File]:
     """Get any bundle files for a specific version"""
     hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
         bundle=bundle_name, date=started_at
@@ -178,9 +179,7 @@ List[hk_models.File]:
         f"pipeline: {pipeline}; "
         f"date {started_at}"
     )
-    return housekeeper_api.get_files(
-        bundle=bundle_name, version=hk_bundle_version.id
-    ).all()
+    return housekeeper_api.get_files(bundle=bundle_name, version=hk_bundle_version.id).all()
 
 
 @clean.command("hk-case-bundle-files")
@@ -214,9 +213,12 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
         analysis: models.Analysis
         for analysis in analyses:
             LOG.info(f"Cleaning analysis {analysis}")
-            version_files: List[hk_models.File] = get_bundle_files(housekeeper_api=housekeeper_api,
-                                                                   bundle_name=analysis.family.internal_id,
-                                                                   started_at=analysis.started_at, pipeline=pipeline)
+            version_files: List[hk_models.File] = get_bundle_files(
+                housekeeper_api=housekeeper_api,
+                bundle_name=analysis.family.internal_id,
+                started_at=analysis.started_at,
+                pipeline=pipeline,
+            )
 
             version_file: hk_models.File
             for version_file in version_files:
@@ -251,12 +253,12 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @DRY_RUN
 @click.pass_obj
 def hk_bundle_files(
-        context: CGConfig,
-        case_id: Optional[str],
-        tags: list,
-        days_old: Optional[int],
-        pipeline: Optional[Pipeline],
-        dry_run: bool,
+    context: CGConfig,
+    case_id: Optional[str],
+    tags: list,
+    days_old: Optional[int],
+    pipeline: Optional[Pipeline],
+    dry_run: bool,
 ):
     """Remove files found in housekeeper bundles"""
 
