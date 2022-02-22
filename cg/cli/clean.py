@@ -211,7 +211,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
         if protected_tags_lists:
             LOG.debug(f"Protected tags defined for {pipeline} {protected_tags_lists}")
         else:
-            LOG.debug(f"no protected tags defined for {pipeline}, skipping")
+            LOG.debug(f"No protected tags defined for {pipeline}, skipping")
             continue
 
         analyses: Query = status_db.get_analyses_before_date(pipeline=pipeline, before=before)
