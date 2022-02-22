@@ -35,7 +35,7 @@ class DemultiplexingAPI:
         self.dry_run: bool = False
 
     @property
-    def priority(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
+    def slurm_quality_of_service(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
         if self.environment == "stage":
             return SlurmQos.LOW
         return SlurmQos.HIGH
@@ -201,7 +201,7 @@ class DemultiplexingAPI:
             analysis_type="other",
             config_path=flowcell.trailblazer_config_path.as_posix(),
             out_dir=flowcell.trailblazer_config_path.parent.as_posix(),
-            slurm_quality_of_service=self.priority,
+            slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail,
             data_analysis=str(Pipeline.DEMULTIPLEX),
         )
@@ -240,7 +240,7 @@ class DemultiplexingAPI:
                 log_dir=log_path.parent.as_posix(),
                 memory=125,
                 number_tasks=18,
-                priority=self.priority,
+                priority=self.slurm_quality_of_service,
             )
         if flowcell.bcl_converter == "dragen":
             sbatch_parameters = SbatchDragen(
@@ -251,7 +251,7 @@ class DemultiplexingAPI:
                 hours=36,
                 job_name=self.get_run_name(flowcell),
                 log_dir=log_path.parent.as_posix(),
-                priority=self.priority,
+                priority=self.slurm_quality_of_service,
             )
 
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
