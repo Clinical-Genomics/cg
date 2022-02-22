@@ -226,18 +226,20 @@ class CrunchyAPI:
             spring_path=compression_obj.spring_path,
             pending_path=compression_obj.pending_path,
         )
-        sbatch_info = {
-            "job_name": "_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
-            "account": self.slurm_account,
-            "number_tasks": 12,
-            "memory": 50,
-            "log_dir": log_dir.as_posix(),
-            "email": self.mail_user,
-            "hours": 24,
-            "commands": commands,
-            "error": error_function,
-        }
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_parameters = Sbatch(
+            job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
+            account=self.slurm_account,
+            number_tasks=12,
+            memory=50,
+            log_dir=log_dir.as_posix(),
+            email=self.mail_user,
+            hours=24,
+            commands=commands,
+            error=error_function,
+        )
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(
+            sbatch_parameters=sbatch_parameters
+        )
         sbatch_path: Path = files.get_fastq_to_spring_sbatch_path(
             log_dir=log_dir, run_name=compression_obj.run_name
         )
@@ -280,19 +282,18 @@ class CrunchyAPI:
             checksum_first=files_info["fastq_first"].checksum,
             checksum_second=files_info["fastq_second"].checksum,
         )
-
-        sbatch_info = {
-            "job_name": "_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
-            "account": self.slurm_account,
-            "number_tasks": 12,
-            "memory": 50,
-            "log_dir": log_dir.as_posix(),
-            "email": self.mail_user,
-            "hours": 24,
-            "commands": commands,
-            "error": error_function,
-        }
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_parameters = Sbatch(
+            job_name="_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
+            account=self.slurm_account,
+            number_tasks=12,
+            memory=50,
+            log_dir=log_dir.as_posix(),
+            email=self.mail_user,
+            hours=24,
+            commands=commands,
+            error=error_function,
+        )
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path = files.get_spring_to_fastq_sbatch_path(
             log_dir=log_dir, run_name=compression_obj.run_name
         )

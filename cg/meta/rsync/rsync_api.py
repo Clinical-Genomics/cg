@@ -164,23 +164,22 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-
-        sbatch_info = {
-            "job_name": "_".join([str(ticket_id), "rsync"]),
-            "account": self.account,
-            "number_tasks": 1,
-            "memory": 1,
-            "log_dir": self.log_dir.as_posix(),
-            "email": self.mail_user,
-            "hours": 24,
-            "priority": self.slurm_quality_of_service,
-            "commands": commands,
-            "error": ERROR_RSYNC_FUNCTION.format(),
-            "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
-        }
+        sbatch_parameters = Sbatch(
+            job_name="_".join([str(ticket_id), "rsync"]),
+            account=self.account,
+            number_tasks=1,
+            memory=1,
+            log_dir=self.log_dir.as_posix(),
+            email=self.mail_user,
+            hours=24,
+            quality_of_service=self.slurm_quality_of_service,
+            commands=commands,
+            error=ERROR_RSYNC_FUNCTION.format(),
+            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+        )
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
         sbatch_path = self.log_dir / "_".join([str(ticket_id), "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path

@@ -71,19 +71,21 @@ class ExternalDataAPI(MetaAPI):
             source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
             destination_path=self.get_destination_path(customer=cust),
         )
-        sbatch_info = {
-            "job_name": str(ticket_id) + self.RSYNC_FILE_POSTFIX,
-            "account": self.account,
-            "number_tasks": 1,
-            "memory": 1,
-            "log_dir": str(log_dir),
-            "email": self.mail_user,
-            "hours": 24,
-            "commands": command,
-            "error": error_function,
-        }
+        sbatch_parameters = Sbatch(
+            job_name=str(ticket_id) + self.RSYNC_FILE_POSTFIX,
+            account=self.account,
+            number_tasks=1,
+            memory=1,
+            log_dir=str(log_dir),
+            email=self.mail_user,
+            hours=24,
+            commands=command,
+            error=error_function,
+        )
         self.slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = self.slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_content: str = self.slurm_api.generate_sbatch_content(
+            sbatch_parameters=sbatch_parameters
+        )
         sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(

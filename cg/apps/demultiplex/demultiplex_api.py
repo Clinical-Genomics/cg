@@ -240,7 +240,7 @@ class DemultiplexingAPI:
                 log_dir=log_path.parent.as_posix(),
                 memory=125,
                 number_tasks=18,
-                priority=self.slurm_quality_of_service,
+                quality_of_service=self.slurm_quality_of_service,
             )
         if flowcell.bcl_converter == "dragen":
             sbatch_parameters = SbatchDragen(
@@ -251,7 +251,7 @@ class DemultiplexingAPI:
                 hours=36,
                 job_name=self.get_run_name(flowcell),
                 log_dir=log_path.parent.as_posix(),
-                priority=self.slurm_quality_of_service,
+                quality_of_service=self.slurm_quality_of_service,
             )
 
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
