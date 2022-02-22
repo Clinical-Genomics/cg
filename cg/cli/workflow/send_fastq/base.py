@@ -36,7 +36,6 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: SendFastqAnalysisAPI = context.obj.meta_apis["analysis_api"]
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
-        LOG.info(case_obj.internal_id)
         case_id = case_obj.internal_id
         try:
             context.invoke(start, case_id=case_id, dry_run=dry_run)
@@ -88,11 +87,13 @@ def run(
     try:
         analysis_api.deliver_api.deliver_files(case)
         analysis_api.rsync_api.run_rsync_on_slurm(
-            job_name="auto_deliver_fastq" + str(ticket_id), ticket_id=ticket_id, dry_run=dry_run
+            job_name="auto_deliver_fastq_" + str(ticket_id), ticket_id=ticket_id, dry_run=dry_run
         )
         analysis_api.trailblazer_api.add_pending_analysis(
             case_id=case_id,
-            analysis_type="fastq",
+            analysis_type=analysis_api.get_application_type(
+                analysis_api.status_db.family(case_id).links[0].sample
+            ),
             config_path=str(analysis_api.rsync_api.trailblazer_config_path),
             out_dir=str(analysis_api.rsync_api.log_dir),
             priority=analysis_api.convert_case_priority(case),
