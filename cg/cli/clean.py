@@ -143,15 +143,15 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     before: datetime = datetime.now() - timedelta(days=days_old)
 
-    size_cleaned = 0
+    size_cleaned: int = 0
     pipeline: Pipeline
     for pipeline in Pipeline:
 
         protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
         if protected_tags_lists:
-            LOG.debug(f"protected tags defined for {pipeline} {protected_tags_lists}")
+            LOG.debug(f"Protected tags defined for {pipeline} {protected_tags_lists}")
         else:
-            LOG.debug(f"no protected tags defined for {pipeline}, skipping")
+            LOG.debug(f"No protected tags defined for {pipeline}, skipping")
             continue
 
         analyses: Query = status_db.get_analyses_before_date(pipeline=pipeline, before=before)
@@ -184,8 +184,8 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
             version_file: hk_models.File
             for version_file in version_files:
-                LOG.info(f"File {version_file.full_path} has the tags {version_file.tags}.")
-                version_file_tags: [str] = [tag.name for tag in version_file.tags]
+                LOG.info(f"File {version_file.full_path} has the tags {version_file.tags}")
+                version_file_tags: List[str] = [tag.name for tag in version_file.tags]
 
                 has_protected_tags: bool = False
                 for protected_tags in protected_tags_lists:
