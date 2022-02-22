@@ -57,6 +57,11 @@ clean.add_command(mutant_past_run_dirs)
 clean.add_command(rsync_past_run_dirs)
 
 
+def get_date_days_ago(days_ago: int) -> datetime:
+    """Calculate the date 'days_ago'"""
+    return datetime.now() - timedelta(days=days_ago)
+
+
 @clean.command("hk-alignment-files")
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
@@ -141,7 +146,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     """Clean up all files for all pipelines but those whitelisted"""
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
-    before: datetime = datetime.now() - timedelta(days=days_old)
+    before: datetime = get_date_days_ago(days_ago=days_old)
 
     size_cleaned: int = 0
     pipeline: Pipeline
@@ -245,7 +250,7 @@ def hk_bundle_files(
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
-    date_threshold: datetime = datetime.now() - timedelta(days=days_old)
+    date_threshold: datetime = get_date_days_ago(days_ago=days_old)
 
     analyses: Query = status_db.get_analyses_before_date(
         case_id=case_id, before=date_threshold, pipeline=pipeline

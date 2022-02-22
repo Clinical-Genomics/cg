@@ -9,6 +9,8 @@ from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
+from cg.cli.clean import get_date_days_ago
+
 
 def test_date_days_ago_zero_days():
     # GIVEN
@@ -32,10 +34,6 @@ def test_date_days_ago_one_days():
     # THEN result should be equal to yesterday
     assert isinstance(result, dt.datetime)
     assert result.date() == yesterday.date()
-
-
-def get_date_days_ago(days_ago: int) -> dt.datetime:
-    return dt.datetime.now() - dt.timedelta(days=days_ago)
 
 
 def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGConfig, caplog):
