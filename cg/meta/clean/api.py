@@ -86,21 +86,21 @@ class CleanAPI:
             ):
                 LOG.info("Cleaning analysis %s", analysis)
 
-                version_file: hk_models.File
-                for version_file in self.get_bundle_files(
+                hk_file: hk_models.File
+                for hk_file in self.get_bundle_files(
                     bundle_name=analysis.family.internal_id,
                     started_at=analysis.started_at,
                     pipeline=pipeline,
                 ):
 
                     if self.has_protected_tags(
-                        version_file, protected_tags_lists=protected_tags_lists
+                        hk_file, protected_tags_lists=protected_tags_lists
                     ):
                         continue
 
-                    file_path: Path = Path(version_file.full_path)
+                    file_path: Path = Path(hk_file.full_path)
                     if not file_path.exists():
                         LOG.info("File %s not on disk.", file_path)
                         continue
                     LOG.info("File %s found on disk.", file_path)
-                    yield version_file
+                    yield hk_file
