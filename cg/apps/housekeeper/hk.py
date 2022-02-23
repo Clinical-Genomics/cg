@@ -245,7 +245,7 @@ class HousekeeperAPI:
 
     @staticmethod
     def get_tag_names_from_file(file: models.File) -> List[str]:
-        """Fetch a tag"""
+        """Fetch tag names for a file"""
         return [tag.name for tag in file.tags]
 
     def include(self, version_obj: models.Version):
