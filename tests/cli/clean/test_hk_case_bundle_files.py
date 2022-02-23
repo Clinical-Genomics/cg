@@ -61,9 +61,10 @@ def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGCon
 
 def test_clean_hk_case_files_single_analysis(
     caplog,
-    cli_runner: CliRunner,
     cg_context: CGConfig,
+    cli_runner: CliRunner,
     helpers: StoreHelpers,
+    hk_bundle_data: dict,
     timestamp: dt.datetime,
 ):
     # GIVEN we have some analyses to clean
@@ -78,16 +79,8 @@ def test_clean_hk_case_files_single_analysis(
     )
     bundle_name: str = analysis.family.internal_id
 
-    # GIVEN a housekeeper api with some alignment files
-    file_path = "path/to_file.cram"
-    hk_bundle_data = {
-        "name": bundle_name,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [
-            {"path": file_path, "archive": False, "tags": [bundle_name, "cram"]},
-        ],
-    }
+    # GIVEN a housekeeper api with some files
+    hk_bundle_data["name"] = bundle_name
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
     # WHEN running the clean command
@@ -102,14 +95,15 @@ def test_clean_hk_case_files_single_analysis(
     assert "Version found for" in caplog.text
     assert "has the tags" in caplog.text
     assert "has no protected tags" in caplog.text
-    assert "not on disk" in caplog.text
+    assert "found on disk" in caplog.text
 
 
 def test_clean_hk_case_files_analysis_with_protected_tag(
     caplog,
-    cli_runner: CliRunner,
     cg_context: CGConfig,
+    cli_runner: CliRunner,
     helpers: StoreHelpers,
+    hk_bundle_data: dict,
     timestamp: dt.datetime,
 ):
     # GIVEN we have some analyses to clean
@@ -126,15 +120,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
 
     # GIVEN a housekeeper api with some alignment files with protected tags
     protected_tags = WORKFLOW_PROTECTED_TAGS[pipeline][0]
-    file_path = "path/to_file.fastq"
-    hk_bundle_data = {
-        "name": bundle_name,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [
-            {"path": file_path, "archive": False, "tags": protected_tags},
-        ],
-    }
+    hk_bundle_data["files"][0]["tags"] = protected_tags
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
     # WHEN running the clean command
