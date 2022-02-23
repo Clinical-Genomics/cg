@@ -244,7 +244,7 @@ class HousekeeperAPI:
         return self._store.tag(name)
 
     @staticmethod
-    def get_tag_names_from_file(file: models.File) -> [str]:
+    def get_tag_names_from_file(file: models.File) -> List[str]:
         """Fetch a tag"""
         return [tag.name for tag in file.tags]
 
