@@ -51,21 +51,19 @@ class CleanAPI:
         """Check if a file has any protected tags"""
 
         LOG.info(f"File {file.full_path} has the tags {file.tags}")
-        version_file_tags: List[str] = HousekeeperAPI.get_tag_names_from_file(file)
+        file_tags: List[str] = HousekeeperAPI.get_tag_names_from_file(file)
 
         _has_protected_tags: bool = False
         for protected_tags in protected_tags_lists:
 
-            protected_tags_on_file = set(version_file_tags).intersection(protected_tags)
-            if protected_tags_on_file:
-                if protected_tags_on_file == set(protected_tags):
-                    LOG.debug(
-                        "File %s has the protected tag(s) %s, skipping.",
-                        file.full_path,
-                        protected_tags_on_file,
-                    )
-                    _has_protected_tags = True
-                    break
+            if set(protected_tags).issubset(set(file_tags)):
+                LOG.debug(
+                    "File %s has the protected tag(s) %s, skipping.",
+                    file.full_path,
+                    protected_tags,
+                )
+                _has_protected_tags = True
+                break
 
         if not _has_protected_tags:
             LOG.info("File %s has no protected tags.", file.full_path)
@@ -82,21 +80,18 @@ class CleanAPI:
                 LOG.debug("No protected tags defined for %s, skipping", pipeline)
                 continue
 
-            analyses: Query = self.status_db.get_analyses_before_date(
-                pipeline=pipeline, before=before
-            )
-
             analysis: models.Analysis
-            for analysis in analyses:
+            for analysis in self.status_db.get_analyses_before_date(
+                pipeline=pipeline, before=before
+            ):
                 LOG.info("Cleaning analysis %s", analysis)
-                version_files: List[hk_models.File] = self.get_bundle_files(
+
+                version_file: hk_models.File
+                for version_file in self.get_bundle_files(
                     bundle_name=analysis.family.internal_id,
                     started_at=analysis.started_at,
                     pipeline=pipeline,
-                )
-
-                version_file: hk_models.File
-                for version_file in version_files:
+                ):
 
                     if self.has_protected_tags(
                         version_file, protected_tags_lists=protected_tags_lists
