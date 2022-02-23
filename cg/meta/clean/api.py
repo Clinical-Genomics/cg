@@ -70,7 +70,7 @@ class CleanAPI:
         return _has_protected_tags
 
     def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[hk_models.File]:
-        """Returns all existing bundle files from analyses started before 'before' that hos no protected tags"""
+        """Returns all existing bundle files from analyses started before 'before' that have no protected tags"""
 
         pipeline: Pipeline
         for pipeline in Pipeline:
