@@ -118,8 +118,9 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     )
     bundle_name: str = analysis.family.internal_id
 
-    # GIVEN a housekeeper api with some alignment files with protected tags
+    # GIVEN a housekeeper api with some file with protected tags
     protected_tags = WORKFLOW_PROTECTED_TAGS[pipeline][0]
+    hk_bundle_data["name"] = bundle_name
     hk_bundle_data["files"][0]["tags"] = protected_tags
     helpers.ensure_hk_bundle(cg_context.housekeeper_api, bundle_data=hk_bundle_data)
 
