@@ -161,7 +161,7 @@ def test_check_bundle_files(
     # GIVEN a housekeeper version with a file
     version = populated_housekeeper_api.version(bundle=case_id, date=a_date)
 
-    # WHEN when attempting to add two files, one existing and one new
+    # WHEN attempting to add two files, one existing and one new
     files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
         file_paths=[Path(bed_file), fastq_file],
         bundle_name=case_id,
