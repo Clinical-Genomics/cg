@@ -173,9 +173,30 @@ class RsyncAPI(MetaAPI):
                 for folder in folder_list
             ]
         )
+        sbatch_info = {
+            "job_name": "_".join([case_id, "rsync"]),
+            "account": self.account,
+            "number_tasks": 1,
+            "memory": 1,
+            "log_dir": self.log_dir.as_posix(),
+            "email": self.mail_user,
+            "hours": 24,
+            "priority": priority,
+            "commands": commands,
+            "error": ERROR_RSYNC_FUNCTION.format(),
+            "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
+        }
+        slurm_api = SlurmAPI()
+        slurm_api.set_dry_run(dry_run=dry_run)
+        sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_path = self.log_dir / "_".join([case_id, "rsync.sh"])
+        sbatch_number: int = slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        return sbatch_number
 
     def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
-        self.set_log_dir(ticket_id=ticket_id)
+        self.set_log_dir(folder_prefix=str(ticket_id))
         self.create_log_dir(dry_run=dry_run)
         source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
             ticket_id=ticket_id
