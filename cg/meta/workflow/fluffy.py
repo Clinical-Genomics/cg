@@ -242,4 +242,4 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
 
     def get_slurm_param_qos(self, case_id):
-        return f"qos:{self.get_priority_for_case(case_id=case_id)}"
+        return f"qos:{self.get_slurm_qos_for_case(case_id=case_id)}"
