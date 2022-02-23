@@ -38,7 +38,7 @@ def validate_float(value: Union[float, str]) -> str:
 
 
 def validate_date(date: datetime) -> str:
-    """Return the date part (year, month, day) from a datetime object"""
+    """Returns the date part (year, month, day) from a datetime object"""
 
     return str(date.date()) if date else NA_FIELD
 
