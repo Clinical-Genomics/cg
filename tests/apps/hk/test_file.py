@@ -183,6 +183,6 @@ def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
 
     # THEN a list of tag names is returned
     assert tag_names is not None
-    # THEN type is list of strings
+    # THEN the return type is a list of strings
     assert isinstance(tag_names, list)
     assert all(isinstance(elem, str) for elem in tag_names)
