@@ -3,8 +3,6 @@ from datetime import datetime
 from typing import Iterator, List, Optional
 from pathlib import Path
 
-from alchy import Query
-
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
@@ -20,31 +18,34 @@ class CleanAPI:
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
-    def get_bundle_files(
-        self, bundle_name: str, started_at: datetime, pipeline: Pipeline
-    ) -> List[hk_models.File]:
+    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> List[hk_models.File]:
         """Get any bundle files for a specific version"""
-        hk_bundle_version: Optional[hk_models.Version] = self.housekeeper_api.version(
-            bundle=bundle_name, date=started_at
-        )
-        if not hk_bundle_version:
-            LOG.warning(
-                f"Version not found for "
+
+        analysis: models.Analysis
+        for analysis in self.status_db.get_analyses_before_date(pipeline=pipeline, before=before):
+            bundle_name = analysis.family.internal_id
+
+            hk_bundle_version: Optional[hk_models.Version] = self.housekeeper_api.version(
+                bundle=bundle_name, date=analysis.started_at
+            )
+            if not hk_bundle_version:
+                LOG.warning(
+                    f"Version not found for "
+                    f"bundle:{bundle_name}; "
+                    f"pipeline: {pipeline}; "
+                    f"date {analysis.started_at}"
+                )
+                return []
+
+            LOG.info(
+                f"Version found for "
                 f"bundle:{bundle_name}; "
                 f"pipeline: {pipeline}; "
-                f"date {started_at}"
+                f"date {analysis.started_at}"
             )
-            return []
-
-        LOG.info(
-            f"Version found for "
-            f"bundle:{bundle_name}; "
-            f"pipeline: {pipeline}; "
-            f"date {started_at}"
-        )
-        return self.housekeeper_api.get_files(
-            bundle=bundle_name, version=hk_bundle_version.id
-        ).all()
+            return self.housekeeper_api.get_files(
+                bundle=bundle_name, version=hk_bundle_version.id
+            ).all()
 
     @staticmethod
     def has_protected_tags(file: hk_models.File, protected_tags_lists: List[List[str]]) -> bool:
@@ -80,27 +81,23 @@ class CleanAPI:
                 LOG.debug("No protected tags defined for %s, skipping", pipeline)
                 continue
 
-            analysis: models.Analysis
-            for analysis in self.status_db.get_analyses_before_date(
-                pipeline=pipeline, before=before
-            ):
-                LOG.info("Cleaning analysis %s", analysis)
+            hk_files: [hk_models.File] = self.get_bundle_files(
+                before=before,
+                pipeline=pipeline,
+            )
 
-                hk_file: hk_models.File
-                for hk_file in self.get_bundle_files(
-                    bundle_name=analysis.family.internal_id,
-                    started_at=analysis.started_at,
-                    pipeline=pipeline,
-                ):
+            if not hk_files:
+                LOG.debug("No files found for %s, skipping", pipeline)
+                continue
 
-                    if self.has_protected_tags(
-                        hk_file, protected_tags_lists=protected_tags_lists
-                    ):
-                        continue
+            hk_file: hk_models.File
+            for hk_file in hk_files:
+                if self.has_protected_tags(hk_file, protected_tags_lists=protected_tags_lists):
+                    continue
 
-                    file_path: Path = Path(hk_file.full_path)
-                    if not file_path.exists():
-                        LOG.info("File %s not on disk.", file_path)
-                        continue
-                    LOG.info("File %s found on disk.", file_path)
-                    yield hk_file
+                file_path: Path = Path(hk_file.full_path)
+                if not file_path.exists():
+                    LOG.info("File %s not on disk.", file_path)
+                    continue
+                LOG.info("File %s found on disk.", file_path)
+                yield hk_file
