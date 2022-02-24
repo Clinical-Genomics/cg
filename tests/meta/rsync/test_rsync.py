@@ -7,7 +7,7 @@ from cgmodels.cg.constants import Pipeline
 from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store import models, Store
 
 
 def test_get_source_and_destination_paths(
@@ -63,7 +63,7 @@ def test_set_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
     base_path: Path = rsync_api.log_dir
 
     # WHEN setting the log directory
-    rsync_api.set_log_dir(ticket_id=ticket_number)
+    rsync_api.set_log_dir(folder_prefix=str(ticket_number))
 
     # THEN the log dir should set to a new path, different from the base path
     assert base_path.as_posix() != rsync_api.log_dir.as_posix()
@@ -75,7 +75,7 @@ def test_make_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    rsync_api.set_log_dir(ticket_id=ticket_number)
+    rsync_api.set_log_dir(folder_prefix=str(ticket_number))
     rsync_api.create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
@@ -109,6 +109,34 @@ def test_run_rsync_on_slurm(
 
     # THEN check that SARS-COV-2 analysis is not delivered
     assert "Delivering report for SARS-COV-2 analysis" not in caplog.text
+
+    # THEN check that an integer was returned as sbatch number
+    assert isinstance(sbatch_number, int)
+
+
+def test_run_rsync_single_case(
+    microsalt_case: models.Family, rsync_api: RsyncAPI, caplog, mocker, helpers, ticket_number: int
+):
+    """Test for running rsync on a single case on slurm"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a valid microsalt case
+    case: models.Family = microsalt_case
+
+    # GIVEN paths needed to run rsync
+    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
+    RsyncAPI.get_source_and_destination_paths.return_value = {
+        "delivery_source_path": Path("/path/to/source"),
+        "rsync_destination_path": Path("/path/to/destination"),
+    }
+
+    mocker.patch.object(Store, "get_ticket_from_case")
+    Store.get_ticket_from_case.return_value = ticket_number
+
+    # WHEN the destination path is created
+    sbatch_number: int = rsync_api.run_rsync_single_case(
+        case_id=case.internal_id, case_files_present=True, dry_run=True
+    )
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
