@@ -26,31 +26,32 @@ WORKFLOW_PROTECTED_TAGS = {
     ],
     str(Pipeline.MIP_DNA): [
         ["vcf-snv-clinical"],
-        ["vcf-clinical"],       # legacy
+        ["vcf-clinical"],  # legacy
         ["vcf-snv-research"],
-        ["vcf-research"],       # legacy
+        ["vcf-research"],  # legacy
         ["vcf-str"],
         ["snv-gbcf", "snv-bcf"],
-        ["bcf-raw"],            # legacy
-        ["bcf-raw-index"],      # legacy
+        ["bcf-raw"],  # legacy
+        ["bcf-raw-index"],  # legacy
         ["mip-config"],
-        ["config"],             # legacy
+        ["config"],  # legacy
         ["mip-log"],
-        ["log"],                # legacy
+        ["log"],  # legacy
         ["mip-analyse", "reference-info"],
         ["sample-info"],
-        ["sampleinfo"],         # legacy
+        ["sampleinfo"],  # legacy
         ["qc-metrics"],
-        ["qc"],                 # legacy
+        ["qc"],  # legacy
         ["smn-calling"],
         ["sv-bcf"],
-        ["bcf-raw-sv"],         # legacy
+        ["bcf-raw-sv"],  # legacy
         ["vcf-sv-clinical"],
-        ["vcf-clinical-sv"],    # legacy
+        ["vcf-clinical-sv"],  # legacy
         ["vcf-sv-research"],
-        ["vcf-research-sv"],    # legacy
+        ["vcf-research-sv"],  # legacy
         ["exe-ver"],
         ["vcf2cytosure"],
+        ["delivery-report"],
     ],
     str(Pipeline.MIP_RNA): [
         ["vcf-snv-clinical"],
