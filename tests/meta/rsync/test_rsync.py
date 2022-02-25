@@ -28,13 +28,15 @@ def test_get_source_and_destination_paths(
     )
 
     # THEN the source path ends with a customer id, followed by "inbox" and a ticket id
-    assert source_and_destination_paths["delivery_source_path"].endswith(
-        f"/cust000/inbox/{str(ticket_number)}/"
+    assert (
+        source_and_destination_paths["delivery_source_path"]
+        .as_posix()
+        .endswith(f"/cust000/inbox/{ticket_number}")
     )
     # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
     assert (
-        source_and_destination_paths["rsync_destination_path"]
-        == f"server.name.se:/some/cust000/inbox/{str(ticket_number)}/"
+        source_and_destination_paths["rsync_destination_path"].as_posix()
+        == f"server.name.se:/some/cust000/inbox/{ticket_number}"
     )
 
 

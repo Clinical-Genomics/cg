@@ -88,11 +88,11 @@ class RsyncAPI(MetaAPI):
             LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
             raise CgError()
         customer_id: str = cases[0].customer.internal_id
-        source_and_destination_paths["delivery_source_path"]: Path = (
-            Path(self.delivery_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
+        source_and_destination_paths["delivery_source_path"]: Path = Path(
+            self.delivery_path, customer_id, "inbox", str(ticket_id)
         )
-        source_and_destination_paths["rsync_destination_path"]: Path = (
-            Path(self.destination_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
+        source_and_destination_paths["rsync_destination_path"]: Path = Path(
+            self.destination_path, customer_id, "inbox", str(ticket_id)
         )
         return source_and_destination_paths
 
