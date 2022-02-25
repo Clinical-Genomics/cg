@@ -18,10 +18,16 @@ class CleanAPI:
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
-    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> List[hk_models.File]:
+    def get_bundle_files(
+        self, before: datetime, pipeline: Pipeline
+    ) -> Iterator[List[hk_models.File]]:
         """Get any bundle files for a specific version"""
 
         analysis: models.Analysis
+        LOG.debug(
+            f"number of {pipeline} analyses before: {before} : {self.status_db.get_analyses_before_date(pipeline=pipeline, before=before).count()}"
+        )
+
         for analysis in self.status_db.get_analyses_before_date(pipeline=pipeline, before=before):
             bundle_name = analysis.family.internal_id
 
@@ -43,7 +49,7 @@ class CleanAPI:
                 f"pipeline: {pipeline}; "
                 f"date {analysis.started_at}"
             )
-            return self.housekeeper_api.get_files(
+            yield self.housekeeper_api.get_files(
                 bundle=bundle_name, version=hk_bundle_version.id
             ).all()
 
@@ -81,23 +87,19 @@ class CleanAPI:
                 LOG.debug("No protected tags defined for %s, skipping", pipeline)
                 continue
 
-            hk_files: [hk_models.File] = self.get_bundle_files(
+            hk_files: List[hk_models.File]
+            for hk_files in self.get_bundle_files(
                 before=before,
                 pipeline=pipeline,
-            )
+            ):
+                hk_file: hk_models.File
+                for hk_file in hk_files:
+                    if self.has_protected_tags(hk_file, protected_tags_lists=protected_tags_lists):
+                        continue
 
-            if not hk_files:
-                LOG.debug("No files found for %s, skipping", pipeline)
-                continue
-
-            hk_file: hk_models.File
-            for hk_file in hk_files:
-                if self.has_protected_tags(hk_file, protected_tags_lists=protected_tags_lists):
-                    continue
-
-                file_path: Path = Path(hk_file.full_path)
-                if not file_path.exists():
-                    LOG.info("File %s not on disk.", file_path)
-                    continue
-                LOG.info("File %s found on disk.", file_path)
-                yield hk_file
+                    file_path: Path = Path(hk_file.full_path)
+                    if not file_path.exists():
+                        LOG.info("File %s not on disk.", file_path)
+                        continue
+                    LOG.info("File %s found on disk.", file_path)
+                    yield hk_file
