@@ -75,7 +75,7 @@ class FOHMUploadAPI:
             self._reports_dataframe.drop_duplicates(inplace=True, ignore_index=True)
             self._reports_dataframe = self._reports_dataframe[
                 self._reports_dataframe["provnummer"].str.contains(SARS_COV_REGEX)
-            ]
+            ].reset_index()
         return self._reports_dataframe
 
     @property
@@ -88,7 +88,7 @@ class FOHMUploadAPI:
             self._pangolin_dataframe.drop_duplicates(inplace=True, ignore_index=True)
             self._pangolin_dataframe = self.pangolin_dataframe[
                 self._pangolin_dataframe["taxon"].str.contains(SARS_COV_REGEX)
-            ]
+            ].reset_index()
         return self._pangolin_dataframe
 
     @property
