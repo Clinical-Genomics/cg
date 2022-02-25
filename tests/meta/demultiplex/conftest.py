@@ -6,7 +6,7 @@ from typing import List
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.demultiplex.wipe_demultiplex_api import WipeDemuxAPI
+from cg.meta.demultiplex.wipe_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
 from cg.store.models import Sample
@@ -195,7 +195,7 @@ def fixture_populated_wipe_demux_context(
     populated_flow_cell_store: Store,
     populated_stats_api: StatsAPI,
 ) -> CGConfig:
-    """Yield a populated context to remove flowcells from using the WipeDemuxAPI"""
+    """Yield a populated context to remove flowcells from using the DeleteDemuxAPI"""
     populated_wipe_demux_context = cg_context
     populated_wipe_demux_context.cg_stats_api_ = populated_stats_api
     populated_wipe_demux_context.status_db_ = populated_flow_cell_store
@@ -207,7 +207,7 @@ def fixture_populated_wipe_demux_context(
 def fixture_active_wipe_demux_context(
     cg_context: CGConfig, active_flow_cell_store: Store
 ) -> CGConfig:
-    """Yield a populated context to remove flowcells from using the WipeDemuxAPI"""
+    """Yield a populated context to remove flowcells from using the DeleteDemuxAPI"""
     active_wipe_demux_context = cg_context
     active_wipe_demux_context.status_db_ = active_flow_cell_store
     return active_wipe_demux_context
@@ -218,9 +218,9 @@ def fixture_populated_wipe_demultiplex_api(
     populated_wipe_demux_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
     tmp_flow_cell_run_path: Path,
-) -> WipeDemuxAPI:
-    """Yield an initialized populated WipeDemuxAPI"""
-    return WipeDemuxAPI(
+) -> DeleteDemuxAPI:
+    """Yield an initialized populated DeleteDemuxAPI"""
+    return DeleteDemuxAPI(
         config=populated_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
@@ -233,9 +233,9 @@ def fixture_active_wipe_demultiplex_api(
     active_wipe_demux_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
-) -> WipeDemuxAPI:
-    """Yield an instantiated WipeDemuxAPI with active samples on a flowcell"""
-    return WipeDemuxAPI(
+) -> DeleteDemuxAPI:
+    """Yield an instantiated DeleteDemuxAPI with active samples on a flowcell"""
+    return DeleteDemuxAPI(
         config=active_wipe_demux_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
@@ -249,10 +249,10 @@ def fixture_wipe_demultiplex_api(
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
     stats_api: StatsAPI,
-) -> WipeDemuxAPI:
-    """Yield an initialized WipeDemuxAPI"""
+) -> DeleteDemuxAPI:
+    """Yield an initialized DeleteDemuxAPI"""
     cg_context.cg_stats_api_ = stats_api
-    return WipeDemuxAPI(
+    return DeleteDemuxAPI(
         config=cg_context,
         demultiplexing_dir=demultiplexed_flowcells_working_directory,
         dry_run=False,
@@ -262,7 +262,7 @@ def fixture_wipe_demultiplex_api(
 
 @pytest.fixture(name="demultiplexing_init_files")
 def tmp_demultiplexing_init_files(
-    flowcell_name: str, populated_wipe_demultiplex_api: WipeDemuxAPI
+    flowcell_name: str, populated_wipe_demultiplex_api: DeleteDemuxAPI
 ) -> List[Path]:
     # TODO: Make these files appear
     """Return a list of demultiplexing init files present in the run directory"""

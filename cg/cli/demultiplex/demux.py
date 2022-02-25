@@ -7,7 +7,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowcellError
-from cg.meta.demultiplex.wipe_demultiplex_api import WipeDemuxAPI
+from cg.meta.demultiplex.wipe_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 
@@ -51,10 +51,9 @@ def demultiplex_all(
                 "Malformed sample sheet. Run cg demultiplex samplesheet validate %s",
                 flowcell_obj.sample_sheet_path,
             )
-            if not dry_run:
-                continue
+            continue
 
-        wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+        wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
             config=context,
             demultiplexing_dir=Path(demultiplex_api.out_dir),
             dry_run=dry_run,
@@ -105,7 +104,7 @@ def demultiplex_flowcell(
     except FlowcellError as e:
         raise click.Abort from e
 
-    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+    wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=context,
         demultiplexing_dir=Path(demultiplex_api.out_dir),
         dry_run=dry_run,
@@ -130,8 +129,7 @@ def demultiplex_flowcell(
             "Malformed sample sheet. Run cg demultiplex samplesheet validate %s",
             flowcell_obj.sample_sheet_path,
         )
-        if not dry_run:
-            raise click.Abort
+        raise click.Abort
 
     slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
     tb_api: TrailblazerAPI = context.trailblazer_api
@@ -140,7 +138,7 @@ def demultiplex_flowcell(
     )
 
 
-@click.command(name="wipe-flow-cell")
+@click.command(name="delete-flow-cell")
 @DRY_RUN
 @click.option("--skip-cg-stats", is_flag=True, help="Skip removal in cg-stats")
 @click.option("--skip-demultiplexing-dir", is_flag=True, help="Skip removal on server file system")
@@ -150,7 +148,7 @@ def demultiplex_flowcell(
 @click.option("--skip-init-files", is_flag=True, help="Skip removal of init-files")
 @click.argument("--demultiplexing-dir")
 @click.argument("--run-name")
-def wipe_flow_cell(
+def delete_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: str,
@@ -162,7 +160,7 @@ def wipe_flow_cell(
     skip_run_dir: bool,
     skip_status_db: bool,
 ):
-    """Prepare a flowcell before demultiplexing, using the WipeDemuxAPI
+    """Prepare a flowcell before demultiplexing, using the DeleteDemuxAPI
 
     Args:
         Run path is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/{FLOWCELL_TYPE}/201203_A00689_0200_AHVKJCDRXX'
@@ -171,7 +169,7 @@ def wipe_flow_cell(
 
     demux_path: Path = Path(demultiplexing_dir)
 
-    wipe_demux_api: WipeDemuxAPI = WipeDemuxAPI(
+    wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=context, demultiplexing_dir=demux_path, run_path=run_path
     )
     wipe_demux_api.set_dry_run(dry_run=dry_run)

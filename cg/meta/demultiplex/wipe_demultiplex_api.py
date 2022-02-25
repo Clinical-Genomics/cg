@@ -16,7 +16,7 @@ from housekeeper.store.models import File
 log = logging.getLogger(__name__)
 
 
-class WipeDemuxAPI:
+class DeleteDemuxAPI:
     """Class to handle wiping out a flow cell before restart/start"""
 
     def __init__(self, config: CGConfig, demultiplexing_dir: Path, dry_run: bool, run_path: str):
@@ -27,7 +27,7 @@ class WipeDemuxAPI:
         self.status_db: Store = config.status_db
         self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
-        log.debug("WipeDemuxAPI: API initiated")
+        log.debug("DeleteDemuxAPI: API initiated")
 
     @property
     def demultiplexing_path(self) -> Path:
@@ -54,7 +54,7 @@ class WipeDemuxAPI:
     @staticmethod
     def set_dry_run(dry_run: bool) -> bool:
         """Set dry run flag for API"""
-        log.debug(f"WipeDemuxAPI: Setting dry run mode to {dry_run}")
+        log.debug(f"DeleteDemuxAPI: Setting dry run mode to {dry_run}")
         return dry_run
 
     def _set_samples_on_flow_cell(self) -> None:
@@ -84,9 +84,9 @@ class WipeDemuxAPI:
         if any(sample_sheet_files):
             for file in sample_sheet_files:
                 self.housekeeper_api.delete_file(file_id=file.id)
-                log.info(f"WipeDemuxAPI-Housekeeper: Wiped {file.path} from housekeeper")
+                log.info(f"DeleteDemuxAPI-Housekeeper: Wiped {file.path} from housekeeper")
         else:
-            log.info(f"WipeDemuxAPI-Housekeeper: No files found with tag: {self.flow_cell_name}")
+            log.info(f"DeleteDemuxAPI-Housekeeper: No files found with tag: {self.flow_cell_name}")
 
     def _wipe_fastq_and_spring_housekeeper(self) -> None:
         """Wipe the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
@@ -100,20 +100,20 @@ class WipeDemuxAPI:
         """Wipe any presence of a flow cell in housekeeper. Including Sample sheets AND fastq-files"""
 
         log.info(
-            f"WipeDemuxAPI-Housekeeper: Wiping sample sheet files with tag {self.flow_cell_name}"
+            f"DeleteDemuxAPI-Housekeeper: Wiping sample sheet files with tag {self.flow_cell_name}"
         )
         self._wipe_sample_sheet_housekeeper()
         log.info(
-            f"WipeDemuxAPI-Housekeeper: Wiping fastq and spring files related to flowcell {self.flow_cell_name}"
+            f"DeleteDemuxAPI-Housekeeper: Wiping fastq and spring files related to flowcell {self.flow_cell_name}"
         )
         self._wipe_fastq_and_spring_housekeeper()
 
     def wipe_flow_cell_statusdb(self) -> None:
         """Wipe any presence of a flow cell in status-db"""
         if self.dry_run:
-            log.info(f"WipeDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
+            log.info(f"DeleteDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
         else:
-            log.info(f"WipeDemuxAPI-StatusDB: Wiping flowcell {self.flow_cell_name}")
+            log.info(f"DeleteDemuxAPI-StatusDB: Wiping flowcell {self.flow_cell_name}")
             self.status_db.delete_flowcell(flowcell_name=self.flow_cell_name)
 
     def wipe_flow_cell_cgstats(self) -> None:
@@ -121,20 +121,20 @@ class WipeDemuxAPI:
         from cg.apps.cgstats.crud.delete import delete_flowcell
 
         if self.dry_run:
-            log.info(f"WipeDemuxAPI-CGStats: Would remove {self.flow_cell_name}")
+            log.info(f"DeleteDemuxAPI-CGStats: Would remove {self.flow_cell_name}")
         else:
             delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
 
     def _wipe_demultiplexing_dir_hasta(self) -> None:
         """Wipe demultiplexing directory on server"""
         log.info(
-            f"WipeDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_path}"
+            f"DeleteDemuxAPI-Hasta: Removing flow cell demultiplexing directory: {self.demultiplexing_path}"
         )
         shutil.rmtree(self.demultiplexing_path, ignore_errors=False)
 
     def _wipe_run_dir_hasta(self) -> None:
         """Wipe flow cell run directory on server"""
-        log.info(f"WipeDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
+        log.info(f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {self.run_path}")
         shutil.rmtree(path=self.run_path, ignore_errors=False)
 
     def wipe_flow_cell_hasta(
@@ -145,20 +145,20 @@ class WipeDemuxAPI:
         """Wipe a flow cells presence on the server"""
         if self.dry_run:
             log.info(
-                f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.demultiplexing_path}\n"
-                f"WipeDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
+                f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.demultiplexing_path}\n"
+                f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
             )
         if not skip_demultiplexing_dir and self.demultiplexing_path.exists():
             self._wipe_demultiplexing_dir_hasta()
         else:
             log.info(
-                f"WipeDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_dir}"
+                f"DeleteDemuxAPI-Hasta: Skipped demultiplexing directory, or no target: {self.demultiplexing_dir}"
             )
         if not skip_run_dir and self.run_path.exists():
             self._wipe_run_dir_hasta()
         else:
             log.info(
-                f"WipeDemuxAPI-Hasta: Skipped flow cell run directory, or no target: {self.run_path}"
+                f"DeleteDemuxAPI-Hasta: Skipped flow cell run directory, or no target: {self.run_path}"
             )
 
     def wipe_demux_init_files(self):
@@ -183,10 +183,10 @@ class WipeDemuxAPI:
             ]
         for init_file in demux_init_files:
             if init_file.is_file():
-                log.info(f"WipeDemuxAPI: Removing {init_file}")
+                log.info(f"DeleteDemuxAPI: Removing {init_file}")
                 init_file.unlink()
             else:
-                log.info(f"WipeDemuxAPI: Did not find {init_file}")
+                log.info(f"DeleteDemuxAPI: Did not find {init_file}")
 
     def check_active_samples(self) -> None:
         """Check, and raise, if there are active samples on a flow cell"""

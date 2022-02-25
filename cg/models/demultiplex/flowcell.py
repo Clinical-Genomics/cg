@@ -38,19 +38,20 @@ class Flowcell:
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
         Example: 201203_A00689_0200_AHVKJCDRXX
         """
-        split_name: List[str] = self.path.name.split("_")
-        if len(split_name) != 4:
-            message = f"Flowcell {self.path.name} does not follow the flowcell naming convention"
-            LOG.warning(message)
-            raise FlowcellError(message)
-        self.run_date = datetime.datetime.strptime(split_name[0], "%y%m%d")
-        self.machine_name = split_name[1]
-        self.machine_number = int(split_name[2])
-        base_name: str = split_name[-1]
+
+        self.validate_flow_cell_name()
+        self.run_date = datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
+        self.machine_name = self.split_flow_cell_name[1]
+        self.machine_number = int(self.split_flow_cell_name[2])
+        base_name: str = self.split_flow_cell_name[-1]
         self.base_name = base_name
         LOG.debug("Set flowcell id to %s", base_name)
         self.flowcell_id = base_name[1:]
         self.flowcell_position = base_name[0]
+
+    @property
+    def split_flow_cell_name(self) -> List[str]:
+        return self.path.name.split("_")
 
     @property
     def flowcell_full_name(self) -> str:
@@ -89,6 +90,17 @@ class Flowcell:
     @property
     def trailblazer_config_path(self) -> Path:
         return Path(self.path, "slurm_job_ids.yaml")
+
+    def validate_flow_cell_name(self) -> None:
+        """
+        Validate on the following criteria:
+        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
+        Example: 201203_A00689_0200_AHVKJCDRXX
+        """
+        if len(self.split_flow_cell_name) != 4:
+            message = f"Flowcell {self.path.name} does not follow the flowcell naming convention"
+            LOG.warning(message)
+            raise FlowcellError(message)
 
     def is_demultiplexing_started(self) -> bool:
         """Create the path to where the demuliplexed result should be produced"""
