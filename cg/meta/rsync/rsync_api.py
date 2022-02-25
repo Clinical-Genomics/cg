@@ -182,7 +182,7 @@ class RsyncAPI(MetaAPI):
         """Runs rsync of a whole ticket folder to the delivery server"""
         self.set_log_dir(folder_prefix=str(ticket_id))
         self.create_log_dir(dry_run=dry_run)
-        source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
+        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
             ticket_id=ticket_id
         )
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
