@@ -4,17 +4,12 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from cg.apps.avatar.api import Avatar
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
-
-Avatar.get_avatar_urls = lambda internal_id: [str(uuid.uuid4())]
-Avatar.get_avatar_url = lambda internal_id: str(uuid.uuid4())
-Avatar.is_url_image = lambda: True
 
 
 class StoreHelpers:
