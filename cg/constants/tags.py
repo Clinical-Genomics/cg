@@ -47,11 +47,18 @@ WORKFLOW_PROTECTED_TAGS = {
         ["bcf-raw-sv"],  # legacy
         ["vcf-sv-clinical"],
         ["vcf-clinical-sv"],  # legacy
+        ["vcf-clinical-sv-bin"],  # legacy
+        ["vcf-clinical-sv-bin-index"],  # legacy
         ["vcf-sv-research"],
         ["vcf-research-sv"],  # legacy
+        ["vcf-research-sv-bin"],  # legacy
+        ["vcf-research-sv-bin-index"],  # legacy
         ["exe-ver"],
         ["vcf2cytosure"],
         ["delivery-report"],
+        ["madeline"],
+        ["multiqc-html"],
+        ["storage"],
     ],
     str(Pipeline.MIP_RNA): [
         ["vcf-snv-clinical"],
