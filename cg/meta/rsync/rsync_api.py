@@ -92,7 +92,7 @@ class RsyncAPI(MetaAPI):
             self.delivery_path, customer_id, "inbox", str(ticket_id)
         )
         source_and_destination_paths["rsync_destination_path"]: Path = Path(
-            self.destination_path, customer_id, "inbox", str(ticket_id)
+            self.destination_path, customer_id, "inbox"
         )
         return source_and_destination_paths
 
@@ -151,8 +151,9 @@ class RsyncAPI(MetaAPI):
         if not sample_files_present and not case_files_present:
             LOG.error("Since no file parameter is true, no files will be transferred")
             raise CgError()
+        ticket_id: int = self.status_db.get_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket_id=self.status_db.get_ticket_from_case(case_id=case_id)
+            ticket_id=ticket_id
         )
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
@@ -171,7 +172,7 @@ class RsyncAPI(MetaAPI):
                 RSYNC_COMMAND.format(
                     source_path=source_and_destination_paths["delivery_source_path"] / folder,
                     destination_path=source_and_destination_paths["rsync_destination_path"]
-                    / folder,
+                    / str(ticket_id),
                 )
                 for folder in folder_list
             ]
