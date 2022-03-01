@@ -42,3 +42,8 @@ class BalsamicReportAPI(ReportAPI):
         return self.analysis_api.get_latest_metadata(
             case.internal_id
         ).config.reference.reference_genome_version
+
+    def get_variant_callers(self, case: models.Family) -> list:
+        """Extracts the list of BALSAMIC variant-calling filters from the config.json file"""
+
+        return self.analysis_api.get_latest_metadata(case.internal_id).config.vcf.keys()

@@ -44,6 +44,7 @@ class DataAnalysisModel(BaseModel):
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
         type: analysis type carried out; BALSAMIC specific; source: pipeline workflow
         genome_build: build version of the genome reference; source: pipeline workflow
+        variant_callers: variant-calling filters
         panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
     """
 
@@ -52,6 +53,7 @@ class DataAnalysisModel(BaseModel):
     pipeline_version: Optional[str]
     type: Optional[str]
     genome_build: Optional[str]
+    variant_callers: Union[None, List[str], str]
     panels: Union[None, List[str], str]
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
@@ -63,8 +65,10 @@ class DataAnalysisModel(BaseModel):
         always=True,
         allow_reuse=True,
     )(validate_empty_field)
+    _list_values = validator("variant_callers", "panels", always=True, allow_reuse=True)(
+        validate_list
+    )
     _type = validator("type", always=True, allow_reuse=True)(validate_underscore_separated_str)
-    _panels = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
 class CaseModel(BaseModel):

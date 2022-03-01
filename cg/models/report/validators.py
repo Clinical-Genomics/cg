@@ -6,8 +6,8 @@ from cg.constants import REPORT_SUPPORTED_PIPELINES
 
 PRECISION = 2
 NA_FIELD = "N/A"
-YES_FIELD = "Y"
-NO_FIELD = "N"
+YES_FIELD = "Ja"
+NO_FIELD = "Nej"
 
 
 def validate_empty_field(value: Union[int, str]) -> str:
