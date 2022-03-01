@@ -36,7 +36,7 @@ def test_get_source_and_destination_paths(
     # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
     assert (
         source_and_destination_paths["rsync_destination_path"].as_posix()
-        == f"server.name.se:/some/cust000/inbox/{ticket_number}"
+        == "server.name.se:/some/cust000/inbox"
     )
 
 
@@ -84,7 +84,7 @@ def test_make_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
     assert "Would have created path" in caplog.text
 
     # THEN the created path is
-    assert str(rsync_api.log_dir).startswith(f"/another/path/{str(ticket_number)}")
+    assert str(rsync_api.log_dir).startswith(f"/another/path/{ticket_number}")
 
 
 def test_run_rsync_on_slurm(
