@@ -27,7 +27,7 @@ class ApplicationModel(BaseModel):
     """
 
     tag: str
-    version: Union[int, str] = None
+    version: Union[None, int, str]
     prep_category: Optional[str]
     description: Optional[str]
     limitations: Optional[str]
@@ -75,12 +75,12 @@ class TimestampModel(BaseModel):
         processing_days: days between sample arrival and delivery; source: CG workflow
     """
 
-    ordered_at: Union[datetime, str] = None
-    received_at: Union[datetime, str] = None
-    prepared_at: Union[datetime, str] = None
-    sequenced_at: Union[datetime, str] = None
-    delivered_at: Union[datetime, str] = None
-    processing_days: Union[int, str] = None
+    ordered_at: Union[None, datetime, str]
+    received_at: Union[None, datetime, str]
+    prepared_at: Union[None, datetime, str]
+    sequenced_at: Union[None, datetime, str]
+    delivered_at: Union[None, datetime, str]
+    processing_days: Union[None, int, str]
 
     _values = validator(
         "ordered_at",
@@ -119,16 +119,16 @@ class MetadataModel(BaseModel):
     bait_set: Optional[str]
     bait_set_version: Optional[str]
     gender: Optional[str]
-    million_read_pairs: Union[float, str] = None
-    mapped_reads: Union[float, str] = None
-    duplicates: Union[float, str] = None
-    target_coverage: Union[float, str] = None
-    target_bases_10X: Union[float, str] = None
-    target_bases_250X: Union[float, str] = None
-    target_bases_500X: Union[float, str] = None
-    median_coverage: Union[float, str] = None
-    mean_insert_size: Union[float, str] = None
-    fold_80: Union[float, str] = None
+    million_read_pairs: Union[None, float, str]
+    mapped_reads: Union[None, float, str]
+    duplicates: Union[None, float, str]
+    target_coverage: Union[None, float, str]
+    target_bases_10X: Union[None, float, str]
+    target_bases_250X: Union[None, float, str]
+    target_bases_500X: Union[None, float, str]
+    median_coverage: Union[None, float, str]
+    mean_insert_size: Union[None, float, str]
+    fold_80: Union[None, float, str]
 
     _str_values = validator(
         "bait_set", "bait_set_version", "gender", always=True, allow_reuse=True
@@ -174,7 +174,7 @@ class SampleModel(BaseModel):
     status: Optional[str]
     gender: Optional[str] = Gender.UNKNOWN
     source: Optional[str]
-    tumour: Union[bool, str] = None
+    tumour: Union[None, bool, str]
     application: ApplicationModel
     methods: MethodsModel
     metadata: MetadataModel

@@ -48,7 +48,7 @@ class BalsamicConfigReference(BaseModel):
     """
 
     reference_genome: Path
-    reference_genome_version: Union[Path, str] = None
+    reference_genome_version: Union[None, Path, str]
     reference_access_date: Union[datetime, Path]
 
     @validator("reference_genome_version", always=True)

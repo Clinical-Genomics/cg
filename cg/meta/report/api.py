@@ -3,7 +3,7 @@
 from datetime import datetime
 import logging
 from pathlib import Path
-from typing import TextIO, Optional, List
+from typing import TextIO, Optional, List, Union
 
 import housekeeper
 import requests
@@ -257,7 +257,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_processing_dates(sample: models.Sample) -> int:
+    def get_processing_dates(sample: models.Sample) -> Union[int, None]:
         """Calculates the days it takes to deliver a sample"""
 
         if sample.received_at and sample.delivered_at:

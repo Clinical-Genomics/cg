@@ -52,7 +52,7 @@ class DataAnalysisModel(BaseModel):
     pipeline_version: Optional[str]
     type: Optional[str]
     genome_build: Optional[str]
-    panels: Union[List[str], str] = None
+    panels: Union[None, List[str], str]
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
     _str_values = validator(
@@ -97,7 +97,7 @@ class ReportModel(BaseModel):
     """
 
     customer: CustomerModel
-    version: Union[int, str] = None
+    version: Union[None, int, str]
     date: Union[datetime, str]
     case: CaseModel
     accredited: bool
