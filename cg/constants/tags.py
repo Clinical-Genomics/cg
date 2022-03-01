@@ -10,3 +10,8 @@ class HkMipAnalysisTag(StrEnum):
     CONFIG: str = "mip-config"
     QC_METRICS: str = "qc-metrics"
     SAMPLE_INFO: str = "sample-info"
+
+
+class BalsamicAnalysisTag(StrEnum):
+    CONFIG: str = "balsamic-config"
+    QC_METRICS: str = "qc-metrics"

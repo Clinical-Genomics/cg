@@ -19,29 +19,16 @@ class BalsamicReportAPI(ReportAPI):
     def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
         """Fetches the sample metadata to include in the report"""
 
+        metadata = self.analysis_api.get_latest_metadata(case.internal_id)
+
         return MetadataModel(
             bait_set=sample.capture_kit,
-            bait_set_version="",
-            gender="",
+            bait_set_version=metadata.config.panel.capture_kit_version,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
-            duplicates=None,
-            # PANEL: PERCENT_DUPLICATION
-            # WGS: pct_duplication/percent_duplicates **???**
-            target_bases_250X=None,
-            # PANEL: PCT_TARGET_BASES_250X
-            # WGS: not supported
-            target_bases_500X=None,
-            # PANEL: PCT_TARGET_BASES_500X
-            # WGS: not supported
-            median_coverage=None,
-            # PANEL: MEDIAN_TARGET_COVERAGE
-            # WGS: MEDIAN_COVERAGE
-            mean_insert_size=None,
-            # PANEL: MEAN_INSERT_SIZE
-            # WGS: MEAN_INSERT_SIZE
-            fold_80=None,
-            # PANEL: FOLD_80_BASE_PENALTY
-            # WGS: FOLD_80_BASE_PENALTY
+            duplicates=metadata.sample_metrics[sample.internal_id].percent_duplication,
+            median_coverage=metadata.sample_metrics[sample.internal_id].median_target_coverage,
+            mean_insert_size=metadata.sample_metrics[sample.internal_id].mean_insert_size,
+            fold_80=metadata.sample_metrics[sample.internal_id].fold_80_base_penalty,
         )
 
     def get_data_analysis_type(self, case: models.Family) -> str:
@@ -52,7 +39,6 @@ class BalsamicReportAPI(ReportAPI):
     def get_genome_build(self, case: models.Family) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
-        # TODO
-        # config.json - "reference" - "reference_genome" –
-        # "/home/proj/stage/cancer/balsamic_cache/8.2.5/hg19/genome/human_g1k_v37.fasta"
-        pass
+        return self.analysis_api.get_latest_metadata(
+            case.internal_id
+        ).config.reference.reference_genome_version
