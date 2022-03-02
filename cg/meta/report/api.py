@@ -156,10 +156,14 @@ class ReportAPI(MetaAPI):
     ) -> CaseModel:
         """Returns case associated validated attributes"""
 
+        samples = self.get_samples_data(case, analysis_metadata)
+        unique_applications = self.get_unique_applications(samples)
+
         return CaseModel(
             name=case.name,
             data_analysis=self.get_case_analysis_data(case, analysis, analysis_metadata),
-            samples=self.get_samples_data(case, analysis_metadata),
+            samples=samples,
+            applications=unique_applications,
         )
 
     def get_samples_data(
@@ -216,6 +220,17 @@ class ReportAPI(MetaAPI):
             limitations=application.limitations,
             accredited=application.is_accredited,
         )
+
+    @staticmethod
+    def get_unique_applications(samples: List[SampleModel]) -> List[ApplicationModel]:
+        """Returns the unique case associated applications"""
+
+        applications = list()
+        for sample in samples:
+            if sample.application not in applications:
+                applications.append(sample.application)
+
+        return applications
 
     def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
         """Fetches sample library preparation and sequencing methods from LIMS"""

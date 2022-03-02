@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, validator, root_validator
 from cg.constants import Pipeline
-from cg.models.report.sample import SampleModel
+from cg.models.report.sample import SampleModel, ApplicationModel
 from cg.models.report.validators import (
     validate_empty_field,
     validate_supported_pipeline,
@@ -79,11 +79,13 @@ class CaseModel(BaseModel):
         name: case name; source: StatusDB/family/name
         samples: list of samples associated to a case/family
         data_analysis: pipeline attributes
+        applications: case associated unique applications
     """
 
     name: str
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
+    applications: List[ApplicationModel]
 
     _name = validator("name", always=True, allow_reuse=True)(validate_empty_field)
 
