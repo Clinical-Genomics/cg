@@ -52,6 +52,7 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 REPORT_SUPPORTED_PIPELINES = (Pipeline.BALSAMIC, Pipeline.MIP_DNA)
+REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 
 
 class DataDelivery(StrEnum):

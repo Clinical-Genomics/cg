@@ -1,9 +1,12 @@
 import logging
+from typing import List, Union
 
+from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.cg_config import CGConfig
 from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.models.report.sample import MetadataModel
+from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.report.sample import SampleMetadataModel, SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store import models
 
@@ -17,17 +20,18 @@ class MipDNAReportAPI(ReportAPI):
         super().__init__(config=config, analysis_api=analysis_api)
         self.analysis_api = analysis_api
 
-    def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
+    def get_sample_metadata(
+        self, case: models.Family, sample: models.Sample, analysis_metadata: MipAnalysis
+    ) -> SampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report"""
 
-        metadata = self.analysis_api.get_latest_metadata(case.internal_id)
         parsed_metrics = get_sample_id_metric(
             sample_id=sample.internal_id,
-            sample_id_metrics=metadata.sample_id_metrics,
+            sample_id_metrics=analysis_metadata.sample_id_metrics,
         )
         sample_coverage = self.get_sample_coverage(sample, case)
 
-        return MetadataModel(
+        return SampleMetadataModel(
             bait_set=sample.capture_kit,
             gender=parsed_metrics.predicted_sex,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
@@ -67,7 +71,23 @@ class MipDNAReportAPI(ReportAPI):
 
         return application.analysis_type
 
-    def get_genome_build(self, case: models.Family) -> str:
+    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
-        return self.analysis_api.get_latest_metadata(case.internal_id).genome_build
+        return analysis_metadata.genome_build
+
+    def get_variant_callers(self, analysis_metadata: MipAnalysis) -> Union[None, list]:
+        """Extracts the list of variant-calling filters used during analysis"""
+
+        return None
+
+    def get_report_accreditation(
+        self, analysis_metadata: MipAnalysis, samples: List[SampleModel]
+    ) -> bool:
+        """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
+
+        for sample in samples:
+            if not sample.application.accredited:
+                return False
+
+        return True

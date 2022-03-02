@@ -20,6 +20,7 @@ from .constants import (
     SEX_OPTIONS,
     STATUS_OPTIONS,
     REPORT_SUPPORTED_PIPELINES,
+    REPORT_ACCREDITED_PANELS,
     DataDelivery,
     FlowCellStatus,
     HousekeeperTags,

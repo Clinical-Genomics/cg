@@ -96,7 +96,7 @@ class TimestampModel(BaseModel):
     )
 
 
-class MetadataModel(BaseModel):
+class SampleMetadataModel(BaseModel):
     """
     Metrics and trending data model associated to a specific sample
 
@@ -177,7 +177,7 @@ class SampleModel(BaseModel):
     tumour: Union[None, bool, str]
     application: ApplicationModel
     methods: MethodsModel
-    metadata: MetadataModel
+    metadata: SampleMetadataModel
     timestamp: TimestampModel
 
     _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)

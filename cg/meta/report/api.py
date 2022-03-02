@@ -9,15 +9,17 @@ import housekeeper
 import requests
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
+from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
+from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
 from cg.models.report.sample import (
     SampleModel,
     ApplicationModel,
     TimestampModel,
     MethodsModel,
-    MetadataModel,
+    SampleMetadataModel,
 )
 from cg.store import models
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -110,14 +112,15 @@ class ReportAPI(MetaAPI):
 
         case = self.status_db.family(case_id)
         analysis = self.status_db.analysis(case, analysis_date)
-        case_model = self.get_case_data(case, analysis)
+        analysis_metadata = self.analysis_api.get_latest_metadata(case.internal_id)
+        case_model = self.get_case_data(case, analysis, analysis_metadata)
 
         return ReportModel(
             customer=self.get_customer_data(case),
             version=self.get_report_version(analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(case_model.samples),
+            accredited=self.get_report_accreditation(analysis_metadata, case_model.samples),
         ).dict()
 
     @staticmethod
@@ -145,26 +148,23 @@ class ReportAPI(MetaAPI):
 
         return version
 
-    @staticmethod
-    def get_report_accreditation(samples: List[SampleModel]) -> bool:
-        """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
-
-        for sample in samples:
-            if not sample.application.accredited:
-                return False
-
-        return True
-
-    def get_case_data(self, case: models.Family, analysis: models.Analysis) -> CaseModel:
+    def get_case_data(
+        self,
+        case: models.Family,
+        analysis: models.Analysis,
+        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
+    ) -> CaseModel:
         """Returns case associated validated attributes"""
 
         return CaseModel(
             name=case.name,
-            data_analysis=self.get_case_analysis_data(case, analysis),
-            samples=self.get_samples_data(case),
+            data_analysis=self.get_case_analysis_data(case, analysis, analysis_metadata),
+            samples=self.get_samples_data(case, analysis_metadata),
         )
 
-    def get_samples_data(self, case: models.Family) -> List[SampleModel]:
+    def get_samples_data(
+        self, case: models.Family, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
+    ) -> List[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes"""
 
         samples = list()
@@ -185,7 +185,7 @@ class ReportAPI(MetaAPI):
                     application=self.get_sample_application_data(lims_sample),
                     methods=self.get_sample_methods_data(sample.internal_id),
                     status=case_sample.status,
-                    metadata=self.get_metadata(sample, case),
+                    metadata=self.get_sample_metadata(case, sample, analysis_metadata),
                     timestamp=self.get_sample_timestamp_data(sample),
                 )
             )
@@ -231,7 +231,10 @@ class ReportAPI(MetaAPI):
         return MethodsModel(library_prep=library_prep, sequencing=sequencing)
 
     def get_case_analysis_data(
-        self, case: models.Family, analysis: models.Analysis
+        self,
+        case: models.Family,
+        analysis: models.Analysis,
+        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
     ) -> DataAnalysisModel:
         """Retrieves the pipeline attributes used for data analysis"""
 
@@ -240,7 +243,8 @@ class ReportAPI(MetaAPI):
             pipeline=analysis.pipeline,
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case),
-            genome_build=self.get_genome_build(case),
+            genome_build=self.get_genome_build(analysis_metadata),
+            variant_callers=self.get_variant_callers(analysis_metadata),
             panels=case.panels,
         )
 
@@ -265,7 +269,12 @@ class ReportAPI(MetaAPI):
 
         return None
 
-    def get_metadata(self, sample: models.Sample, case: models.Family) -> MetadataModel:
+    def get_sample_metadata(
+        self,
+        case: models.Family,
+        sample: models.Sample,
+        analysis_metadata: [MipAnalysis, BalsamicAnalysis],
+    ) -> SampleMetadataModel:
         """Fetches the sample metadata to include in the report"""
 
         raise NotImplementedError
@@ -275,8 +284,22 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_genome_build(self, case: models.Family) -> str:
+    def get_genome_build(self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]) -> str:
         """Returns the build version of the genome reference of a specific case"""
+
+        raise NotImplementedError
+
+    def get_variant_callers(
+        self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
+    ) -> Union[None, list]:
+        """Extracts the list of variant-calling filters used during analysis"""
+
+        raise NotImplementedError
+
+    def get_report_accreditation(
+        self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis], samples: List[SampleModel]
+    ) -> bool:
+        """Checks if the report is accredited or not"""
 
         raise NotImplementedError
 
