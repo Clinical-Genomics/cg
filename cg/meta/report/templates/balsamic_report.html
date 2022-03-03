@@ -1,5 +1,6 @@
 {% from "bootstrap.html" import css, custom_css %}
 
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -57,7 +58,7 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Sample table">
             <thead>
               <tr>
                 <th>Prov</th>
@@ -90,7 +91,7 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Sample table">
             <thead>
               <tr>
                 <th>Prov</th>
@@ -133,7 +134,7 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Case table">
             <caption><a href="https://balsamic.readthedocs.io/en/latest/install.html">Variant-calling filters</a>: {{ case.data_analysis.variant_callers }}</caption>
             <thead>
               <tr>
@@ -155,9 +156,9 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Sample table">
             <caption>
-              <b>Förklaringar</b><br>
+              <strong>Förklaringar</strong><br>
                 Värdena presenterade för <ins>Täckningsgrad</ins> och <ins>Mediantäckning</ins> är efter borttagning av duplikata läsningar.<br><br>
               <ins>Läspar</ins>: ... <br>
               <ins>Täckningsgrad</ins>: Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.<br>
