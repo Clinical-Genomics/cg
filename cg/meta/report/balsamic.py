@@ -62,7 +62,7 @@ class BalsamicReportAPI(ReportAPI):
             (
                 i
                 for i in REPORT_ACCREDITED_PANELS
-                if i in analysis_metadata.config.panel.capture_kit
+                if i in str(analysis_metadata.config.panel.capture_kit)
             ),
             None,
         ):
