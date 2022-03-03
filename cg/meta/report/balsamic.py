@@ -26,7 +26,9 @@ class BalsamicReportAPI(ReportAPI):
 
         return SampleMetadataModel(
             bait_set=sample.capture_kit,
-            bait_set_version=analysis_metadata.config.panel.capture_kit_version,
+            bait_set_version=analysis_metadata.config.panel.capture_kit_version
+            if sample.capture_kit
+            else None,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
             duplicates=analysis_metadata.sample_metrics[sample.internal_id].percent_duplication,
             median_coverage=analysis_metadata.sample_metrics[
@@ -49,7 +51,7 @@ class BalsamicReportAPI(ReportAPI):
     def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
         """Extracts the list of BALSAMIC variant-calling filters from the config.json file"""
 
-        return analysis_metadata.config.vcf.keys()
+        return list(analysis_metadata.config.vcf.keys())
 
     def get_report_accreditation(
         self, analysis_metadata: BalsamicAnalysis, samples: List[SampleModel]

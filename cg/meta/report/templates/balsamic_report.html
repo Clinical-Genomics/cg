@@ -157,16 +157,6 @@
 
         <div class="card-block">
           <table class="table table-bordered" aria-describedby="Sample table">
-            <caption>
-              <strong>Förklaringar</strong><br>
-                Värdena presenterade för <ins>Täckningsgrad</ins> och <ins>Mediantäckning</ins> är efter borttagning av duplikata läsningar.<br><br>
-              <ins>Läspar</ins>: ... <br>
-              <ins>Täckningsgrad</ins>: Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.<br>
-              <ins>Duplikat</ins>: ... <br>
-              <ins>Mediantäckning</ins>: Median av täckningen över alla baser inkluderade i analysen.<br>
-              <ins>Medelfragmentlängd</ins>: Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.<br>
-              <ins>Fold 80 base penalty</ins>: Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet.
-            </caption>
             <thead>
               <tr>
                 <th>Prov</th>
@@ -193,6 +183,16 @@
                 </tr>
               {% endfor %}
             </tbody>
+            <caption>
+              <strong>Förklaringar</strong><br>
+                Värdena presenterade för <ins>Täckningsgrad</ins> och <ins>Mediantäckning</ins> är efter borttagning av duplikata läsningar.<br><br>
+              <ins>Läspar</ins>: ... <br>
+              <ins>Täckningsgrad</ins>: Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.<br>
+              <ins>Duplikat</ins>: ... <br>
+              <ins>Mediantäckning</ins>: Median av täckningen över alla baser inkluderade i analysen.<br>
+              <ins>Medelfragmentlängd</ins>: Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument. <200bp kan tyda på degraderade provmaterial (t.ex. FFPE), innan biblioteksberedning.<br>
+              <ins>Fold 80 base penalty</ins>: Jämnhet av täckningsgraden över alla gener i analyspanlen. Ett värde mellan 1.0-1.8 visar god jämnhet.
+            </caption>
           </table>
 
           <div class="card-body">* Information given av kund</div>

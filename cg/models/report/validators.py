@@ -25,7 +25,7 @@ def validate_underscore_separated_str(value: str) -> str:
 def validate_boolean(value: Union[bool, str]) -> str:
     """Formats a boolean to include its value in the delivery report"""
 
-    if value:
+    if isinstance(value, bool) or value:
         return YES_FIELD if str(value) == "True" else NO_FIELD
 
     return NA_FIELD
@@ -43,7 +43,7 @@ def validate_date(date: datetime) -> str:
     return str(date.date()) if date else NA_FIELD
 
 
-def validate_list(value: list) -> list:
+def validate_list(value: list) -> str:
     """Formats a list elements as comma separated individual values"""
 
     return validate_empty_field(
