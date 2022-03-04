@@ -317,8 +317,8 @@ def test_delete_flow_cell_dry_run_status_db(
     assert f"DeleteDemuxAPI-StatusDB: Would remove {flow_cell_name}" in caplog.text
     assert f"DeleteDemuxAPI-CGStats: Would remove {flow_cell_name}" in caplog.text
     assert (
-        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_context.demultiplex_api.out_dir / Path(flowcell_full_name)}\n"
+        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: "
+        f"{demultiplex_context.demultiplex_api.out_dir / Path(flowcell_full_name)}\n"
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flowcell}"
     ) in caplog.text
     assert f"DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text
-
