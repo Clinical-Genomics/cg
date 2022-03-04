@@ -7,8 +7,8 @@ from typing import List, Optional
 from cg.apps.cgstats.db import models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.exc import WipeDemuxError
-from cg.meta.demultiplex.wipe_demultiplex_api import DeleteDemuxAPI
+from cg.exc import DeleteDemuxError
+from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
 from cg.store.models import Sample, Flowcell
@@ -31,7 +31,7 @@ def test_initiate_wipe_demux_api(
     # WHEN initializing the DeleteDemuxAPI
     DeleteDemuxAPI(
         config=config,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=True,
         run_path=flowcell_full_name,
     )
@@ -98,7 +98,7 @@ def test_set_dry_run_wipe_demux_api(
     # WHEN setting the dry_run mode on a DeleteDemuxAPI
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=True,
         run_path=flowcell_full_name,
     )
@@ -172,7 +172,7 @@ def test_check_active_sample(active_wipe_demultiplex_api: DeleteDemuxAPI):
 
     # WHEN checking if there are active samples on flowcell to be deleted
 
-    with pytest.raises(WipeDemuxError):
+    with pytest.raises(DeleteDemuxError):
         # THEN the proper error should be raised
         wipe_demux_api.check_active_samples()
 
@@ -200,7 +200,7 @@ def test_wipe_flow_cell_housekeeper_only_sample_level(
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
         run_path=flowcell_full_name,
     )
@@ -208,7 +208,7 @@ def test_wipe_flow_cell_housekeeper_only_sample_level(
 
     # WHEN wiping files in Housekeeper
 
-    wipe_demultiplex_api.wipe_flow_cell_housekeeper()
+    wipe_demultiplex_api.delete_flow_cell_housekeeper()
 
     # THEN you should be notified that there are no files on flow cell names
 
@@ -246,7 +246,7 @@ def test_wipe_flow_cell_housekeeper_flowcell_name(
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
         run_path=flowcell_full_name,
     )
@@ -254,7 +254,7 @@ def test_wipe_flow_cell_housekeeper_flowcell_name(
 
     # WHEN
 
-    wipe_demultiplex_api.wipe_flow_cell_housekeeper()
+    wipe_demultiplex_api.delete_flow_cell_housekeeper()
 
     # THEN
 
@@ -262,7 +262,7 @@ def test_wipe_flow_cell_housekeeper_flowcell_name(
         f"Housekeeper: No files found with tag: {wipe_demultiplex_api.flow_cell_name}"
         not in caplog.text
     )
-    assert f"Wiped {sample_sheet_file.as_posix()} from housekeeper" in caplog.text
+    assert f"Deleted {sample_sheet_file.as_posix()} from housekeeper" in caplog.text
     for fastq_file in fastq_files:
         assert f"{fastq_file.as_posix()} deleted" in caplog.text
 
@@ -291,7 +291,7 @@ def test_wipe_flow_cell_statusdb(
 
     # WHEN removing the object from the database
 
-    wipe_demux_api.wipe_flow_cell_statusdb()
+    wipe_demux_api.delete_flow_cell_statusdb()
 
     # THEN the user should be informed that the object was removed
 
@@ -327,9 +327,9 @@ def test_wipe_flow_cell_hasta(
 
     # WHEN removing said files with the DeleteDemuxAPI
 
-    wipe_demux_api.wipe_flow_cell_hasta(
-        skip_demultiplexing_dir=False,
-        skip_run_dir=False,
+    wipe_demux_api.delete_flow_cell_hasta(
+        demultiplexing_dir=True,
+        run_dir=True,
     )
 
     # THEN the demultiplexing directory should be removed
@@ -371,7 +371,7 @@ def test_wipe_flow_cell_cgstats(
 
     # WHEN wiping the existance of said object
 
-    wipe_demux_api.wipe_flow_cell_cgstats()
+    wipe_demux_api.delete_flow_cell_cgstats()
 
     # THEN the user should be notified that the object was removed
 
@@ -401,7 +401,7 @@ def test_wipe_demultiplexing_init_files(
 
     # WHEN wiping the existance of mentioned files
 
-    wipe_demux_api.wipe_demux_init_files()
+    wipe_demux_api.delete_demux_init_files()
 
     # THEN the files should no longer exist
 

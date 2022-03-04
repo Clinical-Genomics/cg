@@ -6,7 +6,7 @@ from typing import List
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.demultiplex.wipe_demultiplex_api import DeleteDemuxAPI
+from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
 from cg.store.models import Sample
@@ -222,7 +222,7 @@ def fixture_populated_wipe_demultiplex_api(
     """Yield an initialized populated DeleteDemuxAPI"""
     return DeleteDemuxAPI(
         config=populated_wipe_demux_context,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
         run_path=tmp_flow_cell_run_path,
     )
@@ -237,7 +237,7 @@ def fixture_active_wipe_demultiplex_api(
     """Yield an instantiated DeleteDemuxAPI with active samples on a flowcell"""
     return DeleteDemuxAPI(
         config=active_wipe_demux_context,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
         run_path=flowcell_full_name,
     )
@@ -254,7 +254,7 @@ def fixture_wipe_demultiplex_api(
     cg_context.cg_stats_api_ = stats_api
     return DeleteDemuxAPI(
         config=cg_context,
-        demultiplexing_dir=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
         run_path=flowcell_full_name,
     )

@@ -7,7 +7,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowcellError
-from cg.meta.demultiplex.wipe_demultiplex_api import DeleteDemuxAPI
+from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 
@@ -53,20 +53,20 @@ def demultiplex_all(
             )
             continue
 
-        wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
+        delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
             config=context,
-            demultiplexing_dir=Path(demultiplex_api.out_dir),
+            demultiplex_base=Path(demultiplex_api.out_dir),
             dry_run=dry_run,
             run_path=sub_dir,
         )
 
-        wipe_demux_api.wipe_flow_cell(
-            skip_cg_stats=False,
-            skip_demultiplexing_dir=False,
-            skip_run_dir=True,
-            skip_housekeeper=False,
-            skip_init_files=True,
-            skip_status_db=True,
+        delete_demux_api.delete_flow_cell(
+            cg_stats=True,
+            demultiplexing_dir=False,
+            run_dir=True,
+            housekeeper=False,
+            init_files=True,
+            status_db=True,
         )
 
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
@@ -104,20 +104,20 @@ def demultiplex_flowcell(
     except FlowcellError as e:
         raise click.Abort from e
 
-    wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
+    delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=context,
-        demultiplexing_dir=Path(demultiplex_api.out_dir),
+        demultiplex_base=Path(demultiplex_api.out_dir),
         dry_run=dry_run,
         run_path=flowcell_directory.name,
     )
 
-    wipe_demux_api.wipe_flow_cell(
-        skip_cg_stats=False,
-        skip_demultiplexing_dir=False,
-        skip_run_dir=True,
-        skip_housekeeper=False,
-        skip_init_files=False,
-        skip_status_db=True,
+    delete_demux_api.delete_flow_cell(
+        cg_stats=False,
+        demultiplexing_dir=False,
+        run_dir=True,
+        housekeeper=False,
+        init_files=False,
+        status_db=True,
     )
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
@@ -139,45 +139,75 @@ def demultiplex_flowcell(
 
 
 @click.command(name="delete-flow-cell")
+@click.option("--cg-stats", is_flag=True, help="Delete flow cell in cg-stats")
+@click.option(
+    "-d",
+    "--demultiplex-base",
+    required=True,
+    help="Is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'",
+)
+@click.option(
+    "--demultiplexing-dir", is_flag=True, help="Delete flow cell demultiplexed dir on file system"
+)
 @DRY_RUN
-@click.option("--skip-cg-stats", is_flag=True, help="Skip removal in cg-stats")
-@click.option("--skip-demultiplexing-dir", is_flag=True, help="Skip removal on server file system")
-@click.option("--skip-run-dir", is_flag=True, help="Skip removal of run file system")
-@click.option("--skip-housekeeper", is_flag=True, help="Skip removal in housekeeper")
-@click.option("--skip-status-db", is_flag=True, help="Skip removal in status-db")
-@click.option("--skip-init-files", is_flag=True, help="Skip removal of init-files")
-@click.argument("--demultiplexing-dir")
-@click.argument("--run-name")
+@click.option("--housekeeper", is_flag=True, help="Delete flow cell in housekeeper")
+@click.option("--init-files", is_flag=True, help="Delete flow cell init-files")
+@click.option("--run-dir", is_flag=True, help="Delete flow cell run on file system")
+@click.option(
+    "-r",
+    "--run-path",
+    required=True,
+    help="Is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/flowcells/novaseq/runs/201203_A00689_0200_AHVKJCDRXX'",
+)
+@click.option(
+    "--status-db",
+    is_flag=True,
+    help="Delete flow cell in status-db, if passed all other entries are also deleted",
+)
+@click.option("--yes", is_flag=True, help="Pass yes to click confirm")
+@click.pass_obj
 def delete_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: str,
     run_path: str,
-    skip_cg_stats: bool,
-    skip_demultiplexing_dir: bool,
-    skip_housekeeper: bool,
-    skip_init_files: bool,
-    skip_run_dir: bool,
-    skip_status_db: bool,
+    cg_stats: bool,
+    demultiplex_base: bool,
+    housekeeper: bool,
+    init_files: bool,
+    run_dir: bool,
+    status_db: bool,
+    yes: bool,
 ):
-    """Prepare a flowcell before demultiplexing, using the DeleteDemuxAPI
+    """Delete a flowcell. If --status-db is passed then all other options will be treated as True
 
-    Args:
-        Run path is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/{FLOWCELL_TYPE}/201203_A00689_0200_AHVKJCDRXX'
-        Demultiplexing-dir is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'
+    Options:
+        -d/--demultiplex-base: Is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'
+        -r/--run-name: Is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/flowcells/novaseq/runs/201203_A00689_0200_AHVKJCDRXX'
+    Flags:
+        --cg-stats: Removes data in cgstats
+        --demultiplexing-dir: Removes data in demultipelxed-runs
+        --run_dir: Removes binary file data in flowcells directory
+        --housekeeper: Removes files with tags related to the flowcell in Housekeeper
+        --status-db: Removing from status db and ALL other databases
     """
-
-    demux_path: Path = Path(demultiplexing_dir)
+    demux_path: Path = Path(demultiplex_base)
 
     wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-        config=context, demultiplexing_dir=demux_path, run_path=run_path
+        config=context, demultiplex_base=demux_path, dry_run=dry_run, run_path=run_path
     )
-    wipe_demux_api.set_dry_run(dry_run=dry_run)
-    wipe_demux_api.wipe_flow_cell(
-        skip_cg_stats=skip_cg_stats,
-        skip_demultiplexing_dir=skip_demultiplexing_dir,
-        skip_housekeeper=skip_housekeeper,
-        skip_init_files=skip_init_files,
-        skip_run_dir=skip_run_dir,
-        skip_status_db=skip_status_db,
-    )
+
+    if yes or click.confirm(
+        f"Are you sure you want to delete the flow cell from the following databases:\n"
+        f"cg_stats={True if status_db else cg_stats}\ndemultiplexing_dir={True if status_db else demultiplexing_dir}\n"
+        f"housekeeper={True if status_db else housekeeper}init_files={True if status_db else init_files}\n"
+        f"run_dir={True if status_db else run_dir}\nstatus_db={status_db}"
+    ):
+        wipe_demux_api.delete_flow_cell(
+            cg_stats=cg_stats,
+            demultiplexing_dir=demultiplexing_dir,
+            housekeeper=housekeeper,
+            init_files=init_files,
+            run_dir=run_dir,
+            status_db=status_db,
+        )

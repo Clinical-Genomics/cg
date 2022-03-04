@@ -217,5 +217,5 @@ class ValidationError(CgError):
     """
 
 
-class WipeDemuxError(CgError):
+class DeleteDemuxError(CgError):
     """Raised when there is an issue with wiping a flowcell before start"""
