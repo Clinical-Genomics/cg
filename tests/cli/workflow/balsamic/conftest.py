@@ -391,7 +391,6 @@ def fixture_balsamic_context(
         application_tag="TGSA",
         application_type="tgs",
         reads=10,
-        data_analysis=Pipeline.BALSAMIC,
         sequenced_at=dt.datetime.now(),
     )
     sample_case_tgs_paired_normal = helpers.add_sample(

@@ -34,7 +34,6 @@ openpyxl
 packaging
 pandas
 paramiko
-paramiko
 petname
 pydantic
 python-dateutil
