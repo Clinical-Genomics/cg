@@ -5,14 +5,8 @@ Revises: 76e8252a6efb
 Create Date: 2022-02-25 16:13:16.666812
 
 """
-import random
-from datetime import datetime
-from time import sleep
-
 from alembic import op
 import sqlalchemy as sa
-from cg.apps.avatar.api import Avatar
-from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
 
 
