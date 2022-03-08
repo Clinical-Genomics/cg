@@ -161,7 +161,7 @@ def test_check_bundle_files(
     # GIVEN a housekeeper version with a file
     version = populated_housekeeper_api.version(bundle=case_id, date=a_date)
 
-    # WHEN when attempting to add two files, one existing and one new
+    # WHEN attempting to add two files, one existing and one new
     files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
         file_paths=[Path(bed_file), fastq_file],
         bundle_name=case_id,
@@ -170,3 +170,19 @@ def test_check_bundle_files(
 
     # Then only the new file should be returned
     assert files_to_add == [fastq_file]
+
+
+def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
+    """Test get tag names on a file"""
+    # GIVEN a housekeeper api with a file
+    file_obj = populated_housekeeper_api.files().first()
+    assert file_obj.tags
+
+    # WHEN fetching tags of a file
+    tag_names = populated_housekeeper_api.get_tag_names_from_file(file_obj)
+
+    # THEN a list of tag names is returned
+    assert tag_names is not None
+    # THEN the return type is a list of strings
+    assert isinstance(tag_names, list)
+    assert all(isinstance(elem, str) for elem in tag_names)
