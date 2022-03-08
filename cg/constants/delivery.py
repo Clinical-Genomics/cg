@@ -95,6 +95,8 @@ MIP_RNA_ANALYSIS_CASE_TAGS = [
 ]
 
 MIP_RNA_ANALYSIS_SAMPLE_TAGS = [
+    {"fusion", "star-fusion"},
+    {"fusion", "arriba"},
     {"cram"},
     {"cram-index"},
     {"fusion", "vcf"},
