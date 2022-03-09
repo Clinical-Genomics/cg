@@ -339,7 +339,13 @@ class SampleView(BaseView):
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_priority,
     }
-    column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
+    column_searchable_list = [
+        "internal_id",
+        "name",
+        "subject_id",
+        "ticket_number",
+        "customer.internal_id",
+    ]
     form_excluded_columns = [
         "age_at_sampling",
         "deliveries",
