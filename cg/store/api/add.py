@@ -3,7 +3,6 @@ import logging
 from typing import List, Optional
 
 import petname
-from cg.apps.avatar.api import Avatar
 
 from cg.constants import DataDelivery, Pipeline
 from cg.store import models
@@ -175,21 +174,7 @@ class AddHandler(BaseHandler):
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
-        avatar_url = None
-        try:
-            avatar_urls = Avatar.get_avatar_urls(internal_id)
-            for avatar_url in avatar_urls:
-                if avatar_url and self.find_family_by_avatar_url(avatar_url=avatar_url) is None:
-                    break
-                else:
-                    LOG.debug(f"{avatar_url} already used - trying another url")
-        except Exception as e:
-            LOG.error(
-                "Could not fetch case avatar url for case: %s, Error: %s", internal_id, str(e)
-            )
-
         new_case = self.Family(
-            avatar_url=avatar_url,
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),

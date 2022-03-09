@@ -3,7 +3,6 @@ import logging
 from typing import Optional, Tuple
 import click
 
-from cg.apps.avatar.api import Avatar
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -16,7 +15,6 @@ LOG = logging.getLogger(__name__)
 
 @click.command()
 @click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
-@click.option("--avatar-url", type=click.STRING, help="update avatar url")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option(
     "-d",
@@ -41,7 +39,6 @@ LOG = logging.getLogger(__name__)
 def family(
     context: CGConfig,
     action: Optional[str],
-    avatar_url: Optional[str],
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
@@ -55,17 +52,12 @@ def family(
     if case_obj is None:
         LOG.error("Can't find case %s,", family_id)
         raise click.Abort
-    if not any([action, avatar_url, panels, priority, customer_id, data_analysis, data_delivery]):
+    if not any([action, panels, priority, customer_id, data_analysis, data_delivery]):
         LOG.error("Nothing to change")
         raise click.Abort
     if action:
         LOG.info("Update action: %s -> %s", case_obj.action or "NA", action)
         case_obj.action = action
-    if avatar_url:
-        if not Avatar.is_url_image(avatar_url) or status_db.find_family_by_avatar_url(avatar_url):
-            avatar_url = Avatar.get_avatar_url(case_obj.internal_id)
-        LOG.info("Update avatar_url: %s -> %s", case_obj.avatar_url or "NA", avatar_url)
-        case_obj.avatar_url = avatar_url
     if customer_id:
         customer_obj: models.Customer = status_db.customer(customer_id)
         if customer_obj is None:
