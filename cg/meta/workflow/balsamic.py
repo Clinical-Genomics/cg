@@ -487,11 +487,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),
-                "--sample-id-map": self.build_sample_id_map_string(case_id=case_id),
-                "--case-id-map": self.build_case_id_map_string(case_id=case_id),
             }
         )
-        parameters = command + options
+        parameters = command + options + ["--no-qc-metrics"]
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_analysis_type(self, case_id: str) -> Optional[str]:
