@@ -38,7 +38,7 @@ class FindBusinessDataHandler(BaseHandler):
                 ),
             ).filter(models.Analysis.started_at < before)
         return records
-
+    
     def active_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
         sample: models.Sample = self.sample(internal_id=internal_id)
@@ -65,7 +65,7 @@ class FindBusinessDataHandler(BaseHandler):
         ):
             return True
         return False
-
+    
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -112,7 +112,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
+        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
     ) -> Query:
         """Fetch families."""
 
@@ -176,7 +176,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def families_by_subject_id(
-        self, customer_id: str, subject_id: str, data_analyses: List[Pipeline] = None
+        self, customer_id: str, subject_id: str, data_analyses: [Pipeline] = None
     ) -> Set[models.Family]:
         """Get cases that has a sample for a subject_id.
 
@@ -188,7 +188,7 @@ class FindBusinessDataHandler(BaseHandler):
             set containing the matching cases set(models.Family)
         """
         cases: set[models.Family] = set()
-        samples: List[models.Sample] = self.samples_by_subject_id(
+        samples: [models.Sample] = self.samples_by_subject_id(
             customer_id=customer_id, subject_id=subject_id
         )
         sample: models.Sample
@@ -225,10 +225,6 @@ class FindBusinessDataHandler(BaseHandler):
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
-
-    def find_family_by_avatar_url(self, avatar_url: str) -> models.Family:
-        """Fetch a family by avatar_url from the database."""
-        return self.Family.query.filter_by(avatar_url=avatar_url).first()
 
     def find_family_by_name(self, name: str) -> models.Family:
         """Find a family by family name within a customer."""
@@ -359,7 +355,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[models.Sample]:
+    def samples_by_subject_id(self, customer_id: str, subject_id: str) -> [models.Sample]:
         """Get samples of customer with given subject_id.
 
         Args:

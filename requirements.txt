@@ -23,7 +23,6 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 # utils
 alive_progress
 ansi
-bing-image-urls
 cgmodels>=0.7
 coloredlogs
 email-validator
@@ -39,7 +38,6 @@ pydantic
 python-dateutil
 pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
-simple_image_download
 tabulate
 typing_extensions
 wtforms<3.0.0          # wtforms.compat missing in 3.0.0
