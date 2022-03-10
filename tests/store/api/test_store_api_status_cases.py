@@ -814,7 +814,7 @@ def test_only_prepared_cases(base_store: Store, helpers):
     sample = helpers.add_sample(base_store, prepared_at=datetime.now())
     base_store.relate_sample(new_case, sample, "unknown")
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding prepared
@@ -834,7 +834,7 @@ def test_only_received_cases(base_store: Store, helpers):
     sample = helpers.add_sample(base_store, received_at=datetime.now())
     base_store.relate_sample(new_case, sample, "unknown")
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding received
@@ -854,7 +854,7 @@ def test_only_sequenced_cases(base_store: Store, helpers):
     sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     base_store.relate_sample(new_case, sample, "unknown")
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding sequenced
@@ -874,7 +874,7 @@ def test_only_delivered_cases(base_store: Store, helpers):
     sample = helpers.add_sample(base_store, delivered_at=datetime.now())
     base_store.relate_sample(new_case, sample, "unknown")
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding delivered
@@ -892,7 +892,7 @@ def test_only_uploaded_cases(base_store: Store, helpers):
     # GIVEN a database with an uploaded analysis
     helpers.add_analysis(base_store, uploaded_at=datetime.now())
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding uploaded
@@ -910,7 +910,7 @@ def test_only_delivery_reported_cases(base_store: Store, helpers):
     # GIVEN a database with an delivery-reported analysis
     helpers.add_analysis(base_store, delivery_reported_at=datetime.now())
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding delivery_reported
@@ -932,7 +932,7 @@ def test_only_invoiced_cases(base_store: Store, helpers):
     sample.invoice.invoiced_at = datetime.now()
     base_store.relate_sample(new_case, sample, "unknown")
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding invoiced
@@ -950,7 +950,7 @@ def test_only_analysed_cases(base_store: Store, helpers):
     # GIVEN a database with a completed analysis
     helpers.add_analysis(base_store, completed_at=datetime.now())
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
-    neg_sample = helpers.add_sample(base_store, sample_name="neg_sample")
+    neg_sample = helpers.add_sample(base_store, name="neg_sample")
     base_store.relate_sample(neg_new_case, neg_sample, "unknown")
 
     # WHEN getting active cases excluding not analysed
@@ -1306,7 +1306,7 @@ def test_one_of_two_samples_received(base_store: Store, helpers):
     # GIVEN a database with a case with a received sample and one not received
     new_case = add_case(helpers, base_store)
     sample_received = helpers.add_sample(base_store, "sample_received", received_at=datetime.now())
-    sample_not_received = helpers.add_sample(base_store, "sample_not_received", received=False)
+    sample_not_received = helpers.add_sample(base_store, "sample_not_received", received_at=None)
     base_store.relate_sample(new_case, sample_received, "unknown")
     base_store.relate_sample(new_case, sample_not_received, "unknown")
     assert sample_received.received_at is not None
