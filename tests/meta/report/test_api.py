@@ -303,7 +303,7 @@ def test_get_processing_dates(case_id, report_api_mip_dna, case_samples_data):
     assert processing_dates == 5
 
 
-def test_get_processing_dates_None(case_id, report_api_mip_dna, case_samples_data):
+def test_get_processing_dates_none(case_id, report_api_mip_dna, case_samples_data):
     """Tests processing dates calculation when a date value is missing"""
 
     # GIVEN a specific sample without a timestamp value
