@@ -1,18 +1,7 @@
 import os
 from datetime import datetime, timedelta
 
-
-def recursive_assert(data):
-    """Dictionary recursive assert test"""
-
-    for k, v in data.items():
-        if isinstance(v, dict):
-            recursive_assert(dict(v))
-        if isinstance(v, list):
-            for e in v:
-                recursive_assert(dict(e))
-        else:
-            assert v, f"{k} value is missing"
+from tests.meta.report.helper import recursive_assert
 
 
 def test_create_delivery_report(report_api_mip_dna, case_mip_dna):
@@ -98,19 +87,21 @@ def test_get_customer_data(report_api_mip_dna, case_mip_dna):
     assert customer_data == expected_customer
 
 
-def test_get_report_version(report_api_mip_dna, case_mip_dna):
-    """Validates the extracted report version of an analysis"""
+def test_get_report_version_version(report_api_mip_dna, store, helpers):
+    """Validates the extracted report versions of two analyses"""
 
-    # GIVEN a pre-built case
-
-    # GIVEN an expected output (2 appended analysis to this specific case)
-    expected_analysis_version = 2
+    # GIVEN a specific set of analyses
+    last_analysis = helpers.add_analysis(store, completed_at=datetime.now())
+    yesterday = datetime.now() - timedelta(days=1)
+    first_analysis = helpers.add_analysis(store, last_analysis.family, completed_at=yesterday)
 
     # WHEN retrieving the version
-    analysis_version = report_api_mip_dna.get_report_version(case_mip_dna.analyses[0])
+    last_analysis_version = report_api_mip_dna.get_report_version(last_analysis)
+    first_analysis_version = report_api_mip_dna.get_report_version(first_analysis)
 
     # THEN check if the versions match
-    assert analysis_version == expected_analysis_version
+    assert last_analysis_version == 2
+    assert first_analysis_version == 1
 
 
 def test_get_case_data(report_api_mip_dna, mip_analysis_api, case_mip_dna, family_name):
@@ -287,30 +278,30 @@ def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data):
     assert sample_timestamp_data == expected_case_samples_data
 
 
-def test_get_processing_dates(case_id, report_api_mip_dna, case_samples_data):
+def test_get_processing_days(report_api_mip_dna, sample_store, helpers):
     """Tests processing dates calculation"""
 
     # GIVEN a specific sample received 5 days ago
-    report_api_mip_dna.status_db.family_samples(case_id)[
-        0
-    ].sample.received_at = datetime.now() - timedelta(days=5)
-    report_api_mip_dna.status_db.family_samples(case_id)[0].sample.delivered_at = datetime.now()
+    sample = helpers.add_sample(sample_store)
+    sample.received_at = datetime.now() - timedelta(days=5)
+    sample.delivered_at = datetime.now()
 
     # WHEN calling the processing dates calculation method
-    processing_dates = report_api_mip_dna.get_processing_dates(case_samples_data[0].sample)
+    processing_days = report_api_mip_dna.get_processing_days(sample)
 
     # THEN check if the days to deliver are correctly calculated
-    assert processing_dates == 5
+    assert processing_days == 5
 
 
-def test_get_processing_dates_none(case_id, report_api_mip_dna, case_samples_data):
+def test_get_processing_days_none(report_api_mip_dna, sample_store, helpers):
     """Tests processing dates calculation when a date value is missing"""
 
     # GIVEN a specific sample without a timestamp value
-    report_api_mip_dna.status_db.family_samples(case_id)[0].sample.received_at = None
+    sample = helpers.add_sample(sample_store)
+    sample.received_at = None
 
     # WHEN calling the processing dates calculation method
-    processing_dates = report_api_mip_dna.get_processing_dates(case_samples_data[0].sample)
+    processing_days = report_api_mip_dna.get_processing_days(sample)
 
     # THEN check if None is returned
-    assert processing_dates is None
+    assert processing_days is None

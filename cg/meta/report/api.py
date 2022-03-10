@@ -272,11 +272,11 @@ class ReportAPI(MetaAPI):
             prepared_at=sample.prepared_at,
             sequenced_at=sample.sequenced_at,
             delivered_at=sample.delivered_at,
-            processing_days=self.get_processing_dates(sample),
+            processing_days=self.get_processing_days(sample),
         )
 
     @staticmethod
-    def get_processing_dates(sample: models.Sample) -> Union[int, None]:
+    def get_processing_days(sample: models.Sample) -> Union[int, None]:
         """Calculates the days it takes to deliver a sample"""
 
         if sample.received_at and sample.delivered_at:
