@@ -105,7 +105,7 @@ def delivery_report(
 
     LOG.info("Using analysis started at: %s", analysis_started_at)
 
-    # Dry run: print HTML report to console
+    # Dry run: prints the HTML report to console
     if dry_run:
         delivery_report_html: str = report_api.create_delivery_report(case_id, analysis_started_at)
         click.echo(delivery_report_html)

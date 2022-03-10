@@ -38,7 +38,7 @@ class ReportAPI(MetaAPI):
         """Generates the html contents of a delivery report"""
 
         report_data = self.get_report_data(case_id=case_id, analysis_date=analysis_date)
-        rendered_report = self.render_delivery_report(report_data)
+        rendered_report = self.render_delivery_report(report_data.dict())
         return rendered_report
 
     def create_delivery_report_file(
@@ -107,7 +107,7 @@ class ReportAPI(MetaAPI):
 
         return self.status_db.analyses_to_delivery_report(self.analysis_api.pipeline)[:50]
 
-    def get_report_data(self, case_id: str, analysis_date: datetime) -> dict:
+    def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report"""
 
         case = self.status_db.family(case_id)
@@ -121,7 +121,7 @@ class ReportAPI(MetaAPI):
             date=datetime.today(),
             case=case_model,
             accredited=self.get_report_accreditation(analysis_metadata, case_model.samples),
-        ).dict()
+        )
 
     @staticmethod
     def get_customer_data(case: models.Family) -> CustomerModel:
