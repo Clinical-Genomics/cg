@@ -254,3 +254,199 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_upload_rna_fusion_report_to_scout_tumour_non_matching(
+    caplog: Generator[LogCaptureFixture, None, None],
+    dna_case_id: str,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that an RNA case's gene fusion report is not uploaded if the is_tumour is not matching"""
+
+    # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.is_tumour = True
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.is_tumour = False
+    rna_store.commit()
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA case has a research fusion report in Housekeeper
+
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_upload_rna_coverage_bigwig_to_scout_tumour_non_matching(
+    caplog: Generator[LogCaptureFixture, None, None],
+    dna_case_id: str,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the is_tumour is not matching"""
+
+    # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.is_tumour = True
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.is_tumour = False
+    rna_store.commit()
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA sample has a bigWig in Housekeeper
+
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
+    caplog: Generator[LogCaptureFixture, None, None],
+    dna_case_id: str,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that A RNA case's junction splice files for all samples is not uploaded if the is_tumour is not matching"""
+
+    # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.is_tumour = True
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.is_tumour = False
+    rna_store.commit()
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA sample has a junction bed in Housekeeper
+
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
+    caplog: Generator[LogCaptureFixture, None, None],
+    dna_case_id: str,
+    helpers: StoreHelpers,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that an RNA case's gene fusion report is not uploaded if the is_tumour is not matching"""
+
+    # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
+    subject_id: str
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.is_tumour = True
+        subject_id = link.sample.subject_id
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.is_tumour = True
+
+    dna_extra_case = helpers.ensure_case(
+        store=rna_store, customer=rna_store.family(dna_case_id).customer
+    )
+    dna_extra_tumour = helpers.add_sample(
+        store=rna_store, name="dna_extra_tumour", subject_id=subject_id, is_tumour=True
+    )
+    helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
+
+    rna_store.commit()
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA case has a research fusion report in Housekeeper
+
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
+    caplog: Generator[LogCaptureFixture, None, None],
+    dna_case_id: str,
+    helpers: StoreHelpers,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the is_tumour is not matching"""
+
+    # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
+    subject_id: str
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.is_tumour = True
+        subject_id = link.sample.subject_id
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.is_tumour = True
+
+    dna_extra_case = helpers.ensure_case(
+        store=rna_store, customer=rna_store.family(dna_case_id).customer
+    )
+    dna_extra_tumour = helpers.add_sample(
+        store=rna_store, name="dna_extra_tumour", subject_id=subject_id, is_tumour=True
+    )
+    helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
+    rna_store.commit()
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA sample has a bigWig in Housekeeper
+
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
+    caplog: Generator[LogCaptureFixture, None, None],
+    dna_case_id: str,
+    helpers: StoreHelpers,
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that A RNA case's junction splice files for all samples is not uploaded if the is_tumour is not matching"""
+
+    # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
+    subject_id: str
+    for link in rna_store.family(rna_case_id).links:
+        link.sample.is_tumour = True
+        subject_id = link.sample.subject_id
+    for link in rna_store.family(dna_case_id).links:
+        link.sample.is_tumour = True
+
+    dna_extra_case = helpers.ensure_case(
+        store=rna_store, customer=rna_store.family(dna_case_id).customer
+    )
+    dna_extra_tumour = helpers.add_sample(
+        store=rna_store, name="dna_extra_tumour", subject_id=subject_id, is_tumour=True
+    )
+    helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
+    rna_store.commit()
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA sample has a junction bed in Housekeeper
+
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
