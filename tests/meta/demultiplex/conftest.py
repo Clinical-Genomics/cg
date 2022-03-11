@@ -85,9 +85,7 @@ def fixture_populated_flow_cell_store(
 ) -> Store:
     """Populate a store with a novaseq flow cell"""
     populated_flow_cell_store: Store = store
-    sample: Sample = helpers.add_sample(
-        store=populated_flow_cell_store, sample_id=sample_id, internal_id=sample_id
-    )
+    sample: Sample = helpers.add_sample(store=populated_flow_cell_store, internal_id=sample_id)
     helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
     helpers.add_relationship(
         store=populated_flow_cell_store,
@@ -109,9 +107,7 @@ def fixture_active_flow_cell_store(
 ) -> Store:
     """Populate a store with a novaseq flow cell, with active samples on it"""
     active_flow_cell_store: Store = base_store
-    sample: Sample = helpers.add_sample(
-        store=active_flow_cell_store, sample_id=sample_id, internal_id=sample_id
-    )
+    sample: Sample = helpers.add_sample(store=active_flow_cell_store, internal_id=sample_id)
     helpers.add_case(store=active_flow_cell_store, internal_id=family_name, action="running")
     helpers.add_relationship(
         store=active_flow_cell_store,
