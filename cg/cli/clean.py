@@ -152,9 +152,6 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
     for version_file in clean_api.get_unprotected_existing_bundle_files(
         before=get_date_days_ago(days_ago=days_old)
     ):
-
-        # TODO: continue when version is missing for bundle
-
         file_path: Path = Path(version_file.full_path)
         file_size: int = file_path.stat().st_size
         size_cleaned += file_size
