@@ -14,7 +14,7 @@ class HkMipAnalysisTag(StrEnum):
 WORKFLOW_PROTECTED_TAGS = {
     str(Pipeline.BALSAMIC): [],
     str(Pipeline.FASTQ): [],
-    str(Pipeline.FLUFFY): [],
+    str(Pipeline.FLUFFY): ["NIPT_csv", "MultiQC"],
     str(Pipeline.MICROSALT): [
         ["microsalt-log"],
         ["config"],
