@@ -23,14 +23,16 @@ def clean_context(
 
     # Create textbook case for cleaning
     case_to_clean = helpers.add_case(
-        store=store, internal_id="balsamic_case_clean", name="balsamic_case_clean"
+        store=store,
+        internal_id="balsamic_case_clean",
+        name="balsamic_case_clean",
+        data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_to_clean = helpers.add_sample(
         store,
         internal_id="balsamic_sample_clean",
         is_tumour=True,
         application_type="wgs",
-        data_analysis=Pipeline.BALSAMIC,
     )
     helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
 
@@ -46,7 +48,10 @@ def clean_context(
 
     # Create textbook case not for cleaning
     case_to_not_clean = helpers.add_case(
-        store=store, internal_id="balsamic_case_not_clean", name="balsamic_case_not_clean"
+        store=store,
+        internal_id="balsamic_case_not_clean",
+        name="balsamic_case_not_clean",
+        data_analysis=Pipeline.BALSAMIC,
     )
     case_to_not_clean.action = "running"
     store.commit()
@@ -56,7 +61,6 @@ def clean_context(
         internal_id="balsamic_sample_not_clean",
         is_tumour=True,
         application_type="wgs",
-        data_analysis="balsamic",
     )
     helpers.add_relationship(store, case=case_to_not_clean, sample=sample_case_to_not_clean)
 
