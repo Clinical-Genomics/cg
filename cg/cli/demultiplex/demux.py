@@ -179,18 +179,7 @@ def delete_flow_cell(
     status_db: bool,
     yes: bool,
 ):
-    """Delete a flowcell. If --status-db is passed then all other options will be treated as True
-
-    Options:
-        -d/--demultiplex-base: Is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'
-        -r/--run-name: Is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/flowcells/novaseq/runs/201203_A00689_0200_AHVKJCDRXX'
-    Flags:
-        --cg-stats: Removes data in cgstats
-        --demultiplexing-dir: Removes data in demultipelxed-runs
-        --run_dir: Removes binary file data in flowcells directory
-        --housekeeper: Removes files with tags related to the flowcell in Housekeeper
-        --status-db: Removing from status db and ALL other databases
-    """
+    """Delete a flowcell. If --status-db is passed then all other options will be treated as True"""
     demux_path: Path = Path(demultiplex_base)
 
     wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
