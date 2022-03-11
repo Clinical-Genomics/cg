@@ -38,7 +38,7 @@ class FindBusinessDataHandler(BaseHandler):
                 ),
             ).filter(models.Analysis.started_at < before)
         return records
-    
+
     def active_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
         sample: models.Sample = self.sample(internal_id=internal_id)
@@ -65,7 +65,7 @@ class FindBusinessDataHandler(BaseHandler):
         ):
             return True
         return False
-    
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
