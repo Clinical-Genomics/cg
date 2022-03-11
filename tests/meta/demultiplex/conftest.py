@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
 from cg.store.api import Store
-from cg.store.models import Sample
+from cg.store.models import Sample, Family
 
 from tests.apps.cgstats.conftest import fixture_populated_stats_api
 from tests.cli.demultiplex.conftest import (
@@ -86,11 +86,11 @@ def fixture_populated_flow_cell_store(
     """Populate a store with a novaseq flow cell"""
     populated_flow_cell_store: Store = store
     sample: Sample = helpers.add_sample(store=populated_flow_cell_store, internal_id=sample_id)
-    helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
+    family: Family = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)
     helpers.add_relationship(
         store=populated_flow_cell_store,
-        sample=store.sample(internal_id=sample_id),
-        case=store.family(internal_id=family_name),
+        sample=sample,
+        case=family,
     )
     helpers.add_flowcell(
         store=populated_flow_cell_store,
@@ -108,11 +108,13 @@ def fixture_active_flow_cell_store(
     """Populate a store with a novaseq flow cell, with active samples on it"""
     active_flow_cell_store: Store = base_store
     sample: Sample = helpers.add_sample(store=active_flow_cell_store, internal_id=sample_id)
-    helpers.add_case(store=active_flow_cell_store, internal_id=family_name, action="running")
+    family: Family = helpers.add_case(
+        store=active_flow_cell_store, internal_id=family_name, action="running"
+    )
     helpers.add_relationship(
         store=active_flow_cell_store,
-        sample=active_flow_cell_store.sample(internal_id=sample_id),
-        case=active_flow_cell_store.family(internal_id=family_name),
+        sample=sample,
+        case=family,
     )
     helpers.add_flowcell(
         store=active_flow_cell_store,

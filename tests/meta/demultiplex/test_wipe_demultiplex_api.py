@@ -135,7 +135,6 @@ def test_no_active_samples_on_flow_cell(
 
 def test_active_samples_on_flow_cell(
     active_flow_cell_store: Store,
-    sample_id: str,
     flowcell_name: str,
     active_wipe_demultiplex_api: DeleteDemuxAPI,
 ):
@@ -159,7 +158,7 @@ def test_active_samples_on_flow_cell(
     ] = active_wipe_demultiplex_api.active_samples_on_flow_cell()
 
     # THEN there should be active samples found
-    assert sample_id in active_samples_on_flow_cell
+    assert any(sample.internal_id in active_samples_on_flow_cell for sample in samples_on_flow_cell)
 
 
 def test_check_active_sample(active_wipe_demultiplex_api: DeleteDemuxAPI):

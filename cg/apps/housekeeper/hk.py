@@ -95,7 +95,7 @@ class HousekeeperAPI:
 
         fastq_tag = "fastq"
         fastq_files: Iterable[File] = self.files(bundle=bundle, tags=[fastq_tag])
-
+        first_fastq_file = [fq for fq in fastq_files]
         if not fastq_files:
             LOG.info(f"Could not find fastq-files for {bundle}")
             return

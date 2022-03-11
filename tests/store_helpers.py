@@ -229,7 +229,7 @@ class StoreHelpers:
         control: str = "",
         customer_id: str = None,
         gender: str = "female",
-        internal_id: str = "test_sample",
+        internal_id: str = None,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -249,15 +249,25 @@ class StoreHelpers:
             is_rna=is_rna,
         )
         application_version_id = application_version.id
-        sample = store.add_sample(
-            control=control,
-            name=name,
-            internal_id=internal_id,
-            reads=reads,
-            sex=gender,
-            ticket=ticket,
-            tumour=is_tumour,
-        )
+        if internal_id:
+            sample = store.add_sample(
+                control=control,
+                internal_id=internal_id,
+                name=name,
+                reads=reads,
+                sex=gender,
+                ticket=ticket,
+                tumour=is_tumour,
+            )
+        else:
+            sample = store.add_sample(
+                control=control,
+                name=name,
+                reads=reads,
+                sex=gender,
+                ticket=ticket,
+                tumour=is_tumour,
+            )
 
         sample.application_version_id = application_version_id
         sample.customer = customer
