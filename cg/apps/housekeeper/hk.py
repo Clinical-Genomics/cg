@@ -87,6 +87,13 @@ class HousekeeperAPI:
 
         return file_obj
 
+    def delete_file_if_related(self, root: str, hk_file: File):
+        """Delete a file if the full path includes the root"""
+        if root in hk_file.path:
+            hk_file.delete()
+            self._store.commit()
+            LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
+
     def delete_fastq_and_spring(self, bundle: str, demultiplexing_path: Path) -> None:
         """
         Delete a fastq file from housekeeper, specified by run name in the
@@ -95,29 +102,24 @@ class HousekeeperAPI:
 
         fastq_tag = "fastq"
         fastq_files: Iterable[File] = self.files(bundle=bundle, tags=[fastq_tag])
-        first_fastq_file = [fq for fq in fastq_files]
+
         if not fastq_files:
             LOG.info(f"Could not find fastq-files for {bundle}")
             return
-
-        for fastq_file in fastq_files:
-            if demultiplexing_path.as_posix() in fastq_file.path:
-                fastq_file.delete()
-                self._store.commit()
-                LOG.info(f"FASTQ: {fastq_file.path} deleted from Housekeeper")
+        else:
+            for fastq_file in fastq_files:
+                self.delete_file_if_related(root=demultiplexing_path.as_posix(), hk_file=fastq_file)
 
         spring_tag = "spring"
         spring_files: Iterable[File] = self.files(bundle=bundle, tags=[spring_tag])
 
         if not spring_files:
             LOG.info(f"Could not find spring-files for {bundle}")
-            return
-
-        for spring_file in spring_files:
-            if demultiplexing_path.as_posix() in spring_file.path:
-                spring_file.delete()
-                self._store.commit()
-                LOG.info(f"SPRING: {spring_file.path} deleted from Housekeeper")
+        else:
+            for spring_file in spring_files:
+                self.delete_file_if_related(
+                    root=demultiplexing_path.as_posix(), hk_file=spring_file
+                )
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version"""

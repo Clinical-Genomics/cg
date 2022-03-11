@@ -64,7 +64,6 @@ def test_demultiplex_flowcell(
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-    mocker.patch("cg.meta.demultiplex.delete_demultiplex_api.DeleteDemuxAPI.delete_flow_cell")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -104,7 +103,6 @@ def test_demultiplex_bcl2fastq_flowcell(
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-    mocker.patch("cg.meta.demultiplex.delete_demultiplex_api.DeleteDemuxAPI.delete_flow_cell")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -147,7 +145,6 @@ def test_demultiplex_dragen_flowcell(
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-    mocker.patch("cg.meta.demultiplex.delete_demultiplex_api.DeleteDemuxAPI.delete_flow_cell")
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
@@ -219,7 +216,6 @@ def test_start_demultiplexing_when_already_completed(
 
     # GIVEN that demultiplexing is completed
     demux_api.demultiplexing_completed_path(flowcell=flowcell).touch()
-    mocker.patch("cg.meta.demultiplex.delete_demultiplex_api.DeleteDemuxAPI.delete_flow_cell")
 
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
@@ -317,8 +313,8 @@ def test_delete_flow_cell_dry_run_status_db(
     assert f"DeleteDemuxAPI-StatusDB: Would remove {flow_cell_name}" in caplog.text
     assert f"DeleteDemuxAPI-CGStats: Would remove {flow_cell_name}" in caplog.text
     assert (
-        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: "
+        "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
         f"{demultiplex_context.demultiplex_api.out_dir / Path(flowcell_full_name)}\n"
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flowcell}"
     ) in caplog.text
-    assert f"DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text
+    assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text
