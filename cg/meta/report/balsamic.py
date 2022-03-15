@@ -1,12 +1,16 @@
 import logging
-from typing import List
+from typing import List, Union
 
 from cg.constants import REPORT_ACCREDITED_PANELS
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.report.sample import SampleMetadataModel, SampleModel
+from cg.models.report.metadata import (
+    BalsamicTargetedSampleMetadataModel,
+    BalsamicWGSSampleMetadataModel,
+)
+from cg.models.report.sample import SampleModel
 from cg.store import models
 
 LOG = logging.getLogger(__name__)
@@ -21,22 +25,34 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_sample_metadata(
         self, case: models.Family, sample: models.Sample, analysis_metadata: BalsamicAnalysis
-    ) -> SampleMetadataModel:
+    ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Fetches the sample metadata to include in the report"""
 
-        return SampleMetadataModel(
-            bait_set=sample.capture_kit,
-            bait_set_version=analysis_metadata.config.panel.capture_kit_version
-            if sample.capture_kit
-            else None,
-            million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
-            duplicates=analysis_metadata.sample_metrics[sample.internal_id].percent_duplication,
-            median_coverage=analysis_metadata.sample_metrics[
-                sample.internal_id
-            ].median_target_coverage,
-            mean_insert_size=analysis_metadata.sample_metrics[sample.internal_id].mean_insert_size,
-            fold_80=analysis_metadata.sample_metrics[sample.internal_id].fold_80_base_penalty,
-        )
+        sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
+        million_read_pairs = round(sample.reads / 2000000, 1) if sample.reads else None
+
+        if self.get_data_analysis_type(case) == "wgs":
+            return BalsamicWGSSampleMetadataModel(
+                million_read_pairs=million_read_pairs,
+                median_coverage=sample_metrics.median_coverage,
+                pct_15x=sample_metrics.pct_15x,
+                pct_60x=sample_metrics.pct_60x,
+                duplicates=sample_metrics.percent_duplication,
+                mean_insert_size=sample_metrics.mean_insert_size,
+                fold_80=sample_metrics.fold_80_base_penalty,
+            )
+        else:
+            return BalsamicTargetedSampleMetadataModel(
+                bait_set=sample.capture_kit,
+                bait_set_version=analysis_metadata.config.panel.capture_kit_version,
+                million_read_pairs=million_read_pairs,
+                median_target_coverage=sample_metrics.median_target_coverage,
+                pct_250x=sample_metrics.pct_target_bases_250x,
+                pct_500x=sample_metrics.pct_target_bases_500x,
+                duplicates=sample_metrics.percent_duplication,
+                mean_insert_size=sample_metrics.mean_insert_size,
+                fold_80=sample_metrics.fold_80_base_penalty,
+            )
 
     def get_data_analysis_type(self, case: models.Family) -> str:
         """Retrieves the data analysis type carried out"""

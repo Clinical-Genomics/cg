@@ -13,14 +13,9 @@ from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
 from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
-from cg.models.report.sample import (
-    SampleModel,
-    ApplicationModel,
-    TimestampModel,
-    MethodsModel,
-    SampleMetadataModel,
-)
+from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
 from cg.store import models
 from jinja2 import Environment, PackageLoader, select_autoescape
 

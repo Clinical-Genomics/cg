@@ -21,12 +21,14 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer.name }}, case {{ case.name }}
+          <brief>
+            <b>Leveransrapport</b> {{ customer.name }}, <b>familj</b> {{ case.name }}
             {% if version != 'N/A' %}
-              : {{ version }}
+              , <b>version</b>: {{ version }}
             {% endif %}
             <br>
             Skapad: {{ date }}
+          </brief>
           </li>
         </ul>
 
@@ -46,6 +48,7 @@
             <div class="col">
               <h4>Kundinformation</h4>
               <address>
+                <strong>{{ customer.name }}</strong><br>
                 {{ customer.invoice_address | replace('\n', '<br>') | safe }}
               </address>
             </div>
@@ -68,7 +71,7 @@
                 <th>Provtyp</th>
                 <th>Ticket</th>
                 <th>Applikation</th>
-                <th>Bioinformatisk Analys</th>
+                <th>Bioinformatisk analys</th>
                 <th>Tumör</th>
               </tr>
             </thead>
@@ -98,10 +101,12 @@
                 <th>Ankom</th>
                 <th>Biblioteksberedning</th>
                 <th>Beredd</th>
-                <th>Bait Set</th>
+                {% if "panel" in case.data_analysis.type %}
+                  <th>Bait Set</th>
+                {% endif %}
                 <th>Sekvensering</th>
                 <th>Sekvenserad</th>
-                <th>Bioinformatisk Analys</th>
+                <th>Bioinformatisk analys</th>
                 <th>Svarsdatum</th>
               </tr>
             </thead>
@@ -112,12 +117,14 @@
                   <td>{{ sample.timestamp.received_at }}</td>
                   <td>{{ sample.methods.library_prep }}</td>
                   <td>{{ sample.timestamp.prepared_at }}</td>
-                  <td>
-                    {{ sample.metadata.bait_set }}
-                    {% if sample.metadata.bait_set_version != 'N/A' %}
-                      (version: {{ sample.metadata.bait_set_version }})
-                    {% endif %}
-                  </td>
+                  {% if "panel" in case.data_analysis.type %}
+                    <td>
+                     {{ sample.metadata.bait_set }}
+                     {% if sample.metadata.bait_set_version != 'N/A' %}
+                       (version: {{ sample.metadata.bait_set_version }})
+                     {% endif %}
+                   </td>
+                {% endif %}
                   <td>{{ sample.methods.sequencing }}</td>
                   <td>{{ sample.timestamp.sequenced_at }}</td>
                   <td>{{ case.data_analysis.pipeline }}</td>
@@ -135,7 +142,6 @@
 
         <div class="card-block">
           <table class="table table-bordered" aria-describedby="Case table">
-            <caption><a href="https://balsamic.readthedocs.io/en/latest/install.html">Variant-calling filters</a>: {{ case.data_analysis.variant_callers }}</caption>
             <thead>
               <tr>
                 <th>Case</th>
@@ -152,6 +158,12 @@
                 <td>{{ case.data_analysis.type }}</td>
               </tr>
             </tbody>
+            <caption>
+              <strong>Variant-calling filters</strong>: {{ case.data_analysis.variant_callers }}<br>
+              <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html#balsamic-variant-calling-algorithms">
+                https://balsamic.readthedocs.io/en/latest/balsamic_filters.html#balsamic-variant-calling-algorithms
+              </a>
+            </caption>
           </table>
         </div>
 
@@ -161,10 +173,18 @@
               <tr>
                 <th>Prov</th>
                 <th>Läspar [M]</th>
+                <th>Mediantäckning [baser]</th>
+              {% if "wgs" in case.data_analysis.type %}
+                  {% if "normal" in case.data_analysis.type %}
+                    <th>Täckningsgrad 15x [%]</th>
+                  {% else %}
+                    <th>Täckningsgrad 60x [%]</th>
+                  {% endif %}
+              {% else %}
                 <th>Täckningsgrad 250x [%]</th>
                 <th>Täckningsgrad 500x [%]</th>
+              {% endif %}
                 <th>Duplikat [%]</th>
-                <th>Mediantäckning [baser]</th>
                 <th>Medelfragmentlängd [baspar]</th>
                 <th>Fold 80 base penalty</th>
               </tr>
@@ -174,10 +194,19 @@
                 <tr>
                   <td>{{ sample.name }}*</td>
                   <td>{{ sample.metadata.million_read_pairs }}</td>
-                  <td>{{ sample.metadata.target_bases_250X }}</td>
-                  <td>{{ sample.metadata.target_bases_500X }}</td>
+                  {% if "wgs" in case.data_analysis.type %}
+                    <td>{{ sample.metadata.median_coverage }}</td>
+                    {% if "normal" in case.data_analysis.type %}
+                      <td>{{ sample.metadata.pct_15x }}</td>
+                    {% else %}
+                      <td>{{ sample.metadata.pct_60x }}</td>
+                    {% endif %}
+                  {% else %}
+                    <td>{{ sample.metadata.median_target_coverage }}</td>
+                    <td>{{ sample.metadata.pct_250x }}</td>
+                    <td>{{ sample.metadata.pct_500x }}</td>
+                  {% endif %}
                   <td>{{ sample.metadata.duplicates }}</td>
-                  <td>{{ sample.metadata.median_coverage }}</td>
                   <td>{{ sample.metadata.mean_insert_size }}</td>
                   <td>{{ sample.metadata.fold_80 }}</td>
                 </tr>

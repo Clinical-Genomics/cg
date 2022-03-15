@@ -1,12 +1,12 @@
 import logging
 from typing import List, Union
 
-from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.cg_config import CGConfig
 from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.report.sample import SampleMetadataModel, SampleModel
+from cg.models.report.metadata import MipDNASampleMetadataModel
+from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store import models
 
@@ -22,7 +22,7 @@ class MipDNAReportAPI(ReportAPI):
 
     def get_sample_metadata(
         self, case: models.Family, sample: models.Sample, analysis_metadata: MipAnalysis
-    ) -> SampleMetadataModel:
+    ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report"""
 
         parsed_metrics = get_sample_id_metric(
@@ -31,14 +31,14 @@ class MipDNAReportAPI(ReportAPI):
         )
         sample_coverage = self.get_sample_coverage(sample, case)
 
-        return SampleMetadataModel(
+        return MipDNASampleMetadataModel(
             bait_set=sample.capture_kit,
             gender=parsed_metrics.predicted_sex,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
             mapped_reads=parsed_metrics.mapped_reads,
+            mean_target_coverage=sample_coverage.get("mean_coverage"),
+            pct_10x=sample_coverage.get("mean_completeness"),
             duplicates=parsed_metrics.duplicate_reads,
-            target_coverage=sample_coverage.get("mean_coverage"),
-            target_bases_10X=sample_coverage.get("mean_completeness"),
         )
 
     def get_sample_coverage(self, sample: models.Sample, case: models.Family) -> dict:

@@ -1,9 +1,12 @@
-from typing import Dict
+from typing import Dict, Union
 
 from pydantic import BaseModel
-
 from cg.models.balsamic.config import BalsamicConfigJSON
-from cg.models.balsamic.metrics import BalsamicQCMetrics, BalsamicMetricsBase
+from cg.models.balsamic.metrics import (
+    BalsamicMetricsBase,
+    BalsamicTargetedQCMetrics,
+    BalsamicWGSQCMetrics,
+)
 
 
 class BalsamicAnalysis(BaseModel):
@@ -15,18 +18,39 @@ class BalsamicAnalysis(BaseModel):
     """
 
     config: BalsamicConfigJSON
-    sample_metrics: Dict[str, BalsamicQCMetrics]
+    sample_metrics: Dict[str, Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]]
+
+
+def cast_metrics_type(
+    sequencing_type: dict, metrics: dict
+) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
+    """Cast metrics model type according to the sequencing type"""
+
+    if metrics:
+        if sequencing_type == "wgs":
+            for k, v in metrics.items():
+                metrics[k] = BalsamicWGSQCMetrics(**v)
+        else:
+            for k, v in metrics.items():
+                metrics[k] = BalsamicTargetedQCMetrics(**v)
+
+        return metrics
+
+    return None
 
 
 def parse_balsamic_analysis(config: dict, metrics: list) -> BalsamicAnalysis:
     """Returns a formatted BalsamicAnalysis object"""
 
     qc_metrics = dict()
-    for v in metrics:
-        sample_metric = BalsamicMetricsBase(**v)
+    for value in metrics:
+        sample_metric = BalsamicMetricsBase(**value)
         try:
             qc_metrics[sample_metric.id].update({sample_metric.name.lower(): sample_metric.value})
         except KeyError:
             qc_metrics[sample_metric.id] = {sample_metric.name.lower(): sample_metric.value}
 
-    return BalsamicAnalysis(config=config, sample_metrics=qc_metrics)
+    return BalsamicAnalysis(
+        config=config,
+        sample_metrics=cast_metrics_type(config["analysis"]["sequencing_type"], qc_metrics),
+    )

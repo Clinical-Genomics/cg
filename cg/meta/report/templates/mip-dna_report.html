@@ -21,12 +21,14 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer.name }}, familj {{ case.name }}
+          <brief>
+            <b>Leveransrapport</b> {{ customer.name }}, <b>familj</b> {{ case.name }}
             {% if version != 'N/A' %}
-              : {{ version }}
+              , <b>version</b>: {{ version }}
             {% endif %}
             <br>
             Skapad: {{ date }}
+          </brief>
           </li>
         </ul>
 
@@ -39,12 +41,14 @@
                 Science for Life Laboratory<br>
                 Tomtebodavägen 23<br>
                 171 65 Solna<br>
-                <abbr title="Phone">P:</abbr> (08) 524 81 500
+                P: <a href="tel:(08) 524 81 500">(08) 524 81 500</a><br>
+                E-post: <a href = "mailto: support@clinicalgenomics.se">support@clinicalgenomics.se</a>
               </address>
             </div>
             <div class="col">
               <h4>Kundinformation</h4>
               <address>
+                <strong>{{ customer.name }}</strong><br>
                 {{ customer.invoice_address | replace('\n', '<br>') | safe }}
               </address>
             </div>
@@ -68,7 +72,7 @@
                 <th>Vävnad</th>
                 <th>Ticket</th>
                 <th>Applikation</th>
-                <th>Bioinformatisk Analys</th>
+                <th>Bioinformatisk analys</th>
               </tr>
             </thead>
             <tbody>
@@ -79,12 +83,14 @@
                   <td>{{ case.name }}*</td>
                   <td>
                     {{ sample.gender }}*
-                    (analys:
+                    {%  if sample.metadata.gender != 'N/A'%}
+                      (analys:
                       {% if sample.gender != sample.metadata.gender %}
                         <span class="text-danger">{{ sample.metadata.gender }}</span>)
                       {% else %}
                         <span class="text-success">{{ sample.metadata.gender }}</span>)
                       {% endif %}
+                    {% endif %}
                   </td>
                   <td>{{ sample.status }}*</td>
                   <td>{{ sample.source }}*</td>
@@ -105,10 +111,10 @@
                 <th>Ankom</th>
                 <th>Biblioteksberedning</th>
                 <th>Beredd</th>
-                <th>Bait Set</th>
+                <th>Bait set</th>
                 <th>Sekvensering</th>
                 <th>Sekvenserad</th>
-                <th>Bioinformatisk Analys</th>
+                <th>Bioinformatisk analys</th>
                 <th>Svarsdatum</th>
               </tr>
             </thead>
@@ -158,7 +164,6 @@
 
         <div class="card-block">
           <table class="table table-bordered" aria-describedby="Case table">
-            <caption>Resultat baserade på valda genpaneler - {{ case.data_analysis.panels }}.</caption>
             <thead>
               <tr>
                 <th>Prov</th>
@@ -175,12 +180,13 @@
                   <td>{{ sample.name }}*</td>
                   <td>{{ sample.metadata.million_read_pairs }}</td>
                   <td>{{ sample.metadata.mapped_reads }}</td>
-                  <td>{{ sample.metadata.target_coverage }}</td>
-                  <td>{{ sample.metadata.target_bases_10X }}</td>
+                  <td>{{ sample.metadata.mean_target_coverage }}</td>
+                  <td>{{ sample.metadata.pct_10x }}</td>
                   <td>{{ sample.metadata.duplicates }}</td>
                 </tr>
               {% endfor %}
             </tbody>
+            <caption>Resultat baserade på valda genpaneler: {{ case.data_analysis.panels }}.</caption>
           </table>
 
           <div class="card-body">* Information given av kund</div>
