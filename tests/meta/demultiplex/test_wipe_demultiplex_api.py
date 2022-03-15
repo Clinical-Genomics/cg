@@ -294,7 +294,7 @@ def test_wipe_flow_cell_statusdb(
 
     # THEN the user should be informed that the object was removed
 
-    assert f"StatusDB: Wiping flowcell {wipe_demux_api.flow_cell_name}" in caplog.text
+    assert f"StatusDB: Deleted flowcell {wipe_demux_api.flow_cell_name}" in caplog.text
 
     # AND the object should no longer exist in status db
 

@@ -87,10 +87,10 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def delete_file_if_related(self, root: str, hk_file: File):
+    def delete_file_if_related(self, stem: str, hk_file: File):
         """Delete a file if the full path includes the root"""
-        if root in hk_file.path:
-            hk_file.delete()
+        if stem in hk_file.path:
+            self.delete_file(file_id=hk_file.id)
             self._store.commit()
             LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
 
@@ -108,7 +108,7 @@ class HousekeeperAPI:
             return
         else:
             for fastq_file in fastq_files:
-                self.delete_file_if_related(root=demultiplexing_path.as_posix(), hk_file=fastq_file)
+                self.delete_file_if_related(stem=demultiplexing_path.as_posix(), hk_file=fastq_file)
 
         spring_tag = "spring"
         spring_files: Iterable[File] = self.files(bundle=bundle, tags=[spring_tag])
@@ -118,7 +118,7 @@ class HousekeeperAPI:
         else:
             for spring_file in spring_files:
                 self.delete_file_if_related(
-                    root=demultiplexing_path.as_posix(), hk_file=spring_file
+                    stem=demultiplexing_path.as_posix(), hk_file=spring_file
                 )
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:

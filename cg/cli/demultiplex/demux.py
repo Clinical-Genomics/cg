@@ -188,9 +188,9 @@ def delete_flow_cell(
 
     if yes or click.confirm(
         f"Are you sure you want to delete the flow cell from the following databases:\n"
-        f"cg_stats={True if status_db else cg_stats}\ndemultiplexing_dir={True if status_db else demultiplexing_dir}\n"
-        f"housekeeper={True if status_db else housekeeper}init_files={True if status_db else init_files}\n"
-        f"run_dir={True if status_db else run_dir}\nstatus_db={status_db}"
+        f"cg-stats={True if status_db else cg_stats}\nDemultiplexing-dir={True if status_db else demultiplexing_dir}\n"
+        f"Housekeeper={True if status_db else housekeeper}\nInit_files={True if status_db else init_files}\n"
+        f"Run-dir={True if status_db else run_dir}\nStatusdb={status_db}"
     ):
         wipe_demux_api.delete_flow_cell(
             cg_stats=cg_stats,

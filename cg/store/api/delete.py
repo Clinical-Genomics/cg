@@ -14,3 +14,4 @@ class DeleteDataHandler(BaseHandler):
         if flowcell:
             flowcell.delete()
             flowcell.flush()
+            self.commit()

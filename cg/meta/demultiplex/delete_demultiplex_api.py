@@ -121,8 +121,8 @@ class DeleteDemuxAPI:
         if self.dry_run:
             log.info(f"DeleteDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
         else:
-            log.info(f"DeleteDemuxAPI-StatusDB: Wiping flowcell {self.flow_cell_name}")
             self.status_db.delete_flowcell(flowcell_name=self.flow_cell_name)
+            log.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
 
     def delete_flow_cell_cgstats(self) -> None:
         """Delete any presence of a flow cell in cgstats"""
@@ -226,8 +226,8 @@ class DeleteDemuxAPI:
         if status_db:
             self.delete_flow_cell_statusdb()
             self.delete_flow_cell_hasta(
-                demultiplexing_dir=False,
-                run_dir=False,
+                demultiplexing_dir=True,
+                run_dir=True,
             )
             self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
