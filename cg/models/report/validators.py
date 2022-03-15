@@ -63,7 +63,7 @@ def validate_rml_sample(prep_category: str) -> str:
 def validate_supported_pipeline(cls, values: dict) -> dict:
     """Validates if the report generation supports a specific pipeline"""
 
-    if values["pipeline"] and values["customer_pipeline"]:
+    if values and values["pipeline"] and values["customer_pipeline"]:
         # Checks that the requested analysis and the executed one match
         if values["pipeline"] != values["customer_pipeline"]:
             raise ValueError(

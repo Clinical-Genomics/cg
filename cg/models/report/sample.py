@@ -26,12 +26,12 @@ class ApplicationModel(BaseModel):
 
     """
 
-    tag: str
+    tag: Optional[str]
     version: Union[None, int, str]
     prep_category: Optional[str]
     description: Optional[str]
     limitations: Optional[str]
-    accredited: bool
+    accredited: Optional[bool]
 
     _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
     _values = validator(
@@ -114,9 +114,9 @@ class SampleModel(BaseModel):
         timestamp: processing timestamp attributes
     """
 
-    name: str
-    id: str
-    ticket: Union[int, str]
+    name: Optional[str]
+    id: Optional[str]
+    ticket: Union[None, int, str]
     status: Optional[str]
     gender: Optional[str] = Gender.UNKNOWN
     source: Optional[str]

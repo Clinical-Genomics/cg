@@ -24,10 +24,10 @@ class CustomerModel(BaseModel):
         scout_access: whether the customer has access to scout or not; source: statusDB/family/customer/scout_access
     """
 
-    name: str
+    name: Optional[str]
     id: Optional[str]
     invoice_address: Optional[str]
-    scout_access: bool
+    scout_access: Optional[bool]
 
     _values = validator("name", "id", "invoice_address", always=True, allow_reuse=True)(
         validate_empty_field
@@ -48,8 +48,8 @@ class DataAnalysisModel(BaseModel):
         panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
     """
 
-    customer_pipeline: Pipeline
-    pipeline: Pipeline
+    customer_pipeline: Optional[Pipeline]
+    pipeline: Optional[Pipeline]
     pipeline_version: Optional[str]
     type: Optional[str]
     genome_build: Optional[str]
@@ -82,7 +82,7 @@ class CaseModel(BaseModel):
         applications: case associated unique applications
     """
 
-    name: str
+    name: Optional[str]
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
     applications: List[ApplicationModel]
@@ -104,9 +104,9 @@ class ReportModel(BaseModel):
 
     customer: CustomerModel
     version: Union[None, int, str]
-    date: Union[datetime, str]
+    date: Union[None, datetime, str]
     case: CaseModel
-    accredited: bool
+    accredited: Optional[bool]
 
     _version = validator("version", always=True, allow_reuse=True)(validate_empty_field)
     _date = validator("date", always=True, allow_reuse=True)(validate_date)

@@ -76,7 +76,7 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     """
 
     bait_set: Optional[str]
-    bait_set_version: Union[int, str]
+    bait_set_version: Union[None, int, str]
     median_target_coverage: Union[None, float, str]
     pct_250x: Union[None, float, str]
     pct_500x: Union[None, float, str]
