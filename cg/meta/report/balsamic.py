@@ -67,7 +67,19 @@ class BalsamicReportAPI(ReportAPI):
     def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
         """Extracts the list of BALSAMIC variant-calling filters from the config.json file"""
 
-        return list(analysis_metadata.config.vcf.keys())
+        sequencing_type = analysis_metadata.config.analysis.sequencing_type
+        analysis_type = analysis_metadata.config.analysis.analysis_type
+        var_callers = analysis_metadata.config.vcf
+
+        analysis_var_callers = list()
+        for var_caller, var_caller_attributes in var_callers.items():
+            if (
+                sequencing_type in var_caller_attributes.sequencing_type
+                and analysis_type in var_caller_attributes.analysis_type
+            ):
+                analysis_var_callers.append(var_caller)
+
+        return analysis_var_callers
 
     def get_report_accreditation(
         self, analysis_metadata: BalsamicAnalysis, samples: List[SampleModel]
