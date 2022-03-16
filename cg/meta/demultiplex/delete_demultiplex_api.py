@@ -150,13 +150,18 @@ class DeleteDemuxAPI:
         demultiplexing_dir: bool,
         run_dir: bool,
     ) -> None:
-        """Delete a flow cells presence on the server"""
+        """Delete a flow cells presence on the server, if flow cell is removed from demultiplexing dir and run
+        dir set status to removed"""
         if self.dry_run:
             log.info(
                 f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.demultiplexing_path}\n"
                 f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {self.run_path}"
             )
             return
+        if demultiplexing_dir and run_dir and self.status_db_presence:
+            flow_cell_obj: Flowcell = self.status_db.flowcell(self.flow_cell_name)
+            flow_cell_obj.status = "removed"
+            self.status_db.commit()
         if demultiplexing_dir and self.demultiplexing_path.exists():
             self._delete_demultiplexing_dir_hasta()
         else:
@@ -224,13 +229,13 @@ class DeleteDemuxAPI:
         """Master command to delete the presence of a flowcell in all services"""
         self.check_active_samples()
         if status_db:
-            self.delete_flow_cell_statusdb()
             self.delete_flow_cell_hasta(
                 demultiplexing_dir=True,
                 run_dir=True,
             )
             self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
+            self.delete_flow_cell_statusdb()
         if demultiplexing_dir or run_dir:
             self.delete_flow_cell_hasta(
                 demultiplexing_dir=demultiplexing_dir,

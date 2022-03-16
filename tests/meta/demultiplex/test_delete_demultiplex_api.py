@@ -15,7 +15,7 @@ from cg.store.models import Sample, Flowcell
 from tests.store_helpers import StoreHelpers
 
 
-def test_initiate_wipe_demux_api(
+def test_initiate_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
@@ -80,7 +80,7 @@ def test_get_presence_status_status_db(
     assert populated_presence
 
 
-def test_set_dry_run_wipe_demux_api(
+def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
@@ -176,7 +176,7 @@ def test_check_active_sample(active_wipe_demultiplex_api: DeleteDemuxAPI):
         wipe_demux_api.check_active_samples()
 
 
-def test_wipe_flow_cell_housekeeper_only_sample_level(
+def test_delete_flow_cell_housekeeper_only_sample_level(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
@@ -222,7 +222,7 @@ def test_wipe_flow_cell_housekeeper_only_sample_level(
         assert f"{file.as_posix()} deleted" in caplog.text
 
 
-def test_wipe_flow_cell_housekeeper_flowcell_name(
+def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
@@ -266,7 +266,7 @@ def test_wipe_flow_cell_housekeeper_flowcell_name(
         assert f"{fastq_file.as_posix()} deleted" in caplog.text
 
 
-def test_wipe_flow_cell_statusdb(
+def test_delete_flow_cell_statusdb(
     caplog,
     flowcell_name: str,
     populated_wipe_demultiplex_api: DeleteDemuxAPI,
@@ -307,7 +307,7 @@ def test_wipe_flow_cell_statusdb(
     assert not existing_object
 
 
-def test_wipe_flow_cell_hasta(
+def test_delete_flow_cell_hasta(
     caplog,
     populated_wipe_demultiplex_api: DeleteDemuxAPI,
     tmp_demulitplexing_dir: Path,
@@ -317,12 +317,14 @@ def test_wipe_flow_cell_hasta(
 
     caplog.set_level(logging.INFO)
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
+    flow_cell_obj: Flowcell = wipe_demux_api.status_db.flowcell(wipe_demux_api.flow_cell_name)
     wipe_demux_api.set_dry_run(dry_run=False)
 
-    # GIVEN an existing demultiplexing and run directory of a flow cell
+    # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"
 
     assert tmp_demulitplexing_dir.exists()
     assert tmp_flow_cell_run_path.exists()
+    assert flow_cell_obj.status == "ondisk"
 
     # WHEN removing said files with the DeleteDemuxAPI
 
@@ -338,15 +340,18 @@ def test_wipe_flow_cell_hasta(
     )
     assert tmp_demulitplexing_dir.exists() is False
 
-    # as well as the run directory
+    # THEN the run directory should be removed
     assert (
         f"DeleteDemuxAPI-Hasta: Removing flow cell run directory: {tmp_flow_cell_run_path.as_posix()}"
         in caplog.text
     )
     assert tmp_flow_cell_run_path.exists() is False
 
+    # THEN the status of the flow cell in statusdb should be set to removed
+    assert flow_cell_obj.status == "removed"
 
-def test_wipe_flow_cell_cgstats(
+
+def test_delete_flow_cell_cgstats(
     caplog,
     populated_wipe_demux_context: CGConfig,
     populated_wipe_demultiplex_api: DeleteDemuxAPI,
@@ -387,7 +392,7 @@ def test_wipe_flow_cell_cgstats(
     assert not existing_object
 
 
-def test_wipe_demultiplexing_init_files(
+def test_delete_demultiplexing_init_files(
     caplog, demultiplexing_init_files: List[Path], populated_wipe_demultiplex_api: DeleteDemuxAPI
 ):
     """Test function to remove demultiplexing init files from the filesystem"""
