@@ -11,7 +11,9 @@ def test_create_delivery_report(report_api_mip_dna, case_mip_dna):
 
     # WHEN extracting and rendering the report data
     delivery_report = report_api_mip_dna.create_delivery_report(
-        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
+        case_id=case_mip_dna.internal_id,
+        analysis_date=case_mip_dna.analyses[0].started_at,
+        force_report=False,
     )
 
     # THEN check if the delivery report has been created
@@ -28,6 +30,7 @@ def test_create_delivery_report_file(report_api_mip_dna, case_mip_dna, tmp_path)
         case_id=case_mip_dna.internal_id,
         file_path=tmp_path,
         analysis_date=case_mip_dna.analyses[0].started_at,
+        force_report=False,
     )
 
     # THEN check if an html report has been created and saved
@@ -141,20 +144,20 @@ def test_get_samples_data(
     # print(mip_metadata)
 
     # WHEN extracting the samples of a specific case
-    samples_data = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)
+    samples_data = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)[0]
 
     # THEN assert that the retrieved sample is the expected one
-    assert samples_data[0].name == str(expected_lims_data.get("name"))
-    assert samples_data[0].id == str(expected_sample_data.sample.internal_id)
-    assert samples_data[0].ticket == str(expected_sample_data.sample.ticket_number)
-    assert samples_data[0].status == str(expected_sample_data.status)
-    assert samples_data[0].gender == str(expected_lims_data.get("sex"))
-    assert samples_data[0].source == str(expected_lims_data.get("source"))
-    assert samples_data[0].tumour == "Nej"
-    assert samples_data[0].application
-    assert samples_data[0].methods
-    assert samples_data[0].metadata
-    assert samples_data[0].timestamp
+    assert samples_data.name == str(expected_lims_data.get("name"))
+    assert samples_data.id == str(expected_sample_data.sample.internal_id)
+    assert samples_data.ticket == str(expected_sample_data.sample.ticket_number)
+    assert samples_data.status == str(expected_sample_data.status)
+    assert samples_data.gender == str(expected_lims_data.get("sex"))
+    assert samples_data.source == str(expected_lims_data.get("source"))
+    assert samples_data.tumour == "Nej"
+    assert samples_data.application
+    assert samples_data.methods
+    assert samples_data.metadata
+    assert samples_data.timestamp
 
 
 def test_get_lims_sample(report_api_mip_dna, case_samples_data, lims_samples):

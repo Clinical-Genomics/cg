@@ -1,13 +1,8 @@
 from datetime import datetime
 from typing import Union
 
-from cg.constants import Pipeline
 from cg.constants import REPORT_SUPPORTED_PIPELINES
-
-PRECISION = 2
-NA_FIELD = "N/A"
-YES_FIELD = "Ja"
-NO_FIELD = "Nej"
+from cg.constants.report import NA_FIELD, YES_FIELD, NO_FIELD, PRECISION
 
 
 def validate_empty_field(value: Union[int, str]) -> str:

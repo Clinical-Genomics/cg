@@ -1,6 +1,17 @@
 import logging
 from typing import List, Union
 
+from cg.constants.report import (
+    REQUIRED_REPORT_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
+    REQUIRED_SAMPLE_MIP_DNA_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMPS_FIELDS,
+    REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
+)
 from cg.models.cg_config import CGConfig
 from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -91,3 +102,18 @@ class MipDNAReportAPI(ReportAPI):
                 return False
 
         return True
+
+    def get_required_fields(self, case: models.Family) -> dict:
+        """Retrieves a dictionary with the delivery report required fields for MIP DNA"""
+
+        return {
+            "report": REQUIRED_REPORT_FIELDS,
+            "customer": REQUIRED_CUSTOMER_FIELDS,
+            "case": REQUIRED_CASE_FIELDS,
+            "applications": REQUIRED_APPLICATION_FIELDS,
+            "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
+            "samples": REQUIRED_SAMPLE_MIP_DNA_FIELDS,
+            "methods": REQUIRED_SAMPLE_METHODS_FIELDS,
+            "timestamp": REQUIRED_SAMPLE_TIMESTAMPS_FIELDS,
+            "metadata": REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
+        }

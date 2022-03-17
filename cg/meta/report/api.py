@@ -7,6 +7,10 @@ from typing import TextIO, Optional, List, Union
 
 import housekeeper
 import requests
+import yaml
+
+from cg.exc import DeliveryReportError
+from cg.meta.report.field_validators import get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -29,20 +33,26 @@ class ReportAPI(MetaAPI):
         super().__init__(config=config)
         self.analysis_api = analysis_api
 
-    def create_delivery_report(self, case_id: str, analysis_date: datetime) -> str:
+    def create_delivery_report(
+        self, case_id: str, analysis_date: datetime, force_report: bool
+    ) -> str:
         """Generates the html contents of a delivery report"""
 
         report_data = self.get_report_data(case_id=case_id, analysis_date=analysis_date)
+        report_data = self.validate_report_fields(report_data, force_report)
+
         rendered_report = self.render_delivery_report(report_data.dict())
         return rendered_report
 
     def create_delivery_report_file(
-        self, case_id: str, file_path: Path, analysis_date: datetime
+        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
     ) -> TextIO:
         """Generates a temporary file containing a delivery report"""
 
         file_path.mkdir(parents=True, exist_ok=True)
-        delivery_report = self.create_delivery_report(case_id=case_id, analysis_date=analysis_date)
+        delivery_report = self.create_delivery_report(
+            case_id=case_id, analysis_date=analysis_date, force_report=force_report
+        )
 
         report_file_path = Path(file_path / "delivery-report.html")
         with open(report_file_path, "w") as delivery_report_file:
@@ -117,6 +127,25 @@ class ReportAPI(MetaAPI):
             case=case_model,
             accredited=self.get_report_accreditation(analysis_metadata, case_model.samples),
         )
+
+    def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
+        """Verifies that the required report fields are not empty"""
+
+        missing_fields, empty_fields = get_missing_report_data(
+            report_data, self.get_required_fields(report_data.case.name)
+        )
+
+        if missing_fields:
+            if not force_report:
+                raise DeliveryReportError(
+                    f"Could not generate report data for {report_data.case.name}. "
+                    f"Missing data: \n{yaml.dump(missing_fields)}"
+                )
+
+        if empty_fields:
+            LOG.warning(f"Allowed empty report fields: \n{yaml.dump(empty_fields)}")
+
+        return report_data
 
     @staticmethod
     def get_customer_data(case: models.Family) -> CustomerModel:
@@ -291,6 +320,11 @@ class ReportAPI(MetaAPI):
 
     def get_data_analysis_type(self, case: models.Family) -> str:
         """Retrieves the data analysis type carried out"""
+
+        raise NotImplementedError
+
+    def get_required_fields(self, case: models.Family) -> dict:
+        """Retrieves a dictionary with the delivery report required fields for MIP DNA"""
 
         raise NotImplementedError
 
