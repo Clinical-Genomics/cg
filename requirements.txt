@@ -23,23 +23,21 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 # utils
 alive_progress
 ansi
-bing-image-urls
 cgmodels>=0.7
 coloredlogs
 email-validator
 lxml
 marshmallow>3               # due to code expects behaviour from >3
+markupsafe<2.1              # due to soft_unicode import error from markupsafe
 openpyxl
 packaging
 pandas
-paramiko
 paramiko
 petname
 pydantic
 python-dateutil
 pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
-simple_image_download
 tabulate
 typing_extensions
 wtforms<3.0.0          # wtforms.compat missing in 3.0.0

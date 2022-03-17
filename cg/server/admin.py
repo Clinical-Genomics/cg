@@ -186,12 +186,6 @@ class CustomerGroupView(BaseView):
 class FamilyView(BaseView):
     """Admin view for Model.Family"""
 
-    def _list_thumbnail(view, context, model, name):
-        if not model.avatar_url:
-            return ""
-
-        return Markup('<img width="48" height="48" src="%s">' % model.avatar_url)
-
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
     column_exclude_list = ["created_at", "_cohorts", "synopsis"]
@@ -205,7 +199,6 @@ class FamilyView(BaseView):
     column_formatters = {
         "internal_id": view_family_sample_link,
         "priority": view_priority,
-        "avatar_url": _list_thumbnail,
     }
     column_searchable_list = ["internal_id", "name", "customer.internal_id"]
     form_excluded_columns = [
@@ -225,11 +218,6 @@ class FamilyView(BaseView):
         del unused1, unused2, unused3
         markup = ""
         if model.family:
-            if model.family.avatar_url:
-                markup += Markup(
-                    '<img width="24" height="24" src="%s" />' % model.family.avatar_url
-                )
-
             markup += Markup(
                 " <a href='%s'>%s</a>"
                 % (url_for("family.index_view", search=model.family.internal_id), model.family)
@@ -351,7 +339,13 @@ class SampleView(BaseView):
         "invoice": InvoiceView.view_invoice_link,
         "priority": view_priority,
     }
-    column_searchable_list = ["internal_id", "name", "ticket_number", "customer.internal_id"]
+    column_searchable_list = [
+        "internal_id",
+        "name",
+        "subject_id",
+        "ticket_number",
+        "customer.internal_id",
+    ]
     form_excluded_columns = [
         "age_at_sampling",
         "deliveries",
