@@ -1,8 +1,14 @@
 from datetime import datetime
 from typing import Union
 
-from cg.constants import REPORT_SUPPORTED_PIPELINES
-from cg.constants.report import NA_FIELD, YES_FIELD, NO_FIELD, PRECISION
+from cg.constants import (
+    NA_FIELD,
+    YES_FIELD,
+    NO_FIELD,
+    PRECISION,
+    REPORT_SUPPORTED_PIPELINES,
+    BALSAMIC_ANALYSIS_TYPE,
+)
 
 
 def validate_empty_field(value: Union[int, str]) -> str:
@@ -11,10 +17,14 @@ def validate_empty_field(value: Union[int, str]) -> str:
     return str(value) if value else NA_FIELD
 
 
-def validate_underscore_separated_str(value: str) -> str:
+def validate_balsamic_analysis_type(value: str) -> str:
     """Erases underscores from a string attribute"""
 
-    return value.replace("_", " ") if value else NA_FIELD
+    return (
+        BALSAMIC_ANALYSIS_TYPE.get(value)
+        if value and BALSAMIC_ANALYSIS_TYPE.get(value)
+        else NA_FIELD
+    )
 
 
 def validate_boolean(value: Union[bool, str]) -> str:
@@ -58,18 +68,18 @@ def validate_rml_sample(prep_category: str) -> str:
 def validate_supported_pipeline(cls, values: dict) -> dict:
     """Validates if the report generation supports a specific pipeline"""
 
-    if values and values["pipeline"] and values["customer_pipeline"]:
+    if values and values.get("pipeline") and values.get("customer_pipeline"):
         # Checks that the requested analysis and the executed one match
-        if values["pipeline"] != values["customer_pipeline"]:
+        if values.get("pipeline") != values.get("customer_pipeline"):
             raise ValueError(
-                f"The analysis requested by the customer ({values['customer_pipeline']}) does not match the one "
-                f"executed ({values['pipeline']})"
+                f"The analysis requested by the customer ({values.get('customer_pipeline')}) does not match the one "
+                f"executed ({values.get('pipeline')})"
             )
 
         # Check that the generation of the report supports the data analysis executed on the case
-        if values["pipeline"] not in REPORT_SUPPORTED_PIPELINES:
+        if values.get("pipeline") not in REPORT_SUPPORTED_PIPELINES:
             raise ValueError(
-                f"The pipeline {values['pipeline']} does not support delivery report generation"
+                f"The pipeline {values.get('pipeline')} does not support delivery report generation"
             )
 
     return values

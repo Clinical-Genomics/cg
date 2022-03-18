@@ -11,6 +11,13 @@ NA_FIELD = "N/A"
 YES_FIELD = "Ja"
 NO_FIELD = "Nej"
 
+BALSAMIC_ANALYSIS_TYPE = {
+    "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
+    "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
+    "tumor_panel": "Tumör-endast (panelsekvensering)",
+    "tumor_normal_panel": "Tumör/nornal (panelsekvensering)",
+}
+
 # Report required fields (OPTIONAL: "version")
 REQUIRED_REPORT_FIELDS = [
     "customer",

@@ -1,7 +1,7 @@
 import logging
 from typing import List, Union
 
-from cg.constants.report import (
+from cg.constants import (
     REQUIRED_REPORT_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_CASE_FIELDS,

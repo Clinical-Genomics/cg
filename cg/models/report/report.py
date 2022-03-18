@@ -9,7 +9,7 @@ from cg.models.report.validators import (
     validate_supported_pipeline,
     validate_list,
     validate_date,
-    validate_underscore_separated_str,
+    validate_balsamic_analysis_type,
 )
 
 
@@ -68,7 +68,7 @@ class DataAnalysisModel(BaseModel):
     _list_values = validator("variant_callers", "panels", always=True, allow_reuse=True)(
         validate_list
     )
-    _type = validator("type", always=True, allow_reuse=True)(validate_underscore_separated_str)
+    _type = validator("type", always=True, allow_reuse=True)(validate_balsamic_analysis_type)
 
 
 class CaseModel(BaseModel):
