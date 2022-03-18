@@ -135,12 +135,11 @@ class ReportAPI(MetaAPI):
             report_data, self.get_required_fields(report_data.case.name)
         )
 
-        if missing_fields:
-            if not force_report:
-                raise DeliveryReportError(
-                    f"Could not generate report data for {report_data.case.name}. "
-                    f"Missing data: \n{yaml.dump(missing_fields)}"
-                )
+        if missing_fields and not force_report:
+            raise DeliveryReportError(
+                f"Could not generate report data for {report_data.case.name}. "
+                f"Missing data: \n{yaml.dump(missing_fields)}"
+            )
 
         if empty_fields:
             LOG.warning(f"Allowed empty report fields: \n{yaml.dump(empty_fields)}")

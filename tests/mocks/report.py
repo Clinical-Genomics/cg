@@ -1,3 +1,5 @@
+from typing import Union
+
 from cg.store import Store
 
 
@@ -13,7 +15,7 @@ class MockChanjo:
 
     _sample_coverage_returns_none = False
 
-    def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> Union[None, dict]:
         """Calculate coverage for OMIM panel"""
 
         if self._sample_coverage_returns_none:

@@ -27,16 +27,14 @@ def cast_metrics_type(
     """Cast metrics model type according to the sequencing type"""
 
     if metrics:
-        if sequencing_type == "wgs":
-            for k, v in metrics.items():
-                metrics[k] = BalsamicWGSQCMetrics(**v)
-        else:
-            for k, v in metrics.items():
-                metrics[k] = BalsamicTargetedQCMetrics(**v)
+        for k, v in metrics.items():
+            metrics[k] = (
+                BalsamicWGSQCMetrics(**v)
+                if sequencing_type == "wgs"
+                else BalsamicTargetedQCMetrics(**v)
+            )
 
-        return metrics
-
-    return None
+    return metrics
 
 
 def parse_balsamic_analysis(config: dict, metrics: list) -> BalsamicAnalysis:
