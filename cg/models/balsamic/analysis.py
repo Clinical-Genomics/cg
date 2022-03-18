@@ -40,7 +40,9 @@ def cast_metrics_type(
 def parse_balsamic_analysis(config: dict, metrics: list) -> BalsamicAnalysis:
     """Returns a formatted BalsamicAnalysis object"""
 
+    sequencing_type = config["analysis"]["sequencing_type"]
     qc_metrics = dict()
+
     for value in metrics:
         sample_metric = BalsamicMetricsBase(**value)
         try:
@@ -50,5 +52,5 @@ def parse_balsamic_analysis(config: dict, metrics: list) -> BalsamicAnalysis:
 
     return BalsamicAnalysis(
         config=config,
-        sample_metrics=cast_metrics_type(config["analysis"]["sequencing_type"], qc_metrics),
+        sample_metrics=cast_metrics_type(sequencing_type, qc_metrics),
     )
