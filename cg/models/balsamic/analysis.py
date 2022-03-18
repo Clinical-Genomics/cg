@@ -22,7 +22,7 @@ class BalsamicAnalysis(BaseModel):
 
 
 def cast_metrics_type(
-    sequencing_type: dict, metrics: dict
+    sequencing_type: str, metrics: dict
 ) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
     """Cast metrics model type according to the sequencing type"""
 
