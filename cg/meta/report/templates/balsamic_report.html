@@ -101,7 +101,7 @@
                 <th>Ankom</th>
                 <th>Biblioteksberedning</th>
                 <th>Beredd</th>
-                {% if "panel" in case.data_analysis.type %}
+                {% if "panelsekvensering" in case.data_analysis.type %}
                   <th>Bait Set</th>
                 {% endif %}
                 <th>Sekvensering</th>
@@ -117,7 +117,7 @@
                   <td>{{ sample.timestamp.received_at }}</td>
                   <td>{{ sample.methods.library_prep }}</td>
                   <td>{{ sample.timestamp.prepared_at }}</td>
-                  {% if "panel" in case.data_analysis.type %}
+                  {% if "panelsekvensering" in case.data_analysis.type %}
                     <td>
                      {{ sample.metadata.bait_set }}
                      {% if sample.metadata.bait_set_version != 'N/A' %}
@@ -174,7 +174,7 @@
                 <th>Prov</th>
                 <th>Läspar [M]</th>
                 <th>Mediantäckning [baser]</th>
-              {% if "wgs" in case.data_analysis.type %}
+              {% if "helgenomsekvensering" in case.data_analysis.type %}
                   {% if "normal" in case.data_analysis.type %}
                     <th>Täckningsgrad 15x [%]</th>
                   {% else %}
@@ -194,7 +194,7 @@
                 <tr>
                   <td>{{ sample.name }}*</td>
                   <td>{{ sample.metadata.million_read_pairs }}</td>
-                  {% if "wgs" in case.data_analysis.type %}
+                  {% if "helgenomsekvensering" in case.data_analysis.type %}
                     <td>{{ sample.metadata.median_coverage }}</td>
                     {% if "normal" in case.data_analysis.type %}
                       <td>{{ sample.metadata.pct_15x }}</td>

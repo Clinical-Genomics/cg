@@ -1,11 +1,8 @@
 from cgmodels.cg.constants import Pipeline
 
-
-REPORT_SUPPORTED_PIPELINES = (Pipeline.BALSAMIC, Pipeline.MIP_DNA)
-
-REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
-
 # Validation constants
+REPORT_SUPPORTED_PIPELINES = (Pipeline.BALSAMIC, Pipeline.MIP_DNA)
+BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 PRECISION = 2
 NA_FIELD = "N/A"
 YES_FIELD = "Ja"
@@ -15,7 +12,7 @@ BALSAMIC_ANALYSIS_TYPE = {
     "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
     "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
     "tumor_panel": "Tumör-endast (panelsekvensering)",
-    "tumor_normal_panel": "Tumör/nornal (panelsekvensering)",
+    "tumor_normal_panel": "Tumör/normal (panelsekvensering)",
 }
 
 # Report required fields (OPTIONAL: "version")

@@ -131,9 +131,8 @@ class ReportAPI(MetaAPI):
     def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
         """Verifies that the required report fields are not empty"""
 
-        missing_fields, empty_fields = get_missing_report_data(
-            report_data, self.get_required_fields(report_data.case.name)
-        )
+        required_fields = self.get_required_fields(report_data.case)
+        missing_fields, empty_fields = get_missing_report_data(report_data, required_fields)
 
         if missing_fields and not force_report:
             raise DeliveryReportError(
@@ -322,8 +321,8 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_required_fields(self, case: models.Family) -> dict:
-        """Retrieves a dictionary with the delivery report required fields for MIP DNA"""
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Retrieves a dictionary with the delivery report required fields"""
 
         raise NotImplementedError
 

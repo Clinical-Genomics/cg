@@ -2,7 +2,7 @@ import logging
 from typing import List, Union
 
 from cg.constants import (
-    REPORT_ACCREDITED_PANELS,
+    BALSAMIC_REPORT_ACCREDITED_PANELS,
     REQUIRED_REPORT_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -22,6 +22,7 @@ from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
     BalsamicWGSSampleMetadataModel,
 )
+from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.store import models
 
@@ -101,7 +102,7 @@ class BalsamicReportAPI(ReportAPI):
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
                 i
-                for i in REPORT_ACCREDITED_PANELS
+                for i in BALSAMIC_REPORT_ACCREDITED_PANELS
                 if i in str(analysis_metadata.config.panel.capture_kit)
             ),
             None,
@@ -110,12 +111,12 @@ class BalsamicReportAPI(ReportAPI):
 
         return False
 
-    def get_required_fields(self, case: models.Family) -> dict:
+    def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC"""
 
         required_sample_metadata_fields = (
             REQUIRED_SAMPLE_METADATA_BALSAMIC_WGS_FIELDS
-            if "wgs" in self.get_data_analysis_type(case)
+            if "helgenomsekvensering" in case.data_analysis.type
             else REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
         )
 
