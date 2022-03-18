@@ -6,26 +6,22 @@ REPORT_SUPPORTED_PIPELINES = (Pipeline.BALSAMIC, Pipeline.MIP_DNA)
 REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 
 # Validation constants
-
 PRECISION = 2
 NA_FIELD = "N/A"
 YES_FIELD = "Ja"
 NO_FIELD = "Nej"
 
-# Report required fields
+# Report required fields (OPTIONAL: "version")
 REQUIRED_REPORT_FIELDS = [
     "customer",
-    # "version",
     "date",
     "case",
     "accredited",
 ]
 
-# Customer required fields
-
+# Customer required fields (OPTIONAL: "id")
 REQUIRED_CUSTOMER_FIELDS = [
     "name",
-    # "id",
     "invoice_address",
     "scout_access",
 ]
@@ -38,19 +34,13 @@ REQUIRED_CASE_FIELDS = [
     "applications",
 ]
 
-# Application required fields
-
+# Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations")
 REQUIRED_APPLICATION_FIELDS = [
     "tag",
-    # "version",
-    # "prep_category",
-    # "description",
-    # "limitations",
     "accredited",
 ]
 
 # Data analysis required fields
-
 _REQUIRED_DATA_ANALYSIS_FIELDS = [
     "customer_pipeline",
     "pipeline",
@@ -68,7 +58,6 @@ REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
 ]
 
 # Sample required fields
-
 _REQUIRED_SAMPLE_FIELDS = [
     "name",
     "id",
@@ -89,25 +78,18 @@ REQUIRED_SAMPLE_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
     "tumour",
 ]
 
-# Methods required fields
+# Methods required fields (OPTIONAL: "library_prep", "sequencing")
+REQUIRED_SAMPLE_METHODS_FIELDS = []
 
-REQUIRED_SAMPLE_METHODS_FIELDS = [
-    # "library_prep",
-    # "sequencing",
-]
-
-# Timestamp required fields
+# Timestamp required fields (OPTIONAL: "prepared_at", "sequenced_at")
 REQUIRED_SAMPLE_TIMESTAMPS_FIELDS = [
     "ordered_at",
     "received_at",
-    # "prepared_at",
-    # "sequenced_at",
     "delivered_at",
     "processing_days",
 ]
 
 # Metadata required fields
-
 _REQUIRED_SAMPLE_METADATA_FIELDS = [
     "million_read_pairs",
     "duplicates",
