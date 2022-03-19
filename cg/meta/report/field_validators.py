@@ -3,31 +3,34 @@
 from cg.models.report.report import ReportModel
 
 
+def update_missing_data_dict(missing_data: dict, source: str, field: str, id: str):
+    """
+    Populates a specific dictionary with the missing/empty fields.
+    If the new entry is sample/application dependant field, the ID/TAG is also stored to uniquely identify it.
+    """
+
+    if source in missing_data.keys() and id:
+        try:
+            missing_data[source][id].append(field)
+        except KeyError:
+            missing_data[source][id] = field
+        except AttributeError:
+            missing_data[source][id] = [missing_data[source][id], field]
+
+    elif source in missing_data.keys() and not id:
+        try:
+            missing_data[source].append(field)
+        except AttributeError:
+            missing_data[source] = [missing_data[source], field]
+    else:
+        missing_data.update({source: {id: field} if id else field})
+
+
 def get_missing_report_data(report_data: ReportModel, required_fields: dict):
     """Retrieve empty and missing fields from a specific report model"""
 
     missing_fields = dict()
     empty_fields = dict()
-
-    def update_missing_data_dict(dict: dict, source: str, field: str, id: str):
-        """Populates a dictionary with the missing/empty fields"""
-
-        if source in dict.keys():
-            if id:
-                # If it's a sample/application dependant field, the ID/TAG is stored to uniquely identify it
-                try:
-                    dict[source][id].append(field)
-                except KeyError:
-                    dict[source][id] = field
-                except AttributeError:
-                    dict[source][id] = [dict[source][id], field]
-            else:
-                try:
-                    dict[source].append(field)
-                except AttributeError:
-                    dict[source] = [dict[source], field]
-        else:
-            dict.update({source: {id: field} if id else field})
 
     def update_missing_data(data: dict, source: str, id: str = None):
         """Updates the missing or empty fields from an input report data"""
