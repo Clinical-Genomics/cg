@@ -11,8 +11,10 @@ from cg.constants import (
     REQUIRED_SAMPLE_BALSAMIC_FIELDS,
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMPS_FIELDS,
-    REQUIRED_SAMPLE_METADATA_BALSAMIC_WGS_FIELDS,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS,
+    REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS,
+    BALSAMIC_ANALYSIS_TYPE,
+    REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
 )
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.api import ReportAPI
@@ -44,7 +46,7 @@ class BalsamicReportAPI(ReportAPI):
         sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
         million_read_pairs = round(sample.reads / 2000000, 1) if sample.reads else None
 
-        if self.get_data_analysis_type(case) == "wgs":
+        if "wgs" in self.get_data_analysis_type(case):
             return BalsamicWGSSampleMetadataModel(
                 million_read_pairs=million_read_pairs,
                 median_coverage=sample_metrics.median_coverage,
@@ -114,11 +116,18 @@ class BalsamicReportAPI(ReportAPI):
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC"""
 
-        required_sample_metadata_fields = (
-            REQUIRED_SAMPLE_METADATA_BALSAMIC_WGS_FIELDS
-            if "helgenomsekvensering" in case.data_analysis.type
-            else REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
-        )
+        analysis_type = case.data_analysis.type
+        required_sample_metadata_fields = list()
+
+        if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
+            required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+        elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
+            required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+        elif (
+            BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
+            or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
+        ):
+            required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
 
         return {
             "report": REQUIRED_REPORT_FIELDS,

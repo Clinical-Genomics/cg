@@ -177,6 +177,7 @@
               {% if "helgenomsekvensering" in case.data_analysis.type %}
                   {% if "normal" in case.data_analysis.type %}
                     <th>Täckningsgrad 15x [%]</th>
+                    <th>Täckningsgrad 60x [%]</th>
                   {% else %}
                     <th>Täckningsgrad 60x [%]</th>
                   {% endif %}
@@ -198,6 +199,7 @@
                     <td>{{ sample.metadata.median_coverage }}</td>
                     {% if "normal" in case.data_analysis.type %}
                       <td>{{ sample.metadata.pct_15x }}</td>
+                      <td>{{ sample.metadata.pct_60x }}</td>
                     {% else %}
                       <td>{{ sample.metadata.pct_60x }}</td>
                     {% endif %}
