@@ -42,7 +42,7 @@ class DataAnalysisModel(BaseModel):
         customer_pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
         pipeline: actual pipeline used for analysis; source: statusDB/analysis/pipeline
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
-        type: analysis type carried out; BALSAMIC specific; source: pipeline workflow
+        type: analysis type carried out; source: pipeline workflow
         genome_build: build version of the genome reference; source: pipeline workflow
         variant_callers: variant-calling filters
         panels: list of case specific panels; MIP specific; source: StatusDB/family/panels
@@ -61,6 +61,7 @@ class DataAnalysisModel(BaseModel):
         "customer_pipeline",
         "pipeline",
         "pipeline_version",
+        "type",
         "genome_build",
         always=True,
         allow_reuse=True,
@@ -68,7 +69,6 @@ class DataAnalysisModel(BaseModel):
     _list_values = validator("variant_callers", "panels", always=True, allow_reuse=True)(
         validate_list
     )
-    _type = validator("type", always=True, allow_reuse=True)(validate_balsamic_analysis_type)
 
 
 class CaseModel(BaseModel):

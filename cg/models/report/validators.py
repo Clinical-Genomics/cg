@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Union
 
 from cg.constants import (
+    Pipeline,
     NA_FIELD,
     YES_FIELD,
     NO_FIELD,
@@ -15,16 +16,6 @@ def validate_empty_field(value: Union[int, str]) -> str:
     """Formats an empty value to be included in the report as 'N/A'"""
 
     return str(value) if value else NA_FIELD
-
-
-def validate_balsamic_analysis_type(value: str) -> str:
-    """Erases underscores from a string attribute"""
-
-    return (
-        BALSAMIC_ANALYSIS_TYPE.get(value)
-        if value and BALSAMIC_ANALYSIS_TYPE.get(value)
-        else NA_FIELD
-    )
 
 
 def validate_boolean(value: Union[bool, str]) -> str:
@@ -60,26 +51,40 @@ def validate_rml_sample(prep_category: str) -> str:
     """Checks if a specific sample is a RML one"""
 
     if prep_category == "rml":
-        raise ValueError("The delivery report generation does not support RML samples")
+        raise ValueError("The delivery report generation does not support RML samples.")
 
     return validate_empty_field(prep_category)
 
 
+def validate_balsamic_analysis_type(value: str) -> str:
+    """Erases underscores from a string attribute"""
+
+    return (
+        BALSAMIC_ANALYSIS_TYPE.get(value)
+        if value and BALSAMIC_ANALYSIS_TYPE.get(value)
+        else NA_FIELD
+    )
+
+
 def validate_supported_pipeline(cls, values: dict) -> dict:
-    """Validates if the report generation supports a specific pipeline"""
+    """Validates if the report generation supports a specific pipeline and analysis type"""
 
     if values and values.get("pipeline") and values.get("customer_pipeline"):
         # Checks that the requested analysis and the executed one match
         if values.get("pipeline") != values.get("customer_pipeline"):
             raise ValueError(
                 f"The analysis requested by the customer ({values.get('customer_pipeline')}) does not match the one "
-                f"executed ({values.get('pipeline')})"
+                f"executed ({values.get('pipeline')})."
             )
 
         # Check that the generation of the report supports the data analysis executed on the case
         if values.get("pipeline") not in REPORT_SUPPORTED_PIPELINES:
             raise ValueError(
-                f"The pipeline {values.get('pipeline')} does not support delivery report generation"
+                f"The pipeline {values.get('pipeline')} does not support delivery report generation."
             )
+
+    # Validates the analysis type
+    if values.get("pipeline") == Pipeline.BALSAMIC:
+        values["type"] = validate_balsamic_analysis_type(values["type"])
 
     return values
