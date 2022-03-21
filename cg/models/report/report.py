@@ -43,7 +43,6 @@ class DataAnalysisModel(BaseModel):
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
         type: analysis type carried out; source: pipeline workflow
         genome_build: build version of the genome reference; source: pipeline workflow
-        variant_callers: variant-calling filters
         panels: list of case specific panels; source: StatusDB/family/panels
     """
 
@@ -52,7 +51,6 @@ class DataAnalysisModel(BaseModel):
     pipeline_version: Optional[str]
     type: Optional[str]
     genome_build: Optional[str]
-    variant_callers: Union[None, List[str], str]
     panels: Union[None, List[str], str]
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)

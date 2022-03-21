@@ -280,7 +280,6 @@ class ReportAPI(MetaAPI):
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case),
             genome_build=self.get_genome_build(analysis_metadata),
-            variant_callers=self.get_variant_callers(analysis_metadata),
             panels=case.panels,
         )
 
@@ -320,23 +319,18 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_required_fields(self, case: CaseModel) -> dict:
-        """Retrieves a dictionary with the delivery report required fields"""
-
-        raise NotImplementedError
-
     def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
         raise NotImplementedError
 
-    def get_variant_callers(self, analysis_metadata: MipAnalysis) -> Union[None, list]:
-        """Extracts the list of variant-calling filters used during analysis"""
+    def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
+        """Checks if the report is accredited or not"""
 
         raise NotImplementedError
 
-    def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
-        """Checks if the report is accredited or not"""
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Retrieves a dictionary with the delivery report required fields"""
 
         raise NotImplementedError
 

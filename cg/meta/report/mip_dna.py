@@ -37,20 +37,23 @@ class MipDNAReportAPI(ReportAPI):
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report"""
 
-        parsed_metrics = get_sample_id_metric(
-            sample_id=sample.internal_id,
-            sample_id_metrics=analysis_metadata.sample_id_metrics,
+        parsed_metrics = (
+            get_sample_id_metric(
+                sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
+            )
+            if analysis_metadata
+            else None
         )
         sample_coverage = self.get_sample_coverage(sample, case)
 
         return MipDNASampleMetadataModel(
             bait_set=sample.capture_kit,
-            gender=parsed_metrics.predicted_sex,
+            gender=parsed_metrics.predicted_sex if analysis_metadata else None,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
-            mapped_reads=parsed_metrics.mapped_reads,
+            mapped_reads=parsed_metrics.mapped_reads if analysis_metadata else None,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
             pct_10x=sample_coverage.get("mean_completeness"),
-            duplicates=parsed_metrics.duplicate_reads,
+            duplicates=parsed_metrics.duplicate_reads if analysis_metadata else None,
         )
 
     def get_sample_coverage(self, sample: models.Sample, case: models.Family) -> dict:
@@ -83,15 +86,10 @@ class MipDNAReportAPI(ReportAPI):
 
         return application.analysis_type
 
-    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
+    def get_genome_build(self, analysis_metadata: MipAnalysis) -> Union[None, str]:
         """Returns the build version of the genome reference of a specific case"""
 
-        return analysis_metadata.genome_build
-
-    def get_variant_callers(self, analysis_metadata: MipAnalysis) -> Union[None, list]:
-        """Extracts the list of variant-calling filters used during analysis"""
-
-        return None
+        return analysis_metadata.genome_build if analysis_metadata else None
 
     def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
