@@ -61,12 +61,12 @@ def demultiplex_all(
         )
 
         delete_demux_api.delete_flow_cell(
-            cg_stats=True,
-            demultiplexing_dir=False,
-            run_dir=True,
-            housekeeper=False,
-            init_files=True,
-            status_db=True,
+            cg_stats=False,
+            demultiplexing_dir=True,
+            run_dir=False,
+            housekeeper=True,
+            init_files=False,
+            status_db=False
         )
 
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
@@ -112,12 +112,12 @@ def demultiplex_flowcell(
     )
 
     delete_demux_api.delete_flow_cell(
-        cg_stats=False,
-        demultiplexing_dir=False,
-        run_dir=True,
-        housekeeper=False,
-        init_files=False,
-        status_db=True,
+        cg_stats=True,
+        demultiplexing_dir=True,
+        run_dir=False,
+        housekeeper=True,
+        init_files=True,
+        status_db=False
     )
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
