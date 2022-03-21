@@ -9,7 +9,6 @@ from cg.models.report.validators import (
     validate_supported_pipeline,
     validate_list,
     validate_date,
-    validate_balsamic_analysis_type,
 )
 
 
