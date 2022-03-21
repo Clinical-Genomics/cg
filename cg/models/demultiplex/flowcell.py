@@ -103,7 +103,7 @@ class Flowcell:
             raise FlowcellError(message)
 
     def is_demultiplexing_started(self) -> bool:
-        """Create the path to where the demuliplexed result should be produced"""
+        """Check if demultiplexing started path exists"""
         return self.demultiplexing_started_path.exists()
 
     def sample_sheet_exists(self) -> bool:
