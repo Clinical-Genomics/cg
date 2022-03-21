@@ -3,27 +3,27 @@
 from cg.models.report.report import ReportModel
 
 
-def update_missing_data_dict(missing_data: dict, source: str, field: str, id: str):
+def update_missing_data_dict(missing_data: dict, source: str, field: str, label: str):
     """
     Populates a specific dictionary with the missing/empty fields.
     If the new entry is sample/application dependant field, the ID/TAG is also stored to uniquely identify it.
     """
 
-    if source in missing_data.keys() and id:
+    if source in missing_data.keys() and label:
         try:
-            missing_data[source][id].append(field)
+            missing_data[source][label].append(field)
         except KeyError:
-            missing_data[source][id] = field
+            missing_data[source][label] = field
         except AttributeError:
-            missing_data[source][id] = [missing_data[source][id], field]
+            missing_data[source][label] = [missing_data[source][label], field]
 
-    elif source in missing_data.keys() and not id:
+    elif source in missing_data.keys() and not label:
         try:
             missing_data[source].append(field)
         except AttributeError:
             missing_data[source] = [missing_data[source], field]
     else:
-        missing_data.update({source: {id: field} if id else field})
+        missing_data.update({source: {label: field} if label else field})
 
 
 def get_missing_report_data(report_data: ReportModel, required_fields: dict):
@@ -32,14 +32,14 @@ def get_missing_report_data(report_data: ReportModel, required_fields: dict):
     missing_fields = dict()
     empty_fields = dict()
 
-    def update_missing_data(data: dict, source: str, id: str = None):
+    def update_missing_data(data: dict, source: str, label: str = None):
         """Updates the missing or empty fields from an input report data"""
 
         for field, value in data.items():
             if not value or value == "N/A":
-                update_missing_data_dict(empty_fields, source, field, id)
+                update_missing_data_dict(empty_fields, source, field, label)
                 if field in required_fields[source]:
-                    update_missing_data_dict(missing_fields, source, field, id)
+                    update_missing_data_dict(missing_fields, source, field, label)
 
     update_missing_data(report_data.dict(), "report")
     update_missing_data(report_data.customer.dict(), "customer")

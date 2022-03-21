@@ -124,7 +124,7 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(analysis_metadata, case_model.samples),
+            accredited=self.get_report_accreditation(case_model.samples),
         )
 
     def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
@@ -335,9 +335,7 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_report_accreditation(
-        self, analysis_metadata: MipAnalysis, samples: List[SampleModel]
-    ) -> bool:
+    def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
         """Checks if the report is accredited or not"""
 
         raise NotImplementedError

@@ -93,9 +93,7 @@ class MipDNAReportAPI(ReportAPI):
 
         return None
 
-    def get_report_accreditation(
-        self, analysis_metadata: MipAnalysis, samples: List[SampleModel]
-    ) -> bool:
+    def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
 
         for sample in samples:
