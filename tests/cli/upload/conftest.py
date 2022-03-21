@@ -12,7 +12,6 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
 from cg.constants.tags import HkMipAnalysisTag
-from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -136,7 +135,6 @@ def fixture_base_context(
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.scout_api_ = MockScoutApi()
-    cg_context.meta_apis["report_api"] = MockReportApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
 
@@ -160,20 +158,6 @@ class MockScoutApi(ScoutAPI):
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
-
-
-class MockReportApi(ReportAPI):
-    def __init__(self):
-        """docstring for __init__"""
-
-    def create_delivery_report(self, *args, **kwargs):
-        """docstring for create_delivery_report"""
-
-        for arg in args:
-            LOG.info("create_delivery_report called with positional %s", arg)
-
-        for key, value in kwargs.items():
-            LOG.info("create_delivery_report called with key %s and value %s", key, value)
 
 
 class MockAnalysisApi(MipAnalysisAPI):
@@ -245,13 +229,6 @@ class MockLims:
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = ReportAPI(
-        store=cg_context.status_db,
-        lims_api=cg_context.lims_api,
-        chanjo_api=cg_context.chanjo_api,
-        analysis_api=analysis_api,
-        scout_api=cg_context.scout_api,
-    )
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,

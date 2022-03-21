@@ -10,7 +10,6 @@ import click
 from cg.cli.upload.nipt import nipt
 from cg.constants import Pipeline
 from cg.exc import AnalysisUploadError, CgError
-from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -20,7 +19,6 @@ from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
 from .coverage import coverage
-from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
 from .fohm import fohm
 from .genotype import genotypes
 from .gisaid import gisaid
@@ -89,14 +87,6 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
             message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
             click.echo(click.style(message, fg="yellow"))
             return
-
-    context.obj.meta_apis["report_api"] = ReportAPI(
-        store=status_db,
-        lims_api=config_object.lims_api,
-        chanjo_api=config_object.chanjo_api,
-        analysis_api=analysis_api,
-        scout_api=config_object.scout_api,
-    )
 
     context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=config_object.housekeeper_api,
@@ -176,9 +166,6 @@ upload.add_command(create_scout_load_config)
 upload.add_command(observations)
 upload.add_command(genotypes)
 upload.add_command(coverage)
-upload.add_command(delivery_report)
-upload.add_command(delivery_reports)
-upload.add_command(delivery_report_to_scout)
 upload.add_command(vogue)
 upload.add_command(gisaid)
 upload.add_command(nipt)

@@ -28,6 +28,7 @@ from .status import status
 from .transfer import transfer_group
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
+from .generate.base import generate as generate_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -100,3 +101,4 @@ base.add_command(store_cmd)
 base.add_command(deploy_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
+base.add_command(generate_cmd)
