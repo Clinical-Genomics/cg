@@ -310,7 +310,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         sample: models.Sample,
-        analysis_metadata: [MipAnalysis, BalsamicAnalysis],
+        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
     ) -> SampleMetadataModel:
         """Fetches the sample metadata to include in the report"""
 
