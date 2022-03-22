@@ -3,7 +3,7 @@
 from cg.models.report.report import ReportModel
 
 
-def update_missing_data_dict(missing_data: dict, source: str, field: str, label: str):
+def update_missing_data_dict(missing_data: dict, source: str, field: str, label: str = None):
     """
     Populates a specific dictionary with the missing/empty fields.
     If the new entry is sample/application dependant field, the ID/TAG is also stored to uniquely identify it.

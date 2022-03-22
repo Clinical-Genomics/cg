@@ -130,7 +130,7 @@ class ReportAPI(MetaAPI):
     def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
         """Verifies that the required report fields are not empty"""
 
-        required_fields = self.get_required_fields(report_data.case)
+        required_fields = self.get_required_fields()
         missing_fields, empty_fields = get_missing_report_data(report_data, required_fields)
 
         if missing_fields and not force_report:
@@ -329,7 +329,7 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_required_fields(self, case: CaseModel) -> dict:
+    def get_required_fields(self) -> dict:
         """Retrieves a dictionary with the delivery report required fields"""
 
         raise NotImplementedError

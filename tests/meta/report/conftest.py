@@ -8,9 +8,10 @@ from cgmodels.cg.constants import Pipeline
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
+from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
-from tests.mocks.report import MockChanjo, MockDB, MockScout
+from tests.mocks.report import MockChanjo, MockDB
 
 
 @pytest.fixture(scope="function", name="report_api_mip_dna")
@@ -21,7 +22,7 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
     cg_context.status_db_ = MockDB(report_store)
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
-    cg_context.scout_api_ = MockScout()
+    cg_context.scout_api_ = MockScoutApi(cg_context)
     return MipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 

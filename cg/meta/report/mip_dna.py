@@ -100,7 +100,7 @@ class MipDNAReportAPI(ReportAPI):
 
         return True
 
-    def get_required_fields(self, case: CaseModel) -> dict:
+    def get_required_fields(self) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA"""
 
         return {

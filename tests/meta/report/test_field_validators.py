@@ -44,16 +44,16 @@ def test_update_missing_data_dict():
         "metadata": {"sample_1": "million_read_pairs", "sample_2": "duplicates"},
     }
 
+    print(type(missing_data))
+
     # WHEN appending a new (nested) key value
-    update_missing_data_dict(missing_data=missing_data, source="customer", field="name", label=None)
+    update_missing_data_dict(missing_data=missing_data, source="customer", field="name")
     update_missing_data_dict(
         missing_data=missing_data, source="applications", field="tag", label="app_1"
     )
 
     # WHEN appending a field to an existing source
-    update_missing_data_dict(
-        missing_data=missing_data, source="report", field="version", label=None
-    )
+    update_missing_data_dict(missing_data=missing_data, source="report", field="version")
 
     # WHEN appending a field to an existing nested source
     update_missing_data_dict(
