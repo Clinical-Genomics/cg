@@ -19,7 +19,7 @@ from cg.store import models
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
-    "priority": {"option": "--slurm_quality_of_service"},
+    "slurm_quality_of_service": {"option": "--slurm_quality_of_service"},
     "email": {"option": "--email"},
     "base": {"option": "--cluster_constant_path"},
     "dryrun": {"option": "--dry_run_all"},
