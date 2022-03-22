@@ -91,10 +91,6 @@ def test_set_dry_run_delete_demux_api(
 
     caplog.set_level(logging.DEBUG)
     cg_context.cg_stats_api_ = stats_api
-
-    # GIVEN a dry run flag
-    dry_run: bool = True
-
     # WHEN setting the dry_run mode on a DeleteDemuxAPI
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
@@ -105,7 +101,7 @@ def test_set_dry_run_delete_demux_api(
 
     # THEN the dry run parameter should be set to True and it should be logged
     assert wipe_demultiplex_api.dry_run
-    assert f"DeleteDemuxAPI: Setting dry run mode to {dry_run}" in caplog.text
+    assert f"DeleteDemuxAPI: Setting dry run mode to True" in caplog.text
 
 
 def test_no_active_samples_on_flow_cell(
