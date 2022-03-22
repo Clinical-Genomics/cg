@@ -140,7 +140,7 @@ class RsyncAPI(MetaAPI):
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_rsync_single_case(
+    def slurm_rsync_single_case(
         self,
         case_id: str,
         dry_run: bool,
@@ -167,16 +167,16 @@ class RsyncAPI(MetaAPI):
             )
         if case_files_present:
             folder_list.append(self.status_db.family(case_id).name)
-        commands: str = "".join(
-            [
-                RSYNC_COMMAND.format(
-                    source_path=source_and_destination_paths["delivery_source_path"] / folder,
-                    destination_path=source_and_destination_paths["rsync_destination_path"]
-                    / str(ticket_id),
-                )
-                for folder in folder_list
-            ]
-        )
+        commands: str = ""
+        for folder in folder_list:
+            source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
+            destination_path: Path = source_and_destination_paths["rsync_destination_path"] / str(
+                ticket_id
+            )
+            commands += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
+
         return self.sbatch_rsync_commands(commands=commands, job_prefix=case_id, dry_run=dry_run)
 
     def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
@@ -220,7 +220,8 @@ class RsyncAPI(MetaAPI):
         memory: int = 1,
         dry_run: bool = False,
     ) -> int:
-        """Instantiates a slurm api and sbatches the given commands. Default parameters can be overridden"""
+        """Instantiates a slurm api and sbatches the given commands. Default parameters can be
+        overridden"""
         sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([job_prefix, "rsync"]),
             account=account or self.account,

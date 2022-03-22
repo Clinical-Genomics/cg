@@ -116,7 +116,7 @@ def test_run_rsync_on_slurm(
     assert isinstance(sbatch_number, int)
 
 
-def test_run_rsync_single_case(
+def test_slurm_rsync_single_case(
     microsalt_case: models.Family, rsync_api: RsyncAPI, caplog, mocker, helpers, ticket_number: int
 ):
     """Test for running rsync on a single case on slurm"""
@@ -136,7 +136,7 @@ def test_run_rsync_single_case(
     Store.get_ticket_from_case.return_value = ticket_number
 
     # WHEN the destination path is created
-    sbatch_number: int = rsync_api.run_rsync_single_case(
+    sbatch_number: int = rsync_api.slurm_rsync_single_case(
         case_id=case.internal_id, case_files_present=True, dry_run=True
     )
 

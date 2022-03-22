@@ -152,14 +152,14 @@ class StatusHandler(BaseHandler):
             return flowcell.samples
 
     def get_ticket_from_case(self, case_id: str):
-        """Returns the ticket to which the majority of the case's samples are related to"""
-        samples = (
+        """Returns the ticket from the most recent sample in a case"""
+        newest_sample: models.Sample = (
             self.Sample.query.join(models.Family.links, models.FamilySample.sample)
             .filter(models.Family.internal_id == case_id)
-            .all()
+            .order_by(models.Sample.created_at.desc())
+            .first()
         )
-        tickets = [sample.ticket_number for sample in samples]
-        return max(set(tickets), key=tickets.count)
+        return newest_sample.ticket_number
 
     def cases(
         self,
