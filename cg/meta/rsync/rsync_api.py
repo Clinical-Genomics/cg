@@ -8,7 +8,7 @@ from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, SLURM_ACCOUNT_TO_QOS
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
@@ -16,7 +16,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
 from cg.constants import Pipeline
-from cg.constants.priority import SLURM_ACCOUNT_TO_QOS
 
 LOG = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.priority: str = SlurmQos.LOW
+        self.slurm_quality_of_service: str = SLURM_ACCOUNT_TO_QOS[self.account] or SlurmQos.LOW
         self.pipeline: str = Pipeline.RSYNC
 
     @property
@@ -112,7 +111,7 @@ class RsyncAPI(MetaAPI):
             analysis_type="other",
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
-            priority=self.priority,
+            slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail_user,
             data_analysis=Pipeline.RSYNC,
         )
@@ -165,26 +164,22 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        if self.account in SLURM_ACCOUNT_TO_QOS.keys():
-            priority = SLURM_ACCOUNT_TO_QOS[self.account]
-        else:
-            priority = "low"
-        sbatch_info = {
-            "job_name": "_".join([str(ticket_id), "rsync"]),
-            "account": self.account,
-            "number_tasks": 1,
-            "memory": 1,
-            "log_dir": self.log_dir.as_posix(),
-            "email": self.mail_user,
-            "hours": 24,
-            "priority": priority,
-            "commands": commands,
-            "error": ERROR_RSYNC_FUNCTION.format(),
-            "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
-        }
+        sbatch_parameters: Sbatch = Sbatch(
+            job_name="_".join([str(ticket_id), "rsync"]),
+            account=self.account,
+            number_tasks=1,
+            memory=1,
+            log_dir=self.log_dir.as_posix(),
+            email=self.mail_user,
+            hours=24,
+            quality_of_service=self.slurm_quality_of_service,
+            commands=commands,
+            error=ERROR_RSYNC_FUNCTION.format(),
+            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+        )
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
         sbatch_path = self.log_dir / "_".join([str(ticket_id), "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path

@@ -457,7 +457,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         case_id: str,
         analysis_type: Optional[str],
         run_analysis: bool = True,
-        priority: Optional[str] = None,
+        slurm_quality_of_service: Optional[str] = None,
         dry_run: bool = False,
     ) -> None:
         """Execute BALSAMIC run analysis with given options"""
@@ -469,7 +469,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--account": self.account,
                 "--mail-user": self.email,
-                "--qos": priority or self.get_priority_for_case(case_id=case_id),
+                "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }

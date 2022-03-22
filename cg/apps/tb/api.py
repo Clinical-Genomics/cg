@@ -9,7 +9,8 @@ from google.auth import jwt
 from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import Pipeline, Priority
+from cg.constants import Pipeline
+from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
 
@@ -143,7 +144,7 @@ class TrailblazerAPI:
         analysis_type: str,
         config_path: str,
         out_dir: str,
-        priority: Priority,
+        slurm_quality_of_service: SlurmQos,
         email: str = None,
         data_analysis: Pipeline = None,
     ) -> TrailblazerAnalysis:
@@ -153,7 +154,7 @@ class TrailblazerAPI:
             "type": analysis_type,
             "config_path": config_path,
             "out_dir": out_dir,
-            "priority": priority,
+            "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
