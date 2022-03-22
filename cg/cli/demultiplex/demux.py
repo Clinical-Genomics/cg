@@ -66,7 +66,7 @@ def demultiplex_all(
             run_dir=False,
             housekeeper=True,
             init_files=False,
-            status_db=False
+            status_db=False,
         )
 
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flowcell=flowcell_obj)
@@ -117,7 +117,7 @@ def demultiplex_flowcell(
         run_dir=False,
         housekeeper=True,
         init_files=True,
-        status_db=False
+        status_db=False,
     )
 
     if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
