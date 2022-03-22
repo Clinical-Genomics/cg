@@ -19,6 +19,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
 from .coverage import coverage
+from .delivery_report import mip_dna
 from .fohm import fohm
 from .genotype import genotypes
 from .gisaid import gisaid
@@ -170,3 +171,4 @@ upload.add_command(vogue)
 upload.add_command(gisaid)
 upload.add_command(nipt)
 upload.add_command(fohm)
+upload.add_command(mip_dna)

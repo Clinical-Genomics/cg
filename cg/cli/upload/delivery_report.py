@@ -1,0 +1,66 @@
+import logging
+from typing import List
+
+import click
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+
+from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.models.cg_config import CGConfig
+from cg.meta.report.api import ReportAPI
+from housekeeper.store import models as hk_models
+
+LOG = logging.getLogger(__name__)
+
+
+@click.group("mip-dna")
+@click.pass_context
+def mip_dna(context: click.Context):
+    """Rare disease DNA upload"""
+
+    context.obj.meta_apis["report_api"] = MipDNAReportAPI(
+        config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+    )
+
+
+@click.command("delivery-report-to-scout")
+@click.argument("case_id", required=False)
+@click.option(
+    "-d", "--dry-run", is_flag=True, default=False, help="Run command without uploading to scout"
+)
+@click.pass_obj
+def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
+    """Fetches a delivery report from housekeeper and uploads it to scout"""
+
+    report_api: ReportAPI = context.meta_apis["report_api"]
+
+    # Invalid internal case ID
+    if not case_id:
+        LOG.error("Provide a case, suggestions:")
+        for case_obj in report_api.get_cases_without_delivery_report():
+            click.echo(case_obj)
+
+        raise click.Abort
+
+    uploaded_delivery_report_files: List[hk_models.File] = [
+        file_obj
+        for file_obj in report_api.housekeeper_api.get_files(
+            bundle=case_id,
+            tags=["delivery-report"],
+            version=report_api.housekeeper_api.last_version(case_id).id,
+        )
+    ]
+
+    if not uploaded_delivery_report_files:
+        raise FileNotFoundError(f"No delivery report was found in housekeeper for case: {case_id}")
+
+    report_path: str = uploaded_delivery_report_files[0].full_path
+
+    if not dry_run:
+        report_api.scout_api.upload_delivery_report(
+            report_path=report_path, case_id=case_id, update=True
+        )
+
+    click.echo(click.style("Uploaded to scout", fg="green"))
+
+
+mip_dna.add_command(delivery_report_to_scout)

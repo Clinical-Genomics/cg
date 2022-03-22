@@ -5,8 +5,9 @@ from pathlib import Path
 from typing import TextIO, Optional
 
 import click
+from cg.cli.upload.delivery_report import delivery_report_to_scout
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.exc import DeliveryReportError
+from cg.exc import DeliveryReportError, CgError
 from cg.meta.report.api import ReportAPI
 from cg.models.cg_config import CGConfig
 from housekeeper.store import models as hk_models
@@ -22,7 +23,11 @@ OPTION_FORCE_REPORT = click.option(
     "-f", "--force", "force_report", is_flag=True, default=False, help="Overrule report validation"
 )
 OPTION_DRY_RUN = click.option(
-    "-d", "--dry-run", is_flag=True, default=False, help="Print to console instead of executing"
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Print to console instead of generating an html report file",
 )
 
 
@@ -36,11 +41,11 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
     report_api: ReportAPI = context.obj.meta_apis["report_api"]
     exit_code = EXIT_SUCCESS
 
-    click.echo(click.style("--------------- AVAILABLE_DELIVERY REPORTS ---------------"))
+    click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
     for analysis_obj in report_api.get_cases_without_delivery_report():
         case_id = analysis_obj.family.internal_id
-        LOG.info("Uploading delivery report for the case: %s", case_id)
+        LOG.info("Uploading delivery report for case: %s", case_id)
         try:
             context.invoke(
                 delivery_report,
@@ -50,31 +55,25 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
             )
         except FileNotFoundError as error:
             LOG.error(
-                "The delivery report generation is missing a file for the case: %s, %s",
+                "The delivery report generation is missing a file for case: %s, %s",
                 case_id,
                 error,
             )
             exit_code = EXIT_FAIL
-        except DeliveryReportError as error:
+        except (CgError, DeliveryReportError) as error:
             LOG.error(
-                "The delivery report generation failed for the case: %s, %s",
+                "The delivery report generation failed for case: %s, %s",
                 case_id,
                 error.message,
             )
             exit_code = EXIT_FAIL
-        # except CgError as error:  # TODO
-        #    LOG.error(
-        #        "Uploading delivery report failed for case: %s, %s",
-        #        case_id,
-        #        error.message,
-        #    )
-        #    exit_code = FAIL
-        # except Exception:
-        #    LOG.error(
-        #        "Unspecified error when uploading delivery report for case: %s",
-        #        case_id,
-        #    )
-        #    exit_code = FAIL
+        except Exception as error:
+            LOG.error(
+                "Unspecified error when uploading delivery report for case: %s, %s",
+                case_id,
+                error.message,
+            )
+            exit_code = EXIT_FAIL
 
     sys.exit(exit_code)
 
@@ -86,7 +85,8 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
 @OPTION_STARTED_AT
 @click.pass_obj
 def delivery_report(
-    context: CGConfig,
+    context: click.Context,
+    cg_context: CGConfig,
     case_id: str,
     force_report: bool,
     dry_run: bool,
@@ -94,9 +94,9 @@ def delivery_report(
 ):
     """Generates a delivery report for a case and stores it in housekeeper"""
 
-    click.echo(click.style("--------------- DELIVERY_REPORT ---------------"))
+    click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
 
-    report_api: ReportAPI = context.meta_apis["report_api"]
+    report_api: ReportAPI = cg_context.meta_apis["report_api"]
 
     # Invalid internal case ID
     if not case_id or not report_api.status_db.family(case_id):
@@ -136,50 +136,5 @@ def delivery_report(
     else:
         click.echo(click.style("Delivery report already uploaded to housekeeper", fg="yellow"))
 
-    # TODO
-    # context.invoke(delivery_report_to_scout, case_id=case_id)
-    # report_api.update_delivery_report_date(
-    #     status_api=status_db, case_id=case_id, analysis_date=analysis_started_at
-    # )
-
-
-'''
-@click.command("delivery-report-to-scout")
-@click.argument("case_id", required=False)
-@click.option(
-    "-d",
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    help="run command without uploading to scout",
-)
-@click.pass_obj
-def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
-    """Fetches an delivery-report from housekeeper and uploads it to scout"""
-    status_db: Store = context.status_db
-    housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    scout_api: ScoutAPI = context.scout_api
-
-    if not case_id:
-        suggest_cases_delivery_report(status_db=status_db, pipeline=Pipeline.MIP_DNA)
-        raise click.Abort
-
-    uploaded_delivery_report_files: List[hk_models.File] = [
-        file_obj
-        for file_obj in housekeeper_api.get_files(
-            bundle=case_id,
-            tags=["delivery-report"],
-            version=housekeeper_api.last_version(case_id).id,
-        )
-    ]
-    if not uploaded_delivery_report_files:
-        raise FileNotFoundError(f"No delivery report was found in housekeeper for {case_id}")
-
-    report_path: str = uploaded_delivery_report_files[0].full_path
-
-    LOG.info("uploading delivery report %s to scout for case: %s", report_path, case_id)
-    if not dry_run:
-        scout_api.upload_delivery_report(report_path=report_path, case_id=case_id, update=True)
-    click.echo(click.style("uploaded to scout", fg="green"))
-
-'''
+    context.invoke(delivery_report_to_scout, case_id, dry_run)
+    report_api.update_delivery_report_date(case_id=case_id, analysis_date=analysis_started_at)

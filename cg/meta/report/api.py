@@ -111,6 +111,14 @@ class ReportAPI(MetaAPI):
 
         return self.status_db.analyses_to_delivery_report(self.analysis_api.pipeline)[:50]
 
+    def update_delivery_report_date(self, case_id: str, analysis_date: datetime) -> None:
+        """Updates the date when delivery report was created"""
+
+        case_obj = self.status_db.family(case_id)
+        analysis_obj = self.status_db.analysis(case_obj, analysis_date)
+        analysis_obj.delivery_report_created_at = datetime.now()
+        self.status_db.commit()
+
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report"""
 
@@ -333,19 +341,3 @@ class ReportAPI(MetaAPI):
         """Retrieves a dictionary with the delivery report required fields"""
 
         raise NotImplementedError
-
-    '''
-
-    @staticmethod
-    def update_delivery_report_date(
-        status_api: Store, case_id: str, analysis_date: datetime
-    ) -> None:
-        """Update date on analysis when delivery report was created"""
-
-        case_obj = status_api.family(case_id)
-        analysis_obj = status_api.analysis(case_obj, analysis_date)
-        analysis_obj.delivery_report_created_at = datetime.now()
-        status_api.commit()
-
-
-    '''
