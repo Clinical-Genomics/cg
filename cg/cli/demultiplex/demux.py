@@ -55,9 +55,9 @@ def demultiplex_all(
 
         delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
             config=context,
-            demultiplex_base=Path(demultiplex_api.out_dir),
+            demultiplex_base=demultiplex_api.out_dir,
             dry_run=dry_run,
-            run_path=sub_dir,
+            run_path=(flowcells_directory / sub_dir),
         )
 
         delete_demux_api.delete_flow_cell(
@@ -106,9 +106,9 @@ def demultiplex_flowcell(
 
     delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=context,
-        demultiplex_base=Path(demultiplex_api.out_dir),
+        demultiplex_base=demultiplex_api.out_dir,
         dry_run=dry_run,
-        run_path=flowcell_directory.name,
+        run_path=flowcell_directory,
     )
 
     delete_demux_api.delete_flow_cell(
@@ -143,6 +143,7 @@ def demultiplex_flowcell(
 @click.option(
     "-d",
     "--demultiplex-base",
+    type=click.Path(exists=True),
     required=True,
     help="Is the base of demultiplexing, e.g. '/home/proj/{ENVIRONMENT}/demultiplexed-runs/'",
 )
@@ -155,7 +156,8 @@ def demultiplex_flowcell(
 @click.option("--run-dir", is_flag=True, help="Delete flow cell run on file system")
 @click.option(
     "-r",
-    "--run-path",
+    "--run-directory",
+    type=click.Path(exists=False),
     required=True,
     help="Is the path to the flowcell run directory name, e.g. '/home/proj/{ENVIRONMENT}/flowcells/novaseq/runs/201203_A00689_0200_AHVKJCDRXX'",
 )
@@ -170,20 +172,21 @@ def delete_flow_cell(
     context: CGConfig,
     dry_run: bool,
     demultiplexing_dir: str,
-    run_path: str,
     cg_stats: bool,
     demultiplex_base: bool,
     housekeeper: bool,
     init_files: bool,
     run_dir: bool,
+    run_directory: str,
     status_db: bool,
     yes: bool,
 ):
     """Delete a flowcell. If --status-db is passed then all other options will be treated as True"""
-    demux_path: Path = Path(demultiplex_base)
+    demultiplex_base: Path = Path(demultiplex_base)
+    run_path: Path = Path(run_directory)
 
     wipe_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-        config=context, demultiplex_base=demux_path, dry_run=dry_run, run_path=run_path
+        config=context, demultiplex_base=demultiplex_base, dry_run=dry_run, run_path=run_path
     )
 
     if yes or click.confirm(

@@ -20,11 +20,11 @@ log = logging.getLogger(__name__)
 class DeleteDemuxAPI:
     """Class to handle wiping out a flow cell before restart/start"""
 
-    def __init__(self, config: CGConfig, demultiplex_base: Path, dry_run: bool, run_path: str):
+    def __init__(self, config: CGConfig, demultiplex_base: Path, dry_run: bool, run_path: Path):
         self.dry_run: bool = self.set_dry_run(dry_run=dry_run)
         self.demultiplexing_dir: Path = demultiplex_base
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
-        self.run_path: Path = Path(run_path)
+        self.run_path: Path = run_path
         self.status_db: Store = config.status_db
         self.stats_api: StatsAPI = config.cg_stats_api
         self.samples_on_flow_cell: List[Sample] = []
@@ -204,7 +204,7 @@ class DeleteDemuxAPI:
                 Path(log_path),
             ]
         except ValueError:
-            log.info(f"No init demux logs found in: {self.run_path}")
+            log.info(f"DeleteDemuxAPI-Init-files: No demultiplexing logs found in: {self.run_path}")
             demux_init_files: List[Path] = [
                 slurm_job_id_file_path,
                 demux_script_file_path,

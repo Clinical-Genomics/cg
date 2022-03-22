@@ -237,7 +237,7 @@ def fixture_active_wipe_demultiplex_api(
         config=active_wipe_demux_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_path=flowcell_full_name,
+        run_path=Path(flowcell_full_name),
     )
 
 
@@ -254,7 +254,7 @@ def fixture_wipe_demultiplex_api(
         config=cg_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_path=flowcell_full_name,
+        run_path=Path(flowcell_full_name),
     )
 
 

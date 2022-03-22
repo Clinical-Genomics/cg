@@ -201,7 +201,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
         config=cg_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_path=flowcell_full_name,
+        run_path=Path(flowcell_full_name),
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
@@ -247,7 +247,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
         config=cg_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_path=flowcell_full_name,
+        run_path=Path(flowcell_full_name),
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
