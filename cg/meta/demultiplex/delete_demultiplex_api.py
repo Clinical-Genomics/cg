@@ -118,7 +118,7 @@ class DeleteDemuxAPI:
                 f"DeleteDemuxAPI-Housekeeper: Would delete sample sheet files with tag {self.flow_cell_name}"
             )
             log.info(
-                f"DeleteDemuxAPI-Housekeeper: Deleting fastq and spring files related to flowcell {self.flow_cell_name}"
+                f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flowcell {self.flow_cell_name}"
             )
         else:
             log.info(
