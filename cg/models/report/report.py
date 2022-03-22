@@ -63,9 +63,7 @@ class DataAnalysisModel(BaseModel):
         always=True,
         allow_reuse=True,
     )(validate_empty_field)
-    _list_values = validator("variant_callers", "panels", always=True, allow_reuse=True)(
-        validate_list
-    )
+    _list_values = validator("panels", always=True, allow_reuse=True)(validate_list)
 
 
 class CaseModel(BaseModel):

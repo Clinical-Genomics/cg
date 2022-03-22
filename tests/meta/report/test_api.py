@@ -1,6 +1,8 @@
+import logging
 import os
 from datetime import datetime, timedelta
 
+from cg.exc import DeliveryReportError
 from tests.meta.report.helper import recursive_assert
 
 
@@ -53,7 +55,7 @@ def test_render_delivery_report(report_api_mip_dna, case_mip_dna):
     assert "html" in rendered_report
 
 
-def test_get_report_data(report_api_mip_dna, case_mip_dna):
+def test_get_validated_report_data(report_api_mip_dna, case_mip_dna):
     """Tests report data retrieval"""
 
     # GIVEN a valid case
@@ -66,8 +68,54 @@ def test_get_report_data(report_api_mip_dna, case_mip_dna):
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
 
-    # THEN check collection of the nested report data
+    # THEN check collection of the nested report data and that the required fields are not empty
+    report_data = report_api_mip_dna.validate_report_fields(report_data, force_report=False)
     recursive_assert(report_data.dict())
+
+
+def test_validate_report_empty_fields(report_api_mip_dna, case_mip_dna, caplog):
+    """Tests the validations of allowed empty report fields"""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a delivery report
+    report_data = report_api_mip_dna.get_report_data(
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
+    )
+
+    # WHEN the report has some allowed empty fields
+    report_data.version = None
+    report_data.customer.id = None
+    report_data.case.samples[0].methods.library_prep = None
+
+    # THEN check if the empty fields are identified
+    report_data = report_api_mip_dna.validate_report_fields(report_data, force_report=False)
+    assert report_data
+    assert "version" in caplog.text
+    assert "id" in caplog.text
+    assert "library_prep" in caplog.text
+
+
+def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna):
+    """Tests the validations of empty required report fields"""
+
+    # GIVEN a delivery report
+    report_data = report_api_mip_dna.get_report_data(
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
+    )
+
+    # WHEN the report contains some required empty fields
+    report_data.accredited = None
+    report_data.case.samples[0].metadata.million_read_pairs = None
+    report_data.case.samples[1].metadata.duplicates = None
+
+    # THEN test that the DeliveryReportError is raised when the report generation is not forced
+    try:
+        report_api_mip_dna.validate_report_fields(report_data, force_report=False)
+    except DeliveryReportError as err:
+        assert "accredited" in err.message
+        assert "duplicates" in err.message
+        assert "accredited" in err.message
 
 
 def test_get_customer_data(report_api_mip_dna, case_mip_dna):
@@ -243,7 +291,6 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
         "pipeline_version": "1.0",
         "type": "wgs",
         "genome_build": "hg19",
-        "variant_callers": "N/A",
         "panels": "IEM, EP",
     }
 
