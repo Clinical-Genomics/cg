@@ -307,7 +307,7 @@ def test_delete_flow_cell_dry_run_status_db(
         in caplog.text
     )
     assert (
-        f"DeleteDemuxAPI-Housekeeper: Deleting fastq and spring files related to flowcell {flow_cell_name}"
+        f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flowcell {flow_cell_name}"
         in caplog.text
     )
     assert f"DeleteDemuxAPI-StatusDB: Would remove {flow_cell_name}" in caplog.text
