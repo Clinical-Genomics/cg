@@ -60,7 +60,7 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
                 error,
             )
             exit_code = EXIT_FAIL
-        except (CgError, DeliveryReportError) as error:
+        except CgError as error:
             LOG.error(
                 "The delivery report generation failed for case: %s, %s",
                 case_id,
