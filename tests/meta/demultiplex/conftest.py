@@ -262,7 +262,6 @@ def fixture_wipe_demultiplex_api(
 def tmp_demultiplexing_init_files(
     flowcell_name: str, populated_wipe_demultiplex_api: DeleteDemuxAPI
 ) -> List[Path]:
-    # TODO: Make these files appear
     """Return a list of demultiplexing init files present in the run directory"""
     run_path: Path = populated_wipe_demultiplex_api.run_path
     slurm_job_id_file_path: Path = run_path / "slurm_job_ids.yaml"

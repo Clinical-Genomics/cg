@@ -94,33 +94,6 @@ class HousekeeperAPI:
             self._store.commit()
             LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
 
-    def delete_fastq_and_spring(self, bundle: str, demultiplexing_path: Path) -> None:
-        """
-        Delete a fastq file from housekeeper, specified by run name in the
-        file paths in sample bundle
-        """
-
-        fastq_tag = "fastq"
-        fastq_files: Iterable[File] = self.files(bundle=bundle, tags=[fastq_tag])
-
-        if not fastq_files:
-            LOG.info(f"Could not find fastq-files for {bundle}")
-            return
-        else:
-            for fastq_file in fastq_files:
-                self.delete_file_if_related(stem=demultiplexing_path.as_posix(), hk_file=fastq_file)
-
-        spring_tag = "spring"
-        spring_files: Iterable[File] = self.files(bundle=bundle, tags=[spring_tag])
-
-        if not spring_files:
-            LOG.info(f"Could not find spring-files for {bundle}")
-        else:
-            for spring_file in spring_files:
-                self.delete_file_if_related(
-                    stem=demultiplexing_path.as_posix(), hk_file=spring_file
-                )
-
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version"""
         files: Optional[Iterable[File]] = self.files(bundle=bundle, tags=tags, version=version)
@@ -201,8 +174,7 @@ class HousekeeperAPI:
             if Path(file.path) in file_paths:
                 file_paths.remove(Path(file.path))
                 LOG.info(
-                    "Path %s is already linked to bundle %s in housekeeper"
-                    % (file.path, bundle_name)
+                    f"Path {file.path} is already linked to bundle {bundle_name} in housekeeper"
                 )
         return file_paths
 

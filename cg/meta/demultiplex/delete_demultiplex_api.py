@@ -1,3 +1,4 @@
+import itertools
 import logging
 import shutil
 
@@ -88,12 +89,23 @@ class DeleteDemuxAPI:
         else:
             log.info(f"DeleteDemuxAPI-Housekeeper: No files found with tag: {self.flow_cell_name}")
 
+    def _delete_files_if_related_in_housekeeper_by_tags(self, sample: Sample, tag: str):
+        """Delete any existing fastq related to sample"""
+
+        housekeeper_files: Iterable[File] = self.files(bundle=sample.internal_id, tags=[tag])
+        if not housekeeper_files:
+            log.info(f"Could not find {tag} for {sample.internal_id}")
+        else:
+            for housekeeper_file in housekeeper_files:
+                self.housekeeper_api.delete_file_if_related(stem=self.demultiplexing_path.as_posix(), hk_file=housekeeper_file)
+
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
-        for sample in self.samples_on_flow_cell:
-            self.housekeeper_api.delete_fastq_and_spring(
-                bundle=sample.internal_id, demultiplexing_path=self.demultiplexing_path
+        tags = ["fastq", "spring"]
+        for tag, sample in itertools.product(tags, self.samples_on_flow_cell):
+            self.housekeeper_api._delete_files_if_related_in_housekeeper_by_tag(
+                sample=sample, tag=tag
             )
 
     def delete_flow_cell_housekeeper(self) -> None:
