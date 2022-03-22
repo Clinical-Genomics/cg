@@ -8,7 +8,7 @@ def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
     report_data = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
-    required_fields = report_api_mip_dna.get_required_fields(case_mip_dna)
+    required_fields = report_api_mip_dna.get_required_fields()
 
     # GIVEN some allowed empty fields
     report_data.version = None
