@@ -163,7 +163,7 @@ class RsyncAPI(MetaAPI):
         transferred"""
         if not sample_files_present and not case_files_present:
             LOG.error("Since no file parameter is true, no files will be transferred")
-            raise CgError()
+            raise CgError("Since no file parameter is true, no files will be transferred")
         folder_list: List[str] = []
         if sample_files_present:
             folder_list.extend(
