@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ReportAPI(MetaAPI):
-    """Parent class of existing report APIs"""
+    """Common Delivery Report API"""
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config=config)
