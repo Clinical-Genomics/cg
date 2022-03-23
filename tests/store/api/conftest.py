@@ -159,8 +159,9 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         "RMLP15S450",
         "RMLP15S475",
         "RMLP15S500",
-        "RMLP05R800",
         "RMLS05R200",
+        "RMLCUSR800",
+        "RMLCUSS160",
     ]
 
     for app_tag in active_apptags:
