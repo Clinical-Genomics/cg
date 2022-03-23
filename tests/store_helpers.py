@@ -502,6 +502,7 @@ class StoreHelpers:
         store: Store,
         flowcell_id: str = "flowcell_test",
         archived_at: datetime = None,
+        sequencer_type: str = "hiseqx",
         samples: list = None,
         status: str = None,
         date: datetime = datetime.now(),
@@ -510,7 +511,7 @@ class StoreHelpers:
         flowcell_obj = store.add_flowcell(
             name=flowcell_id,
             sequencer="dummy_sequencer",
-            sequencer_type="hiseqx",
+            sequencer_type=sequencer_type,
             date=date,
         )
         flowcell_obj.archived_at = archived_at
