@@ -69,6 +69,22 @@ class RsyncAPI(MetaAPI):
 
         return before > ctime
 
+    @staticmethod
+    def concatenate_rsync_commands(
+        folder_list: List[str], source_and_destination_paths: Dict[str, Path], ticket_id: int
+    ) -> str:
+        """Concatenates the rsync commands for each folder to be transferred"""
+        commands = ""
+        for folder in folder_list:
+            source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
+            destination_path: Path = source_and_destination_paths["rsync_destination_path"] / str(
+                ticket_id
+            )
+            commands += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
+        return commands
+
     def set_log_dir(self, folder_prefix: str) -> None:
         if self.log_dir.as_posix() == self.base_path.as_posix():
             timestamp = dt.datetime.now()
@@ -140,23 +156,14 @@ class RsyncAPI(MetaAPI):
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
-    def slurm_rsync_single_case(
-        self,
-        case_id: str,
-        dry_run: bool,
-        sample_files_present: bool = False,
-        case_files_present: bool = False,
-    ) -> int:
-        """Runs rsync of a single case to the delivery server, parameters depend on delivery type"""
+    def get_folders_to_deliver(
+        self, case_id: str, sample_files_present: bool, case_files_present: bool
+    ) -> List[str]:
+        """Returns a list of all the folder names depending if sample and/or case data is to be
+        transferred"""
         if not sample_files_present and not case_files_present:
             LOG.error("Since no file parameter is true, no files will be transferred")
             raise CgError()
-        ticket_id: int = self.status_db.get_ticket_from_case(case_id=case_id)
-        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket_id=ticket_id
-        )
-        self.set_log_dir(folder_prefix=case_id)
-        self.create_log_dir(dry_run=dry_run)
         folder_list: List[str] = []
         if sample_files_present:
             folder_list.extend(
@@ -167,15 +174,34 @@ class RsyncAPI(MetaAPI):
             )
         if case_files_present:
             folder_list.append(self.status_db.family(case_id).name)
-        commands: str = ""
-        for folder in folder_list:
-            source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
-            destination_path: Path = source_and_destination_paths["rsync_destination_path"] / str(
-                ticket_id
-            )
-            commands += RSYNC_COMMAND.format(
-                source_path=source_path, destination_path=destination_path
-            )
+        return folder_list
+
+    def slurm_rsync_single_case(
+        self,
+        case_id: str,
+        dry_run: bool,
+        sample_files_present: bool = False,
+        case_files_present: bool = False,
+    ) -> int:
+        """Runs rsync of a single case to the delivery server, parameters depend on delivery type"""
+
+        ticket_id: int = self.status_db.get_ticket_from_case(case_id=case_id)
+        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
+            ticket_id=ticket_id
+        )
+        self.set_log_dir(folder_prefix=case_id)
+        self.create_log_dir(dry_run=dry_run)
+
+        folder_list: List[str] = self.get_folders_to_deliver(
+            case_id=case_id,
+            sample_files_present=sample_files_present,
+            case_files_present=case_files_present,
+        )
+        commands: str = RsyncAPI.concatenate_rsync_commands(
+            folder_list=folder_list,
+            source_and_destination_paths=source_and_destination_paths,
+            ticket_id=ticket_id,
+        )
 
         return self.sbatch_rsync_commands(commands=commands, job_prefix=case_id, dry_run=dry_run)
 

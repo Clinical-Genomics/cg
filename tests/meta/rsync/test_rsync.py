@@ -1,5 +1,7 @@
 """Tests for rsync API"""
 import logging
+from typing import List
+
 import pytest
 from pathlib import Path
 
@@ -114,6 +116,66 @@ def test_run_rsync_on_slurm(
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
+
+
+def test_get_folders_to_deliver(
+    analysis_family: dict, analysis_store_trio, rsync_api: RsyncAPI, case_id: str
+):
+    """Tests the ability for the rsync api to get case and sample names"""
+    # GIVEN a case
+
+    # WHEN the function gets the folders
+    folder_list: List[str] = rsync_api.get_folders_to_deliver(
+        case_id=case_id, sample_files_present=True, case_files_present=True
+    )
+
+    # THEN it the list should contain the case name and all the samples
+    assert folder_list == [
+        analysis_family["samples"][0]["name"],
+        analysis_family["samples"][1]["name"],
+        analysis_family["samples"][2]["name"],
+        analysis_family["name"],
+    ]
+
+
+def test_concatenate_rsync_commands(
+    analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket_nr
+):
+    """Tests the function to concatenate rsync commands for transferring multiple files"""
+    # GIVEN a list with a case and a sample name
+    folder_list: List[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
+    source_and_destination_paths = {
+        "delivery_source_path": project_dir / customer_id / str(ticket_nr),
+        "rsync_destination_path": project_dir / customer_id,
+    }
+    # WHEN then commands are generated
+    commands: str = RsyncAPI.concatenate_rsync_commands(
+        folder_list=folder_list,
+        source_and_destination_paths=source_and_destination_paths,
+        ticket_id=ticket_nr,
+    )
+    # THEN the correct folder should be added to the source path
+    assert (
+        " ".join(
+            [
+                str(source_and_destination_paths["delivery_source_path"] / analysis_family["name"]),
+                str(source_and_destination_paths["delivery_source_path"]),
+            ]
+        )
+        in commands
+    )
+    assert (
+        " ".join(
+            [
+                str(
+                    source_and_destination_paths["delivery_source_path"]
+                    / analysis_family["samples"][0]["name"]
+                ),
+                str(source_and_destination_paths["delivery_source_path"]),
+            ]
+        )
+        in commands
+    )
 
 
 def test_slurm_rsync_single_case(
