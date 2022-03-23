@@ -83,10 +83,9 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
 @OPTION_FORCE_REPORT
 @OPTION_DRY_RUN
 @OPTION_STARTED_AT
-@click.pass_obj
+@click.pass_context
 def delivery_report(
     context: click.Context,
-    cg_context: CGConfig,
     case_id: str,
     force_report: bool,
     dry_run: bool,
@@ -96,7 +95,7 @@ def delivery_report(
 
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
 
-    report_api: ReportAPI = cg_context.meta_apis["report_api"]
+    report_api: ReportAPI = context.obj.meta_apis["report_api"]
 
     # Invalid internal case ID
     if not case_id or not report_api.status_db.family(case_id):
