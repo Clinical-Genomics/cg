@@ -37,6 +37,6 @@ class OsTicket(object):
             except ValueError:
                 LOG.error("Could not convert res %s to int", res.text)
                 return None
-        else:
-            LOG.error("res.text: %s, reason: %s", res.text, res.reason)
-            raise TicketCreationError(res)
+
+        LOG.error("res.text: %s, reason: %s", res.text, res.reason)
+        raise TicketCreationError(res)
