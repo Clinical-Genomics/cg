@@ -33,7 +33,7 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
 
     report_api: ReportAPI = context.meta_apis["report_api"]
 
-    # Invalid internal case ID
+    # Missing internal case ID
     if not case_id:
         LOG.error("Provide a case, suggestions:")
         for case_obj in report_api.get_cases_without_delivery_report():
