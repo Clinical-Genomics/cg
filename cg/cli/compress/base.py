@@ -26,7 +26,7 @@ def compress(context: CGConfig):
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, demux_root=context.demultiplex.out_dir)
     context.meta_apis["compress_api"] = compress_api
 
 
@@ -49,7 +49,7 @@ def decompress(context: CGConfig):
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, demux_root=context.demultiplex.out_dir)
     context.meta_apis["compress_api"] = compress_api
     LOG.info("Running decompress spring")
 

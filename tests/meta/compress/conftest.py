@@ -134,10 +134,9 @@ def fixture_compress_api(
 ):
     """compress api fixture"""
     hk_api = housekeeper_api
-    _api = CompressAPI(
+    yield CompressAPI(
         crunchy_api=real_crunchy_api, hk_api=hk_api, demux_root=project_dir.as_posix()
     )
-    yield _api
 
 
 @pytest.fixture(scope="function", name="populated_compress_fastq_api")

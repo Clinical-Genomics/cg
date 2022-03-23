@@ -60,10 +60,9 @@ def fixture_real_compress_api(
     demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
 ) -> CompressAPI:
     """Return a compress context"""
-    _api = CompressAPI(
+    yield CompressAPI(
         crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
     )
-    yield _api
 
 
 @pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
