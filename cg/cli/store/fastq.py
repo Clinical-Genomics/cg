@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 def store_sample(context: CGConfig, sample_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this sample in housekeeper"""
     compress_api: CompressAPI = context.meta_apis["compress_api"]
-    status_db: Store = context.obj.status_db
+    status_db: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
     sample_obj = status_db.sample(internal_id=sample_id)
