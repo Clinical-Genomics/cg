@@ -39,6 +39,33 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
+    def active_sample(self, internal_id: str) -> bool:
+        """Check if there are any active cases for a sample"""
+        sample: models.Sample = self.sample(internal_id=internal_id)
+        if any(
+            [
+                self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "analyze"
+                or self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "running"
+                for family_sample in sample.links
+            ]
+        ):
+            return True
+        return False
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],

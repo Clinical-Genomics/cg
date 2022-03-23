@@ -91,6 +91,7 @@ ENV/
 .ropeproject
 
 DEVELOP/
+.vscode
 .idea
 
 # Apple-OS specific files
