@@ -7,9 +7,8 @@ from typing import TextIO, Optional
 import click
 from cg.cli.upload.delivery_report import delivery_report_to_scout
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
-from cg.exc import DeliveryReportError, CgError
+from cg.exc import CgError
 from cg.meta.report.api import ReportAPI
-from cg.models.cg_config import CGConfig
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)

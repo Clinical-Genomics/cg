@@ -11,7 +11,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -104,6 +105,34 @@ def fixture_upload_genotypes_context(
     base_context.housekeeper_api_ = upload_genotypes_hk_api
     base_context.status_db_ = analysis_store_trio
     return base_context
+
+
+@pytest.fixture(name="upload_report_hk_bundle")
+def fixture_upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
+    """Returns a dictionary including the delivery report html file"""
+
+    return {
+        "name": case_id,
+        "created": datetime.now(),
+        "files": [
+            {"path": str(delivery_report_html), "archive": False, "tags": [HK_DELIVERY_REPORT_TAG]}
+        ],
+    }
+
+
+@pytest.fixture(name="upload_report_hk_api")
+def fixture_upload_report_hk_api(
+    real_housekeeper_api: HousekeeperAPI,
+    upload_report_hk_bundle: dict,
+    analysis_obj: models.Analysis,
+    helpers,
+) -> HousekeeperAPI:
+    """Add and include files from upload reports hk bundle"""
+
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_report_hk_bundle)
+    hk_version = real_housekeeper_api.last_version(analysis_obj.family.internal_id)
+    real_housekeeper_api.include(hk_version)
+    return real_housekeeper_api
 
 
 @pytest.fixture(name="scout_load_object")
@@ -229,6 +258,7 @@ class MockLims:
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
+    cg_context.meta_apis["report_api"] = MipDNAReportAPI(cg_context, analysis_api)
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,

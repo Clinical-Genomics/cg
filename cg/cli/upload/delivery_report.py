@@ -3,7 +3,6 @@ from typing import List
 
 import click
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.report.api import ReportAPI
@@ -60,7 +59,7 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
             report_path=report_path, case_id=case_id, update=True
         )
 
-    click.echo(click.style("Uploaded to scout", fg="green"))
+    LOG.info("Uploaded delivery report to Scout successfully")
 
 
 mip_dna.add_command(delivery_report_to_scout)

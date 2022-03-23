@@ -1,4 +1,4 @@
-# Report field validation helper
+"""Report field validation helper"""
 
 from cg.models.report.report import ReportModel
 
