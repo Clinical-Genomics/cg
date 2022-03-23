@@ -87,6 +87,20 @@ class HousekeeperAPI:
 
         return file_obj
 
+    def delete_file_if_related(self, stem: str, hk_file: File):
+        """Delete a file if the full path includes the root"""
+        if stem in hk_file.path:
+            self.delete_file(file_id=hk_file.id)
+            self._store.commit()
+            LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
+
+    def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
+        """Check if there are files for a bundle, tags, and/or version"""
+        files: Optional[Iterable[File]] = self.files(bundle=bundle, tags=tags, version=version)
+        if not any(files):
+            return False
+        return True
+
     def add_file(
         self, path, version_obj: models.Version, tags: list, to_archive: bool = False
     ) -> models.File:
@@ -160,8 +174,7 @@ class HousekeeperAPI:
             if Path(file.path) in file_paths:
                 file_paths.remove(Path(file.path))
                 LOG.info(
-                    "Path %s is already linked to bundle %s in housekeeper"
-                    % (file.path, bundle_name)
+                    f"Path {file.path} is already linked to bundle {bundle_name} in housekeeper"
                 )
         return file_paths
 
