@@ -10,7 +10,6 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
 from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -19,7 +18,6 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store, models
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 

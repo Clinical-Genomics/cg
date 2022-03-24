@@ -7,7 +7,7 @@ from cg.cli.upload.delivery_report import mip_dna
 from cg.meta.report.mip_dna import MipDNAReportAPI
 
 
-def test_delivery_report_to_scout_no_param(upload_context, cli_runner, caplog):
+def test_delivery_report_to_scout_no_params(upload_context, cli_runner, caplog):
     """Tests the upload to Scout no specifying the case"""
 
     caplog.set_level(logging.INFO)
@@ -15,14 +15,14 @@ def test_delivery_report_to_scout_no_param(upload_context, cli_runner, caplog):
     # GIVEN a MIP-DNA report api
     assert isinstance(upload_context.meta_apis.get("report_api"), MipDNAReportAPI)
 
-    # WHEN calling delivery_report without parameters
+    # WHEN invoking the delivery report upload without parameters
     result = cli_runner.invoke(
         mip_dna,
         ["delivery-report-to-scout"],
         obj=upload_context,
     )
 
-    # THEN the command should fail due to a missing case_id
+    # THEN the command should fail due to a missing case ID
     assert result.exit_code == EXIT_FAIL
     assert "Provide a case, suggestions:" in caplog.text
 

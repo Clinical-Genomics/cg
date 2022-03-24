@@ -96,7 +96,7 @@ def delivery_report(
 
     report_api: ReportAPI = context.obj.meta_apis["report_api"]
 
-    # Invalid internal case ID
+    # Missing or not valid internal case ID
     if not case_id or not report_api.status_db.family(case_id):
         LOG.error("Provide a case, suggestions:")
         for case_obj in report_api.get_cases_without_delivery_report():
