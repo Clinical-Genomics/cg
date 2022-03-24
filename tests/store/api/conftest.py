@@ -1,7 +1,7 @@
 import datetime as dt
-from typing import Iterable, List
-
 import pytest
+
+from typing import Iterable, List
 
 from cg.constants import Pipeline
 from cg.store import Store, models
@@ -12,6 +12,7 @@ from cg.store.api.import_func import (
 )
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
+from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
 
 
 class StoreCheckers:
@@ -158,8 +159,9 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
         "RMLP15S450",
         "RMLP15S475",
         "RMLP15S500",
-        "RMLP05R800",
         "RMLS05R200",
+        "RMLCUSR800",
+        "RMLCUSS160",
     ]
 
     for app_tag in active_apptags:
