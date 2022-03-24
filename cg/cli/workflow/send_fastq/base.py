@@ -8,6 +8,7 @@ from cg.cli.workflow.commands import (
     OPTION_DRY,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.send_fastq import SendFastqAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -75,7 +76,6 @@ def run(
 
     analysis_api: SendFastqAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
-    ticket_id: int = analysis_api.status_db.get_ticket_from_case(case_id=case_id)
 
     analysis_api.check_analysis_ongoing(case_id=case_id)
     case: models.Family = analysis_api.status_db.family(internal_id=case_id)
@@ -86,8 +86,8 @@ def run(
 
     try:
         analysis_api.deliver_api.deliver_files(case)
-        analysis_api.rsync_api.run_rsync_on_slurm(
-            job_name="auto_deliver_fastq_" + str(ticket_id), ticket_id=ticket_id, dry_run=dry_run
+        analysis_api.rsync_api.slurm_rsync_single_case(
+            case_id=case_id, dry_run=dry_run, sample_files_present=True
         )
         analysis_api.trailblazer_api.add_pending_analysis(
             case_id=case_id,
@@ -96,7 +96,7 @@ def run(
             ),
             config_path=str(analysis_api.rsync_api.trailblazer_config_path),
             out_dir=str(analysis_api.rsync_api.log_dir),
-            priority=analysis_api.convert_case_priority(case),
+            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS(case.priority),
             data_analysis=Pipeline.FASTQ,
         )
         analysis_api.set_statusdb_action(case_id=case_id, action="running")

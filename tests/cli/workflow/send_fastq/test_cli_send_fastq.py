@@ -1,15 +1,17 @@
 import logging
-
-from cg.models.cg_config import CGConfig
+import datetime as dt
 from cg.cli.workflow.send_fastq.base import start, start_available, run, send_fastq
+from cg.store import models
 
 
-def test_start_available(caplog, case_id: str, cli_runner, send_fastq_context):
+def test_start_available(caplog, case_id: str, cli_runner, sample_id: str, send_fastq_context):
     """Tests the start_available command for the send_fastq workflow"""
     caplog.set_level(logging.INFO)
-    # GIVEN a case with no analysis and a send_fastq context
-    send_fastq_context.status_db.family(internal_id=case_id).analyses = []
-    send_fastq_context.status_db.commit()
+    # GIVEN a case with no analysis, a sample that has been sequenced and a send_fastq context
+    case_obj: models.Family = send_fastq_context.status_db.family(internal_id=case_id)
+    case_obj.analyses = []
+    sample_obj: models.Sample = send_fastq_context.status_db.sample(internal_id=sample_id)
+    sample_obj.sequenced_at = dt.datetime.now()
 
     # WHEN the start_available command is invoked
     cli_runner.invoke(start_available, ["--dry-run"], obj=send_fastq_context)

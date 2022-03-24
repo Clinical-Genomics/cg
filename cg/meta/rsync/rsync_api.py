@@ -4,7 +4,7 @@ import glob
 import logging
 import yaml
 from pathlib import Path
-from typing import List, Dict, Iterable, Optional
+from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
