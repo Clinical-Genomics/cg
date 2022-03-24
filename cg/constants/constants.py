@@ -87,6 +87,10 @@ class Sequencers(StrEnum):
     ALL: str = "all"
 
 
+class HastaSlurmPartitions(StrEnum):
+    DRAGEN: str = "dragen"
+
+
 DRY_RUN = click.option(
     "-d",
     "--dry-run",

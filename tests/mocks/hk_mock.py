@@ -5,8 +5,9 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import List, Optional
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import models
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
@@ -107,11 +108,11 @@ class MockVersion:
         return f"MockVersion:id={self.id}, created_at={self.created_at}, files={self.files}"
 
 
-class EnhancedList(list):
+class QueryList(list):
     """Create a list that mocks the behaviour of a query result"""
 
     def __init__(self):
-        super(EnhancedList, self).__init__()
+        super(QueryList, self).__init__()
 
     def first(self):
         """Mock the first method"""
@@ -148,9 +149,9 @@ class MockHousekeeperAPI:
     def __init__(self, config=None):
         self._version_obj = None
         self._bundle_obj = None
-        self._files = EnhancedList()
-        self._tags = EnhancedList()
-        self._bundles = EnhancedList()
+        self._files = QueryList()
+        self._tags = QueryList()
+        self._bundles = QueryList()
         self._id_counter = 1
         self._file_added = False
         self._file_included = False
@@ -312,7 +313,7 @@ class MockHousekeeperAPI:
         """
         tags = set(kwargs.get("tags", []))
         if tags.intersection(self._missing_tags):
-            return EnhancedList()
+            return QueryList()
         return self._files
 
     def new_tag(self, name: str, category: str = None):
@@ -457,6 +458,11 @@ class MockHousekeeperAPI:
         self.commit()
         LOG.info("New bundle created with name %s", new_bundle.name)
         return new_bundle
+
+    @staticmethod
+    def get_tag_names_from_file(file) -> [str]:
+        """Fetch a tag"""
+        return HousekeeperAPI.get_tag_names_from_file(file=file)
 
     @staticmethod
     def checksum(path):

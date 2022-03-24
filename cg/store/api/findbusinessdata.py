@@ -39,6 +39,33 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
+    def active_sample(self, internal_id: str) -> bool:
+        """Check if there are any active cases for a sample"""
+        sample: models.Sample = self.sample(internal_id=internal_id)
+        if any(
+            [
+                self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "analyze"
+                or self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "running"
+                for family_sample in sample.links
+            ]
+        ):
+            return True
+        return False
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -198,10 +225,6 @@ class FindBusinessDataHandler(BaseHandler):
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
-
-    def find_family_by_avatar_url(self, avatar_url: str) -> models.Family:
-        """Fetch a family by avatar_url from the database."""
-        return self.Family.query.filter_by(avatar_url=avatar_url).first()
 
     def find_family_by_name(self, name: str) -> models.Family:
         """Find a family by family name within a customer."""
