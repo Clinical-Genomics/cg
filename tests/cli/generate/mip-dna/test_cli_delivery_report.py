@@ -62,7 +62,6 @@ def test_delivery_report(mip_dna_context, cli_runner, case_id, caplog):
         obj=mip_dna_context,
     )
 
-    # THEN the call should be successful and the resultant delivery report file added to HK
-    assert result.exit_code == EXIT_SUCCESS
+    # THEN the report html should have been created and added to HK
     assert "create_delivery_report_file" in caplog.text
     assert "add_delivery_report_to_hk" in caplog.text
