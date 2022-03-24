@@ -56,7 +56,7 @@ def test_delivery_report(mip_dna_context, cli_runner, case_id, caplog):
     # GIVEN a MIP DNA context object
 
     # WHEN calling delivery_report with a dry option
-    result = cli_runner.invoke(
+    cli_runner.invoke(
         delivery_report,
         [case_id],
         obj=mip_dna_context,
