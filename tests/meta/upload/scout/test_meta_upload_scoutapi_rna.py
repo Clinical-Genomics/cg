@@ -1,17 +1,41 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Optional, Generator
+from typing import Generator
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.store import Store, models
+from cg.store import Store
 from tests.store_helpers import StoreHelpers
+
+
+def set_is_tumour_on_case(store: Store, case_id: str, is_tumour: bool):
+    for link in store.family(case_id).links:
+        link.sample.is_tumour = is_tumour
+
+
+def get_subject_id_from_case(store: Store, case_id: str) -> str:
+    for link in store.family(case_id).links:
+        return link.sample.subject_id
+
+
+def ensure_two_dna_tumour_matches(
+    dna_case_id: str, helpers: StoreHelpers, rna_case_id: str, rna_store: Store
+) -> None:
+    """Ensures that we have one RNA case that has two matching DNA cases via subjectID and tumour state"""
+    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
+    subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
+    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=True)
+    dna_extra_case = helpers.ensure_case(
+        store=rna_store, customer=rna_store.family(dna_case_id).customer
+    )
+    dna_extra_tumour = helpers.add_sample(
+        store=rna_store, name="dna_extra_tumour", subject_id=subject_id, is_tumour=True
+    )
+    helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
+    rna_store.commit()
 
 
 def test_upload_rna_junctions_to_scout(
@@ -267,10 +291,8 @@ def test_upload_rna_fusion_report_to_scout_tumour_non_matching(
     """Test that an RNA case's gene fusion report is not uploaded if the is_tumour is not matching"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
-    for link in rna_store.family(rna_case_id).links:
-        link.sample.is_tumour = True
-    for link in rna_store.family(dna_case_id).links:
-        link.sample.is_tumour = False
+    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
+    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
     rna_store.commit()
     upload_scout_api.status_db = rna_store
 
@@ -295,10 +317,8 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_non_matching(
     """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the is_tumour is not matching"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
-    for link in rna_store.family(rna_case_id).links:
-        link.sample.is_tumour = True
-    for link in rna_store.family(dna_case_id).links:
-        link.sample.is_tumour = False
+    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
+    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
     rna_store.commit()
     upload_scout_api.status_db = rna_store
 
@@ -323,10 +343,8 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
     """Test that A RNA case's junction splice files for all samples is not uploaded if the is_tumour is not matching"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
-    for link in rna_store.family(rna_case_id).links:
-        link.sample.is_tumour = True
-    for link in rna_store.family(dna_case_id).links:
-        link.sample.is_tumour = False
+    set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
+    set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
     rna_store.commit()
     upload_scout_api.status_db = rna_store
 
@@ -363,23 +381,6 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
-
-
-def ensure_two_dna_tumour_matches(dna_case_id, helpers, rna_case_id, rna_store):
-    subject_id: str
-    for link in rna_store.family(rna_case_id).links:
-        link.sample.is_tumour = True
-        subject_id = link.sample.subject_id
-    for link in rna_store.family(dna_case_id).links:
-        link.sample.is_tumour = True
-    dna_extra_case = helpers.ensure_case(
-        store=rna_store, customer=rna_store.family(dna_case_id).customer
-    )
-    dna_extra_tumour = helpers.add_sample(
-        store=rna_store, name="dna_extra_tumour", subject_id=subject_id, is_tumour=True
-    )
-    helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
-    rna_store.commit()
 
 
 def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(

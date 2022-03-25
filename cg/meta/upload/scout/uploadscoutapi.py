@@ -250,7 +250,9 @@ class UploadScoutAPI:
         LOG.info("Upload %s fusion report finished!", report_type)
 
     @staticmethod
-    def _check_dna_cases_ok_for_upload(dna_cases, rna_sample):
+    def _check_dna_cases_ok_for_upload(
+        dna_cases: [models.Family], rna_sample: models.Sample
+    ) -> None:
         if not dna_cases:
             raise CgDataError(
                 "Failed to upload RNA sample %s since there are no DNA samples linked to it via subject_id"

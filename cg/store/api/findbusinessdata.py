@@ -374,11 +374,11 @@ class FindBusinessDataHandler(BaseHandler):
             matching samples (list of models.Sample)
         """
 
-        query = self.Sample.query.join(models.Customer).filter(
+        query: Query = self.Sample.query.join(models.Customer).filter(
             models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
         )
         if is_tumour is not None:
-            query = query.filter(models.Sample.is_tumour == is_tumour)
+            query: Query = query.filter(models.Sample.is_tumour == is_tumour)
         return query
 
     def samples_by_ids(self, **identifiers) -> Query:
