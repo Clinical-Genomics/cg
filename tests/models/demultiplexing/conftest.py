@@ -16,11 +16,6 @@ def fixture_flowcell_runs(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "flowcell-runs"
 
 
-@pytest.fixture(name="demultiplexed_runs")
-def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return demultiplex_fixtures / "demultiplexed-runs"
-
-
 @pytest.fixture(name="flowcell_full_name")
 def fixture_flowcell_full_name() -> str:
     return "201203_A00689_0200_AHVKJCDRXX"

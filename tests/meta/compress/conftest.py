@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 
 
@@ -125,11 +126,17 @@ def fixture_real_crunchy_api(crunchy_config_dict):
 
 
 @pytest.fixture(scope="function", name="compress_api")
-def fixture_compress_api(real_crunchy_api, housekeeper_api):
+def fixture_compress_api(
+    demultiplexed_runs: Path,
+    real_crunchy_api: CrunchyAPI,
+    housekeeper_api: HousekeeperAPI,
+    project_dir: Path,
+):
     """compress api fixture"""
     hk_api = housekeeper_api
-    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=hk_api)
-    yield _api
+    yield CompressAPI(
+        crunchy_api=real_crunchy_api, hk_api=hk_api, demux_root=project_dir.as_posix()
+    )
 
 
 @pytest.fixture(scope="function", name="populated_compress_fastq_api")
