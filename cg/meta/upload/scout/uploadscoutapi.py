@@ -259,7 +259,7 @@ class UploadScoutAPI:
 
         if rna_sample.is_tumour and len(dna_cases) > 1:
             raise CgDataError(
-                "Failed to upload on RNA tumour sample %s since there are more than one tumour DNA sample linked to it via subject_id"
+                "Failed to upload RNA tumour sample %s since there are more than one tumour DNA sample linked to it via subject_id"
                 % rna_sample.internal_id,
             )
 
