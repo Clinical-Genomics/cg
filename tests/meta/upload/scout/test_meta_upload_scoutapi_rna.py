@@ -278,6 +278,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_non_matching(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
+
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
@@ -305,6 +306,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_non_matching(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
+
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
@@ -332,6 +334,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
+
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
@@ -356,6 +359,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
+
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
@@ -397,6 +401,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
+
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
@@ -421,6 +426,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
+
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)

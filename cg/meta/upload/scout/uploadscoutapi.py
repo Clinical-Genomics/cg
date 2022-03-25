@@ -253,13 +253,13 @@ class UploadScoutAPI:
     def _check_dna_cases_ok_for_upload(dna_cases, rna_sample):
         if not dna_cases:
             raise CgDataError(
-                "Failed to upload on RNA sample %s since there are no DNA samples linked to it via subject_id"
+                "Failed to upload RNA sample %s since there are no DNA samples linked to it via subject_id"
                 % rna_sample.internal_id,
             )
 
         if rna_sample.is_tumour and len(dna_cases) > 1:
             raise CgDataError(
-                "Failed to upload on RNA tumour sample %s since there are more than one tumour DNA sample linked to it via subject_id"
+                "Failed to upload RNA tumour sample %s since there are more than one tumour DNA sample linked to it via subject_id"
                 % rna_sample.internal_id,
             )
 
