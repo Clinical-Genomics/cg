@@ -44,8 +44,6 @@ def test_update_missing_data_dict():
         "metadata": {"sample_1": "million_read_pairs", "sample_2": "duplicates"},
     }
 
-    print(type(missing_data))
-
     # WHEN appending a new (nested) key value
     update_missing_data_dict(missing_data=missing_data, source="customer", field="name")
     update_missing_data_dict(

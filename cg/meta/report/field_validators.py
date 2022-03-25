@@ -10,17 +10,17 @@ def update_missing_data_dict(missing_data: dict, source: str, field: str, label:
     """
 
     if source in missing_data.keys() and label:
-        try:
-            missing_data[source][label].append(field)
-        except KeyError:
-            missing_data[source][label] = field
-        except AttributeError:
-            missing_data[source][label] = [missing_data[source][label], field]
 
+        if label in missing_data[source] and isinstance(missing_data[source][label], list):
+            missing_data[source][label].append(field)
+        elif label in missing_data[source]:
+            missing_data[source][label] = [missing_data[source][label], field]
+        else:
+            missing_data[source][label] = field
     elif source in missing_data.keys() and not label:
-        try:
+        if isinstance(missing_data[source], list):
             missing_data[source].append(field)
-        except AttributeError:
+        else:
             missing_data[source] = [missing_data[source], field]
     else:
         missing_data.update({source: {label: field} if label else field})
