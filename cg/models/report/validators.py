@@ -23,7 +23,7 @@ def validate_boolean(value: Union[bool, str]) -> str:
     if isinstance(value, bool) or value:
         if str(value) == "True":
             return YES_FIELD
-        elif str(value) == "False":
+        if str(value) == "False":
             return NO_FIELD
 
     return NA_FIELD
