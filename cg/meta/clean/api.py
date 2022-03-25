@@ -41,7 +41,7 @@ class CleanAPI:
                     f"pipeline: {pipeline}; "
                     f"date {analysis.started_at}"
                 )
-                return []
+                continue
 
             LOG.info(
                 f"Version found for "

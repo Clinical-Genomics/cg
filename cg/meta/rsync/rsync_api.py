@@ -8,7 +8,7 @@ from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, SLURM_ACCOUNT_TO_QOS
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
@@ -16,7 +16,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
 from cg.constants import Pipeline
-from cg.constants.priority import SLURM_ACCOUNT_TO_QOS
 
 LOG = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ class RsyncAPI(MetaAPI):
         self.account: str = config.data_delivery.account
         self.log_dir: Path = Path(config.data_delivery.base_path)
         self.mail_user: str = config.data_delivery.mail_user
-        self.priority: str = SlurmQos.LOW
+        self.slurm_quality_of_service: str = SLURM_ACCOUNT_TO_QOS[self.account] or SlurmQos.LOW
         self.pipeline: str = Pipeline.RSYNC
 
     @property
@@ -70,11 +69,27 @@ class RsyncAPI(MetaAPI):
 
         return before > ctime
 
-    def set_log_dir(self, ticket_id: int) -> None:
+    @staticmethod
+    def concatenate_rsync_commands(
+        folder_list: List[str], source_and_destination_paths: Dict[str, Path], ticket_id: int
+    ) -> str:
+        """Concatenates the rsync commands for each folder to be transferred"""
+        commands = ""
+        for folder in folder_list:
+            source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
+            destination_path: Path = source_and_destination_paths["rsync_destination_path"] / str(
+                ticket_id
+            )
+            commands += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
+        return commands
+
+    def set_log_dir(self, folder_prefix: str) -> None:
         if self.log_dir.as_posix() == self.base_path.as_posix():
             timestamp = dt.datetime.now()
             timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-            folder_name = Path("_".join([str(ticket_id), timestamp_str]))
+            folder_name = Path("_".join([folder_prefix, timestamp_str]))
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
@@ -82,18 +97,18 @@ class RsyncAPI(MetaAPI):
         cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
         return cases
 
-    def get_source_and_destination_paths(self, ticket_id: int) -> Dict[str, str]:
+    def get_source_and_destination_paths(self, ticket_id: int) -> Dict[str, Path]:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
         source_and_destination_paths = {}
         if not cases:
             LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
             raise CgError()
         customer_id: str = cases[0].customer.internal_id
-        source_and_destination_paths["delivery_source_path"]: Path = (
-            Path(self.delivery_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
+        source_and_destination_paths["delivery_source_path"]: Path = Path(
+            self.delivery_path, customer_id, "inbox", str(ticket_id)
         )
-        source_and_destination_paths["rsync_destination_path"]: Path = (
-            Path(self.destination_path, customer_id, "inbox", str(ticket_id)).as_posix() + "/"
+        source_and_destination_paths["rsync_destination_path"]: Path = Path(
+            self.destination_path, customer_id, "inbox"
         )
         return source_and_destination_paths
 
@@ -112,7 +127,7 @@ class RsyncAPI(MetaAPI):
             analysis_type="other",
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
-            priority=self.priority,
+            slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail_user,
             data_analysis=Pipeline.RSYNC,
         )
@@ -141,10 +156,60 @@ class RsyncAPI(MetaAPI):
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
-        self.set_log_dir(ticket_id=ticket_id)
+    def get_folders_to_deliver(
+        self, case_id: str, sample_files_present: bool, case_files_present: bool
+    ) -> List[str]:
+        """Returns a list of all the folder names depending if sample and/or case data is to be
+        transferred"""
+        if not sample_files_present and not case_files_present:
+            LOG.error("Since no file parameter is true, no files will be transferred")
+            raise CgError("Since no file parameter is true, no files will be transferred")
+        folder_list: List[str] = []
+        if sample_files_present:
+            folder_list.extend(
+                [
+                    sample.name
+                    for sample in self.status_db.get_samples_by_family_id(family_id=case_id)
+                ]
+            )
+        if case_files_present:
+            folder_list.append(self.status_db.family(case_id).name)
+        return folder_list
+
+    def slurm_rsync_single_case(
+        self,
+        case_id: str,
+        dry_run: bool,
+        sample_files_present: bool = False,
+        case_files_present: bool = False,
+    ) -> int:
+        """Runs rsync of a single case to the delivery server, parameters depend on delivery type"""
+
+        ticket_id: int = self.status_db.get_ticket_from_case(case_id=case_id)
+        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
+            ticket_id=ticket_id
+        )
+        self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
-        source_and_destination_paths: Dict[str, str] = self.get_source_and_destination_paths(
+
+        folder_list: List[str] = self.get_folders_to_deliver(
+            case_id=case_id,
+            sample_files_present=sample_files_present,
+            case_files_present=case_files_present,
+        )
+        commands: str = RsyncAPI.concatenate_rsync_commands(
+            folder_list=folder_list,
+            source_and_destination_paths=source_and_destination_paths,
+            ticket_id=ticket_id,
+        )
+
+        return self.sbatch_rsync_commands(commands=commands, job_prefix=case_id, dry_run=dry_run)
+
+    def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
+        """Runs rsync of a whole ticket folder to the delivery server"""
+        self.set_log_dir(folder_prefix=str(ticket_id))
+        self.create_log_dir(dry_run=dry_run)
+        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
             ticket_id=ticket_id
         )
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
@@ -165,27 +230,41 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        if self.account in SLURM_ACCOUNT_TO_QOS.keys():
-            priority = SLURM_ACCOUNT_TO_QOS[self.account]
-        else:
-            priority = "low"
-        sbatch_info = {
-            "job_name": "_".join([str(ticket_id), "rsync"]),
-            "account": self.account,
-            "number_tasks": 1,
-            "memory": 1,
-            "log_dir": self.log_dir.as_posix(),
-            "email": self.mail_user,
-            "hours": 24,
-            "priority": priority,
-            "commands": commands,
-            "error": ERROR_RSYNC_FUNCTION.format(),
-            "exclude": "--exclude=gpu-compute-0-[0-1],cg-dragen",
-        }
+        return self.sbatch_rsync_commands(
+            commands=commands, job_prefix=str(ticket_id), dry_run=dry_run
+        )
+
+    def sbatch_rsync_commands(
+        self,
+        commands: str,
+        job_prefix: str,
+        account: str = None,
+        email: str = None,
+        log_dir: str = None,
+        hours: int = 24,
+        number_tasks: int = 1,
+        memory: int = 1,
+        dry_run: bool = False,
+    ) -> int:
+        """Instantiates a slurm api and sbatches the given commands. Default parameters can be
+        overridden"""
+        sbatch_parameters: Sbatch = Sbatch(
+            job_name="_".join([job_prefix, "rsync"]),
+            account=account or self.account,
+            number_tasks=number_tasks,
+            memory=memory,
+            log_dir=log_dir or self.log_dir.as_posix(),
+            email=email or self.mail_user,
+            hours=hours,
+            quality_of_service=self.slurm_quality_of_service,
+            commands=commands,
+            error=ERROR_RSYNC_FUNCTION.format(),
+            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+        )
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = slurm_api.generate_sbatch_content(Sbatch.parse_obj(sbatch_info))
-        sbatch_path = self.log_dir / "_".join([str(ticket_id), "rsync.sh"])
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
+        sbatch_path = self.log_dir / "_".join([job_prefix, "rsync.sh"])
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )

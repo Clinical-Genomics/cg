@@ -13,7 +13,6 @@ from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_dragen_flow_cell,
     fixture_demultiplexed_flowcell,
-    fixture_demultiplexed_runs,
     fixture_dragen_demux_results,
     fixture_dragen_flow_cell_full_name,
     fixture_dragen_flow_cell_object,
