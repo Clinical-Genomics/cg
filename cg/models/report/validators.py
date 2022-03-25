@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Union
 
+from cg.models.orders.constants import OrderType
 from cg.constants import (
-    Pipeline,
     NA_FIELD,
     YES_FIELD,
     NO_FIELD,
@@ -18,10 +18,13 @@ def validate_empty_field(value: Union[int, str]) -> str:
 
 
 def validate_boolean(value: Union[bool, str]) -> str:
-    """Formats a boolean to include its value in the delivery report"""
+    """Formats a boolean value for the delivery report"""
 
     if isinstance(value, bool) or value:
-        return YES_FIELD if str(value) == "True" else NO_FIELD
+        if str(value) == "True":
+            return YES_FIELD
+        elif str(value) == "False":
+            return NO_FIELD
 
     return NA_FIELD
 
@@ -49,8 +52,8 @@ def validate_list(value: list) -> str:
 def validate_rml_sample(prep_category: str) -> str:
     """Checks if a specific sample is a RML one"""
 
-    if prep_category == "rml":
-        raise ValueError("The delivery report generation does not support RML samples.")
+    if prep_category == OrderType.RML:
+        raise ValueError("The delivery report generation does not support RML samples")
 
     return validate_empty_field(prep_category)
 
@@ -63,17 +66,13 @@ def validate_supported_pipeline(cls, values: dict) -> dict:
         if values.get("pipeline") != values.get("customer_pipeline"):
             raise ValueError(
                 f"The analysis requested by the customer ({values.get('customer_pipeline')}) does not match the one "
-                f"executed ({values.get('pipeline')})."
+                f"executed ({values.get('pipeline')})"
             )
 
         # Check that the generation of the report supports the data analysis executed on the case
         if values.get("pipeline") not in REPORT_SUPPORTED_PIPELINES:
             raise ValueError(
-                f"The pipeline {values.get('pipeline')} does not support delivery report generation."
+                f"The pipeline {values.get('pipeline')} does not support delivery report generation"
             )
-
-    # Validates the analysis type
-    if values.get("pipeline") == Pipeline.BALSAMIC:
-        values["type"] = validate_balsamic_analysis_type(values["type"])
 
     return values
