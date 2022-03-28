@@ -97,7 +97,13 @@ class ApplicationVersionView(BaseView):
     """Admin view for Model.ApplicationVersion"""
 
     column_default_sort = ("valid_from", True)
-    column_editable_list = ["valid_from"]
+    column_editable_list = [
+        "valid_from",
+        "price_standard",
+        "price_priority",
+        "price_express",
+        "price_clinical_trials",
+    ]
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
     column_formatters = {"application": ApplicationView.view_application_link}
