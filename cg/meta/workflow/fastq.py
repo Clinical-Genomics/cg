@@ -64,18 +64,17 @@ class FastqAnalysisAPI(AnalysisAPI):
 
     def run_transfer(self, case: models.Family, case_id: str, dry_run: bool) -> int:
         """Run the transfer of fastq files for a case"""
-        trailblazer_config_path: Path = self.rsync_api.trailblazer_config_path
         self.deliver_api.deliver_files(case)
         job_id: int = self.rsync_api.slurm_rsync_single_case(
             case_id=case_id, dry_run=dry_run, sample_files_present=True
         )
         self.rsync_api.write_trailblazer_config(
-            {"jobs": [str(job_id)]}, config_path=trailblazer_config_path
+            {"jobs": [str(job_id)]}, config_path=self.rsync_api.trailblazer_config_path
         )
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
-            config_path=str(trailblazer_config_path),
+            config_path=str(self.rsync_api.trailblazer_config_path),
             out_dir=str(self.rsync_api.log_dir),
             slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
             data_analysis=Pipeline.FASTQ,
