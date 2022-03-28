@@ -4,8 +4,10 @@ import datetime as dt
 from pathlib import Path
 
 import pytest
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.compression import CompressionHkTags
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -17,7 +19,7 @@ class MockCompressAPI(CompressAPI):
 
     def __init__(self):
         """initialize mock"""
-        super().__init__(hk_api=None, crunchy_api=None)
+        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True
@@ -53,13 +55,14 @@ def fixture_real_crunchy_api(crunchy_config_dict):
     yield _api
 
 
-@pytest.fixture(name="real_compress_api")
+@pytest.fixture(scope="function", name="real_compress_api")
 def fixture_real_compress_api(
-    housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+    demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
 ) -> CompressAPI:
     """Return a compress context"""
-    _api = CompressAPI(crunchy_api=real_crunchy_api, hk_api=housekeeper_api)
-    yield _api
+    return CompressAPI(
+        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
+    )
 
 
 @pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
@@ -247,8 +250,16 @@ def fixture_spring_bundle(project_dir, timestamp, sample):
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(spring_file), "archive": False, "tags": [sample, "spring"]},
-            {"path": str(spring_meta_file), "archive": False, "tags": [sample, "spring-metadata"]},
+            {
+                "path": str(spring_file),
+                "archive": False,
+                "tags": [sample, CompressionHkTags.SPRING],
+            },
+            {
+                "path": str(spring_meta_file),
+                "archive": False,
+                "tags": [sample, CompressionHkTags.SPRING_METADATA],
+            },
         ],
     }
 
@@ -270,11 +281,15 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
         "created": timestamp,
         "expires": timestamp,
         "files": [
-            {"path": str(wrong_spring_file), "archive": False, "tags": [sample, "spring"]},
+            {
+                "path": str(wrong_spring_file),
+                "archive": False,
+                "tags": [sample, CompressionHkTags.SPRING],
+            },
             {
                 "path": str(wrong_spring_meta_file),
                 "archive": False,
-                "tags": [sample, "spring-metadata"],
+                "tags": [sample, CompressionHkTags.SPRING_METADATA],
             },
         ],
     }

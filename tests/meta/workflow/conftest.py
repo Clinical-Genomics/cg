@@ -30,7 +30,7 @@ def fixture_populated_compress_api_fastq_spring(
 @pytest.fixture(name="only_spring_bundle")
 def fixture_only_spring_bundle() -> dict:
     """Return a dictionary with bundle info in the correct format"""
-    _bundle_data = {
+    return {
         "name": "ADM1",
         "created": "2019-12-24",
         "files": [
@@ -42,13 +42,12 @@ def fixture_only_spring_bundle() -> dict:
         ],
     }
 
-    return _bundle_data
-
 
 @pytest.fixture(name="spring_fastq_mix")
 def fixture_spring_fastq_mix(compression_object: CompressionData) -> dict:
     """Return a dictionary with bundle info including both fastq and spring files"""
-    _bundle_data = {
+
+    return {
         "name": "ADM1",
         "created": "2019-12-24",
         "files": [
@@ -69,5 +68,3 @@ def fixture_spring_fastq_mix(compression_object: CompressionData) -> dict:
             },
         ],
     }
-
-    return _bundle_data
