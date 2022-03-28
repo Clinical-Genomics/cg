@@ -103,6 +103,7 @@ class ApplicationVersionView(BaseView):
         "price_priority",
         "price_express",
         "price_clinical_trials",
+        "price_research",
     ]
     column_exclude_list = ["created_at", "updated_at"]
     column_filters = ["version", "application.tag"]
