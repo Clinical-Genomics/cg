@@ -129,6 +129,7 @@ class ApplicationVersion(Model):
     price_priority = Column(types.Integer)
     price_express = Column(types.Integer)
     price_research = Column(types.Integer)
+    price_clinical_trials = Column(types.Integer)
     comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
