@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
+from cg.meta.workflow.fastq_handler import MicrosaltFastqHandler, MutantFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store import models

@@ -5,7 +5,7 @@ import click
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
-from cg.meta.workflow.send_fastq import SendFastqAnalysisAPI
+from cg.meta.workflow.fastq import FastqAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 
@@ -14,22 +14,22 @@ LOG = logging.getLogger(__name__)
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def send_fastq(context: click.Context):
+def fastq(context: click.Context):
     """Deliver fastq files to caesar"""
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return
 
-    context.obj.meta_apis["analysis_api"] = SendFastqAnalysisAPI(config=context.obj)
+    context.obj.meta_apis["analysis_api"] = FastqAnalysisAPI(config=context.obj)
 
 
-@send_fastq.command("start-available")
+@fastq.command("start-available")
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Send fastq files for fastq-cases which have not yet been delivered"""
 
-    analysis_api: SendFastqAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api: FastqAnalysisAPI = context.obj.meta_apis["analysis_api"]
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
         case_id = case_obj.internal_id
@@ -45,7 +45,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         raise click.Abort
 
 
-@send_fastq.command("start")
+@fastq.command("start")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_context
@@ -58,7 +58,7 @@ def start(context: click.Context, dry_run: bool, case_id: str) -> None:
         LOG.info("Workflow not ready to run, can continue after decompression")
 
 
-@send_fastq.command()
+@fastq.command()
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
@@ -69,7 +69,7 @@ def run(
 ):
     """Deliver fastq files for a case"""
 
-    analysis_api: SendFastqAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: FastqAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
 
     analysis_api.check_analysis_ongoing(case_id=case_id)
@@ -87,5 +87,5 @@ def run(
         raise click.Abort
 
 
-send_fastq.add_command(store)
-send_fastq.add_command(store_available)
+fastq.add_command(store)
+fastq.add_command(store_available)

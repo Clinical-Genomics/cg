@@ -10,7 +10,7 @@ from cg.constants import CASE_ACTIONS, Pipeline, Priority
 from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
-from cg.meta.workflow.fastq import FastqHandler
+from cg.meta.workflow.fastq_handler import FastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import Bundle, Version

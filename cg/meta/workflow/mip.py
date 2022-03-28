@@ -11,7 +11,7 @@ from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
 from cg.constants.tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import MipFastqHandler
+from cg.meta.workflow.fastq_handler import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis, parse_mip_analysis
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo

@@ -18,7 +18,7 @@ import click
 from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.fastq_handler import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
