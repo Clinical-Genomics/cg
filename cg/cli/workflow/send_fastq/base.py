@@ -1,14 +1,9 @@
 import logging
 
 import click
-from cgmodels.cg.constants import Pipeline
 
-from cg.cli.workflow.commands import (
-    ARGUMENT_CASE_ID,
-    OPTION_DRY,
-)
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_DRY, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.send_fastq import SendFastqAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -85,22 +80,12 @@ def run(
         return
 
     try:
-        analysis_api.deliver_api.deliver_files(case)
-        analysis_api.rsync_api.slurm_rsync_single_case(
-            case_id=case_id, dry_run=dry_run, sample_files_present=True
-        )
-        analysis_api.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            analysis_type=analysis_api.get_application_type(
-                analysis_api.status_db.family(case_id).links[0].sample
-            ),
-            config_path=str(analysis_api.rsync_api.trailblazer_config_path),
-            out_dir=str(analysis_api.rsync_api.log_dir),
-            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS(case.priority),
-            data_analysis=Pipeline.FASTQ,
-        )
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-        LOG.info("%s run started!", analysis_api.pipeline)
+        job_id: int = analysis_api.run_transfer(case=case, case_id=case_id, dry_run=dry_run)
+        LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
     except CgError as e:
         LOG.error(e.message)
         raise click.Abort
+
+
+send_fastq.add_command(store)
+send_fastq.add_command(store_available)

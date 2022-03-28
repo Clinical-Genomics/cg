@@ -5,7 +5,7 @@ from typing import List
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -62,10 +62,19 @@ class SendFastqAnalysisAPI(AnalysisAPI):
         customer_id: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
         return Path(self.deliver_api.project_base_path, customer_id, "inbox", str(ticket_id))
 
-    @staticmethod
-    def convert_case_priority(case_obj: models.Family) -> str:
-        """Converts the priority of a case to a SlurmQos"""
-        if case_obj.priority_int == 4:
-            return SlurmQos.HIGH
-        else:
-            return SlurmQos.LOW
+    def run_transfer(self, case: models.Family, case_id: str, dry_run: bool) -> int:
+        """Run the transfer of fastq files for a case"""
+        self.deliver_api.deliver_files(case)
+        job_id: int = self.rsync_api.slurm_rsync_single_case(
+            case_id=case_id, dry_run=dry_run, sample_files_present=True
+        )
+        self.trailblazer_api.add_pending_analysis(
+            case_id=case_id,
+            analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
+            config_path=str(self.rsync_api.trailblazer_config_path),
+            out_dir=str(self.rsync_api.log_dir),
+            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
+            data_analysis=Pipeline.FASTQ,
+        )
+        self.set_statusdb_action(case_id=case_id, action="running")
+        return job_id
