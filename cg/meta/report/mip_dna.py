@@ -91,13 +91,13 @@ class MipDNAReportAPI(ReportAPI):
 
         return analysis_metadata.genome_build if analysis_metadata else None
 
-    def get_variant_callers(self, analysis_metadata: MipAnalysis) -> Union[None, list]:
+    def get_variant_callers(self, analysis_metadata: MipAnalysis = None) -> Union[None, list]:
         """Extracts the list of variant-calling filters used during analysis"""
 
         return None
 
     def get_report_accreditation(
-        self, analysis_metadata: MipAnalysis, samples: List[SampleModel]
+        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
 
@@ -107,7 +107,7 @@ class MipDNAReportAPI(ReportAPI):
 
         return True
 
-    def get_required_fields(self, case: CaseModel) -> dict:
+    def get_required_fields(self, case: CaseModel = None) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA"""
 
         return {
