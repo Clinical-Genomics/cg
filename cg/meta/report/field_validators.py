@@ -73,10 +73,11 @@ def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
     """Retrieve the missing required fields from a report data model"""
 
     nested_sources = ["applications", "samples", "methods", "timestamps", "metadata"]
-
     missing_fields = dict()
+
     for source in empty_fields:
         if source in nested_sources:
+            # Associates application/sample tags/ids to missing fields
             missing_data = {
                 tag: get_missing_fields(empty_fields[source][tag], required_fields[source])
                 for tag in empty_fields[source]
