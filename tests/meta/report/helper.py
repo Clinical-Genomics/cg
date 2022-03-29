@@ -1,4 +1,4 @@
-# Report helper
+"""Report helper"""
 
 
 def recursive_assert(data):
