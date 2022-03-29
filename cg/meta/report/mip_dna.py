@@ -17,6 +17,7 @@ from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import MipDNASampleMetadataModel
+from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store import models

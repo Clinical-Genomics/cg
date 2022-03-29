@@ -79,7 +79,7 @@
               {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.name }}* ({{ sample.id }})</td>
-                  <td>{{ sample.timestamp.ordered_at }}</td>
+                  <td>{{ sample.timestamps.ordered_at }}</td>
                   <td>{{ case.name }}*</td>
                   <td>{{ sample.gender }}*</td>
                   <td>{{ sample.source }}*</td>
@@ -114,9 +114,9 @@
               {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ sample.timestamp.received_at }}</td>
+                  <td>{{ sample.timestamps.received_at }}</td>
                   <td>{{ sample.methods.library_prep }}</td>
-                  <td>{{ sample.timestamp.prepared_at }}</td>
+                  <td>{{ sample.timestamps.prepared_at }}</td>
                   {% if "panelsekvensering" in case.data_analysis.type %}
                     <td>
                      {{ sample.metadata.bait_set }}
@@ -126,12 +126,12 @@
                    </td>
                 {% endif %}
                   <td>{{ sample.methods.sequencing }}</td>
-                  <td>{{ sample.timestamp.sequenced_at }}</td>
+                  <td>{{ sample.timestamps.sequenced_at }}</td>
                   <td>{{ case.data_analysis.pipeline }}</td>
                   <td>
-                    {{ sample.timestamp.delivered_at }}
-                    {% if sample.timestamp.processing_days != 'N/A' %}
-                      ({{ sample.timestamp.processing_days }} dagar)
+                    {{ sample.timestamps.delivered_at }}
+                    {% if sample.timestamps.processing_days != 'N/A' %}
+                      ({{ sample.timestamps.processing_days }} dagar)
                     {% endif %}
                   </td>
                 </tr>
