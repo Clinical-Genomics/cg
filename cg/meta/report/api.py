@@ -139,7 +139,7 @@ class ReportAPI(MetaAPI):
     def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
         """Verifies that the required report fields are not empty"""
 
-        required_fields = self.get_required_fields()
+        required_fields = self.get_required_fields(report_data.case)
         empty_report_fields = get_empty_report_data(report_data)
         missing_report_fields = get_missing_report_data(empty_report_fields, required_fields)
 
