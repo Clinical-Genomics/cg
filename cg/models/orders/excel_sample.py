@@ -74,7 +74,7 @@ class ExcelSample(OrderSample):
             "No analysis",
         ]
         if value not in data_analysis_alternatives:
-            raise AttributeError(f"{value} is not a valid data analysis")
+            raise AttributeError(f"'{value}' is not a valid data analysis")
         return value
 
     @validator(
@@ -86,7 +86,7 @@ class ExcelSample(OrderSample):
         str_value = value.rsplit(".0")[0]
         if str_value.replace(".", "").isnumeric():
             return str_value
-        raise AttributeError(f"Non numeric value {value}")
+        raise AttributeError(f"Order contains non-numeric value '{value}'")
 
     @validator("mother", "father")
     def validate_parent(cls, value: str):
@@ -97,7 +97,7 @@ class ExcelSample(OrderSample):
     @validator("source")
     def validate_source(cls, value: Optional[str]):
         if value not in SOURCE_TYPES:
-            raise ValueError(f"{value} is not a valid source")
+            raise ValueError(f"'{value}' is not a valid source")
         return value
 
     @validator("sex")
