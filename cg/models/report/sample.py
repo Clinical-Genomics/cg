@@ -64,7 +64,7 @@ class MethodsModel(BaseModel):
 
 class TimestampModel(BaseModel):
     """
-    Model describing the processing timestamp of a specific sample
+    Model describing the processing timestamps of a specific sample
 
     Atributes:
         ordered_at: order date; source: StatusDB/sample/ordered_at
@@ -111,7 +111,7 @@ class SampleModel(BaseModel):
         application: analysis application model
         methods: sample processing methods model
         metadata: sample associated metrics and trending data model
-        timestamp: processing timestamp attributes
+        timestamps: processing timestamp attributes
     """
 
     name: Optional[str]
@@ -124,7 +124,7 @@ class SampleModel(BaseModel):
     application: ApplicationModel
     methods: MethodsModel
     metadata: SampleMetadataModel
-    timestamp: TimestampModel
+    timestamps: TimestampModel
 
     _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)
     _values = validator(

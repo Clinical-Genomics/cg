@@ -1,56 +1,91 @@
 """Report field validation helper"""
 
+from cg.constants import NA_FIELD
 from cg.models.report.report import ReportModel
 
 
-def update_missing_data_dict(missing_data: dict, source: str, field: str, label: str = None):
-    """
-    Populates a specific dictionary with the missing/empty fields.
-    If the new entry is sample/application dependant field, the ID/TAG is also stored to uniquely identify it.
-    """
+def get_missing_fields(empty_fields: list, required_fields: list) -> list:
+    """Extracts the missing fields that are required to generate successfully the delivery report"""
 
-    if source in missing_data.keys() and label:
+    missing_fields = list()
 
-        if label in missing_data[source] and isinstance(missing_data[source][label], list):
-            missing_data[source][label].append(field)
-        elif label in missing_data[source]:
-            missing_data[source][label] = [missing_data[source][label], field]
-        else:
-            missing_data[source][label] = field
-    elif source in missing_data.keys() and not label:
-        if isinstance(missing_data[source], list):
-            missing_data[source].append(field)
-        else:
-            missing_data[source] = [missing_data[source], field]
-    else:
-        missing_data.update({source: {label: field} if label else field})
+    for field in empty_fields:
+        if field in required_fields:
+            missing_fields.append(field)
+
+    return missing_fields
 
 
-def get_missing_report_data(report_data: ReportModel, required_fields: dict):
-    """Retrieve empty and missing fields from a specific report model"""
+def get_empty_fields(report_data: dict) -> list:
+    """Returns a list of empty report fields"""
+
+    empty_fields = list()
+
+    for field, value in report_data.items():
+        if not value or value == NA_FIELD:
+            empty_fields.append(field)
+
+    return empty_fields
+
+
+def get_empty_report_data(report_data: ReportModel) -> dict:
+    """Retrieve empty fields from a report data model"""
+
+    empty_fields = {
+        "report": get_empty_fields(report_data.dict()),
+        "customer": get_empty_fields(report_data.customer.dict()),
+        "case": get_empty_fields(report_data.case.dict()),
+        "applications": {
+            app.tag: get_empty_fields(app.dict())
+            for app in report_data.case.applications
+            if get_empty_fields(app.dict())
+        },
+        "data_analysis": get_empty_fields(report_data.case.data_analysis.dict()),
+        "samples": {
+            sample.id: get_empty_fields(sample.dict())
+            for sample in report_data.case.samples
+            if get_empty_fields(sample.dict())
+        },
+        "methods": {
+            sample.id: get_empty_fields(sample.methods.dict())
+            for sample in report_data.case.samples
+            if get_empty_fields(sample.methods.dict())
+        },
+        "timestamps": {
+            sample.id: get_empty_fields(sample.timestamps.dict())
+            for sample in report_data.case.samples
+            if get_empty_fields(sample.timestamps.dict())
+        },
+        "metadata": {
+            sample.id: get_empty_fields(sample.metadata.dict())
+            for sample in report_data.case.samples
+            if get_empty_fields(sample.metadata.dict())
+        },
+    }
+
+    # Clear empty values
+    empty_fields = {k: v for k, v in empty_fields.items() if v}
+
+    return empty_fields
+
+
+def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
+    """Retrieve the missing required fields from a report data model"""
+
+    nested_sources = ["applications", "samples", "methods", "timestamps", "metadata"]
 
     missing_fields = dict()
-    empty_fields = dict()
+    for source in empty_fields:
+        if source in nested_sources:
+            missing_data = {
+                tag: get_missing_fields(empty_fields[source][tag], required_fields[source])
+                for tag in empty_fields[source]
+                if get_missing_fields(empty_fields[source][tag], required_fields[source])
+            }
+        else:
+            missing_data = get_missing_fields(empty_fields[source], required_fields[source])
 
-    def update_missing_data(data: dict, source: str, label: str = None):
-        """Updates the missing or empty fields from an input report data"""
+        if missing_data:
+            missing_fields.update({source: missing_data})
 
-        for field, value in data.items():
-            if not value or value == "N/A":
-                update_missing_data_dict(empty_fields, source, field, label)
-                if field in required_fields[source]:
-                    update_missing_data_dict(missing_fields, source, field, label)
-
-    update_missing_data(report_data.dict(), "report")
-    update_missing_data(report_data.customer.dict(), "customer")
-    update_missing_data(report_data.case.dict(), "case")
-    for application in report_data.case.applications:
-        update_missing_data(application.dict(), "applications", application.tag)
-    update_missing_data(report_data.case.data_analysis.dict(), "data_analysis")
-    for sample in report_data.case.samples:
-        update_missing_data(sample.dict(), "samples", sample.id)
-        update_missing_data(sample.methods.dict(), "methods", sample.id)
-        update_missing_data(sample.timestamp.dict(), "timestamp", sample.id)
-        update_missing_data(sample.metadata.dict(), "metadata", sample.id)
-
-    return missing_fields, empty_fields
+    return missing_fields
