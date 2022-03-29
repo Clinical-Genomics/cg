@@ -71,7 +71,7 @@ _REQUIRED_SAMPLE_FIELDS = [
     "application",
     "methods",
     "metadata",
-    "timestamp",
+    "timestamps",
 ]
 
 REQUIRED_SAMPLE_MIP_DNA_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
@@ -86,7 +86,7 @@ REQUIRED_SAMPLE_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
 REQUIRED_SAMPLE_METHODS_FIELDS = []
 
 # Timestamp required fields (OPTIONAL: "prepared_at", "sequenced_at")
-REQUIRED_SAMPLE_TIMESTAMPS_FIELDS = [
+REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
     "ordered_at",
     "received_at",
     "delivered_at",

@@ -138,13 +138,14 @@ def test_get_customer_data(report_api_mip_dna, case_mip_dna):
     assert customer_data == expected_customer
 
 
-def test_get_report_version_version(report_api_mip_dna, store, helpers):
+def test_get_report_version_version(report_api_mip_dna, store, helpers, timestamp_yesterday):
     """Validates the extracted report versions of two analyses"""
 
     # GIVEN a specific set of analyses
     last_analysis = helpers.add_analysis(store, completed_at=datetime.now())
-    yesterday = datetime.now() - timedelta(days=1)
-    first_analysis = helpers.add_analysis(store, last_analysis.family, completed_at=yesterday)
+    first_analysis = helpers.add_analysis(
+        store, last_analysis.family, completed_at=timestamp_yesterday
+    )
 
     # WHEN retrieving the version
     last_analysis_version = report_api_mip_dna.get_report_version(last_analysis)
@@ -205,7 +206,7 @@ def test_get_samples_data(
     assert samples_data.application
     assert samples_data.methods
     assert samples_data.metadata
-    assert samples_data.timestamp
+    assert samples_data.timestamps
 
 
 def test_get_lims_sample(report_api_mip_dna, case_samples_data, lims_samples):
@@ -304,18 +305,17 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
     assert case_analysis_data == expected_case_analysis_data
 
 
-def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data):
+def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timestamp_yesterday):
     """Checks that the sample timestamp information is correctly retrieved from StatusDB"""
 
     # GIVEN a mock sample data
 
     # GIVEN an expected output
-    yesterday = str((datetime.now() - timedelta(days=1)).date())
     expected_case_samples_data = {
         "ordered_at": str((datetime.now() - timedelta(days=3)).date()),
         "received_at": str((datetime.now() - timedelta(days=2)).date()),
-        "prepared_at": yesterday,
-        "sequenced_at": yesterday,
+        "prepared_at": str(timestamp_yesterday.date()),
+        "sequenced_at": str(timestamp_yesterday.date()),
         "delivered_at": str((datetime.now()).date()),
         "processing_days": "2",
     }

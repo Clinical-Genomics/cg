@@ -62,21 +62,21 @@ def lims_samples(lims_family: dict) -> List[dict]:
 
 
 @pytest.fixture(scope="function", autouse=True, name="report_store")
-def report_store(analysis_store, helpers):
+def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing"""
 
     case = analysis_store.families()[0]
-    yesterday = datetime.now() - timedelta(days=1)
-    helpers.add_analysis(analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=yesterday)
+    helpers.add_analysis(
+        analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=timestamp_yesterday
+    )
     helpers.add_analysis(analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=datetime.now())
 
     # Mock sample dates to calculate processing times
-    yesterday = datetime.now() - timedelta(days=1)
     for family_sample in analysis_store.family_samples(case.internal_id):
-        family_sample.sample.ordered_at = yesterday - timedelta(days=2)
-        family_sample.sample.received_at = yesterday - timedelta(days=1)
-        family_sample.sample.prepared_at = yesterday
-        family_sample.sample.sequenced_at = yesterday
+        family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
+        family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
+        family_sample.sample.prepared_at = timestamp_yesterday
+        family_sample.sample.sequenced_at = timestamp_yesterday
         family_sample.sample.delivered_at = datetime.now()
 
     return analysis_store

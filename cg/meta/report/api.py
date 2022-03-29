@@ -10,7 +10,7 @@ import requests
 import yaml
 
 from cg.exc import DeliveryReportError
-from cg.meta.report.field_validators import get_missing_report_data
+from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
 from cg.models.cg_config import CGConfig
@@ -139,17 +139,18 @@ class ReportAPI(MetaAPI):
     def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
         """Verifies that the required report fields are not empty"""
 
-        required_fields = self.get_required_fields(report_data.case)
-        missing_fields, empty_fields = get_missing_report_data(report_data, required_fields)
+        required_fields = self.get_required_fields()
+        empty_report_fields = get_empty_report_data(report_data)
+        missing_report_fields = get_missing_report_data(empty_report_fields, required_fields)
 
-        if missing_fields and not force_report:
+        if missing_report_fields and not force_report:
             raise DeliveryReportError(
                 f"Could not generate report data for {report_data.case.name}. "
-                f"Missing data: \n{yaml.dump(missing_fields)}"
+                f"Missing data: \n{yaml.dump(missing_report_fields)}"
             )
 
-        if empty_fields:
-            LOG.warning(f"Allowed empty report fields: \n{yaml.dump(empty_fields)}")
+        if empty_report_fields:
+            LOG.warning(f"Allowed empty report fields: \n{yaml.dump(empty_report_fields)}")
 
         return report_data
 
@@ -220,7 +221,7 @@ class ReportAPI(MetaAPI):
                     methods=self.get_sample_methods_data(sample.internal_id),
                     status=case_sample.status,
                     metadata=self.get_sample_metadata(case, sample, analysis_metadata),
-                    timestamp=self.get_sample_timestamp_data(sample),
+                    timestamps=self.get_sample_timestamp_data(sample),
                 )
             )
 

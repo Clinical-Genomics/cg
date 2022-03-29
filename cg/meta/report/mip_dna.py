@@ -9,7 +9,7 @@ from cg.constants import (
     REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_METHODS_FIELDS,
-    REQUIRED_SAMPLE_TIMESTAMPS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
 )
 from cg.models.cg_config import CGConfig
@@ -17,7 +17,6 @@ from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import MipDNASampleMetadataModel
-from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store import models
@@ -118,6 +117,6 @@ class MipDNAReportAPI(ReportAPI):
             "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
             "samples": REQUIRED_SAMPLE_MIP_DNA_FIELDS,
             "methods": REQUIRED_SAMPLE_METHODS_FIELDS,
-            "timestamp": REQUIRED_SAMPLE_TIMESTAMPS_FIELDS,
+            "timestamps": REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
             "metadata": REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
         }
