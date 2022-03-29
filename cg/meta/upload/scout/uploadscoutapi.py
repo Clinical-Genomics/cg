@@ -220,7 +220,7 @@ class UploadScoutAPI:
                 is_tumour=rna_sample.is_tumour,
             )
 
-            self._check_dna_cases_ok_for_upload(dna_cases, rna_sample)
+            self._check_cases_single_connected(dna_cases, rna_sample)
 
             upload_dna_cases.update(dna_cases)
 
@@ -250,7 +250,7 @@ class UploadScoutAPI:
         LOG.info("Upload %s fusion report finished!", report_type)
 
     @staticmethod
-    def _check_dna_cases_ok_for_upload(
+    def _check_cases_single_connected(
         dna_cases: [models.Family], rna_sample: models.Sample
     ) -> None:
         if not dna_cases:
@@ -259,9 +259,9 @@ class UploadScoutAPI:
                 % rna_sample.internal_id,
             )
 
-        if rna_sample.is_tumour and len(dna_cases) > 1:
+        if len(dna_cases) > 1:
             raise CgDataError(
-                "Failed to upload RNA tumour sample %s since there are more than one tumour DNA sample linked to it via subject_id"
+                "Failed to upload RNA sample %s since there are more than one DNA sample linked to it via subject_id"
                 % rna_sample.internal_id,
             )
 
@@ -311,7 +311,7 @@ class UploadScoutAPI:
                 is_tumour=rna_sample.is_tumour,
             )
 
-            self._check_dna_cases_ok_for_upload(dna_cases, rna_sample)
+            self._check_cases_single_connected(dna_cases, rna_sample)
 
             dna_case: models.Family
             for dna_case in dna_cases:
@@ -379,7 +379,7 @@ class UploadScoutAPI:
                 is_tumour=rna_sample.is_tumour,
             )
 
-            self._check_dna_cases_ok_for_upload(dna_cases, rna_sample)
+            self._check_cases_single_connected(dna_cases, rna_sample)
 
             dna_case: models.Family
             for dna_case in dna_cases:
