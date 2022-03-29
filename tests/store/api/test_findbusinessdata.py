@@ -66,6 +66,56 @@ def test_families_by_subject_id(
     assert rna_case not in dna_cases
 
 
+def test_families_by_subject_id_by_is_tumour(
+    helpers: StoreHelpers,
+    sample_store: Store,
+):
+    """Test that we get a case back for a subject id depending on tumour state"""
+    # GIVEN we have two cases with same subject_id but different is_tumour
+    subject_id = "a_subject_id"
+    store: Store = sample_store
+
+    tumour_sample: models.Sample = helpers.add_sample(
+        store=store, subject_id=subject_id, is_tumour=True
+    )
+    tumour_case: models.Family = helpers.add_case(store=store, name="tumour_case")
+    helpers.add_relationship(store=store, case=tumour_case, sample=tumour_sample)
+    store.add_commit(tumour_case)
+
+    non_tumour_sample: models.Sample = helpers.add_sample(
+        store=store, subject_id=subject_id, is_tumour=False
+    )
+    non_tumour_case: models.Family = helpers.add_case(store=store, name="non_tumour_case")
+    helpers.add_relationship(store=store, case=non_tumour_case, sample=non_tumour_sample)
+    store.add_commit(non_tumour_case)
+
+    customer: models.Customer = tumour_case.customer
+
+    # WHEN calling method families_by_subject_id
+    all_cases: set[models.Family] = sample_store.families_by_subject_id(
+        customer_id=customer.internal_id, subject_id=subject_id
+    )
+
+    tumour_cases: set[models.Family] = sample_store.families_by_subject_id(
+        customer_id=customer.internal_id, subject_id=subject_id, is_tumour=True
+    )
+
+    non_tumour_cases: set[models.Family] = sample_store.families_by_subject_id(
+        customer_id=customer.internal_id, subject_id=subject_id, is_tumour=False
+    )
+
+    # THEN we have one group with both cases independent of is_tumour
+    assert tumour_case in all_cases
+    assert non_tumour_case in all_cases
+
+    # THEN we have two groups depending on is_tumour
+    assert tumour_case in tumour_cases
+    assert tumour_case not in non_tumour_cases
+
+    assert non_tumour_case in non_tumour_cases
+    assert non_tumour_case not in tumour_cases
+
+
 def test_get_latest_flow_cell_on_case(
     re_sequenced_sample_store: Store, case_id: str, flowcell_name: str
 ):
