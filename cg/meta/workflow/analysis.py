@@ -11,6 +11,7 @@ from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
+from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.store import models
@@ -410,7 +411,7 @@ class AnalysisAPI(MetaAPI):
     def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
         return None
 
-    def get_latest_metadata(self, case_id: str) -> Union[MipAnalysis, None]:
+    def get_latest_metadata(self, case_id: str) -> Union[MipAnalysis, BalsamicAnalysis, None]:
         """Get the latest metadata of a specific case"""
 
         raise NotImplementedError

@@ -16,6 +16,7 @@ from cg.constants.tags import HK_DELIVERY_REPORT_TAG
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
 from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
@@ -132,13 +133,13 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(case_model.samples),
+            accredited=self.get_report_accreditation(analysis_metadata, case_model.samples),
         )
 
     def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
         """Verifies that the required report fields are not empty"""
 
-        required_fields = self.get_required_fields()
+        required_fields = self.get_required_fields(report_data.case)
         missing_fields, empty_fields = get_missing_report_data(report_data, required_fields)
 
         if missing_fields and not force_report:
@@ -181,7 +182,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         analysis: models.Analysis,
-        analysis_metadata: MipAnalysis,
+        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
     ) -> CaseModel:
         """Returns case associated validated attributes"""
 
@@ -196,7 +197,7 @@ class ReportAPI(MetaAPI):
         )
 
     def get_samples_data(
-        self, case: models.Family, analysis_metadata: MipAnalysis
+        self, case: models.Family, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
     ) -> List[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes"""
 
@@ -278,7 +279,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         analysis: models.Analysis,
-        analysis_metadata: MipAnalysis,
+        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
     ) -> DataAnalysisModel:
         """Retrieves the pipeline attributes used for data analysis"""
 
@@ -288,6 +289,7 @@ class ReportAPI(MetaAPI):
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case),
             genome_build=self.get_genome_build(analysis_metadata),
+            variant_callers=self.get_variant_callers(analysis_metadata),
             panels=case.panels,
         )
 
@@ -316,7 +318,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         sample: models.Sample,
-        analysis_metadata: MipAnalysis,
+        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
     ) -> SampleMetadataModel:
         """Fetches the sample metadata to include in the report"""
 
@@ -327,17 +329,26 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Retrieves a dictionary with the delivery report required fields"""
+
+        raise NotImplementedError
+
+    def get_genome_build(self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
         raise NotImplementedError
 
-    def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
-        """Checks if the report is accredited or not"""
+    def get_variant_callers(
+        self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
+    ) -> Union[None, list]:
+        """Extracts the list of variant-calling filters used during analysis"""
 
         raise NotImplementedError
 
-    def get_required_fields(self) -> dict:
-        """Retrieves a dictionary with the delivery report required fields"""
+    def get_report_accreditation(
+        self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis], samples: List[SampleModel]
+    ) -> bool:
+        """Checks if the report is accredited or not"""
 
         raise NotImplementedError

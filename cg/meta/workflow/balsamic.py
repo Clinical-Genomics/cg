@@ -3,12 +3,16 @@
 import json
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
+import yaml
+from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
+from cg.models.balsamic.analysis import BalsamicAnalysis, parse_balsamic_analysis
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
@@ -35,6 +39,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
+
+    @property
+    def root(self) -> str:
+        return self.root_dir
 
     @property
     def threshold_reads(self):
@@ -231,6 +239,42 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if not normal_paths:
             return None
         return normal_paths[0]
+
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[list, dict]:
+        """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
+
+        version = self.housekeeper_api.last_version(bundle=case_id)
+        raw_file = self.housekeeper_api.get_files(
+            bundle=case_id, version=version.id, tags=tags
+        ).first()
+
+        if not raw_file:
+            raise FileNotFoundError(
+                f"No file associated to {tags} was found in housekeeper for {case_id}"
+            )
+
+        with open(Path(raw_file.full_path), "r") as stream:
+            data = yaml.safe_load(stream)
+
+        return data
+
+    def get_latest_metadata(self, case_id: str) -> Union[BalsamicAnalysis, None]:
+        """Get the latest metadata of a specific BALSAMIC case"""
+
+        config_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.CONFIG])
+        metrics_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.QC_METRICS])
+
+        if config_raw_data and metrics_raw_data:
+            try:
+                return parse_balsamic_analysis(config=config_raw_data, metrics=metrics_raw_data)
+            except ValidationError as error:
+                LOG.warning(
+                    "get_latest_metadata failed for '%s', missing attribute: %s",
+                    case_id,
+                    error,
+                )
+
+        return None
 
     def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
         sample_obj = (

@@ -291,6 +291,7 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
         "pipeline_version": "1.0",
         "type": "wgs",
         "genome_build": "hg19",
+        "variant_callers": "N/A",
         "panels": "IEM, EP",
     }
 
