@@ -36,7 +36,7 @@ def fastq(context: click.Context):
     context.obj.meta_apis["rsync_api"] = RsyncAPI(context.obj)
 
 
-@fastq.command("start-available")
+@fastq.command("all-available")
 @click.pass_context
 @OPTION_DRY
 def auto_fastq(context: click.Context, dry_run: bool):
