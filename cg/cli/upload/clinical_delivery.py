@@ -69,9 +69,10 @@ def auto_fastq(context: click.Context, dry_run: bool):
                 )
             continue
         case: models.Family = analysis_obj.family
-
+        analysis_obj.upload_started_at = dt.datetime.now()
         LOG.info("Uploading family: %s", case.internal_id)
         context.invoke(upload_fastq, case_id=case.internal_id, dry_run=dry_run)
+        status_db.commit()
 
 
 @fastq.command("case")
@@ -105,5 +106,6 @@ def upload_fastq(context: click.Context, case_id: str, dry_run: bool):
             slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
             data_analysis=Pipeline.FASTQ,
         )
+        status_db.a
         status_db.set_case_action(case_id=case_id, action="running")
     LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
