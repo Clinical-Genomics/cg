@@ -61,6 +61,47 @@ def fixture_analysis_store(
     return _store
 
 
+@pytest.fixture(name="fastq_context")
+def fixture_fastq_context(
+    base_context,
+    cg_context: CGConfig,
+    fastq_case,
+    helpers: StoreHelpers,
+    case_id,
+) -> CGConfig:
+    """Returns a CGConfig where the meta_apis["analysis_api"] is a FastqAnalysisAPI and a store
+    containing a fastq case"""
+    _store = cg_context.status_db
+    # Add fastq case to db
+    fastq_case["samples"][0]["sequenced_at"] = datetime.now()
+    helpers.ensure_case_from_dict(store=_store, case_info=fastq_case)
+    return cg_context
+
+
+@pytest.fixture(name="fastq_case")
+def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_nr) -> dict:
+    """Returns a dict describing a fastq case"""
+    return {
+        "name": family_name,
+        "panels": None,
+        "internal_id": case_id,
+        "data_analysis": "fastq",
+        "data_delivery": "fastq",
+        "completed_at": None,
+        "action": None,
+        "samples": [
+            {
+                "internal_id": sample_id,
+                "sex": "male",
+                "name": cust_sample_id,
+                "ticket_number": ticket_nr,
+                "reads": 1000000,
+                "capture_kit": "anything",
+            },
+        ],
+    }
+
+
 @pytest.fixture(scope="function")
 def dna_case(analysis_store, helpers) -> models.Family:
     """Case with DNA application"""

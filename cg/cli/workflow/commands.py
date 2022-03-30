@@ -5,6 +5,7 @@ import shutil
 
 from pathlib import Path
 
+from cgmodels.cg.constants import Pipeline
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
@@ -15,7 +16,7 @@ from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store import Store, models
 from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
@@ -262,3 +263,34 @@ def mutant_past_run_dirs(
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("fastq-store")
+@OPTION_DRY
+@ARGUMENT_CASE_ID
+@click.pass_context
+def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = False):
+    """Creates an analysis object in status-db for the given fast case"""
+    LOG.info("Creating an analysis for case %s", case_id)
+    status_db: Store = context.obj.status_db
+    case_obj: models.Family = status_db.family(internal_id=case_id)
+    new_analysis: models.Analysis = status_db.add_analysis(
+        pipeline=Pipeline.FASTQ,
+        completed_at=dt.datetime.now(),
+        primary=True,
+        started_at=dt.datetime.now(),
+        family_id=case_obj.id,
+    )
+    if dry_run:
+        return
+    status_db.add_commit(new_analysis)
+
+
+@click.command("fastq-store-available")
+@OPTION_DRY
+@click.pass_context
+def store_available_fastq_analysis(context: click.Context, dry_run: bool = False):
+    """Creates an analysis object in status-db for all fastq cases to be delivered"""
+    status_db: Store = context.obj.status_db
+    for case in status_db.cases_to_analyze(pipeline=Pipeline.FASTQ, threshold=False):
+        context.invoke(store_fastq_analysis, case_id=case.internal_id, dry_run=dry_run)

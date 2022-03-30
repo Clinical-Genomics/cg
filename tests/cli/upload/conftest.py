@@ -10,9 +10,11 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS
+from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tags import HkMipAnalysisTag
+from cg.meta.deliver import DeliverAPI
 from cg.meta.report.api import ReportAPI
+from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -141,6 +143,30 @@ def fixture_base_context(
     cg_context.mip_rd_dna.root = tempdir
 
     return cg_context
+
+
+@pytest.fixture(name="fastq_context")
+def fixture_fastq_context(
+    base_context,
+    analysis_store: Store,
+    housekeeper_api: HousekeeperAPI,
+    upload_scout_api: UploadScoutAPI,
+    trailblazer_api: TrailblazerAPI,
+    cg_context: CGConfig,
+) -> CGConfig:
+    """fastq context to use in cli"""
+
+    base_context.meta_apis["delivery_api"] = DeliverAPI(
+        store=base_context.status_db,
+        hk_api=base_context.housekeeper_api,
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP["fastq"]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP["fastq"]["sample_tags"],
+        delivery_type="fastq",
+        project_base_path=Path(base_context.delivery_path),
+    )
+    base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
+    base_context.trailblazer_api_ = trailblazer_api
+    return base_context
 
 
 @pytest.fixture(scope="function", name="upload_scout_api")
