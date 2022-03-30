@@ -265,7 +265,16 @@ def mutant_past_run_dirs(
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
-@click.command("fastq-store")
+@click.group(invoke_without_command=True)
+@click.pass_context
+def fastq(context: click.Context):
+    """Function for storing fastq-cases"""
+    if context.invoked_subcommand is None:
+        click.echo(context.get_help())
+    return None
+
+
+@fastq.command("store")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_context
@@ -286,7 +295,7 @@ def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = F
     status_db.add_commit(new_analysis)
 
 
-@click.command("fastq-store-available")
+@fastq.command("store-available")
 @OPTION_DRY
 @click.pass_context
 def store_available_fastq_analysis(context: click.Context, dry_run: bool = False):
