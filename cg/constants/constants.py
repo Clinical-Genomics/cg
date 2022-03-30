@@ -40,7 +40,7 @@ FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 FLOWCELL_Q30_THRESHOLD = {
     "hiseqx": 75,
     "hiseqga": 80,
-    "novaseq": {"151": 75, "101": 75, "51": 75},
+    "novaseq": 75,
 }
 
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
