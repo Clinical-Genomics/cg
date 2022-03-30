@@ -45,7 +45,6 @@ def auto_fastq(context: click.Context, dry_run: bool):
     status_db: Store = context.obj.status_db
     trailblazer_api = context.obj.trailblazer_api
     for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FASTQ):
-
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
                 "Newer analysis already uploaded for %s, skipping",
@@ -53,7 +52,9 @@ def auto_fastq(context: click.Context, dry_run: bool):
             )
             continue
         if analysis_obj.upload_started_at is not None:
-            if trailblazer_api.is_latest_analysis_completed(case_id=analysis_obj.family_id):
+            if trailblazer_api.is_latest_analysis_completed(
+                case_id=analysis_obj.family.internal_id
+            ):
                 LOG.info(
                     "The upload for %s is completed, setting uploaded at to %s",
                     analysis_obj.family.internal_id,
