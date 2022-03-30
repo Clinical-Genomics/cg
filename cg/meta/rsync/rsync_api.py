@@ -86,7 +86,7 @@ class RsyncAPI(MetaAPI):
         return commands
 
     def set_log_dir(self, folder_prefix: str) -> None:
-        if self.log_dir.as_posix() == self.base_path.as_posix():
+        if folder_prefix not in str(self.log_dir.as_posix()):
             timestamp = dt.datetime.now()
             timestamp_str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
             folder_name = Path("_".join([folder_prefix, timestamp_str]))
