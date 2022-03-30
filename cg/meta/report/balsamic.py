@@ -97,7 +97,7 @@ class BalsamicReportAPI(ReportAPI):
         return analysis_var_callers
 
     def get_report_accreditation(
-        self, analysis_metadata: BalsamicAnalysis, samples: List[SampleModel]
+        self, samples: List[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
         """Checks if the report is accredited or not"""
 
