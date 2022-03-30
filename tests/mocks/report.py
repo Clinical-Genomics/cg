@@ -98,7 +98,7 @@ class MockChanjo:
 class MockChanjoTest:
     """Chanjo mock class"""
 
-    def sample_coverage(self, sample_id: str, panel_genes: list) -> Union[None, dict]:
+    def sample_coverage(self, sample_id: str, _panel_genes: list) -> Union[None, dict]:
         """Calculates  for a specific panel"""
 
         sample_coverage = None
