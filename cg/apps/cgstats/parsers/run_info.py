@@ -21,9 +21,7 @@ class RunInfo:
     @property
     def basemask(self) -> str:
         """Return base mask from RunInfo.xml"""
-        return ",".join(
-            [read.attrib["NumCycles"] for read in self.root.findall("Run/Reads/Read")]
-        )
+        return ",".join([read.attrib["NumCycles"] for read in self.root.findall("Run/Reads/Read")])
 
     @property
     def read_length(self) -> int:
