@@ -82,6 +82,10 @@ class MockDB(Store):
 class MockChanjo(ChanjoAPI):
     """Chanjo mock class"""
 
+    def __init__(self):
+        mock_config = {"chanjo": {"config_path": "/mock/path", "binary_path": "/mock/path"}}
+        super().__init__(mock_config)
+
     def sample_coverage(self, sample_id: str, panel_genes: list) -> Union[None, dict]:
         """Calculates  for a specific panel"""
 
