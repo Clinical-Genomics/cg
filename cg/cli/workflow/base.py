@@ -9,7 +9,7 @@ from .microsalt.base import microsalt
 from .mip_dna.base import mip_dna
 from .mip_rna.base import mip_rna
 from .mutant.base import mutant
-from .commands import fastq
+from .fastq.base import fastq
 
 
 @click.group()

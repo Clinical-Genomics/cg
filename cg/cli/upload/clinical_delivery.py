@@ -6,7 +6,8 @@ from pathlib import Path
 
 import click
 
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
+from cg.constants.constants import DRY_RUN
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store, models
 
@@ -17,9 +18,6 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 
 LOG = logging.getLogger(__name__)
-OPTION_DRY = click.option(
-    "-d", "--dry-run", help="Simulate process without executing", is_flag=True
-)
 
 
 @click.group()
@@ -28,9 +26,9 @@ def fastq(context: click.Context):
     context.obj.meta_apis["delivery_api"] = DeliverAPI(
         store=context.obj.status_db,
         hk_api=context.obj.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP["fastq"]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP["fastq"]["sample_tags"],
-        delivery_type="fastq",
+        case_tags=PIPELINE_ANALYSIS_TAG_MAP[DataDelivery.FASTQ]["case_tags"],
+        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[DataDelivery.FASTQ]["sample_tags"],
+        delivery_type=DataDelivery.FASTQ,
         project_base_path=Path(context.obj.delivery_path),
     )
     context.obj.meta_apis["rsync_api"] = RsyncAPI(context.obj)
@@ -38,20 +36,20 @@ def fastq(context: click.Context):
 
 @fastq.command("all-available")
 @click.pass_context
-@OPTION_DRY
+@DRY_RUN
 def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all non-uploaded fastq-cases to clinical.db"""
 
     status_db: Store = context.obj.status_db
     trailblazer_api = context.obj.trailblazer_api
     for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FASTQ):
-        if analysis_obj.family.analyses[0].uploaded_at is not None:
+        if analysis_obj.family.analyses[0].uploaded_at:
             LOG.warning(
                 "Newer analysis already uploaded for %s, skipping",
                 analysis_obj.family.internal_id,
             )
             continue
-        if analysis_obj.upload_started_at is not None:
+        if analysis_obj.upload_started_at:
             if trailblazer_api.is_latest_analysis_completed(
                 case_id=analysis_obj.family.internal_id
             ):
@@ -79,7 +77,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
 @fastq.command("case")
 @click.pass_context
 @click.argument("case_id", required=True)
-@OPTION_DRY
+@DRY_RUN
 def upload_fastq(context: click.Context, case_id: str, dry_run: bool):
     """Uploads fastq-files for a case to clinical.delivery"""
 

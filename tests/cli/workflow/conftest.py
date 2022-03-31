@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
@@ -85,8 +85,8 @@ def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_n
         "name": family_name,
         "panels": None,
         "internal_id": case_id,
-        "data_analysis": "fastq",
-        "data_delivery": "fastq",
+        "data_analysis": Pipeline.FASTQ,
+        "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,
         "samples": [
