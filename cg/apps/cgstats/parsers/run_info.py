@@ -26,7 +26,7 @@ class RunInfo:
     def mean_read_length(self) -> int:
         """Get the mean read length for this flowcell"""
         read_lengths = [
-            read.attrib["NumCycles"]
+            int(read.attrib["NumCycles"])
             for read in self.root.findall("Run/Reads/Read")
             if read.attrib["IsIndexedRead"] == "N"
         ]
