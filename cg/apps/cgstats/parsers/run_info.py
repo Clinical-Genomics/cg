@@ -30,4 +30,4 @@ class RunInfo:
             for read in self.root.findall("Run/Reads/Read")
             if read.attrib["IsIndexedRead"] == "N"
         ]
-        return int(sum(read_lengths) / len(read_lengths))
+        return round(sum(read_lengths) / len(read_lengths), 0)
