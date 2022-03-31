@@ -107,5 +107,4 @@ def upload_fastq(context: click.Context, case_id: str, dry_run: bool):
             slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
             data_analysis=Pipeline.FASTQ,
         )
-        status_db.set_case_action(case_id=case_id, action="running")
     LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
