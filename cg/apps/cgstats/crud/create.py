@@ -78,7 +78,7 @@ def create_demux(
     demux.flowcell_id = flowcell_id
     demux.datasource_id = datasource_id
     if demux_results.bcl_converter == "dragen":
-        basemask: str = demux_results.run_info.basemask
+        demux.basemask: str = demux_results.run_info.basemask
     else:
         demux.basemask = ""
     demux.time = sqlalchemy.func.now()
