@@ -19,13 +19,15 @@ class RunInfo:
         return tree.getroot()
 
     @property
-    def read_length(self) -> int:
-        """Get the read length for this flowcell"""
-        return int(self.root.find("Run/Reads/Read").attrib["NumCycles"])
+    def basemask(self) -> str:
+        """Return base mask from RunInfo.xml"""
+        return ",".join([read.attrib["NumCycles"] for read in self.root.findall("Run/Reads/Read")])
 
-    @property
-    def index_length(self) -> int:
-        """Get the read length of the index used on the flowcell"""
-        for element in self.root.findall("Run/Reads/Read"):
-            if element.attrib["IsIndexedRead"] == "Y":
-                return int(element.attrib["NumCycles"])
+    def mean_read_length(self) -> int:
+        """Get the mean read length for this flowcell"""
+        read_lengths = [
+            int(read.attrib["NumCycles"])
+            for read in self.root.findall("Run/Reads/Read")
+            if read.attrib["IsIndexedRead"] == "N"
+        ]
+        return round(sum(read_lengths) / len(read_lengths), 0)
