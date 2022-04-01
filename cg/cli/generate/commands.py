@@ -68,7 +68,7 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
             exit_code = EXIT_FAIL
         except Exception as error:
             LOG.error(
-                "Unspecified error when uploading delivery report for case: %s, %s",
+                "Unspecified error when generating the delivery report for case: %s, %s",
                 case_id,
                 error.message,
             )
