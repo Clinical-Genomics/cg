@@ -10,7 +10,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 @pytest.mark.parametrize(
     "priority,expected_slurm_qos",
     [
-        (Priority.clinical_trials, SlurmQos.LOW),
+        (Priority.clinical_trials, SlurmQos.NORMAL),
         (Priority.research, SlurmQos.LOW),
         (Priority.standard, SlurmQos.NORMAL),
         (Priority.priority, SlurmQos.HIGH),
