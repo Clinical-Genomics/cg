@@ -69,7 +69,9 @@ def test_get_validated_report_data(report_api_mip_dna, case_mip_dna):
     )
 
     # THEN check collection of the nested report data and that the required fields are not empty
-    report_data = report_api_mip_dna.validate_report_fields(report_data, force_report=False)
+    report_data = report_api_mip_dna.validate_report_fields(
+        case_mip_dna.internal_id, report_data, force_report=False
+    )
     recursive_assert(report_data.dict())
 
 
@@ -89,14 +91,16 @@ def test_validate_report_empty_fields(report_api_mip_dna, case_mip_dna, caplog):
     report_data.case.samples[0].methods.library_prep = None
 
     # THEN check if the empty fields are identified
-    report_data = report_api_mip_dna.validate_report_fields(report_data, force_report=False)
+    report_data = report_api_mip_dna.validate_report_fields(
+        case_mip_dna.internal_id, report_data, force_report=False
+    )
     assert report_data
     assert "version" in caplog.text
     assert "id" in caplog.text
     assert "library_prep" in caplog.text
 
 
-def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna):
+def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog):
     """Tests the validations of empty required report fields"""
 
     # GIVEN a delivery report
@@ -111,11 +115,13 @@ def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna):
 
     # THEN test that the DeliveryReportError is raised when the report generation is not forced
     try:
-        report_api_mip_dna.validate_report_fields(report_data, force_report=False)
+        report_api_mip_dna.validate_report_fields(
+            case_mip_dna.internal_id, report_data, force_report=False
+        )
     except DeliveryReportError as err:
-        assert "accredited" in err.message
-        assert "duplicates" in err.message
-        assert "accredited" in err.message
+        assert "accredited" in caplog.text
+        assert "duplicates" in caplog.text
+        assert "accredited" in caplog.text
 
 
 def test_get_customer_data(report_api_mip_dna, case_mip_dna):

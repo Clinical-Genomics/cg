@@ -50,7 +50,8 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
     ]
 
     if not uploaded_delivery_report_files:
-        raise FileNotFoundError(f"No delivery report was found in housekeeper for case: {case_id}")
+        LOG.error(f"No delivery report was found in housekeeper for case: {case_id}")
+        raise FileNotFoundError
 
     report_path: str = uploaded_delivery_report_files[0].full_path
 

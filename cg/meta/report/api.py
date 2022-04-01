@@ -38,7 +38,7 @@ class ReportAPI(MetaAPI):
         """Generates the html contents of a delivery report"""
 
         report_data = self.get_report_data(case_id=case_id, analysis_date=analysis_date)
-        report_data = self.validate_report_fields(report_data, force_report)
+        report_data = self.validate_report_fields(case_id, report_data, force_report)
 
         rendered_report = self.render_delivery_report(report_data.dict())
         return rendered_report
@@ -89,7 +89,8 @@ class ReportAPI(MetaAPI):
         )
 
         if delivery_report_files.count() == 0:
-            raise FileNotFoundError(f"No delivery report was found in housekeeper for {case_id}")
+            LOG.error(f"No delivery report was found in housekeeper for {case_id}")
+            raise FileNotFoundError
 
         return delivery_report_files[0].full_path
 
@@ -135,7 +136,9 @@ class ReportAPI(MetaAPI):
             accredited=self.get_report_accreditation(case_model.samples),
         )
 
-    def validate_report_fields(self, report_data: ReportModel, force_report) -> ReportModel:
+    def validate_report_fields(
+        self, case_id: str, report_data: ReportModel, force_report
+    ) -> ReportModel:
         """Verifies that the required report fields are not empty"""
 
         required_fields = self.get_required_fields()
@@ -143,13 +146,14 @@ class ReportAPI(MetaAPI):
         missing_report_fields = get_missing_report_data(empty_report_fields, required_fields)
 
         if missing_report_fields and not force_report:
-            raise DeliveryReportError(
-                f"Could not generate report data for {report_data.case.name}. "
+            LOG.error(
+                f"Could not generate report data for {case_id}. "
                 f"Missing data: \n{yaml.dump(missing_report_fields)}"
             )
+            raise DeliveryReportError
 
         if empty_report_fields:
-            LOG.warning(f"Allowed empty report fields: \n{yaml.dump(empty_report_fields)}")
+            LOG.warning(f"Empty report fields: \n{yaml.dump(empty_report_fields)}")
 
         return report_data
 
