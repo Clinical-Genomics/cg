@@ -42,37 +42,44 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
 
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
-    for analysis_obj in report_api.get_cases_without_delivery_report():
-        case_id = analysis_obj.family.internal_id
-        LOG.info("Uploading delivery report for case: %s", case_id)
-        try:
-            context.invoke(
-                delivery_report,
-                case_id=analysis_obj.family.internal_id,
-                force_report=force_report,
-                dry_run=dry_run,
-            )
-        except FileNotFoundError as error:
-            LOG.error(
-                "The delivery report generation is missing a file for case: %s, %s",
-                case_id,
-                error,
-            )
-            exit_code = EXIT_FAIL
-        except CgError as error:
-            LOG.error(
-                "The delivery report generation failed for case: %s, %s",
-                case_id,
-                error.message,
-            )
-            exit_code = EXIT_FAIL
-        except Exception as error:
-            LOG.error(
-                "Unspecified error when generating the delivery report for case: %s, %s",
-                case_id,
-                error.message,
-            )
-            exit_code = EXIT_FAIL
+    cases_without_delivery_report = report_api.get_cases_without_delivery_report()
+
+    if not cases_without_delivery_report:
+        click.echo(
+            click.style("There are no cases available to generate delivery reports", fg="green")
+        )
+    else:
+        for analysis_obj in cases_without_delivery_report:
+            case_id = analysis_obj.family.internal_id
+            LOG.info("Generating delivery report for case: %s", case_id)
+            try:
+                context.invoke(
+                    delivery_report,
+                    case_id=analysis_obj.family.internal_id,
+                    force_report=force_report,
+                    dry_run=dry_run,
+                )
+            except FileNotFoundError as error:
+                LOG.error(
+                    "The delivery report generation is missing a file for case: %s, %s",
+                    case_id,
+                    error,
+                )
+                exit_code = EXIT_FAIL
+            except CgError as error:
+                LOG.error(
+                    "The delivery report generation failed for case: %s, %s",
+                    case_id,
+                    error,
+                )
+                exit_code = EXIT_FAIL
+            except Exception as error:
+                LOG.error(
+                    "Unspecified error when generating the delivery report for case: %s, %s",
+                    case_id,
+                    error,
+                )
+                exit_code = EXIT_FAIL
 
     sys.exit(exit_code)
 
