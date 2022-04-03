@@ -118,7 +118,7 @@ def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog
         report_api_mip_dna.validate_report_fields(
             case_mip_dna.internal_id, report_data, force_report=False
         )
-    except DeliveryReportError as err:
+    except DeliveryReportError:
         assert "accredited" in caplog.text
         assert "duplicates" in caplog.text
         assert "accredited" in caplog.text
