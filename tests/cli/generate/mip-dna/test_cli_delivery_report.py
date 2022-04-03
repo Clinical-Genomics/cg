@@ -22,8 +22,9 @@ def test_delivery_report_invalid_case(mip_dna_context, cli_runner, caplog):
     )
 
     # THEN the command should fail due to an invalid case ID
+    assert "Invalid case ID. Retrieving cases without a delivery report." in caplog.text
+    assert "There are no cases available to generate delivery reports" in result.output
     assert result.exit_code == EXIT_FAIL
-    assert "Provide a case, suggestions:" in caplog.text
 
 
 def test_delivery_report_dry_run(mip_dna_context, cli_runner, case_id, caplog):
@@ -41,11 +42,11 @@ def test_delivery_report_dry_run(mip_dna_context, cli_runner, case_id, caplog):
     )
 
     # THEN the command should be invoked successfully
-    assert result.exit_code == EXIT_SUCCESS
     assert "create_delivery_report" in caplog.text
     assert "create_delivery_report_file" not in caplog.text
     assert "case=" + case_id in caplog.text
     assert "analysis_date=" + str(datetime.now().date()) in caplog.text
+    assert result.exit_code == EXIT_SUCCESS
 
 
 def test_delivery_report(mip_dna_context, cli_runner, case_id, caplog):

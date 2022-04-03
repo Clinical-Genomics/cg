@@ -43,7 +43,6 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
     cases_without_delivery_report = report_api.get_cases_without_delivery_report()
-
     if not cases_without_delivery_report:
         click.echo(
             click.style("There are no cases available to generate delivery reports", fg="green")
@@ -106,9 +105,16 @@ def delivery_report(
     # Missing or not valid internal case ID
     case = report_api.status_db.family(case_id)
     if not case_id or not case:
-        LOG.error("Provide a case, suggestions:")
-        for case_obj in report_api.get_cases_without_delivery_report():
-            click.echo(case_obj)
+        LOG.info("Invalid case ID. Retrieving cases without a delivery report.")
+        cases_without_delivery_report = report_api.get_cases_without_delivery_report()
+        if not cases_without_delivery_report:
+            click.echo(
+                click.style("There are no cases available to generate delivery reports", fg="green")
+            )
+        else:
+            LOG.error("Provide one of the following case IDs:\n")
+            for case_obj in cases_without_delivery_report:
+                click.echo(case_obj)
 
         raise click.Abort
 
