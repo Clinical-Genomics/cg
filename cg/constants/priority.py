@@ -35,5 +35,5 @@ PRIORITY_TO_SLURM_QOS = {
     Priority.standard: SlurmQos.NORMAL,
     Priority.priority: SlurmQos.HIGH,
     Priority.express: SlurmQos.EXPRESS,
-    Priority.clinical_trials: SlurmQos.LOW,
+    Priority.clinical_trials: SlurmQos.NORMAL,
 }
