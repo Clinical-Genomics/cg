@@ -41,20 +41,10 @@ class StatsAPI(alchy.Manager):
             curated_sample_name: str = self.get_curated_sample_name(sample_obj.samplename)
             sample_data = {"name": curated_sample_name, "reads": 0, "fastqs": []}
             for fc_data in self.sample_reads(sample_obj):
-                read_length: str = ""
-                if fc_data.type == "novaseq":
-                    # Base mask is assumed to have structure of "read_length,index_length,index_length,read_length"
-                    read_length = fc_data.base_mask.split(",")[0]
-                    if fc_data.q30 >= FLOWCELL_Q30_THRESHOLD[fc_data.type][read_length]:
-                        sample_data["reads"] += fc_data.reads
-                elif fc_data.q30 >= FLOWCELL_Q30_THRESHOLD[fc_data.type]:
+                if fc_data.q30 >= FLOWCELL_Q30_THRESHOLD[fc_data.type]:
                     sample_data["reads"] += fc_data.reads
                 else:
-                    q30_threshold: int = (
-                        FLOWCELL_Q30_THRESHOLD[fc_data.type][read_length]
-                        if fc_data.type == "novaseq"
-                        else FLOWCELL_Q30_THRESHOLD[fc_data.type]
-                    )
+                    q30_threshold: int = FLOWCELL_Q30_THRESHOLD[fc_data.type]
                     LOG.warning(
                         f"q30 too low for {curated_sample_name} on {fc_data.name}:"
                         f"{fc_data.q30} < {q30_threshold}%"
