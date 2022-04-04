@@ -87,7 +87,7 @@ class MockChanjo(ChanjoAPI):
         super().__init__(mock_config)
 
     def sample_coverage(self, sample_id: str, panel_genes: list) -> Union[None, dict]:
-        """Calculates  for a specific panel"""
+        """Calculates sample coverage for a specific panel"""
 
         sample_coverage = None
         if sample_id == "ADM1":
