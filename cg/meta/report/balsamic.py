@@ -19,6 +19,7 @@ from cg.constants import (
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
@@ -38,6 +39,42 @@ class BalsamicReportAPI(ReportAPI):
         super().__init__(config=config, analysis_api=analysis_api)
         self.analysis_api = analysis_api
 
+    @staticmethod
+    def get_wgs_metadata(
+        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+    ) -> BalsamicWGSSampleMetadataModel:
+        """Returns a report metadata for BALSAMIC WGS analysis"""
+
+        return BalsamicWGSSampleMetadataModel(
+            million_read_pairs=million_read_pairs,
+            median_coverage=sample_metrics.median_coverage if sample_metrics else None,
+            pct_15x=sample_metrics.pct_15x if sample_metrics else None,
+            pct_60x=sample_metrics.pct_60x if sample_metrics else None,
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
+            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+        )
+
+    @staticmethod
+    def get_panel_metadata(
+        sample, million_read_pairs, sample_metrics, analysis_metadata
+    ) -> BalsamicTargetedSampleMetadataModel:
+        """Returns a report metadata for BALSAMIC TGS analysis"""
+
+        return BalsamicTargetedSampleMetadataModel(
+            bait_set=sample.capture_kit,
+            bait_set_version=analysis_metadata.config.panel.capture_kit_version,
+            million_read_pairs=million_read_pairs,
+            median_target_coverage=sample_metrics.median_target_coverage
+            if sample_metrics
+            else None,
+            pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
+            pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
+            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
+            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+        )
+
     def get_sample_metadata(
         self, case: models.Family, sample: models.Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
@@ -49,28 +86,10 @@ class BalsamicReportAPI(ReportAPI):
         million_read_pairs = round(sample.reads / 2000000, 1) if sample.reads else None
 
         if "wgs" in self.get_data_analysis_type(case):
-            return BalsamicWGSSampleMetadataModel(
-                million_read_pairs=million_read_pairs,
-                median_coverage=sample_metrics.median_coverage if sample_metrics else None,
-                pct_15x=sample_metrics.pct_15x if sample_metrics else None,
-                pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-                duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-                mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-                fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            )
+            return self.get_wgs_metadata(million_read_pairs, sample_metrics)
         else:
-            return BalsamicTargetedSampleMetadataModel(
-                bait_set=sample.capture_kit,
-                bait_set_version=analysis_metadata.config.panel.capture_kit_version,
-                million_read_pairs=million_read_pairs,
-                median_target_coverage=sample_metrics.median_target_coverage
-                if sample_metrics
-                else None,
-                pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
-                pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
-                duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-                mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-                fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            return self.get_panel_metadata(
+                sample, million_read_pairs, sample_metrics, analysis_metadata
             )
 
     def get_data_analysis_type(self, case: models.Family) -> str:
