@@ -49,7 +49,7 @@ MASTER_STEPS_UDFS = {
         "obsolete_CG002 - Hybridize Library  (SS XT)": "SureSelect capture library/libraries used",
         "Hybridize Library TWIST v1": "Bait Set",
         "Hybridize Library TWIST v2": "Bait Set",
-        "Target enrichment TWIST v1": "Bait Set"
+        "Target enrichment TWIST v1": "Bait Set",
     },
     "prep_method_step": {
         "Library Preparation (Cov) v1": {
