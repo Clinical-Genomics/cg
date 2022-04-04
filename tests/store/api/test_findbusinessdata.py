@@ -2,9 +2,9 @@
 from datetime import datetime
 
 import pytest
-from cgmodels.cg.constants import Pipeline
 
 from cg.store import Store, models
+from cgmodels.cg.constants import Pipeline
 from tests.store_helpers import StoreHelpers
 
 
@@ -64,3 +64,72 @@ def test_families_by_subject_id(
     assert rna_case in all_cases
     assert dna_case in dna_cases
     assert rna_case not in dna_cases
+
+
+def test_families_by_subject_id_by_is_tumour(
+    helpers: StoreHelpers,
+    sample_store: Store,
+):
+    """Test that we get a case back for a subject id depending on tumour state"""
+    # GIVEN we have two cases with same subject_id but different is_tumour
+    subject_id = "a_subject_id"
+    store: Store = sample_store
+
+    tumour_sample: models.Sample = helpers.add_sample(
+        store=store, subject_id=subject_id, is_tumour=True
+    )
+    tumour_case: models.Family = helpers.add_case(store=store, name="tumour_case")
+    helpers.add_relationship(store=store, case=tumour_case, sample=tumour_sample)
+    store.add_commit(tumour_case)
+
+    non_tumour_sample: models.Sample = helpers.add_sample(
+        store=store, subject_id=subject_id, is_tumour=False
+    )
+    non_tumour_case: models.Family = helpers.add_case(store=store, name="non_tumour_case")
+    helpers.add_relationship(store=store, case=non_tumour_case, sample=non_tumour_sample)
+    store.add_commit(non_tumour_case)
+
+    customer: models.Customer = tumour_case.customer
+
+    # WHEN calling method families_by_subject_id
+    all_cases: set[models.Family] = sample_store.families_by_subject_id(
+        customer_id=customer.internal_id, subject_id=subject_id
+    )
+
+    tumour_cases: set[models.Family] = sample_store.families_by_subject_id(
+        customer_id=customer.internal_id, subject_id=subject_id, is_tumour=True
+    )
+
+    non_tumour_cases: set[models.Family] = sample_store.families_by_subject_id(
+        customer_id=customer.internal_id, subject_id=subject_id, is_tumour=False
+    )
+
+    # THEN we have one group with both cases independent of is_tumour
+    assert tumour_case in all_cases
+    assert non_tumour_case in all_cases
+
+    # THEN we have two groups depending on is_tumour
+    assert tumour_case in tumour_cases
+    assert tumour_case not in non_tumour_cases
+
+    assert non_tumour_case in non_tumour_cases
+    assert non_tumour_case not in tumour_cases
+
+
+def test_get_latest_flow_cell_on_case(
+    re_sequenced_sample_store: Store, case_id: str, flowcell_name: str
+):
+    """Test function to fetch the latest sequenced flowcell on a case"""
+
+    # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
+    latest_flow_cell_obj: models.Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
+        models.Flowcell.name == flowcell_name
+    ).first()
+
+    # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
+    latest_flow_cell_on_case: models.Flowcell = (
+        re_sequenced_sample_store.get_latest_flow_cell_on_case(family_id=case_id)
+    )
+
+    # THEN the fetched flow cell should have the same name as the other
+    assert latest_flow_cell_obj.name == latest_flow_cell_on_case.name

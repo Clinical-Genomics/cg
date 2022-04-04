@@ -11,6 +11,11 @@ from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.fixture(name="mip_dna_fixture_config_path")
+def fixture_mip_dna_fixture_config_path() -> str:
+    return "tests/fixtures/apps/mip/dna/case_config.yaml"
+
+
 @pytest.fixture(name="mip_case_id")
 def fixture_mip_case_id() -> str:
     return "yellowhog"
@@ -124,13 +129,12 @@ def fixture_dna_mip_context(
         if not _store.family(case_id):
             case_obj = helpers.add_case(
                 store=_store,
+                data_analysis=Pipeline.MIP_DNA,
                 internal_id=case_id,
                 name=mip_case_ids[case_id]["name"],
             )
             sample = helpers.add_sample(
                 store=_store,
-                sample=mip_case_ids[case_id]["internal_id"],
-                data_analysis=Pipeline.MIP_DNA,
                 customer_id="cust000",
                 application_tag="WGSA",
                 application_type="wgs",

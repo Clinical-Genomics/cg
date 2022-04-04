@@ -68,11 +68,19 @@ def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> stats_mod
     return flowcell
 
 
-def create_demux(manager: StatsAPI, flowcell_id: int, datasource_id: int) -> stats_models.Demux:
+def create_demux(
+    manager: StatsAPI,
+    datasource_id: int,
+    demux_results: DemuxResults,
+    flowcell_id: int,
+) -> stats_models.Demux:
     demux: stats_models.Demux = manager.Demux()
     demux.flowcell_id = flowcell_id
     demux.datasource_id = datasource_id
-    demux.basemask = ""
+    if demux_results.bcl_converter == "dragen":
+        demux.basemask: str = demux_results.run_info.basemask
+    else:
+        demux.basemask = ""
     demux.time = sqlalchemy.func.now()
 
     manager.add(demux)
@@ -355,7 +363,10 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     demux_id: Optional[int] = find.get_demux_id(flowcell_object_id=flowcell_id)
     if not demux_id:
         demux_object: stats_models.Demux = create_demux(
-            manager=manager, flowcell_id=flowcell_id, datasource_id=datasource_id
+            manager=manager,
+            demux_results=demux_results,
+            flowcell_id=flowcell_id,
+            datasource_id=datasource_id,
         )
         demux_id: int = demux_object.demux_id
     else:

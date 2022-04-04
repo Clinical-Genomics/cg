@@ -92,6 +92,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Links fastq files from Housekeeper to case working directory
         """
         case_obj: models.Family = self.status_db.family(case_id)
+        latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
             LOG.info("Fastq directory exists, removing and re-linking files!")
@@ -99,7 +100,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         workdir_path.mkdir(parents=True, exist_ok=True)
         for family_sample in case_obj.links:
             sample_id = family_sample.sample.internal_id
-            files: Query = self.housekeeper_api.files(bundle=sample_id, tags=["fastq"])
+            files: Query = self.housekeeper_api.files(
+                bundle=sample_id, tags=["fastq", latest_flow_cell.name]
+            )
 
             sample_path: Path = self.get_fastq_path(case_id=case_id, sample_id=sample_id)
             for file in files:
@@ -185,10 +188,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
-        case_obj: models.Family = self.status_db.family(case_id)
-        flowcell_name: str = case_obj.links[0].sample.flowcells[0].name
+        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
+            family_id=case_id
+        )
         samplesheet_housekeeper_path = self.get_samplesheet_housekeeper_path(
-            flowcell_name=flowcell_name
+            flowcell_name=latest_flow_cell.name
         )
         samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
         LOG.info(
@@ -238,4 +242,4 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
 
     def get_slurm_param_qos(self, case_id):
-        return f"qos:{self.get_priority_for_case(case_id=case_id)}"
+        return f"qos:{self.get_slurm_qos_for_case(case_id=case_id)}"

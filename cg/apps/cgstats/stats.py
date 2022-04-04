@@ -1,11 +1,13 @@
 import logging
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Dict, Iterator, List, Union
 
 import alchy
 import sqlalchemy as sqa
+
 from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db import models
+from cg.constants import FLOWCELL_Q30_THRESHOLD
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
 
 LOG = logging.getLogger(__name__)
@@ -39,25 +41,23 @@ class StatsAPI(alchy.Manager):
             curated_sample_name: str = self.get_curated_sample_name(sample_obj.samplename)
             sample_data = {"name": curated_sample_name, "reads": 0, "fastqs": []}
             for fc_data in self.sample_reads(sample_obj):
-                if fc_data.type == "hiseqga" and fc_data.q30 >= 80:
-                    sample_data["reads"] += fc_data.reads
-                elif fc_data.type == "hiseqx" and fc_data.q30 >= 75:
-                    sample_data["reads"] += fc_data.reads
-                elif fc_data.type == "novaseq" and fc_data.q30 >= 75:
+                if fc_data.q30 >= FLOWCELL_Q30_THRESHOLD[fc_data.type]:
                     sample_data["reads"] += fc_data.reads
                 else:
+                    q30_threshold: int = FLOWCELL_Q30_THRESHOLD[fc_data.type]
                     LOG.warning(
                         f"q30 too low for {curated_sample_name} on {fc_data.name}:"
-                        f"{fc_data.q30} < {80 if fc_data.type == 'hiseqga' else 75}%"
+                        f"{fc_data.q30} < {q30_threshold}%"
                     )
                     continue
+
                 for fastq_path in self.fastqs(fc_data.name, sample_obj):
                     if self.is_lane_pooled(
                         flowcell_obj=flowcell_object, lane=fc_data.lane
                     ) and "Undetermined" in str(fastq_path):
                         continue
                     sample_data["fastqs"].append(str(fastq_path))
-            flowcell_samples.append(StatsSample(**sample_data))
+                flowcell_samples.append(StatsSample(**sample_data))
         return flowcell_samples
 
     def flowcell(self, flowcell_name: str) -> StatsFlowcell:
@@ -98,6 +98,7 @@ class StatsAPI(alchy.Manager):
                 models.Flowcell.flowcellname.label("name"),
                 models.Flowcell.hiseqtype.label("type"),
                 models.Unaligned.lane,
+                models.Demux.basemask.label("base_mask"),
                 sqa.func.sum(models.Unaligned.readcounts).label("reads"),
                 sqa.func.min(models.Unaligned.q30_bases_pct).label("q30"),
             )
@@ -105,6 +106,28 @@ class StatsAPI(alchy.Manager):
             .filter(models.Unaligned.sample == sample_obj)
             .group_by(models.Flowcell.flowcellname)
         )
+
+    def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
+        flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
+        flow_cell_obj: models.Flowcell = self.Flowcell.query.filter(
+            models.Flowcell.flowcellname == flow_cell_name
+        ).first()
+
+        if flow_cell_obj.exists(flowcell_name=flow_cell_name):
+            sample_count: int = 0
+            q30_list: List[float] = []
+
+            for sample in self.flowcell_samples(flowcell_obj=flow_cell_obj):
+                sample_count += 1
+                sample_info = self.sample_reads(sample_obj=sample).first()
+                flow_cell_reads_and_q30_summary["reads"] += int(sample_info.reads)
+                q30_list.append(float(sample_info.q30))
+
+            flow_cell_reads_and_q30_summary["q30"]: float = sum(q30_list) / sample_count
+        else:
+            LOG.error(f"StatsAPI: Could not find flowcell in database with name: {flow_cell_name}")
+
+        return flow_cell_reads_and_q30_summary
 
     @staticmethod
     def sample(sample_name: str) -> models.Sample:

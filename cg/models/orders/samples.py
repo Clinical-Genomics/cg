@@ -228,7 +228,7 @@ class MicrobialSample(OrderInSample):
 
     # 1603 Orderform Microbial WGS
     # "These fields are required"
-    organism: str
+    organism: constr(max_length=models.Organism.internal_id.property.columns[0].type.length)
     reference_genome: constr(
         max_length=models.Sample.reference_genome.property.columns[0].type.length
     )
@@ -239,12 +239,13 @@ class MicrobialSample(OrderInSample):
     container_name: Optional[str]
     well_position: Optional[str]
     # "Required if "Other" is chosen in column "Species""
-    organism_other: Optional[str]
+    organism_other: Optional[
+        constr(max_length=models.Organism.internal_id.property.columns[0].type.length)
+    ]
     # "These fields are not required"
     concentration_sample: Optional[float]
     quantity: Optional[int]
     verified_organism: Optional[bool]  # sent to LIMS
-
     control: Optional[str]
 
     @validator("quantity", pre=True)

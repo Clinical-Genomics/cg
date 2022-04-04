@@ -11,7 +11,7 @@ from cg.cli.workflow.mip.options import (
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
     OPTION_SKIP_EVALUATION,
-    PRIORITY_OPTION,
+    QOS_OPTION,
     START_AFTER_PROGRAM,
     START_WITH_PROGRAM,
 )
@@ -32,10 +32,9 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
     """Generate a config for the case_id"""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
-
-    panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
     try:
+        analysis_api.verify_case_id_in_statusdb(case_id)
+        panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
         LOG.error(error.message)
@@ -65,7 +64,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
 
 
 @click.command()
-@PRIORITY_OPTION
+@QOS_OPTION
 @EMAIL_OPTION
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
@@ -80,7 +79,7 @@ def run(
     dry_run: bool = False,
     email: str = None,
     mip_dry_run: bool = False,
-    priority: str = None,
+    slurm_quality_of_service: str = None,
     skip_evaluation: bool = False,
     start_after: str = None,
     start_with: str = None,
@@ -91,7 +90,8 @@ def run(
 
     analysis_api.verify_case_id_in_statusdb(case_id)
     command_args = dict(
-        priority=priority or analysis_api.get_priority_for_case(case_id),
+        slurm_quality_of_service=slurm_quality_of_service
+        or analysis_api.get_slurm_qos_for_case(case_id),
         email=email or environ_email(),
         dryrun=mip_dry_run,
         start_after=start_after,
@@ -101,7 +101,11 @@ def run(
         ),
     )
 
-    analysis_api.check_analysis_ongoing(case_id=case_id)
+    try:
+        analysis_api.check_analysis_ongoing(case_id=case_id)
+    except CgError as e:
+        LOG.error(e.message)
+        raise click.Abort
     analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
 
     if dry_run:
@@ -128,7 +132,7 @@ def run(
 @OPTION_MIP_DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_SKIP_EVALUATION
-@PRIORITY_OPTION
+@QOS_OPTION
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @click.pass_context
@@ -139,7 +143,7 @@ def start(
     email: str,
     mip_dry_run: bool,
     panel_bed: str,
-    priority: str,
+    slurm_quality_of_service: str,
     skip_evaluation: bool,
     start_after: str,
     start_with: str,
@@ -159,7 +163,7 @@ def start(
         context.invoke(
             run,
             case_id=case_id,
-            priority=priority,
+            slurm_quality_of_service=slurm_quality_of_service,
             email=email,
             start_after=start_after,
             start_with=start_with,

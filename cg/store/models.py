@@ -129,6 +129,7 @@ class ApplicationVersion(Model):
     price_priority = Column(types.Integer)
     price_express = Column(types.Integer)
     price_research = Column(types.Integer)
+    price_clinical_trials = Column(types.Integer)
     comment = Column(types.Text)
 
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -276,7 +277,6 @@ class Family(Model, PriorityMixin):
 
     action = Column(types.Enum(*CASE_ACTIONS))
     analyses = orm.relationship(Analysis, backref="family", order_by="-Analysis.completed_at")
-    avatar_url = Column(types.Text)
     _cohorts = Column(types.Text)
     comment = Column(types.Text)
     created_at = Column(types.DateTime, default=dt.datetime.now)
@@ -535,11 +535,11 @@ class Sample(Model, PriorityMixin):
     def sequencing_qc(self) -> bool:
         """Return sequencing qc passed or failed."""
         application = self.application_version.application
-        if self.priority < Priority.express:
-            return self.reads > application.expected_reads
-        # Express priority and higher needs to be analyzed regardless at a lower threshold for primary analysis
-        one_half_of_target_reads = application.target_reads / 2
-        return self.reads >= one_half_of_target_reads
+        # Express priority needs to be analyzed at a lower threshold for primary analysis
+        if self.priority == Priority.express:
+            one_half_of_target_reads = application.target_reads / 2
+            return self.reads >= one_half_of_target_reads
+        return self.reads > application.expected_reads
 
     @property
     def phenotype_groups(self) -> List[str]:

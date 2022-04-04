@@ -14,22 +14,6 @@ from cg.apps.lims.samplesheet import (
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
-@pytest.fixture(name="flowcell_name")
-def fixture_flowcell_name() -> str:
-    return "HVKJCDRXX"
-
-
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
-    return "201203_A00689_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(name="demultiplex_fixtures")
-def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
-    """Return the path to the demultiplex fixtures"""
-    return apps_dir / "demultiplexing"
-
-
 @pytest.fixture(name="demultiplexed_runs_dir")
 def fixture_demultiplexed_runs_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
