@@ -65,12 +65,5 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
             report_path=report_path, case_id=case_id, update=True
         )
 
-    click.echo(
-        click.style(
-            f"The delivery report for the {case_id} case has been successfully uploaded to Scout",
-            fg="green",
-        )
-    )
-
 
 mip_dna.add_command(delivery_report_to_scout)
