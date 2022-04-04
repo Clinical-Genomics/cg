@@ -353,7 +353,7 @@ class ReportAPI(MetaAPI):
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
-    ) -> bool:
+    ) -> Union[None, bool]:
         """Checks if the report is accredited or not"""
 
         raise NotImplementedError

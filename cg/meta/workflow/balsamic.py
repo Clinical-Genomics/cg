@@ -266,7 +266,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         if config_raw_data and metrics_raw_data:
             try:
-                return parse_balsamic_analysis(config=config_raw_data, metrics=metrics_raw_data)
+                balsamic_analysis = parse_balsamic_analysis(
+                    config=config_raw_data, metrics=metrics_raw_data
+                )
+                return balsamic_analysis
             except ValidationError as error:
                 LOG.warning(
                     "get_latest_metadata failed for '%s', missing attribute: %s",
