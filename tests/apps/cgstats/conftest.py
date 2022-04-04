@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Dict
 
 import pytest
 from pydantic import BaseModel
@@ -7,6 +8,7 @@ from pydantic import BaseModel
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 from tests.models.demultiplexing.conftest import (
@@ -45,8 +47,7 @@ class MockDemuxResults:
         time: datetime = datetime.now()
 
     class RunInfo(BaseModel):
-        index_length: int = 10
-        read_length: int = 151
+        basemask: str = "151,10,10,151"
 
     def get_logfile_parameters(self) -> LogfileParameters:
         return self.LogfileParameters()
@@ -144,3 +145,10 @@ def fixture_demultiplexing_stats_path(bcl2fastq_demux_results: DemuxResults) -> 
 @pytest.fixture(name="conversion_stats_path")
 def fixture_conversion_stats_path(bcl2fastq_demux_results: DemuxResults) -> Path:
     return bcl2fastq_demux_results.conversion_stats_path
+
+
+@pytest.fixture(name="run_info_path")
+def fixture_run_info(context_config: Dict[str, str]) -> Path:
+    return Path(context_config["demultiplex"]["out_dir"]).joinpath(
+        "211101_A00187_0615_AHLG5GDRXY/Unaligned/Reports/RunInfo.xml"
+    )
