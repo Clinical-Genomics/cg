@@ -154,7 +154,7 @@ def fixture_fastq_context(
     trailblazer_api: TrailblazerAPI,
     cg_context: CGConfig,
 ) -> CGConfig:
-    """fastq context to use in cli"""
+    """Fastq context to use in cli"""
 
     base_context.meta_apis["delivery_api"] = DeliverAPI(
         store=base_context.status_db,

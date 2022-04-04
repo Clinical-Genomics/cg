@@ -38,7 +38,8 @@ def fastq(context: click.Context):
 @click.pass_context
 @DRY_RUN
 def auto_fastq(context: click.Context, dry_run: bool):
-    """Starts upload of all non-uploaded fastq-cases to clinical.db"""
+    """Starts upload of all not previously uploaded cases with analysis type fastq to
+    clinical-delivery"""
 
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
@@ -63,7 +64,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
                     status_db.commit()
             else:
                 LOG.warning(
-                    "Upload to clinical.delivery for %s has already started, skipping",
+                    "Upload to clinical-delivery for %s has already started, skipping",
                     analysis_obj.family.internal_id,
                 )
             continue
@@ -79,7 +80,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
 @click.argument("case_id", required=True)
 @DRY_RUN
 def upload_fastq(context: click.Context, case_id: str, dry_run: bool):
-    """Uploads fastq-files for a case to clinical.delivery"""
+    """Uploads fastq files for a case to clinical-delivery"""
 
     status_db: Store = context.obj.status_db
     deliver_api: DeliverAPI = context.obj.meta_apis["delivery_api"]
