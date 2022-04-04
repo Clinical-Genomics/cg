@@ -39,8 +39,4 @@ def test_delivery_report_to_scout(upload_context, cli_runner, upload_report_hk_a
     )
 
     # THEN check that the command exits with success and that the mock file has been uploaded to Scout
-    assert (
-        f"The delivery report for the {case_id} case has been successfully uploaded to Scout"
-        in result.output
-    )
     assert result.exit_code == EXIT_SUCCESS

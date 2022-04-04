@@ -186,7 +186,18 @@
                 </tr>
               {% endfor %}
             </tbody>
-            <caption>Resultat baserade på valda genpaneler: {{ case.data_analysis.panels }}.</caption>
+            <caption>
+              Resultat baserade på valda genpaneler: {{ case.data_analysis.panels }}.<br>
+              <br>
+              <strong>Förklaringar</strong><br>
+              <ins>Läspar</ins>: Antal sekvenseringsläsningar i miljoner läspar.<br>
+              <ins>Mappade sekvenser</ins>: Procent sekvenser som fått en eller flera positioner i det genom som använts som referensgenom.<br>
+              <ins>Medelsekvensdjup</ins>: Medelvärdet av täckningsgraden i baser över en genomisk region.<br>
+              <ins>Täckningsgrad</ins>: Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.<br>
+              <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering.<br>
+              <br>
+              Värdena presenterade för <ins>Täckningsgrad</ins> är efter borttagning av duplikata läsningar.
+            </caption>
           </table>
 
           <div class="card-body">* Information given av kund</div>
