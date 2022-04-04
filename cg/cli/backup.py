@@ -5,6 +5,7 @@ from typing import Optional
 
 import alchy.query
 import click
+import housekeeper.store.models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, HousekeeperTags
@@ -71,7 +72,11 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     """Archive spring files to PDC"""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     LOG.info("Getting all spring files from Housekeeper.")
-    all_spring_files: alchy.query.Query = housekeeper_api.files(tags=[HousekeeperTags.SPRING])
+    breakpoint()
+    # all_spring_files: alchy.query.Query = housekeeper_api.files(tags=[HousekeeperTags.SPRING])
+    all_spring_files: alchy.query.Query = housekeeper_api.files(
+        tags=[HousekeeperTags.SPRING]
+    ).filter(housekeeper.store.models.File.path.like(f"%{config.environment}%"))
     for spring_file in all_spring_files:
         try:
             LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
@@ -197,7 +202,6 @@ def retrieve_spring_files_for_flow_cell(
     config: CGConfig, context: click.Context, flow_cell_id: str, dry_run: bool
 ):
     """Retrieve all spring files for a given flow cell"""
-    breakpoint()
 
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
