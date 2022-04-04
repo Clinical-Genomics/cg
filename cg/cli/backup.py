@@ -72,8 +72,6 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     """Archive spring files to PDC"""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     LOG.info("Getting all spring files from Housekeeper.")
-    breakpoint()
-    # all_spring_files: alchy.query.Query = housekeeper_api.files(tags=[HousekeeperTags.SPRING])
     all_spring_files: alchy.query.Query = housekeeper_api.files(
         tags=[HousekeeperTags.SPRING]
     ).filter(housekeeper.store.models.File.path.like(f"%{config.environment}%"))
