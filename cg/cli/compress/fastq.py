@@ -5,6 +5,7 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError

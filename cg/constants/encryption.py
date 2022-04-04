@@ -1,0 +1,67 @@
+"""Constants specific for encryption"""
+from enum import Enum
+
+from cgmodels.cg.constants import StrEnum
+
+from cg.utils.enums import ListEnum
+
+
+class SpringEncryptionSuffix(StrEnum):
+    GPG_SUFFIX: str = ".gpg"
+    JSON_SUFFIX: str = ".json"
+    SPRING_SUFFIX: str = ".spring"
+    KEY_SUFFIX: str = ".key"
+    TMP_SUFFIX: str = ".tmp"
+
+
+class CipherAlgorithm(StrEnum):
+    TRIPLE_DES: str = "3DES"
+    AES: str = "AES"
+    AES192: str = "AES192"
+    AES256: str = "AES256"
+    BLOWFISH: str = "BLOWFISH"
+    CAMELLIA128: str = "CAMELLIA128"
+    CAMELLIA192: str = "CAMELLIA192"
+    CAMELLIA256: str = "CAMELLIA256"
+    CAST5: str = "CAST5"
+    IDEA: str = "IDEA"
+    TWOFISH: str = "TWOFISH"
+
+
+class EncryptionUserID(StrEnum):
+    # HASTA_USER_ID: str = "Kenny Billiau"
+    HASTA_USER_ID: str = "Barry Stokman"
+
+
+class GPGParameters(ListEnum):
+    SPRING_ASYMMETRICAL_ENCRYPTION: list = [
+        "--encrypt",
+        "--recipient",
+        EncryptionUserID.HASTA_USER_ID,
+    ]
+    SPRING_ASYMMETRICAL_DECRYPTION: list = [
+        "--decrypt",
+        "--batch",
+        "--cipher-algo",
+        CipherAlgorithm.AES256,
+        "--passphrase",
+    ]
+    SPRING_SYMMETRICAL_ENCRYPTION: list = [
+        "--symmetric",
+        "--cipher-algo",
+        CipherAlgorithm.AES256,
+        "--batch",
+        "--compress-algo",
+        "None",
+        "--passphrase-file",
+    ]
+    SPRING_SYMMETRICAL_DECRYPTION: list = [
+        "--decrypt",
+        "--cipher-algo",
+        CipherAlgorithm.AES256,
+        "--batch",
+        "--passphrase-file",
+    ]
+    OUTPUT_INPUT_FILES: list = [
+        "-o",
+    ]

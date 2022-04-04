@@ -218,6 +218,7 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
+    encryption: CommonAppConfig = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
@@ -231,6 +232,7 @@ class CGConfig(BaseModel):
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pdc: CommonAppConfig = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
     shipping: ShippingConfig = None

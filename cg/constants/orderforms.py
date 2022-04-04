@@ -1,7 +1,6 @@
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.models.orders.order import OrderType
-
-from cg.utils.StrEnum import StrEnum
+from cg.utils.enums import StrEnum
 
 SEX_MAP = {"male": "M", "female": "F", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}

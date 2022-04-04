@@ -1,71 +1,43 @@
-""" tests for the meta BackupAPI """
+"""Tests for the meta BackupAPI"""
 
 import logging
 import subprocess
+from pathlib import Path
 
 import mock
 import pytest
-from cg.meta.backup import BackupApi
+from mock import call
+from tests.mocks.hk_mock import MockFile
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import ChecksumFailedError
+from cg.meta.backup.backup import BackupApi, SpringBackupAPI
+from cg.meta.backup.pdc import PdcAPI
+from cg.meta.encryption.encryption import SpringEncryptionAPI
 
 
-@mock.patch("cg.apps.pdc")
-@mock.patch("cg.store")
-def test_maximum_flowcells_ondisk_reached(mock_store, mock_pdc):
-    """tests maximum_flowcells_ondisk method of the backup api"""
-    # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
-
-    # WHEN the number of flowcells with status "ondisk" greater than the maximum number allowed
-    mock_store.flowcells(status="ondisk").count.return_value = 2000
-
-    # THEN this method should return True
-    assert backup_api.maximum_flowcells_ondisk() is True
-
-
-@mock.patch("cg.apps.pdc")
-@mock.patch("cg.store")
-def test_maximum_flowcells_ondisk_not_reached(mock_store, mock_pdc):
-    """tests maximum_flowcells_ondisk method of the backup api"""
-    # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
-
-    # WHEN the number of flowcells with status "ondisk" less than the maximum number allowed
-    mock_store.flowcells(status="ondisk").count.return_value = 1000
-
-    # THEN this method should return False
-    assert backup_api.maximum_flowcells_ondisk() is False
-
-
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_maximum_processing_queue_full(mock_store, mock_pdc):
     """tests check_processing method of the backup api"""
-    # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    # GIVEN a flow cell needs to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN there's already a flowcell being retrieved from PDC
+    # WHEN there's already a flow cell being retrieved from PDC
     mock_store.flowcells(status="processing").count.return_value = 1
 
     # THEN this method should return False
     assert backup_api.check_processing(max_processing_flowcells=1) is False
 
 
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
     """tests check_processing method of the backup api"""
-    # GIVEN a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    # GIVEN a flow cell needs to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN there are no flowcells being retrieved from PDC
+    # WHEN there are no flow cells being retrieved from PDC
     mock_store.flowcells(status="processing").count.return_value = 0
 
     # THEN this method should return True
@@ -73,200 +45,147 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
 
 
 @mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_pop_flowcell_next_requested(mock_store, mock_pdc, mock_flowcell):
-    """tests pop_flowcell method of the backup api"""
+def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flowcell):
+    """tests pop_flow cell method of the backup api"""
     # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN a flowcell is requested to be retrieved from PDC
+    # WHEN a flow cell is requested to be retrieved from PDC
     mock_store.flowcells(status="requested").first.return_value = mock_flowcell
 
-    popped_flowcell = backup_api.pop_flowcell(dry_run=False)
+    popped_flowcell = backup_api.pop_flowcell()
 
-    # THEN a flowcell is returned, the status is set to "processing", and status-db is updated with
+    # THEN a flow cell is returned, the status is set to "processing", and status-db is updated with
     # the new status
     assert popped_flowcell is not None
 
 
 @mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell):
-    """tests pop_flowcell method of the backup api"""
-    # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    """tests pop_flow cell method of the backup api"""
+    # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN a flowcell is requested to be retrieved from PDC
+    # WHEN a flow cell is requested to be retrieved from PDC
     # AND it's a  dry run
-    popped_flowcell = backup_api.pop_flowcell(dry_run=True)
+    popped_flow_cell = backup_api.pop_flowcell()
 
-    # THEN a flowcell is returned, the status is set to "processing", but status-db is NOT updated with
-    # the new status
-    assert popped_flowcell is not None
+    # THEN a flow cell is returned, the status is set to "processing", but status-db is NOT
+    # updated with # the new status
+    assert popped_flow_cell is not None
     assert not mock_store.commit.called
 
 
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_pop_flowcell_no_flowcell_requested(mock_store, mock_pdc):
-    """tests pop_flowcell method of the backup api"""
-    # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+def test_pop_flow_cell_no_flow_cell_requested(mock_store, mock_pdc):
+    """tests pop_flow cell method of the backup api"""
+    # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN there are no flowcells requested to be retrieved from PDC
+    # WHEN there are no flow cells requested to be retrieved from PDC
     mock_store.flowcells(status="requested").first.return_value = None
 
-    popped_flowcell = backup_api.pop_flowcell(dry_run=False)
+    popped_flow_cell = backup_api.pop_flowcell()
 
-    # THEN no flowcell is returned
-    assert popped_flowcell is None
+    # THEN no flow cell is returned
+    assert popped_flow_cell is None
 
 
-@mock.patch("cg.meta.backup.BackupApi.check_processing")
+@mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
 @mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_processing_queue_full(
-    mock_store, mock_pdc, mock_flowcell, mock_check_processing, caplog
+def test_fetch_flow_cell_processing_queue_full(
+    mock_store, mock_pdc, mock_flow_cell, mock_check_processing, caplog
 ):
-    """tests the fetch_flowcell method of the backup API"""
+    """tests the fetch_flow cell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    # GIVEN we check if a flow cell needs to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
     # WHEN the processing queue is full
     backup_api.check_processing.return_value = False
-    result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
+    result = backup_api.fetch_flowcell(mock_flow_cell, dry_run=False)
 
-    # THEN no flowcell will be fetched and a log message indicates that the processing queue is
+    # THEN no flow cell will be fetched and a log message indicates that the processing queue is
     # full
     assert result is None
     assert "processing queue is full" in caplog.text
 
 
-@mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
-@mock.patch("cg.meta.backup.BackupApi.check_processing")
-@mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.backup.BackupApi.pop_flowcell")
+@mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_max_flowcells_ondisk(
-    mock_store,
-    mock_pdc,
-    mock_flowcell,
-    mock_check_processing,
-    mock_maximum_flowcells_ondisk,
-    caplog,
-):
-    """tests the fetch_flowcell method of the backup API"""
-
-    caplog.set_level(logging.INFO)
-
-    # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
-
-    # WHEN the processing queue is not full but the number of flowcells on disk is greater than the
-    # maximum
-    backup_api.check_processing.return_value = True
-    backup_api.maximum_flowcells_ondisk.return_value = True
-
-    result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
-
-    # THEN no flowcell will be fetched and a log message indicates that maximum number of flowcells
-    # has been reached
-    assert result is None
-    assert "maximum flowcells ondisk reached" in caplog.text
-
-
-@mock.patch("cg.meta.backup.BackupApi.pop_flowcell")
-@mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
-@mock.patch("cg.meta.backup.BackupApi.check_processing")
-@mock.patch("cg.apps.pdc")
-@mock.patch("cg.store")
-def test_fetch_flowcell_no_flowcells_requested(
+def test_fetch_flow_cell_no_flow_cells_requested(
     mock_store,
     mock_pdc,
     mock_check_processing,
-    mock_maximum_flowcells_ondisk,
     mock_pop_flowcell,
     caplog,
 ):
-    """tests the fetch_flowcell method of the backup API"""
+    """tests the fetch_flow cell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    # GIVEN we check if a flow cell needs to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN no flowcells are requested
+    # WHEN no flow cells are requested
     mock_pop_flowcell.return_value = None
     backup_api.check_processing.return_value = True
-    backup_api.maximum_flowcells_ondisk.return_value = False
 
-    # AND no flowcell has been specified
-    mock_flowcell = None
+    # AND no flow cell has been specified
+    mock_flow_cell = None
 
-    result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
+    result = backup_api.fetch_flowcell(mock_flow_cell, dry_run=False)
 
     # THEN no flowcell will be fetched and a log message indicates that no flowcells have been
     # requested
     assert result is None
-    assert "no flowcells requested" in caplog.text
+    assert "no flow cells requested" in caplog.text
 
 
-@mock.patch("cg.meta.backup.BackupApi.pop_flowcell")
-@mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
-@mock.patch("cg.meta.backup.BackupApi.check_processing")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.backup.BackupApi.pop_flowcell")
+@mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_retrieve_next_flowcell(
+def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_store,
     mock_pdc,
     mock_check_processing,
-    mock_maximum_flowcells_ondisk,
     mock_pop_flowcell,
     caplog,
 ):
-    """tests the fetch_flowcell method of the backup API"""
+    """tests the fetch_flow cell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we check if a flowcell needs to be retrieved from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    # GIVEN we check if a flow cell needs to be retrieved from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
-    # WHEN no flowcells is specified, but a flowcell in status-db has the status "requested"
+    # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
     mock_flowcell = None
     mock_pop_flowcell.return_value = mock_store.add_flowcell(
         status="requested",
     )
     backup_api.check_processing.return_value = True
-    backup_api.maximum_flowcells_ondisk.return_value = False
 
     result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
 
-    # THEN the process to retrieve the flowcell from PDC is started
+    # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flowcell is set to "retrieved"
+    # AND when done the status of that flow cell is set to "retrieved"
     assert (
-        f'Status for flowcell {mock_pop_flowcell.return_value.name} set to "retrieved"'
+        f'Status for flow cell {mock_pop_flowcell.return_value.name} set to "retrieved"'
         in caplog.text
     )
     assert mock_pop_flowcell.return_value.status == "retrieved"
@@ -278,29 +197,24 @@ def test_fetch_flowcell_retrieve_next_flowcell(
     assert result > 0
 
 
-@mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
-@mock.patch("cg.meta.backup.BackupApi.check_processing")
+@mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
 @mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_retrieve_specified_flowcell(
+def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_store,
     mock_pdc,
     mock_flowcell,
     mock_check_processing,
-    mock_maximum_flowcells_ondisk,
     caplog,
 ):
-    """tests the fetch_flowcell method of the backup API"""
+    """tests the fetch_flow cell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
     # GIVEN we want to retrieve a specific flowcell from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
     backup_api.check_processing.return_value = True
-    backup_api.maximum_flowcells_ondisk.return_value = False
 
     result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
 
@@ -308,7 +222,7 @@ def test_fetch_flowcell_retrieve_specified_flowcell(
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flowcell is set to "retrieved"
-    assert f'Status for flowcell {mock_flowcell.name} set to "retrieved"' in caplog.text
+    assert f'Status for flow cell {mock_flowcell.name} set to "retrieved"' in caplog.text
     assert mock_flowcell.status == "retrieved"
 
     # AND status-db is updated with the new status
@@ -318,29 +232,24 @@ def test_fetch_flowcell_retrieve_specified_flowcell(
     assert result > 0
 
 
-@mock.patch("cg.meta.backup.BackupApi.maximum_flowcells_ondisk")
-@mock.patch("cg.meta.backup.BackupApi.check_processing")
+@mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
 @mock.patch("cg.store.models.Flowcell")
-@mock.patch("cg.apps.pdc")
+@mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_fetch_flowcell_pdc_retrieval_failed(
     mock_store,
     mock_pdc,
     mock_flowcell,
     mock_check_processing,
-    mock_maximum_flowcells_ondisk,
     caplog,
 ):
-    """tests the fetch_flowcell method of the backup API"""
+    """tests the fetch_flow cell method of the backup API"""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we are going to retrieve a flowcell from PDC
-    backup_api = BackupApi(
-        mock_store, mock_pdc, max_flowcells_on_disk=1250, root_dir="/path/to/root_dir"
-    )
+    # GIVEN we are going to retrieve a flow cell from PDC
+    backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
     backup_api.check_processing.return_value = True
-    backup_api.maximum_flowcells_ondisk.return_value = False
 
     # WHEN the retrieval process fails
     mock_pdc.retrieve_flowcell.side_effect = subprocess.CalledProcessError(1, "echo")
@@ -349,3 +258,205 @@ def test_fetch_flowcell_pdc_retrieval_failed(
 
     # THEN the failure to retrieve is logged
     assert "retrieval failed" in caplog.text
+
+
+@mock.patch("cg.meta.backup.backup.SpringBackupAPI.mark_file_as_archived")
+@mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI")
+@mock.patch("cg.meta.backup.pdc.PdcAPI")
+def test_encrypt_and_archive_spring_file(
+    mock_pdc_api: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+    mock_mark_file_as_archived,
+    tmpdir_factory,
+):
+    # GIVEN a spring file that needs to be encrypted and archived to PDC
+    spring_file_dir = tmpdir_factory.mktemp("barry")
+    spring_file_path = Path(spring_file_dir, "spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+    )
+
+    # WHEN running the encryption and archiving process
+    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
+        spring_file_path.with_suffix(".spring" + ".gpg")
+    )
+    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
+        ".key" + ".gpg"
+    )
+    spring_backup_api.encrypt_and_archive_spring_file(spring_file_path)
+
+    # THEN the spring file directory should be cleaned up first
+    mock_spring_encryption_api.cleanup.assert_called_once_with(spring_file_path)
+    # THEN the spring file should be encrypted
+    mock_spring_encryption_api.spring_symmetric_encryption.assert_called_once_with(spring_file_path)
+    # THEN the key should be encrypted
+    mock_spring_encryption_api.key_asymmetric_encryption.assert_called_once_with(spring_file_path)
+    # THEN the encryption result should be checked
+    mock_spring_encryption_api.compare_file_checksums.assert_called_once_with(spring_file_path)
+    # THEN the encrypted spring file AND the encrypted key should be archived
+    calls = [
+        call(
+            file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value),
+            dry_run=False,
+        ),
+        call(
+            file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value),
+            dry_run=False,
+        ),
+    ]
+    mock_pdc_api.archive_file_to_pdc.assert_has_calls(calls)
+    # THEN the spring file should be marked as archived in Housekeeper
+    mock_mark_file_as_archived.assert_called_once_with(spring_file_path)
+
+
+@mock.patch("cg.apps.housekeeper.hk")
+@mock.patch("cg.meta.encryption.encryption")
+@mock.patch("cg.meta.backup.pdc")
+def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
+    mock_pdc: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+    caplog,
+):
+    # GIVEN a spring file that needs to be encrypted and archived to PDC
+    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
+    )
+
+    # WHEN running the encryption and archiving process, and the encryption command fails
+    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
+        spring_file_path.with_suffix(".spring" + ".gpg")
+    )
+    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
+        ".key" + ".gpg"
+    )
+    mock_pdc.archive_file_to_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
+    spring_backup_api.encrypt_and_archive_spring_file(spring_file_path=spring_file_path)
+
+    # THEN the appropriate message should be logged and the spring file directory should be
+    # cleaned up
+    assert "Encryption failed" in caplog.text
+    mock_spring_encryption_api.cleanup.assert_called_with(spring_file_path)
+
+
+@mock.patch("cg.apps.housekeeper.hk")
+@mock.patch("cg.meta.encryption.encryption")
+@mock.patch("cg.meta.backup.pdc")
+def test_encrypt_and_archive_spring_file_checksum_failed(
+    mock_pdc_api: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+    caplog,
+):
+    # GIVEN a spring file that needs to be encrypted and archived to PDC
+    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+    )
+
+    # WHEN running the encryption and archiving process
+    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
+        spring_file_path.with_suffix(".spring" + ".gpg")
+    )
+    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
+        ".key" + ".gpg"
+    )
+
+    mock_spring_encryption_api.compare_file_checksums.side_effect = ChecksumFailedError(
+        "Checksum comparison failed!"
+    )
+
+    spring_backup_api.encrypt_and_archive_spring_file(spring_file_path)
+
+    assert "Checksum comparison failed!" in caplog.text
+
+
+@mock.patch("cg.apps.housekeeper.hk")
+@mock.patch("cg.meta.encryption.encryption")
+@mock.patch("cg.meta.backup.pdc")
+def test_mark_file_as_archived(
+    mock_pdc_api: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+):
+    # GIVEN a file
+    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+    )
+    mock_housekeeper_file = MockFile(id=0, path=spring_file_path, to_archive=False)
+    mock_housekeeper.files.return_value.first.return_value = mock_housekeeper_file
+
+    # WHEN marking the file as archived
+    spring_backup_api.mark_file_as_archived(spring_file_path)
+
+    # THEN the set_to_archive method in the Housekeeper API should be called with the new value True
+    mock_housekeeper.set_to_archive.assert_called_once_with(file=mock_housekeeper_file, value=True)
+
+
+@mock.patch("cg.apps.housekeeper.hk")
+@mock.patch("cg.meta.encryption.encryption")
+@mock.patch("cg.meta.backup.pdc")
+def test_decrypt_and_retrieve_spring_file(
+    mock_pdc_api: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+):
+    # GIVEN a spring file that needs to be decrypted and retrieved from PDC
+    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
+    )
+
+    # WHEN running the decryption and retrieval process
+    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
+        spring_file_path.with_suffix(".spring" + ".gpg")
+    )
+    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
+        ".key" + ".gpg"
+    )
+    spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path)
+
+    # THEN the encrypted spring file AND the encrypted key should be retrieved
+    calls = [
+        call(
+            file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value),
+            dry_run=False,
+        ),
+        call(
+            file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value),
+            dry_run=False,
+        ),
+    ]
+    mock_pdc_api.retrieve_file_from_pdc.assert_has_calls(calls)
+
+
+@mock.patch("cg.apps.housekeeper.hk")
+@mock.patch("cg.meta.encryption.encryption")
+@mock.patch("cg.meta.backup.pdc")
+def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
+    mock_pdc: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+    caplog,
+):
+    # GIVEN a spring file that needs to be encrypted and archived to PDC
+    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
+    )
+
+    # WHEN running the encryption and archiving process
+    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
+        spring_file_path.with_suffix(".spring" + ".gpg")
+    )
+    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
+        ".key" + ".gpg"
+    )
+    mock_pdc.retrieve_file_from_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
+    spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path=spring_file_path)
+
+    assert "Decryption failed" in caplog.text

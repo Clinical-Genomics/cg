@@ -14,8 +14,8 @@ from .constants import (
     COMBOS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    FLOWCELL_STATUS,
     FLOWCELL_Q30_THRESHOLD,
+    FLOWCELL_STATUS,
     PREP_CATEGORIES,
     SEX_OPTIONS,
     STATUS_OPTIONS,
@@ -24,6 +24,7 @@ from .constants import (
     HousekeeperTags,
     Pipeline,
 )
+from .encryption import SpringEncryptionSuffix
 from .gene_panel import MASTER_LIST
 from .paths import TMP_DIR
 from .priority import Priority

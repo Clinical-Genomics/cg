@@ -4,7 +4,12 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
+from cg.constants import (
+    FASTQ_FIRST_READ_SUFFIX,
+    FASTQ_SECOND_READ_SUFFIX,
+    SPRING_SUFFIX,
+    SpringEncryptionSuffix,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -31,6 +36,11 @@ class CompressionData:
     def spring_path(self) -> Path:
         """Return the path to a SPRING file"""
         return self.stub.with_suffix(SPRING_SUFFIX)
+
+    @property
+    def encrypted_spring_path(self) -> Path:
+        """Return the path to a SPRING file"""
+        return self.stub.with_suffix(SPRING_SUFFIX).with_suffix(SpringEncryptionSuffix.GPG_SUFFIX)
 
     @property
     def spring_metadata_path(self) -> Path:
