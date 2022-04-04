@@ -337,7 +337,7 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_report_accreditation(self, samples: List[SampleModel]) -> bool:
+    def get_report_accreditation(self, samples: List[SampleModel]) -> Union[None, bool]:
         """Checks if the report is accredited or not"""
 
         raise NotImplementedError
