@@ -165,7 +165,6 @@ def retrieve_spring_files_for_case(
     config: CGConfig, context: click.Context, case_id: str, dry_run: bool
 ):
     """Retrieve all spring files for a given case"""
-    breakpoint()
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
