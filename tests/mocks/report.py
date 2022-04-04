@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Union
 
+from cg.apps.coverage import ChanjoAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -78,11 +79,15 @@ class MockDB(Store):
         self.store = store
 
 
-class MockChanjo:
+class MockChanjo(ChanjoAPI):
     """Chanjo mock class"""
 
-    def sample_coverage(self, sample_id: str, _panel_genes: list) -> Union[None, dict]:
-        """Calculates  for a specific panel"""
+    def __init__(self):
+        mock_config = {"chanjo": {"config_path": "/mock/path", "binary_path": "/mock/path"}}
+        super().__init__(mock_config)
+
+    def sample_coverage(self, sample_id: str, panel_genes: list) -> Union[None, dict]:
+        """Calculates sample coverage for a specific panel"""
 
         sample_coverage = None
         if sample_id == "ADM1":

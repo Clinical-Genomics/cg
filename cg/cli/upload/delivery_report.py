@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 @click.group("mip-dna")
 @click.pass_context
 def mip_dna(context: click.Context):
-    """Rare disease DNA upload"""
+    """Upload MIP-DNA files to Scout"""
 
     context.obj.meta_apis["report_api"] = MipDNAReportAPI(
         config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
@@ -22,7 +22,7 @@ def mip_dna(context: click.Context):
 
 
 @click.command("delivery-report-to-scout")
-@click.argument("case_id", required=False)
+@click.argument("case_id", required=False, type=str)
 @click.option(
     "-d", "--dry-run", is_flag=True, default=False, help="Run command without uploading to scout"
 )
@@ -32,11 +32,16 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
 
     report_api: ReportAPI = context.meta_apis["report_api"]
 
-    # Missing internal case ID
+    # Missing case ID
     if not case_id:
-        LOG.error("Provide a case, suggestions:")
-        for case_obj in report_api.get_cases_without_delivery_report():
-            click.echo(case_obj)
+        LOG.info("Case ID not provided. Retrieving cases with pending reports to upload to Scout.")
+        cases_without_delivery_report = report_api.get_cases_without_delivery_report()
+        if not cases_without_delivery_report:
+            click.echo(click.style("There are no reports to upload to Scout", fg="green"))
+        else:
+            LOG.error("Provide one of the following case IDs:\n")
+            for case_obj in cases_without_delivery_report:
+                click.echo(case_obj)
 
         raise click.Abort
 
@@ -50,7 +55,8 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
     ]
 
     if not uploaded_delivery_report_files:
-        raise FileNotFoundError(f"No delivery report was found in housekeeper for case: {case_id}")
+        LOG.error(f"No delivery report was found in housekeeper for case: {case_id}")
+        raise FileNotFoundError
 
     report_path: str = uploaded_delivery_report_files[0].full_path
 
@@ -59,7 +65,12 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
             report_path=report_path, case_id=case_id, update=True
         )
 
-    LOG.info("Uploaded delivery report to Scout successfully")
+    click.echo(
+        click.style(
+            f"The delivery report for the {case_id} case has been successfully uploaded to Scout",
+            fg="green",
+        )
+    )
 
 
 mip_dna.add_command(delivery_report_to_scout)

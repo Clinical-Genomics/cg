@@ -73,7 +73,7 @@ def test_validate_list():
     assert validated_list == "I'm, a, list"
 
 
-def test_validate_rml_sample():
+def test_validate_rml_sample(caplog):
     """Performs validation on a preparation category"""
 
     # GIVEN an invalid prep category
@@ -84,11 +84,11 @@ def test_validate_rml_sample():
         validate_rml_sample(prep_category)
         assert False
     # THEN check if an exception was raised
-    except ValueError as err:
-        assert "The delivery report generation does not support RML samples" in str(err)
+    except ValueError:
+        assert "The delivery report generation does not support RML samples" in caplog.text
 
 
-def test_validate_supported_pipeline_match_error():
+def test_validate_supported_pipeline_match_error(caplog):
     """Tests if a customer requested pipeline matches the data analysis one"""
 
     # GIVEN an input dictionary where the customers and executed pipeline are different
@@ -99,14 +99,14 @@ def test_validate_supported_pipeline_match_error():
         validate_supported_pipeline(None, dict_different_pipelines)
         assert False
     # THEN check if an exception was raised
-    except ValueError as err:
+    except ValueError:
         assert (
             f"The analysis requested by the customer ({dict_different_pipelines.get('customer_pipeline')}) does not "
-            f"match the one executed ({dict_different_pipelines.get('pipeline')})" in str(err)
+            f"match the one executed ({dict_different_pipelines.get('pipeline')})" in caplog.text
         )
 
 
-def test_validate_supported_pipeline():
+def test_validate_supported_pipeline(caplog):
     """Tests that the analysis pipeline is supported by the delivery report workflow"""
 
     # GIVEN a dictionary with a not supported pipeline
@@ -117,8 +117,8 @@ def test_validate_supported_pipeline():
         validate_supported_pipeline(None, dict_invalid_pipeline)
         assert False
     # THEN check if an exception was raised
-    except ValueError as err:
+    except ValueError:
         assert (
             f"The pipeline {dict_invalid_pipeline.get('pipeline')} does not support delivery report generation"
-            in str(err)
+            in caplog.text
         )
