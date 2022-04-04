@@ -41,7 +41,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all non-uploaded fastq-cases to clinical.db"""
 
     status_db: Store = context.obj.status_db
-    trailblazer_api = context.obj.trailblazer_api
+    trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
     for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FASTQ):
         if analysis_obj.family.analyses[0].uploaded_at:
             LOG.warning(
