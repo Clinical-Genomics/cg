@@ -14,4 +14,4 @@ def test_instantiate_balsamic_analysis(balsamic_config_raw, balsamic_metrics_raw
     # THEN assert that it was successfully created
     assert isinstance(balsamic_analysis, BalsamicAnalysis)
     assert isinstance(balsamic_analysis.config, BalsamicConfigJSON)
-    assert isinstance(balsamic_analysis.sample_metrics["ACC7356A4"], BalsamicTargetedQCMetrics)
+    assert isinstance(balsamic_analysis.sample_metrics["ACC0000A1"], BalsamicTargetedQCMetrics)
