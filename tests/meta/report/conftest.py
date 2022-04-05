@@ -28,7 +28,7 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
 
 
 @pytest.fixture(scope="function", name="report_api_balsamic")
-def report_api_balsamic(cg_context: CGConfig) -> BalsamicReportAPI:
+def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI:
     """BALSAMIC ReportAPI fixture"""
 
     cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis()
