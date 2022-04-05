@@ -4,7 +4,6 @@ from typing import List
 
 import pytest
 from cgmodels.cg.constants import Pipeline
-
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
@@ -17,7 +16,7 @@ from tests.mocks.report import MockChanjo, MockDB
 
 
 @pytest.fixture(scope="function", name="report_api_mip_dna")
-def report_api_mip_dna(cg_context: CGConfig) -> MipDNAReportAPI:
+def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture"""
 
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis()
