@@ -6,6 +6,8 @@ from pathlib import Path
 from tempfile import tempdir
 
 import pytest
+from cgmodels.cg.constants import Pipeline
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
