@@ -81,6 +81,7 @@ class Of1508Sample(OrderInSample):
     sex: SexEnum = SexEnum.unknown
     tumour: bool = False
     source: Optional[str]
+    control: Optional[str]
     volume: Optional[str]
     container: Optional[ContainerEnum]
     # "required if plate for new samples"
@@ -162,6 +163,8 @@ class FastqSample(OrderInSample):
     container_name: Optional[str]
     well_position: Optional[str]
     elution_buffer: str
+    # This information is required for panel analysis
+    capture_kit: Optional[str]
     # "Not Required"
     quantity: Optional[int]
 
