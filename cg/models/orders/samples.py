@@ -114,7 +114,7 @@ class Of1508Sample(OrderInSample):
     ]
     synopsis: Optional[str]
 
-    @validator("container", "container_name", "name", "source", "volume")
+    @validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
         if not value and not values.get("internal_id"):
             raise ValueError("required for new sample '%s'" % (values.get("name")))
