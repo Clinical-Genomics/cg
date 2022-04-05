@@ -62,7 +62,7 @@ def validate_rml_sample(prep_category: str) -> str:
     return validate_empty_field(prep_category)
 
 
-def validate_supported_pipeline(cls, values: dict) -> dict:
+def validate_supported_pipeline(_cls, values: dict) -> dict:
     """Validates if the report generation supports a specific pipeline and analysis type"""
 
     if values and values.get("pipeline") and values.get("customer_pipeline"):
