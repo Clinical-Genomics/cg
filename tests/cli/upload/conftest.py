@@ -7,15 +7,14 @@ from tempfile import tempdir
 
 import pytest
 from cgmodels.cg.constants import Pipeline
-
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS, PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.meta.deliver import DeliverAPI
-from cg.meta.report.api import ReportAPI
+from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -111,6 +110,34 @@ def fixture_upload_genotypes_context(
     return base_context
 
 
+@pytest.fixture(name="upload_report_hk_bundle")
+def fixture_upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp) -> dict:
+    """Returns a dictionary including the delivery report html file"""
+
+    return {
+        "name": case_id,
+        "created": datetime.now(),
+        "files": [
+            {"path": str(delivery_report_html), "archive": False, "tags": [HK_DELIVERY_REPORT_TAG]}
+        ],
+    }
+
+
+@pytest.fixture(name="upload_report_hk_api")
+def fixture_upload_report_hk_api(
+    real_housekeeper_api: HousekeeperAPI,
+    upload_report_hk_bundle: dict,
+    analysis_obj: models.Analysis,
+    helpers,
+) -> HousekeeperAPI:
+    """Add and include files from upload reports hk bundle"""
+
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_report_hk_bundle)
+    hk_version = real_housekeeper_api.last_version(analysis_obj.family.internal_id)
+    real_housekeeper_api.include(hk_version)
+    return real_housekeeper_api
+
+
 @pytest.fixture(name="scout_load_object")
 def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadConfig:
     """Create a scout load config case object"""
@@ -140,7 +167,6 @@ def fixture_base_context(
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.scout_api_ = MockScoutApi()
-    cg_context.meta_apis["report_api"] = MockReportApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
 
@@ -188,20 +214,6 @@ class MockScoutApi(ScoutAPI):
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
-
-
-class MockReportApi(ReportAPI):
-    def __init__(self):
-        """docstring for __init__"""
-
-    def create_delivery_report(self, *args, **kwargs):
-        """docstring for create_delivery_report"""
-
-        for arg in args:
-            LOG.info("create_delivery_report called with positional %s", arg)
-
-        for key, value in kwargs.items():
-            LOG.info("create_delivery_report called with key %s and value %s", key, value)
 
 
 class MockAnalysisApi(MipAnalysisAPI):
@@ -273,13 +285,7 @@ class MockLims:
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = ReportAPI(
-        store=cg_context.status_db,
-        lims_api=cg_context.lims_api,
-        chanjo_api=cg_context.chanjo_api,
-        analysis_api=analysis_api,
-        scout_api=cg_context.scout_api,
-    )
+    cg_context.meta_apis["report_api"] = MipDNAReportAPI(cg_context, analysis_api)
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,

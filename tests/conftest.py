@@ -371,6 +371,12 @@ def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
 
 
+@pytest.fixture(name="delivery_report_html")
+def fixture_delivery_report_html(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path("tests", "fixtures", "apps", "mip", "dna", "store", "empty_delivery_report.html")
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""

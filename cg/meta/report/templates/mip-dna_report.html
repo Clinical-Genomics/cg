@@ -1,11 +1,12 @@
 {% from "bootstrap.html" import css, custom_css %}
 
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Clinical Genomics Report - {{ case }}</title>
+    <title>Clinical Genomics Report - {{ case.name }}</title>
 
     {{ css() }}
     {{ custom_css() }}
@@ -20,12 +21,14 @@
 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            Leveransrapport {{ customer_name }}, familj {{ case }} : {{ report_version }}
-            {% if previous_report_version != 'N/A' %}
-              ersätter rapport version: {{ previous_report_version }}
+          <brief>
+            <storng>Leveransrapport</storng> {{ customer.name }}, <strong>familj</strong> {{ case.name }}
+            {% if version != 'N/A' %}
+              , <strong>version</strong>: {{ version }}
             {% endif %}
             <br>
-            Skapad: {{ today }}
+            Skapad: {{ date }}
+          </brief>
           </li>
         </ul>
 
@@ -38,13 +41,15 @@
                 Science for Life Laboratory<br>
                 Tomtebodavägen 23<br>
                 171 65 Solna<br>
-                <abbr title="Phone">P:</abbr> (08) 524 81 500
+                P: <a href="tel:(08) 524 81 500">(08) 524 81 500</a><br>
+                E-post: <a href = "mailto: support@clinicalgenomics.se">support@clinicalgenomics.se</a>
               </address>
             </div>
             <div class="col">
               <h4>Kundinformation</h4>
               <address>
-                {{ customer_invoice_address|replace('\n', '<br>')|safe }}
+                <strong>{{ customer.name }}</strong><br>
+                {{ customer.invoice_address | replace('\n', '<br>') | safe }}
               </address>
             </div>
             {% if accredited %}
@@ -56,7 +61,7 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
                 <th>Prov</th>
@@ -67,29 +72,31 @@
                 <th>Vävnad</th>
                 <th>Ticket</th>
                 <th>Applikation</th>
-                <th>Bioinformatisk Analys</th>
+                <th>Bioinformatisk analys</th>
               </tr>
             </thead>
             <tbody>
-              {% for sample in samples %}
+              {% for sample in case.samples %}
                 <tr>
-                <td>{{ sample.name }}* ({{ sample.internal_id }})</td>
-                  <td>{{ sample.ordered_at }}</td>
-                  <td>{{ case }}*</td>
+                  <td>{{ sample.name }}* ({{ sample.id }})</td>
+                  <td>{{ sample.timestamps.ordered_at }}</td>
+                  <td>{{ case.name }}*</td>
                   <td>
-                    {{ sample.sex }}*
-                    ( analys:
-                      {% if sample.sex != sample.analysis_sex %}
-                        <span class="text-danger">{{ sample.analysis_sex }}</span>
+                    {{ sample.gender }}*
+                    {%  if sample.metadata.gender != 'N/A'%}
+                      (analys:
+                      {% if sample.gender != sample.metadata.gender %}
+                        <span class="text-danger">{{ sample.metadata.gender }}</span>)
                       {% else %}
-                        <span class="text-success">{{ sample.analysis_sex }}</span>
-                      {% endif %})
+                        <span class="text-success">{{ sample.metadata.gender }}</span>)
+                      {% endif %}
+                    {% endif %}
                   </td>
                   <td>{{ sample.status }}*</td>
                   <td>{{ sample.source }}*</td>
                   <td>{{ sample.ticket }}</td>
-                  <td>{{ sample.application }}*</td>
-                  <td>{{ sample.data_analysis }}*</td>
+                  <td>{{ sample.application.tag }}*</td>
+                  <td>{{ case.data_analysis.customer_pipeline }}*</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -97,35 +104,35 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
                 <th>Prov</th>
                 <th>Ankom</th>
                 <th>Biblioteksberedning</th>
                 <th>Beredd</th>
-                <th>Bait Set</th>
+                <th>Bait set</th>
                 <th>Sekvensering</th>
                 <th>Sekvenserad</th>
-                <th>Bioinformatisk Analys</th>
+                <th>Bioinformatisk analys</th>
                 <th>Svarsdatum</th>
               </tr>
             </thead>
             <tbody>
-              {% for sample in samples %}
+              {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ sample.received_at }}</td>
-                  <td>{{ sample.prep_method }}</td>
-                  <td>{{ sample.prepared_at }}</td>
-                  <td>{{ sample.capture_kit }}</td>
-                  <td>{{ sample.sequencing_method }}</td>
-                  <td>{{ sample.sequenced_at }}</td>
-                  <td>{{ pipeline }}</td>
+                  <td>{{ sample.timestamps.received_at }}</td>
+                  <td>{{ sample.methods.library_prep }}</td>
+                  <td>{{ sample.timestamps.prepared_at }}</td>
+                  <td>{{ sample.metadata.bait_set }}</td>
+                  <td>{{ sample.methods.sequencing }}</td>
+                  <td>{{ sample.timestamps.sequenced_at }}</td>
+                  <td>{{ case.data_analysis.pipeline }}</td>
                   <td>
-                    {{ sample.delivered_at }}
-                    {% if sample.processing_time != 'N/A' %}
-                      ({{ sample.processing_time }} dagar)
+                    {{ sample.timestamps.delivered_at }}
+                    {% if sample.timestamps.processing_days != 'N/A' %}
+                      ({{ sample.timestamps.processing_days }} dagar)
                     {% endif %}
                   </td>
                 </tr>
@@ -135,7 +142,7 @@
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
+          <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
                 <th>Familj</th>
@@ -146,18 +153,17 @@
             </thead>
             <tbody>
               <tr>
-                <td>{{ case }}*</td>
-                <td>{{ pipeline_version }}</td>
-                <td>{{ panels }}</td>
-                <td>{{ genome_build }}</td>
+                <td>{{ case.name }}*</td>
+                <td>{{ case.data_analysis.pipeline_version }}</td>
+                <td>{{ case.data_analysis.panels }}</td>
+                <td>{{ case.data_analysis.genome_build }}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="card-block">
-          <table class="table table-bordered">
-            <caption>Resultat baserade på valda genpaneler - {{ panels }}.</caption>
+          <table class="table table-bordered" aria-describedby="Case table">
             <thead>
               <tr>
                 <th>Prov</th>
@@ -169,31 +175,43 @@
               </tr>
             </thead>
             <tbody>
-              {% for sample in samples %}
+              {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.name }}*</td>
-                  <td>{{ sample.million_read_pairs }}</td>
-                  <td>{{ sample.mapped_reads }}</td>
-                  <td>{{ sample.target_coverage }}</td>
-                  <td>{{ sample.target_completeness }}</td>
-                  <td>{{ sample.duplicates }}</td>
+                  <td>{{ sample.metadata.million_read_pairs }}</td>
+                  <td>{{ sample.metadata.mapped_reads }}</td>
+                  <td>{{ sample.metadata.mean_target_coverage }}</td>
+                  <td>{{ sample.metadata.pct_10x }}</td>
+                  <td>{{ sample.metadata.duplicates }}</td>
                 </tr>
               {% endfor %}
             </tbody>
+            <caption>
+              Resultat baserade på valda genpaneler: {{ case.data_analysis.panels }}.<br>
+              <br>
+              <strong>Förklaringar</strong><br>
+              <ins>Läspar</ins>: Antal sekvenseringsläsningar i miljoner läspar.<br>
+              <ins>Mappade sekvenser</ins>: Procent sekvenser som fått en eller flera positioner i det genom som använts som referensgenom.<br>
+              <ins>Medelsekvensdjup</ins>: Medelvärdet av täckningsgraden i baser över en genomisk region.<br>
+              <ins>Täckningsgrad</ins>: Andel baser som är sekvenserade med ett djup över en specificerad gräns, t.ex. 100X.<br>
+              <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering.<br>
+              <br>
+              Värdena presenterade för <ins>Täckningsgrad</ins> är efter borttagning av duplikata läsningar.
+            </caption>
           </table>
 
           <div class="card-body">* Information given av kund</div>
 
         </div>
 
-        {% if scout_access %}
+        {% if customer.scout_access %}
           <p class="card-block">
             Varianter finns uppladdade i Scout:
-            <a href="scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}">scout.scilifelab.se/{{ customer_internal_id }}/{{ case }}</a>
+            <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a>
           </p>
         {% endif %}
 
-        {% for application in applications %}
+        {% for application in case.applications %}
           <div class="card-block">
             <h4 class="card-title">
               Teknisk beskrivning av analysen: {{ application.tag }}

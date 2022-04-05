@@ -31,3 +31,4 @@ from .process import EXIT_FAIL, EXIT_SUCCESS, RETURN_SUCCESS
 from .sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from .symbols import NO_PARENT, SINGLE_QUOTE, SPACE
 from .tags import HK_FASTQ_TAGS
+from .report import *
