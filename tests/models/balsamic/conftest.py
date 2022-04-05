@@ -7,14 +7,14 @@ import yaml
 def fixture_balsamic_config_path(fixtures_dir) -> Path:
     """Returns path to BALSAMIC case_config.json"""
 
-    return Path(fixtures_dir, "analysis", "balsamic", "tn_wgs", "case_config.json")
+    return Path(fixtures_dir, "apps", "balsamic", "case", "config.json")
 
 
 @pytest.fixture(name="balsamic_metrics_path")
 def fixture_balsamic_metrics_path(fixtures_dir) -> Path:
     """Returns path to BALSAMIC case_metrics_deliverables.yaml"""
 
-    return Path(fixtures_dir, "analysis", "balsamic", "tn_wgs", "case_metrics_deliverables.yaml")
+    return Path(fixtures_dir, "apps", "balsamic", "case", "metrics_deliverables.yaml")
 
 
 @pytest.fixture(name="balsamic_config_raw")
