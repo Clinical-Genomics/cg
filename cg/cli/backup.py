@@ -114,6 +114,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 @click.pass_obj
 def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Retrieve a spring file from PDC"""
+    LOG.info("Attempting PDC retrieval and decryption file %s", spring_file_path)
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
@@ -146,7 +147,6 @@ def retrieve_spring_files_for_sample(
         bundle=sample_id, tags=["spring"], version=latest_version.id
     )
     for spring_file in spring_files:
-        LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
         context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
@@ -171,7 +171,6 @@ def retrieve_spring_files_for_case(
             bundle=sample_id, tags=["spring"], version=latest_version.id
         )
         for spring_file in spring_files:
-            LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
             context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
@@ -197,5 +196,4 @@ def retrieve_spring_files_for_flow_cell(
             bundle=sample_id, tags=["spring"], version=latest_version.id
         )
         for spring_file in spring_files:
-            LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
             context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
