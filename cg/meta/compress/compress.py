@@ -11,8 +11,8 @@ from housekeeper.store import models as housekeeper_models
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.backup.backup import SpringBackupAPI
 from cg.constants.compression import CompressionHkTags
+from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store import models
@@ -27,9 +27,9 @@ class CompressAPI:
     def __init__(
         self,
         hk_api: HousekeeperAPI,
+        demux_root: str,
         crunchy_api: CrunchyAPI,
         backup_api: SpringBackupAPI = None,
-        demux_root: str,
         dry_run: bool = False,
     ):
 
@@ -50,7 +50,7 @@ class CompressAPI:
     def get_flow_cell_name(self, fastq_path: Path) -> str:
         """
         Extract the flow cell name from a fastq path assuming fastq files are kept in their
-        demultipelxed path and the following run_name convention:
+        demultiplexed path and the following run_name convention:
 
             - <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>:
             - Ex: 220128_A00689_0460_BHVN2FDSX2
