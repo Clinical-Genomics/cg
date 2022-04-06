@@ -75,7 +75,7 @@ def test_asymmetric_encryption_command():
     assert result == [
         "--encrypt",
         "--recipient",
-        "Clinical Genomics",
+        "'Clinical Genomics'",
         "-o",
         str(output_file),
         str(input_file),
