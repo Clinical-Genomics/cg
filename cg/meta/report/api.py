@@ -334,11 +334,6 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_required_fields(self, case: CaseModel) -> dict:
-        """Retrieves a dictionary with the delivery report required fields"""
-
-        raise NotImplementedError
-
     def get_genome_build(self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
@@ -355,5 +350,10 @@ class ReportAPI(MetaAPI):
         self, samples: List[SampleModel], analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
     ) -> Union[None, bool]:
         """Checks if the report is accredited or not"""
+
+        raise NotImplementedError
+
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Retrieves a dictionary with the delivery report required fields"""
 
         raise NotImplementedError
