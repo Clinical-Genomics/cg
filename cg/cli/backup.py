@@ -76,16 +76,14 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
         tags=[HousekeeperTags.SPRING]
     ).filter(housekeeper.store.models.File.path.like(f"%{config.environment}%"))
     for spring_file in all_spring_files:
-        breakpoint()
-        try:
-            LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
+        LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
+        if Path(spring_file.path).exists():
             context.invoke(archive_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
-        except FileNotFoundError:
+        else:
             LOG.warning(
-                "Spring file %s found in Housekeeper, but not on Hasta! Skipping encryption!",
+                "Spring file %s found in Housekeeper, but not on Hasta! Archiving process skipped!",
                 spring_file.path,
             )
-            continue
 
 
 @backup.command("archive-spring-file")
@@ -149,15 +147,8 @@ def retrieve_spring_files_for_sample(
         bundle=sample_id, tags=["spring"], version=latest_version.id
     )
     for spring_file in spring_files:
-        try:
-            LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
-            context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
-        except FileNotFoundError:
-            LOG.warning(
-                "Spring file %s found in Housekeeper, but not on Hasta! Skipping encryption!",
-                spring_file.path,
-            )
-            continue
+        LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
+        context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
 @backup.command("retrieve-spring-files-case")
@@ -181,17 +172,8 @@ def retrieve_spring_files_for_case(
             bundle=sample_id, tags=["spring"], version=latest_version.id
         )
         for spring_file in spring_files:
-            try:
-                LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
-                context.invoke(
-                    retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run
-                )
-            except FileNotFoundError:
-                LOG.warning(
-                    "Spring file %s found in Housekeeper, but not on Hasta! Skipping encryption!",
-                    spring_file.path,
-                )
-                continue
+            LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
+            context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
 @backup.command("retrieve-spring-files-flow-cell")
@@ -216,14 +198,5 @@ def retrieve_spring_files_for_flow_cell(
             bundle=sample_id, tags=["spring"], version=latest_version.id
         )
         for spring_file in spring_files:
-            try:
-                LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
-                context.invoke(
-                    retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run
-                )
-            except FileNotFoundError:
-                LOG.warning(
-                    "Spring file %s found in Housekeeper, but not on Hasta! Skipping encryption!",
-                    spring_file.path,
-                )
-                continue
+            LOG.info("Attempting PDC retrieval and decryption file %s", spring_file.path)
+            context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
