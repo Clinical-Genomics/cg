@@ -29,24 +29,24 @@ class CipherAlgorithm(StrEnum):
 
 
 class EncryptionUserID(StrEnum):
-    # HASTA_USER_ID: str = "Kenny Billiau"
-    HASTA_USER_ID: str = "Barry Stokman"
+    HASTA_USER_ID: str = "Clinical Genomics"
+    # HASTA_USER_ID: str = "Barry Stokman"
 
 
 class GPGParameters(ListEnum):
-    SPRING_ASYMMETRICAL_ENCRYPTION: list = [
+    SPRING_ASYMMETRIC_ENCRYPTION: list = [
         "--encrypt",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    SPRING_ASYMMETRICAL_DECRYPTION: list = [
+    SPRING_ASYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--batch",
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--passphrase",
     ]
-    SPRING_SYMMETRICAL_ENCRYPTION: list = [
+    SPRING_SYMMETRIC_ENCRYPTION: list = [
         "--symmetric",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -55,7 +55,7 @@ class GPGParameters(ListEnum):
         "None",
         "--passphrase-file",
     ]
-    SPRING_SYMMETRICAL_DECRYPTION: list = [
+    SPRING_SYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--cipher-algo",
         CipherAlgorithm.AES256,

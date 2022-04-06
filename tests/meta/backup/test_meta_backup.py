@@ -49,7 +49,7 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc):
 @mock.patch("cg.store")
 def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flowcell):
     """tests pop_flow cell method of the backup api"""
-    # GIVEN status-db needs to be checked for flowcells to be retrieved from PDC
+    # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
 
     # WHEN a flow cell is requested to be retrieved from PDC
@@ -147,7 +147,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
 
     result = backup_api.fetch_flowcell(mock_flow_cell, dry_run=False)
 
-    # THEN no flowcell will be fetched and a log message indicates that no flowcells have been
+    # THEN no flow cell will be fetched and a log message indicates that no flow cells have been
     # requested
     assert result is None
     assert "no flow cells requested" in caplog.text
@@ -212,16 +212,16 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN we want to retrieve a specific flowcell from PDC
+    # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir="/path/to/root_dir")
     backup_api.check_processing.return_value = True
 
     result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
 
-    # THEN the process to retrieve the flowcell from PDC is started
+    # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
-    # AND when done the status of that flowcell is set to "retrieved"
+    # AND when done the status of that flow cell is set to "retrieved"
     assert f'Status for flow cell {mock_flowcell.name} set to "retrieved"' in caplog.text
     assert mock_flowcell.status == "retrieved"
 
@@ -260,6 +260,7 @@ def test_fetch_flowcell_pdc_retrieval_failed(
     assert "retrieval failed" in caplog.text
 
 
+@mock.patch("cg.meta.backup.backup.SpringBackupAPI.remove_archived_spring_files")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.mark_file_as_archived")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI")
@@ -269,11 +270,10 @@ def test_encrypt_and_archive_spring_file(
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     mock_mark_file_as_archived,
-    tmpdir_factory,
+    mock_archived_spring_files,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_dir = tmpdir_factory.mktemp("barry")
-    spring_file_path = Path(spring_file_dir, "spring_file.spring")
+    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -288,14 +288,18 @@ def test_encrypt_and_archive_spring_file(
     spring_backup_api.encrypt_and_archive_spring_file(spring_file_path)
 
     # THEN the spring file directory should be cleaned up first
-    mock_spring_encryption_api.cleanup.assert_called_once_with(spring_file_path)
-    # THEN the spring file should be encrypted
+    mock_spring_encryption_api.cleanup.assert_called_with(spring_file_path)
+
+    # AND the spring file should be encrypted
     mock_spring_encryption_api.spring_symmetric_encryption.assert_called_once_with(spring_file_path)
-    # THEN the key should be encrypted
+
+    # AND the key should be encrypted
     mock_spring_encryption_api.key_asymmetric_encryption.assert_called_once_with(spring_file_path)
-    # THEN the encryption result should be checked
+
+    # AND the encryption result should be checked
     mock_spring_encryption_api.compare_file_checksums.assert_called_once_with(spring_file_path)
-    # THEN the encrypted spring file AND the encrypted key should be archived
+
+    # AND the encrypted spring file AND the encrypted key should be archived
     calls = [
         call(
             file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value),
@@ -307,8 +311,12 @@ def test_encrypt_and_archive_spring_file(
         ),
     ]
     mock_pdc_api.archive_file_to_pdc.assert_has_calls(calls)
-    # THEN the spring file should be marked as archived in Housekeeper
+
+    # AND the spring file should be marked as archived in Housekeeper
     mock_mark_file_as_archived.assert_called_once_with(spring_file_path)
+
+    # AND the original spring file should be removed
+    mock_archived_spring_files.assert_called_once_with(spring_file_path)
 
 
 @mock.patch("cg.apps.housekeeper.hk")
@@ -321,7 +329,7 @@ def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
     caplog,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
     )
@@ -352,7 +360,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
     caplog,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -371,6 +379,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
 
     spring_backup_api.encrypt_and_archive_spring_file(spring_file_path)
 
+    # THEN the checksum failure should be logged
     assert "Checksum comparison failed!" in caplog.text
 
 
@@ -381,9 +390,11 @@ def test_mark_file_as_archived(
     mock_pdc_api: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    caplog,
 ):
+    caplog.set_level(logging.INFO)
     # GIVEN a file
-    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -395,6 +406,36 @@ def test_mark_file_as_archived(
 
     # THEN the set_to_archive method in the Housekeeper API should be called with the new value True
     mock_housekeeper.set_to_archive.assert_called_once_with(file=mock_housekeeper_file, value=True)
+    assert f"Setting {spring_file_path} to archived in Housekeeper" in caplog.text
+
+
+@mock.patch("cg.apps.housekeeper.hk")
+@mock.patch("cg.meta.encryption.encryption")
+@mock.patch("cg.meta.backup.pdc")
+def test_mark_file_as_archived_dry_run(
+    mock_pdc_api: PdcAPI,
+    mock_spring_encryption_api: SpringEncryptionAPI,
+    mock_housekeeper: HousekeeperAPI,
+    caplog,
+):
+    caplog.set_level(logging.INFO)
+    # GIVEN a file and running as a dry run
+    spring_file_path = Path("/path/to/spring_file.spring")
+    spring_backup_api = SpringBackupAPI(
+        encryption_api=mock_spring_encryption_api,
+        hk_api=mock_housekeeper,
+        pdc_api=mock_pdc_api,
+        dry_run=True,
+    )
+    mock_housekeeper_file = MockFile(id=0, path=spring_file_path, to_archive=False)
+    mock_housekeeper.files.return_value.first.return_value = mock_housekeeper_file
+
+    # WHEN marking the file as archived
+    spring_backup_api.mark_file_as_archived(spring_file_path)
+
+    # THEN the set_to_archive method in the Housekeeper API should be called with the new value True
+    mock_housekeeper.set_to_archive.assert_not_called()
+    assert f"Dry run, no changes made to {spring_file_path}" in caplog.text
 
 
 @mock.patch("cg.apps.housekeeper.hk")
@@ -406,7 +447,7 @@ def test_decrypt_and_retrieve_spring_file(
     mock_housekeeper: HousekeeperAPI,
 ):
     # GIVEN a spring file that needs to be decrypted and retrieved from PDC
-    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -444,7 +485,7 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
     caplog,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/barry/to/spring_file.spring")
+    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
     )
@@ -459,4 +500,5 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
     mock_pdc.retrieve_file_from_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
     spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path=spring_file_path)
 
+    # THEN the decryption failure should be logged
     assert "Decryption failed" in caplog.text

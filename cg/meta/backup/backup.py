@@ -119,7 +119,7 @@ class SpringBackupAPI:
                 dry_run=self.dry_run,
             )
             self.mark_file_as_archived(spring_file_path)
-            spring_file_path.unlink()
+            self.remove_archived_spring_files(spring_file_path)
             LOG.debug(f"*** ARCHIVING PROCESS COMPLETED SUCCESSFULLY ***")
         except subprocess.CalledProcessError as error:
             LOG.error("Encryption failed: %s", error.stderr)
@@ -132,36 +132,35 @@ class SpringBackupAPI:
 
     def retrieve_and_decrypt_spring_file(self, spring_file_path: Path) -> None:
         """Retrieves and decrypts a spring file and its decryption key"""
-        if "barry" in spring_file_path.parts:
-            LOG.info(f"*** START RETRIEVAL PROCESS OF SPRING FILE %s ***", spring_file_path)
-            try:
-                self.pdc.retrieve_file_from_pdc(
-                    file_path=str(self.encryption_api.encrypted_spring_file_path(spring_file_path)),
-                    dry_run=self.dry_run,
-                )
-                self.pdc.retrieve_file_from_pdc(
-                    file_path=str(self.encryption_api.encrypted_key_path(spring_file_path)),
-                    dry_run=self.dry_run,
-                )
-                self.encryption_api.key_asymmetric_decryption(spring_file_path)
-                self.encryption_api.spring_symmetric_decryption(
-                    spring_file_path, output_file=spring_file_path
-                )
-            except subprocess.CalledProcessError as error:
-                LOG.error("Decryption failed: %s", error.stderr)
-                self.encryption_api.cleanup(spring_file_path)
-                LOG.debug(f"*** RETRIEVAL PROCESS FAILED! ***")
-            LOG.debug(f"*** RETRIEVAL PROCESS COMPLETED SUCCESSFULLY ***")
+        LOG.info(f"*** START RETRIEVAL PROCESS OF SPRING FILE %s ***", spring_file_path)
+        try:
+            self.pdc.retrieve_file_from_pdc(
+                file_path=str(self.encryption_api.encrypted_spring_file_path(spring_file_path)),
+                dry_run=self.dry_run,
+            )
+            self.pdc.retrieve_file_from_pdc(
+                file_path=str(self.encryption_api.encrypted_key_path(spring_file_path)),
+                dry_run=self.dry_run,
+            )
+            self.encryption_api.key_asymmetric_decryption(spring_file_path)
+            self.encryption_api.spring_symmetric_decryption(
+                spring_file_path, output_file=spring_file_path
+            )
+        except subprocess.CalledProcessError as error:
+            LOG.error("Decryption failed: %s", error.stderr)
+            self.encryption_api.cleanup(spring_file_path)
+            LOG.debug(f"*** RETRIEVAL PROCESS FAILED! ***")
+        LOG.debug(f"*** RETRIEVAL PROCESS COMPLETED SUCCESSFULLY ***")
 
     def mark_file_as_archived(self, spring_file_path: Path) -> None:
         """Set the field 'to_archive' of the file in Housekeeper to mark that it has been
         archived to PDC"""
-        if not self.dry_run:
-            LOG.info("Setting %s to archived in Housekeeper", spring_file_path)
-            hk_spring_file: hk_models.File = self.hk_api.files(path=spring_file_path).first()
-            self.hk_api.set_to_archive(file=hk_spring_file, value=True)
+        if self.dry_run:
+            LOG.info("Dry run, no changes made to %s", spring_file_path)
             return
-        LOG.info("Dry run, no changes made to %s", spring_file_path)
+        hk_spring_file: hk_models.File = self.hk_api.files(path=spring_file_path).first()
+        LOG.info("Setting %s to archived in Housekeeper", spring_file_path)
+        self.hk_api.set_to_archive(file=hk_spring_file, value=True)
 
     def needs_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
         """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted"""
@@ -172,8 +171,9 @@ class SpringBackupAPI:
 
     def remove_archived_spring_files(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving"""
-        spring_file_path.unlink()
         self.encryption_api.cleanup(spring_file_path)
+        if not self.dry_run:
+            spring_file_path.unlink()
 
     @property
     def dry_run(self) -> bool:

@@ -33,7 +33,8 @@ class PdcAPI:
         """Archive a file by storing it on PDC"""
         command: list = DSMCParameters.ARCHIVE_COMMAND.copy()
         command.append(file_path)
-        self.run_dsmc_command(command=command, dry_run=dry_run)
+        if not dry_run:
+            self.run_dsmc_command(command=command, dry_run=dry_run)
 
     def query_pdc(self, search_pattern: str, dry_run: bool = False) -> None:
         """Query PDC based on a given search pattern"""
@@ -45,7 +46,8 @@ class PdcAPI:
         """Retrieve a file from PDC"""
         command: list = DSMCParameters.RETRIEVE_COMMAND.copy()
         command.append(file_path)
-        self.run_dsmc_command(command=command, dry_run=dry_run)
+        if not dry_run:
+            self.run_dsmc_command(command=command, dry_run=dry_run)
 
     def run_dsmc_command(self, command: list, dry_run: bool = False) -> None:
         """Runs a DSMC command"""

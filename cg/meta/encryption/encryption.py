@@ -9,8 +9,6 @@ from housekeeper.store import models as hk_models
 
 from cg.constants.encryption import GPGParameters, SpringEncryptionSuffix
 from cg.exc import ChecksumFailedError
-
-# from cg.models.cg_config import CGConfig
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -25,9 +23,9 @@ class EncryptionAPI:
 
     def run_gpg_command(self, command: list) -> None:
         """Runs a GPG command"""
-        LOG.debug("Starting GPG command:")
-        LOG.debug(f"{self.process.binary} {' '.join(command)}")
-        self.process.run_command(command)
+        LOG.info("Starting GPG command:")
+        LOG.info(f"{self.process.binary} {' '.join(command)}")
+        self.process.run_command(command, dry_run=self.dry_run)
 
     @staticmethod
     def generate_temporary_passphrase_file(quality_level: int = 2, count: int = 256) -> Path:
@@ -52,7 +50,7 @@ class EncryptionAPI:
 
     @staticmethod
     def output_input_parameters(input_file: Path, output_file: Path) -> list:
-        """Generates the parameters for output and inout files for a gpg command"""
+        """Generates the parameters for output and input files for a gpg command"""
         output_input_files: list = GPGParameters.OUTPUT_INPUT_FILES.copy()
         output_input_files.extend([str(output_file), str(input_file)])
         return output_input_files
@@ -92,7 +90,7 @@ class SpringEncryptionAPI(EncryptionAPI):
 
     def asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> list:
         """Generates the gpg command for asymmetric encryption"""
-        encryption_parameters: list = GPGParameters.SPRING_ASYMMETRICAL_ENCRYPTION.copy()
+        encryption_parameters: list = GPGParameters.SPRING_ASYMMETRIC_ENCRYPTION.copy()
         output_input_files: list = self.output_input_parameters(
             input_file=input_file, output_file=output_file
         )
@@ -101,7 +99,7 @@ class SpringEncryptionAPI(EncryptionAPI):
 
     def asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> list:
         """Generates the gpg command for asymmetric decryption"""
-        decryption_parameters: list = GPGParameters.SPRING_ASYMMETRICAL_DECRYPTION.copy()
+        decryption_parameters: list = GPGParameters.SPRING_ASYMMETRIC_DECRYPTION.copy()
         output_input_files: list = self.output_input_parameters(
             output_file=output_file,
             input_file=input_file,
@@ -111,7 +109,7 @@ class SpringEncryptionAPI(EncryptionAPI):
 
     def symmetric_encryption_command(self, input_file: Path, output_file: Path) -> list:
         """Generates the gpg command for symmetric encryption of spring files"""
-        encryption_parameters: list = GPGParameters.SPRING_SYMMETRICAL_ENCRYPTION.copy()
+        encryption_parameters: list = GPGParameters.SPRING_SYMMETRIC_ENCRYPTION.copy()
         encryption_parameters.append(str(self.temporary_passphrase))
         output_input_files: list = self.output_input_parameters(
             output_file=output_file, input_file=input_file
@@ -123,7 +121,7 @@ class SpringEncryptionAPI(EncryptionAPI):
         self, input_file: Path, output_file: Path, encryption_key: Path
     ) -> list:
         """Generates the gpg command for symmetric decryption"""
-        decryption_parameters: list = GPGParameters.SPRING_SYMMETRICAL_DECRYPTION.copy()
+        decryption_parameters: list = GPGParameters.SPRING_SYMMETRIC_DECRYPTION.copy()
         decryption_parameters.append(str(encryption_key))
         output_input_files: list = self.output_input_parameters(
             input_file=input_file,
@@ -207,6 +205,9 @@ class SpringEncryptionAPI(EncryptionAPI):
     def compare_file_checksums(self, spring_file_path: Path) -> None:
         """Make sure the encrypted spring file is correct and can be decrypted"""
         LOG.debug("PERFORMING CHECKSUM COMPARISON")
+        if self.dry_run:
+            LOG.info("Dry run, skipping checksum!")
+            return
         self.key_asymmetric_decryption(spring_file_path=spring_file_path)
         self.spring_symmetric_decryption(
             spring_file_path=spring_file_path,
