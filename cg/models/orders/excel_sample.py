@@ -50,7 +50,6 @@ class ExcelSample(OrderSample):
     source: str = Field(None, alias="UDF/Source")
     status: str = Field(None, alias="UDF/Status")
     subject_id: str = Field(None, alias="UDF/subjectID")
-    time_point: str = Field(None, alias="UDF/time_point")
     tissue_block_size: str = Field(None, alias="UDF/Tissue Block Size")
     tumour: bool = Field(None, alias="UDF/tumor")
     tumour_purity: str = Field(None, alias="UDF/tumour purity")
@@ -78,7 +77,7 @@ class ExcelSample(OrderSample):
         return value
 
     @validator(
-        "index_number", "volume", "quantity", "concentration", "concentration_sample", "time_point"
+        "index_number", "volume", "quantity", "concentration", "concentration_sample"
     )
     def numeric_value(cls, value: Optional[str]):
         if not value:

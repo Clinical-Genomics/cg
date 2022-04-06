@@ -147,7 +147,6 @@ class BalsamicSample(Of1508Sample):
 
 class MipRnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_RNA
-    time_point: Optional[NonNegativeInt]
 
 
 class FastqSample(OrderInSample):

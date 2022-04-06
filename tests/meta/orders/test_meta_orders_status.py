@@ -536,7 +536,6 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert new_casing.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
-    assert new_link.sample.time_point == 1
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
