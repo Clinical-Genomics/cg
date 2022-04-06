@@ -109,7 +109,7 @@ class SpringBackupAPI:
         try:
             self.encryption_api.spring_symmetric_encryption(spring_file_path)
             self.encryption_api.key_asymmetric_encryption(spring_file_path)
-            self.encryption_api.compare_file_checksums(spring_file_path)
+            self.encryption_api.compare_spring_file_checksums(spring_file_path)
             self.pdc.archive_file_to_pdc(
                 file_path=str(self.encryption_api.encrypted_spring_file_path(spring_file_path)),
                 dry_run=self.dry_run,

@@ -297,7 +297,7 @@ def test_encrypt_and_archive_spring_file(
     mock_spring_encryption_api.key_asymmetric_encryption.assert_called_once_with(spring_file_path)
 
     # AND the encryption result should be checked
-    mock_spring_encryption_api.compare_file_checksums.assert_called_once_with(spring_file_path)
+    mock_spring_encryption_api.compare_spring_file_checksums.assert_called_once_with(spring_file_path)
 
     # AND the encrypted spring file AND the encrypted key should be archived
     calls = [
@@ -373,7 +373,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
         ".key" + ".gpg"
     )
 
-    mock_spring_encryption_api.compare_file_checksums.side_effect = ChecksumFailedError(
+    mock_spring_encryption_api.compare_spring_file_checksums.side_effect = ChecksumFailedError(
         "Checksum comparison failed!"
     )
 

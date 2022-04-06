@@ -202,7 +202,7 @@ class SpringEncryptionAPI(EncryptionAPI):
         except FileNotFoundError:
             LOG.info("No existing key file to clean up, cleanup process completed")
 
-    def compare_file_checksums(self, spring_file_path: Path) -> None:
+    def compare_spring_file_checksums(self, spring_file_path: Path) -> None:
         """Make sure the encrypted spring file is correct and can be decrypted"""
         LOG.debug("PERFORMING CHECKSUM COMPARISON")
         if self.dry_run:
