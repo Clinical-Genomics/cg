@@ -60,11 +60,13 @@ class CgDataError(CgError):
     """
     Error related to missing/incomplete data in Status DB
     """
-    
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal
     """
+
 
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis"""
