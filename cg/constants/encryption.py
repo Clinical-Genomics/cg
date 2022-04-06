@@ -46,6 +46,7 @@ class GPGParameters(ListEnum):
         "--cipher-algo",
         CipherAlgorithm.AES256,
         "--passphrase",
+        EncryptionUserID.HASTA_USER_ID,
     ]
     SPRING_SYMMETRIC_ENCRYPTION: list = [
         "--symmetric",
