@@ -76,6 +76,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
         tags=[HousekeeperTags.SPRING]
     ).filter(housekeeper.store.models.File.path.like(f"%{config.environment}%"))
     for spring_file in all_spring_files:
+        breakpoint()
         try:
             LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
             context.invoke(archive_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
@@ -93,6 +94,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 @click.pass_obj
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Archive a spring file to PDC"""
+    breakpoint()
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
@@ -110,6 +112,7 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 
 
 @backup.command("retrieve-spring-file")
+@click.argument("spring-file-path", type=click.Path(exists=True))
 @DRY_RUN
 @click.pass_obj
 def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
