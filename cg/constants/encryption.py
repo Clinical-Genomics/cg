@@ -30,8 +30,6 @@ class CipherAlgorithm(StrEnum):
 
 class EncryptionUserID(StrEnum):
     HASTA_USER_ID: str = "Clinical Genomics"
-    # HASTA_USER_ID: str = "Barry Stokman"
-    # HASTA_USER_ID: str = "New Name"
 
 
 class GPGParameters(ListEnum):

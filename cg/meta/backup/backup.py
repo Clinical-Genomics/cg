@@ -158,7 +158,7 @@ class SpringBackupAPI:
         if self.dry_run:
             LOG.info("Dry run, no changes made to %s", spring_file_path)
             return
-        hk_spring_file: hk_models.File = self.hk_api.files(path=spring_file_path).first()
+        hk_spring_file: hk_models.File = self.hk_api.files(path=str(spring_file_path)).first()
         LOG.info("Setting %s to archived in Housekeeper", spring_file_path)
         self.hk_api.set_to_archive(file=hk_spring_file, value=True)
 
