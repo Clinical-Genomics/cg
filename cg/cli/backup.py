@@ -88,6 +88,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 
 
 @backup.command("archive-spring-file")
+@click.argument("spring-file-path", type=click.Path(exists=True))
 @DRY_RUN
 @click.pass_obj
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
