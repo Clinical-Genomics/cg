@@ -92,7 +92,6 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 @click.pass_obj
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Archive a spring file to PDC"""
-    breakpoint()
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
