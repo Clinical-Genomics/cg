@@ -8,7 +8,7 @@ SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
-#SBATCH --qos={priority}
+#SBATCH --qos={quality_of_service}
 #SBATCH {exclude}
 
 set -eu -o pipefail
@@ -32,7 +32,7 @@ DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
-#SBATCH --qos={priority}
+#SBATCH --qos={quality_of_service}
 
 set -eu -o pipefail
 

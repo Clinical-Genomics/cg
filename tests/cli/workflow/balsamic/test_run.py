@@ -134,8 +134,8 @@ def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     caplog.set_level(logging.INFO)
     # GIVEN valid case-id
     case_id = "balsamic_case_wgs_single"
-    priority_key = "--priority"
-    priority_value = SlurmQos.HIGH
+    qos_key = "--slurm-quality-of-service"
+    qos_value = SlurmQos.HIGH
     # WHEN ensuring case config exists where it should be stored
     Path.mkdir(
         Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
@@ -146,13 +146,13 @@ def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, capl
     )
     # WHEN dry running with option specified
     result = cli_runner.invoke(
-        run, [case_id, "--dry-run", priority_key, priority_value], obj=balsamic_context
+        run, [case_id, "--dry-run", qos_key, qos_value], obj=balsamic_context
     )
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     # THEN dry run should include the the priority value
     assert "--qos" in caplog.text
-    assert priority_value in caplog.text
+    assert qos_value in caplog.text
 
 
 def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):

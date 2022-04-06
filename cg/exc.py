@@ -56,17 +56,15 @@ class CaseNotFoundError(CgError):
     """
 
 
-class ChecksumFailedError(CgError):
-    """
-    Exception raised when the checksums of two files are not equal
-    """
-
-
 class CgDataError(CgError):
     """
     Error related to missing/incomplete data in Status DB
     """
-
+    
+class ChecksumFailedError(CgError):
+    """
+    Exception raised when the checksums of two files are not equal
+    """
 
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis"""
@@ -221,3 +219,7 @@ class ValidationError(CgError):
     """
     Exception related to delivery report validation
     """
+
+
+class DeleteDemuxError(CgError):
+    """Raised when there is an issue with wiping a flowcell before start"""

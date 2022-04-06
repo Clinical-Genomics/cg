@@ -1,79 +1,42 @@
-"""Test the cli for uploading delivery reports"""
+"""Tests the cli for uploading delivery reports"""
 
 import logging
-from datetime import datetime
 
-from cg.cli.upload.base import delivery_report
-from cg.constants import Pipeline
-from cg.models.cg_config import CGConfig
-from cg.store import models
-from click.testing import CliRunner
-from tests.store_helpers import StoreHelpers
-
-EXIT_CODE_SUCCESS = 0
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.cli.upload.delivery_report import mip_dna
+from cg.meta.report.mip_dna import MipDNAReportAPI
 
 
-def test_no_parameters(upload_context: CGConfig, cli_runner: CliRunner, caplog):
-    # GIVEN we have a report_api set up
-    assert upload_context.meta_apis.get("report_api")
+def test_delivery_report_to_scout_no_params(upload_context, cli_runner):
+    """Tests the upload to Scout without specifying the case"""
 
-    # WHEN calling delivery_report without parameters
-    with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(delivery_report, [], obj=upload_context)
+    # GIVEN a MIP-DNA report api
+    assert isinstance(upload_context.meta_apis.get("report_api"), MipDNAReportAPI)
 
-    # THEN it should fail on missing case_id
-    assert result.exit_code != EXIT_CODE_SUCCESS
-    assert "Provide a case, suggestions:" in caplog.text
-
-
-def test_analysis_started_at(
-    upload_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
-):
-
-    # GIVEN a correct case_id and a correct date
-    analysis: models.Analysis = helpers.add_analysis(
-        upload_context.status_db,
-        started_at=datetime.now(),
-        pipeline=Pipeline.MIP_DNA,
-    )
-    case_id: str = analysis.family.internal_id
-    a_date: datetime = analysis.started_at
-    assert a_date
-
-    # WHEN calling delivery_report with ok date parameter
-    with caplog.at_level(logging.INFO):
-        cli_runner.invoke(
-            delivery_report,
-            [case_id, "--analysis-started-at", a_date],
-            obj=upload_context,
-        )
-
-    # THEN it should contain the date in the logged info
-    assert str(a_date) in caplog.text
-
-
-def test_analysis_without_started_at(
-    upload_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
-):
-
-    # GIVEN a correct case_id and a correct date
-    analysis: models.Analysis = helpers.add_analysis(
-        upload_context.status_db,
-        started_at=datetime.now(),
-        pipeline=Pipeline.MIP_DNA,
-    )
-    case_id: str = analysis.family.internal_id
-    a_date: datetime = analysis.started_at
-    assert a_date
-
-    caplog.set_level(logging.INFO)
-
-    # WHEN calling delivery_report without date parameter
-    cli_runner.invoke(
-        delivery_report,
-        [case_id],
+    # WHEN invoking the delivery report upload without parameters
+    result = cli_runner.invoke(
+        mip_dna,
+        ["delivery-report-to-scout"],
         obj=upload_context,
     )
 
-    # THEN it should contain the date in the logged info
-    assert "Using analysis started at: " in caplog.text
+    # THEN the command should fail due to a missing case ID
+    assert "There are no reports to upload to Scout" in result.output
+    assert result.exit_code == EXIT_FAIL
+
+
+def test_delivery_report_to_scout(upload_context, cli_runner, upload_report_hk_api, case_id):
+    """Tests the upload to Scout of a MIP DNA delivery report"""
+
+    # GIVEN a Housekeeper context with a delivery report file that is ready for upload
+    upload_context.housekeeper_api_ = upload_report_hk_api
+
+    # WHEN uploading the delivery report
+    result = cli_runner.invoke(
+        mip_dna,
+        ["delivery-report-to-scout", case_id],
+        obj=upload_context,
+    )
+
+    # THEN check that the command exits with success and that the mock file has been uploaded to Scout
+    assert result.exit_code == EXIT_SUCCESS

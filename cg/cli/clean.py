@@ -7,7 +7,6 @@ from typing import List, Optional
 import click
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
 from tabulate import tabulate
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -24,10 +23,12 @@ from cg.cli.workflow.commands import (
 )
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.constants.constants import DRY_RUN, Sequencers
+from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+from housekeeper.store import models as hk_models
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -56,10 +57,15 @@ clean.add_command(mutant_past_run_dirs)
 clean.add_command(rsync_past_run_dirs)
 
 
+def get_date_days_ago(days_ago: int) -> datetime:
+    """Calculate the date 'days_ago'"""
+    return datetime.now() - timedelta(days=days_ago)
+
+
 @clean.command("hk-alignment-files")
 @click.argument("bundle")
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Show files that would be cleaned")
+@DRY_RUN
 @click.pass_obj
 def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
     """Clean up alignment files in Housekeeper bundle"""
@@ -105,7 +111,7 @@ def _get_confirm_question(bundle, file_obj):
     help="Clean alignment files with analysis dates older then given number of days",
 )
 @click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@DRY_RUN
 @click.pass_context
 def scout_finished_cases(
     context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
@@ -127,12 +133,46 @@ def scout_finished_cases(
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)
 
 
+@clean.command("hk-case-bundle-files")
+@click.option(
+    "--days-old",
+    type=int,
+    default=365,
+    help="Clean all files with analysis dates older then given number of days",
+)
+@DRY_RUN
+@click.pass_context
+def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False):
+    """Clean up all non-protected files for all pipelines"""
+    housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
+    clean_api: CleanAPI = CleanAPI(status_db=context.obj.status_db, housekeeper_api=housekeeper_api)
+
+    size_cleaned: int = 0
+    version_file: hk_models.File
+    for version_file in clean_api.get_unprotected_existing_bundle_files(
+        before=get_date_days_ago(days_ago=days_old)
+    ):
+        file_path: Path = Path(version_file.full_path)
+        file_size: int = file_path.stat().st_size
+        size_cleaned += file_size
+        if dry_run:
+            LOG.info("Dry run: %s. Keeping file %s", dry_run, file_path)
+            continue
+
+        file_path.unlink()
+        housekeeper_api.delete_file(version_file.id)
+        housekeeper_api.commit()
+        LOG.info("Removed file %s. Dry run: %s", file_path, dry_run)
+
+    LOG.info("Process freed %s GB. Dry run: %s", round(size_cleaned * 0.0000000001, 2), dry_run)
+
+
 @clean.command("hk-bundle-files")
 @click.option("-c", "--case_id", type=str, required=False)
 @click.option("-p", "--pipeline", type=Pipeline, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
-@click.option("-d", "--dry-run", is_flag=True, help="Shows cases and files that would be cleaned")
+@DRY_RUN
 @click.pass_obj
 def hk_bundle_files(
     context: CGConfig,
@@ -147,7 +187,7 @@ def hk_bundle_files(
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
-    date_threshold: datetime = datetime.now() - timedelta(days=days_old)
+    date_threshold: datetime = get_date_days_ago(days_ago=days_old)
 
     analyses: Query = status_db.get_analyses_before_date(
         case_id=case_id, before=date_threshold, pipeline=pipeline
@@ -198,12 +238,7 @@ def hk_bundle_files(
 
 @clean.command("invalid-flow-cell-dirs")
 @click.option("-f", "--failed-only", is_flag=True, help="Shows failed flow cells only")
-@click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    help="Runs this command without actually removing flow cells!",
-)
+@DRY_RUN
 @click.pass_obj
 def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, dry_run: bool):
     """Removes invalid flow cell directories from demultiplexed-runs"""
@@ -273,12 +308,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
 
 
 @clean.command("fix-flow-cell-status")
-@click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    help="Runs this command without actually fixing flow cell statuses!",
-)
+@DRY_RUN
 @click.pass_obj
 def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     """set correct flow cell statuses in statusdb"""

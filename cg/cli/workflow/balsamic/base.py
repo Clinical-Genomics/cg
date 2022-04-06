@@ -38,10 +38,10 @@ OPTION_RUN_ANALYSIS = click.option(
     default=False,
     help="Execute BALSAMIC in non-dry mode",
 )
-OPTION_PRIORITY = click.option(
-    "-p",
-    "--priority",
-    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH]),
+OPTION_QOS = click.option(
+    "-qos",
+    "--slurm-quality-of-service",
+    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH, SlurmQos.EXPRESS]),
     help="Job priority in SLURM. Will be set automatically according to priority in ClinicalDB, \
          this option can be used to override server setting",
 )
@@ -88,7 +88,7 @@ def config_case(context: CGConfig, panel_bed: str, case_id: str, dry_run: bool):
 @balsamic.command("run")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
-@OPTION_PRIORITY
+@OPTION_QOS
 @OPTION_ANALYSIS_TYPE
 @OPTION_RUN_ANALYSIS
 @click.pass_obj
@@ -96,7 +96,7 @@ def run(
     context: CGConfig,
     analysis_type: str,
     run_analysis: bool,
-    priority: str,
+    slurm_quality_of_service: str,
     case_id: str,
     dry_run: bool,
 ):
@@ -110,7 +110,7 @@ def run(
             case_id=case_id,
             analysis_type=analysis_type,
             run_analysis=run_analysis,
-            priority=priority,
+            slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
         )
         if dry_run or not run_analysis:
@@ -181,7 +181,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @balsamic.command("start")
 @ARGUMENT_CASE_ID
 @OPTION_ANALYSIS_TYPE
-@OPTION_PRIORITY
+@OPTION_QOS
 @OPTION_DRY
 @OPTION_PANEL_BED
 @OPTION_RUN_ANALYSIS
@@ -191,7 +191,7 @@ def start(
     case_id: str,
     analysis_type: str,
     panel_bed: str,
-    priority: str,
+    slurm_quality_of_service: str,
     run_analysis: bool,
     dry_run: bool,
 ):
@@ -205,7 +205,7 @@ def start(
             run,
             case_id=case_id,
             analysis_type=analysis_type,
-            priority=priority,
+            slurm_quality_of_service=slurm_quality_of_service,
             run_analysis=run_analysis,
             dry_run=dry_run,
         )

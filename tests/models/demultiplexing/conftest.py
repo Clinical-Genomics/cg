@@ -6,14 +6,14 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
 
 
+@pytest.fixture(name="flow_cell_name")
+def fixture_flow_cell_name(flowcell_full_name: str) -> str:
+    return flowcell_full_name.split("_")[-1][1:]
+
+
 @pytest.fixture(name="flowcell_runs")
 def fixture_flowcell_runs(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "flowcell-runs"
-
-
-@pytest.fixture(name="demultiplexed_runs")
-def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return demultiplex_fixtures / "demultiplexed-runs"
 
 
 @pytest.fixture(name="flowcell_full_name")
@@ -28,6 +28,8 @@ def fixture_flowcell_path(flowcell_runs: Path, flowcell_full_name: str) -> Path:
 
 @pytest.fixture(name="flowcell_object")
 def fixture_flowcell_object(flowcell_path: Path) -> Flowcell:
+    flow_cell = Flowcell(flowcell_path)
+    flow_cell.parse_flowcell_name()
     return Flowcell(flowcell_path)
 
 
@@ -64,6 +66,8 @@ def fixture_demultiplexed_dragen_flow_cell(
 
 @pytest.fixture(name="dragen_flow_cell_object")
 def fixture_dragen_flow_cell_object(dragen_flow_cell_path: Path) -> Flowcell:
+    flow_cell = Flowcell(dragen_flow_cell_path)
+    flow_cell.parse_flowcell_name()
     return Flowcell(dragen_flow_cell_path)
 
 

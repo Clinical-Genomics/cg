@@ -30,7 +30,9 @@ def compress(context: CGConfig):
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api)
+    compress_api = CompressAPI(
+        hk_api=hk_api, crunchy_api=crunchy_api, demux_root=context.demultiplex.out_dir
+    )
     context.meta_apis["compress_api"] = compress_api
 
 
@@ -53,6 +55,7 @@ def decompress(context: CGConfig):
     hk_api = context.housekeeper_api
     crunchy_api = context.crunchy_api
 
+
     pdc_api: PdcAPI = PdcAPI(binary_path=context.pdc.binary_path)
     spring_encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=context.encryption.binary_path,
@@ -64,7 +67,8 @@ def decompress(context: CGConfig):
     )
     LOG.debug("Start spring retrieval if not dry run")
 
-    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, backup_api=spring_backup_api)
+    compress_api = CompressAPI(hk_api=hk_api, crunchy_api=crunchy_api, demux_root=context.demultiplex.out_dir, backup_api=spring_backup_api)
+
     context.meta_apis["compress_api"] = compress_api
     LOG.info("Running decompress spring")
 

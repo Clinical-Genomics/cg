@@ -92,6 +92,20 @@ class HousekeeperAPI:
 
         return file_obj
 
+    def delete_file_if_related(self, stem: str, hk_file: File):
+        """Delete a file if the full path includes the root"""
+        if stem in hk_file.path:
+            self.delete_file(file_id=hk_file.id)
+            self._store.commit()
+            LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
+
+    def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
+        """Check if there are files for a bundle, tags, and/or version"""
+        files: Optional[Iterable[File]] = self.files(bundle=bundle, tags=tags, version=version)
+        if not any(files):
+            return False
+        return True
+
     def add_file(
         self, path, version_obj: models.Version, tags: list, to_archive: bool = False
     ) -> models.File:
@@ -147,7 +161,9 @@ class HousekeeperAPI:
         """Wrap property in Housekeeper Store"""
         return self._store.session.no_autoflush
 
-    def get_files(self, bundle: str, tags: Optional[list], version: Optional[int] = None) -> Query:
+    def get_files(
+        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
+    ) -> Query:
         """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version
 
@@ -169,8 +185,7 @@ class HousekeeperAPI:
             if Path(file.path) in file_paths:
                 file_paths.remove(Path(file.path))
                 LOG.info(
-                    "Path %s is already linked to bundle %s in housekeeper"
-                    % (file.path, bundle_name)
+                    f"Path {file.path} is already linked to bundle {bundle_name} in housekeeper"
                 )
         return file_paths
 
@@ -243,15 +258,20 @@ class HousekeeperAPI:
         """Create a new tag"""
         return self._store.new_tag(name, category)
 
-    def add_tag(self, name: str, category: str = None):
+    def add_tag(self, name: str, category: str = None) -> models.Tag:
         """Add a tag to the database"""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
-    def tag(self, name: str):
+    def tag(self, name: str) -> models.Tag:
         """Fetch a tag"""
         return self._store.tag(name)
+
+    @staticmethod
+    def get_tag_names_from_file(file: models.File) -> List[str]:
+        """Fetch tag names for a file"""
+        return [tag.name for tag in file.tags]
 
     def include(self, version_obj: models.Version):
         """Call the include version function to import related assets."""
@@ -265,10 +285,6 @@ class HousekeeperAPI:
     def commit(self):
         """Wrap method in Housekeeper Store"""
         return self._store.commit()
-
-    def session_no_autoflush(self):
-        """Wrap property in Housekeeper Store"""
-        return self._store.session.no_autoflush
 
     def get_root_dir(self):
         """Returns the root dir of Housekeeper"""

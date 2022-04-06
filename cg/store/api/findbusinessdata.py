@@ -39,6 +39,33 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(models.Analysis.started_at < before)
         return records
 
+    def active_sample(self, internal_id: str) -> bool:
+        """Check if there are any active cases for a sample"""
+        sample: models.Sample = self.sample(internal_id=internal_id)
+        if any(
+            [
+                self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "analyze"
+                or self.family(
+                    internal_id=self.Family.query.filter(
+                        models.Family.id == family_sample.family_id
+                    )
+                    .first()
+                    .internal_id
+                ).action
+                == "running"
+                for family_sample in sample.links
+            ]
+        ):
+            return True
+        return False
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -149,20 +176,25 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def families_by_subject_id(
-        self, customer_id: str, subject_id: str, data_analyses: [Pipeline] = None
+        self,
+        customer_id: str,
+        subject_id: str,
+        data_analyses: [Pipeline] = None,
+        is_tumour: bool = None,
     ) -> Set[models.Family]:
-        """Get cases that has a sample for a subject_id.
+        """Get all cases that have a sample for a subject_id.
 
         Args:
             customer_id     (str):                 Customer-id of customer owning the cases
             subject_id      (str):                 Subject-id to search for
-            data_analyses   (list[Pipeline]):      Optional list of data_analysis values
+            data_analyses   (list[Pipeline]):      Optional list of data_analysis values to filter on
+            is_tumour       (bool):                Optional is_tumour value to filter on
         Returns:
             set containing the matching cases set(models.Family)
         """
         cases: set[models.Family] = set()
         samples: [models.Sample] = self.samples_by_subject_id(
-            customer_id=customer_id, subject_id=subject_id
+            customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
         )
         sample: models.Sample
         for sample in samples:
@@ -172,6 +204,7 @@ class FindBusinessDataHandler(BaseHandler):
 
                 if data_analyses and case.data_analysis not in data_analyses:
                     continue
+
                 cases.add(case)
         return cases
 
@@ -198,10 +231,6 @@ class FindBusinessDataHandler(BaseHandler):
     def find_family(self, customer: models.Customer, name: str) -> models.Family:
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(customer=customer, name=name).first()
-
-    def find_family_by_avatar_url(self, avatar_url: str) -> models.Family:
-        """Fetch a family by avatar_url from the database."""
-        return self.Family.query.filter_by(avatar_url=avatar_url).first()
 
     def find_family_by_name(self, name: str) -> models.Family:
         """Find a family by family name within a customer."""
@@ -332,19 +361,25 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
-    def samples_by_subject_id(self, customer_id: str, subject_id: str) -> [models.Sample]:
+    def samples_by_subject_id(
+        self, customer_id: str, subject_id: str, is_tumour: bool = None
+    ) -> Query:
         """Get samples of customer with given subject_id.
 
         Args:
             customer_id  (str):               Internal-id of customer
             subject_id   (str):               Subject id
+            is_tumour    (bool):              (Optional) match on is_tumour
         Returns:
             matching samples (list of models.Sample)
         """
 
-        return self.Sample.query.join(models.Customer).filter(
+        query: Query = self.Sample.query.join(models.Customer).filter(
             models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
         )
+        if is_tumour is not None:
+            query: Query = query.filter(models.Sample.is_tumour == is_tumour)
+        return query
 
     def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query

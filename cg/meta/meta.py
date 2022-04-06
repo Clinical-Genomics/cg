@@ -32,7 +32,11 @@ class MetaAPI:
         self.mutacc_auto_api: MutaccAutoAPI = config.mutacc_auto_api
         self.prepare_fastq_api: PrepareFastqAPI = PrepareFastqAPI(
             store=config.status_db,
-            compress_api=CompressAPI(hk_api=config.housekeeper_api, crunchy_api=config.crunchy_api),
+            compress_api=CompressAPI(
+                hk_api=config.housekeeper_api,
+                crunchy_api=config.crunchy_api,
+                demux_root=config.demultiplex.out_dir,
+            ),
         )
         self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
