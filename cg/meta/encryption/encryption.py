@@ -68,12 +68,12 @@ class EncryptionAPI:
     def file_checksum(file: Path) -> str:
         """Generates the checksum of a file"""
         LOG.debug("Checksum for file %s: ", file)
-        md5_hash = hashlib.md5()
+        sha512_hash = hashlib.sha512()
         with open(file, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
-                md5_hash.update(chunk)
-        LOG.debug("Result: %s", md5_hash.hexdigest())
-        return md5_hash.hexdigest()
+                sha512_hash.update(chunk)
+        LOG.debug("Result: %s", sha512_hash.hexdigest())
+        return sha512_hash.hexdigest()
 
 
 class SpringEncryptionAPI(EncryptionAPI):
