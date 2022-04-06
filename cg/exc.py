@@ -72,12 +72,6 @@ class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis"""
 
 
-class DSMCError(CgError):
-    """
-    Error related to DSMC commands
-    """
-
-
 class DeliveryReportError(CgError):
     """
     Exception related to delivery report creation
