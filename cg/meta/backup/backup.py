@@ -148,8 +148,8 @@ class SpringBackupAPI:
             )
         except subprocess.CalledProcessError as error:
             LOG.error("Decryption failed: %s", error.stderr)
-            self.encryption_api.cleanup(spring_file_path)
             LOG.debug(f"*** RETRIEVAL PROCESS FAILED! ***")
+        self.encryption_api.cleanup(spring_file_path)
         LOG.debug(f"*** RETRIEVAL PROCESS COMPLETED SUCCESSFULLY ***")
 
     def mark_file_as_archived(self, spring_file_path: Path) -> None:
