@@ -48,5 +48,5 @@ def test_retrieve_file_from_pdc(mock_process):
 
     # THEN
     mock_process.run_command.assert_called_once_with(
-        parameters=["retrieve", "--replace=yes", "path/to/file"], dry_run=False
+        parameters=["retrieve", "-replace=yes", "path/to/file"], dry_run=False
     )
