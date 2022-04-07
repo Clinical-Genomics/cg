@@ -74,7 +74,8 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     all_spring_files: alchy.query.Query = housekeeper_api.files(
         tags=[HousekeeperTags.SPRING]
-    ).filter(housekeeper.store.models.File.path.like(f"%{config.environment}%"))
+        # ).filter(housekeeper.store.models.File.path.like(f"%{config.environment}%"))
+    ).filter(housekeeper.store.models.File.path.like("%barry%"))
     for spring_file in all_spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():
@@ -109,11 +110,12 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
 
 
 @backup.command("retrieve-spring-file")
-@click.argument("spring-file-path", type=click.Path(exists=True))
+@click.argument("spring-file-path", type=click.Path(exists=False))
 @DRY_RUN
 @click.pass_obj
 def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Retrieve a spring file from PDC"""
+    breakpoint()
     LOG.info("Attempting PDC retrieval and decryption file %s", spring_file_path)
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path)
