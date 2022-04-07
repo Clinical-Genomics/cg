@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 @click.group()
 @click.pass_obj
 def backup(context: CGConfig):
-    """Backup utilities."""
+    """Backup utilities"""
     pdc_api = PdcAPI()
     context.meta_apis["backup_api"] = BackupApi(
         status=context.status_db,
@@ -35,7 +35,7 @@ def backup(context: CGConfig):
 @click.option("--dry-run", is_flag=True, help="Don't retrieve from PDC or set flow cell status")
 @click.pass_obj
 def fetch_flowcell(context: CGConfig, dry_run: bool, flowcell: str):
-    """Fetch the first flow cell in the requested queue from backup."""
+    """Fetch the first flow cell in the requested queue from backup"""
     status_api: Store = context.status_db
     backup_api: BackupApi = context.meta_apis["backup_api"]
 
