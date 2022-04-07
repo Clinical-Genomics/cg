@@ -49,7 +49,7 @@ class MipDNAReportAPI(ReportAPI):
         sample_coverage = self.get_sample_coverage(sample, case)
 
         return MipDNASampleMetadataModel(
-            bait_set=sample.capture_kit,
+            bait_set=self.lims_api.capture_kit(sample.internal_id),
             gender=parsed_metrics.predicted_sex if analysis_metadata else None,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
             mapped_reads=parsed_metrics.mapped_reads if analysis_metadata else None,
