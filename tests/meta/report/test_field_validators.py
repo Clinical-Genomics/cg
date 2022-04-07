@@ -15,6 +15,7 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
     report_data.version = None
     report_data.accredited = None
     report_data.customer.id = "N/A"
+    report_data.customer.scout_access = False
     report_data.case.samples[0].methods.library_prep = ""
     report_data.case.samples[0].metadata.million_read_pairs = None
     report_data.case.samples[0].metadata.duplicates = None
@@ -27,6 +28,7 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
     assert "version" in empty_fields["report"]
     assert "accredited" in empty_fields["report"]
     assert "id" in empty_fields["customer"]
+    assert "scout_access" not in empty_fields["customer"]
     assert "library_prep" in empty_fields["methods"]["ADM1"]
     assert "million_read_pairs" in empty_fields["metadata"]["ADM1"]
     assert "duplicates" in empty_fields["metadata"]["ADM1"]

@@ -23,6 +23,9 @@ def get_empty_fields(report_data: dict) -> list:
 
     for field, value in report_data.items():
         if not value or value == NA_FIELD:
+            if isinstance(value, bool):
+                continue
+
             empty_fields.append(field)
 
     return empty_fields
