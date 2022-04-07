@@ -46,12 +46,10 @@ class PdcAPI:
         """Retrieve a file from PDC"""
         command: list = DSMCParameters.RETRIEVE_COMMAND.copy()
         command.append(file_path)
-        if not dry_run:
-            self.run_dsmc_command(command=command, dry_run=dry_run)
+        self.run_dsmc_command(command=command, dry_run=dry_run)
 
     def run_dsmc_command(self, command: list, dry_run: bool = False) -> None:
         """Runs a DSMC command"""
         LOG.debug("Starting DSMC command:")
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
-        if not dry_run:
-            self.process.run_command(parameters=command, dry_run=dry_run)
+        self.process.run_command(parameters=command, dry_run=dry_run)
