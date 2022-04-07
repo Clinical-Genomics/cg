@@ -1,5 +1,4 @@
 """Constants specific for encryption"""
-from enum import Enum
 
 from cgmodels.cg.constants import StrEnum
 
