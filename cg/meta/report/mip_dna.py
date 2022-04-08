@@ -11,6 +11,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METHODS_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
+    REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
 )
 from cg.models.cg_config import CGConfig
 from cg.meta.report.api import ReportAPI
@@ -47,7 +48,7 @@ class MipDNAReportAPI(ReportAPI):
         sample_coverage = self.get_sample_coverage(sample, case)
 
         return MipDNASampleMetadataModel(
-            bait_set=sample.capture_kit,
+            bait_set=self.lims_api.capture_kit(sample.internal_id),
             gender=parsed_metrics.predicted_sex if analysis_metadata else None,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
             mapped_reads=parsed_metrics.mapped_reads if analysis_metadata else None,
@@ -107,17 +108,56 @@ class MipDNAReportAPI(ReportAPI):
 
         return True
 
-    def get_required_fields(self, case: CaseModel = None) -> dict:
+    def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA"""
 
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
             "case": REQUIRED_CASE_FIELDS,
-            "applications": REQUIRED_APPLICATION_FIELDS,
+            "applications": self.get_application_required_fields(case, REQUIRED_APPLICATION_FIELDS),
             "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
-            "samples": REQUIRED_SAMPLE_MIP_DNA_FIELDS,
-            "methods": REQUIRED_SAMPLE_METHODS_FIELDS,
-            "timestamps": REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
-            "metadata": REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
+            "samples": self.get_sample_required_fields(case, REQUIRED_SAMPLE_MIP_DNA_FIELDS),
+            "methods": self.get_sample_required_fields(case, REQUIRED_SAMPLE_METHODS_FIELDS),
+            "timestamps": self.get_sample_required_fields(case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS),
+            "metadata": self.get_sample_metadata_required_fields(case),
         }
+
+    @staticmethod
+    def get_application_required_fields(case: CaseModel, required_fields: list) -> dict:
+        """Retrieves sample required fields"""
+
+        required_sample_fields = dict()
+
+        for application in case.applications:
+            required_sample_fields.update({application.tag: required_fields})
+
+        return required_sample_fields
+
+    @staticmethod
+    def get_sample_required_fields(case: CaseModel, required_fields: list) -> dict:
+        """Retrieves sample required fields"""
+
+        required_sample_fields = dict()
+
+        for sample in case.samples:
+            required_sample_fields.update({sample.id: required_fields})
+
+        return required_sample_fields
+
+    @staticmethod
+    def get_sample_metadata_required_fields(case: CaseModel) -> dict:
+        """Retrieves sample metadata required fields associated to a specific sample ID"""
+
+        required_sample_metadata_fields = dict()
+
+        for sample in case.samples:
+            required_fields = (
+                REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS
+                if "wgs" in sample.application.tag.lower()
+                else REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS
+            )
+
+            required_sample_metadata_fields.update({sample.id: required_fields})
+
+        return required_sample_metadata_fields
