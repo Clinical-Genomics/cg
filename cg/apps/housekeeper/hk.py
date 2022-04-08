@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional, Set, Tuple, Union
+from typing import Iterable, List, Optional, Set, Tuple
 
 from alchy import Query
 from housekeeper.include import checksum as hk_checksum
@@ -131,7 +131,7 @@ class HousekeeperAPI:
         bundle: str = None,
         tags: List[str] = None,
         version: int = None,
-        path: Union[Path, str] = None,
+        path: str = None,
     ) -> Query:
         """Fetch files"""
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)

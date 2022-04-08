@@ -165,7 +165,7 @@ class SpringBackupAPI:
     def needs_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
         """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted"""
         return (
-            self.hk_api.files(path=spring_file_path).first().to_archive
+            self.hk_api.files(path=str(spring_file_path)).first().to_archive
             and not spring_file_path.exists()
         )
 
