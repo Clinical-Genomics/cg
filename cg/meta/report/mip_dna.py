@@ -124,28 +124,6 @@ class MipDNAReportAPI(ReportAPI):
         }
 
     @staticmethod
-    def get_application_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample required fields"""
-
-        required_sample_fields = dict()
-
-        for application in case.applications:
-            required_sample_fields.update({application.tag: required_fields})
-
-        return required_sample_fields
-
-    @staticmethod
-    def get_sample_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample required fields"""
-
-        required_sample_fields = dict()
-
-        for sample in case.samples:
-            required_sample_fields.update({sample.id: required_fields})
-
-        return required_sample_fields
-
-    @staticmethod
     def get_sample_metadata_required_fields(case: CaseModel) -> dict:
         """Retrieves sample metadata required fields associated to a specific sample ID"""
 
