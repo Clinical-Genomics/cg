@@ -275,9 +275,9 @@ def test_encrypt_and_archive_spring_file(
     mock_housekeeper: HousekeeperAPI,
     mock_mark_file_as_archived,
     mock_archived_spring_files,
+    spring_file_path,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -332,10 +332,10 @@ def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
     mock_pdc: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    spring_file_path,
     caplog,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
     )
@@ -363,10 +363,10 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
     mock_pdc_api: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    spring_file_path,
     caplog,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -396,11 +396,11 @@ def test_mark_file_as_archived(
     mock_pdc_api: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    spring_file_path,
     caplog,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a file
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -423,10 +423,10 @@ def test_mark_file_as_archived_dry_run(
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     caplog,
+    spring_file_path,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN a file and running as a dry run
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api,
         hk_api=mock_housekeeper,
@@ -451,9 +451,9 @@ def test_decrypt_and_retrieve_spring_file(
     mock_pdc_api: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    spring_file_path,
 ):
     # GIVEN a spring file that needs to be decrypted and retrieved from PDC
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
@@ -488,10 +488,10 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
     mock_pdc: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    spring_file_path,
     caplog,
 ):
     # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_file_path = Path("/path/to/spring_file.spring")
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc
     )
