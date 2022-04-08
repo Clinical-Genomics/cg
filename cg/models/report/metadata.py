@@ -26,7 +26,7 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific MIP DNA sample
 
     Attributes:
-        bait_set: panel bed used for the analysis; StatusDB/sample/capture_kit
+        bait_set: panel bed used for the analysis; source: LIMS
         gender: gender estimated by the pipeline; source: pipeline workflow
         mapped_reads: percentage of reads aligned to the reference sequence; source: pipeline workflow
         mean_target_coverage: mean coverage of a target region; source: pipeline workflow
@@ -68,7 +68,7 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample
 
     Attributes:
-            bait_set: panel bed used for the analysis; StatusDB/sample/capture_kit
+            bait_set: panel bed used for the analysis; source: LIMS
             bait_set_version: panel bed version; source: pipeline workflow
             median_target_coverage: median coverage of a target region in bases; source: pipeline workflow
             pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: pipeline workflow
