@@ -49,8 +49,6 @@ def test_generate_temporary_passphrase(mock_process, binary_path):
 def test_output_input_parameters(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
     encryption_api = EncryptionAPI(binary_path=binary_path)
-    input_file = input_file
-    output_file = output_file
 
     # WHEN generating the output/input parameters for a GPG command
     result = encryption_api.output_input_parameters(input_file=input_file, output_file=output_file)
@@ -62,8 +60,6 @@ def test_output_input_parameters(binary_path, input_file, output_file):
 def test_asymmetric_encryption_command(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    input_file = input_file
-    output_file = output_file
 
     # WHEN generating the GPG command for asymmetric_encryption
     result = encryption_api.asymmetric_encryption_command(
@@ -85,8 +81,6 @@ def test_asymmetric_encryption_command(binary_path, input_file, output_file):
 def test_asymmetric_decryption_command(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    input_file = input_file
-    output_file = output_file
 
     # WHEN generating the GPG command for asymmetric_decryption
     result = encryption_api.asymmetric_decryption_command(
@@ -114,8 +108,6 @@ def test_symmetric_encryption_command(
 ):
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    input_file = input_file
-    output_file = output_file
     mock_passphrase.return_value = temporary_passphrase
 
     # WHEN generating the GPG command for symmetric_encryption
@@ -143,8 +135,6 @@ def test_symmetric_encryption_command(
 def test_symmetric_decryption_command(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    input_file = input_file
-    output_file = output_file
     encryption_key = Path("encryption.key")
 
     # WHEN generating the GPG command for symmetric_decryption
