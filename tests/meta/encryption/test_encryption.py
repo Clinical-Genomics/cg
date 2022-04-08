@@ -7,9 +7,9 @@ from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command(mock_process):
+def test_run_gpg_command(mock_process, binary_path):
     # GIVEN
-    encryption_api = EncryptionAPI(binary_path="/binary/path", dry_run=False)
+    encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=False)
     encryption_api.process = mock_process()
 
     # WHEN running a gpg command
@@ -20,9 +20,9 @@ def test_run_gpg_command(mock_process):
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command_dry_run(mock_process):
+def test_run_gpg_command_dry_run(mock_process, binary_path):
     # GIVEN
-    encryption_api = EncryptionAPI(binary_path="/binary/path", dry_run=True)
+    encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
     encryption_api.process = mock_process()
 
     # WHEN running a gpg command in dry mode
@@ -33,9 +33,9 @@ def test_run_gpg_command_dry_run(mock_process):
 
 
 @mock.patch("cg.utils.Process")
-def test_generate_temporary_passphrase(mock_process):
+def test_generate_temporary_passphrase(mock_process, binary_path):
     # GIVEN
-    encryption_api = EncryptionAPI(binary_path="/binary/path", dry_run=True)
+    encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
     encryption_api.process = mock_process()
 
     # WHEN creating a temporary passphrase
@@ -46,11 +46,11 @@ def test_generate_temporary_passphrase(mock_process):
     assert result.name.startswith("tmp")
 
 
-def test_output_input_parameters():
+def test_output_input_parameters(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
-    encryption_api = EncryptionAPI(binary_path="/binary/path")
-    input_file = Path("/path/to/input.file")
-    output_file = Path("/path/to/output")
+    encryption_api = EncryptionAPI(binary_path=binary_path)
+    input_file = input_file
+    output_file = output_file
 
     # WHEN generating the output/input parameters for a GPG command
     result = encryption_api.output_input_parameters(input_file=input_file, output_file=output_file)
@@ -59,11 +59,11 @@ def test_output_input_parameters():
     assert result == ["-o", str(output_file), str(input_file)]
 
 
-def test_asymmetric_encryption_command():
+def test_asymmetric_encryption_command(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
-    encryption_api = SpringEncryptionAPI(binary_path="/binary/path")
-    input_file = Path("/path/to/input.file")
-    output_file = Path("/path/to/output")
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    input_file = input_file
+    output_file = output_file
 
     # WHEN generating the GPG command for asymmetric_encryption
     result = encryption_api.asymmetric_encryption_command(
@@ -82,11 +82,11 @@ def test_asymmetric_encryption_command():
     ]
 
 
-def test_asymmetric_decryption_command():
+def test_asymmetric_decryption_command(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
-    encryption_api = SpringEncryptionAPI(binary_path="/binary/path")
-    input_file = Path("/path/to/input.file")
-    output_file = Path("/path/to/output")
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    input_file = input_file
+    output_file = output_file
 
     # WHEN generating the GPG command for asymmetric_decryption
     result = encryption_api.asymmetric_decryption_command(
@@ -109,12 +109,14 @@ def test_asymmetric_decryption_command():
 
 
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.generate_temporary_passphrase_file")
-def test_symmetric_encryption_command(mock_passphrase):
+def test_symmetric_encryption_command(
+    mock_passphrase, binary_path, input_file, output_file, temporary_passphrase
+):
     # GIVEN an input file and an output file for a gpg command
-    encryption_api = SpringEncryptionAPI(binary_path="/binary/path")
-    input_file = Path("/path/to/input.file")
-    output_file = Path("/path/to/output")
-    mock_passphrase.return_value = "tmp/tmp_test_passphrase"
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    input_file = input_file
+    output_file = output_file
+    mock_passphrase.return_value = temporary_passphrase
 
     # WHEN generating the GPG command for symmetric_encryption
     result = encryption_api.symmetric_encryption_command(
@@ -122,7 +124,7 @@ def test_symmetric_encryption_command(mock_passphrase):
     )
 
     # THEN the result should be correct
-    assert encryption_api.temporary_passphrase == "tmp/tmp_test_passphrase"
+    assert encryption_api.temporary_passphrase == temporary_passphrase
     assert result == [
         "--symmetric",
         "--cipher-algo",
@@ -131,18 +133,18 @@ def test_symmetric_encryption_command(mock_passphrase):
         "--compress-algo",
         "None",
         "--passphrase-file",
-        "tmp/tmp_test_passphrase",
+        temporary_passphrase,
         "-o",
         str(output_file),
         str(input_file),
     ]
 
 
-def test_symmetric_decryption_command():
+def test_symmetric_decryption_command(binary_path, input_file, output_file):
     # GIVEN an input file and an output file for a gpg command
-    encryption_api = SpringEncryptionAPI(binary_path="/binary/path")
-    input_file = Path("/path/to/input.file")
-    output_file = Path("/path/to/output")
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    input_file = input_file
+    output_file = output_file
     encryption_key = Path("encryption.key")
 
     # WHEN generating the GPG command for symmetric_decryption
@@ -169,10 +171,10 @@ def test_symmetric_decryption_command():
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.symmetric_encryption_command")
 @mock.patch("cg.utils.Process")
 def test_spring_symmetric_encryption(
-    mock_process, mock_command, mock_encrypted_spring_file, mock_run_gpg_command
+    mock_process, mock_command, mock_encrypted_spring_file, binary_path, temporary_passphrase
 ):
     # GIVEN an input file and an output file for a gpg command
-    encryption_api = SpringEncryptionAPI(binary_path="/binary/path")
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     encryption_api.process = mock_process()
     mock_encrypted_spring_file.return_value = Path("/path/to/file.spring.gpg")
     spring_file_path = Path("/path/to/file.spring")
@@ -184,7 +186,7 @@ def test_spring_symmetric_encryption(
         "--compress-algo",
         "None",
         "--passphrase-file",
-        "tmp/tmp_test_passphrase",
+        temporary_passphrase,
         "-o",
         str(mock_encrypted_spring_file),
         str(spring_file_path),
