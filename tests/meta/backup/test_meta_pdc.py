@@ -5,10 +5,10 @@ from cg.meta.backup.pdc import PdcAPI
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_archive_file_to_pdc(mock_process):
+def test_archive_file_to_pdc(mock_process, binary_path):
     """tests execution command to archive files to pdc"""
     # GIVEN
-    pdc_api = PdcAPI(binary_path="/usr/bin/echo")
+    pdc_api = PdcAPI(binary_path=binary_path)
     pdc_api.process = mock_process
 
     # WHEN
@@ -21,10 +21,10 @@ def test_archive_file_to_pdc(mock_process):
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_query_pdc(mock_process):
+def test_query_pdc(mock_process, binary_path):
     """tests execution command to archive files to pdc"""
     # GIVEN
-    pdc_api = PdcAPI(binary_path="/usr/bin/echo")
+    pdc_api = PdcAPI(binary_path=binary_path)
     pdc_api.process = mock_process
 
     # WHEN
@@ -37,10 +37,10 @@ def test_query_pdc(mock_process):
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
-def test_retrieve_file_from_pdc(mock_process):
+def test_retrieve_file_from_pdc(mock_process, binary_path):
     """tests execution command to archive files to pdc"""
     # GIVEN
-    pdc_api = PdcAPI(binary_path="/usr/bin/echo")
+    pdc_api = PdcAPI(binary_path=binary_path)
     pdc_api.process = mock_process
 
     # WHEN
