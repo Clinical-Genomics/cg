@@ -6,6 +6,7 @@ from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
     BalsamicTargetedQCMetrics,
     BalsamicWGSQCMetrics,
+    BalsamicQCMetrics,
 )
 
 
@@ -18,7 +19,7 @@ class BalsamicAnalysis(BaseModel):
     """
 
     config: BalsamicConfigJSON
-    sample_metrics: Dict[str, Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]]
+    sample_metrics: Dict[str, BalsamicQCMetrics]
 
 
 def cast_metrics_type(

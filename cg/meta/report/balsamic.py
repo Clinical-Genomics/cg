@@ -40,8 +40,18 @@ class BalsamicReportAPI(ReportAPI):
         self.analysis_api = analysis_api
 
     @staticmethod
+    def get_wgs_percent_duplication(sample_metrics: BalsamicWGSQCMetrics):
+        """Returns the duplication percentage taking into account both reads"""
+
+        return (
+            (sample_metrics.percent_duplication_r1 + sample_metrics.percent_duplication_r2) / 2
+            if sample_metrics
+            else None
+        )
+
+    @staticmethod
     def get_wgs_metadata(
-        million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
+        self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
         """Returns a report metadata for BALSAMIC WGS analysis"""
 
@@ -50,7 +60,7 @@ class BalsamicReportAPI(ReportAPI):
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
+            duplicates=self.get_wgs_percent_duplication(sample_metrics),
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
         )
