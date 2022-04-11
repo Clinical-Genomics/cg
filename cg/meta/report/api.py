@@ -127,6 +127,13 @@ class ReportAPI(MetaAPI):
         case = self.status_db.family(case_id)
         analysis = self.status_db.analysis(case, analysis_date)
         analysis_metadata = self.analysis_api.get_latest_metadata(case.internal_id)
+
+        if not analysis_metadata:
+            LOG.error(
+                f"Could not generate report data for {case_id}. Unable to retrieve the latest metadata."
+            )
+            raise DeliveryReportError
+
         case_model = self.get_case_data(case, analysis, analysis_metadata)
 
         return ReportModel(
@@ -339,16 +346,14 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_variant_callers(
-        self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
-    ) -> Union[None, list]:
+    def get_variant_callers(self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]) -> list:
         """Extracts the list of variant-calling filters used during analysis"""
 
         raise NotImplementedError
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
-    ) -> Union[None, bool]:
+    ) -> bool:
         """Checks if the report is accredited or not"""
 
         raise NotImplementedError

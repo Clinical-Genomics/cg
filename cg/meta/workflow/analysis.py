@@ -411,7 +411,7 @@ class AnalysisAPI(MetaAPI):
     def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
         return None
 
-    def get_latest_metadata(self, case_id: str) -> Union[MipAnalysis, BalsamicAnalysis, None]:
+    def get_latest_metadata(self, case_id: str) -> Union[None, MipAnalysis, BalsamicAnalysis]:
         """Get the latest metadata of a specific case"""
 
         raise NotImplementedError

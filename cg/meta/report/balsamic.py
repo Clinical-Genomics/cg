@@ -44,9 +44,7 @@ class BalsamicReportAPI(ReportAPI):
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Fetches the sample metadata to include in the report"""
 
-        sample_metrics = (
-            analysis_metadata.sample_metrics[sample.internal_id] if analysis_metadata else None
-        )
+        sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
         million_read_pairs = round(sample.reads / 2000000, 1) if sample.reads else None
 
         if "wgs" in self.get_data_analysis_type(case):
@@ -76,7 +74,6 @@ class BalsamicReportAPI(ReportAPI):
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
         )
 
-    @staticmethod
     def get_wgs_metadata(
         self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
@@ -107,20 +104,13 @@ class BalsamicReportAPI(ReportAPI):
 
         return self.analysis_api.get_bundle_deliverables_type(case.internal_id)
 
-    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> Union[None, str]:
+    def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
-        return (
-            analysis_metadata.config.reference.reference_genome_version
-            if analysis_metadata
-            else None
-        )
+        return analysis_metadata.config.reference.reference_genome_version
 
-    def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> Union[None, list]:
+    def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
         """Extracts the list of BALSAMIC variant-calling filters from the config.json file"""
-
-        if not analysis_metadata:
-            return None
 
         sequencing_type = analysis_metadata.config.analysis.sequencing_type
         analysis_type = analysis_metadata.config.analysis.analysis_type
@@ -138,11 +128,8 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: BalsamicAnalysis
-    ) -> Union[None, bool]:
+    ) -> bool:
         """Checks if the report is accredited or not"""
-
-        if not analysis_metadata:
-            return None
 
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
