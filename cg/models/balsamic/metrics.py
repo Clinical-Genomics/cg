@@ -54,6 +54,7 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     pct_off_bait: Optional[float]
 
     _pct_values = validator(
+        "percent_duplication",
         "pct_target_bases_50x",
         "pct_target_bases_100x",
         "pct_target_bases_250x",
