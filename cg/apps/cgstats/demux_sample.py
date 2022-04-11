@@ -174,7 +174,7 @@ def get_dragen_demux_samples(
             mean_quality_score=float(demultiplexing_stats["Mean Quality Score (PF)"]),
             r1_sample_bases=int(adapter_metrics["R1_SampleBases"]),
             r2_sample_bases=int(adapter_metrics["R2_SampleBases"]),
-            read_length=demux_results.run_info.read_length,
+            read_length=demux_results.run_info.mean_read_length(),
         )
 
     return demux_samples

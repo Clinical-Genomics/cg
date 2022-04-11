@@ -7,6 +7,7 @@ from click.testing import CliRunner
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
@@ -30,7 +31,6 @@ from tests.apps.demultiplex.conftest import (
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_flowcell,
-    fixture_demultiplexed_runs,
 )
 
 LOG = logging.getLogger(__name__)
@@ -280,10 +280,14 @@ def fixture_demultiplexing_api(
 
 @pytest.fixture(name="demultiplex_context")
 def fixture_demultiplex_context(
-    demultiplexing_api: DemultiplexingAPI, stats_api: StatsAPI, cg_context: CGConfig
+    demultiplexing_api: DemultiplexingAPI,
+    stats_api: StatsAPI,
+    real_housekeeper_api: HousekeeperAPI,
+    cg_context: CGConfig,
 ) -> CGConfig:
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.cg_stats_api_ = stats_api
+    cg_context.housekeeper_api_ = real_housekeeper_api
     return cg_context
 
 

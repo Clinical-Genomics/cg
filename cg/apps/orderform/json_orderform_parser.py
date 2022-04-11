@@ -38,7 +38,7 @@ class JsonOrderformParser(OrderformParser):
             str(OrderType.FASTQ): DataDelivery.FASTQ,
             str(OrderType.RML): DataDelivery.FASTQ,
             str(OrderType.MIP_RNA): DataDelivery.ANALYSIS_FILES,
-            str(OrderType.FLUFFY): DataDelivery.NIPT_VIEWER,
+            str(OrderType.FLUFFY): DataDelivery.STATINA,
         }
         if project_type not in project_to_order:
             raise OrderFormError(f"Could not find data delivery for: {project_type}")
@@ -56,6 +56,9 @@ class JsonOrderformParser(OrderformParser):
 
         if data_delivery == self.NO_VALUE:
             return str(self.project_type_to_order_type(self.project_type))
+
+        if data_delivery == str(DataDelivery.NIPT_VIEWER):
+            return str(DataDelivery.STATINA)
 
         try:
             return str(DataDelivery(data_delivery))

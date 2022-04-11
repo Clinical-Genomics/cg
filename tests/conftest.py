@@ -306,9 +306,9 @@ def fixture_apps_dir(fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture(name="fastq_dir")
-def fixture_fastq_dir(fixtures_dir: Path) -> Path:
+def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir"""
-    return fixtures_dir / "fastq"
+    return demultiplexed_runs / "fastq"
 
 
 @pytest.fixture(scope="function", name="project_dir")
@@ -371,6 +371,12 @@ def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
     return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
 
 
+@pytest.fixture(name="delivery_report_html")
+def fixture_delivery_report_html(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path("tests", "fixtures", "apps", "mip", "dna", "store", "empty_delivery_report.html")
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
@@ -389,10 +395,10 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     return analysis_dir / "balsamic"
 
 
-@pytest.fixture(name="balsamic_panel_analysis_dir")
-def fixture_balsamic_panel_analysis_dir(balsamic_analysis_dir: Path) -> Path:
+@pytest.fixture(name="balsamic_wgs_analysis_dir")
+def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    return balsamic_analysis_dir / "tn_panel"
+    return balsamic_analysis_dir / "tn_wgs"
 
 
 @pytest.fixture(name="mip_dna_analysis_dir")
@@ -443,7 +449,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.12.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.14.rml.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -553,6 +559,11 @@ def fixture_compression_object(
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixtures"""
     return apps_dir / "demultiplexing"
+
+
+@pytest.fixture(name="demultiplexed_runs")
+def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
+    return demultiplex_fixtures / "demultiplexed-runs"
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")

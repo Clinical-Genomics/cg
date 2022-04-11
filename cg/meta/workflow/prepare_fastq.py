@@ -35,14 +35,11 @@ class PrepareFastqAPI:
     def is_spring_decompression_needed(self, case_id: str) -> bool:
         """Check if spring decompression needs to be started"""
         compression_objects = self.get_compression_objects(case_id=case_id)
-        for compression_object in compression_objects:
-            if (
-                self.crunchy_api.is_compression_pending(compression_object)
-                or compression_object.pair_exists()
-            ):
-                continue
-            return True
-        return False
+        return any(
+            not self.crunchy_api.is_compression_pending(compression_object)
+            and not compression_object.pair_exists()
+            for compression_object in compression_objects
+        )
 
     def is_spring_decompression_running(self, case_id: str) -> bool:
         """Check if case is being decompressed"""
@@ -77,7 +74,7 @@ class PrepareFastqAPI:
                         "Adding %s to sample %s in housekeeper"
                         % (compression_obj.fastq_first, sample_id)
                     )
-                    result: bool = self.compress_api.add_decompressed_fastq(sample_id)
+                    result: bool = self.compress_api.add_decompressed_fastq(sample_obj=link.sample)
                 else:
                     LOG.info(
                         "%s from sample %s is already in housekeeper"
@@ -88,7 +85,7 @@ class PrepareFastqAPI:
                         "Adding %s to sample %s in housekeeper"
                         % (compression_obj.fastq_first, sample_id)
                     )
-                    result: bool = self.compress_api.add_decompressed_fastq(sample_id)
+                    result: bool = self.compress_api.add_decompressed_fastq(sample_obj=link.sample)
                 else:
                     LOG.info(
                         "%s from sample %s is already in housekeeper"

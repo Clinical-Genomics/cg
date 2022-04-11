@@ -1,5 +1,7 @@
 """Tests for rsync API"""
 import logging
+from typing import List
+
 import pytest
 from pathlib import Path
 
@@ -7,7 +9,7 @@ from cgmodels.cg.constants import Pipeline
 from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store import models, Store
 
 
 def test_get_source_and_destination_paths(
@@ -28,13 +30,15 @@ def test_get_source_and_destination_paths(
     )
 
     # THEN the source path ends with a customer id, followed by "inbox" and a ticket id
-    assert source_and_destination_paths["delivery_source_path"].endswith(
-        f"/cust000/inbox/{str(ticket_number)}/"
+    assert (
+        source_and_destination_paths["delivery_source_path"]
+        .as_posix()
+        .endswith(f"/cust000/inbox/{ticket_number}")
     )
     # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
     assert (
-        source_and_destination_paths["rsync_destination_path"]
-        == f"server.name.se:/some/cust000/inbox/{str(ticket_number)}/"
+        source_and_destination_paths["rsync_destination_path"].as_posix()
+        == "server.name.se:/some/cust000/inbox"
     )
 
 
@@ -63,7 +67,7 @@ def test_set_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
     base_path: Path = rsync_api.log_dir
 
     # WHEN setting the log directory
-    rsync_api.set_log_dir(ticket_id=ticket_number)
+    rsync_api.set_log_dir(folder_prefix=str(ticket_number))
 
     # THEN the log dir should set to a new path, different from the base path
     assert base_path.as_posix() != rsync_api.log_dir.as_posix()
@@ -75,14 +79,14 @@ def test_make_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    rsync_api.set_log_dir(ticket_id=ticket_number)
+    rsync_api.set_log_dir(folder_prefix=str(ticket_number))
     rsync_api.create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
 
     # THEN the created path is
-    assert str(rsync_api.log_dir).startswith(f"/another/path/{str(ticket_number)}")
+    assert str(rsync_api.log_dir).startswith(f"/another/path/{ticket_number}")
 
 
 def test_run_rsync_on_slurm(
@@ -109,6 +113,94 @@ def test_run_rsync_on_slurm(
 
     # THEN check that SARS-COV-2 analysis is not delivered
     assert "Delivering report for SARS-COV-2 analysis" not in caplog.text
+
+    # THEN check that an integer was returned as sbatch number
+    assert isinstance(sbatch_number, int)
+
+
+def test_get_folders_to_deliver(
+    analysis_family: dict, analysis_store_trio, rsync_api: RsyncAPI, case_id: str
+):
+    """Tests the ability for the rsync api to get case and sample names"""
+    # GIVEN a case
+
+    # WHEN the function gets the folders
+    folder_list: List[str] = rsync_api.get_folders_to_deliver(
+        case_id=case_id, sample_files_present=True, case_files_present=True
+    )
+
+    # THEN it the list should contain the case name and all the samples
+    assert folder_list == [
+        analysis_family["samples"][0]["name"],
+        analysis_family["samples"][1]["name"],
+        analysis_family["samples"][2]["name"],
+        analysis_family["name"],
+    ]
+
+
+def test_concatenate_rsync_commands(
+    analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket_nr
+):
+    """Tests the function to concatenate rsync commands for transferring multiple files"""
+    # GIVEN a list with a case and a sample name
+    folder_list: List[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
+    source_and_destination_paths = {
+        "delivery_source_path": project_dir / customer_id / str(ticket_nr),
+        "rsync_destination_path": project_dir / customer_id,
+    }
+    # WHEN then commands are generated
+    commands: str = RsyncAPI.concatenate_rsync_commands(
+        folder_list=folder_list,
+        source_and_destination_paths=source_and_destination_paths,
+        ticket_id=ticket_nr,
+    )
+    # THEN the correct folder should be added to the source path
+    assert (
+        " ".join(
+            [
+                str(source_and_destination_paths["delivery_source_path"] / analysis_family["name"]),
+                str(source_and_destination_paths["delivery_source_path"]),
+            ]
+        )
+        in commands
+    )
+    assert (
+        " ".join(
+            [
+                str(
+                    source_and_destination_paths["delivery_source_path"]
+                    / analysis_family["samples"][0]["name"]
+                ),
+                str(source_and_destination_paths["delivery_source_path"]),
+            ]
+        )
+        in commands
+    )
+
+
+def test_slurm_rsync_single_case(
+    microsalt_case: models.Family, rsync_api: RsyncAPI, caplog, mocker, helpers, ticket_number: int
+):
+    """Test for running rsync on a single case on slurm"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a valid microsalt case
+    case: models.Family = microsalt_case
+
+    # GIVEN paths needed to run rsync
+    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
+    RsyncAPI.get_source_and_destination_paths.return_value = {
+        "delivery_source_path": Path("/path/to/source"),
+        "rsync_destination_path": Path("/path/to/destination"),
+    }
+
+    mocker.patch.object(Store, "get_ticket_from_case")
+    Store.get_ticket_from_case.return_value = ticket_number
+
+    # WHEN the destination path is created
+    sbatch_number: int = rsync_api.slurm_rsync_single_case(
+        case_id=case.internal_id, case_files_present=True, dry_run=True
+    )
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
