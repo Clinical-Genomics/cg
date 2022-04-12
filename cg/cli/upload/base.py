@@ -118,7 +118,7 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
-        if DataDelivery.SCOUT in case_obj.data_analysis:
+        if DataDelivery.SCOUT in case_obj.data_delivery:
             context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
         status_db.commit()
