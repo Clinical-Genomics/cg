@@ -8,7 +8,7 @@ from typing import Optional
 import click
 
 from cg.cli.upload.nipt import nipt
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import AnalysisUploadError, CgError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -118,7 +118,8 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
-        context.invoke(scout, case_id=family_id)
+        if DataDelivery.SCOUT in case_obj.data_analysis:
+            context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
         status_db.commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
