@@ -71,14 +71,12 @@ class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     median_coverage: Optional[float]
     percent_duplication_r1: Optional[float]
     percent_duplication_r2: Optional[float]
-    pct_5x: Optional[float]
     pct_15x: Optional[float]
     pct_30x: Optional[float]
     pct_60x: Optional[float]
     pct_100x: Optional[float]
 
     _pct_values = validator(
-        "pct_5x",
         "pct_15x",
         "pct_30x",
         "pct_60x",

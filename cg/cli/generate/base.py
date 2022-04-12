@@ -12,5 +12,5 @@ def generate():
     """Generates and/or modifies files"""
 
 
-generate.add_command(balsamic)
 generate.add_command(mip_dna)
+generate.add_command(balsamic)

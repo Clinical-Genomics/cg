@@ -49,10 +49,10 @@ class BalsamicReportAPI(ReportAPI):
 
         if "wgs" in self.get_data_analysis_type(case):
             return self.get_wgs_metadata(million_read_pairs, sample_metrics)
-        else:
-            return self.get_panel_metadata(
-                sample, million_read_pairs, sample_metrics, analysis_metadata
-            )
+
+        return self.get_panel_metadata(
+            sample, million_read_pairs, sample_metrics, analysis_metadata
+        )
 
     @staticmethod
     def get_panel_metadata(
