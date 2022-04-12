@@ -167,6 +167,6 @@ class BalsamicReportAPI(ReportAPI):
             "data_analysis": REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
             "samples": self.get_sample_required_fields(case, REQUIRED_SAMPLE_BALSAMIC_FIELDS),
             "methods": self.get_sample_required_fields(case, REQUIRED_SAMPLE_METHODS_FIELDS),
-            "timestamp": self.get_sample_required_fields(case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS),
+            "timestamps": self.get_sample_required_fields(case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS),
             "metadata": self.get_sample_required_fields(case, required_sample_metadata_fields),
         }
