@@ -1,16 +1,18 @@
 """Schemas for scout serialisation"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from pydantic import BaseModel, Field, validator
 from typing_extensions import Literal
+
+from cg.constants.gender import PlinkGender, Gender
 
 
 class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
-    sex: Literal["0", "1", "2", "other"]
+    sex: Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER]
     father: Optional[str]
     mother: Optional[str]
     phenotype: Literal[1, 2, 0]
@@ -24,8 +26,8 @@ class Individual(BaseModel):
 
     @validator("sex")
     def convert_sex_to_zero(cls, v):
-        if v == "other":
-            return "0"
+        if v == Gender.OTHER:
+            return PlinkGender.UNKNOWN
         return v
 
 
@@ -47,6 +49,13 @@ class Gene(BaseModel):
     polyphen_prediction: Optional[str]
 
 
+class DiagnosisPhenotypes(BaseModel):
+    disease_nr: int
+    disease_id: str
+    description: str
+    individuals: Optional[List[Dict[str, str]]]
+
+
 class ScoutExportCase(BaseModel):
     id: str = Field(str, alias="_id")
     analysis_date: datetime
@@ -61,7 +70,7 @@ class ScoutExportCase(BaseModel):
     rank_score_threshold: int = 5
     phenotype_terms: Optional[List[Phenotype]]
     phenotype_groups: Optional[List[Phenotype]]
-    diagnosis_phenotypes: Optional[List[int]]
+    diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]]
     diagnosis_genes: Optional[List[int]]
 
     @validator("genome_build")

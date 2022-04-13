@@ -36,31 +36,31 @@ def fixture_sample_dict() -> dict:
 @pytest.fixture(name="scout_dir")
 def fixture_scout_dir(apps_dir: Path) -> Path:
     """Return the path to the scout fixtures dir"""
-    return apps_dir / "scout"
+    return Path(apps_dir, "scout")
 
 
 @pytest.fixture(name="causatives_file")
 def fixture_causatives_file(scout_dir: Path) -> Path:
     """Return the path to a file with causatives output"""
-    return scout_dir / "export_causatives.json"
+    return Path(scout_dir, "export_causatives.json")
 
 
 @pytest.fixture(name="cases_file")
 def fixture_cases_file(scout_dir: Path) -> Path:
     """Return the path to a file with export cases output"""
-    return scout_dir / "case_export.json"
+    return Path(scout_dir, "case_export.json")
 
 
 @pytest.fixture(name="none_case_file")
 def fixture_none_case_file(scout_dir: Path) -> Path:
     """Return the path to a file with export cases output where mandatory fields are None"""
-    return scout_dir / "none_case_export.json"
+    return Path(scout_dir, "none_case_export.json")
 
 
 @pytest.fixture(name="other_sex_case_file")
 def fixture_other_sex_case_file(scout_dir: Path) -> Path:
     """Return the path to a file with export cases output where sex is 'other0'"""
-    return scout_dir / "other_sex_case.json"
+    return Path(scout_dir, "other_sex_case.json")
 
 
 @pytest.fixture(name="none_case_output")
