@@ -27,7 +27,7 @@ def test_maximum_processing_queue_full(mock_store, mock_pdc, cg_context):
     mock_store.flowcells(status="processing").count.return_value = 1
 
     # THEN this method should return False
-    assert backup_api.check_processing(max_processing_flowcells=1) is False
+    assert backup_api.check_processing(max_processing_flow_cells=1) is False
 
 
 @mock.patch("cg.meta.backup.pdc")
@@ -41,7 +41,7 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc, cg_context):
     mock_store.flowcells(status="processing").count.return_value = 0
 
     # THEN this method should return True
-    assert backup_api.check_processing(max_processing_flowcells=1) is True
+    assert backup_api.check_processing(max_processing_flow_cells=1) is True
 
 
 @mock.patch("cg.store.models.Flowcell")
@@ -55,11 +55,11 @@ def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flowcell, cg_co
     # WHEN a flow cell is requested to be retrieved from PDC
     mock_store.flowcells(status="requested").first.return_value = mock_flowcell
 
-    popped_flowcell = backup_api.pop_flowcell()
+    popped_flow_cell = backup_api.get_first_flow_cell()
 
     # THEN a flow cell is returned, the status is set to "processing", and status-db is updated with
     # the new status
-    assert popped_flowcell is not None
+    assert popped_flow_cell is not None
 
 
 @mock.patch("cg.store.models.Flowcell")
@@ -72,7 +72,7 @@ def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell, cg_context):
 
     # WHEN a flow cell is requested to be retrieved from PDC
     # AND it's a  dry run
-    popped_flow_cell = backup_api.pop_flowcell()
+    popped_flow_cell = backup_api.get_first_flow_cell()
 
     # THEN a flow cell is returned, the status is set to "processing", but status-db is NOT
     # updated with # the new status
@@ -90,7 +90,7 @@ def test_pop_flow_cell_no_flow_cell_requested(mock_store, mock_pdc, cg_context):
     # WHEN there are no flow cells requested to be retrieved from PDC
     mock_store.flowcells(status="requested").first.return_value = None
 
-    popped_flow_cell = backup_api.pop_flowcell()
+    popped_flow_cell = backup_api.get_first_flow_cell()
 
     # THEN no flow cell is returned
     assert popped_flow_cell is None
@@ -112,15 +112,15 @@ def test_fetch_flow_cell_processing_queue_full(
 
     # WHEN the processing queue is full
     backup_api.check_processing.return_value = False
-    result = backup_api.fetch_flowcell(mock_flow_cell, dry_run=False)
+    result = backup_api.fetch_flow_cell(mock_flow_cell, dry_run=False)
 
     # THEN no flow cell will be fetched and a log message indicates that the processing queue is
     # full
     assert result is None
-    assert "processing queue is full" in caplog.text
+    assert "Processing queue is full" in caplog.text
 
 
-@mock.patch("cg.meta.backup.backup.BackupApi.pop_flowcell")
+@mock.patch("cg.meta.backup.backup.BackupApi.get_first_flow_cell")
 @mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
@@ -146,15 +146,15 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     # AND no flow cell has been specified
     mock_flow_cell = None
 
-    result = backup_api.fetch_flowcell(mock_flow_cell, dry_run=False)
+    result = backup_api.fetch_flow_cell(mock_flow_cell, dry_run=False)
 
     # THEN no flow cell will be fetched and a log message indicates that no flow cells have been
     # requested
     assert result is None
-    assert "no flow cells requested" in caplog.text
+    assert "No flow cells requested" in caplog.text
 
 
-@mock.patch("cg.meta.backup.backup.BackupApi.pop_flowcell")
+@mock.patch("cg.meta.backup.backup.BackupApi.get_first_flow_cell")
 @mock.patch("cg.meta.backup.backup.BackupApi.check_processing")
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
@@ -180,14 +180,14 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     )
     backup_api.check_processing.return_value = True
 
-    result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
+    result = backup_api.fetch_flow_cell(mock_flowcell, dry_run=False)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flow cell is set to "retrieved"
     assert (
-        f'Status for flow cell {mock_pop_flowcell.return_value.name} set to "retrieved"'
+        f"Status for flow cell {mock_pop_flowcell.return_value.name} set to retrieved"
         in caplog.text
     )
     assert mock_pop_flowcell.return_value.status == "retrieved"
@@ -219,13 +219,13 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
     backup_api.check_processing.return_value = True
 
-    result = backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
+    result = backup_api.fetch_flow_cell(mock_flowcell, dry_run=False)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flow cell is set to "retrieved"
-    assert f'Status for flow cell {mock_flowcell.name} set to "retrieved"' in caplog.text
+    assert f"Status for flow cell {mock_flowcell.name} set to retrieved" in caplog.text
     assert mock_flowcell.status == "retrieved"
 
     # AND status-db is updated with the new status
@@ -256,15 +256,15 @@ def test_fetch_flowcell_pdc_retrieval_failed(
     backup_api.check_processing.return_value = True
 
     # WHEN the retrieval process fails
-    mock_pdc.retrieve_flowcell.side_effect = subprocess.CalledProcessError(1, "echo")
+    mock_pdc.retrieve_flow_cell.side_effect = subprocess.CalledProcessError(1, "echo")
     with pytest.raises(subprocess.CalledProcessError):
-        backup_api.fetch_flowcell(mock_flowcell, dry_run=False)
+        backup_api.fetch_flow_cell(mock_flowcell, dry_run=False)
 
     # THEN the failure to retrieve is logged
     assert "retrieval failed" in caplog.text
 
 
-@mock.patch("cg.meta.backup.backup.SpringBackupAPI.remove_archived_spring_files")
+@mock.patch("cg.meta.backup.backup.SpringBackupAPI.remove_archived_spring_file")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.mark_file_as_archived")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI")
@@ -297,7 +297,9 @@ def test_encrypt_and_archive_spring_file(
     mock_spring_encryption_api.cleanup.assert_called_with(spring_file_path)
 
     # AND the spring file should be encrypted
-    mock_spring_encryption_api.spring_symmetric_encryption.assert_called_once_with(spring_file_path)
+    mock_spring_encryption_api.get_spring_symmetric_encryption.assert_called_once_with(
+        spring_file_path
+    )
 
     # AND the key should be encrypted
     mock_spring_encryption_api.key_asymmetric_encryption.assert_called_once_with(spring_file_path)
