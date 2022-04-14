@@ -66,8 +66,7 @@ def test_asymmetric_encryption_command(binary_path, input_file, output_file):
         input_file=input_file, output_file=output_file
     )
 
-    # THEN the result should be [ "--encrypt", "--recipient", "Clinical Genomics", "-o",
-    # str(output_file), str(input_file)]
+    # THEN a list of parameters should be returned
     assert result == [
         "--encrypt",
         "--recipient",
@@ -115,8 +114,9 @@ def test_symmetric_encryption_command(
         input_file=input_file, output_file=output_file
     )
 
-    # THEN the result should be correct
+    # THEN the the passphrase should match
     assert encryption_api.temporary_passphrase == temporary_passphrase
+    # THEN a list of parameters should be returned
     assert result == [
         "--symmetric",
         "--cipher-algo",
@@ -186,5 +186,5 @@ def test_spring_symmetric_encryption(
     # WHEN generating the GPG command for symmetric_encryption
     encryption_api.spring_symmetric_encryption(spring_file_path=spring_file_path)
 
-    # THEN the result should be correct
+    # THEN a list of parameters should be returned
     encryption_api.run_gpg_command.assert_called_once_with(mock_command.return_value)

@@ -48,7 +48,7 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc, cg_context):
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flow_cell, cg_context):
-    """Tests pop_flow cell method of the backup API"""
+    """Tests pop_flowcell method of the backup API when requesting next flow cell"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
@@ -66,7 +66,7 @@ def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flow_cell, cg_c
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_pop_flow_cell_dry_run(mock_store, mock_pdc, cg_context):
-    """Tests pop_flow cell method of the backup API"""
+    """Tests pop_flowcell method of the backup API when using dry_run"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
@@ -83,7 +83,7 @@ def test_pop_flow_cell_dry_run(mock_store, mock_pdc, cg_context):
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_pop_flow_cell_no_flow_cell_requested(mock_store, mock_pdc, cg_context):
-    """Tests pop_flow cell method of the backup API"""
+    """Tests pop_flowcell method of the backup API when no flow cell requested"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
@@ -103,7 +103,7 @@ def test_pop_flow_cell_no_flow_cell_requested(mock_store, mock_pdc, cg_context):
 def test_fetch_flow_cell_processing_queue_full(
     mock_store, mock_pdc, mock_flow_cell, cg_context, caplog
 ):
-    """Tests the fetch_flow cell method of the backup API"""
+    """Tests the fetch_flowcell method of the backup API when processing queue is full"""
 
     caplog.set_level(logging.INFO)
 
@@ -132,7 +132,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     cg_context,
     caplog,
 ):
-    """Tests the fetch_flow cell method of the backup API"""
+    """Tests the fetch_flowcell method of the backup API when no flow cell requested"""
 
     caplog.set_level(logging.INFO)
 
@@ -166,7 +166,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     cg_context,
     caplog,
 ):
-    """Tests the fetch_flow cell method of the backup API"""
+    """Tests the fetch_flowcell method of the backup API when retrieving next flow cell"""
 
     caplog.set_level(logging.INFO)
 
@@ -210,7 +210,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     cg_context,
     caplog,
 ):
-    """Tests the fetch_flow cell method of the backup API"""
+    """Tests the fetch_flowcell method of the backup API when given a flow cell"""
 
     caplog.set_level(logging.INFO)
 
@@ -245,7 +245,7 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
     cg_context,
     caplog,
 ):
-    """Tests the fetch_flow cell method of the backup API"""
+    """Tests the fetch_flowcell method of the backup API when PDC retrieval failed"""
 
     caplog.set_level(logging.INFO)
 
