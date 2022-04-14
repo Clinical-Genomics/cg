@@ -3,6 +3,8 @@
 from pathlib import Path
 
 import pytest
+
+from cg.constants.subject import RelationshipStatus, Gender, PhenotypeStatus
 from tests.mocks.process_mock import ProcessMock
 
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -22,13 +24,13 @@ def fixture_sample_dict() -> dict:
         "bam_path": "/path/to/sample.bam",
         "mt_bam": "/path/to/reduced_mt.bam",
         "capture_kit": None,
-        "father": "0",
-        "mother": "0",
+        "father": RelationshipStatus.HAS_NO_PARENT,
+        "mother": RelationshipStatus.HAS_NO_PARENT,
         "sample_id": "sample_id",
         "sample_name": "sample_name",
-        "sex": "male",
+        "sex": Gender.MALE,
         "tissue_type": "unknown",
-        "phenotype": "affected",
+        "phenotype": PhenotypeStatus.AFFECTED,
     }
     return dict(sample_dict)
 

@@ -6,7 +6,13 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel, Field, validator
 from typing_extensions import Literal
 
-from cg.constants.gender import PlinkGender, Gender
+from cg.constants.subject import (
+    PlinkGender,
+    Gender,
+    PlinkPhenotypeStatus,
+    Relationship,
+    RelationshipStatus,
+)
 
 
 class Individual(BaseModel):
@@ -15,20 +21,20 @@ class Individual(BaseModel):
     sex: Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER]
     father: Optional[str]
     mother: Optional[str]
-    phenotype: Literal[1, 2, 0]
+    phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 
-    @validator("father", "mother")
-    def convert_to_zero(cls, v):
-        if v is None:
-            return "0"
-        return v
+    @validator(Relationship.FATHER, Relationship.MOTHER)
+    def convert_to_zero(cls, value):
+        if value is None:
+            return RelationshipStatus.HAS_NO_PARENT
+        return value
 
     @validator("sex")
-    def convert_sex_to_zero(cls, v):
-        if v == Gender.OTHER:
+    def convert_sex_to_zero(cls, value):
+        if value == Gender.OTHER:
             return PlinkGender.UNKNOWN
-        return v
+        return value
 
 
 class Panel(BaseModel):
