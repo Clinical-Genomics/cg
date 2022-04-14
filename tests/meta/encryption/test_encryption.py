@@ -62,7 +62,7 @@ def test_asymmetric_encryption_command(binary_path, input_file, output_file):
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
 
     # WHEN generating the GPG command for asymmetric_encryption
-    result = encryption_api.asymmetric_encryption_command(
+    result = encryption_api.get_asymmetric_encryption_command(
         input_file=input_file, output_file=output_file
     )
 
@@ -83,7 +83,7 @@ def test_asymmetric_decryption_command(binary_path, input_file, output_file):
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
 
     # WHEN generating the GPG command for asymmetric_decryption
-    result = encryption_api.asymmetric_decryption_command(
+    result = encryption_api.get_asymmetric_decryption_command(
         input_file=input_file, output_file=output_file
     )
 
@@ -111,7 +111,7 @@ def test_symmetric_encryption_command(
     mock_passphrase.return_value = temporary_passphrase
 
     # WHEN generating the GPG command for symmetric_encryption
-    result = encryption_api.symmetric_encryption_command(
+    result = encryption_api.get_symmetric_encryption_command(
         input_file=input_file, output_file=output_file
     )
 
@@ -138,7 +138,7 @@ def test_symmetric_decryption_command(binary_path, input_file, output_file):
     encryption_key = Path("encryption.key")
 
     # WHEN generating the GPG command for symmetric_decryption
-    result = encryption_api.symmetric_decryption_command(
+    result = encryption_api.get_symmetric_decryption_command(
         input_file=input_file, output_file=output_file, encryption_key=encryption_key
     )
 
@@ -158,7 +158,7 @@ def test_symmetric_decryption_command(binary_path, input_file, output_file):
 
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.run_gpg_command")
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.encrypted_spring_file_path")
-@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.symmetric_encryption_command")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.get_symmetric_encryption_command")
 @mock.patch("cg.utils.Process")
 def test_spring_symmetric_encryption(
     mock_process, mock_command, mock_encrypted_spring_file, binary_path, temporary_passphrase
@@ -184,7 +184,7 @@ def test_spring_symmetric_encryption(
     spring_file_path = Path("/path/to/file.spring")
 
     # WHEN generating the GPG command for symmetric_encryption
-    encryption_api.spring_symmetric_encryption(spring_file_path=spring_file_path)
+    encryption_api.get_spring_symmetric_encryption(spring_file_path=spring_file_path)
 
     # THEN the result should be correct
     encryption_api.run_gpg_command.assert_called_once_with(mock_command.return_value)
