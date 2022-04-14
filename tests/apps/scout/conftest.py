@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.pedigree import Pedigree
 from cg.constants.subject import RelationshipStatus, Gender, PhenotypeStatus
 from tests.mocks.process_mock import ProcessMock
 
@@ -24,13 +25,13 @@ def fixture_sample_dict() -> dict:
         "bam_path": "/path/to/sample.bam",
         "mt_bam": "/path/to/reduced_mt.bam",
         "capture_kit": None,
-        "father": RelationshipStatus.HAS_NO_PARENT,
-        "mother": RelationshipStatus.HAS_NO_PARENT,
+        Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+        Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
         "sample_id": "sample_id",
         "sample_name": "sample_name",
-        "sex": Gender.MALE,
+        Pedigree.SEX: Gender.MALE,
         "tissue_type": "unknown",
-        "phenotype": PhenotypeStatus.AFFECTED,
+        Pedigree.PHENOTYPE: PhenotypeStatus.AFFECTED,
     }
     return dict(sample_dict)
 

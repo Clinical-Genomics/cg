@@ -2,6 +2,7 @@ import pytest
 
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.constants.subject import PlinkPhenotypeStatus, RelationshipStatus, PlinkGender
+from cg.constants.pedigree import Pedigree
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 
@@ -59,26 +60,26 @@ def fixture_scout_export_case_data(customer_id: str) -> dict:
             {
                 "individual_id": "individual_1",
                 "bam_file": "",
-                "sex": PlinkGender.MALE,
-                "father": "individual_2",
-                "mother": "individual_3",
-                "phenotype": PlinkPhenotypeStatus.AFFECTED,
+                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.FATHER: "individual_2",
+                Pedigree.MOTHER: "individual_3",
+                Pedigree.PHENOTYPE: PlinkPhenotypeStatus.AFFECTED,
             },
             {
                 "individual_id": "individual_2",
                 "bam_file": "",
-                "sex": PlinkGender.MALE,
-                "father": RelationshipStatus.HAS_NO_PARENT,
-                "mother": RelationshipStatus.HAS_NO_PARENT,
-                "phenotype": PlinkPhenotypeStatus.UNAFFECTED,
+                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
             },
             {
                 "individual_id": "individual_3",
                 "bam_file": "",
-                "sex": PlinkGender.FEMALE,
-                "father": RelationshipStatus.HAS_NO_PARENT,
-                "mother": RelationshipStatus.HAS_NO_PARENT,
-                "phenotype": PlinkPhenotypeStatus.UNAFFECTED,
+                Pedigree.SEX: PlinkGender.FEMALE,
+                Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
             },
         ],
     }

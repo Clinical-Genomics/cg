@@ -26,11 +26,5 @@ class PlinkGender(str, Enum):
     FEMALE = 2
 
 
-class Relationship(str, Enum):
-    FATHER = "father"
-    MOTHER = "mother"
-    CHILD = "child"
-
-
 class RelationshipStatus(str, Enum):
     HAS_NO_PARENT = 0
