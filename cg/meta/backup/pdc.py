@@ -18,12 +18,12 @@ class PdcAPI:
         self.process: Process = Process(binary=binary_path)
 
     @classmethod
-    def retrieve_flowcell(
-        cls, flowcell_id: str, sequencer_type: str, root_dir: dict, dry: bool = False
+    def retrieve_flow_cell(
+        cls, flow_cell_id: str, sequencer_type: str, root_dir: dict, dry: bool = False
     ) -> None:
         """Fetch a flow cell back from the backup solution."""
         path = root_dir[sequencer_type]
-        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flowcell_id} {SERVER} {path}"
+        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flow_cell_id} {SERVER} {path}"
         command = ["ssh", "nas-9.scilifelab.se", bash_command]
         LOG.info(" ".join(command))
         if not dry:
