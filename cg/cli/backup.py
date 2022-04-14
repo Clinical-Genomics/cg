@@ -7,7 +7,7 @@ import click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import DRY_RUN, HousekeeperTags
+from cg.constants.constants import DRY_RUN, FlowCellStatus, HousekeeperTags
 from cg.meta.backup.backup import BackupApi, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
@@ -58,8 +58,8 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
         return
 
     if not dry_run:
-        LOG.info(f"{flow_cell}: updating flow cell status to requested")
-        flow_cell_obj.status = "requested"
+        LOG.info("%s: updating flow cell status to %", flow_cell, FlowCellStatus.REQUESTED)
+        flow_cell_obj.status = FlowCellStatus.REQUESTED
         status_api.commit()
 
 
