@@ -1,17 +1,18 @@
 """ Module for retrieving FCs from backup """
 import logging
 import subprocess
-import time
 from pathlib import Path
 from typing import Optional
 
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import FlowCellStatus
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.store import Store, models
+from cg.utils.time import get_elapsed_time, get_start_time
 
 LOG = logging.getLogger(__name__)
 
@@ -25,22 +26,23 @@ class BackupApi:
         self.pdc: PdcAPI = pdc_api
         self.root_dir: dict = root_dir
 
-    def check_processing(self, max_processing_flowcells: int = 1) -> bool:
+    def check_processing(self, max_processing_flow_cells: int = 1) -> bool:
         """Check if the processing queue for flow cells is not full."""
-        processing_flowcells = self.status.flowcells(status="processing").count()
-        LOG.debug("processing flow cells: %s", processing_flowcells)
-        return processing_flowcells < max_processing_flowcells
+        processing_flow_cells = self.status.flowcells(status=FlowCellStatus.PROCESSING).count()
+        LOG.debug("Processing flow cells: %s", processing_flow_cells)
+        return processing_flow_cells < max_processing_flow_cells
 
-    def pop_flowcell(self) -> Optional[models.Flowcell]:
-        """Get the top flow cell from the requested queue"""
-        flowcell_obj: Optional[models.Flowcell] = self.status.flowcells(status="requested").first()
-        if not flowcell_obj:
+    def get_first_flow_cell(self) -> Optional[models.Flowcell]:
+        """Get the first flow cell from the requested queue"""
+        flow_cell_obj: Optional[models.Flowcell] = self.status.flowcells(
+            status=FlowCellStatus.REQUESTED
+        ).first()
+        if not flow_cell_obj:
             return None
+        return flow_cell_obj
 
-        return flowcell_obj
-
-    def fetch_flowcell(
-        self, flowcell_obj: Optional[models.Flowcell] = None, dry_run: bool = False
+    def fetch_flow_cell(
+        self, flow_cell_obj: Optional[models.Flowcell] = None, dry_run: bool = False
     ) -> Optional[float]:
         """Start fetching a flow cell from backup if possible.
 
@@ -48,43 +50,44 @@ class BackupApi:
         2. The requested queue is not emtpy
         """
         if self.check_processing() is False:
-            LOG.info("processing queue is full")
+            LOG.info("Processing queue is full")
             return None
 
-        if not flowcell_obj:
-            flowcell_obj = self.pop_flowcell()
+        if not flow_cell_obj:
+            flow_cell_obj = self.get_first_flow_cell()
 
-        if not flowcell_obj:
-            LOG.info("no flow cells requested")
+        if not flow_cell_obj:
+            LOG.info("No flow cells requested")
             return None
 
-        flowcell_obj.status = "processing"
+        flow_cell_obj.status = FlowCellStatus.PROCESSING
         if not dry_run:
             self.status.commit()
-            LOG.info("%s: retrieving from PDC", flowcell_obj.name)
+            LOG.info("%s: retrieving from PDC", flow_cell_obj.name)
 
-        start_time = time.time()
+        start_time = get_start_time()
 
         try:
-            self.pdc.retrieve_flowcell(
-                flowcell_id=flowcell_obj.name,
-                sequencer_type=flowcell_obj.sequencer_type,
+            self.pdc.retrieve_flow_cell(
+                flow_cell_id=flow_cell_obj.name,
+                sequencer_type=flow_cell_obj.sequencer_type,
                 root_dir=self.root_dir,
                 dry=dry_run,
             )
             if not dry_run:
-                flowcell_obj.status = "retrieved"
+                flow_cell_obj.status = FlowCellStatus.RETRIEVED
                 self.status.commit()
-                LOG.info('Status for flow cell %s set to "retrieved"', flowcell_obj.name)
+                LOG.info(
+                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
+                )
         except subprocess.CalledProcessError as error:
-            LOG.error("%s: retrieval failed", flowcell_obj.name)
+            LOG.error("%s: retrieval failed", flow_cell_obj.name)
             if not dry_run:
-                flowcell_obj.status = "requested"
+                flow_cell_obj.status = FlowCellStatus.REQUESTED
                 self.status.commit()
             raise error
 
-        end_time = time.time()
-        return end_time - start_time
+        return get_elapsed_time(start_time=start_time)
 
 
 class SpringBackupAPI:
@@ -107,7 +110,7 @@ class SpringBackupAPI:
         LOG.debug(f"*** START BACKUP PROCESS OF SPRING FILE %s ***", spring_file_path)
         self.encryption_api.cleanup(spring_file_path)
         try:
-            self.encryption_api.spring_symmetric_encryption(spring_file_path)
+            self.encryption_api.get_spring_symmetric_encryption(spring_file_path)
             self.encryption_api.key_asymmetric_encryption(spring_file_path)
             self.encryption_api.compare_spring_file_checksums(spring_file_path)
             self.pdc.archive_file_to_pdc(
@@ -119,7 +122,7 @@ class SpringBackupAPI:
                 dry_run=self.dry_run,
             )
             self.mark_file_as_archived(spring_file_path)
-            self.remove_archived_spring_files(spring_file_path)
+            self.remove_archived_spring_file(spring_file_path)
             LOG.debug(f"*** ARCHIVING PROCESS COMPLETED SUCCESSFULLY ***")
         except subprocess.CalledProcessError as error:
             LOG.error("Encryption failed: %s", error.stderr)
@@ -162,14 +165,14 @@ class SpringBackupAPI:
         LOG.info("Setting %s to archived in Housekeeper", spring_file_path)
         self.hk_api.set_to_archive(file=hk_spring_file, value=True)
 
-    def needs_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
+    def is_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
         """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted"""
         return (
             self.hk_api.files(path=str(spring_file_path)).first().to_archive
             and not spring_file_path.exists()
         )
 
-    def remove_archived_spring_files(self, spring_file_path: Path) -> None:
+    def remove_archived_spring_file(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving"""
         self.encryption_api.cleanup(spring_file_path)
         if not self.dry_run:
