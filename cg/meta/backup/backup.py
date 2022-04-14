@@ -110,7 +110,7 @@ class SpringBackupAPI:
         LOG.debug(f"*** START BACKUP PROCESS OF SPRING FILE %s ***", spring_file_path)
         self.encryption_api.cleanup(spring_file_path)
         try:
-            self.encryption_api.get_spring_symmetric_encryption(spring_file_path)
+            self.encryption_api.spring_symmetric_encryption(spring_file_path)
             self.encryption_api.key_asymmetric_encryption(spring_file_path)
             self.encryption_api.compare_spring_file_checksums(spring_file_path)
             self.pdc.archive_file_to_pdc(

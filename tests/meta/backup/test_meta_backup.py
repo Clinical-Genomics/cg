@@ -297,9 +297,7 @@ def test_encrypt_and_archive_spring_file(
     mock_spring_encryption_api.cleanup.assert_called_with(spring_file_path)
 
     # AND the spring file should be encrypted
-    mock_spring_encryption_api.get_spring_symmetric_encryption.assert_called_once_with(
-        spring_file_path
-    )
+    mock_spring_encryption_api.spring_symmetric_encryption.assert_called_once_with(spring_file_path)
 
     # AND the key should be encrypted
     mock_spring_encryption_api.key_asymmetric_encryption.assert_called_once_with(spring_file_path)
