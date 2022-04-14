@@ -66,8 +66,7 @@ def test_asymmetric_encryption_command(binary_path, input_file, output_file):
         input_file=input_file, output_file=output_file
     )
 
-    # THEN the result should be [ "--encrypt", "--recipient", "Clinical Genomics", "-o",
-    # str(output_file), str(input_file)]
+    # THEN a list of parameters should be returned
     assert result == [
         "--encrypt",
         "--recipient",
