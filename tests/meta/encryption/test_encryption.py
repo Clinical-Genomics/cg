@@ -186,5 +186,5 @@ def test_spring_symmetric_encryption(
     # WHEN generating the GPG command for symmetric_encryption
     encryption_api.spring_symmetric_encryption(spring_file_path=spring_file_path)
 
-    # THEN the result should be correct
+    # THEN a list of parameters should be returned
     encryption_api.run_gpg_command.assert_called_once_with(mock_command.return_value)
