@@ -7,13 +7,12 @@ from typing import Iterable, List, Optional
 import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.compress.helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-
-from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
 
