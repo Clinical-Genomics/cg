@@ -9,7 +9,7 @@ from mock import call
 from tests.mocks.hk_mock import MockFile
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.encryption import SpringEncryptionSuffix
+from cg.constants import FileExtensions
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupApi, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
@@ -284,12 +284,10 @@ def test_encrypt_and_archive_spring_file(
 
     # WHEN running the encryption and archiving process
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
     mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        SpringEncryptionSuffix.KEY_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
+        FileExtensions.KEY + FileExtensions.GPG
     )
     spring_backup_api.encrypt_and_archive_spring_file(spring_file_path)
 
@@ -344,12 +342,10 @@ def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
 
     # WHEN running the encryption and archiving process, and the encryption command fails
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
     mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        SpringEncryptionSuffix.KEY_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
+        FileExtensions.KEY + FileExtensions.GPG
     )
     mock_pdc.archive_file_to_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
     spring_backup_api.encrypt_and_archive_spring_file(spring_file_path=spring_file_path)
@@ -377,12 +373,10 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
 
     # WHEN running the encryption and archiving process
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
     mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        SpringEncryptionSuffix.KEY_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
+        FileExtensions.KEY + FileExtensions.GPG
     )
 
     mock_spring_encryption_api.compare_spring_file_checksums.side_effect = ChecksumFailedError(
@@ -466,12 +460,10 @@ def test_decrypt_and_retrieve_spring_file(
 
     # WHEN running the decryption and retrieval process
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
     mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        SpringEncryptionSuffix.KEY_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
+        FileExtensions.KEY + FileExtensions.GPG
     )
     spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path)
 
@@ -506,12 +498,10 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
 
     # WHEN running the encryption and archiving process
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
     mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        SpringEncryptionSuffix.KEY_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
+        FileExtensions.KEY + FileExtensions.GPG
     )
     mock_pdc.retrieve_file_from_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
     spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path=spring_file_path)

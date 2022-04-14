@@ -73,6 +73,10 @@ class FlowCellStatus(StrEnum):
     RETRIEVED: str = "retrieved"
 
 
+class HastaSlurmPartitions(StrEnum):
+    DRAGEN: str = "dragen"
+
+
 class HousekeeperTags(StrEnum):
     FASTQ: str = "fastq"
     SAMPLESHEET: str = "samplesheet"
@@ -87,8 +91,12 @@ class Sequencers(StrEnum):
     ALL: str = "all"
 
 
-class HastaSlurmPartitions(StrEnum):
-    DRAGEN: str = "dragen"
+class FileExtensions(StrEnum):
+    GPG: str = ".gpg"
+    JSON: str = ".json"
+    KEY: str = ".key"
+    SPRING: str = ".spring"
+    TMP: str = ".tmp"
 
 
 DRY_RUN = click.option(

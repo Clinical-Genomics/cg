@@ -1,11 +1,6 @@
 """Import all constants here for easy access"""
 
-from cg.constants.compression import (
-    FASTQ_DELTA,
-    FASTQ_FIRST_READ_SUFFIX,
-    FASTQ_SECOND_READ_SUFFIX,
-    SPRING_SUFFIX,
-)
+from cg.constants.compression import FASTQ_DELTA, FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX
 from cg.constants.constants import (
     CAPTUREKIT_CANCER_OPTIONS,
     CAPTUREKIT_OPTIONS,
@@ -20,11 +15,11 @@ from cg.constants.constants import (
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
+    FileExtensions,
     FlowCellStatus,
     HousekeeperTags,
     Pipeline,
 )
-from cg.constants.encryption import SpringEncryptionSuffix
 from cg.constants.gene_panel import MASTER_LIST
 from cg.constants.paths import TMP_DIR
 from cg.constants.priority import Priority

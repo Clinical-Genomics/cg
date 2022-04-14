@@ -5,14 +5,6 @@ from cgmodels.cg.constants import StrEnum
 from cg.utils.enums import ListEnum
 
 
-class SpringEncryptionSuffix(StrEnum):
-    GPG_SUFFIX: str = ".gpg"
-    JSON_SUFFIX: str = ".json"
-    SPRING_SUFFIX: str = ".spring"
-    KEY_SUFFIX: str = ".key"
-    TMP_SUFFIX: str = ".tmp"
-
-
 class CipherAlgorithm(StrEnum):
     TRIPLE_DES: str = "3DES"
     AES: str = "AES"

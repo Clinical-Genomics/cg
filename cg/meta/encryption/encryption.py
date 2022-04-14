@@ -8,7 +8,8 @@ from typing import List
 
 from housekeeper.store import models as hk_models
 
-from cg.constants.encryption import GPGParameters, SpringEncryptionSuffix
+from cg.constants import FileExtensions
+from cg.constants.encryption import GPGParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 
@@ -223,25 +224,19 @@ class SpringEncryptionAPI(EncryptionAPI):
 
     def encrypted_key_path(self, spring_file_path: Path) -> Path:
         """The name of the encrypted key file"""
-        return Path(spring_file_path).with_suffix(
-            SpringEncryptionSuffix.KEY_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        return Path(spring_file_path).with_suffix(FileExtensions.KEY + FileExtensions.GPG)
 
     def encryption_key(self, spring_file_path: Path) -> Path:
         """The name of the encryption key"""
-        return Path(spring_file_path).with_suffix(SpringEncryptionSuffix.KEY_SUFFIX)
+        return Path(spring_file_path).with_suffix(FileExtensions.KEY)
 
     def encrypted_spring_file_path(self, spring_file_path: Path) -> Path:
         """The name of the encrypted spring file"""
-        return spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.GPG_SUFFIX
-        )
+        return spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
 
     def decrypted_spring_file_checksum(self, spring_file_path: Path) -> Path:
         """The name of the decrypted spring file used to perform the checksum check"""
-        return spring_file_path.with_suffix(
-            SpringEncryptionSuffix.SPRING_SUFFIX + SpringEncryptionSuffix.TMP_SUFFIX
-        )
+        return spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.TMP)
 
     @property
     def temporary_passphrase(self) -> Path:
