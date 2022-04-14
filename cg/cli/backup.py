@@ -140,7 +140,7 @@ def retrieve_spring_files(
 
 
 def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[models.Sample]:
-    """Gets all samples belonging to an identifier"""
+    """Gets all samples belonging to a sample, case or flow cell id"""
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_family_id,
