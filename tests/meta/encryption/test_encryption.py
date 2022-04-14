@@ -117,6 +117,7 @@ def test_symmetric_encryption_command(
 
     # THEN the the passphrase should match
     assert encryption_api.temporary_passphrase == temporary_passphrase
+    # THEN a list of parameters should be returned
     assert result == [
         "--symmetric",
         "--cipher-algo",
