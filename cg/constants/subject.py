@@ -12,6 +12,7 @@ class PhenotypeStatus(str, Enum):
     UNKNOWN = "unknown"
     UNAFFECTED = "unaffected"
     AFFECTED = "affected"
+    MISSING = None
 
 
 class PlinkPhenotypeStatus(IntEnum):

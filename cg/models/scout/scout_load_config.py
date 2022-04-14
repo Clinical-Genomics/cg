@@ -24,7 +24,7 @@ class ScoutIndividual(BaseModel):
     confirmed_sex: Optional[bool] = None
     father: Optional[str] = None
     mother: Optional[str] = None
-    phenotype: PhenotypeStatus = None
+    phenotype: PhenotypeStatus = PhenotypeStatus.MISSING
     sample_id: str = None
     sample_name: Optional[str] = None
     sex: Literal[Gender.MALE, Gender.FEMALE, Gender.UNKNOWN] = None
