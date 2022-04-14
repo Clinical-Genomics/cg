@@ -115,7 +115,7 @@ def test_symmetric_encryption_command(
         input_file=input_file, output_file=output_file
     )
 
-    # THEN the result should be correct
+    # THEN the the passphrase should match
     assert encryption_api.temporary_passphrase == temporary_passphrase
     assert result == [
         "--symmetric",
