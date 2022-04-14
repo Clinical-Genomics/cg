@@ -33,6 +33,11 @@ def fixture_sample_dict() -> dict:
     return dict(sample_dict)
 
 
+@pytest.fixture(name="omim_disease_nr")
+def fixture_omim_disease_nr() -> int:
+    return 607208
+
+
 @pytest.fixture(name="scout_dir")
 def fixture_scout_dir(apps_dir: Path) -> Path:
     """Return the path to the scout fixtures dir"""
