@@ -3,13 +3,7 @@ import logging
 
 import click
 
-from cg.meta.compress import CompressAPI
-from cg.models.cg_config import CGConfig
-
-from ...meta.backup.backup import SpringBackupAPI
-from ...meta.backup.pdc import PdcAPI
-from ...meta.encryption.encryption import SpringEncryptionAPI
-from .fastq import (
+from cg.cli.compress.fastq import (
     clean_fastq,
     decompress_case,
     decompress_flowcell,
@@ -18,6 +12,11 @@ from .fastq import (
     fastq_cmd,
     fix_spring,
 )
+from cg.meta.backup.backup import SpringBackupAPI
+from cg.meta.backup.pdc import PdcAPI
+from cg.meta.compress import CompressAPI
+from cg.meta.encryption.encryption import SpringEncryptionAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
