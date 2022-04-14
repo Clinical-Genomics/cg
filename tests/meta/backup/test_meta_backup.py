@@ -47,13 +47,13 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc, cg_context):
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flowcell, cg_context):
+def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flow_cell, cg_context):
     """tests pop_flow cell method of the backup api"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
     # WHEN a flow cell is requested to be retrieved from PDC
-    mock_store.flowcells(status="requested").first.return_value = mock_flowcell
+    mock_store.flowcells(status="requested").first.return_value = mock_flow_cell
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
@@ -65,7 +65,7 @@ def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flowcell, cg_co
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_pop_flowcell_dry_run(mock_store, mock_pdc, mock_flowcell, cg_context):
+def test_pop_flow_cell_dry_run(mock_store, mock_pdc, cg_context):
     """tests pop_flow cell method of the backup api"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
@@ -101,7 +101,7 @@ def test_pop_flow_cell_no_flow_cell_requested(mock_store, mock_pdc, cg_context):
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_fetch_flow_cell_processing_queue_full(
-    mock_store, mock_pdc, mock_flow_cell, mock_check_processing, cg_context, caplog
+    mock_store, mock_pdc, mock_flow_cell, cg_context, caplog
 ):
     """tests the fetch_flow cell method of the backup API"""
 
@@ -128,7 +128,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     mock_store,
     mock_pdc,
     mock_check_processing,
-    mock_pop_flowcell,
+    mock_pop_flow_cell,
     cg_context,
     caplog,
 ):
@@ -140,7 +140,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
     # WHEN no flow cells are requested
-    mock_pop_flowcell.return_value = None
+    mock_pop_flow_cell.return_value = None
     backup_api.check_processing.return_value = True
 
     # AND no flow cell has been specified
@@ -162,7 +162,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_store,
     mock_pdc,
     mock_check_processing,
-    mock_pop_flowcell,
+    mock_pop_flow_cell,
     cg_context,
     caplog,
 ):
@@ -174,23 +174,23 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
     # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
-    mock_flowcell = None
-    mock_pop_flowcell.return_value = mock_store.add_flowcell(
+    mock_flow_cell = None
+    mock_pop_flow_cell.return_value = mock_store.add_flowcell(
         status="requested",
     )
     backup_api.check_processing.return_value = True
 
-    result = backup_api.fetch_flow_cell(mock_flowcell, dry_run=False)
+    result = backup_api.fetch_flow_cell(mock_flow_cell, dry_run=False)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flow cell is set to "retrieved"
     assert (
-        f"Status for flow cell {mock_pop_flowcell.return_value.name} set to retrieved"
+        f"Status for flow cell {mock_pop_flow_cell.return_value.name} set to retrieved"
         in caplog.text
     )
-    assert mock_pop_flowcell.return_value.status == "retrieved"
+    assert mock_pop_flow_cell.return_value.status == "retrieved"
 
     # AND status-db is updated with the new status
     assert mock_store.commit.called
@@ -206,8 +206,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
 def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_store,
     mock_pdc,
-    mock_flowcell,
-    mock_check_processing,
+    mock_flow_cell,
     cg_context,
     caplog,
 ):
@@ -219,14 +218,14 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
     backup_api.check_processing.return_value = True
 
-    result = backup_api.fetch_flow_cell(mock_flowcell, dry_run=False)
+    result = backup_api.fetch_flow_cell(mock_flow_cell, dry_run=False)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
 
     # AND when done the status of that flow cell is set to "retrieved"
-    assert f"Status for flow cell {mock_flowcell.name} set to retrieved" in caplog.text
-    assert mock_flowcell.status == "retrieved"
+    assert f"Status for flow cell {mock_flow_cell.name} set to retrieved" in caplog.text
+    assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
     assert mock_store.commit.called
@@ -239,11 +238,10 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
-def test_fetch_flowcell_pdc_retrieval_failed(
+def test_fetch_flow_cell_pdc_retrieval_failed(
     mock_store,
     mock_pdc,
-    mock_flowcell,
-    mock_check_processing,
+    mock_flow_cell,
     cg_context,
     caplog,
 ):
@@ -258,7 +256,7 @@ def test_fetch_flowcell_pdc_retrieval_failed(
     # WHEN the retrieval process fails
     mock_pdc.retrieve_flow_cell.side_effect = subprocess.CalledProcessError(1, "echo")
     with pytest.raises(subprocess.CalledProcessError):
-        backup_api.fetch_flow_cell(mock_flowcell, dry_run=False)
+        backup_api.fetch_flow_cell(mock_flow_cell, dry_run=False)
 
     # THEN the failure to retrieve is logged
     assert "retrieval failed" in caplog.text
