@@ -48,7 +48,7 @@ def test_maximum_processing_queue_not_full(mock_store, mock_pdc, cg_context):
 @mock.patch("cg.meta.backup.pdc")
 @mock.patch("cg.store")
 def test_pop_flow_cell_next_requested(mock_store, mock_pdc, mock_flow_cell, cg_context):
-    """tests pop_flow cell method of the backup api"""
+    """Tests pop_flowcell method of the backup API when requesting next flow cell"""
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupApi(mock_store, mock_pdc, root_dir=cg_context.backup.root.dict())
 
