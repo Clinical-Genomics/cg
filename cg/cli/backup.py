@@ -58,7 +58,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
         return
 
     if not dry_run:
-        LOG.info("%s: updating flow cell status to %", flow_cell, FlowCellStatus.REQUESTED)
+        LOG.info("%s: updating flow cell status to %s", flow_cell, FlowCellStatus.REQUESTED)
         flow_cell_obj.status = FlowCellStatus.REQUESTED
         status_api.commit()
 
