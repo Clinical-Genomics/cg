@@ -42,8 +42,8 @@ def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
     report_data = report_api_mip_dna.get_report_data(
         case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
     )
-    report_data.case.samples[0].application.tag = "WGSapplicationTAG"  # ADM1 sample (WGS app tag)
-    report_data.case.samples[1].application.tag = "WESapplicationTAG"  # ADM2 sample (WES app tag)
+    report_data.case.samples[0].application.prep_category = "wgs"  # ADM1 sample (WGS)
+    report_data.case.samples[1].application.prep_category = "wes"  # ADM2 sample (WES)
 
     # GIVEN a dictionary of report empty fields and a list of required MIP DNA report fields
     empty_fields = {
