@@ -3,7 +3,8 @@
 
 import click
 
-from .balsamic.base import balsamic as balsamic_cmd
+from .balsamic.base import balsamic
+from .balsamic.umi import balsamic_umi
 from .fluffy.base import fluffy
 from .microsalt.base import microsalt
 from .mip_dna.base import mip_dna
@@ -16,7 +17,8 @@ def workflow():
     """Workflows commands"""
 
 
-workflow.add_command(balsamic_cmd)
+workflow.add_command(balsamic)
+workflow.add_command(balsamic_umi)
 workflow.add_command(microsalt)
 workflow.add_command(mip_dna)
 workflow.add_command(mip_rna)

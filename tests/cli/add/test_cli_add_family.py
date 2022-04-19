@@ -7,7 +7,7 @@ from cg.store import Store, models
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
-CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC
+CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI
 CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 

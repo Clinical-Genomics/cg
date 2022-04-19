@@ -145,6 +145,10 @@ class BalsamicSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC
 
 
+class BalsamicUmiSample(Of1508Sample):
+    _suitable_project = OrderType.BALSAMIC_UMI
+
+
 class MipRnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_RNA
 

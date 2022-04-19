@@ -93,7 +93,7 @@ def test_mip_rna_sample_is_correct(mip_rna_orderform_sample: dict):
 
     This will test if the aliases are mapped to the correct field in the pydantic model
     """
-    # GIVEN sample data about a known balsamic sample
+    # GIVEN sample data about a known mip-rna sample
 
     # WHEN parsing the sample
     mip_rna_sample: ExcelSample = ExcelSample(**mip_rna_orderform_sample)

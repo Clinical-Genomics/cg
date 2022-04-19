@@ -32,15 +32,16 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
     """Factory Method"""
 
     submitters = {
+        OrderType.BALSAMIC: BalsamicSubmitter,
+        OrderType.BALSAMIC_UMI: BalsamicSubmitter,
         OrderType.FASTQ: FastqSubmitter,
+        OrderType.FLUFFY: FluffySubmitter,
         OrderType.METAGENOME: MetagenomeSubmitter,
         OrderType.MICROSALT: MicrosaltSubmitter,
-        OrderType.SARS_COV_2: SarsCov2Submitter,
         OrderType.MIP_DNA: MipDnaSubmitter,
-        OrderType.BALSAMIC: BalsamicSubmitter,
         OrderType.MIP_RNA: MipRnaSubmitter,
-        OrderType.FLUFFY: FluffySubmitter,
         OrderType.RML: RmlSubmitter,
+        OrderType.SARS_COV_2: SarsCov2Submitter,
     }
     if project in submitters:
         return submitters[project](lims=lims, status=status)

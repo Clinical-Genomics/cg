@@ -86,9 +86,7 @@ def test_store(
     assert balsamic_context.housekeeper_api.bundle(case_id)
 
 
-def test_start_available(
-    tmpdir_factory, cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker
-):
+def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
