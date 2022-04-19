@@ -128,7 +128,7 @@ class MipDNAReportAPI(ReportAPI):
         for sample in case.samples:
             required_fields = (
                 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS
-                if "wgs" in sample.application.tag.lower()
+                if "wgs" in sample.application.prep_category.lower()
                 else REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS
             )
 
