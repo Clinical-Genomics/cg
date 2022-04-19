@@ -1,75 +1,58 @@
-"""Module to create MIP analysis delivery reports"""
-import logging
+"""Module to create delivery reports"""
+
 from datetime import datetime
+import logging
 from pathlib import Path
-from typing import Optional, TextIO, Union
+from typing import TextIO, Optional, List, Union
 
 import housekeeper
 import requests
-from cg.apps.coverage import ChanjoAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
-from cg.apps.scout.scoutapi import ScoutAPI
+import yaml
+
 from cg.exc import DeliveryReportError
-from cg.meta.report.presenter import Presenter
-from cg.meta.report.report_helper import ReportHelper
-from cg.meta.report.report_validator import ReportValidator
-from cg.meta.report.sample_calculator import SampleCalculator
+from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.constants.tags import HK_DELIVERY_REPORT_TAG
+from cg.models.cg_config import CGConfig
+from cg.meta.meta import MetaAPI
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.store import Store, models
+from cg.models.report.metadata import SampleMetadataModel
+from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
+from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
+from cg.store import models
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+LOG = logging.getLogger(__name__)
 
-class ReportAPI:
-    """API to create MIP analysis delivery reports"""
 
-    def __init__(
-        self,
-        store: Store,
-        lims_api: LimsAPI,
-        chanjo_api: ChanjoAPI,
-        analysis_api: AnalysisAPI,
-        scout_api: ScoutAPI,
-        logger=logging.getLogger(__name__),
-        path_tool=Path,
-    ):
+class ReportAPI(MetaAPI):
+    """Common Delivery Report API"""
 
-        self.store = store
-        self.lims = lims_api
-        self.chanjo = chanjo_api
-        self.analysis = analysis_api
-        self.log = logger
-        self.path_tool = path_tool
-        self.scout = scout_api
-        self.report_validator = ReportValidator(store)
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config=config)
+        self.analysis_api = analysis_api
 
     def create_delivery_report(
-        self, case_id: str, analysis_date: datetime, accept_missing_data: bool = False
+        self, case_id: str, analysis_date: datetime, force_report: bool
     ) -> str:
-        """Generate the html contents of a delivery report."""
+        """Generates the html contents of a delivery report"""
 
-        delivery_data = self._get_delivery_data(case_id=case_id, analysis_date=analysis_date)
-        self._handle_missing_report_data(accept_missing_data, delivery_data, case_id)
-        report_data = self._make_data_presentable(delivery_data)
-        self._handle_missing_report_data(accept_missing_data, report_data, case_id)
-        rendered_report = self._render_delivery_report(report_data)
+        report_data = self.get_report_data(case_id=case_id, analysis_date=analysis_date)
+        report_data = self.validate_report_fields(case_id, report_data, force_report)
+
+        rendered_report = self.render_delivery_report(report_data.dict())
         return rendered_report
 
     def create_delivery_report_file(
-        self,
-        case_id: str,
-        file_path: Path,
-        analysis_date: datetime,
-        accept_missing_data: bool = False,
+        self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
     ) -> TextIO:
-        """Generate a temporary file containing a delivery report."""
+        """Generates a temporary file containing a delivery report"""
 
-        delivery_report = self.create_delivery_report(
-            case_id=case_id, accept_missing_data=accept_missing_data, analysis_date=analysis_date
-        )
         file_path.mkdir(parents=True, exist_ok=True)
+        delivery_report = self.create_delivery_report(
+            case_id=case_id, analysis_date=analysis_date, force_report=force_report
+        )
+
         report_file_path = Path(file_path / "delivery-report.html")
         with open(report_file_path, "w") as delivery_report_file:
             delivery_report_file.write(delivery_report)
@@ -77,300 +60,289 @@ class ReportAPI:
         return delivery_report_file
 
     def add_delivery_report_to_hk(
-        self,
-        delivery_report_file: Path,
-        hk_api: HousekeeperAPI,
-        case_id: str,
-        analysis_date: datetime,
+        self, delivery_report_file: Path, case_id: str, analysis_date: datetime
     ) -> Optional[housekeeper.store.models.File]:
         """
-        Add a delivery report to a analysis bundle for a case in Housekeeper
-
-        If there is already a delivery report for the bundle doesn't add to it
-        If successful the method returns a pointer to the new file in Housekeeper
+        Adds a delivery report file, if it has not already been generated, to an analysis bundle for a specific case
+        in HK and returns a pointer to it
         """
-        delivery_report_tag_name = "delivery-report"
 
-        version_obj = hk_api.version(case_id, analysis_date)
-
-        is_bundle_missing_delivery_report = False
+        version = self.housekeeper_api.version(case_id, analysis_date)
         try:
-            self.get_delivery_report_from_hk(hk_api=hk_api, case_id=case_id)
+            self.get_delivery_report_from_hk(case_id=case_id)
         except FileNotFoundError:
-            is_bundle_missing_delivery_report = True
-
-        if is_bundle_missing_delivery_report:
-            file_obj = hk_api.add_file(
-                delivery_report_file.name, version_obj, delivery_report_tag_name
+            file = self.housekeeper_api.add_file(
+                delivery_report_file.name, version, HK_DELIVERY_REPORT_TAG
             )
-            hk_api.include_file(file_obj, version_obj)
-            hk_api.add_commit(file_obj)
-            return file_obj
+            self.housekeeper_api.include_file(file, version)
+            self.housekeeper_api.add_commit(file)
+            return file
 
         return None
 
-    @staticmethod
-    def get_delivery_report_from_hk(hk_api: HousekeeperAPI, case_id: str) -> str:
-        delivery_report_tag_name = "delivery-report"
-        version_obj = hk_api.last_version(case_id)
-        uploaded_delivery_report_files = hk_api.get_files(
-            bundle=case_id,
-            tags=[delivery_report_tag_name],
-            version=version_obj.id,
+    def get_delivery_report_from_hk(self, case_id: str) -> str:
+        """Extracts the delivery reports of a specific case stored in HK"""
+
+        version = self.housekeeper_api.last_version(case_id)
+        delivery_report_files = self.housekeeper_api.get_files(
+            bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
 
-        if uploaded_delivery_report_files.count() == 0:
-            raise FileNotFoundError(f"No delivery report was found in housekeeper for {case_id}")
+        if delivery_report_files.count() == 0:
+            LOG.info(f"No existing delivery report found in housekeeper for {case_id}. Adding one.")
+            raise FileNotFoundError
 
-        return uploaded_delivery_report_files[0].full_path
-
-    @staticmethod
-    def update_delivery_report_date(
-        status_api: Store, case_id: str, analysis_date: datetime
-    ) -> None:
-        """Update date on analysis when delivery report was created"""
-
-        case_obj = status_api.family(case_id)
-        analysis_obj = status_api.analysis(case_obj, analysis_date)
-        analysis_obj.delivery_report_created_at = datetime.now()
-        status_api.commit()
-
-    def _handle_missing_report_data(self, accept_missing_data, delivery_data, case_id):
-        """Handle when some crucial data is missing in the report"""
-        if not self.report_validator.has_required_data(delivery_data, case_id):
-            if not accept_missing_data:
-                raise DeliveryReportError(
-                    f"Could not generate report data for {case_id}, "
-                    f"missing data:"
-                    f" {self.report_validator.get_missing_attributes()}"
-                )
-
-            self.log.warning(
-                "missing data: %s", ", ".join(self.report_validator.get_missing_attributes())
-            )
-
-    def _get_delivery_data(self, case_id: str, analysis_date: datetime) -> dict:
-        """Fetch all data needed to render a delivery report."""
-
-        report_data = dict()
-        case_obj = self._get_case_from_statusdb(case_id)
-        analysis_obj = self._get_analysis_from_statusdb(case_obj, analysis_date)
-
-        report_data["case"] = case_obj.name
-        report_data["pipeline"] = analysis_obj.pipeline
-        report_data["pipeline_version"] = analysis_obj.pipeline_version
-        report_data["customer_name"] = case_obj.customer.name
-        report_data["customer_internal_id"] = case_obj.customer.internal_id
-        report_data["customer_invoice_address"] = case_obj.customer.invoice_address
-        report_data["scout_access"] = bool(case_obj.customer.scout_access)
-        report_data["report_version"] = ReportHelper.get_report_version(analysis_obj)
-        report_data["previous_report_version"] = ReportHelper.get_previous_report_version(
-            analysis_obj
-        )
-
-        report_data["samples"] = self._fetch_case_samples_from_status_db(case_id)
-        report_data["panels"] = self._fetch_panels_from_status_db(case_id)
-        self._incorporate_lims_data(report_data)
-        self._incorporate_lims_methods(report_data["samples"])
-        self._incorporate_coverage_data(report_data["samples"], report_data["panels"])
-        self._incorporate_trending_data(report_data, case_id)
-
-        report_data["today"] = datetime.today()
-        application_data = self._get_application_data_from_status_db(report_data["samples"])
-        report_data.update(application_data)
-        return report_data
-
-    def _get_case_from_statusdb(self, case_id: str) -> models.Family:
-        """Fetch a case object from the status database."""
-        return self.store.family(case_id)
-
-    def _get_analysis_from_statusdb(
-        self, case: models.Family, analysis_date: datetime
-    ) -> models.Analysis:
-        """Fetch an analysis object from the status database."""
-        return self.store.analysis(case, analysis_date)
-
-    def _incorporate_lims_methods(self, samples: list):
-        """Fetch the methods used for preparation, sequencing and delivery of the samples."""
-
-        for sample in samples:
-            lims_id = sample["internal_id"]
-            method_types = ["prep_method", "sequencing_method"]
-            for method_type in method_types:
-                get_method = getattr(self.lims, f"get_{method_type}")
-                method_name = get_method(lims_id)
-                sample[method_type] = method_name
+        return delivery_report_files[0].full_path
 
     @staticmethod
-    def _render_delivery_report(report_data: dict) -> str:
-        """Render and return report data on the report Jinja template."""
+    def render_delivery_report(report_data: dict) -> str:
+        """Renders the report on the Jinja template"""
 
         env = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template = env.get_template("report.html")
-        template_out = template.render(**report_data)
-        return template_out
+        template = env.get_template(
+            f"{report_data['case']['data_analysis']['pipeline']}_report.html"
+        )
+        return template.render(**report_data)
 
-    def _get_sample_coverage_from_chanjo(self, lims_id: str, genes: list) -> dict:
+    def get_cases_without_delivery_report(self):
+        """Returns a list of analyses that need a delivery report"""
 
-        """Get coverage data from Chanjo for a sample."""
-        return self.chanjo.sample_coverage(lims_id, genes)
+        return self.status_db.analyses_to_delivery_report(self.analysis_api.pipeline)[:50]
 
-    def _incorporate_trending_data(self, report_data: dict, case_id: str) -> None:
-        """Incorporate trending data into a set of samples."""
-        mip_analysis: Union[MipAnalysis, None] = self.analysis.get_latest_metadata(
-            family_id=case_id
+    def update_delivery_report_date(self, case_id: str, analysis_date: datetime) -> None:
+        """Updates the date when delivery report was created"""
+
+        case_obj = self.status_db.family(case_id)
+        analysis_obj = self.status_db.analysis(case_obj, analysis_date)
+        analysis_obj.delivery_report_created_at = datetime.now()
+        self.status_db.commit()
+
+    def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
+        """Fetches all the data needed to generate a delivery report"""
+
+        case = self.status_db.family(case_id)
+        analysis = self.status_db.analysis(case, analysis_date)
+        analysis_metadata = self.analysis_api.get_latest_metadata(case.internal_id)
+        case_model = self.get_case_data(case, analysis, analysis_metadata)
+
+        return ReportModel(
+            customer=self.get_customer_data(case),
+            version=self.get_report_version(analysis),
+            date=datetime.today(),
+            case=case_model,
+            accredited=self.get_report_accreditation(case_model.samples),
         )
 
-        if not mip_analysis:
-            return
-        for sample in report_data["samples"]:
-            sample_id_metric = get_sample_id_metric(
-                sample_id=sample["internal_id"], sample_id_metrics=mip_analysis.sample_id_metrics
+    def validate_report_fields(
+        self, case_id: str, report_data: ReportModel, force_report
+    ) -> ReportModel:
+        """Verifies that the required report fields are not empty"""
+
+        required_fields = self.get_required_fields(report_data.case)
+        empty_report_fields = get_empty_report_data(report_data)
+        missing_report_fields = get_missing_report_data(empty_report_fields, required_fields)
+
+        if missing_report_fields and not force_report:
+            LOG.error(
+                f"Could not generate report data for {case_id}. "
+                f"Missing data: \n{yaml.dump(missing_report_fields)}"
             )
-            sample["analysis_sex"] = sample_id_metric.predicted_sex
-            sample["duplicates"] = sample_id_metric.duplicate_reads
-            sample["mapped_reads"] = sample_id_metric.mapped_reads
+            raise DeliveryReportError
 
-        report_data["genome_build"] = mip_analysis.genome_build
+        if empty_report_fields:
+            LOG.warning(f"Empty report fields: \n{yaml.dump(empty_report_fields)}")
 
-    def _incorporate_coverage_data(self, samples: list, panels: list):
-        """Incorporate coverage data from Chanjo for each sample ."""
+        return report_data
 
-        genes = self._get_genes_from_scout(panels)
+    @staticmethod
+    def get_customer_data(case: models.Family) -> CustomerModel:
+        """Returns customer validated attributes retrieved from status DB"""
 
-        for sample in samples:
-            lims_id = sample["internal_id"]
+        return CustomerModel(
+            name=case.customer.name,
+            id=case.customer.internal_id,
+            invoice_address=case.customer.invoice_address,
+            scout_access=case.customer.scout_access,
+        )
 
-            sample_coverage = self._get_sample_coverage_from_chanjo(lims_id, genes)
+    @staticmethod
+    def get_report_version(analysis: models.Analysis) -> int:
+        """
+        Returns the version of the given analysis. The version of the first analysis is 1 and subsequent reruns
+        increase it by 1.
+        """
 
-            target_coverage = None
-            target_completeness = None
+        version = None
 
-            if sample_coverage:
-                target_coverage = sample_coverage.get("mean_coverage")
-                target_completeness = sample_coverage.get("mean_completeness")
-            else:
-                self.log.warning("No coverage could be calculated for: %s", lims_id)
+        if analysis:
+            version = len(analysis.family.analyses) - analysis.family.analyses.index(analysis)
 
-            sample["target_coverage"] = target_coverage
-            sample["target_completeness"] = target_completeness
+        return version
 
-    def _fetch_case_samples_from_status_db(self, case_id: str) -> list:
-        """Incorporate data from the status database for each sample ."""
+    def get_case_data(
+        self,
+        case: models.Family,
+        analysis: models.Analysis,
+        analysis_metadata: MipAnalysis,
+    ) -> CaseModel:
+        """Returns case associated validated attributes"""
 
-        delivery_data_samples = list()
-        case_samples = self.store.family_samples(case_id)
-        case = self.store.family(case_id)
+        samples = self.get_samples_data(case, analysis_metadata)
+        unique_applications = self.get_unique_applications(samples)
+
+        return CaseModel(
+            name=case.name,
+            data_analysis=self.get_case_analysis_data(case, analysis, analysis_metadata),
+            samples=samples,
+            applications=unique_applications,
+        )
+
+    def get_samples_data(
+        self, case: models.Family, analysis_metadata: MipAnalysis
+    ) -> List[SampleModel]:
+        """Extracts all the samples associated to a specific case and their attributes"""
+
+        samples = list()
+        case_samples = self.status_db.family_samples(case.internal_id)
 
         for case_sample in case_samples:
             sample = case_sample.sample
-            delivery_data_sample = dict()
-            delivery_data_sample["internal_id"] = sample.internal_id
-            delivery_data_sample["ticket"] = sample.ticket_number
-            delivery_data_sample["status"] = case_sample.status
-            delivery_data_sample["received_at"] = sample.received_at
-            delivery_data_sample["prepared_at"] = sample.prepared_at
-            delivery_data_sample["sequenced_at"] = sample.sequenced_at
-            delivery_data_sample["delivered_at"] = sample.delivered_at
-            delivery_data_sample["processing_time"] = SampleCalculator.calculate_processing_days(
-                sample
-            )
-            delivery_data_sample["ordered_at"] = sample.ordered_at
-            delivery_data_sample["million_read_pairs"] = (
-                round(sample.reads / 2000000, 1) if sample.reads else None
-            )
+            lims_sample = self.get_lims_sample(sample.internal_id)
 
-            delivery_data_sample["capture_kit"] = sample.capture_kit
-            delivery_data_sample["data_analysis"] = case.data_analysis
-            delivery_data_samples.append(delivery_data_sample)
-
-        return delivery_data_samples
-
-    def _get_application_data_from_status_db(self, samples: list) -> dict:
-        """Fetch application data including accreditation status for all samples."""
-        application_data = dict()
-        used_applications = set()
-
-        for sample in samples:
-            used_applications.add((sample["application"], sample["application_version"]))
-
-        applications = []
-        accreditations = []
-        for apptag_id, apptag_version in used_applications:
-
-            application_is_accredited = False
-
-            application = self.store.application(tag=apptag_id)
-
-            if application:
-                application_is_accredited = application.is_accredited
-                applications.append(
-                    {
-                        "tag": application.tag,
-                        "description": application.description,
-                        "limitations": application.limitations,
-                    }
+            samples.append(
+                SampleModel(
+                    name=lims_sample.get("name"),
+                    id=sample.internal_id,
+                    ticket=sample.ticket_number,
+                    gender=lims_sample.get("sex"),
+                    source=lims_sample.get("source"),
+                    tumour=sample.is_tumour,
+                    application=self.get_sample_application_data(lims_sample),
+                    methods=self.get_sample_methods_data(sample.internal_id),
+                    status=case_sample.status,
+                    metadata=self.get_sample_metadata(case, sample, analysis_metadata),
+                    timestamps=self.get_sample_timestamp_data(sample),
                 )
+            )
 
-            accreditations.append(application_is_accredited)
+        return samples
 
-        application_data["applications"] = applications
-        application_data["accredited"] = bool(all(accreditations))
+    def get_lims_sample(self, sample_id: str) -> dict:
+        """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful"""
 
-        return application_data
+        lims_sample = dict()
+        try:
+            lims_sample = self.lims_api.sample(sample_id)
+        except requests.exceptions.HTTPError as ex:
+            LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
-    def _fetch_panels_from_status_db(self, case_id: str) -> list:
-        """fetch data from the status database for each panels ."""
-        case_obj = self.store.family(case_id)
-        panels = case_obj.panels
-        return panels
+        return lims_sample
 
-    def _incorporate_lims_data(self, report_data: dict):
-        """Incorporate data from LIMS for each sample ."""
-        for sample in report_data.get("samples"):
-            lims_id = sample["internal_id"]
+    def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
+        """Retrieves the analysis application attributes"""
 
-            try:
-                lims_sample = self.lims.sample(lims_id)
-            except requests.exceptions.HTTPError as error:
-                lims_sample = dict()
-                self.log.info("could not fetch sample %s from LIMS: %s", lims_id, error)
+        application = self.status_db.application(tag=lims_sample.get("application"))
 
-            sample["name"] = lims_sample.get("name")
-            sample["sex"] = lims_sample.get("sex")
-            sample["source"] = lims_sample.get("source")
-            sample["application"] = lims_sample.get("application")
-            sample["application_version"] = lims_sample.get("application_version")
-
-    def _get_genes_from_scout(self, panels: list) -> list:
-        panel_genes = list()
-
-        for panel in panels:
-            panel_genes.extend(self.scout.get_genes(panel))
-
-        panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
-
-        return panel_gene_ids
+        return ApplicationModel(
+            tag=application.tag,
+            version=lims_sample.get("application_version"),
+            prep_category=application.prep_category,
+            description=application.description,
+            limitations=application.limitations,
+            accredited=application.is_accredited,
+        )
 
     @staticmethod
-    def _make_data_presentable(delivery_data: dict) -> dict:
-        """Replace db values with what a human might expect"""
+    def get_unique_applications(samples: List[SampleModel]) -> List[ApplicationModel]:
+        """Returns the unique case associated applications"""
 
-        presenter = Presenter(precision=2)
+        applications = list()
+        for sample in samples:
+            if sample.application not in applications:
+                applications.append(sample.application)
 
-        _presentable_dict = presenter.process_dict(delivery_data)
-        _presentable_dict["accredited"] = delivery_data["accredited"]
-        _presentable_dict["scout_access"] = delivery_data["accredited"]
+        return applications
 
-        for sample in delivery_data["samples"]:
-            sample["mapped_reads"] = presenter.process_float_string(sample["mapped_reads"], 2)
-            sample["target_coverage"] = presenter.process_float_string(sample["target_coverage"], 1)
-            sample["target_completeness"] = presenter.process_float_string(
-                sample["target_completeness"], 2
-            )
-            sample["duplicates"] = presenter.process_float_string(sample["duplicates"], 1)
+    def get_sample_methods_data(self, sample_id: str) -> MethodsModel:
+        """Fetches sample library preparation and sequencing methods from LIMS"""
 
-        return _presentable_dict
+        library_prep = None
+        sequencing = None
+        try:
+            library_prep = self.lims_api.get_prep_method(sample_id)
+            sequencing = self.lims_api.get_sequencing_method(sample_id)
+        except requests.exceptions.HTTPError as ex:
+            LOG.info("Could not fetch sample (%s) methods from LIMS: %s", sample_id, ex)
+
+        return MethodsModel(library_prep=library_prep, sequencing=sequencing)
+
+    def get_case_analysis_data(
+        self,
+        case: models.Family,
+        analysis: models.Analysis,
+        analysis_metadata: MipAnalysis,
+    ) -> DataAnalysisModel:
+        """Retrieves the pipeline attributes used for data analysis"""
+
+        return DataAnalysisModel(
+            customer_pipeline=case.data_analysis,
+            pipeline=analysis.pipeline,
+            pipeline_version=analysis.pipeline_version,
+            type=self.get_data_analysis_type(case),
+            genome_build=self.get_genome_build(analysis_metadata),
+            panels=case.panels,
+        )
+
+    def get_sample_timestamp_data(self, sample: models.Sample) -> TimestampModel:
+        """Retrieves the sample processing dates"""
+
+        return TimestampModel(
+            ordered_at=sample.ordered_at,
+            received_at=sample.received_at,
+            prepared_at=sample.prepared_at,
+            sequenced_at=sample.sequenced_at,
+            delivered_at=sample.delivered_at,
+            processing_days=self.get_processing_days(sample),
+        )
+
+    @staticmethod
+    def get_processing_days(sample: models.Sample) -> Union[int, None]:
+        """Calculates the days it takes to deliver a sample"""
+
+        if sample.received_at and sample.delivered_at:
+            return (sample.delivered_at - sample.received_at).days
+
+        return None
+
+    def get_sample_metadata(
+        self,
+        case: models.Family,
+        sample: models.Sample,
+        analysis_metadata: MipAnalysis,
+    ) -> SampleMetadataModel:
+        """Fetches the sample metadata to include in the report"""
+
+        raise NotImplementedError
+
+    def get_data_analysis_type(self, case: models.Family) -> str:
+        """Retrieves the data analysis type carried out"""
+
+        raise NotImplementedError
+
+    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
+        """Returns the build version of the genome reference of a specific case"""
+
+        raise NotImplementedError
+
+    def get_report_accreditation(self, samples: List[SampleModel]) -> Union[None, bool]:
+        """Checks if the report is accredited or not"""
+
+        raise NotImplementedError
+
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Retrieves a dictionary with the delivery report required fields"""
+
+        raise NotImplementedError

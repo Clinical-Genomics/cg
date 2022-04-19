@@ -28,10 +28,3 @@ def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = Non
     records = status_db.analyses_to_upload(pipeline=pipeline)[:50]
     for case_obj in records:
         click.echo(case_obj)
-
-
-def suggest_cases_delivery_report(status_db: Store, pipeline: Optional[Pipeline] = None) -> None:
-    LOG.error("Provide a case, suggestions:")
-    records = status_db.analyses_to_delivery_report(pipeline=pipeline)[:50]
-    for case_obj in records:
-        click.echo(case_obj)

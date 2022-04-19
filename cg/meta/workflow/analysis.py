@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline, Priority
@@ -12,6 +12,7 @@ from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.mip.mip_analysis import MipAnalysis
 from cg.store import models
 from housekeeper.store.models import Bundle, Version
 
@@ -27,6 +28,10 @@ class AnalysisAPI(MetaAPI):
         super().__init__(config=config)
         self.pipeline = pipeline
         self._process = None
+
+    @property
+    def root(self):
+        raise NotImplementedError
 
     @property
     def threshold_reads(self):
@@ -404,3 +409,8 @@ class AnalysisAPI(MetaAPI):
 
     def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
         return None
+
+    def get_latest_metadata(self, case_id: str) -> Union[MipAnalysis, None]:
+        """Get the latest metadata of a specific case"""
+
+        raise NotImplementedError

@@ -3,157 +3,80 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytest
-from cg.meta.report.api import ReportAPI
-from cg.store import Store
+from cgmodels.cg.constants import Pipeline
+
+from cg.meta.report.mip_dna import MipDNAReportAPI
+from cg.models.cg_config import CGConfig
+from cg.store import models
+from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
+from tests.mocks.report import MockChanjo, MockDB
 
 
-@pytest.fixture
+@pytest.fixture(scope="function", name="report_api_mip_dna")
+def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
+    """MIP DNA ReportAPI fixture"""
+
+    cg_context.meta_apis["analysis_api"] = MockMipAnalysis()
+    cg_context.status_db_ = MockDB(report_store)
+    cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
+    cg_context.chanjo_api_ = MockChanjo()
+    cg_context.scout_api_ = MockScoutApi(cg_context)
+    return MipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
+
+
+@pytest.fixture(scope="function", name="case_mip_dna")
+def case_mip_dna(case_id, report_api_mip_dna) -> models.Family:
+    """MIP DNA case instance"""
+
+    return report_api_mip_dna.status_db.family(case_id)
+
+
+@pytest.fixture(scope="function", name="case_samples_data")
+def case_samples_data(case_id, report_api_mip_dna):
+    """MIP DNA family sample object"""
+
+    return report_api_mip_dna.status_db.family_samples(case_id)
+
+
+@pytest.fixture(name="mip_analysis_api")
+def mip_analysis_api() -> MockMipAnalysis:
+    """MIP analysis mock data"""
+
+    return MockMipAnalysis()
+
+
+@pytest.fixture(name="lims_family")
 def lims_family() -> dict:
+    """Returns a lims-like case of samples"""
+
     return json.load(open("tests/fixtures/report/lims_family.json"))
 
 
-@pytest.fixture
+@pytest.fixture(name="lims_samples")
 def lims_samples(lims_family: dict) -> List[dict]:
-    return lims_family["samples"]
-
-
-@pytest.fixture
-def report_samples(lims_family: List[dict]):
-    for sample in lims_family["samples"]:
-        sample["internal_id"] = sample["id"]
+    """Returns the samples of a lims case"""
 
     return lims_family["samples"]
 
 
-class MockFile:
-    def __init__(self, path):
-        self.path = path
+@pytest.fixture(scope="function", autouse=True, name="report_store")
+def report_store(analysis_store, helpers, timestamp_yesterday):
+    """A mock store instance for report testing"""
 
-
-class MockChanjo:
-    _sample_coverage_returns_none = False
-
-    def sample_coverage(self, sample_id: str, panel_genes: list) -> dict:
-        """Calculate coverage for OMIM panel."""
-
-        if self._sample_coverage_returns_none:
-            return None
-
-        if sample_id == "ADM1":
-            data = {"mean_coverage": 38.342, "mean_completeness": 99.1}
-        elif sample_id == "ADM2":
-            data = {"mean_coverage": 37.342, "mean_completeness": 97.1}
-        else:
-            data = {"mean_coverage": 39.342, "mean_completeness": 98.1}
-
-        return data
-
-    def sample(self, sample_id: str) -> dict:
-        """Fetch sample from the database."""
-        return {"id": sample_id}
-
-
-class MockPath:
-    _path = None
-
-    def __call__(self, path):
-        self._path = path
-        return self
-
-    def joinpath(self, another_path):
-        return self(self._path + another_path)
-
-    def open(self):
-        pass
-
-
-class MockLogger:
-    last_warning = None
-    warnings = []
-
-    def warning(self, text, *interpolations):
-
-        self.warnings.append(text % interpolations)
-        self.last_warning = text % interpolations
-
-    def get_last_warning(self) -> str:
-        return self.last_warning
-
-    def get_warnings(self) -> list:
-        return self.warnings
-
-
-class MockDB(Store):
-    family_samples_returns_no_reads = False
-    samples_returns_no_capture_kit = False
-    _application_accreditation = None
-
-    def __init__(self, store):
-        self.store = store
-
-    def family_samples(self, family_id: str):
-
-        family_samples = self.store.family_samples(family_id)
-
-        if self.family_samples_returns_no_reads:
-            for family_sample in family_samples:
-                family_sample.sample.reads = None
-
-        if self.samples_returns_no_capture_kit:
-            for family_sample in family_samples:
-                family_sample.sample.capture_kit = None
-
-        # add some date to calculate processing time on
-        yesterday = datetime.now() - timedelta(days=1)
-        for family_sample in family_samples:
-            family_sample.sample.received_at = yesterday
-            family_sample.sample.prepared_at = yesterday
-            family_sample.sample.sequenced_at = yesterday
-            family_sample.sample.delivered_at = datetime.now()
-
-        return family_samples
-
-    def application(self, tag: str):
-        """Fetch an application from the store."""
-        application = self.store.application(tag=tag)
-
-        if self._application_accreditation is not None:
-            application.is_accredited = self._application_accreditation
-
-        return application
-
-
-class MockScout:
-    def get_genes(self, panel_id: str, version: str = None) -> list:
-        return []
-
-
-@pytest.fixture(scope="function")
-def report_api(report_store, lims_samples):
-    db = MockDB(report_store)
-    lims = MockLimsAPI(samples=lims_samples)
-    chanjo = MockChanjo()
-    analysis = MockMipAnalysis()
-    scout = MockScout()
-    logger = MockLogger()
-    path_tool = MockPath()
-    return ReportAPI(
-        lims_api=lims,
-        store=db,
-        chanjo_api=chanjo,
-        analysis_api=analysis,
-        scout_api=scout,
-        logger=logger,
-        path_tool=path_tool,
+    case = analysis_store.families()[0]
+    helpers.add_analysis(
+        analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=timestamp_yesterday
     )
+    helpers.add_analysis(analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=datetime.now())
 
+    # Mock sample dates to calculate processing times
+    for family_sample in analysis_store.family_samples(case.internal_id):
+        family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
+        family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
+        family_sample.sample.prepared_at = timestamp_yesterday
+        family_sample.sample.sequenced_at = timestamp_yesterday
+        family_sample.sample.delivered_at = datetime.now()
 
-@pytest.fixture(scope="function")
-def report_store(analysis_store, helpers):
-    family = analysis_store.families()[0]
-    yesterday = datetime.now() - timedelta(days=1)
-    helpers.add_analysis(analysis_store, family, started_at=yesterday)
-    helpers.add_analysis(analysis_store, family, started_at=datetime.now())
     return analysis_store
