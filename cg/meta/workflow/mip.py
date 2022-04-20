@@ -223,6 +223,9 @@ class MipAnalysisAPI(AnalysisAPI):
                     error,
                 )
                 raise error
+        else:
+            LOG.error(f"Unable to retrieve the latest metadata for {family_id}")
+            raise CgError
 
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict

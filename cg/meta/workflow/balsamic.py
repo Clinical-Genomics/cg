@@ -3,13 +3,13 @@
 import json
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 
 import yaml
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.tags import BalsamicAnalysisTag
-from cg.exc import BalsamicStartError
+from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -245,7 +245,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return None
         return normal_paths[0]
 
-    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[list, dict]:
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Any:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
 
         version = self.housekeeper_api.last_version(bundle=case_id)
@@ -266,12 +266,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Get the latest metadata of a specific BALSAMIC case"""
 
-        config_raw_data = self.get_latest_raw_file_data(
-            case_id, [BalsamicAnalysisTag.CONFIG]
-        )  # dict
-        metrics_raw_data = self.get_latest_raw_file_data(
-            case_id, [BalsamicAnalysisTag.QC_METRICS]
-        )  # list
+        config_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.CONFIG])
+        metrics_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.QC_METRICS])
 
         if config_raw_data and metrics_raw_data:
             try:
@@ -286,6 +282,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                     error,
                 )
                 raise error
+        else:
+            LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
+            raise CgError
 
     def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
         """Returns a formatted BalsamicAnalysis object"""
