@@ -263,7 +263,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return data
 
-    def get_latest_metadata(self, case_id: str) -> Union[None, BalsamicAnalysis]:
+    def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Get the latest metadata of a specific BALSAMIC case"""
 
         config_raw_data = self.get_latest_raw_file_data(
@@ -280,13 +280,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
                 return balsamic_analysis
             except ValidationError as error:
-                LOG.warning(
+                LOG.error(
                     "get_latest_metadata failed for '%s', missing attribute: %s",
                     case_id,
                     error,
                 )
-
-        return None
+                raise error
 
     def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
         """Returns a formatted BalsamicAnalysis object"""

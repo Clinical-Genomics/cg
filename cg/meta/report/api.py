@@ -13,10 +13,9 @@ from cg.exc import DeliveryReportError
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
+from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
-from cg.models.mip.mip_analysis import MipAnalysis
-from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
@@ -127,13 +126,6 @@ class ReportAPI(MetaAPI):
         case = self.status_db.family(case_id)
         analysis = self.status_db.analysis(case, analysis_date)
         analysis_metadata = self.analysis_api.get_latest_metadata(case.internal_id)
-
-        if not analysis_metadata:
-            LOG.error(
-                f"Could not generate report data for {case_id}. Unable to retrieve the latest metadata."
-            )
-            raise DeliveryReportError
-
         case_model = self.get_case_data(case, analysis, analysis_metadata)
 
         return ReportModel(
@@ -194,7 +186,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         analysis: models.Analysis,
-        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
+        analysis_metadata: AnalysisModel,
     ) -> CaseModel:
         """Returns case associated validated attributes"""
 
@@ -209,7 +201,7 @@ class ReportAPI(MetaAPI):
         )
 
     def get_samples_data(
-        self, case: models.Family, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
+        self, case: models.Family, analysis_metadata: AnalysisModel
     ) -> List[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes"""
 
@@ -291,7 +283,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         analysis: models.Analysis,
-        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
+        analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
         """Retrieves the pipeline attributes used for data analysis"""
 
@@ -330,7 +322,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         sample: models.Sample,
-        analysis_metadata: Union[MipAnalysis, BalsamicAnalysis],
+        analysis_metadata: AnalysisModel,
     ) -> SampleMetadataModel:
         """Fetches the sample metadata to include in the report"""
 
@@ -341,18 +333,18 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_genome_build(self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]) -> str:
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
         raise NotImplementedError
 
-    def get_variant_callers(self, analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]) -> list:
+    def get_variant_callers(self, analysis_metadata: AnalysisModel) -> list:
         """Extracts the list of variant-calling filters used during analysis"""
 
         raise NotImplementedError
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: Union[MipAnalysis, BalsamicAnalysis]
+        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
     ) -> bool:
         """Checks if the report is accredited or not"""
 

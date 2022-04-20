@@ -198,7 +198,7 @@ class MipAnalysisAPI(AnalysisAPI):
         full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
         return yaml.safe_load(open(full_file_path))
 
-    def get_latest_metadata(self, family_id: str) -> Union[MipAnalysis, None]:
+    def get_latest_metadata(self, family_id: str) -> MipAnalysis:
         """Get the latest trending data for a family"""
 
         mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
@@ -208,7 +208,6 @@ class MipAnalysisAPI(AnalysisAPI):
         sample_info_raw = self._get_latest_raw_file(
             family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
         )
-        mip_analysis = None
         if mip_config_raw and qc_metrics_raw and sample_info_raw:
             try:
                 mip_analysis: MipAnalysis = self.parse_analysis(
@@ -216,19 +215,14 @@ class MipAnalysisAPI(AnalysisAPI):
                     qc_metrics_raw=qc_metrics_raw,
                     sample_info_raw=sample_info_raw,
                 )
+                return mip_analysis
             except ValidationError as error:
-                LOG.warning(
+                LOG.error(
                     "get_latest_metadata failed for '%s', missing attribute: %s",
                     family_id,
                     error,
                 )
-                LOG.warning(
-                    "get_latest_metadata failed for '%s', missing attribute: %s",
-                    family_id,
-                    error,
-                )
-                mip_analysis = None
-        return mip_analysis
+                raise error
 
     def parse_analysis(
         self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
