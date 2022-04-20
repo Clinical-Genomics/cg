@@ -231,7 +231,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         except Exception as e:
             LOG.error("Unspecified error occurred: %s", e)
             exit_code = EXIT_FAIL
-    if exit_code:
+    if exit_code == EXIT_FAIL:
         raise click.Abort
 
 
@@ -263,5 +263,5 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         except Exception as exception_object:
             LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
             exit_code = EXIT_FAIL
-    if exit_code:
+    if exit_code == EXIT_FAIL:
         raise click.Abort
