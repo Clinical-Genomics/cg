@@ -420,7 +420,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return [
             case_object
             for case_object in self.get_running_cases()
-            if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
     @staticmethod
