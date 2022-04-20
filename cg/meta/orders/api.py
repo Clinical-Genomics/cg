@@ -14,6 +14,7 @@ from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
 from .balsamic_submitter import BalsamicSubmitter
+from .balsamic_umi_submitter import BalsamicUmiSubmitter
 from .fastq_submitter import FastqSubmitter
 from .fluffy_submitter import FluffySubmitter
 from .metagenome_submitter import MetagenomeSubmitter
@@ -33,7 +34,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
 
     submitters = {
         OrderType.BALSAMIC: BalsamicSubmitter,
-        OrderType.BALSAMIC_UMI: BalsamicSubmitter,
+        OrderType.BALSAMIC_UMI: BalsamicUmiSubmitter,
         OrderType.FASTQ: FastqSubmitter,
         OrderType.FLUFFY: FluffySubmitter,
         OrderType.METAGENOME: MetagenomeSubmitter,
