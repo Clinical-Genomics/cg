@@ -21,9 +21,6 @@ class BalsamicUmiAnalysisAPI(BalsamicAnalysisAPI):
     """Handles communication between BALSAMIC processes
     and the rest of CG infrastructure"""
 
-    __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
-    __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
-
     def __init__(
         self,
         config: CGConfig,
