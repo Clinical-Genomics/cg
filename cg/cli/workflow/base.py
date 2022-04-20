@@ -10,6 +10,7 @@ from .microsalt.base import microsalt
 from .mip_dna.base import mip_dna
 from .mip_rna.base import mip_rna
 from .mutant.base import mutant
+from .fastq.base import fastq
 
 
 @click.group()
@@ -24,3 +25,4 @@ workflow.add_command(mip_dna)
 workflow.add_command(mip_rna)
 workflow.add_command(fluffy)
 workflow.add_command(mutant)
+workflow.add_command(fastq)

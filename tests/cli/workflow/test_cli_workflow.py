@@ -1,4 +1,5 @@
 """This script tests the cli method enable workflows"""
+
 from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner

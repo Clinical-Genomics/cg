@@ -8,9 +8,8 @@ from typing import Optional
 import click
 
 from cg.cli.upload.nipt import nipt
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import AnalysisUploadError, CgError
-from cg.meta.report.api import ReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -19,8 +18,9 @@ from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
+from .clinical_delivery import fastq
 from .coverage import coverage
-from .delivery_report import delivery_report, delivery_report_to_scout, delivery_reports
+from .delivery_report import mip_dna
 from .fohm import fohm
 from .genotype import genotypes
 from .gisaid import gisaid
@@ -90,14 +90,6 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
             click.echo(click.style(message, fg="yellow"))
             return
 
-    context.obj.meta_apis["report_api"] = ReportAPI(
-        store=status_db,
-        lims_api=config_object.lims_api,
-        chanjo_api=config_object.chanjo_api,
-        analysis_api=analysis_api,
-        scout_api=config_object.scout_api,
-    )
-
     context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=config_object.housekeeper_api,
         scout_api=config_object.scout_api,
@@ -126,7 +118,8 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
-        context.invoke(scout, case_id=family_id)
+        if DataDelivery.SCOUT in case_obj.data_delivery:
+            context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
         status_db.commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
@@ -176,10 +169,9 @@ upload.add_command(create_scout_load_config)
 upload.add_command(observations)
 upload.add_command(genotypes)
 upload.add_command(coverage)
-upload.add_command(delivery_report)
-upload.add_command(delivery_reports)
-upload.add_command(delivery_report_to_scout)
 upload.add_command(vogue)
 upload.add_command(gisaid)
 upload.add_command(nipt)
 upload.add_command(fohm)
+upload.add_command(fastq)
+upload.add_command(mip_dna)
