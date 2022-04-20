@@ -12,7 +12,12 @@ from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
-from cg.models.balsamic.analysis import BalsamicAnalysis, parse_balsamic_analysis
+from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.metrics import (
+    BalsamicTargetedQCMetrics,
+    BalsamicWGSQCMetrics,
+    BalsamicMetricsBase,
+)
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
@@ -270,8 +275,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         if config_raw_data and metrics_raw_data:
             try:
-                balsamic_analysis = parse_balsamic_analysis(
-                    config=config_raw_data, metrics=metrics_raw_data
+                balsamic_analysis = self.parse_analysis(
+                    config_raw=config_raw_data, qc_metrics_raw=metrics_raw_data
                 )
                 return balsamic_analysis
             except ValidationError as error:
@@ -282,6 +287,42 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
 
         return None
+
+    def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
+        """Returns a formatted BalsamicAnalysis object"""
+
+        sequencing_type = config_raw["analysis"]["sequencing_type"]
+        qc_metrics = dict()
+
+        for value in qc_metrics_raw:
+            sample_metric = BalsamicMetricsBase(**value)
+            try:
+                qc_metrics[sample_metric.id].update(
+                    {sample_metric.name.lower(): sample_metric.value}
+                )
+            except KeyError:
+                qc_metrics[sample_metric.id] = {sample_metric.name.lower(): sample_metric.value}
+
+        return BalsamicAnalysis(
+            config=config_raw,
+            sample_metrics=self.cast_metrics_type(sequencing_type, qc_metrics),
+        )
+
+    @staticmethod
+    def cast_metrics_type(
+        sequencing_type: str, metrics: dict
+    ) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
+        """Cast metrics model type according to the sequencing type"""
+
+        if metrics:
+            for k, v in metrics.items():
+                metrics[k] = (
+                    BalsamicWGSQCMetrics(**v)
+                    if sequencing_type == "wgs"
+                    else BalsamicTargetedQCMetrics(**v)
+                )
+
+        return metrics
 
     def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
         sample_obj = (

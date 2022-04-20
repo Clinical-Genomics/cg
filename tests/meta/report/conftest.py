@@ -31,7 +31,7 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
 def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI:
     """BALSAMIC ReportAPI fixture"""
 
-    cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis()
+    cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
     cg_context.status_db_ = MockDB(report_store)
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.scout_api_ = MockScoutApi(cg_context)

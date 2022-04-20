@@ -1,6 +1,6 @@
 import yaml
 
-from cg.models.balsamic.analysis import parse_balsamic_analysis
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 
 def get_balsamic_raw_data():
@@ -14,18 +14,16 @@ def get_balsamic_raw_data():
     return config, metrics
 
 
-class MockBalsamicAnalysis:
+class MockBalsamicAnalysis(BalsamicAnalysisAPI):
     """Mock a BALSAMIC analysis object"""
 
-    @staticmethod
-    def get_latest_metadata(_case_id: str):
+    def get_latest_metadata(self, case_id: str):
         """Get the latest metadata of a specific BALSAMIC case"""
 
         config, metrics = get_balsamic_raw_data()
-        return parse_balsamic_analysis(config, metrics)
+        return self.parse_analysis(config, metrics)
 
-    @staticmethod
-    def get_bundle_deliverables_type(_case_id: str) -> str:
+    def get_bundle_deliverables_type(self, case_id: str) -> str:
         """Return the analysis type for a case"""
 
         return "tumor_normal_panel"

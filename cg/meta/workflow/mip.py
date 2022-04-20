@@ -13,7 +13,9 @@ from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
-from cg.models.mip.mip_analysis import MipAnalysis, parse_mip_analysis
+from cg.models.mip.mip_analysis import MipAnalysis
+from cg.models.mip.mip_config import MipBaseConfig
+from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 from cg.store import models
 
@@ -209,8 +211,8 @@ class MipAnalysisAPI(AnalysisAPI):
         mip_analysis = None
         if mip_config_raw and qc_metrics_raw and sample_info_raw:
             try:
-                mip_analysis: MipAnalysis = parse_mip_analysis(
-                    mip_config_raw=mip_config_raw,
+                mip_analysis: MipAnalysis = self.parse_analysis(
+                    config_raw=mip_config_raw,
                     qc_metrics_raw=qc_metrics_raw,
                     sample_info_raw=sample_info_raw,
                 )
@@ -227,6 +229,32 @@ class MipAnalysisAPI(AnalysisAPI):
                 )
                 mip_analysis = None
         return mip_analysis
+
+    def parse_analysis(
+        self, config_raw: dict, qc_metrics_raw: dict, sample_info_raw: dict
+    ) -> MipAnalysis:
+        """Parses the output analysis files from MIP
+
+        Args:
+            config_raw (dict): raw YAML input from MIP analysis config file
+            qc_metrics_raw (dict): raw YAML input from MIP analysis qc metric file
+            sample_info_raw (dict): raw YAML input from MIP analysis qc sample info file
+        Returns:
+            MipAnalysis: parsed MIP analysis data
+        """
+        mip_config: MipBaseConfig = MipBaseConfig(**config_raw)
+        qc_metrics = MIPMetricsDeliverables(**qc_metrics_raw)
+        sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
+
+        return MipAnalysis(
+            case=mip_config.case_id,
+            genome_build=sample_info.genome_build,
+            sample_id_metrics=qc_metrics.sample_id_metrics,
+            mip_version=sample_info.mip_version,
+            rank_model_version=sample_info.rank_model_version,
+            sample_ids=mip_config.sample_ids,
+            sv_rank_model_version=sample_info.sv_rank_model_version,
+        )
 
     @staticmethod
     def is_dna_only_case(case_obj: models.Family) -> bool:
