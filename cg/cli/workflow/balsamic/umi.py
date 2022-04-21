@@ -4,8 +4,16 @@ import logging
 
 import click
 
-from cg.cli.workflow.balsamic.base import config_case, run, report_deliver, store_housekeeper, start, start_available, \
-    store, store_available
+from cg.cli.workflow.balsamic.base import (
+    config_case,
+    run,
+    report_deliver,
+    store_housekeeper,
+    start,
+    start_available,
+    store,
+    store_available,
+)
 from cg.cli.workflow.commands import link, resolve_compression
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 

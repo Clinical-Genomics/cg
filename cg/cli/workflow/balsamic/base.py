@@ -4,8 +4,13 @@ import logging
 
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.balsamic.options import OPTION_PANEL_BED, OPTION_DRY, OPTION_QOS, OPTION_ANALYSIS_TYPE, \
-    OPTION_RUN_ANALYSIS
+from cg.cli.workflow.balsamic.options import (
+    OPTION_PANEL_BED,
+    OPTION_DRY,
+    OPTION_QOS,
+    OPTION_ANALYSIS_TYPE,
+    OPTION_RUN_ANALYSIS,
+)
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
