@@ -99,7 +99,7 @@ class InvoiceAPI:
             priority = record.priority_human
 
         full_price = getattr(record.application_version, f"price_{priority}")
-        discount_factor = float(100 - discount) / 100
+        discount_factor = 1 - discount / 100
 
         if not full_price:
             return None
@@ -112,7 +112,7 @@ class InvoiceAPI:
                 if costcenter == "kth":
                     split_factor = percent_kth / 100
                 else:
-                    split_factor = (100 - percent_kth) / 100
+                    split_factor = 1 - percent_kth / 100
                 split_price = round(price * split_factor, 1)
             except ValueError:
                 self.log.append(
@@ -179,4 +179,4 @@ class InvoiceAPI:
             else:
                 return None
 
-        return total_price
+        return round(total_price, 1)
