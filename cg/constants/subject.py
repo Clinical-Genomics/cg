@@ -5,3 +5,4 @@ class Gender(str, Enum):
     FEMALE = "female"
     MALE = "male"
     UNKNOWN = "unknown"
+    MISSING = None

@@ -96,6 +96,12 @@ def fixture_ticket_nr() -> int:
     return 123456
 
 
+@pytest.fixture(name="subject_id")
+def fixture_subject_id() -> str:
+    """Return subject id"""
+    return "a_subject_id"
+
+
 @pytest.fixture(scope="function", name="analysis_family_single_case")
 def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
     """Build an example case."""

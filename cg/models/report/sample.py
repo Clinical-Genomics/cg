@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Union
 
-from cg.constants.gender import Gender
+from cg.constants.subject import Gender
 from pydantic import BaseModel, validator
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.validators import (
