@@ -38,3 +38,6 @@ class MockTB:
         self.get_latest_analysis_response[analysis_dict["family"]] = TrailblazerAnalysis.parse_obj(
             analysis_dict
         )
+
+    def is_latest_analysis_completed(self, case_id: str):
+        return True
