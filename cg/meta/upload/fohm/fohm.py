@@ -199,7 +199,7 @@ class FOHMUploadAPI:
                 continue
             pangolin_path = Path(
                 self.daily_rawdata_path,
-                f"{region_lab}_{self.current_datestr}_pangolin_classification_format3.txt",
+                f"{region_lab}_{self.current_datestr}_pangolin_classification_format4.txt",
             )
             pangolin_df.to_csv(
                 pangolin_path,

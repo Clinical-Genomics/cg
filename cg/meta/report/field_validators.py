@@ -23,6 +23,9 @@ def get_empty_fields(report_data: dict) -> list:
 
     for field, value in report_data.items():
         if not value or value == NA_FIELD:
+            if isinstance(value, bool):
+                continue
+
             empty_fields.append(field)
 
     return empty_fields
@@ -79,9 +82,9 @@ def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
         if source in nested_sources:
             # Associates application/sample tags/ids to missing fields
             missing_data = {
-                tag: get_missing_fields(empty_fields[source][tag], required_fields[source])
+                tag: get_missing_fields(empty_fields[source][tag], required_fields[source][tag])
                 for tag in empty_fields[source]
-                if get_missing_fields(empty_fields[source][tag], required_fields[source])
+                if get_missing_fields(empty_fields[source][tag], required_fields[source][tag])
             }
         else:
             missing_data = get_missing_fields(empty_fields[source], required_fields[source])
