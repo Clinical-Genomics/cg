@@ -1,0 +1,11 @@
+{
+  "customer": "cust000",
+  "customer_sample_id": "a_customer_sample_id",
+  "comment": "a_comment",
+  "lims_sample_id": "ADM1",
+  "invoice_id": 123,
+  "order_id": 123,
+  "priority": "standard",
+  "sample_id": "a_sample_id",
+  "subject_id": "a_subject_id"
+}

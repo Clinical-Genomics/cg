@@ -2,9 +2,9 @@ from cg.constants.subject import Gender
 from cg.models.dolores.subject import Subject
 
 
-def test_instantiate_dolores_subjects(dolores_subject_raw: dict):
+def test_instantiate_dolores_subject(dolores_subject_raw: dict):
     """
-    Tests Dolores subjects model
+    Tests Dolores subject model
     """
     # GIVEN a dictionary with the some subject data
 
@@ -17,7 +17,7 @@ def test_instantiate_dolores_subjects(dolores_subject_raw: dict):
 
 def test_instantiate_dolores_subjects_with_gender(dolores_subject_raw: dict):
     """
-    Tests Dolores subjects model with gender
+    Tests Dolores subject model with gender
     """
     # GIVEN a dictionary with the some subject data including gender
     dolores_subject_raw.update({"gender": Gender.MALE})

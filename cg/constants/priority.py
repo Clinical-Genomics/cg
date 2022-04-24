@@ -22,6 +22,14 @@ class IntEnum(int, Enum):
         return int.__str__(self)
 
 
+class PriorityChoices(str, Enum):
+    RESEARCH = "research"
+    STANDARD = "standard"
+    PRIORITY = "priority"
+    EXPRESS = "express"
+    CLINICAL_TRIALS = "clinical_trials"
+
+
 class Priority(IntEnum):
     research: int = 0
     standard: int = 1
