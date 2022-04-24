@@ -31,7 +31,6 @@ def fixture_test_command() -> List:
 @pytest.fixture(name="encryption_key_file")
 def fixture_encryption_key_file() -> Path:
     """Return an encryption key file Path object"""
-    # return Path("encryption.key")
     return Path("/path/to/file.key")
 
 
