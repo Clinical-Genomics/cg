@@ -1,63 +1,117 @@
+"""Tests for the meta EncryptionAPI and SpringEncryptionAPI"""
+import logging
 import pathlib
 from pathlib import Path
 
 import mock
+import pytest
 
+import cg.utils.checksum.checksum
+from cg.exc import ChecksumFailedError
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command(mock_process, binary_path):
-    # GIVEN
-    encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=False)
-    encryption_api.process = mock_process()
+def test_run_gpg_command(mock_process, binary_path, test_command):
+    """Tests the run_gpg_command method"""
+    # GIVEN a CLI command input for the Process API
+    command = test_command
 
-    # WHEN running a gpg command
-    encryption_api.run_gpg_command(command=["test", "command"])
+    # WHEN running that command
+    encryption_api = EncryptionAPI(binary_path=binary_path)
+    encryption_api.process = mock_process()
+    encryption_api.process.binary = binary_path
+    encryption_api.run_gpg_command(command=command)
 
     # THEN the Process API should be used to execute that command with dry_run set to False
-    encryption_api.process.run_command.assert_called_once_with(["test", "command"], dry_run=False)
+    encryption_api.process.run_command.assert_called_once_with(command, dry_run=False)
 
 
 @mock.patch("cg.utils.Process")
-def test_run_gpg_command_dry_run(mock_process, binary_path):
-    # GIVEN
-    encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
-    encryption_api.process = mock_process()
+def test_run_gpg_command_dry_run(mock_process, binary_path, test_command):
+    """Tests the run_gpg_command method"""
+    # GIVEN a CLI command input for the Process API
+    command = test_command
 
     # WHEN running a gpg command in dry mode
-    encryption_api.run_gpg_command(command=["test", "command"])
+    encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
+    encryption_api.process = mock_process()
+    encryption_api.run_gpg_command(command=command)
 
     # THEN the Process API should be used to execute that command with dry_run set to True
-    encryption_api.process.run_command.assert_called_once_with(["test", "command"], dry_run=True)
+    encryption_api.process.run_command.assert_called_once_with(command, dry_run=True)
 
 
 @mock.patch("cg.utils.Process")
 def test_generate_temporary_passphrase(mock_process, binary_path):
-    # GIVEN
+    """Tests generating a temporary passphrase"""
+    # GIVEN an instance of the encryption API
     encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
     encryption_api.process = mock_process()
 
     # WHEN creating a temporary passphrase
     result = encryption_api.generate_temporary_passphrase_file()
-    # THEN the passphrase file should be a temporary file
+
+    # THEN the passphrase file should be generated as a temporary file
     assert type(result) is pathlib.PosixPath
     assert result.parent == Path("/tmp")
     assert result.name.startswith("tmp")
 
 
-def test_output_input_parameters(binary_path, input_file, output_file):
-    # GIVEN an input file and an output file for a gpg command
-    encryption_api = EncryptionAPI(binary_path=binary_path)
+@mock.patch("cg.meta.encryption.encryption.sha512_checksum")
+def test_compare_file_checksums_equal(
+    mock_file_checksum,
+    binary_path,
+    spring_file_path,
+    checksum_spring_file_path,
+    checksum_result_1,
+    caplog,
+):
+    """Tests the compare_file_checksum method"""
+    # GIVEN two identical checksum results
+    caplog.set_level(logging.INFO)
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
 
-    # WHEN generating the output/input parameters for a GPG command
-    result = encryption_api.output_input_parameters(input_file=input_file, output_file=output_file)
+    mock_file_checksum.side_effect = [checksum_result_1, checksum_result_1]
 
-    # THEN the result should be a list of the form ["-o", str(output_file), str(input_file)]
-    assert result == ["-o", str(output_file), str(input_file)]
+    # WHEN comparing the checksums of those files
+    encryption_api.compare_file_checksums(
+        original_file=spring_file_path, decrypted_file_checksum=checksum_spring_file_path
+    )
+
+    # THEN the checksum comparison should pass
+    assert "Checksum comparison successful!" in caplog.text
 
 
-def test_asymmetric_encryption_command(binary_path, input_file, output_file):
+@mock.patch("cg.meta.encryption.encryption.sha512_checksum")
+def test_compare_file_checksums_not_equal(
+    mock_file_checksum,
+    binary_path,
+    spring_file_path,
+    checksum_spring_file_path,
+    checksum_result_1,
+    checksum_result_2,
+):
+    """Tests the compare_file_checksum method"""
+    # GIVEN two nonidentical checksum results
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+
+    mock_file_checksum.side_effect = [checksum_result_1, checksum_result_2]
+
+    # WHEN comparing the checksums of those files
+    with pytest.raises(ChecksumFailedError) as error:
+        encryption_api.compare_file_checksums(
+            original_file=spring_file_path, decrypted_file_checksum=checksum_spring_file_path
+        )
+
+    # THEN the checksum comparison should fail and an exception should be raised
+    assert error.value.message == "Checksum comparison failed!"
+
+
+def test_get_asymmetric_encryption_command(
+    binary_path, input_file, output_file, asymmetric_encryption_command
+):
+    """Tests creating the asymmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
 
@@ -66,18 +120,14 @@ def test_asymmetric_encryption_command(binary_path, input_file, output_file):
         input_file=input_file, output_file=output_file
     )
 
-    # THEN a list of parameters should be returned
-    assert result == [
-        "--encrypt",
-        "--recipient",
-        "Clinical Genomics",
-        "-o",
-        str(output_file),
-        str(input_file),
-    ]
+    # THEN the correct parameters should be returned
+    assert result == asymmetric_encryption_command
 
 
-def test_asymmetric_decryption_command(binary_path, input_file, output_file):
+def test_get_asymmetric_decryption_command(
+    binary_path, input_file, output_file, asymmetric_decryption_command
+):
+    """Tests creating the asymmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
 
@@ -86,25 +136,20 @@ def test_asymmetric_decryption_command(binary_path, input_file, output_file):
         input_file=input_file, output_file=output_file
     )
 
-    # THEN the result should be  ["--decrypt", "--batch", "--cipher-algo", "AES256",
-    # "--passphrase", "-o", str(output_file), str(input_file)]
-    assert result == [
-        "--decrypt",
-        "--batch",
-        "--cipher-algo",
-        "AES256",
-        "--passphrase",
-        "Clinical Genomics",
-        "-o",
-        str(output_file),
-        str(input_file),
-    ]
+    # THEN the correct parameters should be returned
+    assert result == asymmetric_decryption_command
 
 
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.generate_temporary_passphrase_file")
-def test_symmetric_encryption_command(
-    mock_passphrase, binary_path, input_file, output_file, temporary_passphrase
+def test_get_symmetric_encryption_command(
+    mock_passphrase,
+    binary_path,
+    input_file,
+    output_file,
+    temporary_passphrase,
+    symmetric_encryption_command,
 ):
+    """Tests creating the symmetric encryption command"""
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     mock_passphrase.return_value = temporary_passphrase
@@ -114,77 +159,179 @@ def test_symmetric_encryption_command(
         input_file=input_file, output_file=output_file
     )
 
-    # THEN the the passphrase should match
-    assert encryption_api.temporary_passphrase == temporary_passphrase
-    # THEN a list of parameters should be returned
-    assert result == [
-        "--symmetric",
-        "--cipher-algo",
-        "AES256",
-        "--batch",
-        "--compress-algo",
-        "None",
-        "--passphrase-file",
-        temporary_passphrase,
-        "-o",
-        str(output_file),
-        str(input_file),
-    ]
+    # THEN the correct parameters should be returned
+    assert result == symmetric_encryption_command
 
 
-def test_symmetric_decryption_command(binary_path, input_file, output_file):
+def test_get_symmetric_decryption_command(
+    binary_path, input_file, output_file, encryption_key_file, symmetric_decryption_command
+):
+    """Tests creating the symmetric decryption command"""
     # GIVEN an input file and an output file for a gpg command
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
-    encryption_key = Path("encryption.key")
 
     # WHEN generating the GPG command for symmetric_decryption
     result = encryption_api.get_symmetric_decryption_command(
-        input_file=input_file, output_file=output_file, encryption_key=encryption_key
+        input_file=input_file, output_file=output_file, encryption_key=encryption_key_file
     )
 
-    # THEN the result should be correct
-    assert result == [
-        "--decrypt",
-        "--cipher-algo",
-        "AES256",
-        "--batch",
-        "--passphrase-file",
-        str(encryption_key),
-        "-o",
-        str(output_file),
-        str(input_file),
-    ]
+    # THEN the correct parameters should be returned
+    assert result == symmetric_decryption_command
 
 
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.run_gpg_command")
 @mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.encrypted_spring_file_path")
-@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.get_symmetric_encryption_command")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.generate_temporary_passphrase_file")
 @mock.patch("cg.utils.Process")
 def test_spring_symmetric_encryption(
-    mock_process, mock_command, mock_encrypted_spring_file, binary_path, temporary_passphrase
+    mock_process,
+    mock_passphrase,
+    mock_encrypted_spring_file,
+    binary_path,
+    encrypted_spring_file_path,
+    spring_file_path,
+    spring_symmetric_encryption_command,
+    temporary_passphrase,
 ):
-    # GIVEN an input file and an output file for a gpg command
+    """Tests encrypting a spring file"""
+    # GIVEN a spring file
     encryption_api = SpringEncryptionAPI(binary_path=binary_path)
     encryption_api.process = mock_process()
-    mock_encrypted_spring_file.return_value = Path("/path/to/file.spring.gpg")
-    spring_file_path = Path("/path/to/file.spring")
-    mock_command.return_value = [
-        "--symmetric",
-        "--cipher-algo",
-        "AES256",
-        "--batch",
-        "--compress-algo",
-        "None",
-        "--passphrase-file",
-        temporary_passphrase,
-        "-o",
-        str(mock_encrypted_spring_file),
-        str(spring_file_path),
-    ]
-    spring_file_path = Path("/path/to/file.spring")
+    mock_encrypted_spring_file.return_value = encrypted_spring_file_path
+    mock_passphrase.return_value = temporary_passphrase
 
-    # WHEN generating the GPG command for symmetric_encryption
+    # WHEN symmetrically encrypting the spring file
     encryption_api.spring_symmetric_encryption(spring_file_path=spring_file_path)
 
-    # THEN a list of parameters should be returned
-    encryption_api.run_gpg_command.assert_called_once_with(mock_command.return_value)
+    # THEN the gpg command should be run with the correct encryption command
+    encryption_api.run_gpg_command.assert_called_once_with(spring_symmetric_encryption_command)
+
+
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.run_gpg_command")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.encrypted_key_path")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.generate_temporary_passphrase_file")
+@mock.patch("cg.utils.Process")
+def test_key_asymmetric_encryption(
+    mock_process,
+    mock_passphrase,
+    mock_encrypted_key_file,
+    binary_path,
+    encrypted_key_file,
+    key_asymmetric_encryption_command,
+    spring_file_path,
+    temporary_passphrase,
+):
+    """Tests encrypting an encryption key"""
+    # GIVEN a temporary passphrase
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    encryption_api.process = mock_process()
+    mock_encrypted_key_file.return_value = encrypted_key_file
+    mock_passphrase.return_value = temporary_passphrase
+
+    # WHEN asymmetrically encrypting the temporary passphrase
+    encryption_api.key_asymmetric_encryption(spring_file_path=spring_file_path)
+
+    # THEN the gpg command should be run with the correct encryption command
+    encryption_api.run_gpg_command.assert_called_once_with(key_asymmetric_encryption_command)
+
+
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.run_gpg_command")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.encrypted_spring_file_path")
+@mock.patch("cg.utils.Process")
+def test_spring_symmetric_decryption(
+    mock_process,
+    mock_encrypted_spring_file_path,
+    binary_path,
+    encrypted_spring_file_path,
+    spring_symmetric_decryption_command,
+    spring_file_path,
+):
+    """Tests decrypting a spring file"""
+    # GIVEN an encrypted spring file
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    encryption_api.process = mock_process()
+    mock_encrypted_spring_file_path.return_value = encrypted_spring_file_path
+
+    # WHEN symmetrically decrypting the spring file
+    encryption_api.spring_symmetric_decryption(
+        spring_file_path=spring_file_path, output_file=spring_file_path
+    )
+
+    # THEN the gpg command should be run with the correct decryption command
+    encryption_api.run_gpg_command.assert_called_once_with(spring_symmetric_decryption_command)
+
+
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.run_gpg_command")
+@mock.patch("cg.meta.encryption.encryption.SpringEncryptionAPI.encrypted_key_path")
+@mock.patch("cg.utils.Process")
+def test_key_asymmetric_decryption(
+    mock_process,
+    mock_encrypted_key_file,
+    binary_path,
+    encrypted_key_file,
+    key_asymmetric_decryption_command,
+    spring_file_path,
+):
+    """Tests decrypting a encryption key file"""
+    # GIVEN an encryption encryption key
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    encryption_api.process = mock_process()
+    mock_encrypted_key_file.return_value = encrypted_key_file
+
+    # WHEN asymmetrically decrypting the encryption key
+    encryption_api.key_asymmetric_decryption(spring_file_path=spring_file_path)
+
+    # THEN the gpg command should be run with the correct decryption command
+    encryption_api.run_gpg_command.assert_called_once_with(key_asymmetric_decryption_command)
+
+
+@mock.patch("pathlib.Path.unlink")
+@mock.patch("cg.utils.Process")
+def test_cleanup_all_files(mock_process, mock_unlink, binary_path, spring_file_path, caplog):
+    """ """
+    # GIVEN there are files to clean up: decrypted spring file, encrypted spring file, encrypted
+    # encryption key and encryption key
+    caplog.set_level(logging.INFO)
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    encryption_api.process = mock_process()
+
+    # WHEN attempting to clean up those files
+    encryption_api.cleanup(spring_file_path=spring_file_path)
+
+    # THEN the files should be removed and the result logged
+    assert 4 == mock_unlink.call_count
+    assert "Removed existing decrypted checksum spring file" in caplog.text
+    assert "Removed existing encrypted spring file" in caplog.text
+    assert "Removed existing encrypted key file" in caplog.text
+    assert "Removed existing key file" in caplog.text
+
+
+@mock.patch("pathlib.Path.unlink")
+@mock.patch("cg.utils.Process")
+def test_cleanup_no_files(
+    mock_process,
+    mock_unlink,
+    binary_path,
+    spring_file_path,
+    caplog,
+):
+    """ """
+    # GIVEN there are no files out of a possible four to clean up
+    caplog.set_level(logging.INFO)
+    encryption_api = SpringEncryptionAPI(binary_path=binary_path)
+    encryption_api.process = mock_process()
+    mock_unlink.side_effect = [
+        FileNotFoundError,
+        FileNotFoundError,
+        FileNotFoundError,
+        FileNotFoundError,
+    ]
+    # WHEN attempting to clean up those files
+    encryption_api.cleanup(spring_file_path=spring_file_path)
+
+    # THEN the cleanup method should handle the thrown exception and log the result
+    assert 4 == mock_unlink.call_count
+    assert "No decrypted checksum spring file to clean up, continuing cleanup" in caplog.text
+    assert "No encrypted spring file to clean up, continuing cleanup" in caplog.text
+    assert "No encrypted key file to clean up, continuing cleanup" in caplog.text
+    assert "No existing key file to clean up, cleanup process completed" in caplog.text

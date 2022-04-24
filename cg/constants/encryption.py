@@ -53,6 +53,6 @@ class GPGParameters(ListEnum):
         "--batch",
         "--passphrase-file",
     ]
-    OUTPUT_INPUT_FILES: list = [
+    OUTPUT_PARAMETER: list = [
         "-o",
     ]
