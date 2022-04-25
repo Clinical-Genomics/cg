@@ -10,6 +10,7 @@ from cg.models.dolores.sequencing import Sequencing
 
 class Sample(BaseModel):
     created_at: Optional[datetime]
+    comment: Optional[str]
     customer: str
     customer_sample_id: str
     lims_sample_id: str
@@ -21,7 +22,7 @@ class Sample(BaseModel):
     subject_id: str
 
     @validator("priority", always=True)
-    def validate_priority(cls, value: Union[Priority, PriorityChoices]) -> Priority:
+    def convert_priority(cls, value: Union[Priority, PriorityChoices]) -> Priority:
         if isinstance(value, str):
             return Priority[value]
         return value

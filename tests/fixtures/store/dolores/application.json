@@ -1,0 +1,17 @@
+{
+  "application_id": "WGSPCFC030",
+  "description": "a_description",
+  "is_accredited": "True",
+  "is_archived": "False",
+  "min_required_sample_concentration": 50,
+  "max_required_sample_concentration": 250,
+  "percent_reads_guaranteed": 92,
+  "percent_invoicing_kth": 75,
+  "preparation_category": "wgs",
+  "priority_processing": "True",
+  "sample_concentration_unit": "ng/uL",
+  "sequencing_depth": 30,
+  "min_sequencing_depth": 26,
+  "target_sequence_reads": 650000000,
+  "turn_around_time": 21
+}

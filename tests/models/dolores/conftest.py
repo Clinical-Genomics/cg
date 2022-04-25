@@ -17,6 +17,18 @@ def fixture_datestamp_now() -> datetime:
     return datetime.datetime.now()
 
 
+@pytest.fixture(name="dolores_application_json_path")
+def fixture_dolores_application_json_path(fixtures_dir) -> Path:
+    """Return path to Dolores application.json path"""
+    return Path(fixtures_dir, "store", "dolores", "application.json")
+
+
+@pytest.fixture(name="dolores_application_raw")
+def fixture_dolores_application_raw(dolores_application_json_path: Path) -> dict:
+    """Load an example of json dolores application"""
+    return get_dict_from_json(file_path=dolores_application_json_path)
+
+
 @pytest.fixture(name="dolores_sample_json_path")
 def fixture_dolores_sample_json_path(fixtures_dir) -> Path:
     """Return path to Dolores sample.json path"""

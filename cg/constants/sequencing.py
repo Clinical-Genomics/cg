@@ -1,4 +1,6 @@
 """Constants related to all things sequencing"""
+from enum import Enum
+
 from cgmodels.cg.constants import StrEnum
 
 sequencer_types = {
@@ -21,6 +23,16 @@ sequencer_types = {
     "A00621": "novaseq",
     "A00689": "novaseq",
 }
+
+
+class PreparationCategory(str, Enum):
+    SARS2_COV = "cov"
+    MICRO = "mic"
+    READY_MADE_LIBRARY = "rml"
+    TARGETED_GENOME_SEQUENCING = "tgs"
+    WHOLE_EXOME_SEQUENCING = "wes"
+    WHOLE_GENOME_SEQUENCING = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING = "wts"
 
 
 class Sequencers(StrEnum):
