@@ -11,13 +11,13 @@ def test_instantiate_dolores_sample(dolores_sample_raw: dict):
     # GIVEN a dictionary with the some sample data
 
     # WHEN instantiating a Sample object
-    dolores_samples = Sample(**dolores_sample_raw)
+    dolores_sample = Sample(**dolores_sample_raw)
 
     # THEN assert that it was successfully created
-    assert isinstance(dolores_samples, Sample)
+    assert isinstance(dolores_sample, Sample)
 
 
-def test_instantiate_dolores_samples_with_created_at(
+def test_instantiate_dolores_sample_with_created_at(
     datestamp_now: datetime, dolores_sample_raw: dict
 ):
     """
@@ -27,13 +27,13 @@ def test_instantiate_dolores_samples_with_created_at(
     dolores_sample_raw.update({"created_at": datestamp_now})
 
     # WHEN instantiating a Sample object
-    dolores_samples = Sample(**dolores_sample_raw)
+    dolores_sample = Sample(**dolores_sample_raw)
 
     # THEN assert that it should return the current time
-    assert dolores_samples.created_at == datestamp_now
+    assert dolores_sample.created_at == datestamp_now
 
 
-def test_instantiate_dolores_samples_with_priority_str(dolores_sample_raw: dict):
+def test_instantiate_dolores_sample_with_priority_str(dolores_sample_raw: dict):
     """
     Tests Dolores sample model with "priority" in str format
     """
@@ -41,13 +41,13 @@ def test_instantiate_dolores_samples_with_priority_str(dolores_sample_raw: dict)
     assert isinstance(dolores_sample_raw["priority"], str)
 
     # WHEN instantiating a Sample object
-    dolores_samples = Sample(**dolores_sample_raw)
+    dolores_sample = Sample(**dolores_sample_raw)
 
     # THEN assert that it should return the integer value of the priority
-    assert dolores_samples.priority == Priority.standard
+    assert dolores_sample.priority == Priority.standard
 
 
-def test_instantiate_dolores_samples_with_priority_int(dolores_sample_raw: dict):
+def test_instantiate_dolores_sample_with_priority_int(dolores_sample_raw: dict):
     """
     Tests Dolores sample model with "priority" in int format
     """
@@ -56,7 +56,7 @@ def test_instantiate_dolores_samples_with_priority_int(dolores_sample_raw: dict)
     assert isinstance(dolores_sample_raw["priority"], int)
 
     # WHEN instantiating a Sample object
-    dolores_samples = Sample(**dolores_sample_raw)
+    dolores_sample = Sample(**dolores_sample_raw)
 
     # THEN assert that it should return the integer value of the priority
-    assert dolores_samples.priority == Priority.standard
+    assert dolores_sample.priority == Priority.standard

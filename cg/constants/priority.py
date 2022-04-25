@@ -1,5 +1,5 @@
 """Priority specific constants"""
-from enum import Enum
+from enum import Enum, IntEnum
 
 from cgmodels.cg.constants import StrEnum
 
@@ -15,11 +15,6 @@ SLURM_ACCOUNT_TO_QOS = {
     "production": SlurmQos.NORMAL,
     "development": SlurmQos.LOW,
 }
-
-
-class IntEnum(int, Enum):
-    def __str__(self) -> str:
-        return int.__str__(self)
 
 
 class PriorityChoices(str, Enum):

@@ -9,10 +9,10 @@ def test_instantiate_dolores_subject(dolores_subject_raw: dict):
     # GIVEN a dictionary with the some subject data
 
     # WHEN instantiating a Subject object
-    dolores_subjects = Subject(**dolores_subject_raw)
+    dolores_subject = Subject(**dolores_subject_raw)
 
     # THEN assert that it was successfully created
-    assert isinstance(dolores_subjects, Subject)
+    assert isinstance(dolores_subject, Subject)
 
 
 def test_instantiate_dolores_subjects_with_gender(dolores_subject_raw: dict):
@@ -23,7 +23,7 @@ def test_instantiate_dolores_subjects_with_gender(dolores_subject_raw: dict):
     dolores_subject_raw.update({"gender": Gender.MALE})
 
     # WHEN instantiating a Subject object
-    dolores_subjects = Subject(**dolores_subject_raw)
+    dolores_subject = Subject(**dolores_subject_raw)
 
     # THEN assert that it was successfully created
-    assert dolores_subjects.gender == Gender.MALE
+    assert dolores_subject.gender == Gender.MALE

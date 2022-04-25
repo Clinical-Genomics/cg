@@ -102,8 +102,22 @@ def fixture_subject_id() -> str:
     return "a_subject_id"
 
 
+@pytest.fixture(name="nr_of_sequencing_reads")
+def fixture_nr_of_sequencing_reads() -> int:
+    """Return number of sequening reads"""
+    return 5_000_000_000
+
+
+@pytest.fixture(name="application_id")
+def fixture_application_id() -> str:
+    """Return application id"""
+    return "WGSPCFC030"
+
+
 @pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
+def fixture_analysis_family_single(
+    case_id: str, family_name: str, nr_of_sequencing_reads: int, ticket_nr: int
+) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -118,7 +132,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: in
                 "internal_id": "ADM1",
                 "status": "affected",
                 "ticket_number": ticket_nr,
-                "reads": 5000000000,
+                "reads": nr_of_sequencing_reads,
                 "capture_kit": "GMSmyeloid",
             }
         ],
