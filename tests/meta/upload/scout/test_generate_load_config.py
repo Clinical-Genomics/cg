@@ -66,7 +66,7 @@ def test_generate_balsamic_umi_load_config(
         analysis_obj=balsamic_umi_analysis_obj
     )
 
-    # THEN assert that the config is a balsamic config
+    # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
 
 
