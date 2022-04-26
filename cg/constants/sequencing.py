@@ -25,6 +25,10 @@ sequencer_types = {
 }
 
 
+class SequencingMethod(str, Enum):
+    ILLUMINA = "illumina"
+
+
 class PreparationCategory(str, Enum):
     SARS2_COV = "cov"
     MICRO = "mic"

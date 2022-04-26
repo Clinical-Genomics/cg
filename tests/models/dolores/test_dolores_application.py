@@ -25,7 +25,24 @@ def test_instantiate_dolores_application_with_required_sample_concentration(
     # WHEN instantiating a Application object
     dolores_application = Application(**dolores_application_raw)
 
-    expected_sample_concentration: str = "50 - 250 ng/uL"
+    # THEN assert that it the required sample concentration is set
+    assert dolores_application.required_sample_concentration == "50 - 250 ng/uL"
 
-    # THEN assert that it the requirred sampe concentration is set
-    assert dolores_application.required_sample_concentration == expected_sample_concentration
+
+def test_instantiate_dolores_application_expected_reads(
+    dolores_application_raw: dict,
+):
+    """
+    Tests Dolores application model when setting expected_reads
+    """
+    # GIVEN a dictionary with the some application data
+
+    # WHEN instantiating a Application object
+    dolores_application = Application(**dolores_application_raw)
+
+    # THEN assert that it the expected reads are set
+    assert dolores_application.expected_reads == int(
+        dolores_application.target_sequence_reads
+        * dolores_application.percent_reads_guaranteed
+        / 100
+    )

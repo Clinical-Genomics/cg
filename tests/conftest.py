@@ -104,8 +104,14 @@ def fixture_subject_id() -> str:
 
 @pytest.fixture(name="nr_of_sequencing_reads")
 def fixture_nr_of_sequencing_reads() -> int:
-    """Return number of sequening reads"""
+    """Return number of sequencing reads"""
     return 5_000_000_000
+
+
+@pytest.fixture(name="nr_of_sequencing_reads_top_up")
+def fixture_nr_of_sequencing_reads_top_up() -> int:
+    """Return number of sequencing reads from a top up run"""
+    return 1_000_000_000
 
 
 @pytest.fixture(name="application_id")

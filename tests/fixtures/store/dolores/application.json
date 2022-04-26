@@ -1,12 +1,20 @@
 {
   "application_id": "WGSPCFC030",
+  "application_price": [{
+    "express": 21037,
+    "priority": 16037,
+    "research": 11335,
+    "standard": 16037,
+    "percent_invoicing_kth": 75,
+    "valid_from": "2021-02-15",
+    "version": 4
+  }],
   "description": "a_description",
   "is_accredited": "True",
   "is_archived": "False",
   "min_required_sample_concentration": 50,
   "max_required_sample_concentration": 250,
   "percent_reads_guaranteed": 92,
-  "percent_invoicing_kth": 75,
   "preparation_category": "wgs",
   "priority_processing": "True",
   "sample_concentration_unit": "ng/uL",

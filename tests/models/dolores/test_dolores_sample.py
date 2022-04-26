@@ -60,3 +60,21 @@ def test_instantiate_dolores_sample_with_priority_int(dolores_sample_raw: dict):
 
     # THEN assert that it should return the integer value of the priority
     assert dolores_sample.priority == Priority.standard
+
+
+def test_instantiate_dolores_sample_total_nr_sequencing_reads(
+    dolores_sample_raw: dict, nr_of_sequencing_reads: int, nr_of_sequencing_reads_top_up: int
+):
+    """
+    Tests Dolores sample model when setting total_nr_sequencing_reads
+    """
+    # GIVEN a dictionary with the some sample data including sequencing data
+
+    # WHEN instantiating a Sample object
+    dolores_sample = Sample(**dolores_sample_raw)
+
+    # THEN assert that it should return the integer value of the total_nr_sequencing_reads
+    assert (
+        dolores_sample.total_nr_sequencing_reads
+        == nr_of_sequencing_reads + nr_of_sequencing_reads_top_up
+    )
