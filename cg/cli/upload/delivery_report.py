@@ -2,6 +2,9 @@ import logging
 from typing import List
 
 import click
+
+from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
@@ -18,6 +21,16 @@ def mip_dna(context: click.Context):
 
     context.obj.meta_apis["report_api"] = MipDNAReportAPI(
         config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+    )
+
+
+@click.group("balsamic")
+@click.pass_context
+def balsamic(context: click.Context):
+    """Upload BALSAMIC files to Scout"""
+
+    context.obj.meta_apis["report_api"] = BalsamicReportAPI(
+        config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
     )
 
 
@@ -67,3 +80,4 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
 
 
 mip_dna.add_command(delivery_report_to_scout)
+balsamic.add_command(delivery_report_to_scout)
