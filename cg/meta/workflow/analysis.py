@@ -55,10 +55,6 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
-    def verify_analysis_finish_file_exists(self, case_id: str):
-        if not Path(self.get_analysis_finish_path(case_id=case_id)).exists():
-            raise CgError(f"No analysis_finish file found for case {case_id}")
-
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """Passes silently if case exists in StatusDB, raises error if case is missing"""
 
@@ -253,7 +249,13 @@ class AnalysisAPI(MetaAPI):
         return self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
 
     def get_cases_to_store(self) -> List[models.Family]:
-        raise NotImplementedError
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper"""
+        return [
+            case_object
+            for case_object in self.get_running_cases()
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+        ]
 
     def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
         raise NotImplementedError

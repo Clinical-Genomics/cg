@@ -335,14 +335,3 @@ class MipAnalysisAPI(AnalysisAPI):
         sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
-
-    def get_cases_to_store(self) -> List[models.Family]:
-        """Retrieve a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper"""
-        finished_cases: List[models.Family] = [
-            case_object
-            for case_object in self.get_running_cases()
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
-        ]
-
-        return finished_cases

@@ -102,11 +102,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
         return Path(self.root_dir, case_id, case_id + ".json")
 
-    def get_analysis_finish_path(self, case_id: str) -> Path:
-        """Returns path to analysis_finish file.
-        (Optional) Checks if analysis_finish file exists"""
-        return Path(self.root_dir, case_id, "analysis", "analysis_finish")
-
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")
 
@@ -502,15 +497,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             case_object.internal_id
             for case_object in self.get_cases_to_analyze()
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
-        ]
-
-    def get_cases_to_store(self) -> List[models.Family]:
-        """Retrieve a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper"""
-        return [
-            case_object
-            for case_object in self.get_running_cases()
-            if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
 
     @staticmethod
