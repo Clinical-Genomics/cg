@@ -17,6 +17,12 @@ def fixture_datestamp_now() -> datetime:
     return datetime.datetime.now()
 
 
+@pytest.fixture(name="loqusdb_id")
+def fixture_loqusdb_id() -> str:
+    """Return a loqusdb_id"""
+    return "a_loqusdb_id"
+
+
 @pytest.fixture(name="dolores_application_json_path")
 def fixture_dolores_application_json_path(fixtures_dir) -> Path:
     """Return path to Dolores application.json path"""
@@ -27,6 +33,18 @@ def fixture_dolores_application_json_path(fixtures_dir) -> Path:
 def fixture_dolores_application_raw(dolores_application_json_path: Path) -> dict:
     """Load an example of json dolores application"""
     return get_dict_from_json(file_path=dolores_application_json_path)
+
+
+@pytest.fixture(name="dolores_experiment_design_json_path")
+def fixture_dolores_experiment_design_json_path(fixtures_dir) -> Path:
+    """Return path to Dolores experiment_design.json path"""
+    return Path(fixtures_dir, "store", "dolores", "experiment_design.json")
+
+
+@pytest.fixture(name="dolores_experiment_design_raw")
+def fixture_dolores_experiment_design_raw(dolores_experiment_design_json_path: Path) -> dict:
+    """Load an example of json dolores experiment_design"""
+    return get_dict_from_json(file_path=dolores_experiment_design_json_path)
 
 
 @pytest.fixture(name="dolores_sample_json_path")

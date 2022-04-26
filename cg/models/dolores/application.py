@@ -25,6 +25,7 @@ class Application(BaseModel):
     description: str
     is_accredited: bool
     is_archived: bool
+    is_external: bool
     min_sequencing_depth: int
     min_required_sample_concentration: int
     max_required_sample_concentration: int

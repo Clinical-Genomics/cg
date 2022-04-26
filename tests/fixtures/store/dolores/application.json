@@ -12,6 +12,7 @@
   "description": "a_description",
   "is_accredited": "True",
   "is_archived": "False",
+  "is_external": "False",
   "min_required_sample_concentration": 50,
   "max_required_sample_concentration": 250,
   "percent_reads_guaranteed": 92,
