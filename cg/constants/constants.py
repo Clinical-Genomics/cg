@@ -1,4 +1,6 @@
 """Constants for cg"""
+from enum import Enum
+
 import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
@@ -18,6 +20,13 @@ CAPTUREKIT_OPTIONS = (
     "Twist_Target_hg19.bed",
     "other",
 )
+
+
+class CaseAction(str, Enum):
+    ANALYZE = "analyze"
+    RUNNING = "running"
+    HOLD = "hold"
+
 
 CASE_ACTIONS = ("analyze", "running", "hold")
 

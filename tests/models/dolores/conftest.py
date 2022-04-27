@@ -35,6 +35,30 @@ def fixture_dolores_application_raw(dolores_application_json_path: Path) -> dict
     return get_dict_from_json(file_path=dolores_application_json_path)
 
 
+@pytest.fixture(name="dolores_case_json_path")
+def fixture_dolores_case_json_path(fixtures_dir) -> Path:
+    """Return path to Dolores case.json path"""
+    return Path(fixtures_dir, "store", "dolores", "case.json")
+
+
+@pytest.fixture(name="dolores_case_raw")
+def fixture_dolores_case_raw(dolores_case_json_path: Path) -> dict:
+    """Load an example of json dolores case"""
+    return get_dict_from_json(file_path=dolores_case_json_path)
+
+
+@pytest.fixture(name="dolores_case_relation_json_path")
+def fixture_dolores_case_relation_json_path(fixtures_dir) -> Path:
+    """Return path to Dolores case_relation.json path"""
+    return Path(fixtures_dir, "store", "dolores", "case_relation.json")
+
+
+@pytest.fixture(name="dolores_case_relation_raw")
+def fixture_dolores_case_relation_raw(dolores_case_relation_json_path: Path) -> dict:
+    """Load an example of json dolores case_relation"""
+    return get_dict_from_json(file_path=dolores_case_relation_json_path)
+
+
 @pytest.fixture(name="dolores_experiment_design_json_path")
 def fixture_dolores_experiment_design_json_path(fixtures_dir) -> Path:
     """Return path to Dolores experiment_design.json path"""

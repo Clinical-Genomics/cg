@@ -1,5 +1,9 @@
 {
   "organism_id": "an_organism",
   "sample_ids": ["ADM1", "a_sample_id"],
-  "subject_id": "a_subject_id"
+  "subject_id": "a_subject_id",
+  "biopsis": [{
+    "sample_ids": ["ADM1", "a_sample_id"],
+    "tissue": "muscle"
+  }]
 }

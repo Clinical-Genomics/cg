@@ -11,10 +11,12 @@ from cg.models.dolores.sequencing import Sequencing
 
 class ExperimentDesign(BaseModel):
     container: Optional[Container]
+    container_name: Optional[str]
     container_position: Optional[str]
     control: Optional[Control]
     downsampled_to_nr_sequence_reads: Optional[int]
     time_point: Optional[str]
+    series: Optional[str]
 
 
 class Sample(BaseModel):
@@ -35,6 +37,7 @@ class Sample(BaseModel):
     subject_id: str
     ticket_ids: Optional[List[int]]
     total_nr_sequencing_reads: Optional[int]
+    pass_sequencing_qc: bool = False
 
     @validator("priority", always=True)
     def convert_priority(cls, value: Union[Priority, PriorityChoices]) -> Priority:
