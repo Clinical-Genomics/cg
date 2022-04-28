@@ -68,7 +68,7 @@ class Of1508Sample(OrderInSample):
     ]
 
     # customer
-    age_at_sampling: Optional[str]
+    age_at_sampling: Optional[float]
     # "application": str,
     family_name: constr(
         regex=NAME_PATTERN,
@@ -107,6 +107,7 @@ class Of1508Sample(OrderInSample):
     cohorts: Optional[List[str]]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
+    require_qcok: bool = False
     quantity: Optional[int]
     subject_id: Optional[
         constr(
@@ -130,6 +131,14 @@ class Of1508Sample(OrderInSample):
     )
     def str_to_int(cls, v: str) -> Optional[int]:
         return OptionalIntValidator.str_to_int(v=v)
+
+    @validator(
+        "age_at_sampling",
+        "volume",
+        pre=True,
+    )
+    def str_to_float(cls, v: str) -> Optional[float]:
+        return OptionalFloatValidator.str_to_float(v=v)
 
 
 class MipDnaSample(Of1508Sample):
