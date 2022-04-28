@@ -71,10 +71,8 @@ class DeliverAPI:
             LOG.warning("Could not find any samples linked to case %s", case_id)
             return
         samples: List[Sample] = [link.sample for link in link_objs]
-        if not self.ticket_id:
-            self.set_ticket_id(sample_obj=samples[0])
-        if not self.customer_id:
-            self.set_customer_id(case_obj=case_obj)
+        self.set_ticket_id(self.store.get_ticket_from_case(case_id=case_id))
+        self.set_customer_id(case_obj=case_obj)
 
         sample_ids: Set[str] = {sample.internal_id for sample in samples}
 
@@ -266,9 +264,9 @@ class DeliverAPI:
         """Set the customer_id for this upload"""
         self._set_customer_id(case_obj.customer.internal_id)
 
-    def set_ticket_id(self, sample_obj: Sample) -> None:
+    def set_ticket_id(self, ticket_id: int) -> None:
         """Set the ticket_id for this upload"""
-        self._set_ticket_id(sample_obj.ticket_number)
+        self._set_ticket_id(ticket_nr=ticket_id)
 
     def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
         """Create a path for delivering files
