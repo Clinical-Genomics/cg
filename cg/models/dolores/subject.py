@@ -17,5 +17,5 @@ class Subject(BaseModel):
 
 
 class SubjectHuman(Subject):
-    biopsis: Optional[List[Biopsi]]
+    biopsies: Optional[List[Biopsi]]
     gender: Optional[Gender] = Gender.MISSING

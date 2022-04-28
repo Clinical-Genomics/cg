@@ -1,0 +1,13 @@
+{
+  "is_primary": "True",
+  "upload_events": [
+    {
+      "created_at": "1999-12-31 12:12:12",
+      "creator_id": "the_creator_of_the_event",
+      "event_name": "Scout",
+      "uploaded_at": "1999-12-31 12:12:11",
+      "uploaded_to": "scout-rd"
+    }
+  ],
+  "pipeline_version": "1.2.3"
+}

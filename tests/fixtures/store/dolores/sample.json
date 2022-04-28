@@ -1,7 +1,13 @@
 {
   "customer": "cust000",
   "customer_sample_id": "a_customer_sample_id",
-  "comment": "a_comment",
+  "comment": [
+    {
+      "created_at": "1999-12-31 12:12:12",
+      "creator_id": "the_creator_of_the_event",
+      "event_name": "Making a comment",
+      "content": "a_comment"
+    }],
   "experimental_design": {
     "container": "tube"
   },
@@ -9,7 +15,18 @@
   "invoice_id": 123,
   "order_id": 123,
   "priority": "standard",
-  "sequencing": [{ "application_id": "WGSPCFC030", "application_pricing_version": 4, "sequence_reads": "5000000000" }, { "application_id": "WGSPCFC030", "application_pricing_version": 4, "sequence_reads": "1000000000" }],
+  "sequencing": [
+    {
+      "application_id": "WGSPCFC030",
+      "application_pricing_version": 4,
+      "sequence_reads": "5000000000"
+    },
+    {
+      "application_id": "WGSPCFC030",
+      "application_pricing_version": 4,
+      "sequence_reads": "1000000000"
+    }
+  ],
   "sample_id": "a_sample_id",
   "subject_id": "a_subject_id"
 }

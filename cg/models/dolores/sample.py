@@ -6,6 +6,7 @@ from pydantic import BaseModel, validator
 
 from cg.constants.experiment_design import Control, Container
 from cg.constants.priority import Priority, PriorityChoices
+from cg.models.dolores.event import EventComment
 from cg.models.dolores.sequencing import Sequencing
 
 
@@ -21,10 +22,9 @@ class ExperimentDesign(BaseModel):
 
 class Sample(BaseModel):
     created_at: Optional[datetime]
-    comment: Optional[str]
+    comments: Optional[List[EventComment]]
     customer: str
     customer_sample_id: str
-    delivered_at: Optional[datetime]
     experiment_design: Optional[ExperimentDesign]
     lims_sample_id: str
     invoice: bool = True

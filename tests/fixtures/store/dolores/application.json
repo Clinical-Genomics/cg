@@ -1,14 +1,16 @@
 {
   "application_id": "WGSPCFC030",
-  "application_price": [{
-    "express": 21037,
-    "priority": 16037,
-    "research": 11335,
-    "standard": 16037,
-    "percent_invoicing_kth": 75,
-    "valid_from": "2021-02-15",
-    "version": 4
-  }],
+  "application_price": [
+    {
+      "express": 21037,
+      "priority": 16037,
+      "research": 11335,
+      "standard": 16037,
+      "percent_invoicing_kth": 75,
+      "valid_from": "2021-02-15",
+      "version": 4
+    }
+  ],
   "description": "a_description",
   "is_accredited": "True",
   "is_archived": "False",

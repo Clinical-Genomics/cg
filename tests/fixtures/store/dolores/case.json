@@ -1,7 +1,19 @@
 {
   "action": "hold",
+  "analyses": [
+    {
+      "is_primary": "True",
+      "pipeline_version": "1.2.3"
+    }
+  ],
   "case_id": "yellowhog",
-  "comment": "a_comment",
+  "comments": [
+    {
+      "created_at": "1999-12-31 12:12:12",
+      "creator_id": "the_creator_of_the_event",
+      "event_name": "Making a comment",
+      "content": "a_comment"
+    }],
   "customer_id": "cust000",
   "customer_case_id": "a_customer_case_id",
   "data_analysis": "mip-dna",

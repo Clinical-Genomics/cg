@@ -1,10 +1,18 @@
 {
   "case_id": "yellowhog",
   "created_at": "1999-12-31",
-  "samples": [{
-    "sample_id": "a_sample_id", "father": "a_father",
-    "mother": "a_mother",
-    "phenotype_status": "affected",
-    "gender": "male"
-  }, { "sample_id": "another_sample_id", "phenotype_status": "unaffected", "gender": "female" }]
+  "samples": [
+    {
+      "sample_id": "a_sample_id",
+      "father": "a_father",
+      "mother": "a_mother",
+      "phenotype_status": "affected",
+      "gender": "male"
+    },
+    {
+      "sample_id": "another_sample_id",
+      "phenotype_status": "unaffected",
+      "gender": "female"
+    }
+  ]
 }

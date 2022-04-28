@@ -4,12 +4,13 @@ from typing import Any, Optional, List
 from pydantic import BaseModel, validator
 
 from cg.constants.sequencing import PreparationCategory, SequencingMethod
+from cg.models.dolores.event import EventComment
 
 
 class ApplicationPrice(BaseModel):
     express: int
     clinical_trials: Optional[int]
-    comment: Optional[str]
+    comments: Optional[List[EventComment]]
     priority: int
     research: int
     standard: int
@@ -21,7 +22,7 @@ class ApplicationPrice(BaseModel):
 class Application(BaseModel):
     application_id: str
     application_price: List[ApplicationPrice]
-    comment: Optional[str]
+    comments: Optional[List[EventComment]]
     description: str
     is_accredited: bool
     is_archived: bool

@@ -23,6 +23,18 @@ def fixture_loqusdb_id() -> str:
     return "a_loqusdb_id"
 
 
+@pytest.fixture(name="dolores_analysis_json_path")
+def fixture_dolores_analysis_json_path(fixtures_dir) -> Path:
+    """Return path to Dolores analysis.json path"""
+    return Path(fixtures_dir, "store", "dolores", "analysis.json")
+
+
+@pytest.fixture(name="dolores_analysis_raw")
+def fixture_dolores_analysis_raw(dolores_analysis_json_path: Path) -> dict:
+    """Load an example of json dolores analysis"""
+    return get_dict_from_json(file_path=dolores_analysis_json_path)
+
+
 @pytest.fixture(name="dolores_application_json_path")
 def fixture_dolores_application_json_path(fixtures_dir) -> Path:
     """Return path to Dolores application.json path"""
@@ -57,6 +69,18 @@ def fixture_dolores_case_relation_json_path(fixtures_dir) -> Path:
 def fixture_dolores_case_relation_raw(dolores_case_relation_json_path: Path) -> dict:
     """Load an example of json dolores case_relation"""
     return get_dict_from_json(file_path=dolores_case_relation_json_path)
+
+
+@pytest.fixture(name="dolores_event_json_path")
+def fixture_dolores_event_json_path(fixtures_dir) -> Path:
+    """Return path to Dolores event.json path"""
+    return Path(fixtures_dir, "store", "dolores", "event.json")
+
+
+@pytest.fixture(name="dolores_event_raw")
+def fixture_dolores_event_raw(dolores_event_json_path: Path) -> dict:
+    """Load an example of json dolores event"""
+    return get_dict_from_json(file_path=dolores_event_json_path)
 
 
 @pytest.fixture(name="dolores_experiment_design_json_path")
