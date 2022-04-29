@@ -34,7 +34,7 @@ def test_to_lims_mip(mip_order_to_submit):
     assert first_sample.udfs.source == "tissue (fresh frozen)"
     assert first_sample.udfs.quantity == "220"
     assert first_sample.udfs.customer == "cust003"
-    assert first_sample.udfs.volume == "1"
+    assert first_sample.udfs.volume == "1.0"
 
     # THEN assert that the comment of a sample is a string
     assert isinstance(samples[1].udfs.comment, str)
@@ -54,7 +54,7 @@ def test_to_lims_fastq(fastq_order_to_submit):
     # ... and pick out relevant UDF values
     assert normal_sample.udfs.tumour is False
     assert tumor_sample.udfs.tumour is True
-    assert normal_sample.udfs.volume == "1"
+    assert normal_sample.udfs.volume == "1.0"
 
 
 def test_to_lims_rml(rml_order_to_submit):
@@ -69,7 +69,7 @@ def test_to_lims_rml(rml_order_to_submit):
     # ... and pick out relevant UDFs
     first_sample = samples[0]
     assert first_sample.udfs.pool == "pool-1"
-    assert first_sample.udfs.volume == "30"
+    assert first_sample.udfs.volume == "30.0"
     assert first_sample.udfs.concentration == "5.0"
     assert first_sample.udfs.index == "IDT DupSeq 10 bp Set B"
     assert first_sample.udfs.index_number == "1"
@@ -119,7 +119,7 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     assert first_sample["udfs"]["region"] == "Stockholm"
     assert first_sample["udfs"]["region_code"] == "01"
     assert first_sample["udfs"]["selection_criteria"] == "1. Allmän övervakning"
-    assert first_sample["udfs"]["volume"] == "1"
+    assert first_sample["udfs"]["volume"] == "1.0"
 
 
 @pytest.mark.parametrize("project", [OrderType.BALSAMIC, OrderType.BALSAMIC_UMI])
@@ -150,7 +150,7 @@ def test_to_lims_balsamic(balsamic_order_to_submit, project):
     assert first_sample["udfs"]["family_name"] == "family1"
     assert first_sample["udfs"]["customer"] == "cust000"
     assert first_sample["udfs"]["source"] == "blood"
-    assert first_sample["udfs"]["volume"] == "1"
+    assert first_sample["udfs"]["volume"] == "1.0"
     assert first_sample["udfs"]["priority"] == "standard"
 
     assert container_names == set(["p1"])

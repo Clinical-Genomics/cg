@@ -159,7 +159,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert len(family["samples"]) == 3
 
     first_sample = family["samples"][0]
-    assert first_sample["age_at_sampling"] == "17.18192"
+    assert first_sample["age_at_sampling"] == 17.18192
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGSPCFC030"
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
