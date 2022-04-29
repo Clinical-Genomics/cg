@@ -3,14 +3,14 @@
 
 import click
 
-from .balsamic.base import balsamic
-from .balsamic.umi import balsamic_umi
-from .fluffy.base import fluffy
-from .microsalt.base import microsalt
-from .mip_dna.base import mip_dna
-from .mip_rna.base import mip_rna
-from .mutant.base import mutant
-from .fastq.base import fastq
+from cg.cli.workflow.balsamic.base import balsamic
+from cg.cli.workflow.balsamic.umi import balsamic_umi
+from cg.cli.workflow.fluffy.base import fluffy
+from cg.cli.workflow.microsalt.base import microsalt
+from cg.cli.workflow.mip_dna.base import mip_dna
+from cg.cli.workflow.mip_rna.base import mip_rna
+from cg.cli.workflow.mutant.base import mutant
+from cg.cli.workflow.fastq.base import fastq
 
 
 @click.group()
