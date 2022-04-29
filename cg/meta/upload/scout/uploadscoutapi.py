@@ -425,23 +425,28 @@ class UploadScoutAPI:
                 return sample
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
-        config_builder: ScoutConfigBuilder
 
-        if analysis.pipeline == Pipeline.BALSAMIC:
-            config_builder = BalsamicConfigBuilder(
+        config_builders = {
+            Pipeline.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
-            )
-        elif analysis.pipeline == Pipeline.BALSAMIC_UMI:
-            config_builder = BalsamicUmiConfigBuilder(
+            ),
+            Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
-            )
-        else:
-            config_builder = MipConfigBuilder(
+            ),
+            Pipeline.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
-            )
+            ),
+            Pipeline.MIP_RNA: MipConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                mip_analysis_api=self.mip_analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
+        }
 
-        return config_builder
+        return config_builders[analysis.pipeline]
