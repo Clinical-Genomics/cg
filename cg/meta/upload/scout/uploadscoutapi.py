@@ -16,10 +16,10 @@ from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models, Store
 from housekeeper.store import models as hk_models
 
-from .balsamic_config_builder import BalsamicConfigBuilder
-from .balsamic_umi_config_builder import BalsamicUmiConfigBuilder
-from .mip_config_builder import MipConfigBuilder
-from .scout_config_builder import ScoutConfigBuilder
+from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
+from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 
 LOG = logging.getLogger(__name__)
 
