@@ -40,6 +40,7 @@ class FastqSubmitter(Submitter):
             "samples": [
                 {
                     "application": sample.application,
+                    "capture_kit": sample.capture_kit,
                     "comment": sample.comment,
                     "data_analysis": sample.data_analysis,
                     "data_delivery": sample.data_delivery,
@@ -78,6 +79,7 @@ class FastqSubmitter(Submitter):
         with self.status.session.no_autoflush:
             for sample in items:
                 new_sample = self.status.add_sample(
+                    capture_kit=sample["capture_kit"],
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],

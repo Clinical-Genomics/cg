@@ -13,17 +13,19 @@ from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
-from .balsamic_submitter import BalsamicSubmitter
-from .fastq_submitter import FastqSubmitter
-from .fluffy_submitter import FluffySubmitter
-from .metagenome_submitter import MetagenomeSubmitter
-from .microsalt_submitter import MicrosaltSubmitter
-from .mip_dna_submitter import MipDnaSubmitter
-from .mip_rna_submitter import MipRnaSubmitter
-from .rml_submitter import RmlSubmitter
-from .sars_cov_2_submitter import SarsCov2Submitter
-from .submitter import Submitter
-from .ticket_handler import TicketHandler
+
+from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
+from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
+from cg.meta.orders.fastq_submitter import FastqSubmitter
+from cg.meta.orders.fluffy_submitter import FluffySubmitter
+from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
+from cg.meta.orders.microsalt_submitter import MicrosaltSubmitter
+from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
+from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
+from cg.meta.orders.rml_submitter import RmlSubmitter
+from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
+from cg.meta.orders.submitter import Submitter
+from cg.meta.orders.ticket_handler import TicketHandler
 
 LOG = logging.getLogger(__name__)
 
@@ -32,15 +34,16 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
     """Factory Method"""
 
     submitters = {
+        OrderType.BALSAMIC: BalsamicSubmitter,
+        OrderType.BALSAMIC_UMI: BalsamicUmiSubmitter,
         OrderType.FASTQ: FastqSubmitter,
+        OrderType.FLUFFY: FluffySubmitter,
         OrderType.METAGENOME: MetagenomeSubmitter,
         OrderType.MICROSALT: MicrosaltSubmitter,
-        OrderType.SARS_COV_2: SarsCov2Submitter,
         OrderType.MIP_DNA: MipDnaSubmitter,
-        OrderType.BALSAMIC: BalsamicSubmitter,
         OrderType.MIP_RNA: MipRnaSubmitter,
-        OrderType.FLUFFY: FluffySubmitter,
         OrderType.RML: RmlSubmitter,
+        OrderType.SARS_COV_2: SarsCov2Submitter,
     }
     if project in submitters:
         return submitters[project](lims=lims, status=status)

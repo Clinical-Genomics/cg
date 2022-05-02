@@ -438,8 +438,20 @@ def fixture_mip_dna_analysis_obj(
 
 @pytest.fixture(name="balsamic_analysis_obj")
 def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    analysis_obj.pipeline = Pipeline.BALSAMIC
     for link_object in analysis_obj.family.links:
         link_object.sample.application_version.application.prep_category = "wes"
+        link_object.family.data_analysis = Pipeline.BALSAMIC
+    return analysis_obj
+
+
+@pytest.fixture(name="balsamic_umi_analysis_obj")
+def fixture_balsamic_umi_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    analysis_obj.pipeline = Pipeline.BALSAMIC_UMI
+    for link_object in analysis_obj.family.links:
+        link_object.sample.application_version.application.prep_category = "wes"
+        link_object.family.data_analysis = Pipeline.BALSAMIC_UMI
+
     return analysis_obj
 
 
