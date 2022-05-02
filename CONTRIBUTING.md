@@ -327,7 +327,7 @@ Some unit tests make use of [snapshottest][snapshottest]. To update existing sna
 [trailblazer-ui]: https://trailblazer.scilifelab.se/
 [housekeeper]: https://github.com/Clinical-Genomics/housekeeper
 [genotype]: https://github.com/Clinical-Genomics/genotype
-[chanjo]: https://github.com/robinandeer/chanjo
+[chanjo]: https://github.com/Clinical-Genomics/chanjo
 [scout]: https://github.com/Clinical-Genomics/scout
 [mip]: https://github.com/Clinical-Genomics/mip
 [scilife]: https://www.scilifelab.se/
