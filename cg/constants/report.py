@@ -1,11 +1,19 @@
 from cgmodels.cg.constants import Pipeline
 
 # Validation constants
-REPORT_SUPPORTED_PIPELINES = Pipeline.MIP_DNA
+REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC)
+BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 PRECISION = 2
 NA_FIELD = "N/A"
 YES_FIELD = "Ja"
 NO_FIELD = "Nej"
+
+BALSAMIC_ANALYSIS_TYPE = {
+    "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
+    "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
+    "tumor_panel": "Tumör-endast (panelsekvensering)",
+    "tumor_normal_panel": "Tumör/normal (panelsekvensering)",
+}
 
 # Report required fields (OPTIONAL: "version")
 REQUIRED_REPORT_FIELDS = [
@@ -48,6 +56,11 @@ REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
     "panels",
 ]
 
+REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS = _REQUIRED_DATA_ANALYSIS_FIELDS + [
+    "type",
+    "variant_callers",
+]
+
 # Sample required fields
 _REQUIRED_SAMPLE_FIELDS = [
     "name",
@@ -65,6 +78,9 @@ REQUIRED_SAMPLE_MIP_DNA_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
     "status",
 ]
 
+REQUIRED_SAMPLE_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_FIELDS + [
+    "tumour",
+]
 
 # Methods required fields (OPTIONAL: "library_prep", "sequencing")
 REQUIRED_SAMPLE_METHODS_FIELDS = []
@@ -93,3 +109,28 @@ REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS = _REQUIRED_SAMPLE_METADATA_FIELDS +
 REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS = REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS + [
     "bait_set",
 ]
+
+_REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS = _REQUIRED_SAMPLE_METADATA_FIELDS + [
+    "mean_insert_size",
+    "fold_80",
+]
+
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
+    "bait_set",
+    "bait_set_version",
+    "median_target_coverage",
+    "pct_250x",
+    "pct_500x",
+]
+
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS = _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS + [
+    "median_coverage",
+    "pct_60x",
+]
+
+REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS = (
+    REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+    + [
+        "pct_15x",
+    ]
+)
