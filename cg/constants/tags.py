@@ -13,6 +13,11 @@ class HkMipAnalysisTag(StrEnum):
     SAMPLE_INFO: str = "sample-info"
 
 
+class BalsamicAnalysisTag(StrEnum):
+    CONFIG: str = "balsamic-config"
+    QC_METRICS: str = "qc-metrics"
+
+
 WORKFLOW_PROTECTED_TAGS = {
     str(Pipeline.BALSAMIC): [],
     str(Pipeline.FASTQ): [],
