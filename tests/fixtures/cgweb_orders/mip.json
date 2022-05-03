@@ -123,6 +123,7 @@
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "status": "affected",
+      "subject_id": "subjectsample4",
       "synopsis": "",
       "tumour": false,
       "volume": "4",

@@ -16,8 +16,10 @@ from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models, Store
 from housekeeper.store import models as hk_models
 
-from .balsamic_config_builder import BalsamicConfigBuilder
-from .mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
+from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
+from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 
 LOG = logging.getLogger(__name__)
 
@@ -54,18 +56,8 @@ class UploadScoutAPI:
 
         load_config: ScoutLoadConfig
         LOG.info("Found pipeline %s", analysis_obj.pipeline)
-        if analysis_obj.pipeline == Pipeline.BALSAMIC:
-            config_builder = BalsamicConfigBuilder(
-                hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=self.lims
-            )
-        else:
-            config_builder = MipConfigBuilder(
-                hk_version_obj=hk_version_obj,
-                analysis_obj=analysis_obj,
-                mip_analysis_api=self.mip_analysis_api,
-                lims_api=self.lims,
-                madeline_api=self.madeline_api,
-            )
+        config_builder = self.get_config_builder(analysis=analysis_obj, hk_version=hk_version_obj)
+
         config_builder.build_load_config()
 
         return config_builder.load_config
@@ -431,3 +423,30 @@ class UploadScoutAPI:
             sample: models.Sample = link.sample
             if sample.subject_id == subject_id:
                 return sample
+
+    def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
+
+        config_builders = {
+            Pipeline.BALSAMIC: BalsamicConfigBuilder(
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
+            Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
+            Pipeline.MIP_DNA: MipConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                mip_analysis_api=self.mip_analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
+            Pipeline.MIP_RNA: MipConfigBuilder(
+                hk_version_obj=hk_version,
+                analysis_obj=analysis,
+                mip_analysis_api=self.mip_analysis_api,
+                lims_api=self.lims,
+                madeline_api=self.madeline_api,
+            ),
+        }
+
+        return config_builders[analysis.pipeline]

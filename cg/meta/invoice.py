@@ -99,11 +99,11 @@ class InvoiceAPI:
             priority = record.priority_human
 
         full_price = getattr(record.application_version, f"price_{priority}")
-        discount_factor = float(100 - discount) / 100
+        discount_factor = 1 - discount / 100
 
         if not full_price:
             return None
-        return full_price * discount_factor
+        return round(full_price * discount_factor)
 
     def _cost_center_split_factor(self, price, costcenter, percent_kth, tag, version):
         """Split price based on cost center"""
@@ -112,8 +112,8 @@ class InvoiceAPI:
                 if costcenter == "kth":
                     split_factor = percent_kth / 100
                 else:
-                    split_factor = (100 - percent_kth) / 100
-                split_price = round(price * split_factor, 1)
+                    split_factor = 1 - percent_kth / 100
+                split_price = round(price * split_factor)
             except ValueError:
                 self.log.append(
                     f"Could not calculate price for samples with application "

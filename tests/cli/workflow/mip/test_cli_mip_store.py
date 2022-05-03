@@ -144,10 +144,6 @@ def test_cli_store_available_case_is_running(
     mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")
     MipDNAAnalysisAPI.get_deliverables_file_path.return_value = mip_deliverables_file
 
-    # GIVEN deliverables were generated and could be found
-    mocker.patch.object(MipDNAAnalysisAPI, "get_analysis_finish_path")
-    MipDNAAnalysisAPI.get_analysis_finish_path.return_value = mip_deliverables_file
-
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday

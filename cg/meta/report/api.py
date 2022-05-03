@@ -13,9 +13,9 @@ from cg.exc import DeliveryReportError
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
+from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
-from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import SampleMetadataModel
 from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
@@ -133,7 +133,7 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(case_model.samples),
+            accredited=self.get_report_accreditation(case_model.samples, analysis_metadata),
         )
 
     def validate_report_fields(
@@ -186,7 +186,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         analysis: models.Analysis,
-        analysis_metadata: MipAnalysis,
+        analysis_metadata: AnalysisModel,
     ) -> CaseModel:
         """Returns case associated validated attributes"""
 
@@ -201,7 +201,7 @@ class ReportAPI(MetaAPI):
         )
 
     def get_samples_data(
-        self, case: models.Family, analysis_metadata: MipAnalysis
+        self, case: models.Family, analysis_metadata: AnalysisModel
     ) -> List[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes"""
 
@@ -283,7 +283,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         analysis: models.Analysis,
-        analysis_metadata: MipAnalysis,
+        analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
         """Retrieves the pipeline attributes used for data analysis"""
 
@@ -293,6 +293,7 @@ class ReportAPI(MetaAPI):
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case),
             genome_build=self.get_genome_build(analysis_metadata),
+            variant_callers=self.get_variant_callers(analysis_metadata),
             panels=case.panels,
         )
 
@@ -321,7 +322,7 @@ class ReportAPI(MetaAPI):
         self,
         case: models.Family,
         sample: models.Sample,
-        analysis_metadata: MipAnalysis,
+        analysis_metadata: AnalysisModel,
     ) -> SampleMetadataModel:
         """Fetches the sample metadata to include in the report"""
 
@@ -332,12 +333,19 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
         raise NotImplementedError
 
-    def get_report_accreditation(self, samples: List[SampleModel]) -> Union[None, bool]:
+    def get_variant_callers(self, analysis_metadata: AnalysisModel) -> list:
+        """Extracts the list of variant-calling filters used during analysis"""
+
+        raise NotImplementedError
+
+    def get_report_accreditation(
+        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+    ) -> bool:
         """Checks if the report is accredited or not"""
 
         raise NotImplementedError
@@ -346,3 +354,25 @@ class ReportAPI(MetaAPI):
         """Retrieves a dictionary with the delivery report required fields"""
 
         raise NotImplementedError
+
+    @staticmethod
+    def get_application_required_fields(case: CaseModel, required_fields: list) -> dict:
+        """Retrieves sample required fields"""
+
+        required_sample_fields = dict()
+
+        for application in case.applications:
+            required_sample_fields.update({application.tag: required_fields})
+
+        return required_sample_fields
+
+    @staticmethod
+    def get_sample_required_fields(case: CaseModel, required_fields: list) -> dict:
+        """Retrieves sample required fields"""
+
+        required_sample_fields = dict()
+
+        for sample in case.samples:
+            required_sample_fields.update({sample.id: required_fields})
+
+        return required_sample_fields
