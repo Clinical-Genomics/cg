@@ -265,6 +265,7 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
     assert "retrieval failed" in caplog.text
 
 
+@mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.remove_archived_spring_file")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.mark_file_as_archived")
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
@@ -275,13 +276,16 @@ def test_encrypt_and_archive_spring_file(
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
     mock_mark_file_as_archived,
-    mock_archived_spring_files,
+    mock_remove_archived_spring_files,
+    mock_is_archived,
     spring_file_path,
 ):
-    # GIVEN a spring file that needs to be encrypted and archived to PDC
+    # GIVEN a spring file that needs to be encrypted and archived to PDC and that is not already
+    # archived
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_api=mock_pdc_api
     )
+    mock_is_archived.return_value = False
 
     # WHEN running the encryption and archiving process
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
@@ -323,9 +327,10 @@ def test_encrypt_and_archive_spring_file(
     mock_mark_file_as_archived.assert_called_once_with(spring_file_path)
 
     # AND the original spring file should be removed
-    mock_archived_spring_files.assert_called_once_with(spring_file_path)
+    mock_remove_archived_spring_files.assert_called_once_with(spring_file_path)
 
 
+@mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
@@ -333,6 +338,7 @@ def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
     mock_pdc: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    mock_is_archived,
     spring_file_path,
     caplog,
 ):
@@ -342,6 +348,7 @@ def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
     )
 
     # WHEN running the encryption and archiving process, and the encryption command fails
+    mock_is_archived.return_value = False
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
         spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
@@ -357,6 +364,7 @@ def test_encrypt_and_archive_spring_file_pdc_archiving_failed(
     mock_spring_encryption_api.cleanup.assert_called_with(spring_file_path)
 
 
+@mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
 @mock.patch("cg.apps.housekeeper.hk")
 @mock.patch("cg.meta.encryption.encryption")
 @mock.patch("cg.meta.backup.pdc")
@@ -364,6 +372,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
     mock_pdc_api: PdcAPI,
     mock_spring_encryption_api: SpringEncryptionAPI,
     mock_housekeeper: HousekeeperAPI,
+    mock_is_archived,
     spring_file_path,
     caplog,
 ):
@@ -373,6 +382,7 @@ def test_encrypt_and_archive_spring_file_checksum_failed(
     )
 
     # WHEN running the encryption and archiving process
+    mock_is_archived.return_value = False
     mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
         spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
     )
