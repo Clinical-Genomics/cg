@@ -565,7 +565,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }
         )
-        parameters = command + options + ["--no-qc-metrics"]
+        parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_analysis_type(self, case_id: str) -> Optional[str]:
