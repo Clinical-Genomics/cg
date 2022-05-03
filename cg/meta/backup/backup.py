@@ -11,6 +11,7 @@ from cg.constants.constants import FlowCellStatus
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
+from cg.models import CompressionData
 from cg.store import Store, models
 from cg.utils.time import get_elapsed_time, get_start_time
 
@@ -108,7 +109,20 @@ class SpringBackupAPI:
     def encrypt_and_archive_spring_file(self, spring_file_path: Path) -> None:
         """Encrypts and archives a spring file and its decryption key"""
         LOG.debug(f"*** START BACKUP PROCESS OF SPRING FILE %s ***", spring_file_path)
+        if self.is_compression_ongoing(spring_file_path):
+            LOG.info(
+                "Spring (de)compression ongoing, skipping archiving for spring file %s",
+                spring_file_path,
+            )
+            return
         self.encryption_api.cleanup(spring_file_path)
+        if self.is_spring_file_archived(spring_file_path):
+            LOG.info(
+                "Spring file already archived! Spring file will be removed from disk, continuing "
+                "to next spring file "
+            )
+            self.remove_archived_spring_file(spring_file_path)
+            return
         try:
             self.encryption_api.spring_symmetric_encryption(spring_file_path)
             self.encryption_api.key_asymmetric_encryption(spring_file_path)
@@ -122,6 +136,7 @@ class SpringBackupAPI:
                 dry_run=self.dry_run,
             )
             self.mark_file_as_archived(spring_file_path)
+            self.encryption_api.cleanup(spring_file_path)
             self.remove_archived_spring_file(spring_file_path)
             LOG.debug(f"*** ARCHIVING PROCESS COMPLETED SUCCESSFULLY ***")
         except subprocess.CalledProcessError as error:
@@ -174,8 +189,8 @@ class SpringBackupAPI:
 
     def remove_archived_spring_file(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving"""
-        self.encryption_api.cleanup(spring_file_path)
         if not self.dry_run:
+            LOG.info("removing spring file %s from disk", str(spring_file_path))
             spring_file_path.unlink()
 
     @property
@@ -194,3 +209,12 @@ class SpringBackupAPI:
         )
         self._dry_run = value
         self.encryption_api.dry_run = value
+
+    def is_spring_file_archived(self, spring_file_path: Path) -> bool:
+        """Checks if a spring file is marked as archived in Housekeeper"""
+        return self.hk_api.files(path=str(spring_file_path)).first().to_archive
+
+    @staticmethod
+    def is_compression_ongoing(spring_file_path: Path) -> bool:
+        """Determines if (de)compression of the spring file ongoing"""
+        return CompressionData(spring_file_path).pending_exists()
