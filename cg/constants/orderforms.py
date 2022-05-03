@@ -16,6 +16,7 @@ CASE_PROJECT_TYPES = [
 
 class Orderform(StrEnum):
     BALSAMIC: str = "1508"
+    BALSAMIC_UMI: str = "1508"
     FASTQ: str = "1508"
     FLUFFY: str = "1604"
     METAGENOME: str = "1605"
