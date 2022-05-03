@@ -49,7 +49,6 @@ class TicketHandler:
             LOG.info(f"{ticket_nr}: opened new ticket")
         except TicketCreationError as error:
             LOG.warning(error.message)
-
         return ticket_nr
 
     def create_new_ticket_message(self, order: OrderIn, user_name: str, project: str) -> str:
