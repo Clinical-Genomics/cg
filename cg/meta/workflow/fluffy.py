@@ -207,7 +207,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 samplesheet_workdir_path=samplesheet_workdir_path,
             )
 
-    def run_fluffy(self, case_id: str, dry_run: bool) -> None:
+    def run_fluffy(self, case_id: str, dry_run: bool, workflow_config: str) -> None:
         """
         Call fluffy with the configured command-line arguments
         """
@@ -216,9 +216,11 @@ class FluffyAnalysisAPI(AnalysisAPI):
             LOG.info("Old working directory found, cleaning!")
             if not dry_run:
                 shutil.rmtree(output_path, ignore_errors=True)
+        if not workflow_config:
+            workflow_config = self.fluffy_config.as_posix()
         command_args = [
             "--config",
-            self.fluffy_config.as_posix(),
+            workflow_config,
             "--sample",
             self.get_samplesheet_path(case_id=case_id).as_posix(),
             "--project",
