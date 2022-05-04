@@ -108,6 +108,10 @@ class BalsamicLoadConfig(ScoutLoadConfig):
         return v
 
 
+class BalsamicUmiLoadConfig(BalsamicLoadConfig):
+    pass
+
+
 class MipLoadConfig(ScoutLoadConfig):
     smn_tsv: Optional[str] = None
     chromograph_image_files: Optional[List[str]]
