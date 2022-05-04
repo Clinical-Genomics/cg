@@ -190,7 +190,7 @@ class SpringBackupAPI:
     def remove_archived_spring_file(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving"""
         if not self.dry_run:
-            LOG.info("removing spring file %s from disk", str(spring_file_path))
+            LOG.info("Removing spring file %s from disk", str(spring_file_path))
             spring_file_path.unlink()
 
     @property
