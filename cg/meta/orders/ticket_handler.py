@@ -37,18 +37,13 @@ class TicketHandler:
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
-        ticket_nr = None
-        try:
-            ticket_nr: Optional[int] = self.osticket.open_ticket(
-                name=user_name,
-                email=user_mail,
-                subject=order.name,
-                message=message,
-            )
-
-            LOG.info(f"{ticket_nr}: opened new ticket")
-        except TicketCreationError as error:
-            LOG.warning(error.message)
+        ticket_nr: Optional[int] = self.osticket.open_ticket(
+            name=user_name,
+            email=user_mail,
+            subject=order.name,
+            message=message,
+        )
+        LOG.info(f"{ticket_nr}: opened new ticket")
 
         return ticket_nr
 
