@@ -35,7 +35,7 @@ def test_parse_mip_rna_orderform(mip_rna_orderform: str):
 
 
 def test_parse_balsamic_orderform(balsamic_orderform: str):
-    """Test to parse an balsamic orderform in excel format"""
+    """Test to parse a balsamic orderform in Excel format"""
     # GIVEN a orderform in excel format
     assert is_excel(Path(balsamic_orderform))
     # GIVEN a orderform API
@@ -46,6 +46,20 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.BALSAMIC
+
+
+def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
+    """Test to parse a balsamic orderform in excel format"""
+    # GIVEN a orderform in excel format
+    assert is_excel(Path(balsamic_umi_orderform))
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=balsamic_umi_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.BALSAMIC_UMI
 
 
 def test_parse_microbial_orderform(microbial_orderform: str):
@@ -104,7 +118,7 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
     case_obj = orderform.cases[0]
     assert len(case_obj.samples) == 3
     assert case_obj.name == "mipdnacase1"
-    assert case_obj.priority == "research"
+    assert case_obj.priority == "standard"
     assert set(case_obj.panels) == set(["AD-HSP", "Ataxi", "Actionable"])
 
 

@@ -67,7 +67,7 @@ def clean_context(
     helpers.add_analysis(
         store,
         case=case_to_not_clean,
-        pipeline="balsamic",
+        pipeline=Pipeline.BALSAMIC,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,

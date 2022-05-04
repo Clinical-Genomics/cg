@@ -3,12 +3,21 @@
 import json
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union, Any
 
+import yaml
+from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
-from cg.exc import BalsamicStartError
+from cg.constants.tags import BalsamicAnalysisTag
+from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
+from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.metrics import (
+    BalsamicTargetedQCMetrics,
+    BalsamicWGSQCMetrics,
+    BalsamicMetricsBase,
+)
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
@@ -35,6 +44,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
+
+    @property
+    def root(self) -> str:
+        return self.root_dir
 
     @property
     def threshold_reads(self):
@@ -88,11 +101,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         (Optional) Checks if config file exists.
         """
         return Path(self.root_dir, case_id, case_id + ".json")
-
-    def get_analysis_finish_path(self, case_id: str) -> Path:
-        """Returns path to analysis_finish file.
-        (Optional) Checks if analysis_finish file exists"""
-        return Path(self.root_dir, case_id, "analysis", "analysis_finish")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "analysis", "slurm_jobids.yaml")
@@ -231,6 +239,83 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if not normal_paths:
             return None
         return normal_paths[0]
+
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Any:
+        """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
+
+        version = self.housekeeper_api.last_version(bundle=case_id)
+        raw_file = self.housekeeper_api.get_files(
+            bundle=case_id, version=version.id, tags=tags
+        ).first()
+
+        if not raw_file:
+            raise FileNotFoundError(
+                f"No file associated to {tags} was found in housekeeper for {case_id}"
+            )
+
+        with open(Path(raw_file.full_path), "r") as stream:
+            data = yaml.safe_load(stream)
+
+        return data
+
+    def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
+        """Get the latest metadata of a specific BALSAMIC case"""
+
+        config_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.CONFIG])
+        metrics_raw_data = self.get_latest_raw_file_data(case_id, [BalsamicAnalysisTag.QC_METRICS])
+
+        if config_raw_data and metrics_raw_data:
+            try:
+                balsamic_analysis = self.parse_analysis(
+                    config_raw=config_raw_data, qc_metrics_raw=metrics_raw_data
+                )
+                return balsamic_analysis
+            except ValidationError as error:
+                LOG.error(
+                    "get_latest_metadata failed for '%s', missing attribute: %s",
+                    case_id,
+                    error,
+                )
+                raise error
+        else:
+            LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
+            raise CgError
+
+    def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
+        """Returns a formatted BalsamicAnalysis object"""
+
+        sequencing_type = config_raw["analysis"]["sequencing_type"]
+        qc_metrics = dict()
+
+        for value in qc_metrics_raw:
+            sample_metric = BalsamicMetricsBase(**value)
+            try:
+                qc_metrics[sample_metric.id].update(
+                    {sample_metric.name.lower(): sample_metric.value}
+                )
+            except KeyError:
+                qc_metrics[sample_metric.id] = {sample_metric.name.lower(): sample_metric.value}
+
+        return BalsamicAnalysis(
+            config=config_raw,
+            sample_metrics=self.cast_metrics_type(sequencing_type, qc_metrics),
+        )
+
+    @staticmethod
+    def cast_metrics_type(
+        sequencing_type: str, metrics: dict
+    ) -> Union[BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics]:
+        """Cast metrics model type according to the sequencing type"""
+
+        if metrics:
+            for k, v in metrics.items():
+                metrics[k] = (
+                    BalsamicWGSQCMetrics(**v)
+                    if sequencing_type == "wgs"
+                    else BalsamicTargetedQCMetrics(**v)
+                )
+
+        return metrics
 
     def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
         sample_obj = (
@@ -412,15 +497,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             case_object.internal_id
             for case_object in self.get_cases_to_analyze()
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
-        ]
-
-    def get_cases_to_store(self) -> List[models.Family]:
-        """Retrieve a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper"""
-        return [
-            case_object
-            for case_object in self.get_running_cases()
-            if Path(self.get_analysis_finish_path(case_id=case_object.internal_id)).exists()
         ]
 
     @staticmethod

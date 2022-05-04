@@ -4,11 +4,13 @@ from typing import Union
 
 from cg.models.orders.constants import OrderType
 from cg.constants import (
+    Pipeline,
     NA_FIELD,
     YES_FIELD,
     NO_FIELD,
     PRECISION,
     REPORT_SUPPORTED_PIPELINES,
+    BALSAMIC_ANALYSIS_TYPE,
 )
 
 LOG = logging.getLogger(__name__)
@@ -62,6 +64,16 @@ def validate_rml_sample(prep_category: str) -> str:
     return validate_empty_field(prep_category)
 
 
+def validate_balsamic_analysis_type(value: str) -> str:
+    """Translates the BALSAMIC analysis type string to an accepted value for the delivery report"""
+
+    return (
+        BALSAMIC_ANALYSIS_TYPE.get(value)
+        if value and BALSAMIC_ANALYSIS_TYPE.get(value)
+        else NA_FIELD
+    )
+
+
 def validate_supported_pipeline(cls, values: dict) -> dict:
     """Validates if the report generation supports a specific pipeline and analysis type"""
 
@@ -80,5 +92,9 @@ def validate_supported_pipeline(cls, values: dict) -> dict:
                 f"The pipeline {values.get('pipeline')} does not support delivery report generation"
             )
             raise ValueError
+
+    # Validates the analysis type
+    if values.get("pipeline") == Pipeline.BALSAMIC:
+        values["type"] = validate_balsamic_analysis_type(values["type"])
 
     return values
