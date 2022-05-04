@@ -186,6 +186,7 @@ class CaseSubmitter(Submitter):
                         "application": sample.application,
                         "capture_kit": sample.capture_kit,
                         "comment": sample.comment,
+                        "control": sample.control,
                         "father": sample.father,
                         "internal_id": sample.internal_id,
                         "mother": sample.mother,
@@ -195,7 +196,6 @@ class CaseSubmitter(Submitter):
                         "sex": sample.sex,
                         "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
-                        "time_point": sample.time_point if hasattr(sample, "time_point") else None,
                         "tumour": sample.tumour,
                     }
                     for sample in case_samples
@@ -270,6 +270,7 @@ class CaseSubmitter(Submitter):
             age_at_sampling=sample["age_at_sampling"],
             capture_kit=sample["capture_kit"],
             comment=sample["comment"],
+            control=sample["control"],
             internal_id=sample["internal_id"],
             name=sample["name"],
             order=order,
@@ -280,7 +281,6 @@ class CaseSubmitter(Submitter):
             sex=sample["sex"],
             subject_id=sample["subject_id"],
             ticket=ticket,
-            time_point=sample["time_point"],
             tumour=sample["tumour"],
         )
         sample_obj.customer = customer_obj

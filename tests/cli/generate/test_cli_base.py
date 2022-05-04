@@ -16,3 +16,4 @@ def test_generate_no_options(base_context, cli_runner):
     # THEN the output should list all the supported pipelines
     assert result.exit_code == EXIT_SUCCESS
     assert "mip-dna" in result.output
+    assert "balsamic" in result.output

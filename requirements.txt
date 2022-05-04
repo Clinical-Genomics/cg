@@ -23,7 +23,7 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 # utils
 alive_progress
 ansi
-cgmodels>=0.7
+cgmodels>0.8
 coloredlogs
 email-validator
 lxml
