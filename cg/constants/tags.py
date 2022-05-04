@@ -1,7 +1,8 @@
 """Tags for storing analyses in Housekeeper"""
 
 from typing import List
-from cgmodels.cg.constants import Pipeline
+
+from cgmodels.cg.constants import Pipeline, StrEnum
 
 HK_FASTQ_TAGS = ["fastq"]
 
