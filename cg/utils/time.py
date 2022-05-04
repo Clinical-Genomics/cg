@@ -1,4 +1,4 @@
-"""Modele to handle time functions"""
+"""Module to handle time functions"""
 
 import time
 
