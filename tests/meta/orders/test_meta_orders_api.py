@@ -89,6 +89,19 @@ def monkeypatch_process_lims(monkeypatch, order_data):
         )
 
 
+def test_submit_ticketexception(
+    base_store: Store,
+    mocker,
+    monkeypatch,
+    order_type: OrderType,
+    orders_api: OrdersAPI,
+    ticket_number: int,
+    user_mail: str,
+    user_name: str,
+):
+    pass
+
+
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
