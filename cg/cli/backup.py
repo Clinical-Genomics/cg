@@ -122,7 +122,7 @@ def retrieve_spring_files(
     identifier: str,
     dry_run: bool,
 ):
-    """Retrieve all spring files for a given something"""
+    """Retrieve all spring files for a given identity"""
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
