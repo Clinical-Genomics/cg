@@ -9,7 +9,6 @@ from cg.models.orders.sample_base import OrderSample
 class OrderCase(BaseModel):
     name: str
     samples: List[OrderSample]
-    require_qcok: bool = False
     priority: str
     panels: Optional[List[str]]
 
