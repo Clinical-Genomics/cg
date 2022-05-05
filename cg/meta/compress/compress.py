@@ -6,15 +6,17 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from housekeeper.store import models as housekeeper_models
+
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CompressionHkTags
+from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store import models
 from cg.store.queries import get_cases_to_compress
-from housekeeper.store import models as housekeeper_models
 
 LOG = logging.getLogger(__name__)
 
@@ -25,13 +27,15 @@ class CompressAPI:
     def __init__(
         self,
         hk_api: HousekeeperAPI,
-        crunchy_api: CrunchyAPI,
         demux_root: str,
+        crunchy_api: CrunchyAPI,
+        backup_api: SpringBackupAPI = None,
         dry_run: bool = False,
     ):
 
         self.hk_api = hk_api
         self.crunchy_api = crunchy_api
+        self.backup_api = backup_api
         self.demux_root: Path = Path(demux_root)
         self.dry_run = dry_run
         self.get_cases_to_compress = get_cases_to_compress
@@ -41,11 +45,12 @@ class CompressAPI:
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
+        self.backup_api.dry_run = self.dry_run
 
     def get_flow_cell_name(self, fastq_path: Path) -> str:
         """
         Extract the flow cell name from a fastq path assuming fastq files are kept in their
-        demultipelxed path and the following run_name convention:
+        demultiplexed path and the following run_name convention:
 
             - <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>:
             - Ex: 220128_A00689_0460_BHVN2FDSX2
@@ -113,6 +118,7 @@ class CompressAPI:
             - Housekeeper will be updated to include FASTQ files
             - Housekeeper will still have the SPRING and SPRING metadata file
             - The SPRING metadata file will be updated to include date for decompression
+            - PDC archived SPRING files will be retrieved and decrypted before decompression
         """
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
@@ -122,7 +128,12 @@ class CompressAPI:
         for compression_obj in compression_objs:
             if not self.crunchy_api.is_spring_decompression_possible(compression_obj):
                 LOG.info("SPRING to FASTQ decompression not possible for %s", sample_id)
-                return False
+                if not self.backup_api.is_to_be_retrieved_and_decrypted(
+                    compression_obj.spring_path
+                ):
+                    return False
+                LOG.info("Until the SPRING file is retrieved from PDC and decrypted")
+                self.backup_api.retrieve_and_decrypt_spring_file(Path(compression_obj.spring_path))
 
             LOG.info(
                 "Decompressing %s to FASTQ format for sample %s ",

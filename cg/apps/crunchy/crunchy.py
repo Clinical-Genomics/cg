@@ -10,12 +10,13 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional
 
+from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
+
 from cg.apps.crunchy import files
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
-from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
 from .sbatch import (
     FASTQ_TO_SPRING_COMMANDS,
@@ -25,10 +26,6 @@ from .sbatch import (
 )
 
 LOG = logging.getLogger(__name__)
-
-
-FLAG_PATH_SUFFIX = ".crunchy.txt"
-PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 
 class CrunchyAPI:

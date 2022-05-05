@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
@@ -6,7 +7,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import Pipeline, CASE_ACTIONS
+from cg.constants import CASE_ACTIONS, Pipeline
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -147,6 +148,7 @@ class StatusHandler(BaseHandler):
         return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
 
     def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
+        logging.error("CALLED!!!11!")
         flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
         if flowcell:
             return flowcell.samples
