@@ -45,7 +45,8 @@ class CompressAPI:
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
-        self.backup_api.dry_run = self.dry_run
+        if self.backup_api:
+            self.backup_api.dry_run = self.dry_run
 
     def get_flow_cell_name(self, fastq_path: Path) -> str:
         """
