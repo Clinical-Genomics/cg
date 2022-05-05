@@ -64,6 +64,26 @@ def test_dry(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     assert case_id in caplog.text
 
 
+def test_genome_version(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
+    """Test command with --genome-version option"""
+    caplog.set_level(logging.INFO)
+    # GIVEN a VALID case_id and genome_version
+    case_id = "balsamic_case_wgs_paired"
+    option_key = "--genome-version"
+    option_value = "canfam3"
+    # WHEN dry running with genome option specified
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run", option_key, option_value],
+        obj=balsamic_context,
+    )
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the the option key and value
+    assert option_key in caplog.text
+    assert option_value in caplog.text
+
+
 def test_target_bed(
     cli_runner: CliRunner, balsamic_context: CGConfig, balsamic_bed_2_path: Path, caplog
 ):

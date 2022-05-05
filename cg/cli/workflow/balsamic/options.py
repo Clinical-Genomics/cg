@@ -5,6 +5,14 @@ from cg.constants.priority import SlurmQos
 OPTION_DRY = click.option(
     "-d", "--dry-run", help="Print command to console without executing", is_flag=True
 )
+OPTION_GENOME_VERSION = click.option(
+    "-g",
+    "--genome-version",
+    show_default=True,
+    default="hg19",
+    type=click.Choice(["hg19", "hg38", "canfam3"]),
+    help="Type and build version of the reference genome. Set this option to override the default.",
+)
 OPTION_PANEL_BED = click.option(
     "--panel-bed",
     required=False,
