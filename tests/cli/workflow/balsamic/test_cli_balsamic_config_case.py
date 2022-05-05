@@ -150,6 +150,50 @@ def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog)
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    print(caplog.text)
+
+
+"""
+config case 
+--analysis-dir /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/balsamic8
+--balsamic-cache hello --case-id balsamic_case_tgs_paired
+--genome-version hg19
+--normal /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/balsamic8/balsamic_case_tgs_paired/fastq/concatenated_normal_XXXXXX_R_1.fastq.gz
+--tumor /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/balsamic8/balsamic_case_tgs_paired/fastq/concatenated_tumor_XXXXXX_R_1.fastq.gz
+--panel-bed /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/cg8/balsamic_bed_1.bed
+--tumor-sample-name sample_case_tgs_paired_tumor
+--normal-sample-name sample_case_tgs_paired_normal
+
+"""
+
+
+def test_pon_cnn(
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    balsamic_bed_1_path,
+    balsamic_pon_1_path,
+    caplog,
+):
+    """Test command with --pon-cnn option"""
+    caplog.set_level(logging.INFO)
+    # GIVEN VALID case_id of application with BED and PoN files
+    case_id = "balsamic_case_tgs_paired"
+    panel_key = "--panel-bed"
+    panel_value = balsamic_bed_1_path
+    pon_key = "--pon-cnn"
+    pon_value = balsamic_pon_1_path
+    # WHEN dry running with PANEL BED and PON CNN options specified
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run", panel_key, panel_value, pon_key, pon_value],
+        obj=balsamic_context,
+    )
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the PoN option key and value
+    assert pon_key in caplog.text
+    assert pon_value in caplog.text
+    print(caplog.text)
 
 
 def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog):

@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os.path
 from pathlib import Path
 from typing import List, Optional, Union, Any
 
@@ -199,6 +200,24 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return Path(self.bed_path, target_bed).as_posix()
 
     @staticmethod
+    def get_verified_pon(panel_bed: Path, pon_cnn: str) -> Optional[str]:
+        """Returns the validated PoN path
+
+        Raises BalsamicStartError:
+            When there is a missmatch between the PoN and the panel bed file names
+        """
+        if pon_cnn:
+            pon_cnn = Path(str(pon_cnn))
+            if os.path.basename(panel_bed).split(".")[0] not in os.path.basename(pon_cnn):
+                raise BalsamicStartError(
+                    f"The specified PoN reference file {pon_cnn} does not match the panel bed {panel_bed}"
+                )
+
+            return pon_cnn.as_posix()
+
+        return pon_cnn
+
+    @staticmethod
     def get_verified_tumor_path(sample_data: dict) -> str:
         """Takes a dict with samples and attributes, and returns the path
         of tumor sample.
@@ -341,10 +360,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return sample_obj.internal_id
 
     def get_verified_config_case_arguments(
-        self,
-        case_id: str,
-        genome_version: str,
-        panel_bed: str,
+        self, case_id: str, genome_version: str, panel_bed: str, pon_cnn: str
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -375,6 +391,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
+            "pon_cnn": self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=panel_bed),
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
@@ -511,11 +528,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return formatted_options
 
     def config_case(
-        self, case_id: str, genome_version: str, panel_bed: str, dry_run: bool = False
+        self,
+        case_id: str,
+        genome_version: str,
+        panel_bed: str,
+        pon_cnn: str,
+        dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
-            case_id=case_id, genome_version=genome_version, panel_bed=panel_bed
+            case_id=case_id,
+            genome_version=genome_version,
+            panel_bed=panel_bed,
+            pon_cnn=pon_cnn,
         )
         command = ["config", "case"]
         options = self.__build_command_str(
@@ -527,6 +552,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),
+                "--pon-cnn": arguments.get("pon_cnn"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),

@@ -1,6 +1,7 @@
 """CLI support to create config and/or start BALSAMIC """
 
 import logging
+from pathlib import Path
 
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -11,6 +12,7 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_ANALYSIS_TYPE,
     OPTION_RUN_ANALYSIS,
     OPTION_GENOME_VERSION,
+    OPTION_PON_CNN,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -44,10 +46,16 @@ balsamic.add_command(link)
 @ARGUMENT_CASE_ID
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
+@OPTION_PON_CNN
 @OPTION_DRY
 @click.pass_obj
 def config_case(
-    context: CGConfig, case_id: str, genome_version: str, panel_bed: str, dry_run: bool
+    context: CGConfig,
+    case_id: str,
+    genome_version: str,
+    panel_bed: str,
+    pon_cnn: click.Path,
+    dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
 
@@ -56,7 +64,11 @@ def config_case(
         LOG.info(f"Creating config file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.config_case(
-            case_id=case_id, genome_version=genome_version, panel_bed=panel_bed, dry_run=dry_run
+            case_id=case_id,
+            genome_version=genome_version,
+            panel_bed=panel_bed,
+            pon_cnn=pon_cnn,
+            dry_run=dry_run,
         )
     except CgError as e:
         LOG.error(f"Could not create config: {e.message}")

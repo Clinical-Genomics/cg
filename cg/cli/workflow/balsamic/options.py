@@ -39,3 +39,9 @@ OPTION_QOS = click.option(
     help="Job priority in SLURM. Will be set automatically according to priority in ClinicalDB, \
          this option can be used to override server setting",
 )
+OPTION_PON_CNN = click.option(
+    "--pon-cnn",
+    type=click.Path(exists=True),
+    required=False,
+    help="Panel of normal reference (.cnn) for cnvkit",
+)
