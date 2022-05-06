@@ -173,17 +173,21 @@ def store_housekeeper(context: CGConfig, case_id: str):
 
 @balsamic.command("start")
 @ARGUMENT_CASE_ID
+@OPTION_GENOME_VERSION
 @OPTION_ANALYSIS_TYPE
 @OPTION_QOS
 @OPTION_DRY
 @OPTION_PANEL_BED
+@OPTION_PON_CNN
 @OPTION_RUN_ANALYSIS
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
+    genome_version: str,
     analysis_type: str,
     panel_bed: str,
+    pon_cnn: str,
     slurm_quality_of_service: str,
     run_analysis: bool,
     dry_run: bool,
@@ -193,7 +197,14 @@ def start(
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id, dry_run=dry_run)
-        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        context.invoke(
+            config_case,
+            case_id=case_id,
+            genome_version=genome_version,
+            panel_bed=panel_bed,
+            pon_cnn=pon_cnn,
+            dry_run=dry_run,
+        )
         context.invoke(
             run,
             case_id=case_id,
