@@ -42,12 +42,11 @@ def test_run_gpg_command_dry_run(mock_process, binary_path, test_command):
     encryption_api.process.run_command.assert_called_once_with(command, dry_run=True)
 
 
-@mock.patch("cg.utils.Process")
-def test_generate_temporary_passphrase(mock_process, binary_path):
+def test_generate_temporary_passphrase(mocker, binary_path):
     """Tests generating a temporary passphrase"""
     # GIVEN an instance of the encryption API
     encryption_api = EncryptionAPI(binary_path=binary_path, dry_run=True)
-    encryption_api.process = mock_process()
+    mocker.patch("cg.meta.encryption.encryption.EncryptionAPI.run_passhprase_process")
 
     # WHEN creating a temporary passphrase
     result = encryption_api.generate_temporary_passphrase_file()
