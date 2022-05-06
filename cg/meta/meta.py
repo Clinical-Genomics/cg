@@ -41,10 +41,10 @@ class MetaAPI:
                 demux_root=config.demultiplex.out_dir,
                 backup_api=SpringBackupAPI(
                     encryption_api=SpringEncryptionAPI(
-                        binary_path=config["encryption"]["binary_path"]
+                        binary_path=config.dict()["encryption"]["binary_path"]
                     ),
                     hk_api=config.housekeeper_api,
-                    pdc_api=PdcAPI(config["pdc"]["binary_path"]),
+                    pdc_api=PdcAPI(config.dict()["pdc"]["binary_path"]),
                 ),
             ),
         )
