@@ -54,8 +54,7 @@ def test_generate_temporary_passphrase(mock_process, binary_path):
 
     # THEN the passphrase file should be generated as a temporary file
     assert type(result) is pathlib.PosixPath
-    assert result.parent == Path("/tmp")
-    assert result.name.startswith("tmp")
+    assert result.exists()
 
 
 @mock.patch("cg.meta.encryption.encryption.sha512_checksum")
