@@ -11,7 +11,7 @@ from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import File, Version
 
-from cg.exc import HousekeeperFileMissingError, HousekeeperVersionMissingError
+from cg.exc import HousekeeperVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -52,6 +52,11 @@ class HousekeeperAPI:
         self.commit()
         LOG.info("New bundle created with name %s", new_bundle.name)
         return new_bundle
+
+    def set_to_archive(self, file: models.File, value: bool) -> None:
+        """Sets the 'to_archive' field of a file"""
+        file.to_archive = value
+        self.commit()
 
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
@@ -121,7 +126,12 @@ class HousekeeperAPI:
         return new_file
 
     def files(
-        self, *, bundle: str = None, tags: List[str] = None, version: int = None, path: str = None
+        self,
+        *,
+        bundle: str = None,
+        tags: List[str] = None,
+        version: int = None,
+        path: str = None,
     ) -> Query:
         """Fetch files"""
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
@@ -169,7 +179,8 @@ class HousekeeperAPI:
         last_version: Version,
         tags: Optional[list] = None,
     ) -> List[Path]:
-        """Checks if any of the files in the provided list are already added to the provided bundle. Returns a list of files that have not been added"""
+        """Checks if any of the files in the provided list are already added to the provided
+        bundle. Returns a list of files that have not been added"""
         for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
             if Path(file.path) in file_paths:
                 file_paths.remove(Path(file.path))
@@ -227,7 +238,8 @@ class HousekeeperAPI:
         )
 
     def get_create_version(self, bundle: str) -> models.Version:
-        """Returns the latest version of a bundle if it exists. If not creates a bundle and returns its version"""
+        """Returns the latest version of a bundle if it exists. If not creates a bundle and
+        returns its version"""
         last_version: models.Version = self.last_version(bundle=bundle)
         if not last_version:
             LOG.info("Creating bundle for sample %s in housekeeper", bundle)

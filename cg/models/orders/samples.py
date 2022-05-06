@@ -1,7 +1,7 @@
 from typing import List
 
 from cgmodels.cg.constants import Pipeline
-from pydantic import BaseModel, constr, NonNegativeInt, validator
+from pydantic import BaseModel, constr, validator
 from pydantic.typing import Optional
 
 from cg.constants import DataDelivery

@@ -1,11 +1,16 @@
 import datetime as dt
+import subprocess
+from unittest import mock
+from unittest.mock import patch
 
 import pytest
 from cgmodels.cg.constants import Pipeline
+
+from cg.apps.osticket import OsTicket
 from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
-from cg.exc import OrderError
+from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
@@ -86,6 +91,35 @@ def monkeypatch_process_lims(monkeypatch, order_data):
         monkeypatch.setattr(
             f"cg.meta.orders.{submitter}.process_lims",
             lambda **kwargs: (lims_project_data, lims_map),
+        )
+
+
+@pytest.mark.parametrize(
+    "order_type",
+    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
+)
+def test_submit_ticketexception(
+    all_orders_to_submit,
+    base_store: Store,
+    monkeypatch,
+    orders_api: OrdersAPI,
+    order_type: OrderType,
+    ticket_number: int,
+    user_mail: str,
+    user_name: str,
+):
+    # GIVEN an order that does not have a name (ticket_nr)
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    order_data.name = ""
+    with patch("cg.apps.osticket.OsTicket") as os_mock:
+        orders_api.ticket_handler.osticket = os_mock.return_value
+        orders_api.ticket_handler.osticket.open_ticket.side_effect = TicketCreationError("ERROR")
+
+    # WHEN the order is submitted and a TicketCreationError raised
+    # THEN the TicketCreationError is not excepted
+    with pytest.raises(TicketCreationError):
+        orders_api.submit(
+            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
         )
 
 

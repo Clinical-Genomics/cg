@@ -3,15 +3,13 @@
 from datetime import datetime
 
 import pytest
-
-from cg.constants.tags import HkMipAnalysisTag
 from tests.store_helpers import StoreHelpers
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Priority
+from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
-
-from cg.constants import Priority
 
 
 @pytest.fixture(scope="function", name="analysis_store")
@@ -140,3 +138,9 @@ def mip_analysis_api(context_config, mip_hk_store, analysis_store):
     analysis_api.housekeeper_api = mip_hk_store
     analysis_api.status_db = analysis_store
     return analysis_api
+
+
+@pytest.fixture(name="binary_path")
+def fixture_binary_path() -> str:
+    """Return the string of a path to a (fake) binary"""
+    return "/usr/bin/binary"

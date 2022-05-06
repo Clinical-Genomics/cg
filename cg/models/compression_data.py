@@ -4,11 +4,10 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, SPRING_SUFFIX
+from cg.constants import FASTQ_FIRST_READ_SUFFIX, FASTQ_SECOND_READ_SUFFIX, FileExtensions
+from cg.constants.compression import PENDING_PATH_SUFFIX
 
 LOG = logging.getLogger(__name__)
-
-PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 
 class CompressionData:
@@ -30,7 +29,12 @@ class CompressionData:
     @property
     def spring_path(self) -> Path:
         """Return the path to a SPRING file"""
-        return self.stub.with_suffix(SPRING_SUFFIX)
+        return self.stub.with_suffix(FileExtensions.SPRING)
+
+    @property
+    def encrypted_spring_path(self) -> Path:
+        """Return the path to a SPRING file"""
+        return self.stub.with_suffix(FileExtensions.SPRING).with_suffix(FileExtensions.GPG)
 
     @property
     def spring_metadata_path(self) -> Path:

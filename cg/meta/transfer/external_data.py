@@ -6,13 +6,13 @@ from typing import List, Optional
 
 from cg.apps.cgstats.db.models import Version
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.constants import HK_FASTQ_TAGS
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import RSYNC_CONTENTS_COMMAND, ERROR_RSYNC_FUNCTION
+from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store import models
-from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
-from cg.constants import HK_FASTQ_TAGS
+from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
 LOG = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ class ExternalDataAPI(MetaAPI):
         available_samples: List[models.Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket_id=ticket_id
         )
-        cases_to_start: list[dict] = []
+        cases_to_start: List[dict] = []
         for sample in available_samples:
             cases_to_start.extend(
                 self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
