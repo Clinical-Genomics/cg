@@ -53,7 +53,7 @@ class EncryptionAPI:
         LOG.debug("Generate temporary passphrase file:")
         passphrase_file = NamedTemporaryFile(delete=False)
         self.run_passhprase_process(
-            passhrase_file=passphrase_file, quality_level=quality_level, count=count
+            passphrase_file=passphrase_file, quality_level=quality_level, count=count
         )
         LOG.debug(f"Temporary passphrase file generated: {passphrase_file.name}")
 
