@@ -83,6 +83,7 @@ def run(
     skip_evaluation: bool = False,
     start_after: str = None,
     start_with: str = None,
+    comment: str = None,
 ):
     """Run the analysis for a case"""
 
@@ -117,7 +118,7 @@ def run(
         return
 
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id, commnet=comment)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("%s run started!", analysis_api.pipeline)
     except CgError as e:
@@ -147,6 +148,7 @@ def start(
     skip_evaluation: bool,
     start_after: str,
     start_with: str,
+    comment: str = None,
 ):
     """Start full MIP analysis workflow for a case"""
 
@@ -170,6 +172,7 @@ def start(
             dry_run=dry_run,
             mip_dry_run=mip_dry_run,
             skip_evaluation=skip_evaluation,
+            comment=comment,
         )
     except (FlowcellsNeededError, DecompressionNeededError) as e:
         LOG.error(e.message)

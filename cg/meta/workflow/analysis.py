@@ -186,7 +186,7 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(self, case_id: str) -> None:
+    def add_pending_trailblazer_analysis(self, case_id: str, comment: str = None) -> None:
         self.check_analysis_ongoing(case_id=case_id)
         self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
         self.trailblazer_api.add_pending_analysis(
@@ -197,6 +197,7 @@ class AnalysisAPI(MetaAPI):
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
+            comment=comment,
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
