@@ -38,6 +38,7 @@ OPTION_SKIP_EVALUATION = click.option(
 OPTION_TRAILBLAZER_COMMENT = click.option(
     "--tb-comment",
     type=str,
+    default=None,
     help="Set this option to add comment in trailblazer",
 )
 

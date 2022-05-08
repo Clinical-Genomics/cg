@@ -150,7 +150,7 @@ def start(
     skip_evaluation: bool,
     start_after: str,
     start_with: str,
-    tb_comment: str = None,
+    tb_comment: str,
 ):
     """Start full MIP analysis workflow for a case"""
 
