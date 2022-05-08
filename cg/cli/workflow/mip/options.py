@@ -35,4 +35,10 @@ OPTION_SKIP_EVALUATION = click.option(
     help="Skip mip qccollect evaluation",
 )
 
+OPTION_TRAILBLAZER_COMMENT = click.option(
+    "--tb-comment",
+    type=str,
+    help="Set this option to add comment in trailblazer",
+)
+
 ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)

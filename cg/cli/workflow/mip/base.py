@@ -14,6 +14,7 @@ from cg.cli.workflow.mip.options import (
     QOS_OPTION,
     START_AFTER_PROGRAM,
     START_WITH_PROGRAM,
+    OPTION_TRAILBLAZER_COMMENT
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
@@ -136,6 +137,7 @@ def run(
 @QOS_OPTION
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
+@OPTION_TRAILBLAZER_COMMENT
 @click.pass_context
 def start(
     context: click.Context,
@@ -148,7 +150,7 @@ def start(
     skip_evaluation: bool,
     start_after: str,
     start_with: str,
-    comment: str = None,
+    tb_comment: str = None,
 ):
     """Start full MIP analysis workflow for a case"""
 
@@ -172,7 +174,7 @@ def start(
             dry_run=dry_run,
             mip_dry_run=mip_dry_run,
             skip_evaluation=skip_evaluation,
-            comment=comment,
+            comment=tb_comment,
         )
     except (FlowcellsNeededError, DecompressionNeededError) as e:
         LOG.error(e.message)
