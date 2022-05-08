@@ -157,7 +157,7 @@ class TrailblazerAPI:
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
-            "comment": "TESTTEST",
+            "comment": comment,
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
