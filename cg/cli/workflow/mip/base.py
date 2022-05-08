@@ -14,7 +14,7 @@ from cg.cli.workflow.mip.options import (
     QOS_OPTION,
     START_AFTER_PROGRAM,
     START_WITH_PROGRAM,
-    OPTION_TRAILBLAZER_COMMENT
+    OPTION_TRAILBLAZER_COMMENT,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
@@ -119,7 +119,7 @@ def run(
         return
 
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id, commnet=comment)
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id, comment=comment)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("%s run started!", analysis_api.pipeline)
     except CgError as e:
