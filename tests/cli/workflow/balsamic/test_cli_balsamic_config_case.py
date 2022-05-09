@@ -150,21 +150,6 @@ def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog)
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
-    print(caplog.text)
-
-
-"""
-config case 
---analysis-dir /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/balsamic8
---balsamic-cache hello --case-id balsamic_case_tgs_paired
---genome-version hg19
---normal /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/balsamic8/balsamic_case_tgs_paired/fastq/concatenated_normal_XXXXXX_R_1.fastq.gz
---tumor /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/balsamic8/balsamic_case_tgs_paired/fastq/concatenated_tumor_XXXXXX_R_1.fastq.gz
---panel-bed /private/var/folders/j0/swnl57794_n2pv9yll88hmnm437kpc/T/pytest-of-vadym.ivanchuk/pytest-609/cg8/balsamic_bed_1.bed
---tumor-sample-name sample_case_tgs_paired_tumor
---normal-sample-name sample_case_tgs_paired_normal
-
-"""
 
 
 def test_pon_cnn(
@@ -193,7 +178,6 @@ def test_pon_cnn(
     # THEN dry-print should include the PoN option key and value
     assert pon_key in caplog.text
     assert pon_value in caplog.text
-    print(caplog.text)
 
 
 def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog):
