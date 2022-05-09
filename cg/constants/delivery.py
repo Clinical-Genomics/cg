@@ -37,17 +37,20 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
-    {"multiqc-html"},
     {"vcf-umi-clinical"},
     {"vcf-umi-clinical-index"},
     {"vcf-umi-research"},
     {"vcf-umi-research-index"},
 ]
 
+BALSAMIC_UMI_ANALYSIS_CASE_TAGS.extend(BALSAMIC_ANALYSIS_CASE_TAGS)
+
 BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS = [
     {"umi-cram"},
     {"umi-cram-index"},
 ]
+
+BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 
 MIP_DNA_ANALYSIS_CASE_TAGS = [
