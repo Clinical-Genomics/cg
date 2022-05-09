@@ -1,5 +1,6 @@
 """API for encryption on Hasta"""
 import hashlib
+from io import TextIOWrapper
 import logging
 import subprocess
 from pathlib import Path
@@ -21,6 +22,7 @@ class EncryptionAPI:
     """Class that uses gpg for various encryption and decryption functionality"""
 
     def __init__(self, binary_path: str, dry_run: bool = False):
+        self.binary_path: str = binary_path
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
 
@@ -30,16 +32,13 @@ class EncryptionAPI:
         LOG.info(f"{self.process.binary} {' '.join(command)}")
         self.process.run_command(command, dry_run=self.dry_run)
 
-    @staticmethod
-    def generate_temporary_passphrase_file(quality_level: int = 2, count: int = 256) -> Path:
-        """Generates a temporary file with random bytes. The default values are based on the
-        encryption parameters as used on the NAS:es connected to the sequencers"""
-        LOG.debug("Generate temporary passphrase file:")
-        passphrase_file = NamedTemporaryFile(delete=False)
+    def run_passhprase_process(
+        self, quality_level: int, count: int, passphrase_file: TextIOWrapper
+    ) -> None:
         with open(passphrase_file.name, "w") as f:
             process = subprocess.Popen(
                 [
-                    "gpg",
+                    self.binary_path,
                     "--gen-random",
                     str(quality_level),
                     str(count),
@@ -47,6 +46,15 @@ class EncryptionAPI:
                 stdout=f,
             )
         process.wait()
+
+    def generate_temporary_passphrase_file(self, quality_level: int = 2, count: int = 256) -> Path:
+        """Generates a temporary file with random bytes. The default values are based on the
+        encryption parameters as used on the NAS:es connected to the sequencers"""
+        LOG.debug("Generate temporary passphrase file:")
+        passphrase_file = NamedTemporaryFile(delete=False)
+        self.run_passhprase_process(
+            passphrase_file=passphrase_file, quality_level=quality_level, count=count
+        )
         LOG.debug(f"Temporary passphrase file generated: {passphrase_file.name}")
 
         return Path(passphrase_file.name)
