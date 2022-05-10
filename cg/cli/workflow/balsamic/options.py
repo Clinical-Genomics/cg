@@ -36,8 +36,7 @@ OPTION_QOS = click.option(
     "-qos",
     "--slurm-quality-of-service",
     type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH, SlurmQos.EXPRESS]),
-    help="Job priority in SLURM. Will be set automatically according to priority in ClinicalDB, \
-         this option can be used to override server setting",
+    help="Job priority in SLURM. Setting this option will override the StatusDB case priority.",
 )
 OPTION_PON_CNN = click.option(
     "--pon-cnn",
