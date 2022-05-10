@@ -6,7 +6,6 @@ OPTION_DRY = click.option(
     "-d", "--dry-run", help="Print command to console without executing", is_flag=True
 )
 OPTION_GENOME_VERSION = click.option(
-    "-g",
     "--genome-version",
     show_default=True,
     default="hg19",
