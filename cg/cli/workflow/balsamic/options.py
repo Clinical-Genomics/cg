@@ -3,9 +3,6 @@ import click
 from cg.constants.constants import GenomeVersions
 from cg.constants.priority import SlurmQos
 
-OPTION_DRY = click.option(
-    "-d", "--dry-run", help="Print command to console without executing", is_flag=True
-)
 OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,

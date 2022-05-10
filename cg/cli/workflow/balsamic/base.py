@@ -7,7 +7,6 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_PANEL_BED,
-    OPTION_DRY,
     OPTION_QOS,
     OPTION_ANALYSIS_TYPE,
     OPTION_RUN_ANALYSIS,
@@ -16,6 +15,7 @@ from cg.cli.workflow.balsamic.options import (
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.constants import DRY_RUN
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -47,7 +47,7 @@ balsamic.add_command(link)
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_DRY
+@DRY_RUN
 @click.pass_obj
 def config_case(
     context: CGConfig,
@@ -80,7 +80,7 @@ def config_case(
 
 @balsamic.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @OPTION_QOS
 @OPTION_ANALYSIS_TYPE
 @OPTION_RUN_ANALYSIS
@@ -120,7 +120,7 @@ def run(
 
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @OPTION_ANALYSIS_TYPE
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, analysis_type: str, dry_run: bool):
@@ -176,7 +176,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @OPTION_GENOME_VERSION
 @OPTION_ANALYSIS_TYPE
 @OPTION_QOS
-@OPTION_DRY
+@DRY_RUN
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_RUN_ANALYSIS
@@ -218,7 +218,7 @@ def start(
 
 
 @balsamic.command("start-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full workflow for all cases ready for analysis"""
@@ -241,7 +241,7 @@ def start_available(context: click.Context, dry_run: bool = False):
 
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
 def store(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
@@ -252,7 +252,7 @@ def store(context: click.Context, case_id: str, analysis_type: str, dry_run: boo
 
 
 @balsamic.command("store-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper"""
