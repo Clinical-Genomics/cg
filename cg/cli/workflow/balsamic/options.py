@@ -1,5 +1,6 @@
 import click
 
+from cg.constants.constants import GenomeVersions
 from cg.constants.priority import SlurmQos
 
 OPTION_DRY = click.option(
@@ -8,8 +9,8 @@ OPTION_DRY = click.option(
 OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,
-    default="hg19",
-    type=click.Choice(["hg19", "hg38", "canfam3"]),
+    default=GenomeVersions.hg19,
+    type=click.Choice([GenomeVersions.hg19, GenomeVersions.hg38, GenomeVersions.canfam3]),
     help="Type and build version of the reference genome. Set this option to override the default.",
 )
 OPTION_PANEL_BED = click.option(
