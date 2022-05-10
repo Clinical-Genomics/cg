@@ -1233,6 +1233,8 @@ def fixture_context_config(
             "hasta": "/path/on/hasta/%s",
             "caesar": "server.name.se:/path/%s/on/caesar",
         },
+        "encryption": {"binary_path": "bin/gpg"},
+        "pdc": {"binary_path": "/bin/dsmc"},
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {

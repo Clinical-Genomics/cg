@@ -5,14 +5,14 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.compress.helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-
-from .helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
 
 LOG = logging.getLogger(__name__)
 
@@ -151,6 +151,8 @@ def fix_spring(context: CGConfig, bundle_name: Optional[str], dry_run: bool):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_obj
 def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
+    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
 

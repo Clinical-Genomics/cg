@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import OrderError, OrderFormError
+from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import models
@@ -114,6 +114,7 @@ def submit_order(order_type):
         NewConnectionError,
         MaxRetryError,
         TimeoutError,
+        TicketCreationError,
         TypeError,
     ) as error:
         LOG.exception(error)
