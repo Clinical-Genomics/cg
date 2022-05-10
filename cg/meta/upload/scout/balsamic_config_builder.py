@@ -31,7 +31,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_multiqc_report()
         self.include_delivery_report()
 
-    def include_sample_files(self, config_sample: ScoutBalsamicIndividual):
+    def include_sample_files(self, config_sample: ScoutBalsamicIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files")
         if config_sample.alignment_path and "tumor" in config_sample.alignment_path:
             config_sample.vcf2cytosure = self.fetch_sample_file(

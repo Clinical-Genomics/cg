@@ -2,7 +2,6 @@
 
 import json
 import logging
-import os.path
 from pathlib import Path
 from typing import List, Optional, Union, Any
 
@@ -208,7 +207,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """
         if pon_cnn:
             pon_cnn = Path(str(pon_cnn))
-            if os.path.basename(panel_bed).split(".")[0] not in os.path.basename(pon_cnn):
+            if panel_bed.stem not in pon_cnn.stem:
                 raise BalsamicStartError(
                     f"The specified PoN reference file {pon_cnn} does not match the panel bed {panel_bed}"
                 )
