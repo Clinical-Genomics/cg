@@ -163,8 +163,8 @@ class BackupApi:
             if FileExtensions.TAR in row
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
-        ][ListIndexes.FIRST]
-        return Path(flow_cell_query.split(SPACE)[ListIndexes.PDC_PATH_COLUMN])
+        ][ListIndexes.FIRST.value]
+        return Path(flow_cell_query.split(SPACE)[ListIndexes.PDC_PATH_COLUMN.value])
 
     @staticmethod
     def get_archived_encryption_key(query: list) -> Path:
@@ -172,8 +172,8 @@ class BackupApi:
 
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
-        ][ListIndexes.FIRST]
-        return Path(encryption_key_query.split(SPACE)[ListIndexes.PDC_PATH_COLUMN])
+        ][ListIndexes.FIRST.value]
+        return Path(encryption_key_query.split(SPACE)[ListIndexes.PDC_PATH_COLUMN.value])
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
         """Query PDC for a given flow cell id"""
