@@ -550,6 +550,8 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
+        data_analysis=Pipeline(metagenome_status_data["data_analysis"]),
+        data_delivery=DataDelivery(metagenome_status_data["data_delivery"]),
         items=metagenome_status_data["samples"],
     )
 
@@ -575,6 +577,8 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
+            data_analysis=Pipeline(metagenome_status_data["data_analysis"]),
+            data_delivery=DataDelivery(metagenome_status_data["data_delivery"]),
             items=metagenome_status_data["samples"],
         )
 
