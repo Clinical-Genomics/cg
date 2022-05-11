@@ -9,8 +9,9 @@ from housekeeper.store import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.encryption import EncryptionDirsAndFiles
 from cg.constants.indexes import ListIndexes
-from cg.constants.symbols import NEW_LINE, SPACE
+from cg.constants.symbols import ASTERISK, NEW_LINE, SPACE
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
@@ -176,7 +177,8 @@ class BackupApi:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
         """Query PDC for a given flow cell id"""
-        self.pdc.query_pdc(search_pattern=flow_cell_id)
+        search_pattern = EncryptionDirsAndFiles.ENCRYPTynbDIR + ASTERISK + flow_cell_id + ASTERISK
+        self.pdc.query_pdc(search_pattern=search_pattern)
         query: list = self.pdc.process.stdout.split(NEW_LINE)
         return query
 

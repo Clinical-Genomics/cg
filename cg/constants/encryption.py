@@ -70,3 +70,9 @@ class ExtractionParameters(ListEnum):
     CHANGE_TO_DIR: list = [
         "-C",
     ]
+
+
+class EncryptionDirsAndFiles(StrEnum):
+    """Encryption related dirs and files"""
+
+    ENCRYPT_DIR: str = "/home/hiseq.clinical/ENCRYPT/"
