@@ -1,7 +1,7 @@
 """ Module to group PDC related commands """
 
 import logging
-import subprocess
+from pathlib import Path
 
 from cg.constants.pdc import DSMCParameters
 from cg.utils import Process
@@ -17,17 +17,19 @@ class PdcAPI:
     def __init__(self, binary_path: str = None):
         self.process: Process = Process(binary=binary_path)
 
-    @classmethod
     def retrieve_flow_cell(
-        cls, flow_cell_id: str, sequencer_type: str, root_dir: dict, dry: bool = False
+        self, flow_cell: str, encryption_key: str, root_dir: str, dry_run: bool = False
     ) -> None:
-        """Fetch a flow cell back from the backup solution."""
-        path = root_dir[sequencer_type]
-        bash_command = f"bash SCRIPTS/retrieve_run_nas.bash {flow_cell_id} {SERVER} {path}"
-        command = ["ssh", "nas-9.scilifelab.se", bash_command]
-        LOG.info(" ".join(command))
-        if not dry:
-            subprocess.check_call(command)
+        """Fetch a flow cell back and it's encryption key from the backup solution"""
+        flow_cell_target: str = self.get_target_path(root_dir=root_dir, file_=flow_cell)
+        encryption_key_target: str = self.get_target_path(root_dir=root_dir, file_=encryption_key)
+
+        self.retrieve_file_from_pdc(
+            file_path=flow_cell, target_path=flow_cell_target, dry_run=dry_run
+        )
+        self.retrieve_file_from_pdc(
+            file_path=encryption_key, target_path=encryption_key_target, dry_run=dry_run
+        )
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
         """Archive a file by storing it on PDC"""
@@ -42,10 +44,14 @@ class PdcAPI:
         command.append(search_pattern)
         self.run_dsmc_command(command=command, dry_run=dry_run)
 
-    def retrieve_file_from_pdc(self, file_path: str, dry_run: bool = False) -> None:
+    def retrieve_file_from_pdc(
+        self, file_path: str, target_path: str, dry_run: bool = False
+    ) -> None:
         """Retrieve a file from PDC"""
         command: list = DSMCParameters.RETRIEVE_COMMAND.copy()
         command.append(file_path)
+        if target_path:
+            command.append(target_path)
         self.run_dsmc_command(command=command, dry_run=dry_run)
 
     def run_dsmc_command(self, command: list, dry_run: bool = False) -> None:
@@ -53,3 +59,8 @@ class PdcAPI:
         LOG.debug("Starting DSMC command:")
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
         self.process.run_command(parameters=command, dry_run=dry_run)
+
+    @staticmethod
+    def get_target_path(root_dir: str, file_: str) -> str:
+        """Determines the target path for PDC retrieval"""
+        return str(Path(root_dir) / Path(file_).name)

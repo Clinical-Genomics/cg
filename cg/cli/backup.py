@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus, HousekeeperTags
 from cg.meta.backup.backup import BackupApi, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import SpringEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -21,8 +21,10 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""
-    pdc_api = PdcAPI()
+    pdc_api = PdcAPI(binary_path=context.pdc.binary_path)
+    encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path)
     context.meta_apis["backup_api"] = BackupApi(
+        encryption_api=encryption_api,
         status=context.status_db,
         pdc_api=pdc_api,
         root_dir=context.backup.root.dict(),
@@ -73,7 +75,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[HousekeeperTags.SPRING]
-    ).filter(hk_models.File.path.like(f"%{config.environment}%"))
+    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():

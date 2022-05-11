@@ -93,9 +93,11 @@ class Sequencers(StrEnum):
 
 class FileExtensions(StrEnum):
     GPG: str = ".gpg"
+    GZIP: str = ".gz"
     JSON: str = ".json"
     KEY: str = ".key"
     SPRING: str = ".spring"
+    TAR: str = ".tar"
     TMP: str = ".tmp"
 
 

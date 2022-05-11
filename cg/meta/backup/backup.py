@@ -7,10 +7,13 @@ from typing import Optional
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import FlowCellStatus
+from cg.constants.constants import FileExtensions, FlowCellStatus
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.indexes import ListIndexes
+from cg.constants.symbols import NEW_LINE, SPACE
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import SpringEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.models import CompressionData
 from cg.store import Store, models
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -21,8 +24,11 @@ LOG = logging.getLogger(__name__)
 class BackupApi:
     """Class for retrieving FCs from backup"""
 
-    def __init__(self, status: Store, pdc_api: PdcAPI, root_dir: dict):
+    def __init__(
+        self, encryption_api: EncryptionAPI, status: Store, pdc_api: PdcAPI, root_dir: dict
+    ):
 
+        self.encryption_api = encryption_api
         self.status: Store = status
         self.pdc: PdcAPI = pdc_api
         self.root_dir: dict = root_dir
@@ -66,14 +72,30 @@ class BackupApi:
             self.status.commit()
             LOG.info("%s: retrieving from PDC", flow_cell_obj.name)
 
+        pdc_flow_cell_query: list = self.query_pdc_for_flow_cell(flow_cell_obj.name)
+        archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
+        LOG.debug(f"Archived flow cell: {archived_flow_cell}")
+        decrypted_flow_cell: Path = archived_flow_cell.with_suffix(
+            FileExtensions.TAR + FileExtensions.GZIP
+        )
+        LOG.debug(f"Decrypted flow cell: {decrypted_flow_cell}")
+        encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
+        LOG.debug(f"Encrypted key: {encrypted_key}")
+        encryption_key: Path = Path(encrypted_key).with_suffix(FileExtensions.KEY)
+        LOG.debug(f"Encryption key: {encryption_key}")
+        root_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
+        LOG.debug(f"Root dir: {root_dir}")
+        extraction_target_dir = root_dir / decrypted_flow_cell.stem
+        LOG.debug(f"Extraction target dir: {extraction_target_dir}")
+
         start_time = get_start_time()
 
         try:
             self.pdc.retrieve_flow_cell(
-                flow_cell_id=flow_cell_obj.name,
-                sequencer_type=flow_cell_obj.sequencer_type,
-                root_dir=self.root_dir,
-                dry=dry_run,
+                flow_cell=str(archived_flow_cell),
+                encryption_key=str(encrypted_key),
+                root_dir=str(root_dir),
+                dry_run=dry_run,
             )
             if not dry_run:
                 flow_cell_obj.status = FlowCellStatus.RETRIEVED
@@ -87,8 +109,64 @@ class BackupApi:
                 flow_cell_obj.status = FlowCellStatus.REQUESTED
                 self.status.commit()
             raise error
+        try:
+            decryption_command = self.encryption_api.get_asymmetric_decryption_command(
+                input_file=encrypted_key, output_file=encryption_key
+            )
+            LOG.debug(f"Decrypt key command: {decryption_command}")
+            self.encryption_api.run_gpg_command(decryption_command)
+
+            decryption_command = self.encryption_api.get_symmetric_decryption_command(
+                input_file=archived_flow_cell,
+                output_file=decrypted_flow_cell,
+                encryption_key=encryption_key,
+            )
+            LOG.debug(f"Decrypt flow cell command: {decryption_command}")
+            self.encryption_api.run_gpg_command(decryption_command)
+
+            extraction_command = self.encryption_api.get_extract_file_command(
+                input_file=decrypted_flow_cell, output_file=extraction_target_dir
+            )
+            LOG.debug(f"Extract flow cell command: {extraction_command}")
+            self.encryption_api.run_gpg_command(extraction_command)
+            (extraction_target_dir / DemultiplexingDirsAndFiles.RTACOMPLETE).touch()
+            LOG.debug(f"Unlink files")
+            archived_flow_cell.unlink()
+            decrypted_flow_cell.unlink()
+            encrypted_key.unlink()
+            encryption_key.unlink()
+        except subprocess.CalledProcessError as error:
+            LOG.error("Decryption failed: %s", error.stderr)
+            return
 
         return get_elapsed_time(start_time=start_time)
+
+    @staticmethod
+    def get_archived_flow_cell(query: list) -> Path:
+        """Get the path of the archived flow cell from a PDC query"""
+        flow_cell_query: str = [
+            row
+            for row in query
+            if FileExtensions.TAR in row
+            and FileExtensions.GZIP in row
+            and FileExtensions.GPG in row
+        ][ListIndexes.FIRST]
+        return Path(flow_cell_query.split(SPACE)[ListIndexes.PDC_PATH_COLUMN])
+
+    @staticmethod
+    def get_archived_encryption_key(query: list) -> Path:
+        """Get the encryption key for the archived flow cell from a PDC query"""
+
+        encryption_key_query: str = [
+            row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
+        ][ListIndexes.FIRST]
+        return Path(encryption_key_query.split(SPACE)[ListIndexes.PDC_PATH_COLUMN])
+
+    def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
+        """Query PDC for a given flow cell id"""
+        self.pdc.query_pdc(search_pattern=flow_cell_id)
+        query: list = self.pdc.process.stdout.split(NEW_LINE)
+        return query
 
 
 class SpringBackupAPI:

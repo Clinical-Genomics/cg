@@ -9,7 +9,7 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.constants import FileExtensions
-from cg.constants.encryption import GPGParameters
+from cg.constants.encryption import ExtractionParameters, GPGParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -60,6 +60,52 @@ class EncryptionAPI:
             raise ChecksumFailedError(message="Checksum comparison failed!")
         LOG.info("Checksum comparison successful!")
 
+    def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for asymmetric encryption"""
+        encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        encryption_parameters.extend(output_parameter)
+        return encryption_parameters
+
+    def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for symmetric encryption of spring files"""
+        encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
+        encryption_parameters.append(str(self.temporary_passphrase))
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        encryption_parameters.extend(output_parameter)
+        return encryption_parameters
+
+    def get_asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for asymmetric decryption"""
+        decryption_parameters: list = GPGParameters.ASYMMETRIC_DECRYPTION.copy()
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        decryption_parameters.extend(output_parameter)
+        return decryption_parameters
+
+    def get_symmetric_decryption_command(
+        self, input_file: Path, output_file: Path, encryption_key: Path
+    ) -> List[str]:
+        """Generates the gpg command for symmetric decryption"""
+        decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
+        decryption_parameters.append(str(encryption_key))
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        decryption_parameters.extend(output_parameter)
+        return decryption_parameters
+
+    def get_extract_file_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for symmetric decryption"""
+        extraction_parameters: list = ExtractionParameters.EXTRACT_FILE.copy()
+        extraction_parameters.append(str(input_file))
+        exclude_files: list = ExtractionParameters.EXCLUDE_FILES.copy()
+        extraction_parameters.append(exclude_files)
+        target_directory_paramaters: list = ExtractionParameters.CHANGE_TO_DIR.copy()
+        extraction_parameters.extend([target_directory_paramaters, output_file])
+        return extraction_parameters
+
 
 class SpringEncryptionAPI(EncryptionAPI):
     """Encryption functionality for spring files"""
@@ -72,42 +118,6 @@ class SpringEncryptionAPI(EncryptionAPI):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
         self._dry_run = dry_run
         self._temporary_passphrase = None
-
-    def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for asymmetric encryption"""
-        encryption_parameters: list = GPGParameters.SPRING_ASYMMETRIC_ENCRYPTION.copy()
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        encryption_parameters.extend(output_parameter)
-        return encryption_parameters
-
-    def get_asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for asymmetric decryption"""
-        decryption_parameters: list = GPGParameters.SPRING_ASYMMETRIC_DECRYPTION.copy()
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        decryption_parameters.extend(output_parameter)
-        return decryption_parameters
-
-    def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for symmetric encryption of spring files"""
-        encryption_parameters: list = GPGParameters.SPRING_SYMMETRIC_ENCRYPTION.copy()
-        encryption_parameters.append(str(self.temporary_passphrase))
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        encryption_parameters.extend(output_parameter)
-        return encryption_parameters
-
-    def get_symmetric_decryption_command(
-        self, input_file: Path, output_file: Path, encryption_key: Path
-    ) -> List[str]:
-        """Generates the gpg command for symmetric decryption"""
-        decryption_parameters: list = GPGParameters.SPRING_SYMMETRIC_DECRYPTION.copy()
-        decryption_parameters.append(str(encryption_key))
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        decryption_parameters.extend(output_parameter)
-        return decryption_parameters
 
     def spring_symmetric_encryption(self, spring_file_path: Path) -> None:
         """Symmetrically encrypts a spring file"""
