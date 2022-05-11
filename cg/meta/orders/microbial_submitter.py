@@ -74,7 +74,7 @@ class MicrobialSubmitter(Submitter):
         items: List[dict],
         ticket: int,
     ) -> [models.Sample]:
-        """Store microbial samples in the status database."""
+        """Store microbial samples in the status database"""
 
         sample_objs = []
 
