@@ -25,6 +25,8 @@ class MetagenomeSubmitter(Submitter):
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
+            data_analysis=Pipeline(status_data["data_analysis"]),
+            data_delivery=DataDelivery(status_data["data_delivery"]),
             items=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
@@ -36,12 +38,13 @@ class MetagenomeSubmitter(Submitter):
         status_data = {
             "customer": order.customer,
             "order": order.name,
+            "data_analysis": order.samples[0].data_analysis,
+            "data_delivery": order.samples[0].data_delivery,
             "samples": [
                 {
                     "application": sample.application,
                     "comment": sample.comment,
-                    "data_analysis": sample.data_analysis,
-                    "data_delivery": sample.data_delivery,
+                    "control": sample.control,
                     "name": sample.name,
                     "priority": sample.priority,
                     "volume": sample.volume,
@@ -52,7 +55,14 @@ class MetagenomeSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self,
+        customer: str,
+        data_analysis: Pipeline,
+        data_delivery: DataDelivery,
+        order: str,
+        ordered: dt.datetime,
+        ticket: int,
+        items: List[dict],
     ) -> List[models.Sample]:
         """Store samples in the status database."""
         customer_obj = self.status.customer(customer)
@@ -64,6 +74,7 @@ class MetagenomeSubmitter(Submitter):
             for sample in items:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
+                    control=sample["control"],
                     internal_id=sample.get("internal_id"),
                     name=sample["name"],
                     order=order,
@@ -81,8 +92,8 @@ class MetagenomeSubmitter(Submitter):
                 new_samples.append(new_sample)
 
                 new_case = self.status.add_case(
-                    data_analysis=Pipeline(sample["data_analysis"]),
-                    data_delivery=DataDelivery(sample["data_delivery"]),
+                    data_analysis=data_analysis,
+                    data_delivery=data_delivery,
                     name=sample["name"],
                     panels=None,
                     priority=sample["priority"],

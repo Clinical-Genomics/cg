@@ -12,6 +12,7 @@ from cg.models.orders.sample_base import (
     PriorityEnum,
     SexEnum,
     StatusEnum,
+    ControlEnum,
 )
 from cg.store import models
 
@@ -229,6 +230,7 @@ class MetagenomeSample(OrderInSample):
     concentration_sample: Optional[float]
     quantity: Optional[int]
     extraction_method: Optional[str]
+    control: Optional[ControlEnum]
 
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> Optional[int]:
