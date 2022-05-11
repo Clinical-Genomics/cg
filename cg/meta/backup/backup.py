@@ -177,7 +177,7 @@ class BackupApi:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
         """Query PDC for a given flow cell id"""
-        search_pattern = EncryptionDirsAndFiles.ENCRYPTynbDIR + ASTERISK + flow_cell_id + ASTERISK
+        search_pattern = EncryptionDirsAndFiles.ENCRYPT_DIR + ASTERISK + flow_cell_id + ASTERISK
         self.pdc.query_pdc(search_pattern=search_pattern)
         query: list = self.pdc.process.stdout.split(NEW_LINE)
         return query
