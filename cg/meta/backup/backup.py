@@ -14,6 +14,7 @@ from cg.constants.symbols import NEW_LINE, SPACE
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
 from cg.store import Store, models
 from cg.utils.time import get_elapsed_time, get_start_time
@@ -25,11 +26,17 @@ class BackupApi:
     """Class for retrieving FCs from backup"""
 
     def __init__(
-        self, encryption_api: EncryptionAPI, status: Store, pdc_api: PdcAPI, root_dir: dict
+        self,
+        encryption_api: EncryptionAPI,
+        status: Store,
+        tar_api: TarAPI,
+        pdc_api: PdcAPI,
+        root_dir: dict,
     ):
 
         self.encryption_api = encryption_api
         self.status: Store = status
+        self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
         self.root_dir: dict = root_dir
 
@@ -124,7 +131,7 @@ class BackupApi:
             LOG.debug(f"Decrypt flow cell command: {decryption_command}")
             self.encryption_api.run_gpg_command(decryption_command)
 
-            extraction_command = self.encryption_api.get_extract_file_command(
+            extraction_command = self.tar_api.get_extract_file_command(
                 input_file=decrypted_flow_cell, output_file=extraction_target_dir
             )
             LOG.debug(f"Extract flow cell command: {extraction_command}")

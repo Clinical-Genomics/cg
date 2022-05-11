@@ -11,6 +11,7 @@ from cg.constants.constants import DRY_RUN, FlowCellStatus, HousekeeperTags
 from cg.meta.backup.backup import BackupApi, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -23,9 +24,11 @@ def backup(context: CGConfig):
     """Backup utilities"""
     pdc_api = PdcAPI(binary_path=context.pdc.binary_path)
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path)
+    tar_api = TarAPI(binary_path=context.tar.binary_path)
     context.meta_apis["backup_api"] = BackupApi(
         encryption_api=encryption_api,
         status=context.status_db,
+        tar_api=tar_api,
         pdc_api=pdc_api,
         root_dir=context.backup.root.dict(),
     )

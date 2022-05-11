@@ -96,16 +96,6 @@ class EncryptionAPI:
         decryption_parameters.extend(output_parameter)
         return decryption_parameters
 
-    def get_extract_file_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for symmetric decryption"""
-        extraction_parameters: list = ExtractionParameters.EXTRACT_FILE.copy()
-        extraction_parameters.append(str(input_file))
-        exclude_files: list = ExtractionParameters.EXCLUDE_FILES.copy()
-        extraction_parameters.append(exclude_files)
-        target_directory_paramaters: list = ExtractionParameters.CHANGE_TO_DIR.copy()
-        extraction_parameters.extend([target_directory_paramaters, output_file])
-        return extraction_parameters
-
 
 class SpringEncryptionAPI(EncryptionAPI):
     """Encryption functionality for spring files"""
