@@ -79,7 +79,12 @@ class BackupApi:
             self.status.commit()
             LOG.info("%s: retrieving from PDC", flow_cell_obj.name)
 
-        pdc_flow_cell_query: list = self.query_pdc_for_flow_cell(flow_cell_obj.name)
+        try:
+            pdc_flow_cell_query: list = self.query_pdc_for_flow_cell(flow_cell_obj.name)
+        except subprocess.CalledProcessError as error:
+            LOG.error("PDC query failed: %s", error.stderr)
+            raise error
+
         archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
         LOG.debug(f"Archived flow cell: {archived_flow_cell}")
         decrypted_flow_cell: Path = archived_flow_cell.with_suffix(
