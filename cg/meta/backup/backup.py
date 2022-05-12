@@ -103,30 +103,6 @@ class BackupApi:
         start_time = get_start_time()
 
         try:
-            self.pdc.retrieve_flow_cell(
-                flow_cell=str(archived_flow_cell),
-                root_dir=str(root_dir),
-                dry_run=dry_run,
-            )
-            if not dry_run:
-                flow_cell_obj.status = FlowCellStatus.RETRIEVED
-                self.status.commit()
-                LOG.info(
-                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
-                )
-        except subprocess.CalledProcessError as error:
-            if error.returncode == RETURN_WARNING:
-                LOG.warning(
-                    "WARNING for retrieval of flow cell %s, please check dsmerror.log",
-                    flow_cell_obj.name,
-                )
-            else:
-                LOG.error("%s: retrieval failed", flow_cell_obj.name)
-                if not dry_run:
-                    flow_cell_obj.status = FlowCellStatus.REQUESTED
-                    self.status.commit()
-                raise error
-        try:
             self.pdc.retrieve_encryption_key(
                 encryption_key=str(encrypted_key),
                 root_dir=str(root_dir),
@@ -143,6 +119,30 @@ class BackupApi:
                 LOG.warning(
                     "WARNING for retrieval of encryption key of flow cell %s, please check "
                     "dsmerror.log",
+                    flow_cell_obj.name,
+                )
+            else:
+                LOG.error("%s: retrieval failed", flow_cell_obj.name)
+                if not dry_run:
+                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    self.status.commit()
+                raise error
+        try:
+            self.pdc.retrieve_flow_cell(
+                flow_cell=str(archived_flow_cell),
+                root_dir=str(root_dir),
+                dry_run=dry_run,
+            )
+            if not dry_run:
+                flow_cell_obj.status = FlowCellStatus.RETRIEVED
+                self.status.commit()
+                LOG.info(
+                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
+                )
+        except subprocess.CalledProcessError as error:
+            if error.returncode == RETURN_WARNING:
+                LOG.warning(
+                    "WARNING for retrieval of flow cell %s, please check dsmerror.log",
                     flow_cell_obj.name,
                 )
             else:
