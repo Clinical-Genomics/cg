@@ -25,10 +25,10 @@ class PdcAPI:
         encryption_key_target: str = self.get_target_path(root_dir=root_dir, file_=encryption_key)
 
         self.retrieve_file_from_pdc(
-            file_path=flow_cell, target_path=flow_cell_target, dry_run=dry_run
+            file_path=encryption_key, target_path=encryption_key_target, dry_run=dry_run
         )
         self.retrieve_file_from_pdc(
-            file_path=encryption_key, target_path=encryption_key_target, dry_run=dry_run
+            file_path=flow_cell, target_path=flow_cell_target, dry_run=dry_run
         )
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:

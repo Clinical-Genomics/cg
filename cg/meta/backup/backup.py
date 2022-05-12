@@ -11,6 +11,7 @@ from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.encryption import EncryptionDirsAndFiles
 from cg.constants.indexes import ListIndexes
+from cg.constants.process import RETURN_WARNING
 from cg.constants.symbols import ASTERISK, NEW_LINE, SPACE
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
@@ -115,11 +116,17 @@ class BackupApi:
                     "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
                 )
         except subprocess.CalledProcessError as error:
-            LOG.error("%s: retrieval failed", flow_cell_obj.name)
-            if not dry_run:
-                flow_cell_obj.status = FlowCellStatus.REQUESTED
-                self.status.commit()
-            raise error
+            if error.returncode == RETURN_WARNING:
+                LOG.warning(
+                    "WARNING for retrieval of flow cell %s, please check dsmerror.log",
+                    flow_cell_obj.name,
+                )
+            else:
+                LOG.error("%s: retrieval failed", flow_cell_obj.name)
+                if not dry_run:
+                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    self.status.commit()
+                raise error
         try:
             decryption_command = self.encryption_api.get_asymmetric_decryption_command(
                 input_file=encrypted_key, output_file=encryption_key
