@@ -7,4 +7,5 @@ class ListIndexes(Enum):
 
     FIRST: int = 0
     LAST: int = -1
-    PDC_PATH_COLUMN: int = 9
+    PDC_FC_COLUMN: int = 9
+    PDC_KEY_COLUMN: int = 20
