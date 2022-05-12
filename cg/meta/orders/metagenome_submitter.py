@@ -69,7 +69,7 @@ class MetagenomeSubmitter(Submitter):
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         new_samples = []
-
+        case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
         with self.status.session.no_autoflush:
             for sample in items:
                 new_sample = self.status.add_sample(
@@ -91,18 +91,19 @@ class MetagenomeSubmitter(Submitter):
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                new_case = self.status.add_case(
-                    data_analysis=data_analysis,
-                    data_delivery=data_delivery,
-                    name=sample["name"],
-                    panels=None,
-                    priority=sample["priority"],
-                )
-                new_case.customer = customer_obj
-                self.status.add(new_case)
+                if not case_obj:
+                    case_obj = self.status.add_case(
+                        data_analysis=data_analysis,
+                        data_delivery=data_delivery,
+                        name=str(ticket),
+                        panels=None,
+                        priority=sample["priority"],
+                    )
+                    case_obj.customer = customer_obj
+                    self.status.add(case_obj)
 
                 new_relationship = self.status.relate_sample(
-                    family=new_case, sample=new_sample, status=StatusEnum.unknown
+                    family=case_obj, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
 
