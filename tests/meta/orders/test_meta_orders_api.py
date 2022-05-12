@@ -524,7 +524,6 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     [
         OrderType.BALSAMIC,
         OrderType.FASTQ,
-        OrderType.METAGENOME,
         OrderType.MICROSALT,
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
