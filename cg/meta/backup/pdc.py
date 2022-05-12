@@ -17,18 +17,22 @@ class PdcAPI:
     def __init__(self, binary_path: str = None):
         self.process: Process = Process(binary=binary_path)
 
-    def retrieve_flow_cell(
-        self, flow_cell: str, encryption_key: str, root_dir: str, dry_run: bool = False
-    ) -> None:
-        """Fetch a flow cell back and it's encryption key from the backup solution"""
+    def retrieve_flow_cell(self, flow_cell: str, root_dir: str, dry_run: bool = False) -> None:
+        """Fetch a flow cell from the backup solution"""
         flow_cell_target: str = self.get_target_path(root_dir=root_dir, file_=flow_cell)
+
+        self.retrieve_file_from_pdc(
+            file_path=flow_cell, target_path=flow_cell_target, dry_run=dry_run
+        )
+
+    def retrieve_encryption_key(
+        self, encryption_key: str, root_dir: str, dry_run: bool = False
+    ) -> None:
+        """Fetch an encryption key from the backup solution"""
         encryption_key_target: str = self.get_target_path(root_dir=root_dir, file_=encryption_key)
 
         self.retrieve_file_from_pdc(
             file_path=encryption_key, target_path=encryption_key_target, dry_run=dry_run
-        )
-        self.retrieve_file_from_pdc(
-            file_path=flow_cell, target_path=flow_cell_target, dry_run=dry_run
         )
 
     def archive_file_to_pdc(self, file_path: str, dry_run: bool = False) -> None:
