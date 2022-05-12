@@ -9,10 +9,25 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
+from cg.models.orders.samples import OrderInSample, MetagenomeSample
 from cg.store import models
 
 
 class MetagenomeSubmitter(Submitter):
+    def validate_order(self, order: OrderIn) -> None:
+        self._validate_sample_names_are_unique(samples=order.samples, customer_id=order.customer)
+
+    def _validate_sample_names_are_unique(
+        self, samples: List[OrderInSample], customer_id: str
+    ) -> None:
+        """Validate that the names of all samples are unused"""
+        customer_obj: models.Customer = self.status.customer(customer_id)
+
+        sample: MetagenomeSample
+        for sample in samples:
+            if self.status.find_samples(customer=customer_obj, name=sample.name):
+                raise OrderError(f"Sample name {sample.name} already in use")
+
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of metagenome samples."""
         project_data, lims_map = process_lims(
