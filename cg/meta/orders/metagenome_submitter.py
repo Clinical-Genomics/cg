@@ -34,15 +34,13 @@ class MetagenomeSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map)
+        self._fill_in_sample_ids(status_data["families"][0]["samples"], lims_map)
         new_samples = self.store_items_in_status(
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=order.ticket,
-            data_analysis=Pipeline(status_data["data_analysis"]),
-            data_delivery=DataDelivery(status_data["data_delivery"]),
-            items=status_data["samples"],
+            ticket=int(order.ticket),
+            items=status_data["families"],
         )
         self._add_missing_reads(new_samples)
         return {"project": project_data, "records": new_samples}
@@ -50,30 +48,31 @@ class MetagenomeSubmitter(Submitter):
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
         """Convert order input to status for metagenome orders."""
-        status_data = {
+        return {
             "customer": order.customer,
             "order": order.name,
-            "data_analysis": order.samples[0].data_analysis,
-            "data_delivery": order.samples[0].data_delivery,
-            "samples": [
+            "families": [
                 {
-                    "application": sample.application,
-                    "comment": sample.comment,
-                    "control": sample.control,
-                    "name": sample.name,
-                    "priority": sample.priority,
-                    "volume": sample.volume,
+                    "data_analysis": order.samples[0].data_analysis,
+                    "data_delivery": order.samples[0].data_delivery,
+                    "samples": [
+                        {
+                            "application": sample.application,
+                            "comment": sample.comment,
+                            "control": sample.control,
+                            "name": sample.name,
+                            "priority": sample.priority,
+                            "volume": sample.volume,
+                        }
+                        for sample in order.samples
+                    ],
                 }
-                for sample in order.samples
             ],
         }
-        return status_data
 
     def store_items_in_status(
         self,
         customer: str,
-        data_analysis: Pipeline,
-        data_delivery: DataDelivery,
         order: str,
         ordered: dt.datetime,
         ticket: int,
@@ -86,7 +85,8 @@ class MetagenomeSubmitter(Submitter):
         new_samples = []
         case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
         with self.status.session.no_autoflush:
-            for sample in items:
+            case_dict: dict = items[0]
+            for sample in case_dict["samples"]:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
                     control=sample["control"],
@@ -108,8 +108,8 @@ class MetagenomeSubmitter(Submitter):
 
                 if not case_obj:
                     case_obj = self.status.add_case(
-                        data_analysis=data_analysis,
-                        data_delivery=data_delivery,
+                        data_analysis=case_dict["data_analysis"],
+                        data_delivery=case_dict["data_delivery"],
                         name=str(ticket),
                         panels=None,
                         priority=sample["priority"],
