@@ -88,15 +88,15 @@ class BackupApi:
 
         archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
         LOG.debug(f"Archived flow cell: {archived_flow_cell}")
-        decrypted_flow_cell: Path = Path(archived_flow_cell.stem)
+        decrypted_flow_cell: Path = archived_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
         LOG.debug(f"Decrypted flow cell: {decrypted_flow_cell}")
         encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
         LOG.debug(f"Encrypted key: {encrypted_key}")
-        encryption_key: Path = Path(encrypted_key).with_suffix(FileExtensions.KEY)
+        encryption_key: Path = encrypted_key.with_suffix(FileExtensions.NO_EXTENSION)
         LOG.debug(f"Encryption key: {encryption_key}")
         root_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
         LOG.debug(f"Root dir: {root_dir}")
-        extraction_target_dir = root_dir / decrypted_flow_cell.stem
+        extraction_target_dir = root_dir / Path(decrypted_flow_cell.stem).stem
         LOG.debug(f"Extraction target dir: {extraction_target_dir}")
 
         start_time = get_start_time()
