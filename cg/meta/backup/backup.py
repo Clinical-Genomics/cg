@@ -141,7 +141,8 @@ class BackupApi:
         except subprocess.CalledProcessError as error:
             if error.returncode == RETURN_WARNING:
                 LOG.warning(
-                    "WARNING for retrieval of encryption key of flow cell %s, please check dsmerror.log",
+                    "WARNING for retrieval of encryption key of flow cell %s, please check "
+                    "dsmerror.log",
                     flow_cell_obj.name,
                 )
             else:
@@ -166,7 +167,7 @@ class BackupApi:
             self.encryption_api.run_gpg_command(decryption_command)
 
             extraction_command = self.tar_api.get_extract_file_command(
-                input_file=decrypted_flow_cell, output_file=extraction_target_dir
+                input_file=decrypted_flow_cell, output_dir=root_dir
             )
             LOG.debug(f"Extract flow cell command: {extraction_command}")
             self.encryption_api.run_gpg_command(extraction_command)
