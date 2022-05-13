@@ -1235,6 +1235,7 @@ def fixture_context_config(
         },
         "encryption": {"binary_path": "bin/gpg"},
         "pdc": {"binary_path": "/bin/dsmc"},
+        "tar": {"binary_path": "/bin/tar"},
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
