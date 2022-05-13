@@ -175,7 +175,10 @@ class BackupApi:
             encryption_key.unlink()
         except subprocess.CalledProcessError as error:
             LOG.error("Decryption failed: %s", error.stderr)
-            return
+            if not dry_run:
+                flow_cell_obj.status = FlowCellStatus.REQUESTED
+                self.status.commit()
+            raise error
 
         return get_elapsed_time(start_time=start_time)
 
