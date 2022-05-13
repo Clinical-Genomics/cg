@@ -169,9 +169,9 @@ class BackupApi:
                 / DemultiplexingDirsAndFiles.RTACOMPLETE
             ).touch()
             LOG.debug(f"Unlink files")
-            archived_flow_cell.unlink()
+            retrieved_flow_cell.unlink()
             decrypted_flow_cell.unlink()
-            archived_key.unlink()
+            retrieved_key.unlink()
             encryption_key.unlink()
         except subprocess.CalledProcessError as error:
             LOG.error("Decryption failed: %s", error.stderr)
