@@ -92,7 +92,7 @@ class BackupApi:
         archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
         LOG.debug(f"Archived flow cell: {archived_flow_cell}")
         retrieved_flow_cell: Path = root_dir / archived_flow_cell.name
-        LOG.debug("Retrieved flow cell: {retrieved_flow_cell}")
+        LOG.debug(f"Retrieved flow cell: {retrieved_flow_cell}")
         decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
         LOG.debug(f"Decrypted flow cell: {decrypted_flow_cell}")
         encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
