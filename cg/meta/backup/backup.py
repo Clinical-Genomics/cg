@@ -88,29 +88,20 @@ class BackupApi:
             raise error
 
         root_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
-        LOG.debug(f"Root dir: {root_dir}")  # /home/proj/stage/flowcells/novaseq/runs
+        LOG.debug(f"Root dir: {root_dir}")
         archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
-        LOG.debug(
-            f"Archived flow cell: {archived_flow_cell}"
-        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.tar.gz.gpg
+        LOG.debug(f"Archived flow cell: {archived_flow_cell}")
         retrieved_flow_cell: Path = root_dir / archived_flow_cell.name
+        f"Retrieved flow cell: {retrieved_flow_cell}"
         decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
-        LOG.debug(
-            f"Decrypted flow cell: {decrypted_flow_cell}"
-        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.tar.gz
+        LOG.debug(f"Decrypted flow cell: {decrypted_flow_cell}")
         encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
-        LOG.debug(
-            f"Encrypted key: {encrypted_key}"
-        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.key.gpg
+        LOG.debug(f"Encrypted key: {encrypted_key}")
         retrieved_key: Path = root_dir / encrypted_key.name
         encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
-        LOG.debug(
-            f"Encryption key: {encryption_key}"
-        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.key
+        LOG.debug(f"Encryption key: {encryption_key}")
         extraction_target_dir = root_dir / Path(decrypted_flow_cell.stem).stem
-        LOG.debug(
-            f"Extraction target dir: {extraction_target_dir}"
-        )  # /home/proj/stage/flowcells/novaseq/runs/220325_A00621_0651_BH2MFNDRX2
+        LOG.debug(f"Extraction target dir: {extraction_target_dir}")
 
         start_time = get_start_time()
 
