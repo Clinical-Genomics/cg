@@ -18,7 +18,7 @@ class MetagenomeSubmitter(Submitter):
         self._validate_sample_names_are_unique(samples=order.samples, customer_id=order.customer)
 
     def _validate_sample_names_are_unique(
-        self, samples: List[OrderInSample], customer_id: str
+        self, samples: List[MetagenomeSample], customer_id: str
     ) -> None:
         """Validate that the names of all samples are unused"""
         customer_obj: models.Customer = self.status.customer(customer_id)
