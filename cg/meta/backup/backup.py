@@ -87,36 +87,25 @@ class BackupApi:
             LOG.error("PDC query failed: %s", error.stderr)
             raise error
 
-        root_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
-        LOG.debug(f"Root dir: {root_dir}")
+        run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
+        archived_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
         archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
-        LOG.debug(f"Archived flow cell: {archived_flow_cell}")
-        retrieved_flow_cell: Path = root_dir / archived_flow_cell.name
-        LOG.debug(f"Retrieved flow cell: {retrieved_flow_cell}")
-        decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
-        LOG.debug(f"Decrypted flow cell: {decrypted_flow_cell}")
-        encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
-        LOG.debug(f"Encrypted key: {encrypted_key}")
-        retrieved_key: Path = root_dir / encrypted_key.name
-        encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
-        LOG.debug(f"Encryption key: {encryption_key}")
-        extraction_target_dir = root_dir / Path(decrypted_flow_cell.stem).stem
-        LOG.debug(f"Extraction target dir: {extraction_target_dir}")
+        # retrieved_flow_cell: Path = run_dir / archived_flow_cell.name
+
+        # decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
+
+        # encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
+
+        # extraction_target_dir = run_dir / Path(decrypted_flow_cell.stem).stem
 
         start_time = get_start_time()
 
         try:
-            self.pdc.retrieve_encryption_key(
-                encryption_key=str(encrypted_key),
-                root_dir=str(root_dir),
+            self.retrieve_archived_file(
+                archived_file=archived_key,
+                run_dir=run_dir,
                 dry_run=dry_run,
             )
-            if not dry_run:
-                flow_cell_obj.status = FlowCellStatus.RETRIEVED
-                self.status.commit()
-                LOG.info(
-                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
-                )
         except subprocess.CalledProcessError as error:
             if error.returncode == RETURN_WARNING:
                 LOG.warning(
@@ -125,15 +114,16 @@ class BackupApi:
                     flow_cell_obj.name,
                 )
             else:
-                LOG.error("%s: retrieval failed", flow_cell_obj.name)
+                LOG.error("%s: key retrieval failed", flow_cell_obj.name)
                 if not dry_run:
                     flow_cell_obj.status = FlowCellStatus.REQUESTED
                     self.status.commit()
                 raise error
+
         try:
-            self.pdc.retrieve_flow_cell(
-                flow_cell=str(archived_flow_cell),
-                root_dir=str(root_dir),
+            self.retrieve_archived_file(
+                archived_file=archived_flow_cell,
+                run_dir=run_dir,
                 dry_run=dry_run,
             )
             if not dry_run:
@@ -149,40 +139,41 @@ class BackupApi:
                     flow_cell_obj.name,
                 )
             else:
-                LOG.error("%s: retrieval failed", flow_cell_obj.name)
+                LOG.error("%s: run directory retrieval failed", flow_cell_obj.name)
                 if not dry_run:
                     flow_cell_obj.status = FlowCellStatus.REQUESTED
                     self.status.commit()
                 raise error
-        try:
-            decryption_command = self.encryption_api.get_asymmetric_decryption_command(
-                input_file=encrypted_key, output_file=encryption_key
-            )
-            LOG.debug(f"Decrypt key command: {decryption_command}")
-            self.encryption_api.run_gpg_command(decryption_command)
 
-            decryption_command = self.encryption_api.get_symmetric_decryption_command(
-                input_file=archived_flow_cell,
-                output_file=decrypted_flow_cell,
-                encryption_key=encryption_key,
-            )
-            LOG.debug(f"Decrypt flow cell command: {decryption_command}")
-            self.encryption_api.run_gpg_command(decryption_command)
-
-            extraction_command = self.tar_api.get_extract_file_command(
-                input_file=decrypted_flow_cell, output_dir=root_dir
-            )
-            LOG.debug(f"Extract flow cell command: {extraction_command}")
-            self.encryption_api.run_gpg_command(extraction_command)
-            (extraction_target_dir / DemultiplexingDirsAndFiles.RTACOMPLETE).touch()
-            LOG.debug(f"Unlink files")
-            archived_flow_cell.unlink()
-            decrypted_flow_cell.unlink()
-            encrypted_key.unlink()
-            encryption_key.unlink()
-        except subprocess.CalledProcessError as error:
-            LOG.error("Decryption failed: %s", error.stderr)
-            return
+        # try:
+        #     decryption_command = self.encryption_api.get_asymmetric_decryption_command(
+        #         input_file=archived_key, output_file=encryption_key
+        #     )
+        #     LOG.debug(f"Decrypt key command: {decryption_command}")
+        #     self.encryption_api.run_gpg_command(decryption_command)
+        #
+        #     decryption_command = self.encryption_api.get_symmetric_decryption_command(
+        #         input_file=archived_flow_cell,
+        #         output_file=decrypted_flow_cell,
+        #         encryption_key=encryption_key,
+        #     )
+        #     LOG.debug(f"Decrypt flow cell command: {decryption_command}")
+        #     self.encryption_api.run_gpg_command(decryption_command)
+        #
+        #     extraction_command = self.tar_api.get_extract_file_command(
+        #         input_file=decrypted_flow_cell, output_dir=run_dir
+        #     )
+        #     LOG.debug(f"Extract flow cell command: {extraction_command}")
+        #     self.encryption_api.run_gpg_command(extraction_command)
+        #     (extraction_target_dir / DemultiplexingDirsAndFiles.RTACOMPLETE).touch()
+        #     LOG.debug(f"Unlink files")
+        #     archived_flow_cell.unlink()
+        #     decrypted_flow_cell.unlink()
+        #     archived_key.unlink()
+        #     encryption_key.unlink()
+        # except subprocess.CalledProcessError as error:
+        #     LOG.error("Decryption failed: %s", error.stderr)
+        #     return
 
         return get_elapsed_time(start_time=start_time)
 
@@ -214,10 +205,18 @@ class BackupApi:
         query: list = self.pdc.process.stdout.split(NEW_LINE)
         return query
 
-    @staticmethod
-    def get_target_path(root_dir: str, file_: str) -> str:
-        """Determines the target path for PDC retrieval"""
-        return str(Path(root_dir) / Path(file_).name)
+    # @staticmethod
+    # def get_target_path(root_dir: str, file_: str) -> str:
+    #     """Determines the target path for PDC retrieval"""
+    #     return str(Path(root_dir) / Path(file_).name)
+
+    def retrieve_archived_file(self, archived_file: Path, run_dir: Path, dry_run: bool) -> None:
+        """Retrieve the archived file from PDC to a flow cell runs directory"""
+        retrieved_file: Path = run_dir / archived_file.name
+        LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
+        self.pdc.retrieve_file_from_pdc(
+            file_path=str(archived_file), target_path=str(retrieved_file), dry_run=dry_run
+        )
 
 
 class SpringBackupAPI:
