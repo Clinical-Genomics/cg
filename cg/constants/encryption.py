@@ -58,20 +58,6 @@ class GPGParameters(ListEnum):
     ]
 
 
-class ExtractionParameters(ListEnum):
-    EXTRACT_FILE: list = [
-        "-xf",
-    ]
-    EXCLUDE_FILES: list = [
-        "--exclude=RTAComplete.txt",
-        "--exclude=demuxstarted.txt",
-        "--exclude=Thumbnail_Images",
-    ]
-    CHANGE_TO_DIR: list = [
-        "-C",
-    ]
-
-
 class EncryptionDirsAndFiles(StrEnum):
     """Encryption related dirs and files"""
 

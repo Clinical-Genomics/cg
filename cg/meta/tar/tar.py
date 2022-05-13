@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cg.constants.encryption import ExtractionParameters
+from cg.constants.extraction import FlowCellExtractionParameters
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -25,10 +25,11 @@ class TarAPI:
     @staticmethod
     def get_extract_file_command(input_file: Path, output_dir: Path) -> List[str]:
         """Generates the Tar command for flow cel run directory extraction"""
-        extraction_parameters: list = ExtractionParameters.EXTRACT_FILE.copy()
+        extraction_parameters: list = FlowCellExtractionParameters.EXTRACT_FILE.copy()
         extraction_parameters.append(str(input_file))
-        exclude_files: list = ExtractionParameters.EXCLUDE_FILES.copy()
-        extraction_parameters.append(exclude_files)
-        target_directory_parameters: list = ExtractionParameters.CHANGE_TO_DIR.copy()
-        extraction_parameters.extend([target_directory_parameters, output_dir])
+        exclude_files: list = FlowCellExtractionParameters.EXCLUDE_FILES.copy()
+        extraction_parameters.extend(exclude_files)
+        target_directory_parameters: list = FlowCellExtractionParameters.CHANGE_TO_DIR.copy()
+        extraction_parameters.extend(target_directory_parameters)
+        extraction_parameters.append(output_dir)
         return extraction_parameters

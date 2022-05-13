@@ -9,7 +9,8 @@ from typing import List
 from housekeeper.store import models as hk_models
 
 from cg.constants import FileExtensions
-from cg.constants.encryption import ExtractionParameters, GPGParameters
+from cg.constants.encryption import GPGParameters
+from cg.constants.extraction import FlowCellExtractionParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
