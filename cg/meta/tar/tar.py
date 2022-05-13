@@ -16,15 +16,15 @@ class TarAPI:
         self.process: Process = Process(binary=binary_path)
         self.dry_run: bool = dry_run
 
-    def run_gpg_command(self, command: list) -> None:
-        """Runs a GPG command"""
-        LOG.info("Starting GPG command:")
+    def run_tar_command(self, command: list) -> None:
+        """Runs a Tar command"""
+        LOG.info("Starting Tar command:")
         LOG.info(f"{self.process.binary} {' '.join(command)}")
         self.process.run_command(command, dry_run=self.dry_run)
 
     @staticmethod
     def get_extract_file_command(input_file: Path, output_dir: Path) -> List[str]:
-        """Generates the gpg command for symmetric decryption"""
+        """Generates the Tar command for flow cel run directory extraction"""
         extraction_parameters: list = ExtractionParameters.EXTRACT_FILE.copy()
         extraction_parameters.append(str(input_file))
         exclude_files: list = ExtractionParameters.EXCLUDE_FILES.copy()
