@@ -207,11 +207,6 @@ class BackupApi:
         query: list = self.pdc.process.stdout.split(NEW_LINE)
         return query
 
-    # @staticmethod
-    # def get_target_path(root_dir: str, file_: str) -> str:
-    #     """Determines the target path for PDC retrieval"""
-    #     return str(Path(root_dir) / Path(file_).name)
-
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path, dry_run: bool) -> None:
         """Retrieve the archived file from PDC to a flow cell runs directory"""
         retrieved_file: Path = run_dir / archived_file.name

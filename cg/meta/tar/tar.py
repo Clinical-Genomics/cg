@@ -31,5 +31,5 @@ class TarAPI:
         extraction_parameters.extend(exclude_files)
         target_directory_parameters: list = FlowCellExtractionParameters.CHANGE_TO_DIR.copy()
         extraction_parameters.extend(target_directory_parameters)
-        extraction_parameters.append(output_dir)
+        extraction_parameters.append(str(output_dir))
         return extraction_parameters
