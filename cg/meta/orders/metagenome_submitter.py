@@ -110,8 +110,8 @@ class MetagenomeSubmitter(Submitter):
 
                 if not case_obj:
                     case_obj = self.status.add_case(
-                        data_analysis=case_dict["data_analysis"],
-                        data_delivery=case_dict["data_delivery"],
+                        data_analysis=Pipeline(case_dict["data_analysis"]),
+                        data_delivery=DataDelivery(case_dict["data_delivery"]),
                         name=str(ticket),
                         panels=None,
                         priority=sample["priority"],
