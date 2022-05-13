@@ -93,50 +93,9 @@ class BackupApi:
 
         start_time = get_start_time()
 
-        try:
-            self.retrieve_archived_file(
-                archived_file=archived_key,
-                run_dir=run_dir,
-                dry_run=dry_run,
-            )
-        except subprocess.CalledProcessError as error:
-            if error.returncode == RETURN_WARNING:
-                LOG.warning(
-                    "WARNING for retrieval of encryption key of flow cell %s, please check "
-                    "dsmerror.log",
-                    flow_cell_obj.name,
-                )
-            else:
-                LOG.error("%s: key retrieval failed", flow_cell_obj.name)
-                if not dry_run:
-                    flow_cell_obj.status = FlowCellStatus.REQUESTED
-                    self.status.commit()
-                raise error
+        self.retrieve_archived_key(archived_key, dry_run, flow_cell_obj, run_dir)
 
-        try:
-            self.retrieve_archived_file(
-                archived_file=archived_flow_cell,
-                run_dir=run_dir,
-                dry_run=dry_run,
-            )
-            if not dry_run:
-                flow_cell_obj.status = FlowCellStatus.RETRIEVED
-                self.status.commit()
-                LOG.info(
-                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
-                )
-        except subprocess.CalledProcessError as error:
-            if error.returncode == RETURN_WARNING:
-                LOG.warning(
-                    "WARNING for retrieval of flow cell %s, please check dsmerror.log",
-                    flow_cell_obj.name,
-                )
-            else:
-                LOG.error("%s: run directory retrieval failed", flow_cell_obj.name)
-                if not dry_run:
-                    flow_cell_obj.status = FlowCellStatus.REQUESTED
-                    self.status.commit()
-                raise error
+        self.retrieve_archived_flow_cell(archived_flow_cell, dry_run, flow_cell_obj, run_dir)
 
         try:
             retrieved_key = run_dir / archived_key.name
@@ -182,6 +141,74 @@ class BackupApi:
 
         return get_elapsed_time(start_time=start_time)
 
+    def retrieve_archived_key(
+        self, archived_key: Path, dry_run: bool, flow_cell_obj: models.Flowcell, run_dir: Path
+    ) -> None:
+        """Attempt to retrieve an archived key"""
+        try:
+            self.retrieve_archived_file(
+                archived_file=archived_key,
+                run_dir=run_dir,
+                dry_run=dry_run,
+            )
+        except subprocess.CalledProcessError as error:
+            if error.returncode == RETURN_WARNING:
+                LOG.warning(
+                    "WARNING for retrieval of encryption key of flow cell %s, please check "
+                    "dsmerror.log",
+                    flow_cell_obj.name,
+                )
+            else:
+                LOG.error("%s: key retrieval failed", flow_cell_obj.name)
+                if not dry_run:
+                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    self.status.commit()
+                raise error
+
+    def retrieve_archived_flow_cell(
+        self, archived_flow_cell: Path, dry_run: bool, flow_cell_obj: models.Flowcell, run_dir: Path
+    ):
+        """Attempt to retrieve an archived flow cell"""
+        try:
+            self.retrieve_archived_file(
+                archived_file=archived_flow_cell,
+                run_dir=run_dir,
+                dry_run=dry_run,
+            )
+            if not dry_run:
+                flow_cell_obj.status = FlowCellStatus.RETRIEVED
+                self.status.commit()
+                LOG.info(
+                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
+                )
+        except subprocess.CalledProcessError as error:
+            if error.returncode == RETURN_WARNING:
+                LOG.warning(
+                    "WARNING for retrieval of flow cell %s, please check dsmerror.log",
+                    flow_cell_obj.name,
+                )
+            else:
+                LOG.error("%s: run directory retrieval failed", flow_cell_obj.name)
+                if not dry_run:
+                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    self.status.commit()
+                raise error
+
+    def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
+        """Query PDC for a given flow cell id"""
+        search_pattern = EncryptionDirsAndFiles.ENCRYPT_DIR + ASTERISK + flow_cell_id + ASTERISK
+        self.pdc.query_pdc(search_pattern=search_pattern)
+        query: list = self.pdc.process.stdout.split(NEW_LINE)
+        return query
+
+    def retrieve_archived_file(self, archived_file: Path, run_dir: Path, dry_run: bool) -> None:
+        """Retrieve the archived file from PDC to a flow cell runs directory"""
+        retrieved_file: Path = run_dir / archived_file.name
+        LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
+        self.pdc.retrieve_file_from_pdc(
+            file_path=str(archived_file), target_path=str(retrieved_file), dry_run=dry_run
+        )
+
     @staticmethod
     def get_archived_flow_cell(query: list) -> Path:
         """Get the path of the archived flow cell from a PDC query"""
@@ -202,21 +229,6 @@ class BackupApi:
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
         return Path(encryption_key_query.split(SPACE)[ListIndexes.PDC_KEY_COLUMN.value])
-
-    def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
-        """Query PDC for a given flow cell id"""
-        search_pattern = EncryptionDirsAndFiles.ENCRYPT_DIR + ASTERISK + flow_cell_id + ASTERISK
-        self.pdc.query_pdc(search_pattern=search_pattern)
-        query: list = self.pdc.process.stdout.split(NEW_LINE)
-        return query
-
-    def retrieve_archived_file(self, archived_file: Path, run_dir: Path, dry_run: bool) -> None:
-        """Retrieve the archived file from PDC to a flow cell runs directory"""
-        retrieved_file: Path = run_dir / archived_file.name
-        LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
-        self.pdc.retrieve_file_from_pdc(
-            file_path=str(archived_file), target_path=str(retrieved_file), dry_run=dry_run
-        )
 
 
 class SpringBackupAPI:
