@@ -20,6 +20,7 @@ class PdcAPI:
     def retrieve_flow_cell(self, flow_cell: str, root_dir: str, dry_run: bool = False) -> None:
         """Fetch a flow cell from the backup solution"""
         flow_cell_target: str = self.get_target_path(root_dir=root_dir, file_=flow_cell)
+        LOG.debug(f"Flow cell key target: {flow_cell_target}")
 
         self.retrieve_file_from_pdc(
             file_path=flow_cell, target_path=flow_cell_target, dry_run=dry_run
@@ -30,6 +31,7 @@ class PdcAPI:
     ) -> None:
         """Fetch an encryption key from the backup solution"""
         encryption_key_target: str = self.get_target_path(root_dir=root_dir, file_=encryption_key)
+        LOG.debug(f"Encryption key target: {encryption_key_target}")
 
         self.retrieve_file_from_pdc(
             file_path=encryption_key, target_path=encryption_key_target, dry_run=dry_run
@@ -63,8 +65,3 @@ class PdcAPI:
         LOG.debug("Starting DSMC command:")
         LOG.debug(f"{self.process.binary} {' '.join(command)}")
         self.process.run_command(parameters=command, dry_run=dry_run)
-
-    @staticmethod
-    def get_target_path(root_dir: str, file_: str) -> str:
-        """Determines the target path for PDC retrieval"""
-        return str(Path(root_dir) / Path(file_).name)

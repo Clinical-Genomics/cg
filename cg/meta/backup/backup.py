@@ -87,18 +87,30 @@ class BackupApi:
             LOG.error("PDC query failed: %s", error.stderr)
             raise error
 
-        archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
-        LOG.debug(f"Archived flow cell: {archived_flow_cell}")
-        decrypted_flow_cell: Path = archived_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
-        LOG.debug(f"Decrypted flow cell: {decrypted_flow_cell}")
-        encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
-        LOG.debug(f"Encrypted key: {encrypted_key}")
-        encryption_key: Path = encrypted_key.with_suffix(FileExtensions.NO_EXTENSION)
-        LOG.debug(f"Encryption key: {encryption_key}")
         root_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
-        LOG.debug(f"Root dir: {root_dir}")
+        LOG.debug(f"Root dir: {root_dir}")  # /home/proj/stage/flowcells/novaseq/runs
+        archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
+        LOG.debug(
+            f"Archived flow cell: {archived_flow_cell}"
+        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.tar.gz.gpg
+        retrieved_flow_cell: Path = root_dir / archived_flow_cell.name
+        decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
+        LOG.debug(
+            f"Decrypted flow cell: {decrypted_flow_cell}"
+        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.tar.gz
+        encrypted_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
+        LOG.debug(
+            f"Encrypted key: {encrypted_key}"
+        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.key.gpg
+        retrieved_key: Path = root_dir / encrypted_key.name
+        encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
+        LOG.debug(
+            f"Encryption key: {encryption_key}"
+        )  # /home/hiseq.clinical/ENCRYPT/220325_A00621_0651_BH2MFNDRX2.key
         extraction_target_dir = root_dir / Path(decrypted_flow_cell.stem).stem
-        LOG.debug(f"Extraction target dir: {extraction_target_dir}")
+        LOG.debug(
+            f"Extraction target dir: {extraction_target_dir}"
+        )  # /home/proj/stage/flowcells/novaseq/runs/220325_A00621_0651_BH2MFNDRX2
 
         start_time = get_start_time()
 
@@ -210,6 +222,11 @@ class BackupApi:
         self.pdc.query_pdc(search_pattern=search_pattern)
         query: list = self.pdc.process.stdout.split(NEW_LINE)
         return query
+
+    @staticmethod
+    def get_target_path(root_dir: str, file_: str) -> str:
+        """Determines the target path for PDC retrieval"""
+        return str(Path(root_dir) / Path(file_).name)
 
 
 class SpringBackupAPI:
