@@ -57,6 +57,7 @@ class MetagenomeSubmitter(Submitter):
                 {
                     "data_analysis": order.samples[0].data_analysis,
                     "data_delivery": order.samples[0].data_delivery,
+                    "priority": order.samples[0].priority,
                     "samples": [
                         {
                             "application": sample.application,
@@ -86,9 +87,9 @@ class MetagenomeSubmitter(Submitter):
             raise OrderError(f"unknown customer: {customer}")
         new_samples = []
         case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
+        case: dict = items[0]
         with self.status.session.no_autoflush:
-            case_dict: dict = items[0]
-            for sample in case_dict["samples"]:
+            for sample in case["samples"]:
                 new_sample = self.status.add_sample(
                     comment=sample["comment"],
                     control=sample["control"],
@@ -110,11 +111,11 @@ class MetagenomeSubmitter(Submitter):
 
                 if not case_obj:
                     case_obj = self.status.add_case(
-                        data_analysis=Pipeline(case_dict["data_analysis"]),
-                        data_delivery=DataDelivery(case_dict["data_delivery"]),
+                        data_analysis=Pipeline(case["data_analysis"]),
+                        data_delivery=DataDelivery(case["data_delivery"]),
                         name=str(ticket),
                         panels=None,
-                        priority=sample["priority"],
+                        priority=case["priority"],
                     )
                     case_obj.customer = customer_obj
                     self.status.add(case_obj)
