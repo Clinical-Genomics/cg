@@ -51,7 +51,7 @@ class PdcAPI:
         self.run_dsmc_command(command=command, dry_run=dry_run)
 
     def retrieve_file_from_pdc(
-        self, file_path: str, target_path: str, dry_run: bool = False
+        self, file_path: str, target_path: str = None, dry_run: bool = False
     ) -> None:
         """Retrieve a file from PDC"""
         command: list = DSMCParameters.RETRIEVE_COMMAND.copy()

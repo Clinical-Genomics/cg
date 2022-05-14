@@ -8,7 +8,7 @@ import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus, HousekeeperTags
-from cg.meta.backup.backup import BackupApi, SpringBackupAPI
+from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
@@ -25,7 +25,7 @@ def backup(context: CGConfig):
     pdc_api = PdcAPI(binary_path=context.pdc.binary_path)
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path)
     tar_api = TarAPI(binary_path=context.tar.binary_path)
-    context.meta_apis["backup_api"] = BackupApi(
+    context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
         status=context.status_db,
         tar_api=tar_api,
@@ -41,7 +41,7 @@ def backup(context: CGConfig):
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
     """Fetch the first flow cell in the requested queue from backup"""
     status_api: Store = context.status_db
-    backup_api: BackupApi = context.meta_apis["backup_api"]
+    backup_api: BackupAPI = context.meta_apis["backup_api"]
 
     flow_cell_obj: Optional[models.Flowcell] = None
     if flow_cell:

@@ -3,7 +3,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.cli.backup import backup, fetch_flow_cell
-from cg.meta.backup.backup import BackupApi
+from cg.meta.backup.backup import BackupAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -19,7 +19,7 @@ def test_run_backup_base_cmd(cli_runner: CliRunner, cg_context: CGConfig):
     # THEN assert that the command exits without any problems
     assert result.exit_code == 0
     # THEN assert that the BackupAPI was instantiated and added
-    assert isinstance(cg_context.meta_apis["backup_api"], BackupApi)
+    assert isinstance(cg_context.meta_apis["backup_api"], BackupAPI)
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
@@ -50,7 +50,7 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
     assert not backup_context.status_db.flowcells(status="requested").first()
     # GIVEN that the backup api returns a retrieval time
     expected_time = 60
-    mocker.patch("cg.meta.backup.backup.BackupApi.fetch_flow_cell", return_value=expected_time)
+    mocker.patch("cg.meta.backup.backup.BackupAPI.fetch_flow_cell", return_value=expected_time)
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
     result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)

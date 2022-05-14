@@ -24,7 +24,7 @@ from cg.utils.time import get_elapsed_time, get_start_time
 LOG = logging.getLogger(__name__)
 
 
-class BackupApi:
+class BackupAPI:
     """Class for retrieving FCs from backup"""
 
     def __init__(
@@ -98,40 +98,18 @@ class BackupApi:
         self.retrieve_archived_flow_cell(archived_flow_cell, dry_run, flow_cell_obj, run_dir)
 
         try:
-            retrieved_key = run_dir / archived_key.name
-            encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
-            decryption_command = self.encryption_api.get_asymmetric_decryption_command(
-                input_file=retrieved_key, output_file=encryption_key
-            )
-            LOG.debug(f"Decrypt key command: {decryption_command}")
-            self.encryption_api.run_gpg_command(decryption_command)
-
-            retrieved_flow_cell: Path = run_dir / archived_flow_cell.name
-            decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
-            decryption_command = self.encryption_api.get_symmetric_decryption_command(
-                input_file=retrieved_flow_cell,
-                output_file=decrypted_flow_cell,
-                encryption_key=encryption_key,
-            )
-            LOG.debug(f"Decrypt flow cell command: {decryption_command}")
-            self.encryption_api.run_gpg_command(decryption_command)
-
-            extraction_command = self.tar_api.get_extract_file_command(
-                input_file=decrypted_flow_cell, output_dir=run_dir
-            )
-            LOG.debug(f"Extract flow cell command: {extraction_command}")
-
-            self.tar_api.run_tar_command(extraction_command)
             (
-                run_dir
-                / Path(decrypted_flow_cell.stem).stem
-                / DemultiplexingDirsAndFiles.RTACOMPLETE
-            ).touch()
-            LOG.debug(f"Unlink files")
-            retrieved_flow_cell.unlink()
-            decrypted_flow_cell.unlink()
-            retrieved_key.unlink()
-            encryption_key.unlink()
+                decrypted_flow_cell,
+                encryption_key,
+                retrieved_flow_cell,
+                retrieved_key,
+            ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
+
+            self.extract_flow_cell(decrypted_flow_cell, run_dir)
+            self.create_rta_complete(decrypted_flow_cell, run_dir)
+            self.unlink_files(
+                decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
+            )
         except subprocess.CalledProcessError as error:
             LOG.error("Decryption failed: %s", error.stderr)
             if not dry_run:
@@ -140,6 +118,49 @@ class BackupApi:
             raise error
 
         return get_elapsed_time(start_time=start_time)
+
+    def unlink_files(self, decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key):
+        """Remove files after flow cell has been fetched from PDC"""
+        LOG.debug(f"Unlink files")
+        retrieved_flow_cell.unlink()
+        decrypted_flow_cell.unlink()
+        retrieved_key.unlink()
+        encryption_key.unlink()
+
+    @staticmethod
+    def create_rta_complete(decrypted_flow_cell, run_dir):
+        """Create an RTAComplete.txt file in the flow cell run directory"""
+        (
+            run_dir / Path(decrypted_flow_cell.stem).stem / DemultiplexingDirsAndFiles.RTACOMPLETE
+        ).touch()
+
+    def extract_flow_cell(self, decrypted_flow_cell, run_dir):
+        """Extract the flow cell tar archive"""
+        extraction_command = self.tar_api.get_extract_file_command(
+            input_file=decrypted_flow_cell, output_dir=run_dir
+        )
+        LOG.debug(f"Extract flow cell command: {extraction_command}")
+        self.tar_api.run_tar_command(extraction_command)
+
+    def decrypt_flow_cell(self, archived_flow_cell, archived_key, run_dir):
+        """Decrypt the flow cell"""
+        retrieved_key = run_dir / archived_key.name
+        encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
+        decryption_command = self.encryption_api.get_asymmetric_decryption_command(
+            input_file=retrieved_key, output_file=encryption_key
+        )
+        LOG.debug(f"Decrypt key command: {decryption_command}")
+        self.encryption_api.run_gpg_command(decryption_command)
+        retrieved_flow_cell: Path = run_dir / archived_flow_cell.name
+        decrypted_flow_cell: Path = retrieved_flow_cell.with_suffix(FileExtensions.NO_EXTENSION)
+        decryption_command = self.encryption_api.get_symmetric_decryption_command(
+            input_file=retrieved_flow_cell,
+            output_file=decrypted_flow_cell,
+            encryption_key=encryption_key,
+        )
+        LOG.debug(f"Decrypt flow cell command: {decryption_command}")
+        self.encryption_api.run_gpg_command(decryption_command)
+        return decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
 
     def retrieve_archived_key(
         self, archived_key: Path, dry_run: bool, flow_cell_obj: models.Flowcell, run_dir: Path
