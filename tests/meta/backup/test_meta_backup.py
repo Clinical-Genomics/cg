@@ -176,7 +176,6 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_get_first_flow_cell,
     mock_check_processing,
     mock_get_archived_key,
-    mock_get_archived_flow_cell,
     archived_key,
     archived_flow_cell,
     cg_context,
@@ -194,6 +193,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
         pdc_api=mock.Mock(),
         root_dir=cg_context.backup.root.dict(),
     )
+    # breakpoint()
 
     # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
     mock_flow_cell.status = FlowCellStatus.REQUESTED
@@ -607,14 +607,8 @@ def test_decrypt_and_retrieve_spring_file(
 
     # THEN the encrypted spring file AND the encrypted key should be retrieved
     calls = [
-        call(
-            file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value),
-            dry_run=False,
-        ),
-        call(
-            file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value),
-            dry_run=False,
-        ),
+        call(file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value)),
+        call(file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value)),
     ]
     mock_pdc_api.retrieve_file_from_pdc.assert_has_calls(calls)
 

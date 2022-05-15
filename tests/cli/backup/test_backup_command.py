@@ -2,24 +2,8 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.backup import backup, fetch_flow_cell
-from cg.meta.backup.backup import BackupAPI
+from cg.cli.backup import fetch_flow_cell
 from cg.models.cg_config import CGConfig
-
-
-def test_run_backup_base_cmd(cli_runner: CliRunner, cg_context: CGConfig):
-    # GIVEN a context with the backup specific configurations
-    assert cg_context.backup.root
-    # GIVEN that there is no backup meta api available
-    assert "backup_api" not in cg_context.meta_apis
-
-    # WHEN running the base command
-    result = cli_runner.invoke(backup, ["fetch-flow-cell", "--help"], obj=cg_context)
-
-    # THEN assert that the command exits without any problems
-    assert result.exit_code == 0
-    # THEN assert that the BackupAPI was instantiated and added
-    assert isinstance(cg_context.meta_apis["backup_api"], BackupAPI)
 
 
 def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(

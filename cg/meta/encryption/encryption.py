@@ -1,8 +1,8 @@
 """API for encryption on Hasta"""
 import hashlib
-from io import TextIOWrapper
 import logging
 import subprocess
+from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
@@ -115,7 +115,6 @@ class SpringEncryptionAPI(EncryptionAPI):
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
-        self._dry_run = dry_run
         self._temporary_passphrase = None
 
     def spring_symmetric_encryption(self, spring_file_path: Path) -> None:
@@ -230,15 +229,3 @@ class SpringEncryptionAPI(EncryptionAPI):
         if self._temporary_passphrase is None:
             self._temporary_passphrase: Path = self.generate_temporary_passphrase_file()
         return self._temporary_passphrase
-
-    @property
-    def dry_run(self) -> bool:
-        """Dry run property"""
-        LOG.debug("Encryption dry run property: %s", self._dry_run)
-        return self._dry_run
-
-    @dry_run.setter
-    def dry_run(self, value: bool) -> None:
-        """Set the dry run property"""
-        LOG.debug("Setting encryption dry run property to %s", value)
-        self._dry_run = value
