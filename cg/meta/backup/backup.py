@@ -88,8 +88,9 @@ class BackupAPI:
             raise error
 
         run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
-        archived_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
-        archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
+        if not self.dry_run:
+            archived_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
+            archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
 
         start_time = get_start_time()
 
