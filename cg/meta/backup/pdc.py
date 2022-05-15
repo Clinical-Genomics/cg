@@ -28,7 +28,9 @@ class PdcAPI:
         """Query PDC based on a given search pattern"""
         command: list = DSMCParameters.QUERY_COMMAND.copy()
         command.append(search_pattern)
-        self.run_dsmc_command(command=command)
+        LOG.debug("Starting DSMC command:")
+        LOG.debug(f"{self.process.binary} {' '.join(command)}")
+        self.process.run_command(parameters=command)
 
     def retrieve_file_from_pdc(self, file_path: str, target_path: str = None) -> None:
         """Retrieve a file from PDC"""
