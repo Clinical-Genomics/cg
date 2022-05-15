@@ -225,6 +225,14 @@ class BackupAPI:
                     "WARNING for retrieval of flow cell %s, please check dsmerror.log",
                     flow_cell_obj.name,
                 )
+                if not self.dry_run:
+                    flow_cell_obj.status = FlowCellStatus.RETRIEVED
+                    self.status.commit()
+                    LOG.info(
+                        "Status for flow cell %s set to %s",
+                        flow_cell_obj.name,
+                        flow_cell_obj.status,
+                    )
             else:
                 LOG.error("%s: run directory retrieval failed", flow_cell_obj.name)
                 if not self.dry_run:
