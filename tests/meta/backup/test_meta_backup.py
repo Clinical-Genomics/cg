@@ -8,7 +8,6 @@ import pytest
 from mock import call
 from tests.mocks.hk_mock import MockFile
 
-import cg.store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, FlowCellStatus
 from cg.constants.constants import Sequencers
@@ -16,7 +15,6 @@ from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
-from cg.meta.tar.tar import TarAPI
 
 
 @mock.patch("cg.store.Store")
@@ -336,6 +334,59 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
 
     # THEN the failure to retrieve is logged
     assert "retrieval failed" in caplog.text
+
+
+@mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
+@mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
+@mock.patch("cg.meta.backup.backup.BackupAPI.query_pdc_for_flow_cell")
+@mock.patch("cg.meta.tar.tar.TarAPI")
+@mock.patch("cg.store.models.Flowcell")
+@mock.patch("cg.store")
+def test_fetch_flow_cell_integration(
+    mock_store,
+    mock_flow_cell,
+    mock_tar,
+    mock_query,
+    archived_key,
+    archived_flow_cell,
+    cg_context,
+    pdc_query,
+    caplog,
+):
+    """Component integration test for the BackupAPI, fetching a specified flow cell"""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN we want to retrieve a specific flow cell from PDC
+    backup_api = BackupAPI(
+        encryption_api=mock.Mock(),
+        status=mock_store,
+        tar_api=mock_tar,
+        pdc_api=mock.Mock(),
+        root_dir=cg_context.backup.root.dict(),
+    )
+    mock_flow_cell.status = FlowCellStatus.REQUESTED
+    mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
+    mock_store.flowcells.return_value.count.return_value = 0
+    mock_query.return_value = pdc_query
+
+    backup_api.get_archived_encryption_key.return_value = archived_key
+    backup_api.get_archived_flow_cell.return_value = archived_flow_cell
+    backup_api.tar_api.run_tar_command.return_value = None
+    result = backup_api.fetch_flow_cell(mock_flow_cell)
+
+    # THEN the process to retrieve the flow cell from PDC is started
+    assert "retrieving from PDC" in caplog.text
+
+    # AND when done the status of that flow cell is set to "retrieved"
+    assert (
+        f"Status for flow cell {mock_flow_cell.name} set to {FlowCellStatus.RETRIEVED}"
+        in caplog.text
+    )
+    assert mock_flow_cell.status == "retrieved"
+
+    # AND status-db is updated with the new status
+    assert mock_store.commit.called
 
 
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")

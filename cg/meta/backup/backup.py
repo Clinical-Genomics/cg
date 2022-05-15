@@ -245,7 +245,6 @@ class BackupAPI:
     @staticmethod
     def get_archived_encryption_key(query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query"""
-
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
