@@ -87,38 +87,37 @@ class BackupAPI:
             LOG.error("PDC query failed: %s", error.stderr)
             raise error
 
-        run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
         if not self.dry_run:
+            run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
             archived_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
             archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
 
-        start_time = get_start_time()
+            start_time = get_start_time()
 
-        self.retrieve_archived_key(archived_key, flow_cell_obj, run_dir)
+            self.retrieve_archived_key(archived_key, flow_cell_obj, run_dir)
+            self.retrieve_archived_flow_cell(archived_flow_cell, flow_cell_obj, run_dir)
 
-        self.retrieve_archived_flow_cell(archived_flow_cell, flow_cell_obj, run_dir)
+            try:
+                (
+                    decrypted_flow_cell,
+                    encryption_key,
+                    retrieved_flow_cell,
+                    retrieved_key,
+                ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
 
-        try:
-            (
-                decrypted_flow_cell,
-                encryption_key,
-                retrieved_flow_cell,
-                retrieved_key,
-            ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
+                self.extract_flow_cell(decrypted_flow_cell, run_dir)
+                self.create_rta_complete(decrypted_flow_cell, run_dir)
+                self.unlink_files(
+                    decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
+                )
+            except subprocess.CalledProcessError as error:
+                LOG.error("Decryption failed: %s", error.stderr)
+                if not self.dry_run:
+                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    self.status.commit()
+                raise error
 
-            self.extract_flow_cell(decrypted_flow_cell, run_dir)
-            self.create_rta_complete(decrypted_flow_cell, run_dir)
-            self.unlink_files(
-                decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
-            )
-        except subprocess.CalledProcessError as error:
-            LOG.error("Decryption failed: %s", error.stderr)
-            if not self.dry_run:
-                flow_cell_obj.status = FlowCellStatus.REQUESTED
-                self.status.commit()
-            raise error
-
-        return get_elapsed_time(start_time=start_time)
+            return get_elapsed_time(start_time=start_time)
 
     def unlink_files(
         self,
