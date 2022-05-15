@@ -162,8 +162,8 @@ def test_fetch_flow_cell_no_flow_cells_requested(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
 @mock.patch("cg.meta.tar.tar.TarAPI")
@@ -200,8 +200,8 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
     backup_api.get_first_flow_cell.return_value = mock_flow_cell
     backup_api.check_processing.return_value = True
-    backup_api.get_archived_encryption_key.return_value = archived_key
-    backup_api.get_archived_flow_cell.return_value = archived_flow_cell
+    backup_api.get_archived_encryption_key_path.return_value = archived_key
+    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_flow_cell(flow_cell_obj=None)
 
@@ -224,8 +224,8 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
 @mock.patch("cg.meta.tar.tar.TarAPI")
@@ -259,8 +259,8 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
     backup_api.check_processing.return_value = True
-    backup_api.get_archived_encryption_key.return_value = archived_key
-    backup_api.get_archived_flow_cell.return_value = archived_flow_cell
+    backup_api.get_archived_encryption_key_path.return_value = archived_key
+    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_flow_cell(mock_flow_cell)
 
@@ -286,8 +286,8 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
 
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell")
-@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
 @mock.patch("cg.meta.backup.backup.BackupAPI.check_processing")
 @mock.patch("cg.meta.backup.backup.BackupAPI.get_first_flow_cell")
 @mock.patch("cg.meta.tar.tar.TarAPI")
@@ -323,8 +323,8 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
     backup_api.check_processing.return_value = True
-    backup_api.get_archived_encryption_key.return_value = archived_key
-    backup_api.get_archived_flow_cell.return_value = archived_flow_cell
+    backup_api.get_archived_encryption_key_path.return_value = archived_key
+    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
 
     # WHEN the retrieval process fails
@@ -370,8 +370,8 @@ def test_fetch_flow_cell_integration(
     mock_store.flowcells.return_value.count.return_value = 0
     mock_query.return_value = pdc_query
 
-    backup_api.get_archived_encryption_key.return_value = archived_key
-    backup_api.get_archived_flow_cell.return_value = archived_flow_cell
+    backup_api.get_archived_encryption_key_path.return_value = archived_key
+    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_flow_cell(mock_flow_cell)
 

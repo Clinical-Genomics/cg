@@ -87,8 +87,8 @@ class BackupAPI:
             LOG.error("PDC query failed: %s", error.stderr)
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key(pdc_flow_cell_query)
-        archived_flow_cell: Path = self.get_archived_flow_cell(pdc_flow_cell_query)
+        archived_key: Path = self.get_archived_encryption_key_path(pdc_flow_cell_query)
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(pdc_flow_cell_query)
 
         if not self.dry_run:
             start_time = get_start_time()
@@ -248,7 +248,7 @@ class BackupAPI:
         )
 
     @staticmethod
-    def get_archived_flow_cell(query: list) -> Path:
+    def get_archived_flow_cell_path(query: list) -> Path:
         """Get the path of the archived flow cell from a PDC query"""
         flow_cell_query: str = [
             row
@@ -257,15 +257,23 @@ class BackupAPI:
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        return Path(flow_cell_query.split(SPACE)[ListIndexes.PDC_FC_COLUMN.value])
+        archived_flow_cell_path = Path(
+            flow_cell_query.split(SPACE)[ListIndexes.PDC_FC_COLUMN.value]
+        )
+        LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
+        return archived_flow_cell_path
 
     @staticmethod
-    def get_archived_encryption_key(query: list) -> Path:
+    def get_archived_encryption_key_path(query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query"""
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        return Path(encryption_key_query.split(SPACE)[ListIndexes.PDC_KEY_COLUMN.value])
+        archived_encryption_key_path = Path(
+            encryption_key_query.split(SPACE)[ListIndexes.PDC_KEY_COLUMN.value]
+        )
+        LOG.info("Encryption key found: %s", str(archived_encryption_key_path))
+        return archived_encryption_key_path
 
 
 class SpringBackupAPI:
