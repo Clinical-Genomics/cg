@@ -388,6 +388,9 @@ def test_fetch_flow_cell_integration(
     # AND status-db is updated with the new status
     assert mock_store.commit.called
 
+    # AND the elapsed time of the retrieval process is returned
+    assert result > 0
+
 
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.is_spring_file_archived")
 @mock.patch("cg.meta.backup.backup.SpringBackupAPI.remove_archived_spring_file")

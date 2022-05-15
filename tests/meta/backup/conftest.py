@@ -35,7 +35,7 @@ def fixture_pdc_query() -> list:
         "Command Line Backup-Archive Client Interface",
         "  Client Version 7, Release 1, Level 4.0 ",
         "  Client date/time: 05/15/2022 11:43:55",
-        "(c) Copyright by IBM Corporation and other(s) 1990, 2015. All Rights " "Reserved.",
+        "(c) Copyright by IBM Corporation and other(s) 1990, 2015. All Rights Reserved.",
         "",
         "Node Name: HASTA.SCILIFELAB.SE_CLINICAL",
         "Session established with server BLACKHOLE: Linux/x86_64",
