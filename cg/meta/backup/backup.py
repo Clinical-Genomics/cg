@@ -129,22 +129,23 @@ class BackupAPI:
         """Remove files after flow cell has been fetched from PDC"""
         if not self.dry_run:
             LOG.debug(f"Unlink files")
+            message = "%s not found, skipping removal"
             try:
                 retrieved_flow_cell.unlink()
             except FileNotFoundError:
-                LOG.info("%s not found, skipping removal", str(retrieved_flow_cell))
+                LOG.info(message, str(retrieved_flow_cell))
             try:
                 decrypted_flow_cell.unlink()
             except FileNotFoundError:
-                LOG.info("%s not found, skipping removal", str(decrypted_flow_cell))
+                LOG.info(message, str(decrypted_flow_cell))
             try:
                 retrieved_key.unlink()
             except FileNotFoundError:
-                LOG.info("%s not found, skipping removal", str(retrieved_key))
+                LOG.info(message, str(retrieved_key))
             try:
                 encryption_key.unlink()
             except FileNotFoundError:
-                LOG.info("%s not found, skipping removal", str(encryption_key))
+                LOG.info(message, str(encryption_key))
 
     @staticmethod
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
