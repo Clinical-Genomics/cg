@@ -482,7 +482,7 @@ def test_submit_unique_sample_name(
 
 @pytest.mark.parametrize(
     "order_type",
-    [OrderType.SARS_COV_2],
+    [OrderType.SARS_COV_2, OrderType.METAGENOME],
 )
 def test_sarscov2_submit_duplicate_sample_name(
     all_orders_to_submit: dict,
@@ -524,7 +524,6 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     [
         OrderType.BALSAMIC,
         OrderType.FASTQ,
-        OrderType.METAGENOME,
         OrderType.MICROSALT,
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
