@@ -1,5 +1,4 @@
 """Code that handles CLI commands to upload"""
-import datetime as dt
 import logging
 import sys
 import traceback
@@ -8,11 +7,7 @@ from typing import Optional
 import click
 
 from cg.cli.upload.nipt import nipt
-from cg.constants import Pipeline, DataDelivery
-from cg.exc import AnalysisUploadError, CgError
-from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -36,6 +31,8 @@ from .scout import (
 )
 from .utils import suggest_cases_to_upload
 from .validate import validate
+from ...meta.upload.balsamic.balsamic import BalsamicUploadAPI
+from ...meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -45,112 +42,62 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-r",
     "--restart",
-    "force_restart",
     is_flag=True,
-    help="Force upload of analysis " "marked as started",
+    help="Force upload of an analysis that has already been uploaded or marked as started",
 )
 @click.pass_context
-def upload(context: click.Context, family_id: Optional[str], force_restart: bool):
-    """Upload results from analyses."""
+def upload(context: click.Context, family_id: Optional[str], restart: bool):
+    """Upload results from analyses"""
+
     config_object: CGConfig = context.obj
-    if not config_object.meta_apis.get("analysis_api"):
-        config_object.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-    analysis_api: AnalysisAPI = config_object.meta_apis["analysis_api"]
-    status_db: Store = config_object.status_db
+    upload_api = MipDNAUploadAPI(config=config_object)
 
-    click.echo(click.style("----------------- UPLOAD ----------------------"))
-
-    if family_id:
-        try:
-            analysis_api.verify_case_id_in_statusdb(case_id=family_id)
-        except CgError:
-            raise click.Abort
-
-        case_obj: models.Family = status_db.family(family_id)
-        if not case_obj.analyses:
-            message = f"no analysis exists for family: {family_id}"
-            click.echo(click.style(message, fg="red"))
-            raise click.Abort
-
-        analysis_obj: models.Analysis = case_obj.analyses[0]
-
-        if analysis_obj.uploaded_at is not None:
-            message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-            click.echo(click.style(message, fg="red"))
-            raise click.Abort
-
-        if not force_restart and analysis_obj.upload_started_at is not None:
-            if dt.datetime.now() - analysis_obj.upload_started_at > dt.timedelta(hours=24):
-                raise AnalysisUploadError(
-                    f"The upload started at {analysis_obj.upload_started_at} "
-                    f"something went wrong, restart it with the --restart flag"
-                )
-
-            message = f"analysis upload already started: {analysis_obj.upload_started_at.date()}"
-            click.echo(click.style(message, fg="yellow"))
-            return
-
-    context.obj.meta_apis["scout_upload_api"] = UploadScoutAPI(
-        hk_api=config_object.housekeeper_api,
-        scout_api=config_object.scout_api,
-        madeline_api=config_object.madeline_api,
-        analysis_api=analysis_api,
-        lims_api=config_object.lims_api,
-        status_db=status_db,
-    )
+    LOG.info("----------------- UPLOAD -----------------")
 
     if context.invoked_subcommand is not None:
-        return
+        context.obj.meta_apis["upload_api"] = upload_api
+    elif family_id:  # Provided case ID without a subcommand: upload everything
+        upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
+        case_obj: models.Family = upload_api.status_db.family(family_id)
+        upload_api.verify_analysis_upload(case_obj=case_obj, restart=restart)
 
-    if not family_id:
-        suggest_cases_to_upload(status_db=status_db)
-        raise click.Abort
+        # Update the upload API based on the data analysis type (MIP-DNA by default)
+        if case_obj.data_analysis == Pipeline.BALSAMIC:
+            upload_api = BalsamicUploadAPI(config=config_object)
 
-    case_obj: models.Family = status_db.family(family_id)
-    analysis_obj: models.Analysis = case_obj.analyses[0]
-    if analysis_obj.uploaded_at is not None:
-        message = f"analysis already uploaded: {analysis_obj.uploaded_at.date()}"
-        click.echo(click.style(message, fg="yellow"))
+        context.obj.meta_apis["upload_api"] = upload_api
+        upload_api.upload(ctx=context, case_obj=case_obj, restart=restart)
+        click.echo(click.style(f"{family_id} analysis has been successfully uploaded", fg="green"))
     else:
-        analysis_obj.upload_started_at = dt.datetime.now()
-        status_db.commit()
-        context.invoke(coverage, re_upload=True, family_id=family_id)
-        context.invoke(validate, family_id=family_id)
-        context.invoke(genotypes, re_upload=False, family_id=family_id)
-        context.invoke(observations, case_id=family_id)
-        if DataDelivery.SCOUT in case_obj.data_delivery:
-            context.invoke(scout, case_id=family_id)
-        analysis_obj.uploaded_at = dt.datetime.now()
-        status_db.commit()
-        click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
+        suggest_cases_to_upload(status_db=upload_api.status_db)
+        raise click.Abort()
 
 
 @upload.command()
 @click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
 @click.pass_context
 def auto(context: click.Context, pipeline: Pipeline = None):
-    """Upload all completed analyses."""
+    """Upload all completed analyses"""
+
+    LOG.info("----------------- AUTO -----------------")
 
     status_db: Store = context.obj.status_db
 
-    click.echo(click.style("----------------- AUTO ------------------------"))
-
     exit_code = 0
     for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
-
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
-                "Newer analysis already uploaded for %s, skipping",
-                analysis_obj.family.internal_id,
+                f"Skipping upload for case {analysis_obj.family.internal_id}. "
+                f"It has been already uploaded at {analysis_obj.family.analyses[0].uploaded_at}."
             )
             continue
-        internal_id = analysis_obj.family.internal_id
 
-        LOG.info("Uploading family: %s", internal_id)
+        case_id = analysis_obj.family.internal_id
+        LOG.info("Uploading analysis for case: %s", case_id)
         try:
-            context.invoke(upload, family_id=internal_id)
+            context.invoke(upload, case_id=case_id)
         except Exception:
-            LOG.error("Uploading family failed: %s", internal_id)
+            LOG.error(f"Case {case_id} upload failed")
             LOG.error(traceback.format_exc())
             exit_code = 1
 
