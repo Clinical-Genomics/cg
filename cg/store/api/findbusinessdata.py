@@ -1,10 +1,10 @@
 """Handler to find business data objects"""
 import datetime as dt
+import logging
 from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
-
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -207,6 +207,38 @@ class FindBusinessDataHandler(BaseHandler):
 
                 cases.add(case)
         return cases
+
+    def get_cases_from_ticket(self, ticket_id: int) -> Query:
+        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
+            models.Sample.ticket_number == ticket_id
+        )
+
+    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
+        """Returns the customer related to given ticket"""
+        return (
+            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
+            .first()
+            .customer.internal_id
+        )
+
+    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
+        return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
+
+    def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
+        logging.error("CALLED!!!11!")
+        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
+        if flowcell:
+            return flowcell.samples
+
+    def get_ticket_from_case(self, case_id: str):
+        """Returns the ticket from the most recent sample in a case"""
+        newest_sample: models.Sample = (
+            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.internal_id == case_id)
+            .order_by(models.Sample.created_at.desc())
+            .first()
+        )
+        return newest_sample.ticket_number
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> models.Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case"""
@@ -417,3 +449,11 @@ class FindBusinessDataHandler(BaseHandler):
             else records
         )
         return records.order_by(models.Sample.created_at.desc())
+
+    def get_case_pool(self, case_id: str) -> models.Pool:
+        case: models.Family = self.family(internal_id=case_id)
+        pool_name: str = case_id.split("-", 1)[-1]
+        return self.pools(customers=[case.customer], enquiry=pool_name).first()
+        # case_name =250497-2208730_NIPT
+        # ticket_id = 250497
+        # pool_name = 2208730_NIPT
