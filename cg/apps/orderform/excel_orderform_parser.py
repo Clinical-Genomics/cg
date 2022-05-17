@@ -28,7 +28,7 @@ class ExcelOrderformParser(OrderformParser):
         f"{Orderform.MICROSALT}:11",  # Microbial WGS
         f"{Orderform.RML}:14",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:10",  # Microbial meta genomes
-        f"{Orderform.SARS_COV_2}:6",  # Orderform SARS-CoV-2
+        f"{Orderform.SARS_COV_2}:7",  # Orderform SARS-CoV-2
     ]
     samples: List[ExcelSample] = []
 
