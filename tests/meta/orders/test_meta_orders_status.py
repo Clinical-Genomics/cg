@@ -253,9 +253,9 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 2
     assert base_store.samples().count() == 2
-    assert base_store.families().count() == 2
+    assert base_store.families().count() == 3
     first_sample = new_samples[0]
-    assert len(first_sample.links) == 1
+    assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
     assert family_link.family in base_store.families()
     for sample in new_samples:

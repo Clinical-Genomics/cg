@@ -100,14 +100,28 @@ class FastqSubmitter(Submitter):
                 data_analysis: Pipeline = self._get_fastq_pipeline(
                     application_version, new_sample.is_tumour
                 )
+                if data_analysis == Pipeline.MIP_DNA:
+                    new_case_maf = self.status.add_case(
+                        data_analysis=data_analysis,
+                        data_delivery=DataDelivery(sample["data_delivery"]),
+                        name=sample["name"],
+                        panels=["OMIM-AUTO"],
+                        priority="research",
+                    )
+                    new_case_maf.customer = production_customer
+                    self.status.add(new_case_maf)
+                    new_relationship_maf = self.status.relate_sample(
+                        family=new_case_maf, sample=new_sample, status=StatusEnum.unknown
+                    )
+                    self.status.add(new_relationship_maf)
                 new_case = self.status.add_case(
-                    data_analysis=data_analysis,
+                    data_analysis=Pipeline.FASTQ,
                     data_delivery=DataDelivery(sample["data_delivery"]),
                     name=sample["name"],
                     panels=["OMIM-AUTO"],
                     priority="research",
                 )
-                new_case.customer = production_customer
+                new_case.customer = customer_obj
                 self.status.add(new_case)
                 new_relationship = self.status.relate_sample(
                     family=new_case, sample=new_sample, status=StatusEnum.unknown

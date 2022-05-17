@@ -54,5 +54,5 @@ def store_available_fastq_analysis(context: click.Context, dry_run: bool = False
                 for link in case.links
             )
         )
-        if contains_rml or case.all_samples_pass_qc:
+        if status_db.get_case_pool(case_id=case.internal_id) or case.all_samples_pass_qc:
             context.invoke(store_fastq_analysis, case_id=case.internal_id, dry_run=dry_run)

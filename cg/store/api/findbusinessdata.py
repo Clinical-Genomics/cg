@@ -452,7 +452,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_case_pool(self, case_id: str) -> models.Pool:
         case: models.Family = self.family(internal_id=case_id)
-        pool_name: str = case_id.split("-", 1)[-1]
+        pool_name: str = case.name.split("-", 1)[-1]
         return self.pools(customers=[case.customer], enquiry=pool_name).first()
         # case_name =250497-2208730_NIPT
         # ticket_id = 250497
