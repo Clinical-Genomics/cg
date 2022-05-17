@@ -38,6 +38,7 @@ class ExcelSample(OrderSample):
     pool: str = Field(None, alias="UDF/pool name")
     post_formalin_fixation_time: str = Field(None, alias="UDF/Post Formalin Fixation Time")
     pre_processing_method: str = Field(None, alias="UDF/Pre Processing Method")
+    primer: str = Field(None, alias="UDF/primer")
     priority: str = Field(None, alias="UDF/priority")
     quantity: str = Field(None, alias="UDF/Quantity")
     reagent_label: str = Field(None, alias="Sample/Reagent Label")
