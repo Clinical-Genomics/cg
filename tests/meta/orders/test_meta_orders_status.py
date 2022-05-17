@@ -73,10 +73,10 @@ def test_metagenome_to_status(metagenome_order_to_submit):
 
     # WHEN parsing for status
     data = MetagenomeSubmitter.order_to_status(order=order)
-
+    case = data["families"][0]
     # THEN it should pick out samples and relevant information
-    assert len(data["samples"]) == 2
-    first_sample = data["samples"][0]
+    assert len(case["samples"]) == 2
+    first_sample = case["samples"][0]
     assert first_sample["name"] == "Bristol"
     assert first_sample["application"] == "METLIFR020"
     assert first_sample["priority"] == "standard"
@@ -550,7 +550,7 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        items=metagenome_status_data["samples"],
+        items=metagenome_status_data["families"],
     )
 
     # THEN it should store the samples
@@ -562,7 +562,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
-    for sample in metagenome_status_data["samples"]:
+    for sample in metagenome_status_data["families"][0]["samples"]:
         sample["application"] = "nonexistingtag"
 
     submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -575,7 +575,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            items=metagenome_status_data["samples"],
+            items=metagenome_status_data["families"],
         )
 
 
