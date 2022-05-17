@@ -4,11 +4,12 @@ from typing import List
 
 import pytest
 from cgmodels.cg.constants import Pipeline
-
+from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from tests.apps.scout.conftest import MockScoutApi
+from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
 from tests.mocks.report import MockChanjo, MockDB
@@ -26,11 +27,29 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
     return MipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
+@pytest.fixture(scope="function", name="report_api_balsamic")
+def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI:
+    """BALSAMIC ReportAPI fixture"""
+
+    cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
+    cg_context.status_db_ = MockDB(report_store)
+    cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
+    cg_context.scout_api_ = MockScoutApi(cg_context)
+    return BalsamicReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
+
+
 @pytest.fixture(scope="function", name="case_mip_dna")
 def case_mip_dna(case_id, report_api_mip_dna) -> models.Family:
     """MIP DNA case instance"""
 
     return report_api_mip_dna.status_db.family(case_id)
+
+
+@pytest.fixture(scope="function", name="case_balsamic")
+def case_balsamic(case_id, report_api_balsamic) -> models.Family:
+    """BALSAMIC case instance"""
+
+    return report_api_balsamic.status_db.family(case_id)
 
 
 @pytest.fixture(scope="function", name="case_samples_data")

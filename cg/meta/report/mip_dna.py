@@ -1,8 +1,6 @@
 import logging
 from typing import List, Union
 
-from cg.models.report.report import CaseModel
-
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
@@ -20,6 +18,7 @@ from cg.meta.report.api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import MipDNASampleMetadataModel
+from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store import models
@@ -39,23 +38,19 @@ class MipDNAReportAPI(ReportAPI):
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report"""
 
-        parsed_metrics = (
-            get_sample_id_metric(
-                sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
-            )
-            if analysis_metadata
-            else None
+        parsed_metrics = get_sample_id_metric(
+            sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
         )
         sample_coverage = self.get_sample_coverage(sample, case)
 
         return MipDNASampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
-            gender=parsed_metrics.predicted_sex if analysis_metadata else None,
+            gender=parsed_metrics.predicted_sex,
             million_read_pairs=round(sample.reads / 2000000, 1) if sample.reads else None,
-            mapped_reads=parsed_metrics.mapped_reads if analysis_metadata else None,
+            mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
             pct_10x=sample_coverage.get("mean_completeness"),
-            duplicates=parsed_metrics.duplicate_reads if analysis_metadata else None,
+            duplicates=parsed_metrics.duplicate_reads,
         )
 
     def get_sample_coverage(self, sample: models.Sample, case: models.Family) -> dict:
@@ -88,12 +83,19 @@ class MipDNAReportAPI(ReportAPI):
 
         return application.analysis_type
 
-    def get_genome_build(self, analysis_metadata: MipAnalysis) -> Union[None, str]:
+    def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case"""
 
-        return analysis_metadata.genome_build if analysis_metadata else None
+        return analysis_metadata.genome_build
 
-    def get_report_accreditation(self, samples: List[SampleModel]) -> Union[None, bool]:
+    def get_variant_callers(self, analysis_metadata: MipAnalysis = None) -> list:
+        """Extracts the list of variant-calling filters used during analysis"""
+
+        return []
+
+    def get_report_accreditation(
+        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
+    ) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations"""
 
         for sample in samples:
@@ -118,28 +120,6 @@ class MipDNAReportAPI(ReportAPI):
         }
 
     @staticmethod
-    def get_application_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample required fields"""
-
-        required_sample_fields = dict()
-
-        for application in case.applications:
-            required_sample_fields.update({application.tag: required_fields})
-
-        return required_sample_fields
-
-    @staticmethod
-    def get_sample_required_fields(case: CaseModel, required_fields: list) -> dict:
-        """Retrieves sample required fields"""
-
-        required_sample_fields = dict()
-
-        for sample in case.samples:
-            required_sample_fields.update({sample.id: required_fields})
-
-        return required_sample_fields
-
-    @staticmethod
     def get_sample_metadata_required_fields(case: CaseModel) -> dict:
         """Retrieves sample metadata required fields associated to a specific sample ID"""
 
@@ -148,7 +128,7 @@ class MipDNAReportAPI(ReportAPI):
         for sample in case.samples:
             required_fields = (
                 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS
-                if "wgs" in sample.application.tag.lower()
+                if "wgs" in sample.application.prep_category.lower()
                 else REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS
             )
 

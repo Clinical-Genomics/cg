@@ -3,13 +3,14 @@ import logging
 from pathlib import Path
 from typing import List
 
+from tests.cli.workflow.conftest import dna_case
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.store.conftest import fixture_sample_obj
+
 from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.meta.transfer.md5sum import check_md5sum, extract_md5sum
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.cli.workflow.conftest import dna_case
-from tests.store.conftest import fixture_sample_obj
+from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_nr: int):

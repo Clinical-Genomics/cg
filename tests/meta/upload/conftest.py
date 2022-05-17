@@ -59,7 +59,7 @@ def fixture_upload_genotypes_hk_bundle(
             {
                 "path": str(case_qc_metrics_deliverables),
                 "archive": False,
-                "tags": [HkMipAnalysisTag.QC_METRICS],
+                "tags": HkMipAnalysisTag.QC_METRICS,
             },
             {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
         ],

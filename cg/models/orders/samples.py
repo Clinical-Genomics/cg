@@ -1,7 +1,7 @@
 from typing import List
 
 from cgmodels.cg.constants import Pipeline
-from pydantic import BaseModel, constr, NonNegativeInt, validator
+from pydantic import BaseModel, constr, validator
 from pydantic.typing import Optional
 
 from cg.constants import DataDelivery
@@ -12,6 +12,7 @@ from cg.models.orders.sample_base import (
     PriorityEnum,
     SexEnum,
     StatusEnum,
+    ControlEnum,
 )
 from cg.store import models
 
@@ -68,7 +69,7 @@ class Of1508Sample(OrderInSample):
     ]
 
     # customer
-    age_at_sampling: Optional[str]
+    age_at_sampling: Optional[float]
     # "application": str,
     family_name: constr(
         regex=NAME_PATTERN,
@@ -81,6 +82,7 @@ class Of1508Sample(OrderInSample):
     sex: SexEnum = SexEnum.unknown
     tumour: bool = False
     source: Optional[str]
+    control: Optional[str]
     volume: Optional[str]
     container: Optional[ContainerEnum]
     # "required if plate for new samples"
@@ -106,6 +108,7 @@ class Of1508Sample(OrderInSample):
     cohorts: Optional[List[str]]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
+    require_qcok: bool = False
     quantity: Optional[int]
     subject_id: Optional[
         constr(
@@ -114,7 +117,7 @@ class Of1508Sample(OrderInSample):
     ]
     synopsis: Optional[str]
 
-    @validator("container", "container_name", "name", "source", "volume")
+    @validator("container", "container_name", "name", "source", "subject_id", "volume")
     def required_for_new_samples(cls, value, values, **kwargs):
         if not value and not values.get("internal_id"):
             raise ValueError("required for new sample '%s'" % (values.get("name")))
@@ -130,6 +133,14 @@ class Of1508Sample(OrderInSample):
     def str_to_int(cls, v: str) -> Optional[int]:
         return OptionalIntValidator.str_to_int(v=v)
 
+    @validator(
+        "age_at_sampling",
+        "volume",
+        pre=True,
+    )
+    def str_to_float(cls, v: str) -> Optional[float]:
+        return OptionalFloatValidator.str_to_float(v=v)
+
 
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
@@ -144,9 +155,12 @@ class BalsamicSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC
 
 
+class BalsamicUmiSample(Of1508Sample):
+    _suitable_project = OrderType.BALSAMIC_UMI
+
+
 class MipRnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_RNA
-    time_point: Optional[NonNegativeInt]
 
 
 class FastqSample(OrderInSample):
@@ -162,6 +176,8 @@ class FastqSample(OrderInSample):
     container_name: Optional[str]
     well_position: Optional[str]
     elution_buffer: str
+    # This information is required for panel analysis
+    capture_kit: Optional[str]
     # "Not Required"
     quantity: Optional[int]
 
@@ -214,6 +230,7 @@ class MetagenomeSample(OrderInSample):
     concentration_sample: Optional[float]
     quantity: Optional[int]
     extraction_method: Optional[str]
+    control: Optional[ControlEnum]
 
     @validator("quantity", pre=True)
     def str_to_int(cls, v: str) -> Optional[int]:

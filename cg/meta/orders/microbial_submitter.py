@@ -29,7 +29,6 @@ class MicrobialSubmitter(Submitter):
                     "application": sample.application,
                     "comment": sample.comment,
                     "control": sample.control,
-                    "data_delivery": sample.data_delivery,
                     "name": sample.name,
                     "organism_id": sample.organism,
                     "priority": sample.priority,
@@ -75,7 +74,7 @@ class MicrobialSubmitter(Submitter):
         items: List[dict],
         ticket: int,
     ) -> [models.Sample]:
-        """Store microbial samples in the status database."""
+        """Store microbial samples in the status database"""
 
         sample_objs = []
 
@@ -85,7 +84,7 @@ class MicrobialSubmitter(Submitter):
         with self.status.session.no_autoflush:
 
             for sample_data in items:
-                case_obj = self.status.find_family(customer=customer_obj, name=ticket)
+                case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
 
                 if not case_obj:
                     case_obj = self.status.add_case(
@@ -117,7 +116,6 @@ class MicrobialSubmitter(Submitter):
                     comment=sample_data["comment"],
                     control=sample_data["control"],
                     customer=customer_obj,
-                    data_delivery=sample_data["data_delivery"],
                     internal_id=sample_data.get("internal_id"),
                     name=sample_data["name"],
                     order=order,
