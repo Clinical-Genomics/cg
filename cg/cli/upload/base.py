@@ -95,7 +95,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading analysis for case: %s", case_id)
         try:
-            context.invoke(upload, case_id=case_id)
+            context.invoke(upload, family_id=case_id)
         except Exception:
             LOG.error(f"Case {case_id} upload failed")
             LOG.error(traceback.format_exc())
