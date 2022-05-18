@@ -370,6 +370,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return {
             "case_id": case_id,
+            "analysis_workflow": self.pipeline,
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -517,6 +518,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
                 "--case-id": arguments.get("case_id"),
+                "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),
