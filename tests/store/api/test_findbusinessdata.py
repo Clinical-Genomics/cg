@@ -6,6 +6,7 @@ import pytest
 from cg.store import Store, models
 from cgmodels.cg.constants import Pipeline
 from tests.store_helpers import StoreHelpers
+from tests.store.api.conftest import fixture_rml_pool_store
 
 
 def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
@@ -133,3 +134,33 @@ def test_get_latest_flow_cell_on_case(
 
     # THEN the fetched flow cell should have the same name as the other
     assert latest_flow_cell_obj.name == latest_flow_cell_on_case.name
+
+
+def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_nr):
+    """Tests if the function in fact returns the correct customer"""
+    # Given a store with a ticket
+
+    # Then the function should return the customer connected to the ticket
+    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == customer_id
+
+
+def test_get_ticket_from_case(case_id: str, analysis_store_single_case, ticket_nr: int):
+    """Tests if the correct ticket is returned for the given case"""
+    # GIVEN a populated store with a case
+
+    # WHEN the function is called
+    ticket_from_case: int = analysis_store_single_case.get_ticket_from_case(case_id=case_id)
+
+    # THEN the ticket should be correct
+    assert ticket_nr == ticket_from_case
+
+
+def test_get_case_pool(case_id: str, rml_pool_store: Store):
+    """Tests if the correct pool is returned"""
+    # GIVEN a case connected to a pool
+    case_name = rml_pool_store.family(internal_id=case_id).name
+    # WHEN the function is called
+    pool = rml_pool_store.get_case_pool(case_id=case_id)
+    # THEN the correct pool should be returned and the pool name should be the last part of the
+    # case name
+    assert pool.name == case_name.split("-", 1)[-1]
