@@ -451,9 +451,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(models.Sample.created_at.desc())
 
     def get_case_pool(self, case_id: str) -> models.Pool:
+        """Returns the pool connected to the case. Returns None if no pool is found"""
         case: models.Family = self.family(internal_id=case_id)
         pool_name: str = case.name.split("-", 1)[-1]
         return self.pools(customers=[case.customer], enquiry=pool_name).first()
-        # case_name =250497-2208730_NIPT
-        # ticket_id = 250497
-        # pool_name = 2208730_NIPT
