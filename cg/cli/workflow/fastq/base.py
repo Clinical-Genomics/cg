@@ -48,11 +48,5 @@ def store_available_fastq_analysis(context: click.Context, dry_run: bool = False
     """Creates an analysis object in status-db for all fastq cases to be delivered"""
     status_db: Store = context.obj.status_db
     for case in status_db.cases_to_analyze(pipeline=Pipeline.FASTQ, threshold=False):
-        contains_rml: bool = any(
-            (
-                link.sample.application_version.application.prep_category == "rml"
-                for link in case.links
-            )
-        )
         if status_db.get_case_pool(case_id=case.internal_id) or case.all_samples_pass_qc:
             context.invoke(store_fastq_analysis, case_id=case.internal_id, dry_run=dry_run)
