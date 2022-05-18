@@ -224,13 +224,12 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
         return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
 
-    def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
-        logging.error("CALLED!!!11!")
-        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
+    def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
+        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
         if flowcell:
             return flowcell.samples
 
-    def get_ticket_from_case(self, case_id: str):
+    def get_ticket_from_case(self, case_id: str) -> int:
         """Returns the ticket from the most recent sample in a case"""
         newest_sample: models.Sample = (
             self.Sample.query.join(models.Family.links, models.FamilySample.sample)
@@ -450,8 +449,11 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(models.Sample.created_at.desc())
 
-    def get_case_pool(self, case_id: str) -> models.Pool:
+    def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found"""
         case: models.Family = self.family(internal_id=case_id)
         pool_name: str = case.name.split("-", 1)[-1]
         return self.pools(customers=[case.customer], enquiry=pool_name).first()
+
+    def is_pool(self, case_id: str) -> bool:
+        return bool(self.get_case_pool(case_id=case_id))
