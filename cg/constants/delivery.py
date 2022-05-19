@@ -14,48 +14,43 @@ SKIP_MISSING = [
     "sarscov2",
 ]
 
-BALSAMIC_ANALYSIS_ONLY_CASE_TAGS = [
+BALSAMIC_ANALYSIS_CASE_TAGS = [
+    {"multiqc-html"},
+    {"metrics"},
+    {"visualization"},
+    {"vcf-sv-clinical"},
+    {"vcf-sv-clinical-index"},
+    {"vcf-sv-research"},
+    {"vcf-sv-research-index"},
     {"vcf-snv-clinical"},
     {"vcf-snv-clinical-index"},
-    {"vardict", "deliver"},
-    {"vcf", "sention", "haplotype-caller", "filtered"},
-    {"vcf-index", "sention", "haplotype-caller", "filtered"},
-    {"vcf-sv-clinical", "manta", "filtered"},
-    {"vcf-sv-clinical-index", "manta", "filtered"},
-    {"vcf-sv-research", "filtered"},
-    {"vcf-sv-research-index", "filtered"},
-    {"ascatngs", "visualization"},
-    {"cnvkit", "vcf-sv-research", "filtered"},
-    {"cnvkit", "vcf-sv-research-index", "filtered"},
-    {"cnvkit", "visualization"},
-    {"cnvkit", "visualization", "diagram"},
-    {"cnvkit", "regions"},
-    {"multiqc-html"},
+    {"vcf-snv-research"},
+    {"vcf-snv-research-index"},
+    {"germline", "vcf"},
+    {"germline", "vcf-index"},
+    {"vcf2cytosure"},
 ]
-
-BALSAMIC_ANALYSIS_CASE_TAGS = copy.deepcopy(BALSAMIC_ANALYSIS_ONLY_CASE_TAGS)
-BALSAMIC_ANALYSIS_CASE_TAGS.extend(
-    [
-        {"cram", "normal"},
-        {"cram-index"},
-        {"cram", "tumor"},
-        {"cram-index", "tumor"},
-    ]
-)
 
 BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
-    {"cram", "normal"},
+    {"cram"},
     {"cram-index"},
-    {"cram", "tumor"},
-    {"cram-index", "tumor"},
 ]
 
-BALSAMIC_QC_CASE_TAGS = [
-    {"multiqc-html"},
+BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
+    {"vcf-umi-clinical"},
+    {"vcf-umi-clinical-index"},
+    {"vcf-umi-research"},
+    {"vcf-umi-research-index"},
 ]
-BALSAMIC_QC_SAMPLE_TAGS = [
-    {"fastq"},
+
+BALSAMIC_UMI_ANALYSIS_CASE_TAGS.extend(BALSAMIC_ANALYSIS_CASE_TAGS)
+
+BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS = [
+    {"umi-cram"},
+    {"umi-cram-index"},
 ]
+
+BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 
 MIP_DNA_ANALYSIS_CASE_TAGS = [
@@ -135,10 +130,9 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
-    "balsamic-analysis": {"case_tags": BALSAMIC_ANALYSIS_ONLY_CASE_TAGS, "sample_tags": []},
-    "balsamic-qc": {
-        "case_tags": BALSAMIC_QC_CASE_TAGS,
-        "sample_tags": BALSAMIC_QC_SAMPLE_TAGS,
+    "balsamic-umi": {
+        "case_tags": BALSAMIC_UMI_ANALYSIS_CASE_TAGS,
+        "sample_tags": BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS,
     },
     "mip-dna": {
         "case_tags": MIP_DNA_ANALYSIS_CASE_TAGS,

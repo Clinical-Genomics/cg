@@ -64,6 +64,26 @@ def test_dry(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     assert case_id in caplog.text
 
 
+def test_genome_version(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
+    """Test command with --genome-version option"""
+    caplog.set_level(logging.INFO)
+    # GIVEN a VALID case_id and genome_version
+    case_id = "balsamic_case_wgs_paired"
+    option_key = "--genome-version"
+    option_value = "canfam3"
+    # WHEN dry running with genome option specified
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run", option_key, option_value],
+        obj=balsamic_context,
+    )
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the the option key and value
+    assert option_key in caplog.text
+    assert option_value in caplog.text
+
+
 def test_target_bed(
     cli_runner: CliRunner, balsamic_context: CGConfig, balsamic_bed_2_path: Path, caplog
 ):
@@ -130,6 +150,34 @@ def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog)
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+
+
+def test_pon_cnn(
+    balsamic_context: CGConfig,
+    cli_runner: CliRunner,
+    balsamic_bed_1_path,
+    balsamic_pon_1_path,
+    caplog,
+):
+    """Test command with --pon-cnn option"""
+    caplog.set_level(logging.INFO)
+    # GIVEN VALID case_id of application with BED and PoN files
+    case_id = "balsamic_case_tgs_paired"
+    panel_key = "--panel-bed"
+    panel_value = balsamic_bed_1_path
+    pon_key = "--pon-cnn"
+    pon_value = balsamic_pon_1_path
+    # WHEN dry running with PANEL BED and PON CNN options specified
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--dry-run", panel_key, panel_value, pon_key, pon_value],
+        obj=balsamic_context,
+    )
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN dry-print should include the PoN option key and value
+    assert pon_key in caplog.text
+    assert pon_value in caplog.text
 
 
 def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog):
