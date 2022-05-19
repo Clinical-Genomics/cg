@@ -4,6 +4,7 @@
   "comment": "",
   "samples": [
     {
+      "age_at_sampling": "17.18192",
       "application": "WGSPCFC030",
       "capture_kit": "other",
       "cohorts": [

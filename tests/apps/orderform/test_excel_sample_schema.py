@@ -93,7 +93,7 @@ def test_mip_rna_sample_is_correct(mip_rna_orderform_sample: dict):
 
     This will test if the aliases are mapped to the correct field in the pydantic model
     """
-    # GIVEN sample data about a known balsamic sample
+    # GIVEN sample data about a known mip-rna sample
 
     # WHEN parsing the sample
     mip_rna_sample: ExcelSample = ExcelSample(**mip_rna_orderform_sample)
@@ -115,4 +115,3 @@ def test_mip_rna_sample_is_correct(mip_rna_orderform_sample: dict):
     assert mip_rna_sample.tumour is True
     assert mip_rna_sample.quantity == "4"
     assert mip_rna_sample.comment == "other Elution buffer"
-    assert mip_rna_sample.time_point == "0"

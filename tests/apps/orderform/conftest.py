@@ -116,7 +116,6 @@ def fixture_mip_rna_orderform_sample() -> dict:
         "UDF/motherID": "",
         "UDF/fatherID": "",
         "UDF/is_for_sample": "s1",
-        "UDF/time_point": "0",
         "UDF/Capture Library version": "GMCKsolid",
         "UDF/Sample Buffer": 'Other (specify in "Comments")',
         "UDF/Formalin Fixation Time": "2",

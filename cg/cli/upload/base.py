@@ -8,7 +8,7 @@ from typing import Optional
 import click
 
 from cg.cli.upload.nipt import nipt
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.exc import AnalysisUploadError, CgError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -20,7 +20,7 @@ from cg.utils.click.EnumChoice import EnumChoice
 from . import vogue
 from .clinical_delivery import fastq
 from .coverage import coverage
-from .delivery_report import mip_dna
+from .delivery_report import mip_dna, balsamic
 from .fohm import fohm
 from .genotype import genotypes
 from .gisaid import gisaid
@@ -118,7 +118,8 @@ def upload(context: click.Context, family_id: Optional[str], force_restart: bool
         context.invoke(validate, family_id=family_id)
         context.invoke(genotypes, re_upload=False, family_id=family_id)
         context.invoke(observations, case_id=family_id)
-        context.invoke(scout, case_id=family_id)
+        if DataDelivery.SCOUT in case_obj.data_delivery:
+            context.invoke(scout, case_id=family_id)
         analysis_obj.uploaded_at = dt.datetime.now()
         status_db.commit()
         click.echo(click.style(f"{family_id}: analysis uploaded!", fg="green"))
@@ -174,3 +175,4 @@ upload.add_command(nipt)
 upload.add_command(fohm)
 upload.add_command(fastq)
 upload.add_command(mip_dna)
+upload.add_command(balsamic)

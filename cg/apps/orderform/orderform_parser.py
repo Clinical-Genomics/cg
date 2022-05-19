@@ -97,7 +97,6 @@ class OrderformParser(BaseModel):
         return OrderCase(
             name=case_id,
             samples=case_samples,
-            require_qcok=any(sample.require_qcok for sample in case_samples),
             priority=priorities.pop(),
             panels=list(gene_panels),
         )

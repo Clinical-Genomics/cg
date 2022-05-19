@@ -6,15 +6,15 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
+from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.meta.orders.mip_rna_submitter import MipRnaSubmitter
 from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
+from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
-
-from cg.models.orders.sample_base import PriorityEnum
 
 from cg.constants import Priority
 
@@ -73,10 +73,10 @@ def test_metagenome_to_status(metagenome_order_to_submit):
 
     # WHEN parsing for status
     data = MetagenomeSubmitter.order_to_status(order=order)
-
+    case = data["families"][0]
     # THEN it should pick out samples and relevant information
-    assert len(data["samples"]) == 2
-    first_sample = data["samples"][0]
+    assert len(case["samples"]) == 2
+    first_sample = case["samples"][0]
     assert first_sample["name"] == "Bristol"
     assert first_sample["application"] == "METLIFR020"
     assert first_sample["priority"] == "standard"
@@ -159,7 +159,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert len(family["samples"]) == 3
 
     first_sample = family["samples"][0]
-    assert first_sample["age_at_sampling"] == "17.18192"
+    assert first_sample["age_at_sampling"] == 17.18192
     assert first_sample["name"] == "sample1"
     assert first_sample["application"] == "WGSPCFC030"
     assert first_sample["phenotype_groups"] == ["Phenotype-group"]
@@ -536,7 +536,6 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data):
     assert new_casing.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == rna_application
-    assert new_link.sample.time_point == 1
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data):
@@ -551,7 +550,7 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        items=metagenome_status_data["samples"],
+        items=metagenome_status_data["families"],
     )
 
     # THEN it should store the samples
@@ -563,7 +562,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
-    for sample in metagenome_status_data["samples"]:
+    for sample in metagenome_status_data["families"][0]["samples"]:
         sample["application"] = "nonexistingtag"
 
     submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -576,16 +575,17 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            items=metagenome_status_data["samples"],
+            items=metagenome_status_data["families"],
         )
 
 
-def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
+@pytest.mark.parametrize("submitter", [BalsamicSubmitter, BalsamicUmiSubmitter])
+def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, submitter):
     # GIVEN a basic store with no samples and a cancer order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
 
-    submitter: BalsamicSubmitter = BalsamicSubmitter(lims=orders_api.lims, status=orders_api.status)
+    submitter: Submitter = submitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
     new_families = submitter.store_items_in_status(
@@ -600,7 +600,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data):
     assert len(new_families) == 1
     new_case = new_families[0]
     assert new_case.name == "family1"
-    assert new_case.data_analysis == str(Pipeline.BALSAMIC)
+    assert new_case.data_analysis in [str(Pipeline.BALSAMIC), str(Pipeline.BALSAMIC_UMI)]
     assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == Priority.standard.name

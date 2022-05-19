@@ -6,6 +6,7 @@ from cg.models.orders.sample_base import OrderSample
 
 
 class ExcelSample(OrderSample):
+    age_at_sampling: str = Field(None, alias="UDF/age_at_sampling")
     application: str = Field(..., alias="UDF/Sequencing Analysis")
     capture_kit: str = Field(None, alias="UDF/Capture Library version")
     collection_date: str = Field(None, alias="UDF/Collection Date")
@@ -50,7 +51,6 @@ class ExcelSample(OrderSample):
     source: str = Field(None, alias="UDF/Source")
     status: str = Field(None, alias="UDF/Status")
     subject_id: str = Field(None, alias="UDF/subjectID")
-    time_point: str = Field(None, alias="UDF/time_point")
     tissue_block_size: str = Field(None, alias="UDF/Tissue Block Size")
     tumour: bool = Field(None, alias="UDF/tumor")
     tumour_purity: str = Field(None, alias="UDF/tumour purity")
@@ -62,24 +62,21 @@ class ExcelSample(OrderSample):
     def validate_data_analysis(cls, value):
 
         data_analysis_alternatives = [
-            "custom",
-            "Balsamic",
-            "fastq",
-            "FLUFFY",
-            "MicroSALT",
-            "MIP DNA",
-            "MIP RNA",
-            "SARS-CoV-2",
-            "scout",
-            "No analysis",
+            "Balsamic",  # OF 1508
+            "Balsamic UMI",  # OF 1508
+            "fastq",  # OF 1605
+            "FLUFFY",  # OF 1604
+            "MicroSALT",  # OF 1603 (implicit)
+            "MIP DNA",  # OF 1508
+            "MIP RNA",  # OF 1508
+            "SARS-CoV-2",  # OF 2184
+            "No analysis",  # OF 1508, 1604, 2184
         ]
         if value not in data_analysis_alternatives:
             raise AttributeError(f"'{value}' is not a valid data analysis")
         return value
 
-    @validator(
-        "index_number", "volume", "quantity", "concentration", "concentration_sample", "time_point"
-    )
+    @validator("index_number", "volume", "quantity", "concentration", "concentration_sample")
     def numeric_value(cls, value: Optional[str]):
         if not value:
             return None

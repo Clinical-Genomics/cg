@@ -118,7 +118,6 @@ class OrderSample(BaseModel):
         )
     ]
     synopsis: Optional[str]
-    time_point: Optional[NonNegativeInt]
     tissue_block_size: Optional[str]
     tumour: bool = False
     tumour_purity: Optional[int]

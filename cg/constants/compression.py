@@ -1,11 +1,13 @@
 """Constants specific for compression"""
 import datetime
+
 from cgmodels.cg.constants import StrEnum
 
 # Constants for crunchy
 FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
-SPRING_SUFFIX = ".spring"
+FLAG_PATH_SUFFIX = ".crunchy.txt"
+PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 
 class CompressionHkTags(StrEnum):
@@ -47,6 +49,11 @@ BALSAMIC_VALIDATION_CASES = [
     "stableraven",  # UMI seracare validation case (AF 1%) tumor-normal panel
     "sunnyiguana",  # UMI seracare validation case (AF 0.1%) tumor-normal panel
     "uphippo",  # UMI seracare validation case (AF 0.5%) tumor-only panel
+    "cleanfowl",  # BALSAMICE validation case, HD829 reference for FLT3 Ascertation
+    "proudsquid",  # BALSAMICE validation case, HD829 reference for FLT3 Ascertation
+    "modestjaguar",  # BALSAMICE validation case, HD829 reference for FLT3 Ascertation
+    "dearmarmot",  # BALSAMICE validation case, HD829 reference for FLT3 Ascertation
+    "holykid",  # BALSAMICE validation case, HD829 reference for FLT3 Ascertation
 ]
 
 MIP_VALIDATION_CASES = [
