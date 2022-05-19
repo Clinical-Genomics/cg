@@ -1,7 +1,7 @@
 """Priority specific constants"""
 from enum import IntEnum
 
-from cg.utils.StrEnum import StrEnum
+from cg.utils.enums import StrEnum
 
 
 class SlurmQos(StrEnum):

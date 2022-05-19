@@ -6,6 +6,7 @@ class Gender(str, Enum):
     MALE = "male"
     UNKNOWN = "unknown"
     OTHER = "other"
+    MISSING = None
 
 
 class PhenotypeStatus(str, Enum):

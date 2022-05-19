@@ -27,7 +27,7 @@ class ScoutIndividual(BaseModel):
     phenotype: PhenotypeStatus = PhenotypeStatus.MISSING
     sample_id: str = None
     sample_name: Optional[str] = None
-    sex: Literal[Gender.MALE, Gender.FEMALE, Gender.UNKNOWN] = None
+    sex: Literal[Gender.MALE, Gender.FEMALE, Gender.UNKNOWN] = Gender.MISSING
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
