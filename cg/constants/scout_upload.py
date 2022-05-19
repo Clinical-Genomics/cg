@@ -13,8 +13,8 @@ MIP_CASE_TAGS = dict(
 )
 
 BALSAMIC_CASE_TAGS = dict(
-    snv_vcf={"vcf-snv-clinical"},
     sv_vcf={"vcf-sv-clinical"},
+    snv_vcf={"vcf-snv-clinical"},
     cnv_report={"ascatngs", "visualization"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
@@ -34,4 +34,5 @@ MIP_SAMPLE_TAGS = dict(
 BALSAMIC_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
+    vcf2cytosure={"vcf2cytosure"},
 )
