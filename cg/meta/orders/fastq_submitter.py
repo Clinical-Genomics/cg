@@ -56,17 +56,6 @@ class FastqSubmitter(Submitter):
         }
         return status_data
 
-    @staticmethod
-    def _get_fastq_pipeline(
-        application_version: models.ApplicationVersion, is_tumour: bool
-    ) -> Pipeline:
-        if is_tumour:
-            return Pipeline.FASTQ
-        if application_version.application.prep_category == "wgs":
-            return Pipeline.MIP_DNA
-
-        return Pipeline.FASTQ
-
     def create_maf_case(self, sample_obj: models.Sample):
         case_obj: models.Family = self.status.add_case(
             data_analysis=Pipeline(Pipeline.MIP_DNA),
@@ -75,6 +64,7 @@ class FastqSubmitter(Submitter):
             panels=None,
             priority=Priority.research,
         )
+        case_obj.customer = self.status.customer("cust000")
         relationship: models.FamilySample = self.status.relate_sample(
             family=case_obj, sample=sample_obj, status=StatusEnum.unknown
         )
@@ -125,13 +115,11 @@ class FastqSubmitter(Submitter):
                 ):
                     self.create_maf_case(sample_obj=new_sample)
                 case_obj.customer = customer_obj
-                self.status.add(case_obj)
                 new_relationship = self.status.relate_sample(
                     family=case_obj, sample=new_sample, status=StatusEnum.unknown
                 )
-                self.status.add(new_relationship)
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
-                self.status.add(new_delivery)
+                self.status.add(case_obj, new_relationship, new_delivery)
 
         self.status.add_commit(new_samples)
         return new_samples

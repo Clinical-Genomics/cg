@@ -255,13 +255,13 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert base_store.samples().count() == 2
     assert base_store.families().count() == 2
     first_sample = new_samples[0]
-    assert len(first_sample.links) == 1
+    assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
     assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
     assert family_link.family.data_analysis
-    assert family_link.family.data_delivery == DataDelivery.FASTQ
+    assert family_link.family.data_delivery in [DataDelivery.FASTQ, DataDelivery.ANALYSIS_FILES]
 
 
 def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
