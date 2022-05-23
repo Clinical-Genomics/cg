@@ -6,8 +6,6 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 from typing_extensions import Literal
 
-from cg.constants.subject import PhenotypeStatus, Gender
-
 
 class ChromographImages(BaseModel):
     autozygous: Optional[str] = None
@@ -24,10 +22,10 @@ class ScoutIndividual(BaseModel):
     confirmed_sex: Optional[bool] = None
     father: Optional[str] = None
     mother: Optional[str] = None
-    phenotype: PhenotypeStatus = PhenotypeStatus.MISSING
+    phenotype: Optional[str] = None
     sample_id: str = None
     sample_name: Optional[str] = None
-    sex: Literal[Gender.MALE, Gender.FEMALE, Gender.UNKNOWN] = Gender.MISSING
+    sex: Optional[str] = None
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
