@@ -22,10 +22,10 @@ class ScoutIndividual(BaseModel):
     confirmed_sex: Optional[bool] = None
     father: Optional[str] = None
     mother: Optional[str] = None
-    phenotype: str = None
+    phenotype: Optional[str] = None
     sample_id: str = None
     sample_name: Optional[str] = None
-    sex: str = None
+    sex: Optional[str] = None
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
