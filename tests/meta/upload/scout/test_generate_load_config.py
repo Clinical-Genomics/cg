@@ -9,6 +9,7 @@ from cg.models.scout.scout_load_config import (
     MipLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
+    BalsamicQCLoadConfig,
     BalsamicUmiLoadConfig,
 )
 from cg.store import Store, models
@@ -51,6 +52,22 @@ def test_generate_balsamic_load_config(
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, BalsamicLoadConfig)
+
+def test_generate_balsamic_qc_load_config(
+    balsamic_qc_analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
+):
+    # GIVEN an analysis object that have been run with balsamic-qc
+    assert balsamic_qc_analysis_obj.pipeline == Pipeline.BALSAMIC_QC
+
+    # GIVEN an upload scout api with some balsamic information
+
+    # WHEN generating a load config
+    config = upload_balsamic_analysis_scout_api.generate_config(
+        analysis_obj=balsamic_qc_analysis_obj
+    )
+
+    # THEN assert that the config is a balsamic-qc config
+    assert isinstance(config, BalsamicQCLoadConfig)
 
 
 def test_generate_balsamic_umi_load_config(

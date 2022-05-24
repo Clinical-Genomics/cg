@@ -63,6 +63,7 @@ class ExcelSample(OrderSample):
 
         data_analysis_alternatives = [
             "Balsamic",  # OF 1508
+            "Balsamic QC",  # OF 1508
             "Balsamic UMI",  # OF 1508
             "fastq",  # OF 1605
             "FLUFFY",  # OF 1604

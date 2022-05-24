@@ -4,6 +4,7 @@
 import click
 
 from cg.cli.workflow.balsamic.base import balsamic
+from cg.cli.workflow.balsamic.qc import balsamic_qc
 from cg.cli.workflow.balsamic.umi import balsamic_umi
 from cg.cli.workflow.fluffy.base import fluffy
 from cg.cli.workflow.microsalt.base import microsalt
@@ -19,6 +20,7 @@ def workflow():
 
 
 workflow.add_command(balsamic)
+workflow.add_command(balsamic_qc)
 workflow.add_command(balsamic_umi)
 workflow.add_command(microsalt)
 workflow.add_command(mip_dna)

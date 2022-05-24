@@ -15,6 +15,7 @@ from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
 
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
+from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.fastq_submitter import FastqSubmitter
 from cg.meta.orders.fluffy_submitter import FluffySubmitter
@@ -35,6 +36,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
 
     submitters = {
         OrderType.BALSAMIC: BalsamicSubmitter,
+        OrderType.BALSAMIC_QC: BalsamicQCSubmitter,
         OrderType.BALSAMIC_UMI: BalsamicUmiSubmitter,
         OrderType.FASTQ: FastqSubmitter,
         OrderType.FLUFFY: FluffySubmitter,

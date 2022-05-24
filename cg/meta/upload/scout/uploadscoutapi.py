@@ -17,6 +17,7 @@ from cg.store import models, Store
 from housekeeper.store import models as hk_models
 
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
+from cg.meta.upload.scout.balsamic_qc_config_builder import BalsamicQCConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -428,6 +429,9 @@ class UploadScoutAPI:
 
         config_builders = {
             Pipeline.BALSAMIC: BalsamicConfigBuilder(
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
+            Pipeline.BALSAMIC_QC: BalsamicQCConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
             Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
