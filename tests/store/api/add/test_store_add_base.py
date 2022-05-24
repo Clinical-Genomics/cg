@@ -79,48 +79,23 @@ def test_add_microbial_sample(base_store: Store, helpers):
     assert stored_microbial_sample.organism == organism
 
 
-def test_add_pool(store: Store):
+def test_add_pool(rml_pool_store: Store):
+    """Tests whether new pools are invoiced as default"""
     # GIVEN a valid customer and a valid application_version
+    customer = rml_pool_store.customers()[0]
+    application = rml_pool_store.application(tag="RMLP05R800")
+    app_version = rml_pool_store.application_version(application=application, version=1)
 
-    customer_group = store.add_customer_group("dummy_group", "dummy group")
-    new_customer = store.add_customer(
-        internal_id="cust000",
-        name="Test customer",
-        scout_access=True,
-        customer_group=customer_group,
-        invoice_address="skolgatan 15",
-        invoice_reference="abc",
-    )
-    store.add_commit(new_customer)
-
-    application = store.add_application(
-        tag="RMLP05R800",
-        category="rml",
-        description="Ready-made",
-        percent_kth=80,
-        percent_reads_guaranteed=75,
-        sequencing_depth=0,
-    )
-    store.add_commit(application)
-
-    app_version = store.add_version(
-        application=application,
-        version=1,
-        valid_from=dt.today(),
-        prices={"standard": 12, "priority": 222, "express": 123, "research": 12},
-    )
-    store.add_commit(app_version)
-
-    # WHEN adding a new pool into the database
-    new_pool = store.add_pool(
-        customer=new_customer,
-        name="Test",
-        order="Test",
-        ordered=dt.today(),
+    # WHEN adding a new pool
+    new_pool = rml_pool_store.add_pool(
+        customer=customer,
+        name="pool2",
+        order="123456",
+        ordered=dt.now(),
         application_version=app_version,
     )
-    store.add_commit(new_pool)
 
+    rml_pool_store.add_commit(new_pool)
     # THEN the new pool should have no_invoice = False
-    pool = store.pools().first()
+    pool = rml_pool_store.pool(pool_id=2)
     assert pool.no_invoice is False

@@ -233,14 +233,6 @@ def test_multiple_analyses(analysis_store, helpers):
     assert analysis_oldest not in analyses
 
 
-def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_nr):
-    """Tests if the function in fact returns the correct customer"""
-    # Given a store with a ticket
-
-    # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == customer_id
-
-
 def test_set_case_action(analysis_store, case_id):
     """Tests if actions of cases are changed to analyze."""
     # Given a store with a case with action None
@@ -292,14 +284,3 @@ def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
 
     # THEN the qc property should be False
     assert not sequencing_qc_ok
-
-
-def test_get_ticket_from_case(case_id: str, analysis_store_single_case, ticket_nr: int):
-    """Tests if the correct ticket is returned for the given case"""
-    # GIVEN a populated store with a case
-
-    # WHEN the function is called
-    ticket_from_case: int = analysis_store_single_case.get_ticket_from_case(case_id=case_id)
-
-    # THEN the ticket should be correct
-    assert ticket_nr == ticket_from_case

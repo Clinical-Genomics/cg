@@ -46,6 +46,13 @@ def balsamic_reference_path(balsamic_dir: Path) -> str:
     return balsamic_reference_path.as_posix()
 
 
+@pytest.fixture(name="balsamic_pon_1_path")
+def balsamic_pon_1_path(balsamic_dir: Path) -> str:
+    balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
+    balsamic_reference_path.touch(exist_ok=True)
+    return balsamic_reference_path.as_posix()
+
+
 @pytest.fixture(name="balsamic_bed_1_path")
 def balsamic_bed_1_path(balsamic_dir: Path) -> str:
     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
