@@ -50,7 +50,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
-    upload_api = MipDNAUploadAPI(config=config_object)
+    upload_api = MipDNAUploadAPI(config=config_object)  # default upload API
 
     LOG.info("----------------- UPLOAD -----------------")
 

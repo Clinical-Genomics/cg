@@ -31,7 +31,7 @@ class MipDNAUploadAPI(UploadAPI):
         analysis_obj: models.Analysis = case_obj.analyses[0]
         self.update_upload_started_at(analysis_obj)
 
-        # General upload
+        # Main upload
         ctx.invoke(coverage, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(validate, family_id=case_obj.internal_id)
         ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
