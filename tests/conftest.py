@@ -449,7 +449,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.14.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.15.rml.xlsx").as_posix()
 
 
 @pytest.fixture
