@@ -449,7 +449,7 @@ def sarscov2_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.14.rml.xlsx").as_posix()
+    return Path(orderforms / "1604.15.rml.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -832,10 +832,10 @@ def fixture_customer_group() -> str:
 
 
 @pytest.fixture(scope="function", name="customer_production")
-def fixture_customer_production(customer_group) -> dict:
+def fixture_customer_production(customer_group: str, customer_id: str) -> dict:
     """Return a dictionary with information about the prod customer"""
     return dict(
-        customer_id="cust000",
+        customer_id=customer_id,
         name="Production",
         scout_access=True,
         customer_group=customer_group,
@@ -913,14 +913,14 @@ def fixture_apptag_rna() -> str:
 
 
 @pytest.fixture(scope="function", name="base_store")
-def fixture_base_store(store: Store, apptag_rna: str) -> Store:
+def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store:
     """Setup and example store."""
     customer_group = store.add_customer_group("all_customers", "all customers")
 
     store.add_commit(customer_group)
     customers = [
         store.add_customer(
-            "cust000",
+            customer_id,
             "Production",
             scout_access=True,
             customer_group=customer_group,
