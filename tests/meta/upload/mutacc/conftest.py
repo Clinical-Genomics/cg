@@ -1,6 +1,8 @@
 import pytest
 
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.constants.subject import PlinkPhenotypeStatus, RelationshipStatus, PlinkGender
+from cg.constants.pedigree import Pedigree
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 
 
@@ -47,37 +49,37 @@ class MockScoutApi:
 
 
 @pytest.fixture(name="scout_export_case_data")
-def fixture_scout_export_case_data() -> dict:
+def fixture_scout_export_case_data(customer_id: str) -> dict:
     """Return information in the form of a scout export case"""
     case_data = {
         "_id": "internal_id",
-        "owner": "cust000",
+        "owner": customer_id,
         "analysis_date": "2020-11-18T15:02:03.554000",
         "causatives": ["variant_id"],
         "individuals": [
             {
                 "individual_id": "individual_1",
                 "bam_file": "",
-                "sex": "1",
-                "father": "individual_2",
-                "mother": "individual_3",
-                "phenotype": 2,
+                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.FATHER: "individual_2",
+                Pedigree.MOTHER: "individual_3",
+                Pedigree.PHENOTYPE: PlinkPhenotypeStatus.AFFECTED,
             },
             {
                 "individual_id": "individual_2",
                 "bam_file": "",
-                "sex": "1",
-                "father": "0",
-                "mother": "0",
-                "phenotype": 1,
+                Pedigree.SEX: PlinkGender.MALE,
+                Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
             },
             {
                 "individual_id": "individual_3",
                 "bam_file": "",
-                "sex": "2",
-                "father": "0",
-                "mother": "0",
-                "phenotype": 1,
+                Pedigree.SEX: PlinkGender.FEMALE,
+                Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
+                Pedigree.PHENOTYPE: PlinkPhenotypeStatus.UNAFFECTED,
             },
         ],
     }

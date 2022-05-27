@@ -52,6 +52,12 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
+class GenomeVersion(StrEnum):
+    hg19: str = "hg19"
+    hg38: str = "hg38"
+    canfam3: str = "canfam3"
+
+
 class DataDelivery(StrEnum):
     ANALYSIS_BAM_FILES: str = "analysis-bam"
     ANALYSIS_FILES: str = "analysis"

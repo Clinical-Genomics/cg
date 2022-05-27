@@ -131,38 +131,6 @@ class StatusHandler(BaseHandler):
             .all()
         )
 
-    def get_cases_from_ticket(self, ticket_id: int) -> Query:
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.ticket_number == ticket_id
-        )
-
-    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
-        """Returns the customer related to given ticket"""
-        return (
-            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
-            .first()
-            .customer.internal_id
-        )
-
-    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
-        return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
-
-    def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
-        logging.error("CALLED!!!11!")
-        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
-        if flowcell:
-            return flowcell.samples
-
-    def get_ticket_from_case(self, case_id: str):
-        """Returns the ticket from the most recent sample in a case"""
-        newest_sample: models.Sample = (
-            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .order_by(models.Sample.created_at.desc())
-            .first()
-        )
-        return newest_sample.ticket_number
-
     def cases(
         self,
         internal_id: str = None,

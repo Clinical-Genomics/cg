@@ -26,7 +26,7 @@ class ExcelOrderformParser(OrderformParser):
     VALID_ORDERFORMS: List[str] = [
         f"{Orderform.MIP_DNA}:26",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:11",  # Microbial WGS
-        f"{Orderform.RML}:14",  # Orderform Ready made libraries (RML)
+        f"{Orderform.RML}:15",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:10",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:7",  # Orderform SARS-CoV-2
     ]

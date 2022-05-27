@@ -6,13 +6,15 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_PANEL_BED,
-    OPTION_DRY,
     OPTION_QOS,
     OPTION_ANALYSIS_TYPE,
     OPTION_RUN_ANALYSIS,
+    OPTION_GENOME_VERSION,
+    OPTION_PON_CNN,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.constants import DRY_RUN
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -42,17 +44,32 @@ balsamic.add_command(link)
 
 @balsamic.command("config-case")
 @ARGUMENT_CASE_ID
+@OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
-@OPTION_DRY
+@OPTION_PON_CNN
+@DRY_RUN
 @click.pass_obj
-def config_case(context: CGConfig, panel_bed: str, case_id: str, dry_run: bool):
+def config_case(
+    context: CGConfig,
+    case_id: str,
+    genome_version: str,
+    panel_bed: str,
+    pon_cnn: click.Path,
+    dry_run: bool,
+):
     """Create config file for BALSAMIC analysis for a given CASE_ID"""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         LOG.info(f"Creating config file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.config_case(case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        analysis_api.config_case(
+            case_id=case_id,
+            genome_version=genome_version,
+            panel_bed=panel_bed,
+            pon_cnn=pon_cnn,
+            dry_run=dry_run,
+        )
     except CgError as e:
         LOG.error(f"Could not create config: {e.message}")
         raise click.Abort()
@@ -63,7 +80,7 @@ def config_case(context: CGConfig, panel_bed: str, case_id: str, dry_run: bool):
 
 @balsamic.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @OPTION_QOS
 @OPTION_ANALYSIS_TYPE
 @OPTION_RUN_ANALYSIS
@@ -103,7 +120,7 @@ def run(
 
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @OPTION_ANALYSIS_TYPE
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, analysis_type: str, dry_run: bool):
@@ -156,17 +173,21 @@ def store_housekeeper(context: CGConfig, case_id: str):
 
 @balsamic.command("start")
 @ARGUMENT_CASE_ID
+@OPTION_GENOME_VERSION
 @OPTION_ANALYSIS_TYPE
 @OPTION_QOS
-@OPTION_DRY
+@DRY_RUN
 @OPTION_PANEL_BED
+@OPTION_PON_CNN
 @OPTION_RUN_ANALYSIS
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
+    genome_version: str,
     analysis_type: str,
     panel_bed: str,
+    pon_cnn: str,
     slurm_quality_of_service: str,
     run_analysis: bool,
     dry_run: bool,
@@ -176,7 +197,14 @@ def start(
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id, dry_run=dry_run)
-        context.invoke(config_case, case_id=case_id, panel_bed=panel_bed, dry_run=dry_run)
+        context.invoke(
+            config_case,
+            case_id=case_id,
+            genome_version=genome_version,
+            panel_bed=panel_bed,
+            pon_cnn=pon_cnn,
+            dry_run=dry_run,
+        )
         context.invoke(
             run,
             case_id=case_id,
@@ -190,7 +218,7 @@ def start(
 
 
 @balsamic.command("start-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
     """Start full workflow for all cases ready for analysis"""
@@ -213,7 +241,7 @@ def start_available(context: click.Context, dry_run: bool = False):
 
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
-@OPTION_DRY
+@DRY_RUN
 @OPTION_ANALYSIS_TYPE
 @click.pass_context
 def store(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
@@ -224,7 +252,7 @@ def store(context: click.Context, case_id: str, analysis_type: str, dry_run: boo
 
 
 @balsamic.command("store-available")
-@OPTION_DRY
+@DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished analyses in Housekeeper"""
