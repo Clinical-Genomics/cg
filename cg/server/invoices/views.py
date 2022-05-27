@@ -202,7 +202,7 @@ def modified_invoice(invoice_id, cost_center):
     invoice_obj = db.invoice(invoice_id)
     file_name = "invoice_" + cost_center + str(invoice_id) + ".xlsx"
     temp_dir = tempfile.mkdtemp()
-    file_path = os.path.join(temp_dir, file_name)
+    file_path = os.path.join(temp_dir, os.path.basename(file_name))
 
     with open(file_path, "wb") as file_object:
         if cost_center == "KTH":
