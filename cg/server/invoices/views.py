@@ -188,6 +188,7 @@ def invoice_template(invoice_id):
     temp_dir = tempfile.gettempdir()
     filename = "Invoice_{}_{}.xlsx".format(invoice_obj.id, cost_center)
     excel_path = os.path.join(temp_dir, filename)
+    excel_path = os.path.join(temp_dir, os.path.basename(filename))
     workbook.save(excel_path)
 
     return send_from_directory(directory=temp_dir, filename=filename, as_attachment=True)
