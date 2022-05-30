@@ -62,7 +62,7 @@ class OrdersAPI:
         self,
         project: OrderType,
         order_in: OrderIn,
-        order_json: dict,
+        order_dict: dict,
         user_name: str,
         user_mail: str,
     ) -> dict:
@@ -78,7 +78,7 @@ class OrdersAPI:
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in,
-                order_json=order_json,
+                order_dict=order_dict,
                 user_name=user_name,
                 user_mail=user_mail,
                 project=project,

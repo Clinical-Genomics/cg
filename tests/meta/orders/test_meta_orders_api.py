@@ -74,7 +74,7 @@ def test_submit(
     result = orders_api.submit(
         project=order_type,
         order_in=order_data,
-        order_json=order_data.dict(),
+        order_dict=order_data.dict(),
         user_name=user_name,
         user_mail=user_mail,
     )
@@ -125,7 +125,7 @@ def test_submit_ticketexception(
         orders_api.submit(
             project=order_type,
             order_in=order_data,
-            order_json=order_data.dict(),
+            order_dict=order_data.dict(),
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -175,7 +175,7 @@ def test_submit_illegal_sample_customer(
         orders_api.submit(
             project=order_type,
             order_in=order_data,
-            order_json=order_data.dict(),
+            order_dict=order_data.dict(),
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -234,7 +234,7 @@ def test_submit_scout_legal_sample_customer(
     orders_api.submit(
         project=order_type,
         order_in=order_data,
-        order_json=order_data.dict(),
+        order_dict=order_data.dict(),
         user_name=user_name,
         user_mail=user_mail,
     )
@@ -279,7 +279,7 @@ def test_submit_duplicate_sample_case_name(
         orders_api.submit(
             project=order_type,
             order_in=order_data,
-            order_json=order_data.dict(),
+            order_dict=order_data.dict(),
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -305,7 +305,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
     orders_api.submit(
         project=order_type,
         order_in=order_data,
-        order_json=order_data.dict(),
+        order_dict=order_data.dict(),
         user_name=user_name,
         user_mail=user_mail,
     )
@@ -316,7 +316,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
         orders_api.submit(
             project=order_type,
             order_in=order_data,
-            order_json=order_data.dict(),
+            order_dict=order_data.dict(),
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -347,7 +347,7 @@ def test_submit_unique_sample_case_name(
     orders_api.submit(
         project=OrderType.MIP_DNA,
         order_in=order_data,
-        order_json=order_data.dict(),
+        order_dict=order_data.dict(),
         user_name=user_name,
         user_mail=user_mail,
     )
@@ -509,7 +509,7 @@ def test_submit_unique_sample_name(
     orders_api.submit(
         project=order_type,
         order_in=order_data,
-        order_json=order_data.dict(),
+        order_dict=order_data.dict(),
         user_name=user_name,
         user_mail=user_mail,
     )
@@ -543,7 +543,7 @@ def test_sarscov2_submit_duplicate_sample_name(
         orders_api.submit(
             project=order_type,
             order_in=order_data,
-            order_json=order_data.dict(),
+            order_dict=order_data.dict(),
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -591,7 +591,7 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     orders_api.submit(
         project=order_type,
         order_in=order_data,
-        order_json=order_data.dict(),
+        order_dict=order_data.dict(),
         user_name=user_name,
         user_mail=user_mail,
     )

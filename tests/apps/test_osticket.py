@@ -21,9 +21,9 @@ def test_osticket_respone_500(monkeypatch, caplog, response):
         osticket_api.open_ticket(
             name="dummy_name",
             email="dummy_email",
-            order_json={"dummy": "order"},
             subject="dummy_subject",
             message="dummy_message",
+            attachments=[],
         )
 
     # THEN the response text and reason was logged and a ticket creation error raised

@@ -2,7 +2,7 @@
 
 import logging
 import os.path
-from typing import Optional
+from typing import Optional, List
 
 from flask import Flask
 
@@ -35,7 +35,7 @@ class MockOsTicket(OsTicket):
         self.url = os.path.join(domain, "api/tickets.json")
 
     def open_ticket(
-        self, name: str, email: str, order_json, subject: str, message: str
+        self, name: str, email: str, subject: str, message: str, attachments: List[dict]
     ) -> Optional[int]:
         """Open a new ticket through the REST API."""
         if self._should_fail:

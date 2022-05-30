@@ -1,7 +1,7 @@
 import json
 import logging
 import os.path
-from typing import Optional
+from typing import Optional, List
 
 import requests
 from flask import Flask
@@ -9,6 +9,7 @@ from flask import Flask
 from cg.exc import TicketCreationError
 
 LOG = logging.getLogger(__name__)
+TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 class OsTicket(object):
@@ -29,7 +30,7 @@ class OsTicket(object):
         self.url = os.path.join(domain, "api/tickets.json")
 
     def open_ticket(
-        self, name: str, email: str, order_json: dict, subject: str, message: str
+        self, name: str, email: str, attachments: List[dict], subject: str, message: str
     ) -> Optional[int]:
         """Open a new ticket through the REST API."""
         data = dict(
@@ -37,7 +38,7 @@ class OsTicket(object):
             email=email,
             subject=subject,
             message=message,
-            attachments=[{"order.json": f"data:text/plain;charset=utf-8,{json.dumps(order_json)}"}],
+            attachments=attachments,
         )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:

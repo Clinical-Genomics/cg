@@ -1,9 +1,9 @@
+import json
 import logging
 import re
-from typing import Optional
+from typing import Optional, List
 
-from cg.apps.osticket import OsTicket
-from cg.exc import TicketCreationError
+from cg.apps.osticket import OsTicket, TEXT_FILE_ATTACH_PARAMS
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store import Store, models
@@ -33,16 +33,17 @@ class TicketHandler:
         return None
 
     def create_ticket(
-        self, order: OrderIn, order_json: dict, user_name: str, user_mail: str, project: str
+        self, order: OrderIn, order_dict: dict, user_name: str, user_mail: str, project: str
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
+        attachments = self.create_attachments(order_dict=order_dict)
         ticket_nr: Optional[int] = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
-            order_json=order_json,
             subject=order.name,
             message=message,
+            attachments=attachments,
         )
         LOG.info(f"{ticket_nr}: opened new ticket")
 
@@ -130,3 +131,10 @@ class TicketHandler:
         customer: models.Customer = self.status_db.customer(customer_id)
         message += f", {customer.name} ({customer_id})"
         return message
+
+    @staticmethod
+    def create_attachments(
+        order_dict: dict,
+        file_name: str = "order.json",
+    ) -> List[dict]:
+        return [{file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(order_dict))}]
