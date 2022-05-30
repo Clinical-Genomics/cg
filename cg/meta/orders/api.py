@@ -58,7 +58,14 @@ class OrdersAPI:
         self.status = status
         self.ticket_handler: TicketHandler = TicketHandler(osticket_api=osticket, status_db=status)
 
-    def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
+    def submit(
+        self,
+        project: OrderType,
+        order_in: OrderIn,
+        order_json: dict,
+        user_name: str,
+        user_mail: str,
+    ) -> dict:
         """Submit a batch of samples.
 
         Main entry point for the class towards interfaces that implements it.
@@ -70,7 +77,11 @@ class OrdersAPI:
         ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
-                order=order_in, user_name=user_name, user_mail=user_mail, project=project
+                order=order_in,
+                order_json=order_json,
+                user_name=user_name,
+                user_mail=user_mail,
+                project=project,
             )
 
         order_in.ticket = ticket_number

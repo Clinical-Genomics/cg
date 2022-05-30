@@ -27,9 +27,17 @@ class OsTicket(object):
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
 
-    def open_ticket(self, name: str, email: str, subject: str, message: str) -> Optional[int]:
+    def open_ticket(
+        self, name: str, email: str, order_json: dict, subject: str, message: str
+    ) -> Optional[int]:
         """Open a new ticket through the REST API."""
-        data = dict(name=name, email=email, subject=subject, message=message)
+        data = dict(
+            name=name,
+            email=email,
+            subject=subject,
+            message=message,
+            attachments=[{"order.json": f"data:text/plain;charset=utf-8,{order_json}"}],
+        )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
             try:

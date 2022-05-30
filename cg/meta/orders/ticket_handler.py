@@ -33,13 +33,14 @@ class TicketHandler:
         return None
 
     def create_ticket(
-        self, order: OrderIn, user_name: str, user_mail: str, project: str
+        self, order: OrderIn, order_json: dict, user_name: str, user_mail: str, project: str
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
         ticket_nr: Optional[int] = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
+            order_json=order_json,
             subject=order.name,
             message=message,
         )
