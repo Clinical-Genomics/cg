@@ -50,3 +50,10 @@ class OsTicket(object):
 
         LOG.error("res.text: %s, reason: %s", res.text, res.reason)
         raise TicketCreationError(res)
+
+    @staticmethod
+    def create_attachments(
+        order_dict: dict,
+        file_name: str = "order.json",
+    ) -> List[dict]:
+        return [{file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(order_dict))}]

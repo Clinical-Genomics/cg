@@ -1,9 +1,8 @@
-import json
 import logging
 import re
-from typing import Optional, List
+from typing import Optional
 
-from cg.apps.osticket import OsTicket, TEXT_FILE_ATTACH_PARAMS
+from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store import Store, models
@@ -37,7 +36,7 @@ class TicketHandler:
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
-        attachments = self.create_attachments(order_dict=order_dict)
+        attachments = self.osticket.create_attachments(order_dict=order_dict)
         ticket_nr: Optional[int] = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
@@ -131,10 +130,3 @@ class TicketHandler:
         customer: models.Customer = self.status_db.customer(customer_id)
         message += f", {customer.name} ({customer_id})"
         return message
-
-    @staticmethod
-    def create_attachments(
-        order_dict: dict,
-        file_name: str = "order.json",
-    ) -> List[dict]:
-        return [{file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(order_dict))}]

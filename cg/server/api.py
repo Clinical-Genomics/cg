@@ -86,14 +86,12 @@ def submit_order(order_type):
     error_message: str
     try:
         request_json = request.get_json()
-        LOG.info("processing order: %s, %s", json.dumps(request_json))
+        LOG.info("processing order: %s", json.dumps(request_json))
         project: OrderType = OrderType(order_type)
-        order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
 
         result = api.submit(
             project=project,
-            order_in=order_in,
-            order_json=request_json,
+            order_dict=request_json,
             user_name=g.current_user.name,
             user_mail=g.current_user.email,
         )
