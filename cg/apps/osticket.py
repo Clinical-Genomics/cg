@@ -1,3 +1,4 @@
+import json
 import logging
 import os.path
 from typing import Optional
@@ -36,7 +37,7 @@ class OsTicket(object):
             email=email,
             subject=subject,
             message=message,
-            attachments=[{"order.json": f"data:text/plain;charset=utf-8,{order_json}"}],
+            attachments=[{"order.json": f"data:text/plain;charset=utf-8,{json.dumps(order_json)}"}],
         )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:

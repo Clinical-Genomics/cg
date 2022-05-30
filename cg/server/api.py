@@ -86,7 +86,7 @@ def submit_order(order_type):
     error_message: str
     try:
         request_json = request.get_json()
-        LOG.info("processing order: %s, %s", request_json)
+        LOG.info("processing order: %s, %s", json.dumps(request_json))
         project: OrderType = OrderType(order_type)
         order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
 
