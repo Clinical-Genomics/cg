@@ -30,7 +30,7 @@ class OsTicket(object):
         self.url = os.path.join(domain, "api/tickets.json")
 
     def open_ticket(
-        self, name: str, email: str, attachments: List[dict], subject: str, message: str
+        self, name: str, email: str, attachment: dict, subject: str, message: str
     ) -> Optional[int]:
         """Open a new ticket through the REST API."""
         data = dict(
@@ -38,7 +38,7 @@ class OsTicket(object):
             email=email,
             subject=subject,
             message=message,
-            attachments=attachments,
+            attachments=[attachment],
         )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
@@ -52,8 +52,8 @@ class OsTicket(object):
         raise TicketCreationError(res)
 
     @staticmethod
-    def create_attachments(
+    def create_attachment(
         order_dict: dict,
         file_name: str = "order.json",
-    ) -> List[dict]:
-        return [{file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(order_dict))}]
+    ) -> dict:
+        return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(order_dict))}

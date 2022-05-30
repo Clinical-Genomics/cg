@@ -35,7 +35,7 @@ class MockOsTicket(OsTicket):
         self.url = os.path.join(domain, "api/tickets.json")
 
     def open_ticket(
-        self, name: str, email: str, subject: str, message: str, attachments: List[dict]
+        self, name: str, email: str, subject: str, message: str, attachment: List[dict]
     ) -> Optional[int]:
         """Open a new ticket through the REST API."""
         if self._should_fail:
