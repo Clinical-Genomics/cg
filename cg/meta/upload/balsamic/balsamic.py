@@ -29,7 +29,7 @@ class BalsamicUploadAPI(UploadAPI):
         if DataDelivery.SCOUT in case_obj.data_delivery:
             self.update_upload_started_at(analysis_obj)
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
-            self.update_upload_started_at(analysis_obj)
+            self.update_uploaded_at(analysis_obj)
         else:
             LOG.warning(
                 f"There is nothing to upload for case {case_obj.internal_id} and "
