@@ -32,11 +32,13 @@ class TicketHandler:
         return None
 
     def create_ticket(
-        self, order: OrderIn, order_dict: dict, user_name: str, user_mail: str, project: str
+        self, order: OrderIn, user_name: str, user_mail: str, project: str
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
-        attachments = self.osticket.create_attachment(order_dict=order_dict)
+        attachments = self.osticket.create_attachment(
+            content=self.clean_empty_string(dirty=order.dict()), file_name="order.json"
+        )
         ticket_nr: Optional[int] = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
@@ -130,3 +132,18 @@ class TicketHandler:
         customer: models.Customer = self.status_db.customer(customer_id)
         message += f", {customer.name} ({customer_id})"
         return message
+
+    @classmethod
+    def clean_empty_string(cls, dirty):
+        """Recursive function that replaces empty string in nested dicts/lists with None"""
+        if dirty == "":
+            return None
+        if isinstance(dirty, dict):
+            for key, item in dirty.items():
+                if isinstance(item, list):
+                    clean_list = [cls.clean_empty_string(list_item) for list_item in item]
+                    dirty[key] = clean_list
+                else:
+                    dirty[key] = cls.clean_empty_string(item)
+        clean = dirty
+        return clean

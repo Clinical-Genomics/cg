@@ -31,7 +31,7 @@ class OsTicket(object):
 
     def open_ticket(
         self, name: str, email: str, attachment: dict, subject: str, message: str
-    ) -> Optional[int]:
+    ) -> int:
         """Open a new ticket through the REST API."""
         data = dict(
             name=name,
@@ -42,18 +42,10 @@ class OsTicket(object):
         )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
-            try:
-                return int(res.text)
-            except ValueError:
-                LOG.error("Could not convert res %s to int", res.text)
-                return None
-
+            return int(res.text)
         LOG.error("res.text: %s, reason: %s", res.text, res.reason)
         raise TicketCreationError(res)
 
     @staticmethod
-    def create_attachment(
-        order_dict: dict,
-        file_name: str = "order.json",
-    ) -> dict:
-        return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(order_dict))}
+    def create_attachment(content: dict, file_name: str) -> dict:
+        return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(content))}
