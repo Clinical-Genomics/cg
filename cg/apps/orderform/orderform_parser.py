@@ -81,12 +81,17 @@ class OrderformParser(BaseModel):
 
         return [pools[pool_name] for pool_name in pools]
 
-    def expand_case(self, case_id: str, case_samples: List[OrderSample]) -> OrderCase:
+    @staticmethod
+    def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
         priorities = {sample.priority for sample in case_samples if sample.priority}
         if len(priorities) != 1:
             raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
+
+        synopsis = {sample.synopsis for sample in case_samples if sample.synopsis}
+        if len(synopsis) > 1:
+            raise OrderFormError(f"multiple values for 'Synopsis' for case: {case_id}")
 
         gene_panels = set()
         for sample in case_samples:
@@ -94,11 +99,19 @@ class OrderformParser(BaseModel):
                 continue
             gene_panels.update(set(sample.panels))
 
+        cohorts = set()
+        for sample in case_samples:
+            if not sample.cohorts:
+                continue
+            cohorts.update(set(sample.cohorts))
+
         return OrderCase(
+            cohorts=list(cohorts),
             name=case_id,
             samples=case_samples,
             priority=priorities.pop(),
             panels=list(gene_panels),
+            synopsis=synopsis.pop() if synopsis else None,
         )
 
     def generate_orderform(self) -> Orderform:
