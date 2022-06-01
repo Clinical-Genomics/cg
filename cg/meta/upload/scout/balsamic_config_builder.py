@@ -56,14 +56,20 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             config_sample.phenotype = "unaffected"
             config_sample.sample_id = "NORMAL"
 
-        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=db_sample.sample)
+        config_sample.analysis_type = self.get_balsamic_analysis_type(db_sample.sample)
+
+        return config_sample
+
+    def get_balsamic_analysis_type(self, sample: models.Sample) -> str:
+        """Returns a formatted balsamic analysis type"""
+
+        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":
             analysis_type = "wgs"
 
-        config_sample.analysis_type = analysis_type
-        return config_sample
+        return analysis_type
 
     def build_load_config(self) -> None:
         LOG.info("Build load config for balsamic case")
