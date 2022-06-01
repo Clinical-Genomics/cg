@@ -152,19 +152,14 @@ class CaseSubmitter(Submitter):
 
         for case_name, case_samples in cases.items():
 
-            cohorts: Set[str] = {
-                cohort for sample in case_samples for cohort in sample.cohorts if cohort
-            }
-            synopsis: str = ", ".join(set(sample.synopsis or "" for sample in case_samples))
-
             case_internal_id: str = cls._get_single_value(
                 case_name, case_samples, "case_internal_id"
             )
+            cohorts: Set[str] = {
+                cohort for sample in case_samples for cohort in sample.cohorts if cohort
+            }
             data_analysis = cls._get_single_value(case_name, case_samples, "data_analysis")
             data_delivery = cls._get_single_value(case_name, case_samples, "data_delivery")
-            priority = cls._get_single_value(
-                case_name, case_samples, "priority", Priority.standard.name
-            )
 
             panels: Set[str] = set()
             if data_analysis == Pipeline.MIP_DNA:
@@ -172,8 +167,13 @@ class CaseSubmitter(Submitter):
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
 
+            priority = cls._get_single_value(
+                case_name, case_samples, "priority", Priority.standard.name
+            )
+            synopsis: str = cls._get_single_value(case_name, case_samples, "synopsis")
+
             case = {
-                "cohorts": cohorts,
+                "cohorts": list(cohorts),
                 "data_analysis": data_analysis,
                 "data_delivery": data_delivery,
                 "internal_id": case_internal_id,

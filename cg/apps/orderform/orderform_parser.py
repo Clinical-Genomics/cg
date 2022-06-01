@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 from pydantic import constr, BaseModel
 
@@ -85,32 +85,34 @@ class OrderformParser(BaseModel):
     def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
-        priorities = {sample.priority for sample in case_samples if sample.priority}
+        priorities: Set[str] = {sample.priority for sample in case_samples if sample.priority}
         if len(priorities) != 1:
             raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
 
-        synopsis = {sample.synopsis for sample in case_samples if sample.synopsis}
+        synopsis: Set[str] = {sample.synopsis for sample in case_samples if sample.synopsis}
         if len(synopsis) > 1:
             raise OrderFormError(f"multiple values for 'Synopsis' for case: {case_id}")
 
-        gene_panels = set()
-        for sample in case_samples:
-            if not sample.panels:
-                continue
-            gene_panels.update(set(sample.panels))
+        cohorts: Set[str] = set()
+        for sample_idx, sample in enumerate(case_samples):
+            if sample_idx == 0:
+                cohorts = set(sample.cohorts) if sample.cohorts else set()
+            elif cohorts != set(sample.cohorts) if sample.cohorts else set():
+                raise OrderFormError(f"multiple values for 'Cohorts' for case: {case_id}")
 
-        cohorts = set()
-        for sample in case_samples:
-            if not sample.cohorts:
-                continue
-            cohorts.update(set(sample.cohorts))
+        panels: Set[str] = set()
+        for sample_idx, sample in enumerate(case_samples):
+            if sample_idx == 0:
+                panels = set(sample.panels) if sample.panels else set()
+            elif panels != set(sample.panels) if sample.panels else set():
+                raise OrderFormError(f"multiple values for 'Gene Panels' for case: {case_id}")
 
         return OrderCase(
             cohorts=list(cohorts),
             name=case_id,
             samples=case_samples,
             priority=priorities.pop(),
-            panels=list(gene_panels),
+            panels=list(panels),
             synopsis=synopsis.pop() if synopsis else None,
         )
 
