@@ -70,9 +70,13 @@ class MutantAnalysisAPI(AnalysisAPI):
             if not sample_obj.sequencing_qc:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj, sample_obj=sample_obj, concatenate=True
-            )
+            sequencing_platform = "nanopore"
+            if sequencing_platform == "nanopore":
+                self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
+            else:
+                self.link_fastq_files_for_sample(
+                    case_obj=case_obj, sample_obj=sample_obj, concatenate=True
+                )
 
     def get_sample_parameters(self, sample_obj: models.Sample) -> MutantSampleConfig:
         return MutantSampleConfig(
