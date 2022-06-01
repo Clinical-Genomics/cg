@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Optional
+from typing import Optional, Any
 
 from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
@@ -36,19 +36,22 @@ class TicketHandler:
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
         message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
-        attachments = self.osticket.create_attachment(
-            content=self.clean_empty_string(dirty=order.dict()), file_name="order.json"
-        )
+        attachment: dict = self.create_attachment(order=order)
         ticket_nr: Optional[int] = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
             subject=order.name,
             message=message,
-            attachment=attachments,
+            attachment=attachment,
         )
         LOG.info(f"{ticket_nr}: opened new ticket")
 
         return ticket_nr
+
+    def create_attachment(self, order: OrderIn):
+        return self.osticket.create_attachment(
+            content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
+        )
 
     def create_new_ticket_message(self, order: OrderIn, user_name: str, project: str) -> str:
         message = (
@@ -134,16 +137,17 @@ class TicketHandler:
         return message
 
     @classmethod
-    def clean_empty_string(cls, dirty):
+    def replace_empty_string_with_none(cls, obj: Any) -> Any:
         """Recursive function that replaces empty string in nested dicts/lists with None"""
-        if dirty == "":
+        if obj == "":
             return None
-        if isinstance(dirty, dict):
-            for key, item in dirty.items():
+        if isinstance(obj, dict):
+            for key, item in obj.items():
                 if isinstance(item, list):
-                    clean_list = [cls.clean_empty_string(list_item) for list_item in item]
-                    dirty[key] = clean_list
+                    processed_list = [
+                        cls.replace_empty_string_with_none(list_item) for list_item in item
+                    ]
+                    obj[key] = processed_list
                 else:
-                    dirty[key] = cls.clean_empty_string(item)
-        clean = dirty
-        return clean
+                    obj[key] = cls.replace_empty_string_with_none(item)
+        return obj

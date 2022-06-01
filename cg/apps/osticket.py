@@ -1,7 +1,6 @@
 import json
 import logging
 import os.path
-from typing import Optional, List
 
 import requests
 from flask import Flask
@@ -30,7 +29,7 @@ class OsTicket(object):
         self.url = os.path.join(domain, "api/tickets.json")
 
     def open_ticket(
-        self, name: str, email: str, attachment: dict, subject: str, message: str
+        self, attachment: dict, email: str, message: str, name: str, subject: str
     ) -> int:
         """Open a new ticket through the REST API."""
         data = dict(

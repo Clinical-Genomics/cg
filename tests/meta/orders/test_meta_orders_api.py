@@ -1,12 +1,8 @@
 import datetime as dt
-import subprocess
-from unittest import mock
 from unittest.mock import patch
 
 import pytest
 from cgmodels.cg.constants import Pipeline
-
-from cg.apps.osticket import OsTicket
 from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
@@ -72,7 +68,7 @@ def test_submit(
     # WHEN submitting the order
 
     result = orders_api.submit(
-        project=order_type, order_dict=order_data.dict(), user_name=user_name, user_mail=user_mail
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
 
     # THEN the result should contain the ticket number for the order
@@ -99,7 +95,7 @@ def monkeypatch_process_lims(monkeypatch, order_data):
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_ticketexception(
-    all_json_orders_to_submit,
+    all_orders_to_submit,
     base_store: Store,
     monkeypatch,
     orders_api: OrdersAPI,
@@ -109,8 +105,8 @@ def test_submit_ticketexception(
     user_name: str,
 ):
     # GIVEN an order that does not have a name (ticket_nr)
-    order_data = all_json_orders_to_submit[order_type]
-    order_data["name"] = "dummy_name"
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    order_data.name = "dummy_name"
     with patch("cg.apps.osticket.OsTicket") as os_mock:
         orders_api.ticket_handler.osticket = os_mock.return_value
         orders_api.ticket_handler.osticket.open_ticket.side_effect = TicketCreationError("ERROR")
@@ -120,7 +116,7 @@ def test_submit_ticketexception(
     with pytest.raises(TicketCreationError):
         orders_api.submit(
             project=order_type,
-            order_dict=order_data,
+            order_in=order_data,
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -169,7 +165,7 @@ def test_submit_illegal_sample_customer(
     with pytest.raises(OrderError):
         orders_api.submit(
             project=order_type,
-            order_dict=order_data.dict(),
+            order_in=order_data,
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -226,7 +222,7 @@ def test_submit_scout_legal_sample_customer(
     # WHEN calling submit
     # THEN an OrderError should not be raised on illegal customer
     orders_api.submit(
-        project=order_type, order_dict=order_data.dict(), user_name=user_name, user_mail=user_mail
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
 
 
@@ -267,7 +263,7 @@ def test_submit_duplicate_sample_case_name(
     with pytest.raises(OrderError):
         orders_api.submit(
             project=order_type,
-            order_dict=order_data.dict(),
+            order_in=order_data,
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -291,7 +287,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
     monkeypatch_process_lims(monkeypatch, order_data)
 
     orders_api.submit(
-        project=order_type, order_dict=order_data.dict(), user_name=user_name, user_mail=user_mail
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
 
     # WHEN calling submit
@@ -299,7 +295,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
     with pytest.raises(OrderError):
         orders_api.submit(
             project=order_type,
-            order_dict=order_data.dict(),
+            order_in=order_data,
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -329,7 +325,7 @@ def test_submit_unique_sample_case_name(
     # WHEN calling submit
     orders_api.submit(
         project=OrderType.MIP_DNA,
-        order_dict=order_data.dict(),
+        order_in=order_data,
         user_name=user_name,
         user_mail=user_mail,
     )
@@ -489,7 +485,7 @@ def test_submit_unique_sample_name(
 
     # WHEN calling submit
     orders_api.submit(
-        project=order_type, order_dict=order_data.dict(), user_name=user_name, user_mail=user_mail
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
 
     # Then no exception about duplicate names should be thrown
@@ -520,7 +516,7 @@ def test_sarscov2_submit_duplicate_sample_name(
     with pytest.raises(OrderError):
         orders_api.submit(
             project=order_type,
-            order_dict=order_data.dict(),
+            order_in=order_data,
             user_name=user_name,
             user_mail=user_mail,
         )
@@ -566,7 +562,7 @@ def test_not_sarscov2_submit_duplicate_sample_name(
 
     # WHEN calling submit
     orders_api.submit(
-        project=order_type, order_dict=order_data.dict(), user_name=user_name, user_mail=user_mail
+        project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
     )
 
     # THEN no OrderError should be raised on duplicate sample name

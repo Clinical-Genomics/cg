@@ -6,7 +6,6 @@ The normal entry for information is through the REST API which will pass a JSON
 document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
-import json
 import logging
 from typing import Optional
 
@@ -59,12 +58,11 @@ class OrdersAPI:
         self.status = status
         self.ticket_handler: TicketHandler = TicketHandler(osticket_api=osticket, status_db=status)
 
-    def submit(self, project: OrderType, order_dict: dict, user_name: str, user_mail: str) -> dict:
+    def submit(self, project: OrderType, order_in: OrderIn, user_name: str, user_mail: str) -> dict:
         """Submit a batch of samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
-        order_in: OrderIn = OrderIn.parse_obj(order_dict, project=project)
         submit_handler: Submitter = _get_submit_handler(project, lims=self.lims, status=self.status)
         submit_handler.validate_order(order=order_in)
 
@@ -76,5 +74,4 @@ class OrdersAPI:
             )
 
         order_in.ticket = ticket_number
-        submit_handler.validate_order(order=order_in)
         return submit_handler.submit_order(order=order_in)
