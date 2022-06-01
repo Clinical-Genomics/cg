@@ -2,7 +2,7 @@
 
 import logging
 import os.path
-from typing import Optional
+from typing import Optional, List
 
 from flask import Flask
 
@@ -34,7 +34,9 @@ class MockOsTicket(OsTicket):
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
 
-    def open_ticket(self, name: str, email: str, subject: str, message: str) -> Optional[int]:
+    def open_ticket(
+        self, attachment: dict, email: str, message: str, name: str, subject: str
+    ) -> Optional[int]:
         """Open a new ticket through the REST API."""
         if self._should_fail:
             LOG.error("res.text: %s, reason: %s", self._ticket_nr, "Unknown reason")
