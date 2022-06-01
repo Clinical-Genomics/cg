@@ -1,6 +1,6 @@
+import json
 import logging
 import os.path
-from typing import Optional
 
 import requests
 from flask import Flask
@@ -8,6 +8,7 @@ from flask import Flask
 from cg.exc import TicketCreationError
 
 LOG = logging.getLogger(__name__)
+TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 
 class OsTicket(object):
@@ -27,16 +28,23 @@ class OsTicket(object):
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
 
-    def open_ticket(self, name: str, email: str, subject: str, message: str) -> Optional[int]:
+    def open_ticket(
+        self, attachment: dict, email: str, message: str, name: str, subject: str
+    ) -> int:
         """Open a new ticket through the REST API."""
-        data = dict(name=name, email=email, subject=subject, message=message)
+        data = dict(
+            name=name,
+            email=email,
+            subject=subject,
+            message=message,
+            attachments=[attachment],
+        )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
-            try:
-                return int(res.text)
-            except ValueError:
-                LOG.error("Could not convert res %s to int", res.text)
-                return None
-
+            return int(res.text)
         LOG.error("res.text: %s, reason: %s", res.text, res.reason)
         raise TicketCreationError(res)
+
+    @staticmethod
+    def create_attachment(content: dict, file_name: str) -> dict:
+        return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(content))}

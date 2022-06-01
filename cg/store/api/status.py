@@ -633,12 +633,7 @@ class StatusHandler(BaseHandler):
             analyses_query.filter(models.Analysis.uploaded_at)
             .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(
-                or_(
-                    models.Family.data_analysis.is_(None),
-                    models.Family.data_analysis == str(pipeline),
-                )
-            )
+            .filter(models.Analysis.pipeline == str(pipeline))
             .filter(
                 models.Sample.delivered_at.isnot(None),
                 or_(
