@@ -85,7 +85,15 @@ class OrderformParser(BaseModel):
     def _get_single_value(
         items_id: str, items: Iterable, attr: str, default_value: Hashable = None
     ) -> Hashable:
-        values: Set[Hashable] = set(getattr(item, attr) or default_value for item in items)
+        """
+        Get single value from a bunch of items, will raise if value not same on all items
+        @param items_id:        id of items group (e.g. case-id)
+        @param items:           some items (e.g. samples)
+        @param attr:            one attribute of item containing a value (e.g. synopsis)
+        @param default_value:   default value to use if item has an empty value of attr
+        @return:                a value with the attribute of item in items
+        """
+        values: Set[Hashable] = set(getattr(item, attr, default_value) for item in items)
         if len(values) > 1:
             raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
 
@@ -93,6 +101,13 @@ class OrderformParser(BaseModel):
 
     @staticmethod
     def _get_single_set(items_id: str, items: Iterable, attr: str) -> Set[Hashable]:
+        """
+        Get single value (set) from a bunch of items, will raise if value not same on all items
+        @param items_id: id of items group (e.g. case-id)
+        @param items:    some items (e.g. samples)
+        @param attr:     one attribute of item containing a list (e.g. panels)
+        @return:         a set with the attribute of item in items
+        """
         values: Set[Hashable] = set()
         for item_idx, item in enumerate(items):
             if item_idx == 0:
