@@ -223,7 +223,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         if not external_ref:
             batch_ref_flag = "--batch-ref"
         else:
-            batch_ref_flag = None
+            batch_ref_flag = ""
         command_args = [
             "--config",
             workflow_config,
