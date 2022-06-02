@@ -103,8 +103,8 @@ class OrderformParser(BaseModel):
     def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
-        priority: Set[str] = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='priority')
-        synopsis: Set[str] = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='synopsis')
+        priority: str = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='priority')
+        synopsis: str = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='synopsis')
         cohorts: Set[str] = OrderformParser._get_single_set(items_id=case_id, items=case_samples, attr='cohorts')
         panels: Set[str] = OrderformParser._get_single_set(items_id=case_id, items=case_samples, attr='panels')
 
