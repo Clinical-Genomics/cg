@@ -111,10 +111,10 @@ class OrderformParser(BaseModel):
         synopsis: Hashable[str] = OrderformParser._get_single_value(
             items_id=case_id, items=case_samples, attr="synopsis"
         )
-        cohorts: Set[str] = OrderformParser._get_single_set(
+        cohorts: Set[Hashable[str]] = OrderformParser._get_single_set(
             items_id=case_id, items=case_samples, attr="cohorts"
         )
-        panels: Set[str] = OrderformParser._get_single_set(
+        panels: Set[Hashable[str]] = OrderformParser._get_single_set(
             items_id=case_id, items=case_samples, attr="panels"
         )
 
