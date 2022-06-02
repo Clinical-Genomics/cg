@@ -171,7 +171,7 @@
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-16171-81",
-      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
       "volume": "1",
       "well_position": "A1"
     },
@@ -206,7 +206,7 @@
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-20212-22",
-      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
       "volume": "1",
       "well_position": ""
     },
