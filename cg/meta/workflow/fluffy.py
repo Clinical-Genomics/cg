@@ -207,7 +207,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 samplesheet_workdir_path=samplesheet_workdir_path,
             )
 
-    def run_fluffy(self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False) -> None:
+    def run_fluffy(
+        self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False
+    ) -> None:
         """
         Call fluffy with the configured command-line arguments
         """

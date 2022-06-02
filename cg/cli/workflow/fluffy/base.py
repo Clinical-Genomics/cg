@@ -59,7 +59,9 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    analysis_api.run_fluffy(case_id=case_id, workflow_config=config, dry_run=dry_run, external_ref=external_ref)
+    analysis_api.run_fluffy(
+        case_id=case_id, workflow_config=config, dry_run=dry_run, external_ref=external_ref
+    )
     if dry_run:
         return
     # Submit analysis for tracking in Trailblazer
@@ -78,7 +80,9 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @click.option("-e", "--external-ref", is_flag=True)
 @click.pass_context
-def start(context: click.Context, case_id: str, dry_run: bool, external_ref: bool, config: str = None):
+def start(
+    context: click.Context, case_id: str, dry_run: bool, external_ref: bool, config: str = None
+):
     """
     Starts full Fluffy analysis workflow
     """
@@ -88,7 +92,9 @@ def start(context: click.Context, case_id: str, dry_run: bool, external_ref: boo
     try:
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(create_samplesheet, case_id=case_id, dry_run=dry_run)
-        context.invoke(run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref)
+        context.invoke(
+            run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref
+        )
     except DecompressionNeededError as e:
         LOG.error(e.message)
 
