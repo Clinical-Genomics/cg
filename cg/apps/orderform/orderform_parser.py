@@ -82,7 +82,9 @@ class OrderformParser(BaseModel):
         return [pools[pool_name] for pool_name in pools]
 
     @staticmethod
-    def _get_single_value(items_id: str, items: Iterable, attr: str, default_value: Hashable = None) -> Hashable:
+    def _get_single_value(
+        items_id: str, items: Iterable, attr: str, default_value: Hashable = None
+    ) -> Hashable:
         values: Set[Hashable] = set(getattr(item, attr) or default_value for item in items)
         if len(values) > 1:
             raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
@@ -103,10 +105,18 @@ class OrderformParser(BaseModel):
     def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
-        priority: str = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='priority')
-        synopsis: str = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='synopsis')
-        cohorts: Set[str] = OrderformParser._get_single_set(items_id=case_id, items=case_samples, attr='cohorts')
-        panels: Set[str] = OrderformParser._get_single_set(items_id=case_id, items=case_samples, attr='panels')
+        priority: Hashable[str] = OrderformParser._get_single_value(
+            items_id=case_id, items=case_samples, attr="priority"
+        )
+        synopsis: Hashable[str] = OrderformParser._get_single_value(
+            items_id=case_id, items=case_samples, attr="synopsis"
+        )
+        cohorts: Set[str] = OrderformParser._get_single_set(
+            items_id=case_id, items=case_samples, attr="cohorts"
+        )
+        panels: Set[str] = OrderformParser._get_single_set(
+            items_id=case_id, items=case_samples, attr="panels"
+        )
 
         return OrderCase(
             cohorts=list(cohorts),

@@ -58,7 +58,7 @@ class CaseSubmitter(Submitter):
                     )
 
     def _validate_samples_available_to_customer(
-            self, samples: List[OrderInSample], customer_id: str
+        self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the customer have access to all samples"""
         sample: Of1508Sample
@@ -73,7 +73,7 @@ class CaseSubmitter(Submitter):
                 raise OrderError(f"Sample not available: {sample.name}")
 
     def _validate_case_names_are_unique(
-            self, samples: List[OrderInSample], customer_id: str
+        self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
         customer_obj: models.Customer = self.status.customer(customer_id)
@@ -158,8 +158,12 @@ class CaseSubmitter(Submitter):
             cohorts: Set[str] = {
                 cohort for sample in case_samples for cohort in sample.cohorts if cohort
             }
-            data_analysis = CaseSubmitter._get_single_value(case_name, case_samples, "data_analysis")
-            data_delivery = CaseSubmitter._get_single_value(case_name, case_samples, "data_delivery")
+            data_analysis = CaseSubmitter._get_single_value(
+                case_name, case_samples, "data_analysis"
+            )
+            data_delivery = CaseSubmitter._get_single_value(
+                case_name, case_samples, "data_delivery"
+            )
 
             panels: Set[str] = set()
             if data_analysis == Pipeline.MIP_DNA:
@@ -207,7 +211,7 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-            self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
 
