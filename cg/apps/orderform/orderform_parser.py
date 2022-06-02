@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Hashable, Iterable
 
 from pydantic import constr, BaseModel
 
@@ -82,38 +82,39 @@ class OrderformParser(BaseModel):
         return [pools[pool_name] for pool_name in pools]
 
     @staticmethod
+    def _get_single_value(items_id: str, items: Iterable, attr: str, default_value: Hashable = None) -> Hashable:
+        values: Set[Hashable] = set(getattr(item, attr) or default_value for item in items)
+        if len(values) > 1:
+            raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
+
+        return values.pop()
+
+    @staticmethod
+    def _get_single_set(items_id: str, items: Iterable, attr: str) -> Set[Hashable]:
+        values: Set[Hashable] = set()
+        for item_idx, item in enumerate(items):
+            if item_idx == 0:
+                values = set(getattr(item, attr)) if getattr(item, attr) else set()
+            elif values != set(getattr(item, attr)) if getattr(item, attr) else set():
+                raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
+        return values
+
+    @staticmethod
     def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
-        priorities: Set[str] = {sample.priority for sample in case_samples if sample.priority}
-        if len(priorities) != 1:
-            raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
-
-        synopsis: Set[str] = {sample.synopsis for sample in case_samples if sample.synopsis}
-        if len(synopsis) > 1:
-            raise OrderFormError(f"multiple values for 'Synopsis' for case: {case_id}")
-
-        cohorts: Set[str] = set()
-        for sample_idx, sample in enumerate(case_samples):
-            if sample_idx == 0:
-                cohorts = set(sample.cohorts) if sample.cohorts else set()
-            elif cohorts != set(sample.cohorts) if sample.cohorts else set():
-                raise OrderFormError(f"multiple values for 'Cohorts' for case: {case_id}")
-
-        panels: Set[str] = set()
-        for sample_idx, sample in enumerate(case_samples):
-            if sample_idx == 0:
-                panels = set(sample.panels) if sample.panels else set()
-            elif panels != set(sample.panels) if sample.panels else set():
-                raise OrderFormError(f"multiple values for 'Gene Panels' for case: {case_id}")
+        priority: Set[str] = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='priority')
+        synopsis: Set[str] = OrderformParser._get_single_value(items_id=case_id, items=case_samples, attr='synopsis')
+        cohorts: Set[str] = OrderformParser._get_single_set(items_id=case_id, items=case_samples, attr='cohorts')
+        panels: Set[str] = OrderformParser._get_single_set(items_id=case_id, items=case_samples, attr='panels')
 
         return OrderCase(
             cohorts=list(cohorts),
             name=case_id,
             samples=case_samples,
-            priority=priorities.pop(),
+            priority=priority,
             panels=list(panels),
-            synopsis=synopsis.pop() if synopsis else None,
+            synopsis=synopsis,
         )
 
     def generate_orderform(self) -> Orderform:
