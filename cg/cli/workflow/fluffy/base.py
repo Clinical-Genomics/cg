@@ -11,6 +11,7 @@ OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
 )
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+OPTION_EXTERNAL_REF = click.option("-e", "--external-ref", is_flag=True)
 
 LOG = logging.getLogger(__name__)
 
@@ -52,6 +53,7 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
+@OPTION_EXTERNAL_REF
 @click.pass_obj
 def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_ref: bool = False):
     """
@@ -78,7 +80,7 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
-@click.option("-e", "--external-ref", is_flag=True)
+@OPTION_EXTERNAL_REF
 @click.pass_context
 def start(
     context: click.Context, case_id: str, dry_run: bool, external_ref: bool = False, config: str = None
