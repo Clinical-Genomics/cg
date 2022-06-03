@@ -81,7 +81,7 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
 @click.option("-e", "--external-ref", is_flag=True)
 @click.pass_context
 def start(
-    context: click.Context, case_id: str, dry_run: bool, external_ref: bool, config: str = None
+    context: click.Context, case_id: str, dry_run: bool, external_ref: bool = False, config: str = None
 ):
     """
     Starts full Fluffy analysis workflow
