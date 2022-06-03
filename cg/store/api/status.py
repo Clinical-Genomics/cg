@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -633,7 +633,12 @@ class StatusHandler(BaseHandler):
             analyses_query.filter(models.Analysis.uploaded_at)
             .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(models.Analysis.pipeline == str(pipeline))
+            .filter(
+                and_(
+                    models.Analysis.pipeline == str(pipeline),
+                    models.Family.data_delivery.contains(DataDelivery.SCOUT),
+                )
+            )
             .filter(
                 models.Sample.delivered_at.isnot(None),
                 or_(
