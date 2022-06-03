@@ -23,6 +23,7 @@ def test_osticket_respone_500(monkeypatch, caplog, response):
             email="dummy_email",
             subject="dummy_subject",
             message="dummy_message",
+            attachment={},
         )
 
     # THEN the response text and reason was logged and a ticket creation error raised
