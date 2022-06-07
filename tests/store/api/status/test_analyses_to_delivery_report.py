@@ -13,7 +13,11 @@ def test_missing(analysis_store: Store, helpers):
     pipeline = Pipeline.BALSAMIC
     timestamp = datetime.now()
     analysis = helpers.add_analysis(
-        analysis_store, started_at=timestamp, uploaded_at=timestamp, pipeline=pipeline
+        analysis_store,
+        started_at=timestamp,
+        uploaded_at=timestamp,
+        pipeline=pipeline,
+        data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
