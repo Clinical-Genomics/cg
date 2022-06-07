@@ -641,14 +641,15 @@ class StatusHandler(BaseHandler):
                 and_(
                     models.Analysis.pipeline == str(pipeline),
                     models.Family.data_delivery.contains(DataDelivery.SCOUT),
+                    models.Sample.delivered_at.isnot(None),
                 )
             )
             .filter(
-                models.Sample.delivered_at.isnot(None),
                 or_(
                     models.Analysis.delivery_report_created_at.is_(None),
                     and_(
                         models.Analysis.delivery_report_created_at.isnot(None),
+                        models.Analysis.delivery_report_created_at > VALID_DATA_IN_PRODUCTION,
                         models.Analysis.delivery_report_created_at < models.Sample.delivered_at,
                     ),
                 ),
