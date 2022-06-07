@@ -108,8 +108,10 @@ class BalsamicLoadConfig(ScoutLoadConfig):
             raise ValueError("Vcf can not be none")
         return v
 
+
 class BalsamicQCLoadConfig(BalsamicLoadConfig):
     pass
+
 
 class BalsamicUmiLoadConfig(BalsamicLoadConfig):
     pass

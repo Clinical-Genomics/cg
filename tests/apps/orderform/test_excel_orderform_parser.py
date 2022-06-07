@@ -47,6 +47,7 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.BALSAMIC
 
+
 def test_parse_balsamic_qc_orderform(balsamic_qc_orderform: str):
     """Test to parse a balsamic QC orderform in excel format"""
     # GIVEN a orderform in excel format

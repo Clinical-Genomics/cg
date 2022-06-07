@@ -16,11 +16,13 @@ def balsamic_orderform(orderforms: Path) -> str:
     _file = orderforms / "1508.26.balsamic.xlsx"
     return str(_file)
 
+
 @pytest.fixture
 def balsamic_qc_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic QC samples"""
     _file = orderforms / "1508.26.balsamic_qc.xlsx"
     return str(_file)
+
 
 @pytest.fixture
 def balsamic_umi_orderform(orderforms: Path) -> str:

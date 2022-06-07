@@ -444,6 +444,7 @@ def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analy
         link_object.family.data_analysis = Pipeline.BALSAMIC
     return analysis_obj
 
+
 @pytest.fixture(name="balsamic_qc_analysis_obj")
 def fixture_balsamic_qc_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
     analysis_obj.pipeline = Pipeline.BALSAMIC_QC

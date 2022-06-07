@@ -154,8 +154,10 @@ class MipDnaSample(Of1508Sample):
 class BalsamicSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC
 
+
 class BalsamicQCSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC_QC
+
 
 class BalsamicUmiSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC_UMI

@@ -122,7 +122,9 @@ def test_to_lims_sarscov2(sarscov2_order_to_submit):
     assert first_sample["udfs"]["volume"] == "1"
 
 
-@pytest.mark.parametrize("project", [OrderType.BALSAMIC, OrderType.BALSAMIC_UMI, OrderType.BALSAMIC_QC])
+@pytest.mark.parametrize(
+    "project", [OrderType.BALSAMIC, OrderType.BALSAMIC_UMI, OrderType.BALSAMIC_QC]
+)
 def test_to_lims_balsamic(balsamic_order_to_submit, project):
 
     # GIVEN a cancer order for a sample

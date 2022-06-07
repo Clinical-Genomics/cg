@@ -53,6 +53,7 @@ def test_generate_balsamic_load_config(
     # THEN assert that the config is a balsamic config
     assert isinstance(config, BalsamicLoadConfig)
 
+
 def test_generate_balsamic_qc_load_config(
     balsamic_qc_analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
