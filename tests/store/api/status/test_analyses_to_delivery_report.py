@@ -1,7 +1,7 @@
 """This file tests the analyses_to_delivery_report part of the status api"""
 from datetime import datetime, timedelta
 
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.store import Store
 from cg.utils.date import get_date
 
@@ -41,6 +41,7 @@ def test_outdated(analysis_store, helpers):
         uploaded_at=timestamp,
         delivery_reported_at=delivery_timestamp,
         pipeline=pipeline,
+        data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
