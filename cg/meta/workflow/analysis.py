@@ -170,7 +170,7 @@ class AnalysisAPI(MetaAPI):
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
         new_analysis: models.Family = self.status_db.add_analysis(
-            pipeline=self.pipeline,
+            pipeline= str(self.pipeline),
             version=pipeline_version,
             started_at=analysis_start,
             completed_at=dt.datetime.now(),
