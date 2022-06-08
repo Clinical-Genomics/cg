@@ -153,7 +153,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert family["data_analysis"] == str(Pipeline.MIP_DNA)
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == Priority.standard.name
-    assert family["cohorts"] == {"Other"}
+    assert family["cohorts"] == ["Other"]
     assert family["synopsis"] == "Här kommer det att komma en väldigt lång text med för synopsis."
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
