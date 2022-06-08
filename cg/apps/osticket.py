@@ -18,15 +18,30 @@ class OsTicket(object):
     def __init__(self):
         self.headers = None
         self.url = None
+        self.susy_smtp = None
+        self.susy_email = None
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
-        self.setup(api_key=app.config["OSTICKET_API_KEY"], domain=app.config["OSTICKET_DOMAIN"])
+        self.setup(
+            api_key=app.config["OSTICKET_API_KEY"],
+            domain=app.config["OSTICKET_DOMAIN"],
+            susy_email=app.config["SUPPORT_SYSTEM_EMAIL"],
+            smtp_server=app.config["SMTP_SERVER"],
+        )
 
-    def setup(self, api_key: str = None, domain: str = None):
+    def setup(
+        self,
+        api_key: str = None,
+        domain: str = None,
+        susy_email: str = None,
+        smtp_server: str = None,
+    ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
+        self.susy_email = susy_email
+        self.susy_smtp = smtp_server
 
     def open_ticket(
         self, attachment: dict, email: str, message: str, name: str, subject: str

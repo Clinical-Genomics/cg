@@ -3,9 +3,11 @@ import re
 from typing import Optional, Any
 
 from cg.apps.osticket import OsTicket
+from cg.models.email import EmailInfo
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store import Store, models
+from cg.utils.email import send_mail
 
 LOG = logging.getLogger(__name__)
 
@@ -151,3 +153,18 @@ class TicketHandler:
                 else:
                     obj[key] = cls.replace_empty_string_with_none(item)
         return obj
+
+    def connect_to_ticket(
+        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: int
+    ) -> None:
+        message: str = self.create_new_ticket_message(
+            order=order, user_name=user_name, project=project
+        )
+        email_info = EmailInfo(
+            receiver_email=self.osticket.susy_email,
+            sender_email=user_mail,
+            subject=f"[{ticket_number}]",
+            message=message,
+            file=None,
+        )
+        send_mail(email_info=email_info)
