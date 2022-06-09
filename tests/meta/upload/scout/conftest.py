@@ -26,6 +26,7 @@ from tests.mocks.mip_analysis_mock import MockMipAnalysis
 LOG = logging.getLogger(__name__)
 SV = "sv.vcf"
 
+
 @pytest.fixture(name="rna_case_id")
 def fixture_rna_case_id() -> str:
     """Return a rna case id"""
