@@ -166,7 +166,7 @@ class TicketHandler:
             # email_server_alias=settings.email_server_alias,
             request_uri=self.osticket.mail_uri,
             recipients=self.osticket.susy_email,
-            mail_title=f"[{ticket_number}]",
+            mail_title=f"[#{ticket_number}]",
             mail_body=message,
         )
         print(email_form)
