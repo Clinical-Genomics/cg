@@ -24,7 +24,7 @@ from tests.store_helpers import StoreHelpers
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 LOG = logging.getLogger(__name__)
-
+SV = "sv.vcf"
 
 @pytest.fixture(name="rna_case_id")
 def fixture_rna_case_id() -> str:
@@ -213,7 +213,7 @@ def fixture_mip_dna_analysis_hk_bundle_data(
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(mip_dna_analysis_dir / "sv.vcf"),
+                "path": str(mip_dna_analysis_dir / SV),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
@@ -341,12 +341,12 @@ def fixture_balsamic_analysis_hk_bundle_data(
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(balsamic_wgs_analysis_dir / "sv.vcf"),
+                "path": str(balsamic_wgs_analysis_dir / SV),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": str(balsamic_wgs_analysis_dir / "sv.vcf"),
+                "path": str(balsamic_wgs_analysis_dir / SV),
                 "archive": False,
                 "tags": ["vcf-umi-snv-clinical"],
             },
