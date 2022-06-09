@@ -72,6 +72,8 @@ def fastq_cmd(
             continue
 
         LOG.info("Searching for FASTQ files in case %s", internal_id)
+        if not case.links:
+            continue
         for link_obj in case.links:
             sample_id: str = link_obj.sample.internal_id
             case_converted: bool = compress_api.compress_fastq(sample_id)
@@ -81,6 +83,7 @@ def fastq_cmd(
             ind_conversion_count += 1
         if case_converted:
             case_conversion_count += 1
+            LOG.info("Considering case %s converted", internal_id)
 
     LOG.info(
         "%s Individuals in %s (completed) cases where compressed",
