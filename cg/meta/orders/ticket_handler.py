@@ -2,12 +2,12 @@ import logging
 import re
 from typing import Optional, Any
 
+from sendmail_container import FormDataRequest
+
 from cg.apps.osticket import OsTicket
-from cg.models.email import EmailInfo
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store import Store, models
-from cg.utils.email import send_mail
 
 LOG = logging.getLogger(__name__)
 
@@ -157,16 +157,16 @@ class TicketHandler:
     def connect_to_ticket(
         self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: int
     ) -> None:
-        LOG.info("Connecting order ti ticket %s", ticket_number)
+        LOG.info("Connecting order to ticket %s", ticket_number)
         message: str = self.create_new_ticket_message(
             order=order, user_name=user_name, project=project
         )
-        email_info = EmailInfo(
-            receiver_email=self.osticket.susy_email,
-            sender_email=user_mail,
-            smtp_server=self.osticket.smtp_server,
-            subject=f"[{ticket_number}]",
-            message=message,
-            file=None,
+        email_form = FormDataRequest(
+            sender_prefix=user_mail,
+            # email_server_alias=settings.email_server_alias,
+            request_uri=self.osticket.mail_uri,
+            recipients=self.osticket.susy_email,
+            mail_title=f"[{ticket_number}]",
+            mail_body=message,
         )
-        send_mail(email_info=email_info)
+        email_form.submit()
