@@ -133,7 +133,7 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
     assert len(case_obj.samples) == 3
     assert case_obj.name == "mipdnacase1"
     assert case_obj.priority == "standard"
-    assert set(case_obj.panels) == set(["AD-HSP", "Ataxi", "Actionable"])
+    assert set(case_obj.panels) == set(["Actionable"])
 
 
 def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
