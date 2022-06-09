@@ -169,4 +169,5 @@ class TicketHandler:
             mail_title=f"[{ticket_number}]",
             mail_body=message,
         )
+        print(email_form)
         email_form.submit()

@@ -31,7 +31,13 @@ class MockOsTicket(OsTicket):
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
 
-    def setup(self, api_key: str = None, domain: str = None):
+    def setup(
+        self,
+        api_key: str = None,
+        domain: str = None,
+        susy_email: str = None,
+        mail_uri: str = None,
+    ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
