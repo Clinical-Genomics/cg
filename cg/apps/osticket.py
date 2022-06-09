@@ -19,7 +19,7 @@ class OsTicket(object):
         self.headers = None
         self.url = None
         self.susy_smtp = None
-        self.susy_email = None
+        self.smtp_server = None
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
@@ -41,7 +41,7 @@ class OsTicket(object):
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
         self.susy_email = susy_email
-        self.susy_smtp = smtp_server
+        self.smtp_server = smtp_server
 
     def open_ticket(
         self, attachment: dict, email: str, message: str, name: str, subject: str

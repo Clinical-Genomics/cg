@@ -19,6 +19,8 @@ class MockOsTicket(OsTicket):
     def __init__(self):
         self.headers = None
         self.url = None
+        self.smtp_server = "dummy.server"
+        self.susy_email = "james.holden@scilifelab.se"
         self._ticket_nr: int = 123456
         self._should_fail: bool = False
         self._return_none: bool = False

@@ -157,12 +157,14 @@ class TicketHandler:
     def connect_to_ticket(
         self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: int
     ) -> None:
+        LOG.info("Connecting order ti ticket %s", ticket_number)
         message: str = self.create_new_ticket_message(
             order=order, user_name=user_name, project=project
         )
         email_info = EmailInfo(
             receiver_email=self.osticket.susy_email,
             sender_email=user_mail,
+            smtp_server=self.osticket.smtp_server,
             subject=f"[{ticket_number}]",
             message=message,
             file=None,

@@ -35,6 +35,7 @@ def test_too_long_order_name():
         OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
+@patch("cg.meta.orders.ticket_handler.send_mail", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -50,6 +51,7 @@ def test_too_long_order_name():
     ],
 )
 def test_submit(
+    mail_patch,
     all_orders_to_submit: dict,
     base_store: Store,
     monkeypatch,
@@ -171,11 +173,13 @@ def test_submit_illegal_sample_customer(
         )
 
 
+@patch("cg.meta.orders.ticket_handler.send_mail", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_scout_legal_sample_customer(
+    mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
@@ -269,11 +273,13 @@ def test_submit_duplicate_sample_case_name(
         )
 
 
+@patch("cg.meta.orders.ticket_handler.send_mail", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.FLUFFY],
 )
 def test_submit_fluffy_duplicate_sample_case_name(
+    mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
@@ -301,7 +307,9 @@ def test_submit_fluffy_duplicate_sample_case_name(
         )
 
 
+@patch("cg.meta.orders.ticket_handler.send_mail", return_value=None)
 def test_submit_unique_sample_case_name(
+    mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
     ticket_number: int,
@@ -453,6 +461,7 @@ def test_validate_sex_unknown_new_sex(
     # THEN no OrderError should be raised on non-matching sex
 
 
+@patch("cg.meta.orders.ticket_handler.send_mail", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -468,6 +477,7 @@ def test_validate_sex_unknown_new_sex(
     ],
 )
 def test_submit_unique_sample_name(
+    mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
@@ -533,6 +543,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
             store.add_commit(sample_obj)
 
 
+@patch("cg.meta.orders.ticket_handler.send_mail", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -545,6 +556,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     ],
 )
 def test_not_sarscov2_submit_duplicate_sample_name(
+    mail_patch,
     all_orders_to_submit: dict,
     helpers: StoreHelpers,
     monkeypatch,
