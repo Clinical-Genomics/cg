@@ -37,10 +37,10 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
-    {"vcf-umi-clinical"},
-    {"vcf-umi-clinical-index"},
-    {"vcf-umi-research"},
-    {"vcf-umi-research-index"},
+    {"vcf-umi-snv-clinical"},
+    {"vcf-umi-snv-clinical-index"},
+    {"vcf-umi-snv-research"},
+    {"vcf-umi-snv-research-index"},
 ]
 
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS.extend(BALSAMIC_ANALYSIS_CASE_TAGS)
