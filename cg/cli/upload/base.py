@@ -31,6 +31,7 @@ from .scout import (
 )
 from .utils import suggest_cases_to_upload
 from .validate import validate
+from ...exc import AnalysisAlreadyUploadedError
 from ...meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from ...meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
 
@@ -57,9 +58,13 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     if context.invoked_subcommand is not None:
         context.obj.meta_apis["upload_api"] = upload_api
     elif family_id:  # Provided case ID without a subcommand: upload everything
-        upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
-        case_obj: models.Family = upload_api.status_db.family(family_id)
-        upload_api.verify_analysis_upload(case_obj=case_obj, restart=restart)
+        try:
+            upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
+            case_obj: models.Family = upload_api.status_db.family(family_id)
+            upload_api.verify_analysis_upload(case_obj=case_obj, restart=restart)
+        except AnalysisAlreadyUploadedError:
+            # Analysis being uploaded or it has been already uploaded
+            return
 
         # Update the upload API based on the data analysis type (MIP-DNA by default)
         if case_obj.data_analysis == Pipeline.BALSAMIC:
