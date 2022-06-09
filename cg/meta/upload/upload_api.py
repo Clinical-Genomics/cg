@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 
 import click
-from cg.exc import AnalysisUploadError
+from cg.exc import AnalysisUploadError, AnalysisAlreadyUploadedError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
@@ -62,7 +62,7 @@ class UploadAPI(MetaAPI):
         analysis_obj: models.Analysis = case_obj.analyses[0]
         if analysis_obj.uploaded_at is not None:
             LOG.error(f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}")
-            raise AnalysisUploadError
+            raise AnalysisAlreadyUploadedError
 
         if not restart and analysis_obj.upload_started_at is not None:
             if datetime.now() - analysis_obj.upload_started_at > timedelta(hours=24):
@@ -73,4 +73,4 @@ class UploadAPI(MetaAPI):
                 raise AnalysisUploadError
 
             LOG.warning(f"The upload has already started: {analysis_obj.upload_started_at.time()}")
-            raise AnalysisUploadError
+            raise AnalysisAlreadyUploadedError
