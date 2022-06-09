@@ -18,7 +18,8 @@ class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Literal[
         "wgs", "wes", "mixed", "unknown", "panel", "panel-umi", "external"
-    ] = None    capture_kit: Optional[str] = None
+    ] = None
+    capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
     confirmed_sex: Optional[bool] = None
     father: Optional[str] = None
