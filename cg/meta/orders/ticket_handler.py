@@ -183,5 +183,7 @@ class TicketHandler:
             ),
             attachments=[Path(json_attachment.name)],
         )
+        print(email_form)
+        print(Path(json_attachment.name).exists())
         email_form.submit()
         json_attachment.close()
