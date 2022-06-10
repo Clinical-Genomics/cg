@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 
 import yaml
+from cgmodels.cg.constants import Pipeline
+
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
@@ -45,16 +47,44 @@ class UploadGenotypesAPI(object):
         if hk_bcf is None:
             LOG.warning("unable to find GBCF for genotype upload")
             return None
-        data = {"bcf": hk_bcf.full_path, "samples_sex": {}}
+        data = {"bcf": hk_bcf.full_path}
+        if analysis_obj.pipeline in [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]:
+            data["samples_sex"] = self._get_sample_sex_balsamic(
+                case_obj=analysis_obj.family, hk_version=hk_version
+            )
+        elif analysis_obj.pipeline == Pipeline.MIP_DNA:
+            data["samples_sex"] = self._get_sample_sex_mip(
+                case_obj=analysis_obj.family, hk_version=hk_version
+            )
+        return data
+
+    def _get_sample_sex_mip(
+        self, case_obj: models.Family, hk_version: housekeeper_models.Version
+    ) -> dict:
         qc_metrics_file = self.get_qcmetrics_file(hk_version)
         analysis_sexes = self.analysis_sex(qc_metrics_file)
-        for link_obj in analysis_obj.family.links:
+        samples_sex = {}
+        for link_obj in case_obj.links:
             sample_id = link_obj.sample.internal_id
-            data["samples_sex"][sample_id] = {
+            samples_sex[sample_id] = {
                 "pedigree": link_obj.sample.sex,
                 "analysis": analysis_sexes[sample_id],
             }
-        return data
+        return samples_sex
+
+    def _get_sample_sex_balsamic(
+        self, case_obj: models.Family, hk_version: housekeeper_models.Version
+    ) -> dict:
+        samples_sex = {}
+        for link_obj in case_obj.links:
+            if link_obj.sample.is_tumour:
+                continue
+            sample_id = link_obj.sample.internal_id
+            samples_sex[sample_id] = {
+                "pedigree": link_obj.sample.sex,
+                "analysis": "unknown",
+            }
+        return samples_sex
 
     def analysis_sex(self, qc_metrics_file: Path) -> dict:
         """Fetch analysis sex for each sample of an analysis."""
@@ -67,7 +97,7 @@ class UploadGenotypesAPI(object):
     def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
         """Fetch a bcf file and return the file object"""
 
-        bcf_file = self.hk.files(version=hk_version_obj.id, tags=["snv-gbcf"]).first()
+        bcf_file = self.hk.files(version=hk_version_obj.id, tags=["genotype"]).first()
         LOG.debug("Found bcf file %s", bcf_file.full_path)
         return bcf_file
 

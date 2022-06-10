@@ -32,7 +32,7 @@ def test_data(coverage_upload_api, analysis_store, case_id):
     analysis_obj = MockAnalysis(case_obj=case_obj)
 
     # WHEN using the data method
-    results = coverage_api.data(analysis_obj=analysis_obj)
+    results = coverage_api._get_mip_data(analysis_obj=analysis_obj)
 
     # THEN this returns the data needed to upload samples to chanjo
     assert results["family"] == case_name

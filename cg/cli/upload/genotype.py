@@ -37,7 +37,7 @@ def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
         raise click.Abort
     case_obj: models.Family = status_db.family(family_id)
     upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
-    results: dict = upload_genotypes_api.data(case_obj.analyses[0])
+    results: dict = upload_genotypes_api._get_mip_data(case_obj.analyses[0])
 
     if not results:
         LOG.warning("Could not find any results to upload")
