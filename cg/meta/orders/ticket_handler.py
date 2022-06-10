@@ -1,7 +1,7 @@
 import logging
 import re
+from pathlib import Path
 from typing import Optional, Any
-import io
 
 from sendmail_container import FormDataRequest
 
@@ -177,4 +177,4 @@ class TicketHandler:
         )
         print(email_form)
         email_form.submit()
-        json_attachment.delete()
+        json_attachment.close()
