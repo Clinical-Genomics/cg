@@ -20,7 +20,7 @@ class MockOsTicket(OsTicket):
         self.headers = None
         self.url = None
         self.susy_email = "james.holden@scilifelab.se"
-        self.mail_uri = "dummy_uri"
+        self.mail_container_uri = "dummy_uri"
         self._ticket_nr: int = 123456
         self._should_fail: bool = False
         self._return_none: bool = False

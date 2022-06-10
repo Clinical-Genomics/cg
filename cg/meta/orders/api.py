@@ -72,7 +72,7 @@ class OrdersAPI:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project
             )
-        else:
+        elif ticket_number != self.ticket_handler.TESTING_TICKET:
             self.ticket_handler.connect_to_ticket(
                 order=order_in,
                 user_name=user_name,

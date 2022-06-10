@@ -18,6 +18,7 @@ class TicketHandler:
 
     NEW_LINE = "<br />"
     MESSAGE_PREFIX = "data:text/html;charset=utf-8"
+    TESTING_TICKET = 123456
 
     def __init__(self, osticket_api: OsTicket, status_db: Store):
         self.osticket: OsTicket = osticket_api
@@ -154,14 +155,19 @@ class TicketHandler:
                     obj[key] = cls.replace_empty_string_with_none(item)
         return obj
 
+    def create_trimmed_new_ticket_message(
+        self, order: OrderIn, user_name: str, project: str
+    ) -> str:
+        """Creates a new order message but trims away the data type and encoding information"""
+        return self.create_new_ticket_message(order=order, user_name=user_name, project=project)[
+            len(self.MESSAGE_PREFIX) + 2 :
+        ]
+
     def connect_to_ticket(
         self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: int
     ) -> None:
+        """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
-        message: str = self.create_new_ticket_message(
-            order=order, user_name=user_name, project=project
-        )
-        trimmed_message: str = message[len(self.MESSAGE_PREFIX) + 2 :]
         sender_prefix, email_server_alias = user_mail.split("@")
         json_attachment: NamedTemporaryFile = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
@@ -169,12 +175,13 @@ class TicketHandler:
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
-            request_uri=self.osticket.mail_uri,
+            request_uri=self.osticket.mail_container_uri,
             recipients=self.osticket.susy_email,
             mail_title=f"[#{ticket_number}]",
-            mail_body=trimmed_message,
+            mail_body=self.create_trimmed_new_ticket_message(
+                order=order, user_name=user_name, project=project
+            ),
             attachments=[Path(json_attachment.name)],
         )
-        print(email_form)
         email_form.submit()
         json_attachment.close()
