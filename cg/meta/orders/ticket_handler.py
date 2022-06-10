@@ -169,8 +169,6 @@ class TicketHandler:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
         sender_prefix, email_server_alias = user_mail.split("@")
-        print("ORDER DICT:")
-        print(order.dict())
         json_attachment: NamedTemporaryFile = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )
@@ -185,7 +183,5 @@ class TicketHandler:
             ),
             attachments=[Path(json_attachment.name)],
         )
-        print(email_form)
-        print(Path(json_attachment.name).exists())
         email_form.submit()
         json_attachment.close()
