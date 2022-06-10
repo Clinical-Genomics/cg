@@ -69,4 +69,5 @@ class OsTicket(object):
     def create_connecting_ticket_attachment(content: dict) -> NamedTemporaryFile:
         file = NamedTemporaryFile(mode="w", encoding="utf-8", suffix="_order.json")
         file.write(json.dumps(content))
+        file.seek(0)
         return file

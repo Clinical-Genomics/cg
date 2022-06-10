@@ -174,9 +174,6 @@ class TicketHandler:
         json_attachment: NamedTemporaryFile = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )
-        json_attachment.seek(0.0)
-        print("FILE CONTENT:")
-        print(json_attachment.read())
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
