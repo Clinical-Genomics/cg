@@ -8,6 +8,7 @@ from typing import List, Optional, Union, Any
 import yaml
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.subject import Gender
 from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -157,6 +158,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
+    def get_gender(sample_obj: models.Sample) -> str:
+        """Returns the gender associated to a specific sample"""
+
+        return sample_obj.sex
+
+    @staticmethod
     def get_sample_type(sample_obj: models.Sample) -> str:
         """Returns tissue type of a sample"""
         if sample_obj.is_tumour:
@@ -235,6 +242,24 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
             )
         return tumor_paths[0]
+
+    @staticmethod
+    def get_verified_gender(sample_data: dict) -> str:
+        """Takes a dict with samples and attributes, and retrieves the case gender"""
+
+        genders = []
+        samples = []
+        for key, val in sample_data.items():
+            samples.append(key)
+            genders.append(val["gender"])
+
+        unique_gender = all(gender == genders[0] for gender in genders)
+
+        if genders and unique_gender and genders[0] in [Gender.FEMALE, Gender.MALE]:
+            return genders[0]
+        else:
+            LOG.error(f"Unable to retrieve a valid gender from samples: {samples}")
+            raise BalsamicStartError
 
     @staticmethod
     def get_verified_normal_path(sample_data: dict) -> Optional[str]:
@@ -388,6 +413,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
+            "gender": self.get_verified_gender(sample_data=sample_data),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -457,6 +483,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         sample_data = {
             link_object.sample.internal_id: {
+                "gender": self.get_gender(link_object.sample),
                 "tissue_type": self.get_sample_type(link_object.sample),
                 "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
@@ -550,6 +577,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--case-id": arguments.get("case_id"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
+                "--gender": arguments.get("gender"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),
