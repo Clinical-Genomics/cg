@@ -67,7 +67,6 @@ class OsTicket(object):
 
     @staticmethod
     def create_connecting_ticket_attachment(content: dict) -> NamedTemporaryFile:
-        file = NamedTemporaryFile(mode="w", encoding="utf-8")
+        file = NamedTemporaryFile(mode="w", encoding="utf-8", suffix="_order.json")
         file.write(json.dumps(content))
-        file.name = "order.json"
         return file
