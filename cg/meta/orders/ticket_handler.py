@@ -1,6 +1,7 @@
 import logging
 import re
 from typing import Optional, Any
+import io
 
 from sendmail_container import FormDataRequest
 
@@ -16,6 +17,7 @@ class TicketHandler:
     """Handle tickets in the meta orders context"""
 
     NEW_LINE = "<br />"
+    MESSAGE_PREFIX = "data:text/html;charset=utf-8"
 
     def __init__(self, osticket_api: OsTicket, status_db: Store):
         self.osticket: OsTicket = osticket_api
@@ -51,14 +53,12 @@ class TicketHandler:
         return ticket_nr
 
     def create_attachment(self, order: OrderIn):
-        return self.osticket.create_attachment(
+        return self.osticket.create_new_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
         )
 
     def create_new_ticket_message(self, order: OrderIn, user_name: str, project: str) -> str:
-        message = (
-            f"data:text/html;charset=utf-8, New order with {len(order.samples)} {project} samples: "
-        )
+        message = f"{self.MESSAGE_PREFIX}, New order with {len(order.samples)} {project} samples: "
 
         for sample in order.samples:
             message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
@@ -161,14 +161,20 @@ class TicketHandler:
         message: str = self.create_new_ticket_message(
             order=order, user_name=user_name, project=project
         )
+        trimmed_message: str = message[len(self.MESSAGE_PREFIX) + 2 :]
         sender_prefix, email_server_alias = user_mail.split("@")
+        json_attachment: NamedTemporaryFile = self.osticket.create_connecting_ticket_attachment(
+            content=self.replace_empty_string_with_none(obj=order.dict())
+        )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
             request_uri=self.osticket.mail_uri,
             recipients=self.osticket.susy_email,
             mail_title=f"[#{ticket_number}]",
-            mail_body=message,
+            mail_body=trimmed_message,
+            attachments=[Path(json_attachment.name)],
         )
         print(email_form)
         email_form.submit()
+        json_attachment.delete()

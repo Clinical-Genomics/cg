@@ -1,6 +1,7 @@
 import json
 import logging
 import os.path
+from tempfile import NamedTemporaryFile
 
 import requests
 from flask import Flask
@@ -61,5 +62,12 @@ class OsTicket(object):
         raise TicketCreationError(res)
 
     @staticmethod
-    def create_attachment(content: dict, file_name: str) -> dict:
+    def create_new_ticket_attachment(content: dict, file_name: str) -> dict:
         return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(content))}
+
+    @staticmethod
+    def create_connecting_ticket_attachment(content: dict) -> NamedTemporaryFile:
+        file = NamedTemporaryFile(mode="w", encoding="utf-8")
+        file.write(json.dumps(content))
+        file.name = "order.json"
+        return file
