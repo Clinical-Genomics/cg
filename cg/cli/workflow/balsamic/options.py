@@ -16,12 +16,6 @@ OPTION_PANEL_BED = click.option(
     help="Panel BED is determined based on capture kit \
     used for library prep. Set this option to override the default",
 )
-OPTION_ANALYSIS_TYPE = click.option(
-    "-a",
-    "--analysis-type",
-    type=click.Choice(["qc", "paired", "single"]),
-    help="Setting this option to qc ensures only QC analysis is performed",
-)
 OPTION_RUN_ANALYSIS = click.option(
     "-r",
     "--run-analysis",

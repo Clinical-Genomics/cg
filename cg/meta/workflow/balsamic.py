@@ -565,7 +565,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        analysis_type: Optional[str],
         run_analysis: bool = True,
         slurm_quality_of_service: Optional[str] = None,
         dry_run: bool = False,
@@ -581,28 +580,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }
         )
         parameters = command + options + run_analysis + benchmark
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    def report_deliver(
-        self, case_id: str, analysis_type: Optional[str] = None, dry_run: bool = False
-    ) -> None:
+    def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]
         options = self.__build_command_str(
             {
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
-
-    def get_analysis_type(self, case_id: str) -> Optional[str]:
-        case_obj = self.status_db.family(case_id)
-        if case_obj.data_delivery in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ]:
-            return "qc"
