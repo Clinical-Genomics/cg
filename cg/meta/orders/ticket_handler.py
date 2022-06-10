@@ -161,9 +161,10 @@ class TicketHandler:
         message: str = self.create_new_ticket_message(
             order=order, user_name=user_name, project=project
         )
+        sender_prefix, email_server_alias = user_mail.split("@")
         email_form = FormDataRequest(
-            sender_prefix=user_mail,
-            # email_server_alias=settings.email_server_alias,
+            sender_prefix=sender_prefix,
+            email_server_alias=email_server_alias,
             request_uri=self.osticket.mail_uri,
             recipients=self.osticket.susy_email,
             mail_title=f"[#{ticket_number}]",
