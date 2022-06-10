@@ -169,14 +169,19 @@ class TicketHandler:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
         sender_prefix, email_server_alias = user_mail.split("@")
+        print("ORDER DICT:")
+        print(order.dict())
         json_attachment: NamedTemporaryFile = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )
+        json_attachment.seek(0.0)
+        print("FILE CONTENT:")
+        print(json_attachment.read())
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
             request_uri=self.osticket.mail_container_uri,
-            recipients=self.osticket.susy_email,
+            recipients=self.osticket.susy_mail,
             mail_title=f"[#{ticket_number}]",
             mail_body=self.create_trimmed_new_ticket_message(
                 order=order, user_name=user_name, project=project

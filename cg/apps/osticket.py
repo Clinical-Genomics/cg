@@ -27,7 +27,7 @@ class OsTicket(object):
         self.setup(
             api_key=app.config["OSTICKET_API_KEY"],
             domain=app.config["OSTICKET_DOMAIN"],
-            susy_email=app.config["SUPPORT_SYSTEM_EMAIL"],
+            susy_mail=app.config["SUPPORT_SYSTEM_EMAIL"],
             mail_uri=app.config["MAIL_CONTAINER_URI"],
         )
 
@@ -35,13 +35,13 @@ class OsTicket(object):
         self,
         api_key: str = None,
         domain: str = None,
-        susy_email: str = None,
+        susy_mail: str = None,
         mail_uri: str = None,
     ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
-        self.susy_email = susy_email
+        self.susy_mail = susy_mail
         self.mail_container_uri = mail_uri
 
     def open_ticket(
