@@ -384,7 +384,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return sample_obj.internal_id
 
     def get_verified_config_case_arguments(
-        self, case_id: str, genome_version: str, panel_bed: str, pon_cnn: str
+        self,
+        case_id: str,
+        genome_version: str,
+        panel_bed: str,
+        pon_cnn: str,
+        gender: Optional[str] = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -413,7 +418,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
-            "gender": self.get_verified_gender(sample_data=sample_data),
+            "gender": gender or self.get_verified_gender(sample_data=sample_data),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -557,6 +562,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def config_case(
         self,
         case_id: str,
+        gender: str,
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
@@ -565,6 +571,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
             case_id=case_id,
+            gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -575,9 +582,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
                 "--case-id": arguments.get("case_id"),
+                "--gender": arguments.get("gender"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
-                "--gender": arguments.get("gender"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),

@@ -10,6 +10,7 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_RUN_ANALYSIS,
     OPTION_GENOME_VERSION,
     OPTION_PON_CNN,
+    OPTION_GENDER,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -43,6 +44,7 @@ balsamic.add_command(link)
 
 @balsamic.command("config-case")
 @ARGUMENT_CASE_ID
+@OPTION_GENDER
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
@@ -51,6 +53,7 @@ balsamic.add_command(link)
 def config_case(
     context: CGConfig,
     case_id: str,
+    gender: str,
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
@@ -64,6 +67,7 @@ def config_case(
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.config_case(
             case_id=case_id,
+            gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -168,6 +172,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 
 @balsamic.command("start")
 @ARGUMENT_CASE_ID
+@OPTION_GENDER
 @OPTION_GENOME_VERSION
 @OPTION_QOS
 @DRY_RUN
@@ -178,6 +183,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 def start(
     context: click.Context,
     case_id: str,
+    gender: str,
     genome_version: str,
     panel_bed: str,
     pon_cnn: str,
@@ -193,6 +199,7 @@ def start(
         context.invoke(
             config_case,
             case_id=case_id,
+            gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
