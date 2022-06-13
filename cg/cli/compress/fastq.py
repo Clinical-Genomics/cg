@@ -72,6 +72,8 @@ def fastq_cmd(
             continue
 
         LOG.info("Searching for FASTQ files in case %s", internal_id)
+        if not case.links:
+            continue
         for link_obj in case.links:
             sample_id: str = link_obj.sample.internal_id
             case_converted: bool = compress_api.compress_fastq(sample_id)
@@ -81,6 +83,7 @@ def fastq_cmd(
             ind_conversion_count += 1
         if case_converted:
             case_conversion_count += 1
+            LOG.info("Considering case %s converted", internal_id)
 
     LOG.info(
         "%s Individuals in %s (completed) cases where compressed",
@@ -193,7 +196,7 @@ def decompress_flowcell(context: click.Context, flowcell_id: str, dry_run: bool)
     """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
 
     store: Store = context.obj.status_db
-    samples: Iterable[models.Sample] = store.get_samples_from_flowcell(flowcell_id=flowcell_id)
+    samples: Iterable[models.Sample] = store.get_samples_from_flowcell(flowcell_name=flowcell_id)
     decompressed_inds = 0
     for sample in samples:
         decompressed_count = context.invoke(

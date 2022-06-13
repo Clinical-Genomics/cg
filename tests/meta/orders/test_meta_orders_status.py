@@ -73,10 +73,10 @@ def test_metagenome_to_status(metagenome_order_to_submit):
 
     # WHEN parsing for status
     data = MetagenomeSubmitter.order_to_status(order=order)
-
+    case = data["families"][0]
     # THEN it should pick out samples and relevant information
-    assert len(data["samples"]) == 2
-    first_sample = data["samples"][0]
+    assert len(case["samples"]) == 2
+    first_sample = case["samples"][0]
     assert first_sample["name"] == "Bristol"
     assert first_sample["application"] == "METLIFR020"
     assert first_sample["priority"] == "standard"
@@ -153,7 +153,7 @@ def test_cases_to_status(mip_order_to_submit):
     assert family["data_analysis"] == str(Pipeline.MIP_DNA)
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == Priority.standard.name
-    assert family["cohorts"] == {"Other"}
+    assert family["cohorts"] == ["Other"]
     assert family["synopsis"] == "Här kommer det att komma en väldigt lång text med för synopsis."
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
@@ -255,13 +255,13 @@ def test_store_samples(orders_api, base_store, fastq_status_data):
     assert base_store.samples().count() == 2
     assert base_store.families().count() == 2
     first_sample = new_samples[0]
-    assert len(first_sample.links) == 1
+    assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
     assert family_link.family in base_store.families()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
     assert family_link.family.data_analysis
-    assert family_link.family.data_delivery == DataDelivery.FASTQ
+    assert family_link.family.data_delivery in [DataDelivery.FASTQ, DataDelivery.ANALYSIS_FILES]
 
 
 def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data):
@@ -550,7 +550,7 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=1234348,
-        items=metagenome_status_data["samples"],
+        items=metagenome_status_data["families"],
     )
 
     # THEN it should store the samples
@@ -562,7 +562,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
     # GIVEN a basic store with no samples and a metagenome order
     assert base_store.samples().count() == 0
 
-    for sample in metagenome_status_data["samples"]:
+    for sample in metagenome_status_data["families"][0]["samples"]:
         sample["application"] = "nonexistingtag"
 
     submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -575,7 +575,7 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=1234348,
-            items=metagenome_status_data["samples"],
+            items=metagenome_status_data["families"],
         )
 
 

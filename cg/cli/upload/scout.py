@@ -55,7 +55,7 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 def create_scout_load_config(context: CGConfig, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
@@ -211,7 +211,7 @@ def upload_rna_fusion_report_to_scout(
     """
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     try:
         scout_upload_api.upload_fusion_report_to_scout(
             dry_run=dry_run, research=research, case_id=case_id, update=update
@@ -243,7 +243,7 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     """
     LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["scout_upload_api"]
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     try:
         scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
     except (CgDataError, ScoutUploadError) as error:

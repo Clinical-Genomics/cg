@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -130,38 +130,6 @@ class StatusHandler(BaseHandler):
             .filter(models.Family.data_analysis == pipeline)
             .all()
         )
-
-    def get_cases_from_ticket(self, ticket_id: int) -> Query:
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.ticket_number == ticket_id
-        )
-
-    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
-        """Returns the customer related to given ticket"""
-        return (
-            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
-            .first()
-            .customer.internal_id
-        )
-
-    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
-        return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
-
-    def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
-        logging.error("CALLED!!!11!")
-        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
-        if flowcell:
-            return flowcell.samples
-
-    def get_ticket_from_case(self, case_id: str):
-        """Returns the ticket from the most recent sample in a case"""
-        newest_sample: models.Sample = (
-            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .order_by(models.Sample.created_at.desc())
-            .first()
-        )
-        return newest_sample.ticket_number
 
     def cases(
         self,
@@ -586,12 +554,16 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
-        records = self.Analysis.query.filter(
+        records = self.Analysis.query.join(models.Analysis.family)
+        records = records.filter(
             models.Analysis.completed_at.isnot(None), models.Analysis.uploaded_at.is_(None)
         )
 
         if pipeline:
             records = records.filter(models.Analysis.pipeline == str(pipeline))
+
+            if Pipeline.BALSAMIC in pipeline:
+                records = records.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
 
         return records
 
@@ -666,17 +638,18 @@ class StatusHandler(BaseHandler):
             .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
             .filter(
-                or_(
-                    models.Family.data_analysis.is_(None),
-                    models.Family.data_analysis == str(pipeline),
+                and_(
+                    models.Analysis.pipeline == str(pipeline),
+                    models.Family.data_delivery.contains(DataDelivery.SCOUT),
+                    models.Sample.delivered_at.isnot(None),
                 )
             )
             .filter(
-                models.Sample.delivered_at.isnot(None),
                 or_(
                     models.Analysis.delivery_report_created_at.is_(None),
                     and_(
                         models.Analysis.delivery_report_created_at.isnot(None),
+                        models.Analysis.delivery_report_created_at > VALID_DATA_IN_PRODUCTION,
                         models.Analysis.delivery_report_created_at < models.Sample.delivered_at,
                     ),
                 ),

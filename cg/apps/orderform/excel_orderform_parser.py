@@ -26,8 +26,8 @@ class ExcelOrderformParser(OrderformParser):
     VALID_ORDERFORMS: List[str] = [
         f"{Orderform.MIP_DNA}:26",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:11",  # Microbial WGS
-        f"{Orderform.RML}:14",  # Orderform Ready made libraries (RML)
-        f"{Orderform.METAGENOME}:9",  # Microbial meta genomes
+        f"{Orderform.RML}:15",  # Orderform Ready made libraries (RML)
+        f"{Orderform.METAGENOME}:10",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:6",  # Orderform SARS-CoV-2
     ]
     samples: List[ExcelSample] = []
@@ -177,13 +177,13 @@ class ExcelOrderformParser(OrderformParser):
     def default_delivery_type(self, project_type: OrderType) -> str:
         """Returns the default delivery type for a project type"""
 
-        if project_type == OrderType.METAGENOME:
-            return DataDelivery.FASTQ
-        if project_type == OrderType.MICROSALT:
-            if self.parse_data_analysis() in ["custom", "fastq"]:
-                return DataDelivery.FASTQ_QC
+        if project_type == OrderType.MICROSALT and self.parse_data_analysis() in [
+            "custom",
+            "fastq",
+        ]:
+            return DataDelivery.FASTQ_QC
 
-        raise OrderFormError(f"Could not determine value for Data Delivery")
+        raise OrderFormError("Could not determine value for Data Delivery")
 
     def get_data_delivery(self, project_type: OrderType) -> str:
         """Determine the order_data delivery type."""

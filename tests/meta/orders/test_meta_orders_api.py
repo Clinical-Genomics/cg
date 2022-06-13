@@ -1,12 +1,8 @@
 import datetime as dt
-import subprocess
-from unittest import mock
 from unittest.mock import patch
 
 import pytest
 from cgmodels.cg.constants import Pipeline
-
-from cg.apps.osticket import OsTicket
 from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
@@ -110,7 +106,7 @@ def test_submit_ticketexception(
 ):
     # GIVEN an order that does not have a name (ticket_nr)
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
-    order_data.name = ""
+    order_data.name = "dummy_name"
     with patch("cg.apps.osticket.OsTicket") as os_mock:
         orders_api.ticket_handler.osticket = os_mock.return_value
         orders_api.ticket_handler.osticket.open_ticket.side_effect = TicketCreationError("ERROR")
@@ -119,7 +115,10 @@ def test_submit_ticketexception(
     # THEN the TicketCreationError is not excepted
     with pytest.raises(TicketCreationError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
@@ -165,7 +164,10 @@ def test_submit_illegal_sample_customer(
     # THEN an OrderError should be raised on illegal customer
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
@@ -260,7 +262,10 @@ def test_submit_duplicate_sample_case_name(
     # THEN an OrderError should be raised on duplicate case name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
@@ -289,7 +294,10 @@ def test_submit_fluffy_duplicate_sample_case_name(
     # THEN an OrderError should be raised on duplicate case name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
@@ -316,7 +324,10 @@ def test_submit_unique_sample_case_name(
 
     # WHEN calling submit
     orders_api.submit(
-        project=OrderType.MIP_DNA, order_in=order_data, user_name=user_name, user_mail=user_mail
+        project=OrderType.MIP_DNA,
+        order_in=order_data,
+        user_name=user_name,
+        user_mail=user_mail,
     )
 
     # Then no exception about duplicate names should be thrown
@@ -482,7 +493,7 @@ def test_submit_unique_sample_name(
 
 @pytest.mark.parametrize(
     "order_type",
-    [OrderType.SARS_COV_2],
+    [OrderType.SARS_COV_2, OrderType.METAGENOME],
 )
 def test_sarscov2_submit_duplicate_sample_name(
     all_orders_to_submit: dict,
@@ -504,7 +515,10 @@ def test_sarscov2_submit_duplicate_sample_name(
     # THEN an OrderError should be raised on duplicate sample name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
@@ -524,7 +538,6 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     [
         OrderType.BALSAMIC,
         OrderType.FASTQ,
-        OrderType.METAGENOME,
         OrderType.MICROSALT,
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
