@@ -212,10 +212,14 @@ def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_stor
     assert base_context.lims_api.get_updated_sample_value() == new_value
 
 
-def test_sample_comment_append(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+def test_sample_comment_append(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
     # GIVEN a database with a sample with a comment
     old_value = "test comment"
-    sample_obj = helpers.add_sample(base_store, gender="female", comment=f"2022-06-13 10:16-test.user: {old_value}")
+    sample_obj = helpers.add_sample(
+        base_store, gender="female", comment=f"2022-06-13 10:16-test.user: {old_value}"
+    )
     key = "comment"
 
     # WHEN setting key again on sample this time to new_value
