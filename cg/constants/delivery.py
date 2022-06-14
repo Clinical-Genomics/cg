@@ -18,6 +18,7 @@ BALSAMIC_ANALYSIS_CASE_TAGS = [
     {"multiqc-html"},
     {"metrics"},
     {"visualization"},
+    {"coverage"},
     {"vcf-sv-clinical"},
     {"vcf-sv-clinical-index"},
     {"vcf-sv-research"},
