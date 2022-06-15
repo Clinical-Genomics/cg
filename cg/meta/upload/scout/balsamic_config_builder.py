@@ -35,10 +35,11 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         LOG.info("Including BALSAMIC specific sample level files")
 
         sample_id: str = config_sample.sample_id
-        if config_sample.alignment_path and "tumor" in config_sample.alignment_path:
-            sample_id = "tumor"
-        elif "normal" in config_sample.alignment_path:
-            sample_id = "normal"
+        if config_sample.alignment_path:
+            if "tumor" in config_sample.alignment_path:
+                sample_id = "tumor"
+            elif "normal" in config_sample.alignment_path:
+                sample_id = "normal"
 
         config_sample.vcf2cytosure = self.fetch_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
