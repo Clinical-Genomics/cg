@@ -8,8 +8,8 @@ from setuptools import find_packages, setup
 NAME = "cg"
 DESCRIPTION = "Clinical Genomics command center"
 URL = "https://github.com/Clinical-Genomics/cg"
-EMAIL = "patrik.grenfeldt@scilifelab.se"
-AUTHOR = "Patrik Grenfeldt"
+EMAIL = "support@clinicalgenomics.se"
+AUTHOR = "Clinical Genomics"
 REQUIRES_PYTHON = ">=3.6.0"
 
 HERE = os.path.abspath(os.path.dirname(__file__))
