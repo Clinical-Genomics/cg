@@ -244,21 +244,18 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return tumor_paths[0]
 
     @staticmethod
-    def get_verified_gender(sample_data: dict) -> str:
-        """Takes a dict with samples and attributes, and retrieves the case gender"""
+    def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
+        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
 
-        genders = []
-        samples = []
-        for key, val in sample_data.items():
-            samples.append(key)
-            genders.append(val["gender"])
+        gender = next(iter(sample_data.values()))["gender"]
 
-        unique_gender = all(gender == genders[0] for gender in genders)
-
-        if genders and unique_gender and genders[0] in [Gender.FEMALE, Gender.MALE]:
-            return genders[0]
+        if all(val["gender"] == gender for val in sample_data.values()) and gender in [
+            Gender.FEMALE,
+            Gender.MALE,
+        ]:
+            return gender
         else:
-            LOG.error(f"Unable to retrieve a valid gender from samples: {samples}")
+            LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
     @staticmethod

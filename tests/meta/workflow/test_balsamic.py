@@ -1,4 +1,6 @@
 """Tests for BALSAMIC analysis"""
+import pytest
+
 from cg.exc import BalsamicStartError
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -30,11 +32,7 @@ def test_get_verified_gender_error(caplog):
     }
 
     # WHEN extracting the gender
-    try:
+    with pytest.raises(BalsamicStartError):
         BalsamicAnalysisAPI.get_verified_gender(sample_obj)
-    except BalsamicStartError:
         # THEN gender must match the expected one
-        assert (
-            "Unable to retrieve a valid gender from samples: ['ACC0000A0', 'ACC0000A1']"
-            in caplog.text
-        )
+        assert f"Unable to retrieve a valid gender from samples: {sample_obj.keys()}" in caplog.text
