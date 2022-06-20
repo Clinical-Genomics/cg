@@ -19,11 +19,12 @@ class MockOsTicket(OsTicket):
     def __init__(self):
         self.headers = None
         self.url = None
-        self.susy_mail = "james.holden@scilifelab.se"
+        self.osticket_email = "james.holden@scilifelab.se"
         self.mail_container_uri = "dummy_uri"
         self._ticket_nr: int = 123456
         self._should_fail: bool = False
         self._return_none: bool = False
+        self.email_uri = "http://localhost:0000/sendmail"
 
     def set_ticket_nr(self, number: int) -> None:
         self._ticket_nr = number
@@ -35,8 +36,8 @@ class MockOsTicket(OsTicket):
         self,
         api_key: str = None,
         domain: str = None,
-        susy_mail: str = None,
-        mail_uri: str = None,
+        osticket_email: str = None,
+        email_uri: str = None,
     ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}

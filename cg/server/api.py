@@ -25,7 +25,7 @@ from werkzeug.utils import secure_filename
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
 from ..models.orders.orderform_schema import Orderform
-from .ext import db, lims, osticket
+from .ext import db, lims, ticket_factory
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -82,7 +82,7 @@ def before_request():
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type):
     """Submit an order for samples."""
-    api = OrdersAPI(lims=lims, status=db, osticket=osticket)
+    api = OrdersAPI(lims=lims, status=db, osticket=ticket_factory.ticket_handler)
     error_message: str
     try:
         request_json = request.get_json()

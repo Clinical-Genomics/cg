@@ -17,8 +17,6 @@ class TicketHandler:
     """Handle tickets in the meta orders context"""
 
     NEW_LINE = "<br />"
-    MESSAGE_PREFIX = "data:text/html;charset=utf-8"
-    TESTING_TICKET = 123456
 
     def __init__(self, osticket_api: OsTicket, status_db: Store):
         self.osticket: OsTicket = osticket_api
@@ -40,7 +38,11 @@ class TicketHandler:
         self, order: OrderIn, user_name: str, user_mail: str, project: str
     ) -> Optional[int]:
         """Create a ticket and return the ticket number"""
-        message = self.create_new_ticket_message(order=order, user_name=user_name, project=project)
+        message: str = self.create_new_ticket_header(
+            message=self.create_xml_sample_list(order=order, user_name=user_name),
+            order=order,
+            project=project,
+        )
         attachment: dict = self.create_attachment(order=order)
         ticket_nr: Optional[int] = self.osticket.open_ticket(
             name=user_name,
@@ -58,9 +60,8 @@ class TicketHandler:
             content=self.replace_empty_string_with_none(obj=order.dict()), file_name="order.json"
         )
 
-    def create_new_ticket_message(self, order: OrderIn, user_name: str, project: str) -> str:
-        message = f"{self.MESSAGE_PREFIX}, New order with {len(order.samples)} {project} samples: "
-
+    def create_xml_sample_list(self, order: OrderIn, user_name: str) -> str:
+        message = ""
         for sample in order.samples:
             message = self.add_sample_name_to_message(message=message, sample_name=sample.name)
             message = self.add_sample_apptag_to_message(
@@ -82,6 +83,20 @@ class TicketHandler:
         message = self.add_customer_to_message(message=message, customer_id=order.customer)
 
         return message
+
+    @staticmethod
+    def create_new_ticket_header(message: str, order: OrderIn, project: str) -> str:
+        return (
+            f"data:text/html;charset=utf-8, New order with {len(order.samples)} {project} samples:"
+            + message
+        )
+
+    @staticmethod
+    def add_existing_ticket_header(message: str, order: OrderIn, project: str) -> str:
+        return (
+            f"A new order with {len(order.samples)} {project} samples has been connected to this ticket:"
+            + message
+        )
 
     def add_sample_name_to_message(self, message: str, sample_name: str) -> str:
         message += f"{self.NEW_LINE}{sample_name}"
@@ -155,33 +170,28 @@ class TicketHandler:
                     obj[key] = cls.replace_empty_string_with_none(item)
         return obj
 
-    def create_trimmed_new_ticket_message(
-        self, order: OrderIn, user_name: str, project: str
-    ) -> str:
-        """Creates a new order message but trims away the data type and encoding information"""
-        return self.create_new_ticket_message(order=order, user_name=user_name, project=project)[
-            len(self.MESSAGE_PREFIX) + 2 :
-        ]
-
     def connect_to_ticket(
         self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: int
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)
+        message: str = self.add_existing_ticket_header(
+            message=self.create_xml_sample_list(order=order, user_name=user_name),
+            order=order,
+            project=project,
+        )
         sender_prefix, email_server_alias = user_mail.split("@")
-        json_attachment: NamedTemporaryFile = self.osticket.create_connecting_ticket_attachment(
+        temp_dir: TemporaryDirectory = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
             email_server_alias=email_server_alias,
-            request_uri=self.osticket.mail_container_uri,
-            recipients=self.osticket.susy_mail,
+            request_uri=self.osticket.email_uri,
+            recipients=self.osticket.osticket_email,
             mail_title=f"[#{ticket_number}]",
-            mail_body=self.create_trimmed_new_ticket_message(
-                order=order, user_name=user_name, project=project
-            ),
-            attachments=[Path(json_attachment.name)],
+            mail_body=message,
+            attachments=[Path(f"{temp_dir.name}/order.json")],
         )
         email_form.submit()
-        json_attachment.close()
+        temp_dir.cleanup()
