@@ -57,10 +57,8 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
         application_tag = sample_obj.application_version.application.tag
         seq_info = application_tag[3:6]
-        if seq_info != "ONT":
-            return Path(
-                self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj.name
-            )
+        if seq_info == "ONT":
+            return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj.name)
         else:
             return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
 
@@ -79,7 +77,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 continue
             application_tag = sample_obj.application_version.application.tag
             seq_info = application_tag[3:6]
-            if seq_info != "ONT":
+            if seq_info == "ONT":
                 self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
             else:
                 self.link_fastq_files_for_sample(
