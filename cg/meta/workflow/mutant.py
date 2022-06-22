@@ -59,7 +59,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         seq_info = application_tag[3:6]
         if seq_info != "ONT":
             return Path(
-                self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj
+                self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj.name
             )
         else:
             return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
