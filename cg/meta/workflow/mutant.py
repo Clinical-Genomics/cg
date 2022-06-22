@@ -54,10 +54,12 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
 
+    def _is_nanopore(self, application: models.Application) -> bool:
+        return application.tag[3:6] == "ONT"
+
     def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
-        application_tag = sample_obj.application_version.application.tag
-        seq_info = application_tag[3:6]
-        if seq_info == "ONT":
+        application = sample_obj.application_version.application
+        if self._is_nanopore(application):
             return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj.name)
         else:
             return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
@@ -75,9 +77,8 @@ class MutantAnalysisAPI(AnalysisAPI):
             if not sample_obj.sequencing_qc:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
-            application_tag = sample_obj.application_version.application.tag
-            seq_info = application_tag[3:6]
-            if seq_info == "ONT":
+            application = sample_obj.application_version.application
+            if self._is_nanopore(application):
                 self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
             else:
                 self.link_fastq_files_for_sample(
