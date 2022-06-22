@@ -142,7 +142,8 @@
       "age_at_sampling": "17.18192",
       "application": "WGSPCFC030",
       "cohorts": [
-        "Other"
+        "Cohorts1",
+        "Cohorts2"
       ],
       "comment": "F0018192-0 Data finns 2019-19202 duo med bror ",
       "container": "96 well plate",
@@ -152,6 +153,7 @@
       "mother": "",
       "name": "2020-16171-81",
       "panels": [
+        "ATX",
         "CTD"
       ],
       "phenotype_terms": [
@@ -159,7 +161,8 @@
         "HP:0025049"
       ],
       "phenotype_groups": [
-        "Phenotype-group"
+        "Phenotype-group1",
+        "Phenotype-group2"
       ],
       "priority": "clinical trials",
       "quantity": "200",
@@ -168,7 +171,7 @@
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-16171-81",
-      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
       "volume": "1",
       "well_position": "A1"
     },
@@ -176,7 +179,8 @@
       "age_at_sampling": "21.22232",
       "application": "WGSPCFC030",
       "cohorts": [
-        ""
+        "Cohorts1",
+        "Cohorts2"
       ],
       "comment": "F0018192-0 Data finns 2018-19202 duo med syster",
       "container": "Tube",
@@ -186,6 +190,7 @@
       "mother": "",
       "name": "2020-20212-22",
       "panels": [
+        "ATX",
         "CTD"
       ],
       "phenotype_terms": [
@@ -201,7 +206,7 @@
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-20212-22",
-      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."],
+      "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
       "volume": "1",
       "well_position": ""
     },

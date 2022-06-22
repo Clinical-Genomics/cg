@@ -38,6 +38,12 @@ class AnalysisUploadError(CgError):
     """
 
 
+class AnalysisAlreadyUploadedError(CgError):
+    """
+    Error related to trying to upload an already (or in the process) uploaded analysis
+    """
+
+
 class BalsamicStartError(CgError):
     """
     Exception raised when Balsamic fails to start
