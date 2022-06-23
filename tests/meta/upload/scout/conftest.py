@@ -456,6 +456,7 @@ def fixture_balsamic_umi_analysis_obj(analysis_obj: models.Analysis) -> models.A
     for link_object in analysis_obj.family.links:
         link_object.sample.application_version.application.prep_category = "wes"
         link_object.family.data_analysis = Pipeline.BALSAMIC_UMI
+
     return analysis_obj
 
 
