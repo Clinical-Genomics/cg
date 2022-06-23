@@ -130,23 +130,39 @@ class MutantAnalysisAPI(AnalysisAPI):
 
         return f"{region_code}_{lab_code}_{sample_name}"
 
-    def run_analysis(self, case_id: str, dry_run: bool) -> None:
+    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
         if self.get_case_output_path(case_id=case_id).exists():
             LOG.info("Found old output files, directory will be cleaned!")
             shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
 
-        self.process.run_command(
-            [
-                "analyse",
-                "sarscov2",
-                "--config_case",
-                self.get_case_config_path(case_id=case_id).as_posix(),
-                "--outdir",
-                self.get_case_output_path(case_id=case_id).as_posix(),
-                self.get_case_fastq_dir(case_id=case_id).as_posix(),
-            ],
-            dry_run=dry_run,
-        )
+        if config_artic:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--config_artic",
+                    config_artic,
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
+        else:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
 
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis has a deliverables file,

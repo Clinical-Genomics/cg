@@ -8,6 +8,7 @@ from cg.cli.workflow.commands import (
     resolve_compression,
     store,
     store_available,
+    ARGUMENT_ANALYSIS_PARAMETERS_CONFIG,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
@@ -48,8 +49,9 @@ def config_case(context: CGConfig, dry_run: bool, case_id: str) -> None:
 @mutant.command("run")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
+@ARGUMENT_CASE_CONFIG
 @click.pass_obj
-def run(context: CGConfig, dry_run: bool, case_id: str) -> None:
+def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None) -> None:
     """Run mutant analysis command for a case"""
     analysis_api: MutantAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.check_analysis_ongoing(case_id=case_id)
@@ -57,7 +59,7 @@ def run(context: CGConfig, dry_run: bool, case_id: str) -> None:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     try:
-        analysis_api.run_analysis(case_id=case_id, dry_run=dry_run)
+        analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, config_artic=config_artic)
     except:
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
         raise
@@ -67,13 +69,13 @@ def run(context: CGConfig, dry_run: bool, case_id: str) -> None:
 @OPTION_DRY
 @ARGUMENT_CASE_ID
 @click.pass_context
-def start(context: click.Context, dry_run: bool, case_id: str) -> None:
+def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
     try:
 
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, dry_run=dry_run)
-        context.invoke(run, case_id=case_id, dry_run=dry_run)
+        context.invoke(run, case_id=case_id, dry_run=dry_run, config_artic=config_artic)
         context.invoke(store, case_id=case_id, dry_run=dry_run)
     except DecompressionNeededError:
         LOG.info("Workflow not ready to run, can continue after decompression")

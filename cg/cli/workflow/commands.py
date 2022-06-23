@@ -25,6 +25,7 @@ OPTION_DRY = click.option(
 OPTION_YES = click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 ARGUMENT_BEFORE_STR = click.argument("before_str", type=str)
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
+ARGUMENT_ANALYSIS_PARAMETERS_CONFIG = click.argument("--config-artic", type=str)
 
 LOG = logging.getLogger(__name__)
 
