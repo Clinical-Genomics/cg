@@ -8,6 +8,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.subject import Gender
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store import models
 
@@ -44,21 +45,18 @@ class UploadGenotypesAPI(object):
         LOG.info("Fetching upload genotype data for %s", case_id)
         hk_version = self.hk.last_version(case_id)
         hk_bcf = self.get_bcf_file(hk_version)
-        if hk_bcf is None:
-            LOG.warning("unable to find GBCF for genotype upload")
-            return None
         data = {"bcf": hk_bcf.full_path}
         if analysis_obj.pipeline in [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]:
-            data["samples_sex"] = self._get_sample_sex_balsamic(
-                case_obj=analysis_obj.family, hk_version=hk_version
-            )
+            data["samples_sex"] = self._get_samples_sex_balsamic(case_obj=analysis_obj.family)
         elif analysis_obj.pipeline == Pipeline.MIP_DNA:
-            data["samples_sex"] = self._get_sample_sex_mip(
+            data["samples_sex"] = self._get_samples_sex_mip(
                 case_obj=analysis_obj.family, hk_version=hk_version
             )
+        else:
+            raise ValueError(f"Pipeline {analysis_obj.pipeline} does not support Genotype upload")
         return data
 
-    def _get_sample_sex_mip(
+    def _get_samples_sex_mip(
         self, case_obj: models.Family, hk_version: housekeeper_models.Version
     ) -> dict:
         qc_metrics_file = self.get_qcmetrics_file(hk_version)
@@ -72,9 +70,7 @@ class UploadGenotypesAPI(object):
             }
         return samples_sex
 
-    def _get_sample_sex_balsamic(
-        self, case_obj: models.Family, hk_version: housekeeper_models.Version
-    ) -> dict:
+    def _get_samples_sex_balsamic(self, case_obj: models.Family) -> dict:
         samples_sex = {}
         for link_obj in case_obj.links:
             if link_obj.sample.is_tumour:
@@ -82,7 +78,7 @@ class UploadGenotypesAPI(object):
             sample_id = link_obj.sample.internal_id
             samples_sex[sample_id] = {
                 "pedigree": link_obj.sample.sex,
-                "analysis": "unknown",
+                "analysis": Gender.UNKNOWN,
             }
         return samples_sex
 
@@ -96,8 +92,19 @@ class UploadGenotypesAPI(object):
 
     def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
         """Fetch a bcf file and return the file object"""
-
-        bcf_file = self.hk.files(version=hk_version_obj.id, tags=["genotype"]).first()
+        bcf_file = None
+        genotype_files = self.hk.files(version=hk_version_obj.id, tags=["genotype"]).all()
+        while not bcf_file or not genotype_files:
+            hk_file = genotype_files.pop()
+            bcf_file = (
+                hk_file
+                if hk_file.full_path.endswith("vcf.gz") or hk_file.full_path.endswith("bcf")
+                else None
+            )
+        if not bcf_file:
+            raise FileNotFoundError(
+                f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}"
+            )
         LOG.debug("Found bcf file %s", bcf_file.full_path)
         return bcf_file
 
