@@ -199,6 +199,9 @@ def modified_invoice(invoice_id, cost_center):
     if not logged_in():
         return redirect(url_for("admin.index"))
 
+    if cost_center not in ["KTH", "KI"]:
+        return redirect(url_for("admin.index"))
+
     invoice_obj = db.invoice(invoice_id)
     file_name = "invoice_" + cost_center + str(invoice_id) + ".xlsx"
     temp_dir = tempfile.mkdtemp()
