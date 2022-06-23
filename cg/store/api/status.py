@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -554,12 +554,16 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
         """Fetch analyses that haven't been uploaded."""
-        records = self.Analysis.query.filter(
+        records = self.Analysis.query.join(models.Analysis.family)
+        records = records.filter(
             models.Analysis.completed_at.isnot(None), models.Analysis.uploaded_at.is_(None)
         )
 
         if pipeline:
             records = records.filter(models.Analysis.pipeline == str(pipeline))
+
+            if Pipeline.BALSAMIC in pipeline:
+                records = records.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
 
         return records
 
@@ -633,13 +637,19 @@ class StatusHandler(BaseHandler):
             analyses_query.filter(models.Analysis.uploaded_at)
             .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
             .join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(models.Analysis.pipeline == str(pipeline))
             .filter(
-                models.Sample.delivered_at.isnot(None),
+                and_(
+                    models.Analysis.pipeline == str(pipeline),
+                    models.Family.data_delivery.contains(DataDelivery.SCOUT),
+                    models.Sample.delivered_at.isnot(None),
+                )
+            )
+            .filter(
                 or_(
                     models.Analysis.delivery_report_created_at.is_(None),
                     and_(
                         models.Analysis.delivery_report_created_at.isnot(None),
+                        models.Analysis.delivery_report_created_at > VALID_DATA_IN_PRODUCTION,
                         models.Analysis.delivery_report_created_at < models.Sample.delivered_at,
                     ),
                 ),

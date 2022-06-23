@@ -290,6 +290,7 @@ class SarsCov2Sample(MicrobialSample):
     # "These fields are required"
     collection_date: str
     lab_code: str
+    primer: str
     original_lab: str
     original_lab_address: str
     pre_processing_method: str
