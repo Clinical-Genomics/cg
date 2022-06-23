@@ -109,10 +109,6 @@ class BalsamicLoadConfig(ScoutLoadConfig):
         return v
 
 
-class BalsamicQCLoadConfig(BalsamicLoadConfig):
-    pass
-
-
 class BalsamicUmiLoadConfig(BalsamicLoadConfig):
     pass
 

@@ -24,7 +24,6 @@ from tests.store_helpers import StoreHelpers
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 LOG = logging.getLogger(__name__)
-SV = "sv.vcf"
 
 
 @pytest.fixture(name="rna_case_id")
@@ -214,7 +213,7 @@ def fixture_mip_dna_analysis_hk_bundle_data(
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(mip_dna_analysis_dir / SV),
+                "path": str(mip_dna_analysis_dir / "sv.vcf"),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
@@ -342,12 +341,12 @@ def fixture_balsamic_analysis_hk_bundle_data(
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(balsamic_wgs_analysis_dir / SV),
+                "path": str(balsamic_wgs_analysis_dir / "sv.vcf"),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": str(balsamic_wgs_analysis_dir / SV),
+                "path": str(balsamic_wgs_analysis_dir / "umi.sv.vcf"),
                 "archive": False,
                 "tags": ["vcf-umi-snv-clinical"],
             },
@@ -448,15 +447,6 @@ def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analy
     for link_object in analysis_obj.family.links:
         link_object.sample.application_version.application.prep_category = "wes"
         link_object.family.data_analysis = Pipeline.BALSAMIC
-    return analysis_obj
-
-
-@pytest.fixture(name="balsamic_qc_analysis_obj")
-def fixture_balsamic_qc_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
-    analysis_obj.pipeline = Pipeline.BALSAMIC_QC
-    for link_object in analysis_obj.family.links:
-        link_object.sample.application_version.application.prep_category = "wes"
-        link_object.family.data_analysis = Pipeline.BALSAMIC_QC
     return analysis_obj
 
 
