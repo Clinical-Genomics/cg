@@ -1,6 +1,8 @@
 import logging
 from typing import List, Union
 
+from cgmodels.cg.constants import Pipeline
+
 from cg.constants import (
     BALSAMIC_REPORT_ACCREDITED_PANELS,
     REQUIRED_REPORT_FIELDS,
@@ -170,3 +172,8 @@ class BalsamicReportAPI(ReportAPI):
             "timestamps": self.get_sample_required_fields(case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS),
             "metadata": self.get_sample_required_fields(case, required_sample_metadata_fields),
         }
+
+    def get_template_name(self) -> str:
+        """Retrieves the template name to render the delivery report"""
+
+        return Pipeline.BALSAMIC + "_report.html"

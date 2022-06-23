@@ -33,10 +33,17 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_sample_files(self, config_sample: ScoutBalsamicIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files")
-        if config_sample.alignment_path and "tumor" in config_sample.alignment_path:
-            config_sample.vcf2cytosure = self.fetch_sample_file(
-                hk_tags=self.sample_tags.vcf2cytosure, sample_id=self.load_config.family
-            )
+
+        sample_id: str = config_sample.sample_id
+        if config_sample.alignment_path:
+            if "tumor" in config_sample.alignment_path:
+                sample_id = "tumor"
+            elif "normal" in config_sample.alignment_path:
+                sample_id = "normal"
+
+        config_sample.vcf2cytosure = self.fetch_sample_file(
+            hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
+        )
 
     def include_delivery_report(self) -> None:
         LOG.info("Include coverage qc report to case")
