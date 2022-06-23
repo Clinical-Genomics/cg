@@ -94,19 +94,11 @@ class UploadGenotypesAPI(object):
         """Fetch a bcf file and return the file object"""
         bcf_file = None
         genotype_files = self.hk.files(version=hk_version_obj.id, tags=["genotype"]).all()
-        while not bcf_file or not genotype_files:
-            hk_file = genotype_files.pop()
-            bcf_file = (
-                hk_file
-                if hk_file.full_path.endswith("vcf.gz") or hk_file.full_path.endswith("bcf")
-                else None
-            )
-        if not bcf_file:
-            raise FileNotFoundError(
-                f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}"
-            )
-        LOG.debug("Found bcf file %s", bcf_file.full_path)
-        return bcf_file
+        for hk_file in genotype_files:
+            if hk_file.full_path.endswith("vcf.gz") or hk_file.full_path.endswith("bcf"):
+                LOG.debug("Found bcf file %s", hk_file.full_path)
+                return hk_file
+        raise FileNotFoundError(f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}")
 
     def get_qcmetrics_file(self, hk_version_obj: housekeeper_models.Version) -> Path:
         """Fetch a qc_metrics file and return the path"""
