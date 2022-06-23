@@ -36,6 +36,15 @@ BALSAMIC_ANALYSIS_SAMPLE_TAGS = [
     {"cram-index"},
 ]
 
+BALSAMIC_QC_ANALYSIS_CASE_TAGS = [
+    {"multiqc-html"},
+]
+
+BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS = [
+    {"qc-cram"},
+    {"qc-cram-index"},
+]
+
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
     {"vcf-umi-snv-clinical"},
     {"vcf-umi-snv-clinical-index"},
@@ -131,8 +140,8 @@ PIPELINE_ANALYSIS_TAG_MAP = {
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
     "balsamic-qc": {
-        "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
-        "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
+        "case_tags": BALSAMIC_QC_ANALYSIS_CASE_TAGS,
+        "sample_tags": BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS,
     },
     "balsamic-umi": {
         "case_tags": BALSAMIC_UMI_ANALYSIS_CASE_TAGS,
