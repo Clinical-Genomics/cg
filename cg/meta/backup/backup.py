@@ -42,7 +42,7 @@ class BackupAPI:
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
         self.root_dir: dict = root_dir
-        self.dry_run = dry_run
+        self.dry_run: bool = dry_run
 
     def check_processing(self, max_processing_flow_cells: int = 1) -> bool:
         """Check if the processing queue for flow cells is not full."""
