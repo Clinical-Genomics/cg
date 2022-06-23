@@ -7,6 +7,8 @@ import json
 import logging
 from subprocess import CalledProcessError
 
+from yaml import load
+
 from cg.exc import CaseNotFoundError
 from cg.utils import Process
 
@@ -56,6 +58,8 @@ class LoqusdbAPI:
             "0.95",
             "--soft-threshold",
             "0.90",
+            "--gq-treshold",
+            "10",
         ]
         if self.analysis_type == "wgs" and vcf_sv_path:
             load_call_parameters.extend(["--sv-variants", vcf_sv_path.as_posix()])
