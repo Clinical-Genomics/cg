@@ -8,7 +8,7 @@ from cg.cli.workflow.commands import (
     resolve_compression,
     store,
     store_available,
-    ARGUMENT_ANALYSIS_PARAMETERS_CONFIG,
+    OPTION_ANALYSIS_PARAMETERS_CONFIG,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
@@ -67,7 +67,7 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
 @mutant.command("start")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
-@ARGUMENT_ANALYSIS_PARAMETERS_CONFIG
+@OPTION_ANALYSIS_PARAMETERS_CONFIG
 @click.pass_context
 def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
