@@ -49,7 +49,6 @@ def config_case(context: CGConfig, dry_run: bool, case_id: str) -> None:
 @mutant.command("run")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
-@ARGUMENT_ANALYSIS_PARAMETERS_CONFIG
 @click.pass_obj
 def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None) -> None:
     """Run mutant analysis command for a case"""
@@ -68,6 +67,7 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
 @mutant.command("start")
 @OPTION_DRY
 @ARGUMENT_CASE_ID
+@ARGUMENT_ANALYSIS_PARAMETERS_CONFIG
 @click.pass_context
 def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
