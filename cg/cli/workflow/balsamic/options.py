@@ -2,7 +2,14 @@ import click
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.priority import SlurmQos
+from cg.constants.subject import Gender
 
+OPTION_GENDER = click.option(
+    "--gender",
+    type=click.Choice([Gender.FEMALE, Gender.MALE]),
+    required=False,
+    help="Case associated gender. Set this option to override the one selected by the customer in StatusDB.",
+)
 OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,
@@ -15,12 +22,6 @@ OPTION_PANEL_BED = click.option(
     required=False,
     help="Panel BED is determined based on capture kit \
     used for library prep. Set this option to override the default",
-)
-OPTION_ANALYSIS_TYPE = click.option(
-    "-a",
-    "--analysis-type",
-    type=click.Choice(["qc", "paired", "single"]),
-    help="Setting this option to qc ensures only QC analysis is performed",
 )
 OPTION_RUN_ANALYSIS = click.option(
     "-r",
