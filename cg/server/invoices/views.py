@@ -1,3 +1,4 @@
+import http
 import os
 import tempfile
 from datetime import date
@@ -12,6 +13,7 @@ from flask import (
     send_from_directory,
     session,
     url_for,
+    abort,
 )
 from flask_dance.contrib.google import google
 
@@ -200,7 +202,7 @@ def modified_invoice(invoice_id, cost_center):
         return redirect(url_for("admin.index"))
 
     if cost_center not in ["KTH", "KI"]:
-        return redirect(url_for("admin.index"))
+        return abort(http.HTTPStatus.BAD_REQUEST)
 
     invoice_obj = db.invoice(invoice_id)
     file_name = "invoice_" + cost_center + str(invoice_id) + ".xlsx"
