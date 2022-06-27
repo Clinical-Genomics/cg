@@ -69,4 +69,3 @@ class DemultiplexingDirsAndFiles(StrEnum):
 
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
-    RTACOMPLETE: str = "RTAComplete.txt"
