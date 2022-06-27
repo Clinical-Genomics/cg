@@ -1,7 +1,7 @@
 from cgmodels.cg.constants import Pipeline
 
 # Validation constants
-REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_QC, Pipeline.BALSAMIC_UMI)
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 PRECISION = 2
 NA_FIELD = "N/A"
