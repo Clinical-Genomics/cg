@@ -8,9 +8,10 @@ import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DRY_RUN, FlowCellStatus, HousekeeperTags
-from cg.meta.backup.backup import BackupApi, SpringBackupAPI
+from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
-from cg.meta.encryption.encryption import SpringEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -21,12 +22,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""
-    pdc_api = PdcAPI()
-    context.meta_apis["backup_api"] = BackupApi(
-        status=context.status_db,
-        pdc_api=pdc_api,
-        root_dir=context.backup.root.dict(),
-    )
+    pass
 
 
 @backup.command("fetch-flow-cell")
@@ -36,7 +32,18 @@ def backup(context: CGConfig):
 def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
     """Fetch the first flow cell in the requested queue from backup"""
     status_api: Store = context.status_db
-    backup_api: BackupApi = context.meta_apis["backup_api"]
+    pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
+    encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
+    tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
+    context.meta_apis["backup_api"] = BackupAPI(
+        encryption_api=encryption_api,
+        status=context.status_db,
+        tar_api=tar_api,
+        pdc_api=pdc_api,
+        root_dir=context.backup.root.dict(),
+        dry_run=dry_run,
+    )
+    backup_api: BackupAPI = context.meta_apis["backup_api"]
 
     flow_cell_obj: Optional[models.Flowcell] = None
     if flow_cell:
@@ -45,9 +52,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
             LOG.error(f"{flow_cell}: not found in database")
             raise click.Abort
 
-    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(
-        flow_cell_obj=flow_cell_obj, dry_run=dry_run
-    )
+    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell_obj=flow_cell_obj)
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
@@ -73,7 +78,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
         tags=[HousekeeperTags.SPRING]
-    ).filter(hk_models.File.path.like(f"%{config.environment}%"))
+    ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
         if Path(spring_file.path).exists():
@@ -92,7 +97,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
 def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Archive a spring file to PDC"""
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path)
+    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,
@@ -158,7 +163,7 @@ def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool)
     """Retrieve a spring file from PDC"""
     LOG.info("Attempting PDC retrieval and decryption file %s", spring_file_path)
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path)
+    pdc_api: PdcAPI = PdcAPI(binary_path=config.pdc.binary_path, dry_run=dry_run)
     encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
         binary_path=config.encryption.binary_path,
         dry_run=dry_run,

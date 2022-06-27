@@ -31,9 +31,7 @@ def test_query_pdc(mock_process, binary_path, backup_file_path):
     pdc_api.query_pdc(backup_file_path)
 
     # THEN a dsmc process should be started with parameters 'q archive'
-    mock_process.run_command.assert_called_once_with(
-        parameters=["q", "archive", backup_file_path], dry_run=False
-    )
+    mock_process.run_command.assert_called_once_with(parameters=["q", "archive", backup_file_path])
 
 
 @mock.patch("cg.meta.backup.pdc.Process")
