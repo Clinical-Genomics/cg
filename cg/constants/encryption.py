@@ -24,12 +24,12 @@ class EncryptionUserID(StrEnum):
 
 
 class GPGParameters(ListEnum):
-    ASYMMETRIC_ENCRYPTION: list = [
+    SPRING_ASYMMETRIC_ENCRYPTION: list = [
         "--encrypt",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    ASYMMETRIC_DECRYPTION: list = [
+    SPRING_ASYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--batch",
         "--cipher-algo",
@@ -37,7 +37,7 @@ class GPGParameters(ListEnum):
         "--passphrase",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    SYMMETRIC_ENCRYPTION: list = [
+    SPRING_SYMMETRIC_ENCRYPTION: list = [
         "--symmetric",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -46,7 +46,7 @@ class GPGParameters(ListEnum):
         "None",
         "--passphrase-file",
     ]
-    SYMMETRIC_DECRYPTION: list = [
+    SPRING_SYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -56,9 +56,3 @@ class GPGParameters(ListEnum):
     OUTPUT_PARAMETER: list = [
         "-o",
     ]
-
-
-class EncryptionDirsAndFiles(StrEnum):
-    """Encryption related dirs and files"""
-
-    ENCRYPT_DIR: str = "/home/hiseq.clinical/ENCRYPT/"
