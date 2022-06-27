@@ -249,11 +249,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         gender = next(iter(sample_data.values()))["gender"]
 
-        if all(val["gender"] == gender for val in sample_data.values()) and gender in [
-            Gender.FEMALE,
-            Gender.MALE,
-        ]:
-            return gender
+        if all(val["gender"] == gender for val in sample_data.values()):
+            if gender == Gender.UNKNOWN:
+                LOG.warning(
+                    f"The provided gender is unknown, setting {Gender.FEMALE} as the default"
+                )
+                gender = Gender.FEMALE
+
+            if gender in [Gender.FEMALE, Gender.MALE]:
+                return gender
         else:
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
