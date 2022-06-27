@@ -1,8 +1,8 @@
 """API for encryption on Hasta"""
 import hashlib
-from io import TextIOWrapper
 import logging
 import subprocess
+from io import TextIOWrapper
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
@@ -11,6 +11,7 @@ from housekeeper.store import models as hk_models
 
 from cg.constants import FileExtensions
 from cg.constants.encryption import GPGParameters
+from cg.constants.extraction import FlowCellExtractionParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
@@ -68,6 +69,42 @@ class EncryptionAPI:
             raise ChecksumFailedError(message="Checksum comparison failed!")
         LOG.info("Checksum comparison successful!")
 
+    def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for asymmetric encryption"""
+        encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        encryption_parameters.extend(output_parameter)
+        return encryption_parameters
+
+    def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for symmetric encryption of spring files"""
+        encryption_parameters: list = GPGParameters.SYMMETRIC_ENCRYPTION.copy()
+        encryption_parameters.append(str(self.temporary_passphrase))
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        encryption_parameters.extend(output_parameter)
+        return encryption_parameters
+
+    def get_asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> List[str]:
+        """Generates the gpg command for asymmetric decryption"""
+        decryption_parameters: list = GPGParameters.ASYMMETRIC_DECRYPTION.copy()
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        decryption_parameters.extend(output_parameter)
+        return decryption_parameters
+
+    def get_symmetric_decryption_command(
+        self, input_file: Path, output_file: Path, encryption_key: Path
+    ) -> List[str]:
+        """Generates the gpg command for symmetric decryption"""
+        decryption_parameters: list = GPGParameters.SYMMETRIC_DECRYPTION.copy()
+        decryption_parameters.append(str(encryption_key))
+        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
+        output_parameter.extend([str(output_file), str(input_file)])
+        decryption_parameters.extend(output_parameter)
+        return decryption_parameters
+
 
 class SpringEncryptionAPI(EncryptionAPI):
     """Encryption functionality for spring files"""
@@ -78,44 +115,7 @@ class SpringEncryptionAPI(EncryptionAPI):
         dry_run: bool = False,
     ):
         super().__init__(binary_path=binary_path, dry_run=dry_run)
-        self._dry_run = dry_run
         self._temporary_passphrase = None
-
-    def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for asymmetric encryption"""
-        encryption_parameters: list = GPGParameters.SPRING_ASYMMETRIC_ENCRYPTION.copy()
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        encryption_parameters.extend(output_parameter)
-        return encryption_parameters
-
-    def get_asymmetric_decryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for asymmetric decryption"""
-        decryption_parameters: list = GPGParameters.SPRING_ASYMMETRIC_DECRYPTION.copy()
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        decryption_parameters.extend(output_parameter)
-        return decryption_parameters
-
-    def get_symmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
-        """Generates the gpg command for symmetric encryption of spring files"""
-        encryption_parameters: list = GPGParameters.SPRING_SYMMETRIC_ENCRYPTION.copy()
-        encryption_parameters.append(str(self.temporary_passphrase))
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        encryption_parameters.extend(output_parameter)
-        return encryption_parameters
-
-    def get_symmetric_decryption_command(
-        self, input_file: Path, output_file: Path, encryption_key: Path
-    ) -> List[str]:
-        """Generates the gpg command for symmetric decryption"""
-        decryption_parameters: list = GPGParameters.SPRING_SYMMETRIC_DECRYPTION.copy()
-        decryption_parameters.append(str(encryption_key))
-        output_parameter: list = GPGParameters.OUTPUT_PARAMETER.copy()
-        output_parameter.extend([str(output_file), str(input_file)])
-        decryption_parameters.extend(output_parameter)
-        return decryption_parameters
 
     def spring_symmetric_encryption(self, spring_file_path: Path) -> None:
         """Symmetrically encrypts a spring file"""
@@ -229,15 +229,3 @@ class SpringEncryptionAPI(EncryptionAPI):
         if self._temporary_passphrase is None:
             self._temporary_passphrase: Path = self.generate_temporary_passphrase_file()
         return self._temporary_passphrase
-
-    @property
-    def dry_run(self) -> bool:
-        """Dry run property"""
-        LOG.debug("Encryption dry run property: %s", self._dry_run)
-        return self._dry_run
-
-    @dry_run.setter
-    def dry_run(self, value: bool) -> None:
-        """Set the dry run property"""
-        LOG.debug("Setting encryption dry run property to %s", value)
-        self._dry_run = value

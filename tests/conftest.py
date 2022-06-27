@@ -443,7 +443,7 @@ def microbial_orderform(orderforms: Path) -> str:
 @pytest.fixture
 def sarscov2_orderform(orderforms: Path) -> str:
     """Orderform fixture for sarscov2 samples"""
-    return Path(orderforms / "2184.6.sarscov2.xlsx").as_posix()
+    return Path(orderforms / "2184.7.sarscov2.xlsx").as_posix()
 
 
 @pytest.fixture
@@ -1235,6 +1235,7 @@ def fixture_context_config(
         },
         "encryption": {"binary_path": "bin/gpg"},
         "pdc": {"binary_path": "/bin/dsmc"},
+        "tar": {"binary_path": "/bin/tar"},
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
