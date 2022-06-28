@@ -61,7 +61,7 @@ def fixture_upload_genotypes_hk_bundle(
                 "archive": False,
                 "tags": HkMipAnalysisTag.QC_METRICS,
             },
-            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
+            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
         ],
     }
     return data
