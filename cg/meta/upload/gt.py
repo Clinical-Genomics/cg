@@ -92,7 +92,7 @@ class UploadGenotypesAPI(object):
 
     def get_bcf_file(self, hk_version_obj: housekeeper_models.Version) -> housekeeper_models.File:
         """Fetch a bcf file and return the file object"""
-        genotype_files = self._get_genotype_files(version_id=hk_version_obj.id)
+        genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
             if "index" not in genotype_file.tags:
                 LOG.debug("Found bcf file %s", genotype_file.full_path)
@@ -118,5 +118,5 @@ class UploadGenotypesAPI(object):
         """Upload data about genotypes for a family of samples."""
         self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
 
-    def _get_genotype_files(self, version_id: int):
+    def _get_genotype_files(self, version_id: int) -> list:
         return self.hk.files(version=version_id, tags=["genotype"]).all()
