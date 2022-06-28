@@ -194,6 +194,49 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
 
 
+def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
+    # GIVEN a database with a sample without comment
+    sample_obj = helpers.add_sample(base_store, gender="female")
+    key = "comment"
+
+    # WHEN setting key on sample to new_value
+    new_value = "test comment"
+    result = cli_runner.invoke(
+        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+    )
+
+    # THEN it should have new_value as attribute key on the sample and in LIMS
+    assert result.exit_code == SUCCESS
+    assert getattr(sample_obj, key).endswith(new_value)
+    assert base_context.lims_api.get_updated_sample_key() == key
+    assert base_context.lims_api.get_updated_sample_value() == new_value
+
+
+def test_sample_comment_append(
+    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
+):
+    # GIVEN a database with a sample with a comment
+    old_value = "test comment"
+    sample_obj = helpers.add_sample(
+        base_store, gender="female", comment=f"2022-06-13 10:16-test.user: {old_value}"
+    )
+    key = "comment"
+
+    # WHEN setting key again on sample this time to new_value
+    new_value = "another test comment"
+    result = cli_runner.invoke(
+        sample, [sample_obj.internal_id, "-kv", key, new_value, "-y"], obj=base_context
+    )
+
+    # THEN it should have new_value above old_value as attribute key on the sample and in LIMS
+    comments = getattr(sample_obj, key).split("\n")
+    assert result.exit_code == SUCCESS
+    assert comments[0].endswith(new_value)
+    assert comments[1].endswith(old_value)
+    assert base_context.lims_api.get_updated_sample_key() == key
+    assert base_context.lims_api.get_updated_sample_value() == new_value
+
+
 def test_invalid_customer(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers
 ):
