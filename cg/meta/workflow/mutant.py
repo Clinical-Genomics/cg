@@ -54,8 +54,15 @@ class MutantAnalysisAPI(AnalysisAPI):
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_output_path(case_id=case_id), "trailblazer_config.yaml")
 
+    def _is_nanopore(self, application: models.Application) -> bool:
+        return application.tag[3:6] == "ONT"
+
     def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
-        return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
+        application = sample_obj.application_version.application
+        if self._is_nanopore(application):
+            return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj.name)
+        else:
+            return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
 
     def get_case_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "case_config.json")
@@ -70,9 +77,13 @@ class MutantAnalysisAPI(AnalysisAPI):
             if not sample_obj.sequencing_qc:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
-            self.link_fastq_files_for_sample(
-                case_obj=case_obj, sample_obj=sample_obj, concatenate=True
-            )
+            application = sample_obj.application_version.application
+            if self._is_nanopore(application):
+                self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
+            else:
+                self.link_fastq_files_for_sample(
+                    case_obj=case_obj, sample_obj=sample_obj, concatenate=True
+                )
 
     def get_sample_parameters(self, sample_obj: models.Sample) -> MutantSampleConfig:
         return MutantSampleConfig(
@@ -130,23 +141,39 @@ class MutantAnalysisAPI(AnalysisAPI):
 
         return f"{region_code}_{lab_code}_{sample_name}"
 
-    def run_analysis(self, case_id: str, dry_run: bool) -> None:
+    def run_analysis(self, case_id: str, dry_run: bool, config_artic: str = None) -> None:
         if self.get_case_output_path(case_id=case_id).exists():
             LOG.info("Found old output files, directory will be cleaned!")
             shutil.rmtree(self.get_case_output_path(case_id=case_id), ignore_errors=True)
 
-        self.process.run_command(
-            [
-                "analyse",
-                "sarscov2",
-                "--config_case",
-                self.get_case_config_path(case_id=case_id).as_posix(),
-                "--outdir",
-                self.get_case_output_path(case_id=case_id).as_posix(),
-                self.get_case_fastq_dir(case_id=case_id).as_posix(),
-            ],
-            dry_run=dry_run,
-        )
+        if config_artic:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--config_artic",
+                    config_artic,
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
+        else:
+            self.process.run_command(
+                [
+                    "analyse",
+                    "sarscov2",
+                    "--config_case",
+                    self.get_case_config_path(case_id=case_id).as_posix(),
+                    "--outdir",
+                    self.get_case_output_path(case_id=case_id).as_posix(),
+                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                ],
+                dry_run=dry_run,
+            )
 
     def get_cases_to_store(self) -> List[models.Family]:
         """Retrieve a list of cases where analysis has a deliverables file,
