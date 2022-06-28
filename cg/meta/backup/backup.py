@@ -1,18 +1,18 @@
 """ Module for retrieving FCs from backup """
 import logging
+import re
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.encryption import EncryptionDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.process import RETURN_WARNING
-from cg.constants.symbols import ASTERISK, NEW_LINE, SPACE
+from cg.constants.symbols import ASTERISK, NEW_LINE
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
@@ -30,14 +30,16 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
+        encrypt_dir: str,
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
-        root_dir: dict,
+        root_dir: Dict[str, str],
         dry_run: bool = False,
     ):
 
         self.encryption_api = encryption_api
+        self.encrypt_dir = encrypt_dir
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -87,8 +89,8 @@ class BackupAPI:
             LOG.error("PDC query failed: %s", error.stderr)
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key_path(pdc_flow_cell_query)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(pdc_flow_cell_query)
+        archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query, encrypt_dir=self.encrypt_dir)
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(query=pdc_flow_cell_query, encrypt_dir=self.encrypt_dir)
 
         if not self.dry_run:
             start_time = get_start_time()
@@ -242,7 +244,7 @@ class BackupAPI:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
         """Query PDC for a given flow cell id"""
-        search_pattern = EncryptionDirsAndFiles.ENCRYPT_DIR + ASTERISK + flow_cell_id + ASTERISK
+        search_pattern = self.encrypt_dir + ASTERISK + flow_cell_id + ASTERISK
         self.pdc.query_pdc(search_pattern=search_pattern)
         query: list = self.pdc.process.stdout.split(NEW_LINE)
         return query
@@ -255,8 +257,7 @@ class BackupAPI:
             file_path=str(archived_file), target_path=str(retrieved_file)
         )
 
-    @staticmethod
-    def get_archived_flow_cell_path(query: list) -> Path:
+    def get_archived_flow_cell_path(self, query: list) -> Path:
         """Get the path of the archived flow cell from a PDC query"""
         flow_cell_query: str = [
             row
@@ -265,21 +266,18 @@ class BackupAPI:
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        archived_flow_cell_path = Path(
-            flow_cell_query.split(SPACE)[ListIndexes.PDC_FC_COLUMN.value]
-        )
+        regexp: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
+        archived_flow_cell_path = Path(re.search(regexp, flow_cell_query).group())
         LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
         return archived_flow_cell_path
-
-    @staticmethod
-    def get_archived_encryption_key_path(query: list) -> Path:
+    
+    def get_archived_encryption_key_path(self, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query"""
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        archived_encryption_key_path = Path(
-            encryption_key_query.split(SPACE)[ListIndexes.PDC_KEY_COLUMN.value]
-        )
+        regexp: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
+        archived_encryption_key_path = Path(re.search(regexp, encryption_key_query).group())
         LOG.info("Encryption key found: %s", str(archived_encryption_key_path))
         return archived_encryption_key_path
 

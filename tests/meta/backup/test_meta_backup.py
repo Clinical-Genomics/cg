@@ -23,6 +23,7 @@ def test_maximum_processing_queue_full(mock_store):
     # GIVEN a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -42,6 +43,7 @@ def test_maximum_processing_queue_not_full(mock_store):
     # GIVEN a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -61,6 +63,7 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -82,6 +85,7 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     # GIVEN status-db needs to be checked for flow cells to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -107,6 +111,7 @@ def test_fetch_flow_cell_processing_queue_full(mock_flow_cell, mock_check_proces
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
         status=mock.Mock(),
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -139,6 +144,7 @@ def test_fetch_flow_cell_no_flow_cells_requested(
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=mock.Mock(),
         status=mock_store,
         tar_api=mock.Mock(),
         pdc_api=mock.Mock(),
@@ -188,6 +194,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     # GIVEN we check if a flow cell needs to be retrieved from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
@@ -251,10 +258,11 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        root_dir=cg_context.backup.root.dict(),
+        root_dir=cg_context.backup.root.dict()
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
@@ -315,10 +323,11 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
     # GIVEN we are going to retrieve a flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock_pdc,
-        root_dir=cg_context.backup.root.dict(),
+        root_dir=cg_context.backup.root.dict()
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
@@ -339,6 +348,8 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
 @mock.patch("cg.meta.backup.backup.BackupAPI.unlink_files")
 @mock.patch("cg.meta.backup.backup.BackupAPI.create_rta_complete")
 @mock.patch("cg.meta.backup.backup.BackupAPI.query_pdc_for_flow_cell")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_encryption_key_path")
+@mock.patch("cg.meta.backup.backup.BackupAPI.get_archived_flow_cell_path")
 @mock.patch("cg.meta.tar.tar.TarAPI")
 @mock.patch("cg.store.models.Flowcell")
 @mock.patch("cg.store")
@@ -360,18 +371,17 @@ def test_fetch_flow_cell_integration(
     # GIVEN we want to retrieve a specific flow cell from PDC
     backup_api = BackupAPI(
         encryption_api=mock.Mock(),
+        encrypt_dir=cg_context.backup.encrypt_dir,
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        root_dir=cg_context.backup.root.dict(),
+        root_dir=cg_context.backup.root.dict()
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
     mock_store.flowcells.return_value.count.return_value = 0
     mock_query.return_value = pdc_query
 
-    backup_api.get_archived_encryption_key_path.return_value = archived_key
-    backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_flow_cell(mock_flow_cell)
 
