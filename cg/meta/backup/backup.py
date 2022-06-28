@@ -270,7 +270,7 @@ class BackupAPI:
         archived_flow_cell_path = Path(re.search(regexp, flow_cell_query).group())
         LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
         return archived_flow_cell_path
-    
+
     def get_archived_encryption_key_path(self, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query"""
         encryption_key_query: str = [

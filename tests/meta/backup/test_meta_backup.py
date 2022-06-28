@@ -262,7 +262,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        root_dir=cg_context.backup.root.dict()
+        root_dir=cg_context.backup.root.dict(),
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
@@ -327,7 +327,7 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock_pdc,
-        root_dir=cg_context.backup.root.dict()
+        root_dir=cg_context.backup.root.dict(),
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
@@ -375,7 +375,7 @@ def test_fetch_flow_cell_integration(
         status=mock_store,
         tar_api=mock_tar,
         pdc_api=mock.Mock(),
-        root_dir=cg_context.backup.root.dict()
+        root_dir=cg_context.backup.root.dict(),
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ

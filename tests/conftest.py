@@ -1320,11 +1320,9 @@ def fixture_context_config(
             },
         },
         "backup": {
-            "root": {
-                "hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"
-                },
-            "encrypt_dir": "/home/ENCRYPT/"
-            },
+            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+            "encrypt_dir": "/home/ENCRYPT/",
+        },
     }
 
 
