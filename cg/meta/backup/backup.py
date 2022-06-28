@@ -89,8 +89,8 @@ class BackupAPI:
             LOG.error("PDC query failed: %s", error.stderr)
             raise error
 
-        archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query, encrypt_dir=self.encrypt_dir)
-        archived_flow_cell: Path = self.get_archived_flow_cell_path(query=pdc_flow_cell_query, encrypt_dir=self.encrypt_dir)
+        archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query)
+        archived_flow_cell: Path = self.get_archived_flow_cell_path(query=pdc_flow_cell_query)
 
         if not self.dry_run:
             start_time = get_start_time()
