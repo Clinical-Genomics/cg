@@ -63,6 +63,26 @@ def test_is_fastq_compression_possible(
     assert "FASTQ compression is possible" in caplog.text
 
 
+def test_external_data_compression(
+    crunchy_config_dict: dict, compression_object_external: CompressionData, caplog
+):
+    """Test if FASTQ compression is possible when it is not external data"""
+
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a crunchy-api, and existing FASTQ paths that is not external
+    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    compression_object_external.fastq_first.touch()
+    compression_object_external.fastq_second.touch()
+
+    # WHEN checking if FASTQ files is in the external folder
+    result = crunchy_api.is_fastq_compression_possible(compression_object_external)
+
+    # THEN result should be False
+    assert result is False
+    # THEN assert that the correct message was communicated
+    assert "FASTQ compression is not possible" in caplog.text
+
+
 def test_is_fastq_compression_possible_compression_pending(
     crunchy_config_dict: dict, compression_object: CompressionData, caplog
 ):

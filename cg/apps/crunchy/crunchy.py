@@ -66,6 +66,7 @@ class CrunchyAPI:
 
          - Compression is running          -> Compression NOT possible
          - SPRING archive exists           -> Compression NOT possible
+         - Data is external                -> Compression NOT possible
          - Not compressed and not running  -> Compression IS possible
         """
         if CrunchyAPI.is_compression_pending(compression_obj):
@@ -73,6 +74,14 @@ class CrunchyAPI:
 
         if compression_obj.spring_exists():
             LOG.info("SPRING file found")
+            return False
+
+        #if str(compression_obj.fastq_first).find("external-data") == -1:
+        #    LOG.info("File is external data and should not be compressed")
+        #    return False
+
+        if "external-data" in str(compression_obj.fastq_first):
+            LOG.info("File is external data and should not be compressed")
             return False
 
         LOG.info("FASTQ compression is possible")

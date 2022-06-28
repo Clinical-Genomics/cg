@@ -535,6 +535,15 @@ def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
     return CompressionData(fastq_dir / run_name)
 
 
+@pytest.fixture(scope="function", name="external_fastq_data")
+def fixture_external_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
+    """Return a compression object with a path to external fastq files"""
+
+    external_path = Path("/home/proj/production/external-data")
+
+    return CompressionData(fastq_dir / external_path / run_name)
+
+
 @pytest.fixture(scope="function", name="fastq_stub")
 def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
     """Creates a path to the base format of a fastq run"""
@@ -549,6 +558,17 @@ def fixture_compression_object(
     working_files = CompressionData(fastq_stub)
     shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
     shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
+    return working_files
+
+
+@pytest.fixture(scope="function", name="compression_object_external")
+def fixture_compression_object_external(
+    fastq_stub: Path, external_fastq_data: CompressionData
+) -> CompressionData:
+    """Creates compression data object for external data with information about files used in fastq compression"""
+    working_files = CompressionData(fastq_stub)
+    shutil.copy(str(external_fastq_data.fastq_first), str(working_files.fastq_first))
+    shutil.copy(str(external_fastq_data.fastq_second), str(working_files.fastq_second))
     return working_files
 
 
