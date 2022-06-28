@@ -94,7 +94,7 @@ class UploadGenotypesAPI(object):
         """Fetch a bcf file and return the file object"""
         genotype_files: list = self._get_genotype_files(version_id=hk_version_obj.id)
         for genotype_file in genotype_files:
-            if "index" not in genotype_file.tags:
+            if self._is_variant_file(genotype_file=genotype_file):
                 LOG.debug("Found bcf file %s", genotype_file.full_path)
                 return genotype_file
         raise FileNotFoundError(f"No vcf or bcf file found for bundle {hk_version_obj.bundle_id}")
@@ -117,6 +117,10 @@ class UploadGenotypesAPI(object):
     def upload(self, data: dict, replace: bool = False):
         """Upload data about genotypes for a family of samples."""
         self.gt.upload(str(data["bcf"]), data["samples_sex"], force=replace)
+
+    @staticmethod
+    def _is_variant_file(genotype_file: housekeeper_models.File):
+        return genotype_file.full_path.endswith("vcf.gz") or genotype_file.full_path.endswith("bcf")
 
     def _get_genotype_files(self, version_id: int) -> list:
         return self.hk.files(version=version_id, tags=["genotype"]).all()
