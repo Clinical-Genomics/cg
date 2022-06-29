@@ -266,8 +266,8 @@ class BackupAPI:
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        regexp: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
-        archived_flow_cell_path = Path(re.search(regexp, flow_cell_query).group())
+        re_archived_flow_cell_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
+        archived_flow_cell_path = Path(re.search(re_archived_flow_cell_path, flow_cell_query).group())
         LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
         return archived_flow_cell_path
 
