@@ -26,7 +26,7 @@ class AddHandler(BaseHandler):
         self,
         internal_id: str,
         name: str,
-        customer_group: models.CustomerGroup,
+        customer_group: Optional[models.CustomerGroup],
         invoice_address: str,
         invoice_reference: str,
         scout_access: bool = False,

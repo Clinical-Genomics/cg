@@ -37,6 +37,14 @@ customer_user = Table(
     UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
 )
 
+customer_group_links = Table(
+    "customer_group_links",
+    Model.metadata,
+    Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
+    Column("customer_group_id", types.Integer, ForeignKey("customer_group.id"), nullable=False),
+    UniqueConstraint("customer_id", "customer_group_id", name="_customer_group_link_uc"),
+)
+
 
 class PriorityMixin:
     @property
@@ -239,7 +247,9 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
-    customer_group_id = Column(ForeignKey("customer_group.id"), nullable=False)
+    customer_groups = orm.relationship(
+        "CustomerGroup", secondary=customer_group_links, backref="customer"
+    )
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -256,7 +266,9 @@ class CustomerGroup(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
 
-    customers = orm.relationship(Customer, backref="customer_group", order_by="-Customer.id")
+    customers = orm.relationship(
+        "customer", secondary=customer_group_links, backref="customer_groups"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"

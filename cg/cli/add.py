@@ -26,8 +26,7 @@ def add():
     "-cg",
     "--customer-group",
     "customer_group_id",
-    help="internal ID for the customer group of the customer, a new group will be "
-    "created if left out",
+    help="internal ID for the customer group of the customer",
 )
 @click.option(
     "-ia",
@@ -60,10 +59,6 @@ def customer(
         raise click.Abort
 
     customer_group: models.CustomerGroup = status_db.customer_group(customer_group_id)
-    if not customer_group:
-        customer_group: models.CustomerGroup = status_db.add_customer_group(
-            internal_id=internal_id, name=name
-        )
 
     new_customer: models.Customer = status_db.add_customer(
         internal_id=internal_id,
