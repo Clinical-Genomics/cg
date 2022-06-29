@@ -267,7 +267,9 @@ class BackupAPI:
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
         re_archived_flow_cell_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
-        archived_flow_cell_path = Path(re.search(re_archived_flow_cell_path, flow_cell_query).group())
+        archived_flow_cell_path = Path(
+            re.search(re_archived_flow_cell_path, flow_cell_query).group()
+        )
         LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
         return archived_flow_cell_path
 
@@ -277,7 +279,9 @@ class BackupAPI:
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
         re_archived_encryption_key_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
-        archived_encryption_key_path = Path(re.search(re_archived_encryption_key_path, encryption_key_query).group())
+        archived_encryption_key_path = Path(
+            re.search(re_archived_encryption_key_path, encryption_key_query).group()
+        )
         LOG.info("Encryption key found: %s", str(archived_encryption_key_path))
         return archived_encryption_key_path
 
