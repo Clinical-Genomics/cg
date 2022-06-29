@@ -276,8 +276,8 @@ class BackupAPI:
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        regexp: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
-        archived_encryption_key_path = Path(re.search(regexp, encryption_key_query).group())
+        re_archived_encryption_key_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
+        archived_encryption_key_path = Path(re.search(re_archived_encryption_key_path, encryption_key_query).group())
         LOG.info("Encryption key found: %s", str(archived_encryption_key_path))
         return archived_encryption_key_path
 
