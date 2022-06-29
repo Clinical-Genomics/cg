@@ -24,6 +24,7 @@ PROP2UDF = {
     "pool": "pool name",
     "post_formalin_fixation_time": "Post Formalin Fixation Time",
     "pre_processing_method": "Pre Processing Method",
+    "primer": "Primer",
     "priority": "priority",
     "quantity": "Quantity",
     "reference_genome": "Reference Genome Microbial",
