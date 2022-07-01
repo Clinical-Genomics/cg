@@ -1,10 +1,9 @@
 """Handler to find business data objects"""
 import datetime as dt
-import logging
 from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, load_only
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -142,13 +141,14 @@ class FindBusinessDataHandler(BaseHandler):
         self, *, customers: List[models.Customer] = None, enquiry: str = None
     ) -> Query:
         """Fetch all families including those from collaborating customers."""
-        records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
+        records = self.Family.query
 
         if customers:
-            customer_group_ids = []
+            accessible_customers = []
             for customer in customers:
-                customer_group_ids.append(customer.customer_group_id)
-            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
+                accessible_customers.extend(self.accessible_customers(customer))
+            accessible_customers = set(accessible_customers)
+            records = records.filter(models.Family.customer.in_(accessible_customers))
 
         records = (
             records.filter(
@@ -172,6 +172,13 @@ class FindBusinessDataHandler(BaseHandler):
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
             .filter(models.Family.internal_id == family_id)
+            .all()
+        )
+
+    def accessible_customers(self, customer: models.Customer):
+        return (
+            self.CustomerLink.query.filter(models.CustomerLink.viewer == customer)
+            .options(load_only(models.CustomerLink.owner))
             .all()
         )
 
@@ -429,13 +436,14 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> Query:
         """Fetch all samples including those from collaborating customers."""
 
-        records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)
+        records = self.Sample.query
 
         if customers:
-            customer_group_ids = []
+            accessible_customers = []
             for customer in customers:
-                customer_group_ids.append(customer.customer_group_id)
-            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
+                accessible_customers.extend(self.accessible_customers(customer))
+            accessible_customers = set(accessible_customers)
+            records = records.filter(models.Sample.customer.in_(accessible_customers))
 
         records = (
             records.filter(

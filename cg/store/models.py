@@ -265,13 +265,21 @@ class CustomerGroup(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-
     customers = orm.relationship(
         "customer", secondary=customer_group_links, backref="customer_groups"
     )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+
+class CustomerLink(Model):
+    __table_args__ = (UniqueConstraint("viewer_id", "owner_id", name="_cust_link_uc"),)
+    id = Column(types.Integer, primary_key=True)
+    viewer_id = Column(ForeignKey("customer.id"))
+    owner_id = Column(ForeignKey("customer.id"))
+    viewer = orm.relationship("Customer")
+    owner = orm.relationship("Customer")
 
 
 class Delivery(Model):

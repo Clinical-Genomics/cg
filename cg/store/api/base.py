@@ -13,6 +13,7 @@ class BaseHandler:
     BedVersion = models.BedVersion
     Customer = models.Customer
     CustomerGroup = models.CustomerGroup
+    CustomerLink = models.CustomerLink
     Sample = models.Sample
     Family = models.Family
     FamilySample = models.FamilySample
