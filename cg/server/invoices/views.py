@@ -1,3 +1,4 @@
+import http
 import os
 import tempfile
 from datetime import date
@@ -12,6 +13,7 @@ from flask import (
     send_from_directory,
     session,
     url_for,
+    abort,
 )
 from flask_dance.contrib.google import google
 
@@ -199,6 +201,9 @@ def modified_invoice(invoice_id, cost_center):
     if not logged_in():
         return redirect(url_for("admin.index"))
 
+    if cost_center not in ["KTH", "KI"]:
+        return abort(http.HTTPStatus.BAD_REQUEST)
+
     invoice_obj = db.invoice(invoice_id)
     file_name = "invoice_" + cost_center + str(invoice_id) + ".xlsx"
     temp_dir = tempfile.mkdtemp()
@@ -210,4 +215,5 @@ def modified_invoice(invoice_id, cost_center):
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
         pass
+
     return send_from_directory(directory=temp_dir, filename=file_name, as_attachment=True)
