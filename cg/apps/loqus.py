@@ -1,13 +1,10 @@
 """
     Module for loqusdb API
 """
-from pathlib import Path
-
 import json
 import logging
+from pathlib import Path
 from subprocess import CalledProcessError
-
-from yaml import load
 
 from cg.exc import CaseNotFoundError
 from cg.utils import Process
