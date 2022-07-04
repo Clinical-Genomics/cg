@@ -24,12 +24,12 @@ class EncryptionUserID(StrEnum):
 
 
 class GPGParameters(ListEnum):
-    SPRING_ASYMMETRIC_ENCRYPTION: list = [
+    ASYMMETRIC_ENCRYPTION: list = [
         "--encrypt",
         "--recipient",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    SPRING_ASYMMETRIC_DECRYPTION: list = [
+    ASYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--batch",
         "--cipher-algo",
@@ -37,7 +37,7 @@ class GPGParameters(ListEnum):
         "--passphrase",
         EncryptionUserID.HASTA_USER_ID,
     ]
-    SPRING_SYMMETRIC_ENCRYPTION: list = [
+    SYMMETRIC_ENCRYPTION: list = [
         "--symmetric",
         "--cipher-algo",
         CipherAlgorithm.AES256,
@@ -46,7 +46,7 @@ class GPGParameters(ListEnum):
         "None",
         "--passphrase-file",
     ]
-    SPRING_SYMMETRIC_DECRYPTION: list = [
+    SYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--cipher-algo",
         CipherAlgorithm.AES256,

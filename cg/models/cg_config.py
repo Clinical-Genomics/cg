@@ -37,6 +37,7 @@ class FlowCellRunDirs(Sequencers):
 
 class BackupConfig(BaseModel):
     root: Sequencers
+    encrypt_dir: str
 
 
 class CleanDirs(BaseModel):
@@ -237,6 +238,7 @@ class CGConfig(BaseModel):
     scout_api_: ScoutAPI = None
     shipping: ShippingConfig = None
     shipping_api_: ShippingAPI = None
+    tar: Optional[CommonAppConfig] = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
     vogue: CommonAppConfig = None
