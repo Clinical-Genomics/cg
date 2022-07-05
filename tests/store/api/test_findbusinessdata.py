@@ -23,7 +23,7 @@ def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
 
 @pytest.mark.parametrize(
     "data_analysis",
-    [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI, Pipeline.MIP_DNA],
+    [Pipeline.BALSAMIC, Pipeline.BALSAMIC_QC, Pipeline.BALSAMIC_UMI, Pipeline.MIP_DNA],
 )
 def test_families_by_subject_id(
     data_analysis: Pipeline,
