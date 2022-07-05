@@ -54,7 +54,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
-    YAML = "yaml"
+    YAML: str = "yaml"
 
 
 class GenomeVersion(StrEnum):
