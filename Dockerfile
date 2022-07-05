@@ -16,6 +16,9 @@ ENV LIMS_HOST="mocklims.scilifelab.se"
 ENV LIMS_USERNAME="limsadmin"
 ENV LIMS_PASSWORD="limsadminpassword"
 
+ENV MAIL_CONTAINER_URI="http://127.0.0.1:port/container"
+
+ENV OSTICKET_EMAIL="support@system.email"
 ENV OSTICKET_API_KEY=None
 ENV OSTICKET_DOMAIN=None
 ENV OSTICKET_TIMEOUT="1"

@@ -56,9 +56,3 @@ class GPGParameters(ListEnum):
     OUTPUT_PARAMETER: list = [
         "-o",
     ]
-
-
-class EncryptionDirsAndFiles(StrEnum):
-    """Encryption related dirs and files"""
-
-    ENCRYPT_DIR: str = "/home/hiseq.clinical/ENCRYPT/"
