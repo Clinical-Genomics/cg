@@ -94,7 +94,7 @@ def validate_supported_pipeline(cls, values: dict) -> dict:
             raise ValueError
 
     # Validates the analysis type
-    if values.get("pipeline") == Pipeline.BALSAMIC:
+    if Pipeline.BALSAMIC in values.get("pipeline"):
         values["type"] = validate_balsamic_analysis_type(values["type"])
 
     return values

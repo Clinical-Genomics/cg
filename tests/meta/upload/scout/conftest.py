@@ -346,6 +346,11 @@ def fixture_balsamic_analysis_hk_bundle_data(
                 "tags": ["vcf-sv-clinical"],
             },
             {
+                "path": str(balsamic_wgs_analysis_dir / "umi.sv.vcf"),
+                "archive": False,
+                "tags": ["vcf-umi-snv-clinical"],
+            },
+            {
                 "path": str(balsamic_wgs_analysis_dir / "adm1.cram"),
                 "archive": False,
                 "tags": ["cram", sample_id],
