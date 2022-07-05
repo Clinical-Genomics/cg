@@ -35,6 +35,7 @@ CONTROL_OPTIONS = ("", "negative", "positive")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
+
 FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
 
 FLOWCELL_Q30_THRESHOLD = {
@@ -50,6 +51,10 @@ SEX_OPTIONS = ("male", "female", "unknown")
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
+
+
+class FileFormat(StrEnum):
+    YAML = "yaml"
 
 
 class GenomeVersion(StrEnum):
