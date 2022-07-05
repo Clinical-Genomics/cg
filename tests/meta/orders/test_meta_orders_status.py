@@ -6,6 +6,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
+from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
@@ -579,7 +580,9 @@ def test_store_metagenome_samples_bad_apptag(orders_api, base_store, metagenome_
         )
 
 
-@pytest.mark.parametrize("submitter", [BalsamicSubmitter, BalsamicUmiSubmitter])
+@pytest.mark.parametrize(
+    "submitter", [BalsamicSubmitter, BalsamicQCSubmitter, BalsamicUmiSubmitter]
+)
 def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, submitter):
     # GIVEN a basic store with no samples and a cancer order
     assert base_store.samples().first() is None
@@ -600,7 +603,11 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
     assert len(new_families) == 1
     new_case = new_families[0]
     assert new_case.name == "family1"
-    assert new_case.data_analysis in [str(Pipeline.BALSAMIC), str(Pipeline.BALSAMIC_UMI)]
+    assert new_case.data_analysis in [
+        str(Pipeline.BALSAMIC),
+        str(Pipeline.BALSAMIC_QC),
+        str(Pipeline.BALSAMIC_UMI),
+    ]
     assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == Priority.standard.name
