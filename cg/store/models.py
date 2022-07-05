@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
@@ -247,9 +247,7 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
-    customer_groups = orm.relationship(
-        "CustomerGroup", secondary=customer_group_links, backref="customer"
-    )
+    customer_groups = orm.relationship("CustomerGroup", secondary=customer_group_links)
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -265,21 +263,10 @@ class CustomerGroup(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-    customers = orm.relationship(
-        "customer", secondary=customer_group_links, backref="customer_groups"
-    )
+    customers = orm.relationship(Customer, secondary=customer_group_links)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
-
-
-class CustomerLink(Model):
-    __table_args__ = (UniqueConstraint("viewer_id", "owner_id", name="_cust_link_uc"),)
-    id = Column(types.Integer, primary_key=True)
-    viewer_id = Column(ForeignKey("customer.id"))
-    owner_id = Column(ForeignKey("customer.id"))
-    viewer = orm.relationship("Customer")
-    owner = orm.relationship("Customer")
 
 
 class Delivery(Model):
@@ -634,6 +621,17 @@ class User(Model):
     order_portal_login = Column(types.Boolean, default=False)
 
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
+
+    @property
+    def available_customers(self) -> Set[Customer]:
+        """Set of all customers in each customer group in which any of the user's customers are
+        part of"""
+        return {
+            customer
+            for customer_obj in self.customers
+            for customer_group in customer_obj.customer_groups
+            for customer in customer_group
+        }
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""

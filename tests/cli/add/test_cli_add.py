@@ -37,10 +37,10 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
         internal_id=customer_id,
         name="Test Customer",
         scout_access=False,
-        customer_group=customer_group,
         invoice_address="Street nr, 12345 Uppsala",
         invoice_reference="ABCDEF",
     )
+    customer.customer_groups.append(customer_group)
     disk_store.add_commit(customer)
     # GIVEN that there is a certain number of users
     nr_users = disk_store.User.query.count()

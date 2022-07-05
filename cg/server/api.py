@@ -162,12 +162,10 @@ def families():
 @BLUEPRINT.route("/families_in_customer_group")
 def families_in_customer_group():
     """Fetch families in customer_group."""
-    customer_objs: Optional[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.customers
+    customer_objs: List[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.available_customers
     )
-    families_q: Query = db.families_in_customer_group(
-        enquiry=request.args.get("enquiry"), customers=customer_objs
-    )
+    families_q: Query = db.families(enquiry=request.args.get("enquiry"), customers=customer_objs)
     count = families_q.count()
     records = families_q.limit(30)
     data = [case_obj.to_dict(links=True) for case_obj in records]
@@ -193,10 +191,7 @@ def family_in_customer_group(family_id):
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (
-        case_obj.customer.customer_group
-        not in set(customer.customer_group for customer in g.current_user.customers)
-    ):
+    if not g.current_user.is_admin and case_obj.customer not in g.current_user.available_customers:
         return abort(http.HTTPStatus.FORBIDDEN)
 
     data = case_obj.to_dict(links=True, analyses=True)
@@ -227,12 +222,10 @@ def samples():
 @BLUEPRINT.route("/samples_in_customer_group")
 def samples_in_customer_group():
     """Fetch samples in a customer group."""
-    customer_objs: Optional[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.customers
+    customer_objs: List[models.Customer] = (
+        None if g.current_user.is_admin else g.current_user.available_customers
     )
-    samples_q = db.samples_in_customer_group(
-        enquiry=request.args.get("enquiry"), customers=customer_objs
-    )
+    samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -256,9 +249,9 @@ def sample_in_customer_group(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (
-        sample_obj.customer.customer_group
-        not in set(customer.customer_group for customer in g.current_user.customers)
+    if (
+        not g.current_user.is_admin
+        and sample_obj.customer not in g.current_user.available_customers
     ):
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)

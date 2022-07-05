@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import click
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
@@ -25,8 +25,8 @@ def add():
 @click.option(
     "-cg",
     "--customer-group",
-    "customer_group_id",
-    help="internal ID for the customer group of the customer",
+    "customer_group_internal_ids",
+    help="List of internal IDs for the customer groups the customer should belong to",
 )
 @click.option(
     "-ia",
@@ -47,7 +47,7 @@ def customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    customer_group_id: Optional[str],
+    customer_group_internal_ids: Optional[List[str]],
     invoice_address: str,
     invoice_reference: str,
 ):
@@ -58,15 +58,19 @@ def customer(
         LOG.error(f"{existing.name}: customer already added")
         raise click.Abort
 
-    customer_group: models.CustomerGroup = status_db.customer_group(customer_group_id)
+    customer_groups: List[models.CustomerGroup] = [
+        status_db.customer_group(customer_group_internal_id)
+        for customer_group_internal_id in customer_group_internal_ids
+    ]
 
     new_customer: models.Customer = status_db.add_customer(
         internal_id=internal_id,
         name=name,
-        customer_group=customer_group,
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
     )
+    for customer_group in customer_groups:
+        new_customer.customer_groups.append(customer_group)
     status_db.add_commit(new_customer)
     message: str = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)

@@ -149,9 +149,9 @@ def test_submit_illegal_sample_customer(
         "customer 999",
         scout_access=True,
         invoice_address="dummy street",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
+    new_customer.customer_groups.append(customer_group)
     sample_store.add_commit(new_customer)
     existing_sample = sample_store.samples().first()
     existing_sample.customer = new_customer
@@ -197,7 +197,6 @@ def test_submit_scout_legal_sample_customer(
         "customer 1",
         scout_access=True,
         invoice_address="dummy street 1",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
     order_customer = sample_store.add_customer(
@@ -205,9 +204,10 @@ def test_submit_scout_legal_sample_customer(
         "customer 2",
         scout_access=True,
         invoice_address="dummy street 2",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
+    sample_customer.customer_groups.append(customer_group)
+    order_customer.customer_groups.append(customer_group)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample = sample_store.samples().first()

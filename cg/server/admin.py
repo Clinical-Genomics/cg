@@ -160,7 +160,7 @@ class CustomerView(BaseView):
         "primary_contact",
         "delivery_contact",
         "priority",
-        "customer_group",
+        "customer_groups",
         "comment",
     ]
     column_list = [

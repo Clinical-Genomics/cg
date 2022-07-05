@@ -186,10 +186,10 @@ def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket_number: i
         internal_id="cust000",
         name="Test customer",
         scout_access=True,
-        customer_group=customer_group,
         invoice_address="skolgatan 15",
         invoice_reference="abc",
     )
+    new_customer.customer_groups.append(customer_group)
     store.add_commit(new_customer)
 
     application = store.add_application(

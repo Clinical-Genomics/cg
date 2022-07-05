@@ -158,7 +158,7 @@ class StoreHelpers:
         customer_group: str = "all_customers",
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests"""
-        customer_group_id = customer_group or customer_id + "_group"
+        customer_group_id = customer_group or f"{customer_id}_group"
         customer_group = store.customer_group(customer_group_id)
         if not customer_group:
             customer_group = store.add_customer_group(customer_group_id, customer_group_id)
@@ -170,10 +170,10 @@ class StoreHelpers:
                 internal_id=customer_id,
                 name=name,
                 scout_access=scout_access,
-                customer_group=customer_group,
                 invoice_address="Test street",
                 invoice_reference="ABCDEF",
             )
+            customer.customer_groups.append(customer_group)
             store.add_commit(customer)
         return customer
 

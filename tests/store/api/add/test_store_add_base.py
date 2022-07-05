@@ -23,10 +23,10 @@ def test_add_user(store: Store):
         internal_id="custtest",
         name="Test Customer",
         scout_access=False,
-        customer_group=customer_group,
         invoice_address="dummy street 1",
         invoice_reference="dummy nr",
     )
+    customer.customer_groups.append(customer_group)
     store.add_commit(customer)
 
     # WHEN adding a new user

@@ -137,32 +137,6 @@ class FindBusinessDataHandler(BaseHandler):
         records = records.filter_by(action=action) if action else records
         return records.order_by(models.Family.created_at.desc())
 
-    def families_in_customer_group(
-        self, *, customers: List[models.Customer] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all families including those from collaborating customers."""
-        records = self.Family.query
-
-        if customers:
-            accessible_customers = []
-            for customer in customers:
-                accessible_customers.extend(self.accessible_customers(customer))
-            accessible_customers = set(accessible_customers)
-            records = records.filter(models.Family.customer.in_(accessible_customers))
-
-        records = (
-            records.filter(
-                or_(
-                    models.Family.name.like(f"%{enquiry}%"),
-                    models.Family.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-
-        return records.order_by(models.Family.created_at.desc())
-
     def family(self, internal_id: str) -> models.Family:
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
@@ -176,6 +150,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def accessible_customers(self, customer: models.Customer):
+
         return (
             self.CustomerLink.query.filter(models.CustomerLink.viewer == customer)
             .options(load_only(models.CustomerLink.owner))
@@ -430,32 +405,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_sample_by_name(self, name: str) -> models.Sample:
         return self.Sample.query.filter(models.Sample.name == name).first()
-
-    def samples_in_customer_group(
-        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all samples including those from collaborating customers."""
-
-        records = self.Sample.query
-
-        if customers:
-            accessible_customers = []
-            for customer in customers:
-                accessible_customers.extend(self.accessible_customers(customer))
-            accessible_customers = set(accessible_customers)
-            records = records.filter(models.Sample.customer.in_(accessible_customers))
-
-        records = (
-            records.filter(
-                or_(
-                    models.Sample.name.like(f"%{enquiry}%"),
-                    models.Sample.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-        return records.order_by(models.Sample.created_at.desc())
 
     def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found"""
