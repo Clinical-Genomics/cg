@@ -166,6 +166,7 @@ def families_in_customer_group():
         None if g.current_user.is_admin else g.current_user.available_customers
     )
     families_q: Query = db.families(enquiry=request.args.get("enquiry"), customers=customer_objs)
+    print(customer_objs)
     count = families_q.count()
     records = families_q.limit(30)
     data = [case_obj.to_dict(links=True) for case_obj in records]
@@ -191,6 +192,10 @@ def family_in_customer_group(family_id):
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
+    print(case_obj)
+    print(g.current_user.customers)
+    if g.current_user.available_customers:
+        print("True")
     if not g.current_user.is_admin and case_obj.customer not in g.current_user.available_customers:
         return abort(http.HTTPStatus.FORBIDDEN)
 

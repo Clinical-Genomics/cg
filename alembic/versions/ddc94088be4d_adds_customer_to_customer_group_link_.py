@@ -1,7 +1,7 @@
 """Adds customer to customer_group link table
 
 Revision ID: ddc94088be4d
-Revises: 367813f2e597
+Revises: 33cd4b45acb4
 Create Date: 2022-06-29 15:11:08.142445
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy import Column, types, orm
 from sqlalchemy.ext.declarative import declarative_base
 
 revision = "ddc94088be4d"
-down_revision = "367813f2e597"
+down_revision = "33cd4b45acb4"
 branch_labels = None
 depends_on = None
 
@@ -33,6 +33,8 @@ class Customer(Base):
     __tablename__ = "customer"
     id = Column(types.Integer, primary_key=True)
     customer_group_id = Column(sa.ForeignKey("customer_group.id"), nullable=False)
+    internal_id = Column(types.String(32), unique=True, nullable=False)
+    name = Column(types.String(32), unique=False, nullable=False)
     customer_groups = orm.relationship("CustomerGroup", secondary=customer_group_links)
 
 
@@ -65,15 +67,15 @@ def upgrade():
     )
 
     for customer_group in session.query(CustomerGroup):
-        print(f"Customer group {customer_group.internal_id}")
-        print(f"customers {customer_group.customers}")
+        print(f"Customer group {customer_group.internal_id} contains:")
+        print(f"customers {[customer.internal_id for customer in customer_group.customers]}")
         if len(customer_group.customers) > 1:
             for customer in customer_group.customers:
                 customer.customer_groups.append(customer_group)
         else:
-            print(f"Deleting group {customer_group}")
+            print(f"Deleting group {customer_group.internal_id}")
             session.delete(customer_group)
-
+    session.commit()
     op.drop_column(
         table_name="customer",
         column_name="customer_group_id",
@@ -91,25 +93,31 @@ def downgrade():
             nullable=False,
         ),
     )
-    op.create_foreign_key(
-        "customer_group_ibfk_1",
-        source_table="customer_group",
-        referent_table="customer",
-        local_cols=["id"],
-        remote_cols=["customer_group_id"],
-    )
     for customer in session.query(Customer):
-        if not Customer.customer_groups:
+        if not customer.customer_groups:
+            print(f"Creating customer_group for {customer.internal_id}")
             customer_group = CustomerGroup(internal_id=customer.internal_id, name=customer.name)
             session.add(customer_group)
             session.commit()
             session.refresh(customer_group)
             customer.customer_group_id = customer_group.id
         else:
+            print(
+                f"Customer {customer.internal_id} has the following "
+                f"groups: {[customer_group.internal_id for customer_group in customer.customer_groups]}"
+            )
             customer.customer_group_id = customer.customer_groups[0].id
             print(
                 f"Customer {customer.internal_id} is added to the group "
-                f"{customer.customer_groups[0].name} "
+                f"{customer.customer_groups[0].internal_id} "
             )
+    session.commit()
+    op.create_foreign_key(
+        "customer_group_ibfk_1",
+        source_table="customer",
+        referent_table="customer_group",
+        local_cols=["customer_group_id"],
+        remote_cols=["id"],
+    )
     op.drop_table("customer_group_links")
     session.commit()

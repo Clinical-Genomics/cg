@@ -627,7 +627,7 @@ class User(Model):
         """Set of all customers in each customer group in which any of the user's customers are
         part of"""
         return {
-            customer
+            customer if customer_obj.customer_groups else customer_obj
             for customer_obj in self.customers
             for customer_group in customer_obj.customer_groups
             for customer in customer_group
