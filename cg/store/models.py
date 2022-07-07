@@ -19,8 +19,6 @@ from cg.constants import (
 from cg.constants.constants import CONTROL_OPTIONS
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
-
-
 flowcell_sample = Table(
     "flowcell_sample",
     Model.metadata,
@@ -119,7 +117,6 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-
         if self.prep_category == "wts":
             return self.prep_category
 
@@ -149,6 +146,7 @@ class ApplicationVersion(Model):
 
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
+        print(self)
         data = super(ApplicationVersion, self).to_dict()
         if application:
             data["application"] = self.application.to_dict()
@@ -229,7 +227,6 @@ class BedVersion(Model):
 
 
 class Customer(Model):
-
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     comment = Column(types.Text)
@@ -247,7 +244,6 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
-    customer_groups = orm.relationship("CustomerGroup", secondary=customer_group_links)
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -263,10 +259,30 @@ class CustomerGroup(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-    customers = orm.relationship(Customer, secondary=customer_group_links)
+    customers = orm.relationship(
+        Customer, secondary=customer_group_links, backref="customer_groups"
+    )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    def to_dict(self):
+        """Represent as dictionary"""
+        return {
+            "customers": [customer.internal_id for customer in self.customers],
+            "id": self.id,
+            "name": self.name,
+            "internal_id": self.internal_id,
+        }
+
+    # def to_dict(self, customers: bool = False) -> dict:
+    #     """Represent as dictionary"""
+    #     print(f"Innan {self}")
+    #     data = super(CustomerGroup, self).to_dict()
+    #     print(f"Efter {self}")
+    #     if customers:
+    #         data["customers"] = [customer.to_dict() for customer in self.customers]
+    #     return data
 
 
 class Delivery(Model):
@@ -347,12 +363,18 @@ class Family(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary"""
+        print(self)
         data = super(Family, self).to_dict()
+        print(4)
         data["panels"] = self.panels
+        print(5)
         data["priority"] = self.priority_human
+        print(6)
         data["customer"] = self.customer.to_dict()
+        print(6.5)
         if links:
             data["links"] = [link_obj.to_dict(samples=True) for link_obj in self.links]
+        print(7)
         if analyses:
             data["analyses"] = [
                 analysis_obj.to_dict(family=False) for analysis_obj in self.analyses
@@ -381,6 +403,7 @@ class FamilySample(Model):
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
+        print(str(self))
         data = super(FamilySample, self).to_dict()
         if samples:
             data["sample"] = self.sample.to_dict()
@@ -414,6 +437,7 @@ class Flowcell(Model):
 
     def to_dict(self, samples: bool = False):
         """Represent as dictionary"""
+        print(str(self))
         data = super(Flowcell, self).to_dict()
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
@@ -434,12 +458,12 @@ class Organism(Model):
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self) -> dict:
+        print(str(self))
         """Represent as dictionary"""
         return super(Organism, self).to_dict()
 
 
 class Panel(Model):
-
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -477,7 +501,6 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
-
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
@@ -576,6 +599,7 @@ class Sample(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
+        print(self)
         data = super(Sample, self).to_dict()
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
@@ -610,6 +634,7 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
+        print(self)
         return super(Invoice, self).to_dict()
 
 
@@ -630,15 +655,17 @@ class User(Model):
             customer
             for customer_obj in self.customers
             for customer_group in customer_obj.customer_groups
-            for customer in customer_group
+            for customer in customer_group.customers
         }
         available_customers.update(self.customers)
         return available_customers
 
-    def to_dict(self) -> dict:
+    def to_dict(self, customers: bool = False) -> dict:
         """Represent as dictionary"""
+        print(self)
         data = super(User, self).to_dict()
-        data["customers"] = [record.to_dict() for record in self.customers]
+        if customers:
+            data["customers"] = [customer.to_dict() for customer in self.customers]
         return data
 
     def __str__(self) -> str:

@@ -165,10 +165,15 @@ def families_in_customer_group():
     customer_objs: List[models.Customer] = (
         None if g.current_user.is_admin else g.current_user.available_customers
     )
+    # print(customer_objs)
     families_q: Query = db.families(enquiry=request.args.get("enquiry"), customers=customer_objs)
+    print(f"after {families_q.all()}")
     count = families_q.count()
-    records = families_q.limit(30)
+    print(1)
+    records = families_q.limit(1)
+    print(2)
     data = [case_obj.to_dict(links=True) for case_obj in records]
+    print(3)
     return jsonify(families=data, total=count)
 
 
