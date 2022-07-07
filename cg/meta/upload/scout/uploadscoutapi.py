@@ -4,13 +4,14 @@ import logging
 from pathlib import Path
 from typing import Optional, Set
 
-import yaml
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
-from cg.exc import HousekeeperVersionMissingError, ScoutUploadError, CgDataError
+from cg.constants.constants import FileFormat
+from cg.exc import HousekeeperVersionMissingError, CgDataError
+from cg.io.base import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models, Store
@@ -72,7 +73,12 @@ class UploadScoutAPI:
         """Save a scout load config file to <file_path>"""
 
         LOG.info("Save Scout load config to %s", file_path)
-        yaml.dump(upload_config.dict(exclude_none=True), file_path.open("w"))
+        WriteFile.write_file_from_dict(
+            WriteFile,
+            content=upload_config.dict(exclude_none=True),
+            file_format=FileFormat.YAML,
+            file_path=file_path,
+        )
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
