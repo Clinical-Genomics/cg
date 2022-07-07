@@ -118,9 +118,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Family.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(models.Family.customer_id.in_(customer_ids))
 
         records = (

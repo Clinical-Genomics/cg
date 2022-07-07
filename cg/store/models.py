@@ -626,12 +626,14 @@ class User(Model):
     def available_customers(self) -> Set[Customer]:
         """Set of all customers in each customer group in which any of the user's customers are
         part of"""
-        return {
-            customer if customer_obj.customer_groups else customer_obj
+        available_customers = {
+            customer
             for customer_obj in self.customers
             for customer_group in customer_obj.customer_groups
             for customer in customer_group
         }
+        available_customers.update(self.customers)
+        return available_customers
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""

@@ -52,6 +52,7 @@ def customer(
     invoice_reference: str,
 ):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
+    customer_group_internal_ids = customer_group_internal_ids or []
     status_db: Store = context.status_db
     existing: models.Customer = status_db.customer(internal_id)
     if existing:

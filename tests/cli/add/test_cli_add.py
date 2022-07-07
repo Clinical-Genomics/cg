@@ -10,7 +10,7 @@ def test_add_customer(cli_runner: CliRunner, base_context: CGConfig):
     nr_customers: int = status_db.Customer.query.count()
 
     # WHEN adding a customer
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         add,
         [
             "customer",
@@ -25,6 +25,7 @@ def test_add_customer(cli_runner: CliRunner, base_context: CGConfig):
     )
 
     # THEN it should be stored in the database
+    assert result.exit_code == 0
     assert status_db.Customer.query.count() == nr_customers + 1
 
 
