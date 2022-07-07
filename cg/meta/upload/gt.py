@@ -1,14 +1,15 @@
 import logging
 from pathlib import Path
 
-import yaml
 from cgmodels.cg.constants import Pipeline
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
+from cg.constants.constants import FileFormat
 from cg.constants.tags import HkMipAnalysisTag
 from cg.constants.subject import Gender
+from cg.io.base import ReadFile
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store import models
 
@@ -110,8 +111,9 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
         """Parse the information from a qc metrics file"""
-        with qc_metrics.open() as in_stream:
-            qcmetrics_raw = yaml.safe_load(in_stream)
+        qcmetrics_raw: dict = ReadFile.get_dict_from_file(
+            ReadFile, file_format=FileFormat.YAML, file_path=qc_metrics
+        )
         return MIPMetricsDeliverables(**qcmetrics_raw)
 
     def upload(self, data: dict, replace: bool = False):
