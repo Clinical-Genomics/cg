@@ -69,7 +69,11 @@ class CaseSubmitter(Submitter):
             existing_sample: models.Sample = self.status.sample(sample.internal_id)
             data_customer: models.Customer = self.status.customer(customer_id)
 
-            if existing_sample.customer not in data_customer.customer_groups[0].customers:
+            if existing_sample.customer not in [
+                customer
+                for customer_group in data_customer.customer_groups
+                for customer in customer_group.customers
+            ]:
                 raise OrderError(f"Sample not available: {sample.name}")
 
     def _validate_case_names_are_unique(
