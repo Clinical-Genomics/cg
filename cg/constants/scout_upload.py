@@ -20,6 +20,13 @@ BALSAMIC_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
+BALSAMIC_UMI_CASE_TAGS = dict(
+    sv_vcf={"vcf-umi-sv-clinical"},
+    snv_vcf={"vcf-umi-snv-clinical"},
+    multiqc_report={"multiqc-html"},
+    delivery_report={"delivery-report"},
+)
+
 MIP_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -35,4 +42,9 @@ BALSAMIC_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
     vcf2cytosure={"vcf2cytosure"},
+)
+
+BALSAMIC_UMI_SAMPLE_TAGS = dict(
+    bam_file={"umi-bam"},
+    alignment_file={"umi-cram"},
 )

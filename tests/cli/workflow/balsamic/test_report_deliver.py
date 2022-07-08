@@ -86,31 +86,3 @@ def test_dry_run(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     # THEN balsamic and case_id should be found in command string
     assert "balsamic" in caplog.text
     assert case_id + ".json" in caplog.text
-
-
-def test_qc_option(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
-    """Test command with case_id and qc option + config which should execute successfully"""
-    caplog.set_level(logging.INFO)
-    # GIVEN case-id
-    case_id = "balsamic_case_wgs_single"
-    option_key = "--analysis-type"
-    option_value = "qc"
-    # WHEN ensuring case config and analysis_finish exist where they should be stored
-    Path.mkdir(
-        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
-        exist_ok=True,
-    )
-    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
-        exist_ok=True
-    )
-    # WHEN dry running with dry specified
-    result = cli_runner.invoke(
-        report_deliver, [case_id, "--dry-run", option_key, option_value], obj=balsamic_context
-    )
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
-    # THEN balsamic, case_id, and qc options should be found in command string
-    assert "balsamic" in caplog.text
-    assert case_id + ".json" in caplog.text
-    assert option_key in caplog.text
-    assert option_value in caplog.text

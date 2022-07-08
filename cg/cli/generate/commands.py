@@ -45,7 +45,10 @@ def available_delivery_reports(context: click.Context, force_report: bool, dry_r
     cases_without_delivery_report = report_api.get_cases_without_delivery_report()
     if not cases_without_delivery_report:
         click.echo(
-            click.style("There are no cases available to generate delivery reports", fg="green")
+            click.style(
+                f"There are no cases available to generate delivery reports ({datetime.now()})",
+                fg="green",
+            )
         )
     else:
         for analysis_obj in cases_without_delivery_report:
