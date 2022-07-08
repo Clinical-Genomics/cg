@@ -160,7 +160,7 @@ class CustomerView(BaseView):
         "primary_contact",
         "delivery_contact",
         "priority",
-        "customer_groups",
+        "collaborations",
         "comment",
     ]
     column_list = [
@@ -180,7 +180,7 @@ class CustomerView(BaseView):
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
-class CustomerGroupView(BaseView):
+class CollaborationView(BaseView):
     """Admin view for Model.CustomerGroup"""
 
     column_editable_list = ["name"]

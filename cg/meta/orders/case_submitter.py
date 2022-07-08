@@ -71,8 +71,8 @@ class CaseSubmitter(Submitter):
 
             if existing_sample.customer not in [
                 customer
-                for customer_group in data_customer.customer_groups
-                for customer in customer_group.customers
+                for collaboration in data_customer.collaborations
+                for customer in collaboration.customers
             ]:
                 raise OrderError(f"Sample not available: {sample.name}")
 

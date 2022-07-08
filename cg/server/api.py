@@ -159,21 +159,16 @@ def families():
     return jsonify(families=cases_data, total=count)
 
 
-@BLUEPRINT.route("/families_in_customer_group")
-def families_in_customer_group():
-    """Fetch families in customer_group."""
-    customer_objs: List[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.available_customers
-    )
-    # print(customer_objs)
+@BLUEPRINT.route("/families_in_collaboration")
+def families_in_collaboration():
+    """Fetch families in collaboration."""
+    order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
+    if not order_customer:
+        return abort(http.HTTPStatus.NOT_FOUND)
     families_q: Query = db.families(enquiry=request.args.get("enquiry"), customers=customer_objs)
-    print(f"after {families_q.all()}")
     count = families_q.count()
-    print(1)
     records = families_q.limit(1)
-    print(2)
     data = [case_obj.to_dict(links=True) for case_obj in records]
-    print(3)
     return jsonify(families=data, total=count)
 
 
@@ -190,13 +185,13 @@ def family(family_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route("/families_in_customer_group/<family_id>")
-def family_in_customer_group(family_id):
+@BLUEPRINT.route("/families_in_collaboration/<family_id>")
+def family_in_collaboration(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and case_obj.customer not in g.current_user.available_customers:
+    if not g.current_user.is_admin and case_obj.customer not in g.current_user.observable_customers:
         return abort(http.HTTPStatus.FORBIDDEN)
 
     data = case_obj.to_dict(links=True, analyses=True)
@@ -224,11 +219,11 @@ def samples():
     return jsonify(samples=data, total=samples_q.count())
 
 
-@BLUEPRINT.route("/samples_in_customer_group")
-def samples_in_customer_group():
+@BLUEPRINT.route("/samples_in_collaboration")
+def samples_in_collaboration():
     """Fetch samples in a customer group."""
     customer_objs: List[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.available_customers
+        None if g.current_user.is_admin else g.current_user.observable_customers
     )
     samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
@@ -248,15 +243,15 @@ def sample(sample_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route("/samples_in_customer_group/<sample_id>")
-def sample_in_customer_group(sample_id):
+@BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
+def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if (
         not g.current_user.is_admin
-        and sample_obj.customer not in g.current_user.available_customers
+        and sample_obj.customer not in g.current_user.observable_customers
     ):
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)

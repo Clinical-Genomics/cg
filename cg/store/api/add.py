@@ -43,10 +43,10 @@ class AddHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
+    def add_collaboration(self, internal_id: str, name: str, **kwargs) -> models.Collaboration:
         """Build a new customer group record."""
 
-        return self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
+        return self.Collaboration(internal_id=internal_id, name=name, **kwargs)
 
     def add_user(
         self, customer: models.Customer, email: str, name: str, is_admin: bool = False

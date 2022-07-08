@@ -20,26 +20,26 @@ depends_on = None
 
 Base = declarative_base()
 
-customer_group_links = sa.Table(
-    "customer_group_links",
+customer_collaboration = sa.Table(
+    "customer_collaboration",
     Base.metadata,
     Column("customer_id", types.Integer, sa.ForeignKey("customer.id"), nullable=False),
-    Column("customer_group_id", types.Integer, sa.ForeignKey("customer_group.id"), nullable=False),
-    sa.UniqueConstraint("customer_id", "customer_group_id", name="_customer_group_link_uc"),
+    Column("collaboration_id", types.Integer, sa.ForeignKey("collaboration.id"), nullable=False),
+    sa.UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
 )
 
 
 class Customer(Base):
     __tablename__ = "customer"
     id = Column(types.Integer, primary_key=True)
-    customer_group_id = Column(sa.ForeignKey("customer_group.id"), nullable=False)
+    collaboration_id = Column(sa.ForeignKey("collaboration.id"), nullable=False)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(32), unique=False, nullable=False)
-    customer_groups = orm.relationship("CustomerGroup", secondary=customer_group_links)
+    collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
 
 
-class CustomerGroup(Base):
-    __tablename__ = "customer_group"
+class Collaboration(Base):
+    __tablename__ = "collaboration"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -51,30 +51,31 @@ def upgrade():
     session = sa.orm.Session(bind=bind)
     op.alter_column("customer", "customer_group_id", nullable=True, existing_type=mysql.INTEGER)
     op.drop_constraint("customer_group_ibfk_1", table_name="customer", type_="foreignkey")
+    op.rename_table(old_table_name="customer_group", new_table_name="collaboration")
     op.create_table(
-        "customer_group_links",
+        "customer_collaboration",
         sa.Column("customer_id", sa.Integer(), nullable=False),
-        sa.Column("customer_group_id", sa.Integer(), nullable=False),
+        sa.Column("collaboration_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ("customer_id",),
             ["customer.id"],
         ),
         sa.ForeignKeyConstraint(
-            ("customer_group_id",),
-            ["customer_group.id"],
+            ("collaboration_id",),
+            ["collaboration.id"],
         ),
-        sa.UniqueConstraint("customer_id", "customer_group_id", name="_customer_custg_uc"),
+        sa.UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
     )
 
-    for customer_group in session.query(CustomerGroup):
-        print(f"Customer group {customer_group.internal_id} contains:")
-        print(f"customers {[customer.internal_id for customer in customer_group.customers]}")
-        if len(customer_group.customers) > 1:
-            for customer in customer_group.customers:
-                customer.customer_groups.append(customer_group)
+    for collaboration in session.query(Collaboration):
+        print(f"Customer group {collaboration.internal_id} contains:")
+        print(f"customers {[customer.internal_id for customer in collaboration.customers]}")
+        if len(collaboration.customers) > 1:
+            for customer in collaboration.customers:
+                customer.collaborations.append(collaboration)
         else:
-            print(f"Deleting group {customer_group.internal_id}")
-            session.delete(customer_group)
+            print(f"Deleting group {collaboration.internal_id}")
+            session.delete(collaboration)
     session.commit()
     op.drop_column(
         table_name="customer",
@@ -94,9 +95,9 @@ def downgrade():
         ),
     )
     for customer in session.query(Customer):
-        if not customer.customer_groups:
+        if not customer.collaborations:
             print(f"Creating customer_group for {customer.internal_id}")
-            customer_group = CustomerGroup(internal_id=customer.internal_id, name=customer.name)
+            customer_group = Collaboration(internal_id=customer.internal_id, name=customer.name)
             session.add(customer_group)
             session.commit()
             session.refresh(customer_group)
@@ -104,14 +105,15 @@ def downgrade():
         else:
             print(
                 f"Customer {customer.internal_id} has the following "
-                f"groups: {[customer_group.internal_id for customer_group in customer.customer_groups]}"
+                f"groups: {[customer_group.internal_id for customer_group in customer.collaborations]}"
             )
-            customer.customer_group_id = customer.customer_groups[0].id
+            customer.customer_group_id = customer.collaborations[0].id
             print(
                 f"Customer {customer.internal_id} is added to the group "
-                f"{customer.customer_groups[0].internal_id} "
+                f"{customer.collaborations[0].internal_id} "
             )
     session.commit()
+    op.rename_table(new_table_name="customer_group", old_table_name="collaboration")
     op.create_foreign_key(
         "customer_group_ibfk_1",
         source_table="customer",

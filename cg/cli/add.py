@@ -25,8 +25,8 @@ def add():
 @click.option(
     "-cg",
     "--customer-group",
-    "customer_group_internal_ids",
-    help="List of internal IDs for the customer groups the customer should belong to",
+    "collaboration_internal_ids",
+    help="List of internal IDs for the collaborations the customer should belong to",
 )
 @click.option(
     "-ia",
@@ -47,21 +47,21 @@ def customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    customer_group_internal_ids: Optional[List[str]],
+    collaboration_internal_ids: Optional[List[str]],
     invoice_address: str,
     invoice_reference: str,
 ):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
-    customer_group_internal_ids = customer_group_internal_ids or []
+    collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
     existing: models.Customer = status_db.customer(internal_id)
     if existing:
         LOG.error(f"{existing.name}: customer already added")
         raise click.Abort
 
-    customer_groups: List[models.CustomerGroup] = [
-        status_db.customer_group(customer_group_internal_id)
-        for customer_group_internal_id in customer_group_internal_ids
+    collaborations: List[models.Collaboration] = [
+        status_db.collaboration(collaboration_internal_id)
+        for collaboration_internal_id in collaboration_internal_ids
     ]
 
     new_customer: models.Customer = status_db.add_customer(
@@ -70,8 +70,8 @@ def customer(
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
     )
-    for customer_group in customer_groups:
-        new_customer.customer_groups.append(customer_group)
+    for collaboration in collaborations:
+        new_customer.collaborations.append(collaboration)
     status_db.add_commit(new_customer)
     message: str = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)

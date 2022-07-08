@@ -144,8 +144,8 @@ def test_submit_illegal_sample_customer(
 
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
-    sample_store.add_commit(customer_group)
+    collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
+    sample_store.add_commit(collaboration)
     new_customer = sample_store.add_customer(
         "customer999",
         "customer 999",
@@ -153,7 +153,7 @@ def test_submit_illegal_sample_customer(
         invoice_address="dummy street",
         invoice_reference="dummy nr",
     )
-    new_customer.customer_groups.append(customer_group)
+    new_customer.collaborations.append(collaboration)
     sample_store.add_commit(new_customer)
     existing_sample = sample_store.samples().first()
     existing_sample.customer = new_customer
@@ -194,8 +194,8 @@ def test_submit_scout_legal_sample_customer(
     monkeypatch_process_lims(monkeypatch, order_data)
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
-    sample_store.add_commit(customer_group)
+    collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
+    sample_store.add_commit(collaboration)
     sample_customer = sample_store.add_customer(
         "customer1",
         "customer 1",
@@ -210,8 +210,8 @@ def test_submit_scout_legal_sample_customer(
         invoice_address="dummy street 2",
         invoice_reference="dummy nr",
     )
-    sample_customer.customer_groups.append(customer_group)
-    order_customer.customer_groups.append(customer_group)
+    sample_customer.collaborations.append(collaboration)
+    order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample = sample_store.samples().first()

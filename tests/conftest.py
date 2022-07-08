@@ -825,20 +825,20 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case, helpe
     yield base_store
 
 
-@pytest.fixture(scope="function", name="customer_group")
-def fixture_customer_group() -> str:
+@pytest.fixture(scope="function", name="collaboration")
+def fixture_collaboration() -> str:
     """Return a default customer group"""
     return "all_customers"
 
 
 @pytest.fixture(scope="function", name="customer_production")
-def fixture_customer_production(customer_group: str, customer_id: str) -> dict:
+def fixture_customer_production(collaboration: str, customer_id: str) -> dict:
     """Return a dictionary with information about the prod customer"""
     return dict(
         customer_id=customer_id,
         name="Production",
         scout_access=True,
-        customer_group=customer_group,
+        collaboration=collaboration,
     )
 
 
@@ -915,15 +915,15 @@ def fixture_apptag_rna() -> str:
 @pytest.fixture(scope="function", name="base_store")
 def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store:
     """Setup and example store."""
-    customer_group = store.add_customer_group("all_customers", "all customers")
+    collaboration = store.add_collaboration("all_customers", "all customers")
 
-    store.add_commit(customer_group)
+    store.add_commit(collaboration)
     customers = [
         store.add_customer(
             customer_id,
             "Production",
             scout_access=True,
-            customer_group=customer_group,
+            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
@@ -931,7 +931,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             "cust001",
             "Customer",
             scout_access=False,
-            customer_group=customer_group,
+            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
@@ -939,7 +939,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             "cust002",
             "Karolinska",
             scout_access=True,
-            customer_group=customer_group,
+            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
@@ -947,7 +947,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             "cust003",
             "CMMS",
             scout_access=True,
-            customer_group=customer_group,
+            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),

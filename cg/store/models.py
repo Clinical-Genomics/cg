@@ -35,12 +35,12 @@ customer_user = Table(
     UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
 )
 
-customer_group_links = Table(
-    "customer_group_links",
+customer_collaboration = Table(
+    "customer_collaboration",
     Model.metadata,
     Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
-    Column("customer_group_id", types.Integer, ForeignKey("customer_group.id"), nullable=False),
-    UniqueConstraint("customer_id", "customer_group_id", name="_customer_group_link_uc"),
+    Column("collaboration_id", types.Integer, ForeignKey("collaboration.id"), nullable=False),
+    UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
 )
 
 
@@ -146,7 +146,6 @@ class ApplicationVersion(Model):
 
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
-        print(self)
         data = super(ApplicationVersion, self).to_dict()
         if application:
             data["application"] = self.application.to_dict()
@@ -244,6 +243,7 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
+    collaborations = orm.relationship("CustomerGroup", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -254,14 +254,25 @@ class Customer(Model):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
+    @property
+    def collaborators(self) -> Set["Customer"]:
+        """Set of all customers in each customer group in which any of the user's customers are
+        part of"""
+        customers = {
+            customer
+            for customer_obj in self.customers
+            for collaboration in customer_obj.collaborations
+            for customer in collaboration.customers
+        }
+        customers.update(self.customers)
+        return customers
 
-class CustomerGroup(Model):
+
+class Collaboration(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-    customers = orm.relationship(
-        Customer, secondary=customer_group_links, backref="customer_groups"
-    )
+    customers = orm.relationship(Customer, secondary=customer_collaboration)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -274,15 +285,6 @@ class CustomerGroup(Model):
             "name": self.name,
             "internal_id": self.internal_id,
         }
-
-    # def to_dict(self, customers: bool = False) -> dict:
-    #     """Represent as dictionary"""
-    #     print(f"Innan {self}")
-    #     data = super(CustomerGroup, self).to_dict()
-    #     print(f"Efter {self}")
-    #     if customers:
-    #         data["customers"] = [customer.to_dict() for customer in self.customers]
-    #     return data
 
 
 class Delivery(Model):
@@ -363,18 +365,12 @@ class Family(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary"""
-        print(self)
         data = super(Family, self).to_dict()
-        print(4)
         data["panels"] = self.panels
-        print(5)
         data["priority"] = self.priority_human
-        print(6)
         data["customer"] = self.customer.to_dict()
-        print(6.5)
         if links:
             data["links"] = [link_obj.to_dict(samples=True) for link_obj in self.links]
-        print(7)
         if analyses:
             data["analyses"] = [
                 analysis_obj.to_dict(family=False) for analysis_obj in self.analyses
@@ -403,7 +399,6 @@ class FamilySample(Model):
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
-        print(str(self))
         data = super(FamilySample, self).to_dict()
         if samples:
             data["sample"] = self.sample.to_dict()
@@ -437,7 +432,6 @@ class Flowcell(Model):
 
     def to_dict(self, samples: bool = False):
         """Represent as dictionary"""
-        print(str(self))
         data = super(Flowcell, self).to_dict()
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
@@ -458,7 +452,6 @@ class Organism(Model):
         return f"{self.internal_id} ({self.name})"
 
     def to_dict(self) -> dict:
-        print(str(self))
         """Represent as dictionary"""
         return super(Organism, self).to_dict()
 
@@ -599,7 +592,6 @@ class Sample(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
-        print(self)
         data = super(Sample, self).to_dict()
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
@@ -634,7 +626,7 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        print(self)
+
         return super(Invoice, self).to_dict()
 
 
@@ -647,22 +639,8 @@ class User(Model):
 
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
-    @property
-    def available_customers(self) -> Set[Customer]:
-        """Set of all customers in each customer group in which any of the user's customers are
-        part of"""
-        available_customers = {
-            customer
-            for customer_obj in self.customers
-            for customer_group in customer_obj.customer_groups
-            for customer in customer_group.customers
-        }
-        available_customers.update(self.customers)
-        return available_customers
-
     def to_dict(self, customers: bool = False) -> dict:
         """Represent as dictionary"""
-        print(self)
         data = super(User, self).to_dict()
         if customers:
             data["customers"] = [customer.to_dict() for customer in self.customers]
