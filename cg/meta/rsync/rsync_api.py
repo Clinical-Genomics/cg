@@ -2,14 +2,15 @@
 import datetime as dt
 import glob
 import logging
-import yaml
 from pathlib import Path
 from typing import List, Dict, Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos, SLURM_ACCOUNT_TO_QOS
 from cg.exc import CgError
+from cg.io.base import WriteFile
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
 from cg.models.cg_config import CGConfig
@@ -58,8 +59,9 @@ class RsyncAPI(MetaAPI):
     def write_trailblazer_config(content: dict, config_path: Path) -> None:
         """Write slurm job IDs to a .YAML file used as the trailblazer config"""
         LOG.info(f"Writing slurm jobs to {config_path.as_posix()}")
-        with config_path.open("w") as yaml_file:
-            yaml.safe_dump(content, yaml_file, indent=4, explicit_start=True)
+        WriteFile.write_file_from_content(
+            WriteFile, content=content, file_format=FileFormat.YAML, file_path=config_path
+        )
 
     @staticmethod
     def process_ready_to_clean(before: dt.datetime, process: Path) -> bool:

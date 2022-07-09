@@ -18,5 +18,5 @@ def read_yaml_stream(stream: str) -> Union[dict, list]:
 def write_yaml(content: Union[dict, list], file_path: Path) -> None:
     """Write content to a yaml file"""
     with open(file_path, "w") as file:
-        yaml.dump(content, file)
+        yaml.dump(content, file, explicit_start=True)
     return
