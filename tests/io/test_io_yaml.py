@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from cg.io.yaml import read_yaml, write_yaml
+from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
-def test_get_dict_from_file(case_qc_sample_info_path: Path):
+def test_get_content_from_file(case_qc_sample_info_path: Path):
     """
     Tests read_yaml
     """
@@ -21,6 +21,19 @@ def test_get_dict_from_file(case_qc_sample_info_path: Path):
 
     # THEN assert that it was successfully created
     assert isinstance(sample_info_object, MipBaseSampleInfo)
+
+
+def test_get_content_from_stream(yaml_stream: str):
+    """
+    Tests read_yaml_stream
+    """
+    # GIVEN a string in yaml format
+
+    # WHEN reading the yaml content in string
+    raw_content: list = read_yaml_stream(stream=yaml_stream)
+
+    # Then assert a list is returned
+    assert isinstance(raw_content, list)
 
 
 def test_write_yaml(case_qc_sample_info_path: Path, cg_dir: Path):

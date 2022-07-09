@@ -111,7 +111,7 @@ class UploadGenotypesAPI(object):
     @staticmethod
     def get_parsed_qc_metrics_data(qc_metrics: Path) -> MIPMetricsDeliverables:
         """Parse the information from a qc metrics file"""
-        qcmetrics_raw: dict = ReadFile.get_dict_from_file(
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
             ReadFile, file_format=FileFormat.YAML, file_path=qc_metrics
         )
         return MIPMetricsDeliverables(**qcmetrics_raw)

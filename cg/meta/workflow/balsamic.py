@@ -271,7 +271,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise FileNotFoundError(
                 f"No file associated to {tags} was found in housekeeper for {case_id}"
             )
-        return ReadFile.get_dict_from_file(
+        return ReadFile.get_content_from_file(
             ReadFile, file_format=FileFormat.YAML, file_path=Path(raw_file.full_path)
         )
 

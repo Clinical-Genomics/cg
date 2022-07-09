@@ -30,7 +30,7 @@ class ScoutAPI:
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
 
-        scout_config: dict = ReadFile.get_dict_from_file(
+        scout_config: dict = ReadFile.get_content_from_file(
             ReadFile, file_format=FileFormat.YAML, file_path=scout_load_config
         )
         scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)

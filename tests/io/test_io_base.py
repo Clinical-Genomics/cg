@@ -1,18 +1,18 @@
 from pathlib import Path
 
 from cg.constants.constants import FileFormat
-from cg.io.base import ReadFile, WriteFile
+from cg.io.base import ReadFile, WriteFile, ReadStream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
-def test_get_dict_from_file(case_qc_sample_info_path: Path):
+def test_get_content_from_file(case_qc_sample_info_path: Path):
     """
-    Tests get_dict_from_file
+    Tests get_content_from_file
     """
     # GIVEN a yaml file
 
     # WHEN reading the yaml file
-    raw_sample_info: dict = ReadFile.get_dict_from_file(
+    raw_sample_info: dict = ReadFile.get_content_from_file(
         ReadFile, file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
     )
 
@@ -26,9 +26,24 @@ def test_get_dict_from_file(case_qc_sample_info_path: Path):
     assert isinstance(sample_info_object, MipBaseSampleInfo)
 
 
-def test_write_file_from_dict(case_qc_sample_info_path: Path, cg_dir: Path):
+def test_get_content_from_stream(yaml_stream: str):
     """
-    Tests write_file_from_dict
+    Tests read_yaml_stream
+    """
+    # GIVEN a string in yaml format
+
+    # WHEN reading the yaml content in string
+    raw_content: list = ReadStream.get_content_from_stream(
+        ReadStream, file_format=FileFormat.YAML, stream=yaml_stream
+    )
+
+    # Then assert a list is returned
+    assert isinstance(raw_content, list)
+
+
+def test_write_file_from_contant(case_qc_sample_info_path: Path, cg_dir: Path):
+    """
+    Tests write_file_from_content
     """
     # GIVEN a yaml file
 
@@ -36,12 +51,12 @@ def test_write_file_from_dict(case_qc_sample_info_path: Path, cg_dir: Path):
     yaml_file: Path = Path(cg_dir, "write_yaml.yaml")
 
     # WHEN reading the yaml file
-    raw_sample_info: dict = ReadFile.get_dict_from_file(
+    raw_sample_info: dict = ReadFile.get_content_from_file(
         ReadFile, file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
     )
 
     # WHEN writing the yaml file from dict
-    WriteFile.write_file_from_dict(
+    WriteFile.write_file_from_content(
         WriteFile, content=raw_sample_info, file_format=FileFormat.YAML, file_path=yaml_file
     )
 
@@ -49,7 +64,7 @@ def test_write_file_from_dict(case_qc_sample_info_path: Path, cg_dir: Path):
     assert Path.exists(yaml_file)
 
     # WHEN reading it as a yaml
-    written_raw_sample_info: dict = ReadFile.get_dict_from_file(
+    written_raw_sample_info: dict = ReadFile.get_content_from_file(
         ReadFile, file_format=FileFormat.YAML, file_path=yaml_file
     )
 

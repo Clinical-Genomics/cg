@@ -23,7 +23,7 @@ def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
 def test_mip_config(mip_case_config_dna: Path):
     """Test to parse the content of a real MIP DNA config file"""
     # GIVEN the path to a file with config metadata content
-    raw_config: dict = ReadFile.get_dict_from_file(
+    raw_config: dict = ReadFile.get_content_from_file(
         ReadFile, file_format=FileFormat.YAML, file_path=mip_case_config_dna
     )
 

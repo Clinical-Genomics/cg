@@ -1125,7 +1125,7 @@ def fixture_lims_api() -> MockLimsAPI:
 
 
 @pytest.fixture(name="config_root_dir")
-def config_root_dir(tmpdir_factory):
+def config_root_dir(tmpdir_factory) -> Path:
     return Path("tests/fixtures/data")
 
 
@@ -1135,27 +1135,27 @@ def housekeeper_dir(tmpdir_factory):
 
 
 @pytest.fixture()
-def mip_dir(tmpdir_factory):
+def mip_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("mip")
 
 
 @pytest.fixture(scope="function")
-def fluffy_dir(tmpdir_factory):
+def fluffy_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("fluffy")
 
 
 @pytest.fixture(scope="function")
-def balsamic_dir(tmpdir_factory):
+def balsamic_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("balsamic")
 
 
 @pytest.fixture(scope="function")
-def cg_dir(tmpdir_factory):
+def cg_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("cg")
 
 
 @pytest.fixture(scope="function")
-def microsalt_dir(tmpdir_factory):
+def microsalt_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("microsalt")
 
 
