@@ -12,6 +12,7 @@ def read_yaml(file_path: Path) -> Union[dict, list]:
 
 
 def read_yaml_stream(stream: str) -> Union[dict, list]:
+    "Read yaml formatted stream"
     return yaml.safe_load(stream)
 
 
@@ -20,3 +21,8 @@ def write_yaml(content: Union[dict, list], file_path: Path) -> None:
     with open(file_path, "w") as file:
         yaml.dump(content, file, explicit_start=True)
     return
+
+
+def write_yaml_stream(content: Union[dict, list]) -> str:
+    """Write content to a yaml stream"""
+    return yaml.dump(content)

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream
+from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream, write_yaml_stream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -32,7 +32,7 @@ def test_get_content_from_stream(yaml_stream: str):
     # WHEN reading the yaml content in string
     raw_content: list = read_yaml_stream(stream=yaml_stream)
 
-    # Then assert a list is returned
+    # THEN assert a list is returned
     assert isinstance(raw_content, list)
 
 
@@ -59,3 +59,17 @@ def test_write_yaml(case_qc_sample_info_path: Path, cg_dir: Path):
 
     # THEN assert that all data is kept
     assert raw_sample_info == written_raw_sample_info
+
+
+def test_write_yaml_stream(yaml_stream: str):
+    """
+    Tests write_yaml_stream
+    """
+    # GIVEN a list
+    raw_content: list = read_yaml_stream(stream=yaml_stream)
+
+    # WHEN writing the list to a yaml stream
+    yaml_content = write_yaml_stream(content=raw_content)
+
+    # THEN assert that all data is kept and properly formatted
+    assert yaml_stream == yaml_content

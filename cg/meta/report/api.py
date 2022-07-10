@@ -7,9 +7,10 @@ from typing import TextIO, Optional, List, Union
 
 import housekeeper
 import requests
-import yaml
 
+from cg.constants.constants import FileFormat
 from cg.exc import DeliveryReportError
+from cg.io.base import WriteStream
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG
@@ -148,12 +149,14 @@ class ReportAPI(MetaAPI):
         if missing_report_fields and not force_report:
             LOG.error(
                 f"Could not generate report data for {case_id}. "
-                f"Missing data: \n{yaml.dump(missing_report_fields)}"
+                f"Missing data: \n{WriteStream.write_stream_from_content(WriteStream, content=missing_report_fields, file_format=FileFormat.YAML)}"
             )
             raise DeliveryReportError
 
         if empty_report_fields:
-            LOG.warning(f"Empty report fields: \n{yaml.dump(empty_report_fields)}")
+            LOG.warning(
+                f"Empty report fields: \n{WriteStream.write_stream_from_content(WriteStream, content=empty_report_fields, file_format=FileFormat.YAML)}"
+            )
 
         return report_data
 

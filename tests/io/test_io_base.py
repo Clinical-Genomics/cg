@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.constants.constants import FileFormat
-from cg.io.base import ReadFile, WriteFile, ReadStream
+from cg.io.base import ReadFile, WriteFile, ReadStream, WriteStream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -37,11 +37,11 @@ def test_get_content_from_stream(yaml_stream: str):
         ReadStream, file_format=FileFormat.YAML, stream=yaml_stream
     )
 
-    # Then assert a list is returned
+    # THEN assert that a list is returned
     assert isinstance(raw_content, list)
 
 
-def test_write_file_from_contant(case_qc_sample_info_path: Path, cg_dir: Path):
+def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
     """
     Tests write_file_from_content
     """
@@ -70,3 +70,22 @@ def test_write_file_from_contant(case_qc_sample_info_path: Path, cg_dir: Path):
 
     # THEN assert that all data is kept
     assert raw_sample_info == written_raw_sample_info
+
+
+def test_write_yaml_stream_from_content(yaml_stream: str):
+    """
+    Tests read_yaml_stream
+    """
+    # GIVEN a string in yaml format
+
+    # WHEN reading the yaml content in string
+    raw_content: list = ReadStream.get_content_from_stream(
+        ReadStream, file_format=FileFormat.YAML, stream=yaml_stream
+    )
+    # WHEN writing a yaml stream
+    yaml_content = WriteStream.write_stream_from_content(
+        WriteStream, content=raw_content, file_format=FileFormat.YAML
+    )
+
+    # THEN assert all data is kept abd in yaml format
+    assert yaml_stream == yaml_content
