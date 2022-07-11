@@ -243,7 +243,7 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
-    collaborations = orm.relationship("CustomerGroup", secondary=customer_collaboration)
+    collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -260,11 +260,10 @@ class Customer(Model):
         part of"""
         customers = {
             customer
-            for customer_obj in self.customers
-            for collaboration in customer_obj.collaborations
+            for collaboration in self.collaborations
             for customer in collaboration.customers
         }
-        customers.update(self.customers)
+        customers.add(self)
         return customers
 
 

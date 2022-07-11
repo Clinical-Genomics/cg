@@ -63,6 +63,7 @@ def before_request():
         user_data = jwt.decode(
             jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
         )
+        print(user_data)
     except ValueError:
         return abort(
             make_response(
@@ -165,7 +166,9 @@ def families_in_collaboration():
     order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
     if not order_customer:
         return abort(http.HTTPStatus.NOT_FOUND)
-    families_q: Query = db.families(enquiry=request.args.get("enquiry"), customers=customer_objs)
+    families_q: Query = db.families(
+        enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
+    )
     count = families_q.count()
     records = families_q.limit(1)
     data = [case_obj.to_dict(links=True) for case_obj in records]
@@ -189,9 +192,10 @@ def family(family_id):
 def family_in_collaboration(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
+    order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
     if case_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and case_obj.customer not in g.current_user.observable_customers:
+    if not g.current_user.is_admin and case_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
 
     data = case_obj.to_dict(links=True, analyses=True)
@@ -222,10 +226,12 @@ def samples():
 @BLUEPRINT.route("/samples_in_collaboration")
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
-    customer_objs: List[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.observable_customers
+    order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
+    if not order_customer:
+        return abort(http.HTTPStatus.NOT_FOUND)
+    samples_q = db.samples(
+        enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
-    samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -247,12 +253,12 @@ def sample(sample_id):
 def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
+    order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
+    if not order_customer:
+        return abort(http.HTTPStatus.NOT_FOUND)
     if sample_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if (
-        not g.current_user.is_admin
-        and sample_obj.customer not in g.current_user.observable_customers
-    ):
+    if not g.current_user.is_admin and sample_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)

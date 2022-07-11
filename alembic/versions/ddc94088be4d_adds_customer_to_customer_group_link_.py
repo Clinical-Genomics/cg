@@ -1,4 +1,4 @@
-"""Adds customer to customer_group link table
+"""Renames customer_group to collaboration and adds a link table between it and customer
 
 Revision ID: ddc94088be4d
 Revises: 33cd4b45acb4
@@ -32,7 +32,7 @@ customer_collaboration = sa.Table(
 class Customer(Base):
     __tablename__ = "customer"
     id = Column(types.Integer, primary_key=True)
-    collaboration_id = Column(sa.ForeignKey("collaboration.id"), nullable=False)
+    customer_group_id = Column(sa.ForeignKey("collaboration.id"), nullable=False)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(32), unique=False, nullable=False)
     collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
@@ -47,8 +47,6 @@ class Collaboration(Base):
 
 
 def upgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
     op.alter_column("customer", "customer_group_id", nullable=True, existing_type=mysql.INTEGER)
     op.drop_constraint("customer_group_ibfk_1", table_name="customer", type_="foreignkey")
     op.rename_table(old_table_name="customer_group", new_table_name="collaboration")
@@ -66,7 +64,8 @@ def upgrade():
         ),
         sa.UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
     )
-
+    bind = op.get_bind()
+    session = sa.orm.Session(bind=bind)
     for collaboration in session.query(Collaboration):
         print(f"Customer group {collaboration.internal_id} contains:")
         print(f"customers {[customer.internal_id for customer in collaboration.customers]}")
@@ -121,5 +120,5 @@ def downgrade():
         local_cols=["customer_group_id"],
         remote_cols=["id"],
     )
-    op.drop_table("customer_group_links")
+    op.drop_table("customer_collaboration")
     session.commit()
