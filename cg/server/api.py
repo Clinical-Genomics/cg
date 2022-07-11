@@ -63,7 +63,6 @@ def before_request():
         user_data = jwt.decode(
             jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
         )
-        print(user_data)
     except ValueError:
         return abort(
             make_response(
@@ -163,6 +162,7 @@ def families():
 @BLUEPRINT.route("/families_in_collaboration")
 def families_in_collaboration():
     """Fetch families in collaboration."""
+    print(request.args.get("customer"))
     order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
     if not order_customer:
         return abort(http.HTTPStatus.NOT_FOUND)
@@ -226,6 +226,7 @@ def samples():
 @BLUEPRINT.route("/samples_in_collaboration")
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
+    print(request.args.get("customer"))
     order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
     if not order_customer:
         return abort(http.HTTPStatus.NOT_FOUND)
@@ -254,11 +255,15 @@ def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
     order_customer = None if g.current_user.is_admin else db.customer(request.args.get("customer"))
+    print(request.args.get("customer"))
     if not order_customer:
         return abort(http.HTTPStatus.NOT_FOUND)
+    print(2)
     if sample_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
+    print(3)
     if not g.current_user.is_admin and sample_obj.customer not in order_customer.collaborators:
+        print("here!")
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)

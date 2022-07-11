@@ -923,7 +923,6 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             customer_id,
             "Production",
             scout_access=True,
-            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
@@ -931,7 +930,6 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             "cust001",
             "Customer",
             scout_access=False,
-            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
@@ -939,7 +937,6 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             "cust002",
             "Karolinska",
             scout_access=True,
-            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
@@ -947,11 +944,12 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             "cust003",
             "CMMS",
             scout_access=True,
-            collaboration=collaboration,
             invoice_address="Test street",
             invoice_reference="ABCDEF",
         ),
     ]
+    for customer in customers:
+        collaboration.customers.append(customer)
     store.add_commit(customers)
     applications = [
         store.add_application(
