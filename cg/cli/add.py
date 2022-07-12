@@ -24,7 +24,7 @@ def add():
 @click.argument("name")
 @click.option(
     "-cg",
-    "--customer-group",
+    "--collaboration",
     "collaboration_internal_ids",
     help="List of internal IDs for the collaborations the customer should belong to",
 )
