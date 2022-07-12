@@ -1,15 +1,16 @@
 import logging
-import yaml
 
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.tags import HkMipAnalysisTag
 from cg.exc import CgError
+from cg.io.base import WriteFile, ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
@@ -110,8 +111,10 @@ class MipAnalysisAPI(AnalysisAPI):
         """Write the pedigree config to the the case dir"""
         out_dir = self.get_case_path(case_id=case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
-        pedigree_config_path = self.get_pedigree_config_path(case_id=case_id)
-        pedigree_config_path.write_text(yaml.dump(data))
+        pedigree_config_path: Path = self.get_pedigree_config_path(case_id=case_id)
+        WriteFile.write_file_from_content(
+            WriteFile, content=data, file_format=FileFormat.YAML, file_path=pedigree_config_path
+        )
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
@@ -193,10 +196,12 @@ class MipAnalysisAPI(AnalysisAPI):
         return analysis_file_raw
 
     def _open_bundle_file(self, relative_file_path: str) -> Any:
-        """Open a bundle file and return it as an Python object."""
+        """Open a bundle file and return it as an Python object"""
 
-        full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
-        return yaml.safe_load(open(full_file_path))
+        full_file_path: Path = Path(self.housekeeper_api.get_root_dir()).joinpath(
+            relative_file_path
+        )
+        return ReadFile.get_content_from_file(ReadFile, sample_info_raw=full_file_path)
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
         """Get the latest trending data for a family"""
@@ -334,6 +339,8 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_pipeline_version(self, case_id: str) -> str:
         """Get MIP version from sample info file"""
         LOG.debug("Fetch pipeline version")
-        sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
+        sample_info_raw: dict = ReadFile.get_content_from_file(
+            ReadFile, file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
+        )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version
