@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import click
-import yaml
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -16,6 +16,7 @@ from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
 from ...exc import CgDataError, ScoutUploadError
+from ...io.base import WriteStream
 
 LOG = logging.getLogger(__name__)
 
@@ -80,7 +81,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     file_path: Path = root_dir / case_id / "scout_load.yaml"
 
     if print_console:
-        click.echo(yaml.dump(scout_load_config.dict(exclude_none=True)))
+        click.echo(WriteStream.write_stream_from_content(scout_load_config.dict(exclude_none=True)))
         LOG.info("Would save file to %s", file_path)
         return
 
