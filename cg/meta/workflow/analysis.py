@@ -268,6 +268,27 @@ class AnalysisAPI(MetaAPI):
             )
         ]
 
+    def create_samplesheet(
+        self, case_id, sample_obj: models.Sample
+    ) -> None:
+        """
+        Link FASTQ files for a sample to working directory.
+        If pipeline input requires concatenated fastq, files can also be concatenated
+        """
+        files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
+        sorted_files = sorted(files, key=lambda k: k["path"])
+        for fastq_data in sorted_files:
+            fastq_path = Path(fastq_data["path"])
+
+            if not destination_path.exists():
+                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
+                destination_path.symlink_to(fastq_path)
+            else:
+                LOG.warning(f"Destination path already exists: {destination_path}")
+
+        if not concatenate:
+            return
+
     def link_fastq_files_for_sample(
         self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
     ) -> None:
