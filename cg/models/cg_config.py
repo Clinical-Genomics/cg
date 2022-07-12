@@ -335,11 +335,15 @@ class CGConfig(BaseModel):
 
     @property
     def housekeeper_api(self) -> HousekeeperAPI:
+        LOG.debug("instantiating hk_api")
         housekeeper_api = self.__dict__.get("housekeeper_api_")
         if housekeeper_api is None:
+            print("No api found")
             LOG.debug("Instantiating housekeeper api")
             housekeeper_api = HousekeeperAPI(config=self.dict())
+            LOG.debug("hk_api is now up")
             self.housekeeper_api_ = housekeeper_api
+            LOG.debug("hk_api set")
         return housekeeper_api
 
     @property

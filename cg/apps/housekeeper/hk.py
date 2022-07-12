@@ -26,7 +26,7 @@ class HousekeeperAPI:
     def __getattr__(self, name):
         LOG.info("This prints the stack", stack_info=True)
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
-        # return getattr(self._store, name)
+        return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> models.Bundle:
         """Create a new file bundle"""
