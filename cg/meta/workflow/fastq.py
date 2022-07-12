@@ -254,6 +254,26 @@ class MutantFastqHandler(FastqHandler):
 
         return f"{flowcell}_L{lane}_{meta}_{read}.fastq.gz"
 
+
+class RnafusionFastqHandler(FastqHandler):
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flowcell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
+        undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
+    ) -> str:
+        """Name a FASTQ file following MIP conventions,
+        no naming constrains from pipeline"""
+        flowcell = f"{flowcell}-undetermined" if undetermined else flowcell
+        date_str = date if isinstance(date, str) else date.strftime("%y%m%d")
+        return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
+
+
     @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:
         """ "Create a name for the concatenated file from multiple lanes"""
