@@ -12,6 +12,7 @@ from cg.exc import FlowcellsNeededError, DecompressionNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
@@ -264,5 +265,19 @@ def mutant_past_run_dirs(
     """Clean up of "old" MUTANT case run dirs"""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+@click.command("rnafusion-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def rnafusion_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" RNAFUSION case run dirs"""
+
+    context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
