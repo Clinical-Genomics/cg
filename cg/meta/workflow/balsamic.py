@@ -8,6 +8,7 @@ from typing import List, Optional, Union, Any
 import yaml
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.subject import Gender
 from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -157,6 +158,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
+    def get_gender(sample_obj: models.Sample) -> str:
+        """Returns the gender associated to a specific sample"""
+
+        return sample_obj.sex
+
+    @staticmethod
     def get_sample_type(sample_obj: models.Sample) -> str:
         """Returns tissue type of a sample"""
         if sample_obj.is_tumour:
@@ -235,6 +242,26 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
             )
         return tumor_paths[0]
+
+    @staticmethod
+    def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
+        """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
+
+        gender = next(iter(sample_data.values()))["gender"]
+
+        if all(val["gender"] == gender for val in sample_data.values()) and gender in set(
+            value for value in Gender
+        ):
+            if gender not in [Gender.FEMALE, Gender.MALE]:
+                LOG.warning(
+                    f"The provided gender is unknown, setting {Gender.FEMALE.value} as the default"
+                )
+                gender = Gender.FEMALE.value
+
+            return gender
+        else:
+            LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
+            raise BalsamicStartError
 
     @staticmethod
     def get_verified_normal_path(sample_data: dict) -> Optional[str]:
@@ -359,7 +386,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return sample_obj.internal_id
 
     def get_verified_config_case_arguments(
-        self, case_id: str, genome_version: str, panel_bed: str, pon_cnn: str
+        self,
+        case_id: str,
+        genome_version: str,
+        panel_bed: str,
+        pon_cnn: str,
+        gender: Optional[str] = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
         validates them, and transforms into command line arguments
@@ -386,7 +418,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return {
             "case_id": case_id,
+            "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
+            "gender": gender or self.get_verified_gender(sample_data=sample_data),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
@@ -456,6 +490,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         sample_data = {
             link_object.sample.internal_id: {
+                "gender": self.get_gender(link_object.sample),
                 "tissue_type": self.get_sample_type(link_object.sample),
                 "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
@@ -529,6 +564,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def config_case(
         self,
         case_id: str,
+        gender: str,
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
@@ -537,6 +573,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Create config file for BALSAMIC analysis"""
         arguments = self.get_verified_config_case_arguments(
             case_id=case_id,
+            gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -547,6 +584,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
                 "--case-id": arguments.get("case_id"),
+                "--gender": arguments.get("gender"),
+                "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
                 "--normal": arguments.get("normal"),
                 "--tumor": arguments.get("tumor"),
@@ -563,7 +602,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        analysis_type: Optional[str],
         run_analysis: bool = True,
         slurm_quality_of_service: Optional[str] = None,
         dry_run: bool = False,
@@ -579,28 +617,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }
         )
         parameters = command + options + run_analysis + benchmark
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    def report_deliver(
-        self, case_id: str, analysis_type: Optional[str] = None, dry_run: bool = False
-    ) -> None:
+    def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]
         options = self.__build_command_str(
             {
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--analysis-type": analysis_type or self.get_analysis_type(case_id),
             }
         )
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
-
-    def get_analysis_type(self, case_id: str) -> Optional[str]:
-        case_obj = self.status_db.family(case_id)
-        if case_obj.data_delivery in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ]:
-            return "qc"

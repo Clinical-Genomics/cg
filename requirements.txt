@@ -18,12 +18,13 @@ google-auth
 gunicorn
 requests[security]
 requests_cache
+sendmail-container
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
 alive_progress
 ansi
-cgmodels>0.8
+cgmodels>=0.10.1
 coloredlogs
 email-validator
 lxml

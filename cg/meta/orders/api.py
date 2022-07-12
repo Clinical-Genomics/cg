@@ -15,6 +15,7 @@ from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
 
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
+from cg.meta.orders.balsamic_qc_submitter import BalsamicQCSubmitter
 from cg.meta.orders.balsamic_umi_submitter import BalsamicUmiSubmitter
 from cg.meta.orders.fastq_submitter import FastqSubmitter
 from cg.meta.orders.fluffy_submitter import FluffySubmitter
@@ -35,6 +36,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
 
     submitters = {
         OrderType.BALSAMIC: BalsamicSubmitter,
+        OrderType.BALSAMIC_QC: BalsamicQCSubmitter,
         OrderType.BALSAMIC_UMI: BalsamicUmiSubmitter,
         OrderType.FASTQ: FastqSubmitter,
         OrderType.FLUFFY: FluffySubmitter,
@@ -72,6 +74,13 @@ class OrdersAPI:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project
             )
-
+        else:
+            self.ticket_handler.connect_to_ticket(
+                order=order_in,
+                user_name=user_name,
+                user_mail=user_mail,
+                project=project,
+                ticket_number=ticket_number,
+            )
         order_in.ticket = ticket_number
         return submit_handler.submit_order(order=order_in)

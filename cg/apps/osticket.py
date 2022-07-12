@@ -1,6 +1,7 @@
 import json
 import logging
 import os.path
+from tempfile import TemporaryDirectory
 
 import requests
 from flask import Flask
@@ -18,15 +19,30 @@ class OsTicket(object):
     def __init__(self):
         self.headers = None
         self.url = None
+        self.osticket_email = None
+        self.email_uri = None
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
-        self.setup(api_key=app.config["OSTICKET_API_KEY"], domain=app.config["OSTICKET_DOMAIN"])
+        self.setup(
+            api_key=app.config["OSTICKET_API_KEY"],
+            domain=app.config["OSTICKET_DOMAIN"],
+            osticket_email=app.config["SUPPORT_SYSTEM_EMAIL"],
+            email_uri=app.config["EMAIL_URI"],
+        )
 
-    def setup(self, api_key: str = None, domain: str = None):
+    def setup(
+        self,
+        api_key: str = None,
+        domain: str = None,
+        osticket_email: str = None,
+        email_uri: str = None,
+    ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
+        self.osticket_email = osticket_email
+        self.email_uri = email_uri
 
     def open_ticket(
         self, attachment: dict, email: str, message: str, name: str, subject: str
@@ -46,5 +62,12 @@ class OsTicket(object):
         raise TicketCreationError(res)
 
     @staticmethod
-    def create_attachment(content: dict, file_name: str) -> dict:
+    def create_new_ticket_attachment(content: dict, file_name: str) -> dict:
         return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(content))}
+
+    @staticmethod
+    def create_connecting_ticket_attachment(content: dict) -> TemporaryDirectory:
+        directory = TemporaryDirectory()
+        with open(f"{directory.name}/order.json", "w") as json_file:
+            json_file.write(json.dumps(content))
+        return directory
