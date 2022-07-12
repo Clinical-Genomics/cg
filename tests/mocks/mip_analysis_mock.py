@@ -1,13 +1,17 @@
-import yaml
+from pathlib import Path
 
+from cg.constants.constants import FileFormat
+from cg.io.base import ReadFile
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 
 
 def create_mip_metrics_deliverables():
     """Get an mip_metrics_deliverables object"""
-    metrics_deliverables: dict = yaml.safe_load(
-        open("tests/fixtures/apps/mip/case_metrics_deliverables.yaml")
+    metrics_deliverables: dict = ReadFile.get_content_from_file(
+        ReadFile,
+        file_format=FileFormat.YAML,
+        file_path=Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml"),
     )
     return MIPMetricsDeliverables(**metrics_deliverables)
 
