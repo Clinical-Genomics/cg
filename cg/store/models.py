@@ -256,8 +256,7 @@ class Customer(Model):
 
     @property
     def collaborators(self) -> Set["Customer"]:
-        """Set of all customers in each customer group in which any of the user's customers are
-        part of"""
+        """All customers that the current customer collaborates with (including itself)"""
         customers = {
             customer
             for collaboration in self.collaborations
@@ -625,7 +624,6 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-
         return super(Invoice, self).to_dict()
 
 
@@ -638,11 +636,10 @@ class User(Model):
 
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
-    def to_dict(self, customers: bool = False) -> dict:
+    def to_dict(self) -> dict:
         """Represent as dictionary"""
         data = super(User, self).to_dict()
-        if customers:
-            data["customers"] = [customer.to_dict() for customer in self.customers]
+        data["customers"] = [record.to_dict() for record in self.customers]
         return data
 
     def __str__(self) -> str:

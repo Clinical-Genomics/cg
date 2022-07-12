@@ -147,14 +147,6 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def accessible_customers(self, customer: models.Customer):
-
-        return (
-            self.CustomerLink.query.filter(models.CustomerLink.viewer == customer)
-            .options(load_only(models.CustomerLink.owner))
-            .all()
-        )
-
     def families_by_subject_id(
         self,
         customer_id: str,

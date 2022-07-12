@@ -18,7 +18,6 @@ def test_add_collaboration(store: Store):
 
 def test_add_user(store: Store):
     # GIVEN a database with a customer in it that we can connect the user to
-    collaboration = store.add_collaboration("dummy_group", "dummy group")
     customer = store.add_customer(
         internal_id="custtest",
         name="Test Customer",
@@ -26,7 +25,6 @@ def test_add_user(store: Store):
         invoice_address="dummy street 1",
         invoice_reference="dummy nr",
     )
-    customer.collaborations.append(collaboration)
     store.add_commit(customer)
 
     # WHEN adding a new user

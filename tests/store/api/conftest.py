@@ -180,8 +180,6 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 @pytest.fixture(name="rml_pool_store")
 def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket_number: int):
-
-    collaboration = store.add_collaboration("dummy_group", "dummy group")
     new_customer = store.add_customer(
         internal_id="cust000",
         name="Test customer",
@@ -189,7 +187,6 @@ def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket_number: i
         invoice_address="skolgatan 15",
         invoice_reference="abc",
     )
-    new_customer.collaborations.append(collaboration)
     store.add_commit(new_customer)
 
     application = store.add_application(

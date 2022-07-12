@@ -33,7 +33,6 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN a database with a customer in it that we can connect the user to
     disk_store: Store = base_context.status_db
     customer_id = "custtest"
-    collaboration = disk_store.add_collaboration("dummy_group", "dummy group")
     customer = disk_store.add_customer(
         internal_id=customer_id,
         name="Test Customer",
@@ -41,7 +40,6 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
         invoice_address="Street nr, 12345 Uppsala",
         invoice_reference="ABCDEF",
     )
-    customer.collaborations.append(collaboration)
     disk_store.add_commit(customer)
     # GIVEN that there is a certain number of users
     nr_users = disk_store.User.query.count()

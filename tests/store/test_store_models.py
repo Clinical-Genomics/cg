@@ -44,9 +44,21 @@ def test_no_collaborators(base_store):
 def test_collaborators(base_store, customer_id):
     # GIVEN a customer with one collaboration
     customer = base_store.customer(customer_id)
+    assert all(
+        customer_obj.internal_id
+        in [
+            "cust001",
+            "cust002",
+            "cust003",
+            customer_id,
+        ]
+        for customer_obj in customer.collaborations[0].customers
+    )
+
     # WHEN calling the collaborators property
     # THEN the customer and the collaborators should be returned
     collaborators = customer.collaborators
+    assert len(collaborators) == 4
     assert all(
         collaborator.internal_id
         in [

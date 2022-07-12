@@ -155,10 +155,9 @@ class StoreHelpers:
         customer_id: str = "cust000",
         name: str = "Production",
         scout_access: bool = False,
-        collaboration: str = "all_customers",
+        collaboration_id: str = "all_customers",
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests"""
-        collaboration_id = collaboration or f"{customer_id}_group"
         collaboration = store.collaboration(collaboration_id)
         if not collaboration:
             collaboration = store.add_collaboration(collaboration_id, collaboration_id)

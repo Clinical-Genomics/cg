@@ -67,13 +67,10 @@ def upgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for collaboration in session.query(Collaboration):
-        print(f"Customer group {collaboration.internal_id} contains:")
-        print(f"customers {[customer.internal_id for customer in collaboration.customers]}")
         if len(collaboration.customers) > 1:
             for customer in collaboration.customers:
                 customer.collaborations.append(collaboration)
         else:
-            print(f"Deleting group {collaboration.internal_id}")
             session.delete(collaboration)
     session.commit()
     op.drop_column(
@@ -95,22 +92,13 @@ def downgrade():
     )
     for customer in session.query(Customer):
         if not customer.collaborations:
-            print(f"Creating customer_group for {customer.internal_id}")
             customer_group = Collaboration(internal_id=customer.internal_id, name=customer.name)
             session.add(customer_group)
             session.commit()
             session.refresh(customer_group)
             customer.customer_group_id = customer_group.id
         else:
-            print(
-                f"Customer {customer.internal_id} has the following "
-                f"groups: {[customer_group.internal_id for customer_group in customer.collaborations]}"
-            )
             customer.customer_group_id = customer.collaborations[0].id
-            print(
-                f"Customer {customer.internal_id} is added to the group "
-                f"{customer.collaborations[0].internal_id} "
-            )
     session.commit()
     op.rename_table(new_table_name="customer_group", old_table_name="collaboration")
     op.create_foreign_key(

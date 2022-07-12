@@ -825,20 +825,20 @@ def fixture_analysis_store_single(base_store, analysis_family_single_case, helpe
     yield base_store
 
 
-@pytest.fixture(scope="function", name="collaboration")
-def fixture_collaboration() -> str:
+@pytest.fixture(scope="function", name="collaboration_id")
+def fixture_collaboration_id() -> str:
     """Return a default customer group"""
     return "all_customers"
 
 
 @pytest.fixture(scope="function", name="customer_production")
-def fixture_customer_production(collaboration: str, customer_id: str) -> dict:
+def fixture_customer_production(collaboration_id: str, customer_id: str) -> dict:
     """Return a dictionary with information about the prod customer"""
     return dict(
         customer_id=customer_id,
         name="Production",
         scout_access=True,
-        collaboration=collaboration,
+        collaboration_id=collaboration_id,
     )
 
 
