@@ -26,3 +26,12 @@ def write_yaml(content: Union[dict, list], file_path: Path) -> None:
 def write_yaml_stream(content: Union[dict, list]) -> str:
     """Write content to a yaml stream"""
     return yaml.dump(content)
+
+
+def is_valid_yaml_file(file_path: Path) -> bool:
+    """Returns true if the file was successfully loaded as yaml"""
+    try:
+        read_yaml(file_path=file_path)
+    except yaml.YAMLError:
+        return False
+    return True
