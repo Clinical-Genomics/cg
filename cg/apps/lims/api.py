@@ -51,7 +51,6 @@ class LimsAPI(Lims, OrderHandler):
     def __getattr__(self, name):
         LOG.info("This prints the stack", stack_info=True)
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
-        return getattr(self._store, name)
 
     def sample(self, lims_id: str):
         """Fetch a sample from the LIMS database."""
