@@ -338,7 +338,7 @@ class CGConfig(BaseModel):
         LOG.debug("instantiating hk_api")
         housekeeper_api = self.__dict__.get("housekeeper_api_")
         if housekeeper_api is None:
-            print("No api found")
+            LOG.debug("No api found")
             LOG.debug("Instantiating housekeeper api")
             housekeeper_api = HousekeeperAPI(config=self.dict())
             LOG.debug("hk_api is now up")
@@ -352,6 +352,7 @@ class CGConfig(BaseModel):
         if api is None:
             LOG.debug("Instantiating lims api")
             api = LimsAPI(config=self.dict())
+            LOG.debug("lims_api instantiated")
             self.lims_api_ = api
         return api
 
