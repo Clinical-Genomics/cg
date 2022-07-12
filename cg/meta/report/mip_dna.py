@@ -1,6 +1,8 @@
 import logging
 from typing import List, Union
 
+from cgmodels.cg.constants import Pipeline
+
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,
     REQUIRED_CUSTOMER_FIELDS,
@@ -135,3 +137,8 @@ class MipDNAReportAPI(ReportAPI):
             required_sample_metadata_fields.update({sample.id: required_fields})
 
         return required_sample_metadata_fields
+
+    def get_template_name(self) -> str:
+        """Retrieves the template name to render the delivery report"""
+
+        return Pipeline.MIP_DNA + "_report.html"

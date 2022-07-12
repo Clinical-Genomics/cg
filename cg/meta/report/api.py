@@ -8,6 +8,8 @@ from typing import TextIO, Optional, List, Union
 import housekeeper
 import requests
 
+from cgmodels.cg.constants import Pipeline
+
 from cg.constants.constants import FileFormat
 from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
@@ -95,17 +97,15 @@ class ReportAPI(MetaAPI):
 
         return delivery_report_files[0].full_path
 
-    @staticmethod
-    def render_delivery_report(report_data: dict) -> str:
+    def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template"""
 
         env = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template = env.get_template(
-            f"{report_data['case']['data_analysis']['pipeline']}_report.html"
-        )
+        template_name = self.get_template_name()
+        template = env.get_template(template_name)
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self):
@@ -355,6 +355,11 @@ class ReportAPI(MetaAPI):
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields"""
+
+        raise NotImplementedError
+
+    def get_template_name(self) -> str:
+        """Retrieves the pipeline specific template name"""
 
         raise NotImplementedError
 

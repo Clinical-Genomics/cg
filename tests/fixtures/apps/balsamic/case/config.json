@@ -171,6 +171,7 @@
     "analysis": {
         "case_id": "mock_case",
         "analysis_type": "paired",
+        "analysis_workflow": "balsamic",
         "sequencing_type": "targeted",
         "analysis_dir": "/mock/path/cases",
         "fastq_path": "/mock/path/cases/mock_case/analysis/fastq/",
@@ -339,6 +340,5 @@
             "16",
             "17"
         ]
-    },
-    "umiworkflow": true
+    }
 }

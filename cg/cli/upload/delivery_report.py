@@ -4,7 +4,9 @@ from typing import List
 import click
 
 from cg.meta.report.balsamic import BalsamicReportAPI
+from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
@@ -31,6 +33,16 @@ def balsamic(context: click.Context):
 
     context.obj.meta_apis["report_api"] = BalsamicReportAPI(
         config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
+    )
+
+
+@click.group("balsamic-umi")
+@click.pass_context
+def balsamic_umi(context: click.Context):
+    """Upload BALSAMIC UMI files to Scout"""
+
+    context.obj.meta_apis["report_api"] = BalsamicUmiReportAPI(
+        config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
     )
 
 
@@ -81,3 +93,4 @@ def delivery_report_to_scout(context: CGConfig, case_id: str, dry_run: bool):
 
 mip_dna.add_command(delivery_report_to_scout)
 balsamic.add_command(delivery_report_to_scout)
+balsamic_umi.add_command(delivery_report_to_scout)

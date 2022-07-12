@@ -7,10 +7,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.options import (
     OPTION_PANEL_BED,
     OPTION_QOS,
-    OPTION_ANALYSIS_TYPE,
     OPTION_RUN_ANALYSIS,
     OPTION_GENOME_VERSION,
     OPTION_PON_CNN,
+    OPTION_GENDER,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -44,6 +44,7 @@ balsamic.add_command(link)
 
 @balsamic.command("config-case")
 @ARGUMENT_CASE_ID
+@OPTION_GENDER
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
@@ -52,6 +53,7 @@ balsamic.add_command(link)
 def config_case(
     context: CGConfig,
     case_id: str,
+    gender: str,
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
@@ -65,6 +67,7 @@ def config_case(
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.config_case(
             case_id=case_id,
+            gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -82,12 +85,10 @@ def config_case(
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @OPTION_QOS
-@OPTION_ANALYSIS_TYPE
 @OPTION_RUN_ANALYSIS
 @click.pass_obj
 def run(
     context: CGConfig,
-    analysis_type: str,
     run_analysis: bool,
     slurm_quality_of_service: str,
     case_id: str,
@@ -101,7 +102,6 @@ def run(
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
-            analysis_type=analysis_type,
             run_analysis=run_analysis,
             slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
@@ -121,9 +121,8 @@ def run(
 @balsamic.command("report-deliver")
 @ARGUMENT_CASE_ID
 @DRY_RUN
-@OPTION_ANALYSIS_TYPE
 @click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, analysis_type: str, dry_run: bool):
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
     """Create a housekeeper deliverables file for given CASE ID"""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -132,7 +131,7 @@ def report_deliver(context: CGConfig, case_id: str, analysis_type: str, dry_run:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        analysis_api.report_deliver(case_id=case_id, analysis_type=analysis_type, dry_run=dry_run)
+        analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as e:
         LOG.error(f"Could not create report file: {e.message}")
         raise click.Abort()
@@ -173,8 +172,8 @@ def store_housekeeper(context: CGConfig, case_id: str):
 
 @balsamic.command("start")
 @ARGUMENT_CASE_ID
+@OPTION_GENDER
 @OPTION_GENOME_VERSION
-@OPTION_ANALYSIS_TYPE
 @OPTION_QOS
 @DRY_RUN
 @OPTION_PANEL_BED
@@ -184,8 +183,8 @@ def store_housekeeper(context: CGConfig, case_id: str):
 def start(
     context: click.Context,
     case_id: str,
+    gender: str,
     genome_version: str,
-    analysis_type: str,
     panel_bed: str,
     pon_cnn: str,
     slurm_quality_of_service: str,
@@ -200,6 +199,7 @@ def start(
         context.invoke(
             config_case,
             case_id=case_id,
+            gender=gender,
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
@@ -208,7 +208,6 @@ def start(
         context.invoke(
             run,
             case_id=case_id,
-            analysis_type=analysis_type,
             slurm_quality_of_service=slurm_quality_of_service,
             run_analysis=run_analysis,
             dry_run=dry_run,
@@ -242,12 +241,11 @@ def start_available(context: click.Context, dry_run: bool = False):
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
 @DRY_RUN
-@OPTION_ANALYSIS_TYPE
 @click.pass_context
-def store(context: click.Context, case_id: str, analysis_type: str, dry_run: bool):
+def store(context: click.Context, case_id: str, dry_run: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
-    context.invoke(report_deliver, case_id=case_id, analysis_type=analysis_type, dry_run=dry_run)
+    context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id)
 
 
