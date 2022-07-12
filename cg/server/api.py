@@ -330,13 +330,11 @@ def options():
         if not application_obj.versions:
             LOG.debug("Skipping application %s that doesn't have a price", application)
             continue
-
         if application_obj.is_external:
             apptag_groups["ext"].append(application_obj.tag)
-        else:
-            if application_obj.prep_category not in apptag_groups:
-                apptag_groups[application_obj.prep_category] = []
-            apptag_groups[application_obj.prep_category].append(application_obj.tag)
+        if application_obj.prep_category not in apptag_groups:
+            apptag_groups[application_obj.prep_category] = []
+        apptag_groups[application_obj.prep_category].append(application_obj.tag)
 
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
