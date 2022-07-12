@@ -3,7 +3,7 @@ import pytest
 
 
 from cg.constants.constants import FileFormat
-from cg.io.base import ReadFile
+from cg.io.controller import ReadFile
 
 
 @pytest.fixture(name="balsamic_config_path")

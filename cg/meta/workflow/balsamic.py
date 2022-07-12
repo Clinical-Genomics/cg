@@ -10,7 +10,7 @@ from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
-from cg.io.base import ReadFile
+from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis

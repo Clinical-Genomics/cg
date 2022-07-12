@@ -10,7 +10,7 @@ from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.exc import ScoutUploadError
-from cg.io.base import ReadFile
+from cg.io.controller import ReadFile
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 

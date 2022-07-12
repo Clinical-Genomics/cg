@@ -29,7 +29,7 @@ from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
 from .generate.base import generate as generate_cmd
 from ..constants.constants import FileFormat
-from ..io.base import ReadFile
+from ..io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]

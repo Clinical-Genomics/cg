@@ -10,7 +10,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
-from cg.io.base import WriteFile
+from cg.io.controller import WriteFile
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen

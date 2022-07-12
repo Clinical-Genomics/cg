@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.constants import FileFormat
 from cg.constants.tags import HkMipAnalysisTag
 from cg.constants.subject import Gender
-from cg.io.base import ReadFile
+from cg.io.controller import ReadFile
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.store import models
 

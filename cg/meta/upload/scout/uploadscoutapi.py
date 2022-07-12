@@ -11,7 +11,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import HousekeeperVersionMissingError, CgDataError
-from cg.io.base import WriteFile
+from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import models, Store

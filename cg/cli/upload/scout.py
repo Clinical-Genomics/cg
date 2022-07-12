@@ -16,7 +16,7 @@ from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
 from ...exc import CgDataError, ScoutUploadError
-from ...io.base import WriteStream
+from ...io.controller import WriteStream
 
 LOG = logging.getLogger(__name__)
 

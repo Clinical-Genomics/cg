@@ -10,7 +10,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos, SLURM_ACCOUNT_TO_QOS
 from cg.exc import CgError
-from cg.io.base import WriteFile
+from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
 from cg.models.cg_config import CGConfig

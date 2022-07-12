@@ -18,7 +18,8 @@ class ReadFile:
 
 
 class ReadStream:
-    "Reading stream using different methods"
+    """Reading stream using different methods"""
+
     read_stream = {
         FileFormat.YAML: read_yaml_stream,
     }

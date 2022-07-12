@@ -10,7 +10,7 @@ import requests
 
 from cg.constants.constants import FileFormat
 from cg.exc import DeliveryReportError
-from cg.io.base import WriteStream
+from cg.io.controller import WriteStream
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.constants.tags import HK_DELIVERY_REPORT_TAG

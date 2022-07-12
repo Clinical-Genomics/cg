@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from cg.constants.constants import FileFormat
-from cg.io.base import ReadFile
+from cg.io.controller import ReadFile
 from cg.models.mip.mip_config import MipBaseConfig
 
 
