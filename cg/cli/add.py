@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import click
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
@@ -24,10 +24,9 @@ def add():
 @click.argument("name")
 @click.option(
     "-cg",
-    "--customer-group",
-    "customer_group_id",
-    help="internal ID for the customer group of the customer, a new group will be "
-    "created if left out",
+    "--collaboration",
+    "collaboration_internal_ids",
+    help="List of internal IDs for the collaborations the customer should belong to",
 )
 @click.option(
     "-ia",
@@ -48,30 +47,31 @@ def customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    customer_group_id: Optional[str],
+    collaboration_internal_ids: Optional[List[str]],
     invoice_address: str,
     invoice_reference: str,
 ):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
+    collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
     existing: models.Customer = status_db.customer(internal_id)
     if existing:
         LOG.error(f"{existing.name}: customer already added")
         raise click.Abort
 
-    customer_group: models.CustomerGroup = status_db.customer_group(customer_group_id)
-    if not customer_group:
-        customer_group: models.CustomerGroup = status_db.add_customer_group(
-            internal_id=internal_id, name=name
-        )
+    collaborations: List[models.Collaboration] = [
+        status_db.collaboration(collaboration_internal_id)
+        for collaboration_internal_id in collaboration_internal_ids
+    ]
 
     new_customer: models.Customer = status_db.add_customer(
         internal_id=internal_id,
         name=name,
-        customer_group=customer_group,
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
     )
+    for collaboration in collaborations:
+        new_customer.collaborations.append(collaboration)
     status_db.add_commit(new_customer)
     message: str = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)

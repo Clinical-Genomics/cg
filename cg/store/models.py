@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
@@ -19,8 +19,6 @@ from cg.constants import (
 from cg.constants.constants import CONTROL_OPTIONS
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
-
-
 flowcell_sample = Table(
     "flowcell_sample",
     Model.metadata,
@@ -35,6 +33,14 @@ customer_user = Table(
     Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
     Column("user_id", types.Integer, ForeignKey("user.id"), nullable=False),
     UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
+)
+
+customer_collaboration = Table(
+    "customer_collaboration",
+    Model.metadata,
+    Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
+    Column("collaboration_id", types.Integer, ForeignKey("collaboration.id"), nullable=False),
+    UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
 )
 
 
@@ -111,7 +117,6 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-
         if self.prep_category == "wts":
             return self.prep_category
 
@@ -221,7 +226,6 @@ class BedVersion(Model):
 
 
 class Customer(Model):
-
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     comment = Column(types.Text)
@@ -239,7 +243,7 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
-    customer_group_id = Column(ForeignKey("customer_group.id"), nullable=False)
+    collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -250,16 +254,35 @@ class Customer(Model):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
+    @property
+    def collaborators(self) -> Set["Customer"]:
+        """All customers that the current customer collaborates with (including itself)"""
+        customers = {
+            customer
+            for collaboration in self.collaborations
+            for customer in collaboration.customers
+        }
+        customers.add(self)
+        return customers
 
-class CustomerGroup(Model):
+
+class Collaboration(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-
-    customers = orm.relationship(Customer, backref="customer_group", order_by="-Customer.id")
+    customers = orm.relationship(Customer, secondary=customer_collaboration)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    def to_dict(self):
+        """Represent as dictionary"""
+        return {
+            "customers": [customer.internal_id for customer in self.customers],
+            "id": self.id,
+            "name": self.name,
+            "internal_id": self.internal_id,
+        }
 
 
 class Delivery(Model):
@@ -432,7 +455,6 @@ class Organism(Model):
 
 
 class Panel(Model):
-
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -470,7 +492,6 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
-
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
