@@ -297,6 +297,7 @@ class SarsCov2Sample(MicrobialSample):
     region: str
     region_code: str
     selection_criteria: str
+    volume: Optional[str]
 
 
 def sample_class_for(project: OrderType):
