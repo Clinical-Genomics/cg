@@ -20,7 +20,6 @@ def write_yaml(content: Union[dict, list], file_path: Path) -> None:
     """Write content to a yaml file"""
     with open(file_path, "w") as file:
         yaml.dump(content, file, explicit_start=True)
-    return
 
 
 def write_yaml_stream(content: Union[dict, list]) -> str:

@@ -41,7 +41,6 @@ class WriteFile:
     def write_file_from_content(self, content: dict, file_format: str, file_path: Path) -> None:
         """write file using file format dispatch table"""
         self.write_file[file_format](content=content, file_path=file_path)
-        return
 
 
 class WriteStream:
