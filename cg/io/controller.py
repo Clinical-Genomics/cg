@@ -24,11 +24,12 @@ class ReadStream:
         FileFormat.YAML: read_yaml_stream,
     }
 
+    @classmethod
     def get_content_from_stream(
-        self, file_format: str, stream: Union[dict, list]
+        cls, file_format: str, stream: Union[dict, list]
     ) -> Union[dict, list]:
         """Read stream using file format dispatch table"""
-        return self.read_stream[file_format](stream=stream)
+        return cls.read_stream[file_format](stream=stream)
 
 
 class WriteFile:

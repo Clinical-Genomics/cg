@@ -30,7 +30,7 @@ def test_get_causative_variants_one_variant(
 
     # WHEN reading the yaml formatted string
     raw_info: dict = ReadStream.get_content_from_stream(
-        ReadStream, file_format=FileFormat.YAML, stream=causative_output
+        file_format=FileFormat.YAML, stream=causative_output
     )
 
     # WHEN querying for causative variants

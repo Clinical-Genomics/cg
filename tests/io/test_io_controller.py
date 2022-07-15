@@ -34,7 +34,7 @@ def test_get_content_from_stream(yaml_stream: str):
 
     # WHEN reading the yaml content in string
     raw_content: list = ReadStream.get_content_from_stream(
-        ReadStream, file_format=FileFormat.YAML, stream=yaml_stream
+        file_format=FileFormat.YAML, stream=yaml_stream
     )
 
     # THEN assert that a list is returned
@@ -80,7 +80,7 @@ def test_write_yaml_stream_from_content(yaml_stream: str):
 
     # WHEN reading the yaml content in string
     raw_content: list = ReadStream.get_content_from_stream(
-        ReadStream, file_format=FileFormat.YAML, stream=yaml_stream
+        file_format=FileFormat.YAML, stream=yaml_stream
     )
     # WHEN writing a yaml stream
     yaml_content = WriteStream.write_stream_from_content(
