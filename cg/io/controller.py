@@ -53,6 +53,7 @@ class WriteStream:
         FileFormat.YAML: write_yaml_stream,
     }
 
-    def write_stream_from_content(self, content: dict, file_format: str) -> str:
+    @classmethod
+    def write_stream_from_content(cls, content: dict, file_format: str) -> str:
         """write stream using file format dispatch table"""
-        return self.write_stream[file_format](content=content)
+        return cls.write_stream[file_format](content=content)

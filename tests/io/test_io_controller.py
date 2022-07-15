@@ -84,7 +84,7 @@ def test_write_yaml_stream_from_content(yaml_stream: str):
     )
     # WHEN writing a yaml stream
     yaml_content = WriteStream.write_stream_from_content(
-        WriteStream, content=raw_content, file_format=FileFormat.YAML
+        content=raw_content, file_format=FileFormat.YAML
     )
 
     # THEN assert all data is kept abd in yaml format

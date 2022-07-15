@@ -149,13 +149,13 @@ class ReportAPI(MetaAPI):
         if missing_report_fields and not force_report:
             LOG.error(
                 f"Could not generate report data for {case_id}. "
-                f"Missing data: \n{WriteStream.write_stream_from_content(WriteStream, content=missing_report_fields, file_format=FileFormat.YAML)}"
+                f"Missing data: \n{WriteStream.write_stream_from_content(content=missing_report_fields, file_format=FileFormat.YAML)}"
             )
             raise DeliveryReportError
 
         if empty_report_fields:
             LOG.warning(
-                f"Empty report fields: \n{WriteStream.write_stream_from_content(WriteStream, content=empty_report_fields, file_format=FileFormat.YAML)}"
+                f"Empty report fields: \n{WriteStream.write_stream_from_content(content=empty_report_fields, file_format=FileFormat.YAML)}"
             )
 
         return report_data

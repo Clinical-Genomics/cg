@@ -15,6 +15,7 @@ from cg.store.models import Family
 from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
+from ...constants.constants import FileFormat
 from ...exc import CgDataError, ScoutUploadError
 from ...io.controller import WriteStream
 
@@ -81,7 +82,11 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     file_path: Path = root_dir / case_id / "scout_load.yaml"
 
     if print_console:
-        click.echo(WriteStream.write_stream_from_content(scout_load_config.dict(exclude_none=True)))
+        click.echo(
+            WriteStream.write_stream_from_content(
+                content=scout_load_config.dict(exclude_none=True), file_format=FileFormat.YAML
+            )
+        )
         LOG.info("Would save file to %s", file_path)
         return
 
