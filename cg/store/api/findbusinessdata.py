@@ -1,10 +1,9 @@
 """Handler to find business data objects"""
 import datetime as dt
-import logging
 from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, load_only
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -119,9 +118,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Family.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(models.Family.customer_id.in_(customer_ids))
 
         records = (
@@ -136,31 +133,6 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
         records = records.filter_by(action=action) if action else records
-        return records.order_by(models.Family.created_at.desc())
-
-    def families_in_customer_group(
-        self, *, customers: List[models.Customer] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all families including those from collaborating customers."""
-        records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
-
-        if customers:
-            customer_group_ids = []
-            for customer in customers:
-                customer_group_ids.append(customer.customer_group_id)
-            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
-
-        records = (
-            records.filter(
-                or_(
-                    models.Family.name.like(f"%{enquiry}%"),
-                    models.Family.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-
         return records.order_by(models.Family.created_at.desc())
 
     def family(self, internal_id: str) -> models.Family:
@@ -423,31 +395,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_sample_by_name(self, name: str) -> models.Sample:
         return self.Sample.query.filter(models.Sample.name == name).first()
-
-    def samples_in_customer_group(
-        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all samples including those from collaborating customers."""
-
-        records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)
-
-        if customers:
-            customer_group_ids = []
-            for customer in customers:
-                customer_group_ids.append(customer.customer_group_id)
-            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
-
-        records = (
-            records.filter(
-                or_(
-                    models.Sample.name.like(f"%{enquiry}%"),
-                    models.Sample.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-        return records.order_by(models.Sample.created_at.desc())
 
     def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found"""

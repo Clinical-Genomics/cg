@@ -155,13 +155,12 @@ class StoreHelpers:
         customer_id: str = "cust000",
         name: str = "Production",
         scout_access: bool = False,
-        customer_group: str = "all_customers",
+        collaboration_id: str = "all_customers",
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests"""
-        customer_group_id = customer_group or customer_id + "_group"
-        customer_group = store.customer_group(customer_group_id)
-        if not customer_group:
-            customer_group = store.add_customer_group(customer_group_id, customer_group_id)
+        collaboration = store.collaboration(collaboration_id)
+        if not collaboration:
+            collaboration = store.add_collaboration(collaboration_id, collaboration_id)
 
         customer = store.customer(customer_id)
 
@@ -170,10 +169,10 @@ class StoreHelpers:
                 internal_id=customer_id,
                 name=name,
                 scout_access=scout_access,
-                customer_group=customer_group,
                 invoice_address="Test street",
                 invoice_reference="ABCDEF",
             )
+            customer.collaborations.append(collaboration)
             store.add_commit(customer)
         return customer
 
