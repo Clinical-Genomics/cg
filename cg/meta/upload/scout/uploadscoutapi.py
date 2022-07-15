@@ -74,7 +74,6 @@ class UploadScoutAPI:
 
         LOG.info("Save Scout load config to %s", file_path)
         WriteFile.write_file_from_content(
-            WriteFile,
             content=upload_config.dict(exclude_none=True),
             file_format=FileFormat.YAML,
             file_path=file_path,

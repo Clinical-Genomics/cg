@@ -40,9 +40,10 @@ class WriteFile:
         FileFormat.YAML: write_yaml,
     }
 
-    def write_file_from_content(self, content: dict, file_format: str, file_path: Path) -> None:
+    @classmethod
+    def write_file_from_content(cls, content: dict, file_format: str, file_path: Path) -> None:
         """write file using file format dispatch table"""
-        self.write_file[file_format](content=content, file_path=file_path)
+        cls.write_file[file_format](content=content, file_path=file_path)
 
 
 class WriteStream:

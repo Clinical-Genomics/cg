@@ -187,7 +187,7 @@ class DemultiplexingAPI:
         """Write the content to a yaml file"""
         LOG.info("Writing yaml content %s to %s", content, file_path)
         WriteFile.write_file_from_content(
-            WriteFile, content=content, file_format=FileFormat.YAML, file_path=file_path
+            content=content, file_format=FileFormat.YAML, file_path=file_path
         )
 
     def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flowcell: Flowcell):

@@ -113,7 +113,7 @@ class MipAnalysisAPI(AnalysisAPI):
         out_dir.mkdir(parents=True, exist_ok=True)
         pedigree_config_path: Path = self.get_pedigree_config_path(case_id=case_id)
         WriteFile.write_file_from_content(
-            WriteFile, content=data, file_format=FileFormat.YAML, file_path=pedigree_config_path
+            content=data, file_format=FileFormat.YAML, file_path=pedigree_config_path
         )
         LOG.info("Config file saved to %s", pedigree_config_path)
 

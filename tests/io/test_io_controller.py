@@ -57,7 +57,7 @@ def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
 
     # WHEN writing the yaml file from dict
     WriteFile.write_file_from_content(
-        WriteFile, content=raw_sample_info, file_format=FileFormat.YAML, file_path=yaml_file
+        content=raw_sample_info, file_format=FileFormat.YAML, file_path=yaml_file
     )
 
     # THEN assert that a file was successfully created
