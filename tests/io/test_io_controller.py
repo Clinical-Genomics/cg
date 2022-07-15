@@ -13,7 +13,7 @@ def test_get_content_from_file(case_qc_sample_info_path: Path):
 
     # WHEN reading the yaml file
     raw_sample_info: dict = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
+        file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
     )
 
     # Then assert a dict is returned
@@ -52,7 +52,7 @@ def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
 
     # WHEN reading the yaml file
     raw_sample_info: dict = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
+        file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
     )
 
     # WHEN writing the yaml file from dict
@@ -65,7 +65,7 @@ def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
 
     # WHEN reading it as a yaml
     written_raw_sample_info: dict = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=yaml_file
+        file_format=FileFormat.YAML, file_path=yaml_file
     )
 
     # THEN assert that all data is kept

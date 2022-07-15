@@ -59,7 +59,7 @@ def base(
 
     coloredlogs.install(level=log_level, fmt=log_format)
     raw_configs: dict = (
-        ReadFile.get_content_from_file(ReadFile, file_format=FileFormat.YAML, file_path=config)
+        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=config)
         if config
         else {"database": database}
     )

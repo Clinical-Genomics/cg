@@ -10,12 +10,10 @@ def get_balsamic_raw_data() -> Tuple[dict, dict]:
     """Extracts mock BALSAMIC analysis data"""
 
     config: dict = ReadFile.get_content_from_file(
-        ReadFile,
         file_format=FileFormat.YAML,
         file_path=Path("tests", "fixtures", "apps", "balsamic", "case", "config.json"),
     )
     metrics: dict = ReadFile.get_content_from_file(
-        ReadFile,
         file_format=FileFormat.YAML,
         file_path=Path(
             "tests", "fixtures", "apps", "balsamic", "case", "metrics_deliverables.yaml"

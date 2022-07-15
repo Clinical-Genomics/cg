@@ -22,7 +22,7 @@ def test_mip_sampleinfo(case_qc_sample_info_path: Path):
     """Test to parse the content of a real qc_sample_info file"""
     # GIVEN the path to a file with sample_info metadata content
     raw_sample_info = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
+        file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
     )
 
     # WHEN instantiating a MipBaseSampleInfo object

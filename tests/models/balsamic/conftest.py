@@ -25,7 +25,7 @@ def fixture_balsamic_config(balsamic_config_path) -> dict:
     """Return BALSAMIC config file as a dictionary"""
 
     config: dict = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=balsamic_config_path
+        file_format=FileFormat.YAML, file_path=balsamic_config_path
     )
     return config
 
@@ -35,6 +35,6 @@ def fixture_balsamic_metrics(balsamic_metrics_path) -> dict:
     """Return BALSAMIC metrics file as a dictionary"""
 
     metrics: dict = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=balsamic_metrics_path
+        file_format=FileFormat.YAML, file_path=balsamic_metrics_path
     )
     return metrics

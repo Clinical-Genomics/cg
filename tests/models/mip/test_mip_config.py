@@ -24,7 +24,7 @@ def test_mip_config(mip_case_config_dna: Path):
     """Test to parse the content of a real MIP DNA config file"""
     # GIVEN the path to a file with config metadata content
     raw_config: dict = ReadFile.get_content_from_file(
-        ReadFile, file_format=FileFormat.YAML, file_path=mip_case_config_dna
+        file_format=FileFormat.YAML, file_path=mip_case_config_dna
     )
 
     # WHEN instantiating a MipBaseSampleInfo object

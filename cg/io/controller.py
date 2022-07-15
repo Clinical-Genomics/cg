@@ -12,9 +12,10 @@ class ReadFile:
         FileFormat.YAML: read_yaml,
     }
 
-    def get_content_from_file(self, file_format: str, file_path: Path) -> Union[dict, list]:
+    @classmethod
+    def get_content_from_file(cls, file_format: str, file_path: Path) -> Union[dict, list]:
         """Read file using file format dispatch table"""
-        return self.read_file[file_format](file_path=file_path)
+        return cls.read_file[file_format](file_path=file_path)
 
 
 class ReadStream:

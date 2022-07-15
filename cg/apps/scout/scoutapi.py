@@ -31,7 +31,7 @@ class ScoutAPI:
         """Load analysis of a new family into Scout."""
 
         scout_config: dict = ReadFile.get_content_from_file(
-            ReadFile, file_format=FileFormat.YAML, file_path=scout_load_config
+            file_format=FileFormat.YAML, file_path=scout_load_config
         )
         scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
         existing_case: Optional[ScoutExportCase] = self.get_case(

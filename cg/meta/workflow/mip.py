@@ -201,7 +201,9 @@ class MipAnalysisAPI(AnalysisAPI):
         full_file_path: Path = Path(self.housekeeper_api.get_root_dir()).joinpath(
             relative_file_path
         )
-        return ReadFile.get_content_from_file(ReadFile, sample_info_raw=full_file_path)
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, sample_info_raw=full_file_path
+        )
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
         """Get the latest trending data for a family"""
@@ -340,7 +342,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get MIP version from sample info file"""
         LOG.debug("Fetch pipeline version")
         sample_info_raw: dict = ReadFile.get_content_from_file(
-            ReadFile, file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
+            file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
         )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version

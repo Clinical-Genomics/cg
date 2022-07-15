@@ -9,7 +9,6 @@ from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 def create_mip_metrics_deliverables():
     """Get an mip_metrics_deliverables object"""
     metrics_deliverables: dict = ReadFile.get_content_from_file(
-        ReadFile,
         file_format=FileFormat.YAML,
         file_path=Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml"),
     )

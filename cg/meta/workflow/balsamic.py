@@ -299,7 +299,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 f"No file associated to {tags} was found in housekeeper for {case_id}"
             )
         return ReadFile.get_content_from_file(
-            ReadFile, file_format=FileFormat.YAML, file_path=Path(raw_file.full_path)
+            file_format=FileFormat.YAML, file_path=Path(raw_file.full_path)
         )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
