@@ -74,12 +74,13 @@ class MutantAnalysisAPI(AnalysisAPI):
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
         for sample_obj in samples:
-            if not sample_obj.sequencing_qc:
-                LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
-                continue
             application = sample_obj.application_version.application
             if self._is_nanopore(application):
                 self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
+                continue
+            if not sample_obj.sequencing_qc:
+                LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
+                continue
             else:
                 self.link_fastq_files_for_sample(
                     case_obj=case_obj, sample_obj=sample_obj, concatenate=True
