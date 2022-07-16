@@ -115,9 +115,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             lab_code=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="lab_code"
             ),
-            primer=self.lims_api.get_sample_attribute(
-                lims_id=sample_obj.internal_id, key="primer"
-            ),
+            primer=self.lims_api.get_sample_attribute(lims_id=sample_obj.internal_id, key="primer"),
         )
 
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
