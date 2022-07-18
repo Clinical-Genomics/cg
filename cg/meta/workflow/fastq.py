@@ -147,22 +147,43 @@ class FastqHandler:
 
         return fastq_meta
 
+
+    @staticmethod
+    def parse_nanopore_header(line: str) -> dict:
+        fastq_meta = {"lane": None, "flowcell": None}
+        header_metadata: list = line.split(" ")
+        lane = header_metadata[3].split("=")
+        fastq_meta["lane"] = lane[1]
+        flowcell = header_metadata[5].split("=")
+        fastq_meta["flowcell"] = flowcell[1]
+        return fastq_meta
+
+
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
-            header_info = FastqHandler.parse_header(header_line)
-
-            data = {
-                "path": fastq_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("Undetermined" in fastq_path),
-            }
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
+            if "runid" in header_line and "flow_cell_id" in header_line and "barcode" in header_line:
+                header_info: dict = FastqHandler.parse_nanopore_header(line=header_line)
+                data = {
+                    "path": fastq_path,
+                    "lane": int(header_info["lane"]),
+                    "flowcell": header_info["flowcell"],
+                    "read": 1,
+                    "undetermined": False
+                }
+            else:
+                header_info = FastqHandler.parse_header(header_line)
+                data = {
+                    "path": fastq_path,
+                    "lane": int(header_info["lane"]),
+                    "flowcell": header_info["flowcell"],
+                    "read": int(header_info["readnumber"]),
+                    "undetermined": ("Undetermined" in fastq_path),
+                }
+                matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
+                if len(matches) > 0:
+                    data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             return data
 
     @staticmethod
