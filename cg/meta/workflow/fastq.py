@@ -147,7 +147,6 @@ class FastqHandler:
 
         return fastq_meta
 
-
     @staticmethod
     def parse_nanopore_header(line: str) -> dict:
         fastq_meta = {"lane": None, "flowcell": None}
@@ -158,19 +157,22 @@ class FastqHandler:
         fastq_meta["flowcell"] = flowcell[1]
         return fastq_meta
 
-
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
-            if "runid" in header_line and "flow_cell_id" in header_line and "barcode" in header_line:
+            if (
+                "runid" in header_line
+                and "flow_cell_id" in header_line
+                and "barcode" in header_line
+            ):
                 header_info: dict = FastqHandler.parse_nanopore_header(line=header_line)
                 data = {
                     "path": fastq_path,
                     "lane": int(header_info["lane"]),
                     "flowcell": header_info["flowcell"],
                     "read": 1,
-                    "undetermined": False
+                    "undetermined": False,
                 }
             else:
                 header_info = FastqHandler.parse_header(header_line)
