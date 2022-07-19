@@ -167,24 +167,6 @@ class FastqHandler:
 
 
     @staticmethod
-    def parse_file_data(fastq_path: Path) -> dict:
-        with gzip.open(fastq_path) as handle:
-            header_line = handle.readline().decode()
-            header_info = FastqHandler.parse_header(header_line)
-            data = {
-                "path": fastq_path,
-                "lane": int(header_info["lane"]),
-                "flowcell": header_info["flowcell"],
-                "read": int(header_info["readnumber"]),
-                "undetermined": ("Undetermined" in fastq_path),
-            }
-            matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
-            if len(matches) > 0:
-                data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
-        return data
-
-
-    @staticmethod
     def parse_nanopore_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
