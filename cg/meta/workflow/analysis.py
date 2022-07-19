@@ -338,7 +338,7 @@ class AnalysisAPI(MetaAPI):
             counter = 0
             fastq_path = Path(fastq_data["path"])
             fastq_name = self.fastq_handler.create_fastq_name(
-                lane=fastq_data["lane"] + "_" + str(counter),
+                lane=str(fastq_data["lane"]) + "_" + str(counter),
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 read=fastq_data["read"],
