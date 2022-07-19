@@ -312,6 +312,61 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
+    def get_metadata_for_nanopre_sample(self, sample_obj: models.Sample) -> List[dict]:
+        return [
+            self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
+            for file_obj in self.housekeeper_api.files(
+                bundle=sample_obj.internal_id, tags=["fastq"]
+            )
+        ]
+
+    def link_nanopore_fastq_for_sample(
+        self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
+    ) -> None:
+        """
+        Link FASTQ files for a nanopore sample to working directory.
+        If pipeline input requires concatenated fastq, files can also be concatenated
+        """
+        linked_reads_paths = {1: []}
+        concatenated_paths = {1: ""}
+        files: List[dict] = self.get_metadata_for_nanopre_sample(sample_obj=sample_obj)
+        sorted_files = sorted(files, key=lambda k: k["path"])
+        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir.mkdir(parents=True, exist_ok=True)
+
+        for fastq_data in sorted_files:
+            counter = 0
+            fastq_path = Path(fastq_data["path"])
+            fastq_name = self.fastq_handler.create_fastq_name(
+                lane=fastq_data["lane"] + "_" + str(counter),
+                flowcell=fastq_data["flowcell"],
+                sample=sample_obj.internal_id,
+                read=fastq_data["read"],
+                undetermined=fastq_data["undetermined"],
+                meta=self.get_additional_naming_metadata(sample_obj),
+            )
+            counter += 1
+            destination_path: Path = fastq_dir / fastq_name
+            linked_reads_paths[fastq_data["read"]].append(destination_path)
+            concatenated_paths[
+                fastq_data["read"]
+            ] = f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+
+            if not destination_path.exists():
+                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
+                destination_path.symlink_to(fastq_path)
+            else:
+                LOG.warning(f"Destination path already exists: {destination_path}")
+
+        if not concatenate:
+            return
+
+        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        for read, value in linked_reads_paths.items():
+            self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
+            self.fastq_handler.remove_files(value)
+
+
     def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
         """Get target bed filename from lims"""
         case_obj: models.Family = self.status_db.family(case_id)
