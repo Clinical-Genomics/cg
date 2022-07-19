@@ -148,6 +148,14 @@ class FastqHandler:
         return fastq_meta
 
     @staticmethod
+    def create_nanopore_fastq_name(
+        flowcell: str,
+        sample: str,
+        filenr: str,
+    ) -> str:
+        return f"{flowcell}_{sample}_{filenr}.fastq.gz"
+
+    @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
@@ -172,10 +180,7 @@ class FastqHandler:
             header_info: dict = MutantFastqHandler.get_nanopore_header_info(line=header_line)
             data = {
                 "path": fastq_path,
-                "lane": "NA",
                 "flowcell": header_info["flowcell"],
-                "read": 1,
-                "undetermined": False,
             }
             return data
 

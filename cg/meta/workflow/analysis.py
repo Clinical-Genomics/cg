@@ -337,13 +337,10 @@ class AnalysisAPI(MetaAPI):
         counter = 0
         for fastq_data in sorted_files:
             fastq_path = Path(fastq_data["path"])
-            fastq_name = self.fastq_handler.create_fastq_name(
-                lane=str(fastq_data["lane"]) + str(counter),
+            fastq_name = self.fastq_handler.create_nanopore_fastq_name(
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
-                read=fastq_data["read"],
-                undetermined=fastq_data["undetermined"],
-                meta=self.get_additional_naming_metadata(sample_obj),
+                filenr=str(counter),
             )
             counter += 1
             destination_path: Path = fastq_dir / fastq_name
