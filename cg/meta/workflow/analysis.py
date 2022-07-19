@@ -355,8 +355,14 @@ class AnalysisAPI(MetaAPI):
         if not concatenate:
             return
 
+        concatenated_fastq_name = self.fastq_handler.create_nanopore_fastq_name(
+            flowcell=fastq_data["flowcell"],
+            sample=sample_obj.internal_id,
+            filenr=str(1),
+            meta=self.get_additional_naming_metadata(sample_obj),
+        )
         concatenated_path = (
-            f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+            f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(concatenated_fastq_name)}"
         )
         LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
         self.fastq_handler.concatenate(read_paths, concatenated_path)
