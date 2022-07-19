@@ -147,7 +147,6 @@ class FastqHandler:
 
         return fastq_meta
 
-
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
@@ -166,7 +165,6 @@ class FastqHandler:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             return data
 
-
     @staticmethod
     def parse_nanopore_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
@@ -180,7 +178,6 @@ class FastqHandler:
                 "undetermined": False,
             }
             return data
-
 
     @staticmethod
     def create_fastq_name(
