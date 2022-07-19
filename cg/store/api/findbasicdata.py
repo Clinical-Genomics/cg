@@ -60,9 +60,9 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch all customers."""
         return self.Customer.query
 
-    def customer_group(self, internal_id: str) -> models.CustomerGroup:
+    def collaboration(self, internal_id: str) -> models.Collaboration:
         """Fetch a customer group by internal id from the store."""
-        return self.CustomerGroup.query.filter_by(internal_id=internal_id).first()
+        return self.Collaboration.query.filter_by(internal_id=internal_id).first()
 
     def customer_by_id(self, id_: int) -> models.Customer:
         """Fetch a customer by id number from the store."""
