@@ -312,7 +312,7 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.concatenate(linked_reads_paths[read], concatenated_paths[read])
             self.fastq_handler.remove_files(value)
 
-    def get_metadata_for_nanopre_sample(self, sample_obj: models.Sample) -> List[dict]:
+    def get_metadata_for_nanopore_sample(self, sample_obj: models.Sample) -> List[dict]:
         return [
             self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
@@ -329,7 +329,7 @@ class AnalysisAPI(MetaAPI):
         """
         linked_reads_paths = {1: []}
         concatenated_paths = {1: ""}
-        files: List[dict] = self.get_metadata_for_nanopre_sample(sample_obj=sample_obj)
+        files: List[dict] = self.get_metadata_for_nanopore_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
         fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
