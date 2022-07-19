@@ -340,13 +340,12 @@ class AnalysisAPI(MetaAPI):
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 filenr=str(counter),
+                meta=self.get_additional_naming_metadata(sample_obj),
             )
             counter += 1
             destination_path: Path = fastq_dir / fastq_name
             read_paths.append(destination_path)
-            concatenated_path = (
-                f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
-            )
+
             if not destination_path.exists():
                 LOG.info(f"Linking: {fastq_path} -> {destination_path}")
                 destination_path.symlink_to(fastq_path)
@@ -356,6 +355,9 @@ class AnalysisAPI(MetaAPI):
         if not concatenate:
             return
 
+        concatenated_path = (
+            f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(fastq_name)}"
+        )
         LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
         self.fastq_handler.concatenate(read_paths, concatenated_path)
         self.fastq_handler.remove_files(read_paths)

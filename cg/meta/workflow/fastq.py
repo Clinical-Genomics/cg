@@ -152,8 +152,9 @@ class FastqHandler:
         flowcell: str,
         sample: str,
         filenr: str,
+        meta: Optional[str] = None,
     ) -> str:
-        return f"{flowcell}_{sample}_{filenr}.fastq.gz"
+        return f"{flowcell}_{sample}_{meta}_{filenr}.fastq.gz"
 
     @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
