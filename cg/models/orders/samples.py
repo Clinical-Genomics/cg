@@ -5,6 +5,7 @@ from pydantic import BaseModel, constr, validator
 from pydantic.typing import Optional
 
 from cg.constants import DataDelivery
+from cg.constants.constants import GenomeVersion
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     ContainerEnum,
@@ -100,6 +101,8 @@ class Of1508Sample(OrderInSample):
     # This information is required for panel- or exome analysis
     elution_buffer: Optional[str]
     tumour_purity: Optional[int]
+    # This information is required for BalsamicQC analysis
+    reference_genome: Optional[GenomeVersion]
     # "This information is optional for FFPE-samples for new samples"
     formalin_fixation_time: Optional[int]
     post_formalin_fixation_time: Optional[int]
