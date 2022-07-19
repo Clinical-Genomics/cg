@@ -172,7 +172,7 @@ class FastqHandler:
             header_info: dict = MutantFastqHandler.get_nanopore_header_info(line=header_line)
             data = {
                 "path": fastq_path,
-                "lane": int(header_info["lane"]),
+                "lane": "NA",
                 "flowcell": header_info["flowcell"],
                 "read": 1,
                 "undetermined": False,
