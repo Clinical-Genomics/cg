@@ -334,11 +334,11 @@ class AnalysisAPI(MetaAPI):
         fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
+        counter = 0
         for fastq_data in sorted_files:
-            counter = 0
             fastq_path = Path(fastq_data["path"])
             fastq_name = self.fastq_handler.create_fastq_name(
-                lane=str(fastq_data["lane"]) + "_" + str(counter),
+                lane=str(fastq_data["lane"]) + str(counter),
                 flowcell=fastq_data["flowcell"],
                 sample=sample_obj.internal_id,
                 read=fastq_data["read"],
