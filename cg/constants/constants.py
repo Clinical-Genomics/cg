@@ -59,13 +59,13 @@ class GenomeVersion(StrEnum):
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS_BAM_FILES: str = "analysis-bam"
     ANALYSIS_FILES: str = "analysis"
+    ANALYSIS_SCOUT: str = "analysis-scout"
     FASTQ: str = "fastq"
     FASTQ_QC: str = "fastq_qc"
+    FASTQ_ANALYSIS: str = "fastq-analysis"
     FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
-    FASTQ_QC_ANALYSIS_CRAM: str = "fastq_qc-analysis-cram"
-    FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
+    FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
     NIPT_VIEWER: str = "nipt-viewer"
     SCOUT: str = "scout"
     STATINA: str = "statina"
