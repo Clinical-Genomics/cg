@@ -104,7 +104,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
         LOG.info("Uploading analysis for case: %s", case_id)
         with ui.patch_click():
             try:
-                t = Thread(target=upload(context=context, family_id=case_id))
+                t = Thread(target=upload(family_id=case_id))
                 t.start()
                 ui.run()
             except Exception:
