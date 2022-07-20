@@ -148,15 +148,6 @@ class FastqHandler:
         return fastq_meta
 
     @staticmethod
-    def create_nanopore_fastq_name(
-        flowcell: str,
-        sample: str,
-        filenr: str,
-        meta: Optional[str] = None,
-    ) -> str:
-        return f"{flowcell}_{sample}_{meta}_{filenr}.fastq.gz"
-
-    @staticmethod
     def parse_file_data(fastq_path: Path) -> dict:
         with gzip.open(fastq_path) as handle:
             header_line = handle.readline().decode()
@@ -174,16 +165,6 @@ class FastqHandler:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             return data
 
-    @staticmethod
-    def parse_nanopore_file_data(fastq_path: Path) -> dict:
-        with gzip.open(fastq_path) as handle:
-            header_line = handle.readline().decode()
-            header_info: dict = MutantFastqHandler.get_nanopore_header_info(line=header_line)
-            data = {
-                "path": fastq_path,
-                "flowcell": header_info["flowcell"],
-            }
-            return data
 
     @staticmethod
     def create_fastq_name(
@@ -281,10 +262,28 @@ class MutantFastqHandler(FastqHandler):
 
     @staticmethod
     def get_nanopore_header_info(line: str) -> dict:
-        fastq_meta = {"lane": None, "flowcell": None}
+        fastq_meta = {"flowcell": None}
         header_metadata: list = line.split(" ")
-        lane = header_metadata[3].split("=")
-        fastq_meta["lane"] = lane[1]
         flowcell = header_metadata[5].split("=")
         fastq_meta["flowcell"] = flowcell[1]
         return fastq_meta
+
+    @staticmethod
+    def create_nanopore_fastq_name(
+        flowcell: str,
+        sample: str,
+        filenr: str,
+        meta: Optional[str] = None,
+    ) -> str:
+        return f"{flowcell}_{sample}_{meta}_{filenr}.fastq.gz"
+
+    @staticmethod
+    def parse_nanopore_file_data(fastq_path: Path) -> dict:
+        with gzip.open(fastq_path) as handle:
+            header_line = handle.readline().decode()
+            header_info: dict = MutantFastqHandler.get_nanopore_header_info(line=header_line)
+            data = {
+                "path": fastq_path,
+                "flowcell": header_info["flowcell"],
+            }
+            return data
