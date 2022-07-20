@@ -22,12 +22,12 @@ class UploadAPI(MetaAPI):
         super().__init__(config=config)
         self.analysis_api = analysis_api
         self.scout_upload_api: UploadScoutAPI = UploadScoutAPI(
-            hk_api=config.housekeeper_api,
-            scout_api=config.scout_api,
-            madeline_api=config.madeline_api,
+            hk_api=self.housekeeper_api,
+            scout_api=self.scout_api,
+            madeline_api=self.madeline_api,
             analysis_api=self.analysis_api,
-            lims_api=config.lims_api,
-            status_db=config.status_db,
+            lims_api=self.lims_api,
+            status_db=self.status_db,
         )
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
