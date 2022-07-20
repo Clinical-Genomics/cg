@@ -165,7 +165,6 @@ class FastqHandler:
                 data["flowcell"] = f"{data['flowcell']}-{matches[0]}"
             return data
 
-
     @staticmethod
     def create_fastq_name(
         lane: str,
