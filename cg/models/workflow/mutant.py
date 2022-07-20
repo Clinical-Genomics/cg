@@ -19,6 +19,7 @@ class MutantSampleConfig(BaseModel):
     method_sequencing: str
     sequencing_qc_pass: bool
     selection_criteria: str
+    primer: str
 
     @validator("region_code", "lab_code")
     def sanitize_values(cls, value):
