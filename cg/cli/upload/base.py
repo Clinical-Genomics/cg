@@ -2,6 +2,7 @@
 import logging
 import sys
 import traceback
+from click_threading import UiWorker, Thread
 from typing import Optional
 
 import click
@@ -87,8 +88,10 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     LOG.info("----------------- AUTO -----------------")
 
     status_db: Store = context.obj.status_db
+    ui = UiWorker()
 
     exit_code = 0
+
     for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
@@ -99,12 +102,15 @@ def auto(context: click.Context, pipeline: Pipeline = None):
 
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading analysis for case: %s", case_id)
-        try:
-            context.invoke(upload, family_id=case_id)
-        except Exception:
-            LOG.error(f"Case {case_id} upload failed")
-            LOG.error(traceback.format_exc())
-            exit_code = 1
+        with ui.patch_click():
+            try:
+                t = Thread(target=upload(context=context, family_id=case_id))
+                t.start()
+                ui.run()
+            except Exception:
+                LOG.error(f"Case {case_id} upload failed")
+                LOG.error(traceback.format_exc())
+                exit_code = 1
 
     sys.exit(exit_code)
 

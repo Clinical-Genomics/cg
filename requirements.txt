@@ -25,6 +25,7 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 alive_progress
 ansi
 cgmodels>=0.10.1
+click-threading
 coloredlogs
 email-validator
 lxml
