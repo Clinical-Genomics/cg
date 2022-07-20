@@ -7,6 +7,8 @@ import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
@@ -15,9 +17,7 @@ from cg.store.models import Family
 from housekeeper.store import models as hk_models
 
 from .utils import suggest_cases_to_upload
-from ...constants.constants import FileFormat
 from ...exc import CgDataError, ScoutUploadError
-from ...io.controller import WriteStream
 
 LOG = logging.getLogger(__name__)
 

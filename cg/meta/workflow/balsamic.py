@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import ValidationError
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import Pipeline
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
 from cg.constants.tags import BalsamicAnalysisTag
@@ -286,7 +286,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return None
         return normal_paths[0]
 
-    def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict:
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
 
         version = self.housekeeper_api.last_version(bundle=case_id)

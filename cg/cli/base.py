@@ -8,7 +8,9 @@ import click
 import coloredlogs
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
+from cg.constants.constants import FileFormat
 from cg.cli.store.store import store as store_cmd
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -28,8 +30,6 @@ from .transfer import transfer_group
 from .upload.base import upload
 from .workflow.base import workflow as workflow_cmd
 from .generate.base import generate as generate_cmd
-from ..constants.constants import FileFormat
-from ..io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -58,12 +58,12 @@ def base(
         log_format = "%(message)s" if sys.stdout.isatty() else None
 
     coloredlogs.install(level=log_level, fmt=log_format)
-    raw_configs: dict = (
+    raw_config: dict = (
         ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=config)
         if config
         else {"database": database}
     )
-    context.obj = CGConfig(**raw_configs)
+    context.obj = CGConfig(**raw_config)
 
 
 @base.command()
