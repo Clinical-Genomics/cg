@@ -1,4 +1,6 @@
 """ Start of CLI """
+from pathlib import Path
+
 import logging
 import sys
 from typing import Optional
@@ -59,7 +61,7 @@ def base(
 
     coloredlogs.install(level=log_level, fmt=log_format)
     raw_config: dict = (
-        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=config)
+        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=Path(config))
         if config
         else {"database": database}
     )
