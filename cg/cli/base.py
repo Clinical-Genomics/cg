@@ -38,7 +38,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 
 
 @click.group()
-@click.option("-c", "--config", type=click.File(), help="path to config file")
+@click.option("-c", "--config", type=click.Path(exists=True), help="path to config file")
 @click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
     "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
@@ -48,7 +48,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.pass_context
 def base(
     context: click.Context,
-    config: click.File,
+    config: click.Path,
     database: Optional[str],
     log_level: str,
     verbose: bool,
