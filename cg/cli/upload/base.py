@@ -2,7 +2,7 @@
 import logging
 import sys
 import traceback
-from click_threading import UiWorker, Thread
+import threading
 from typing import Optional
 
 import click
@@ -78,6 +78,13 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         suggest_cases_to_upload(status_db=upload_api.status_db)
         raise click.Abort()
 
+def spawn_thread(ctx, family_id: str) -> threading.Thread:
+    def wrapper():
+        with ctx:
+            ctx.invoke(upload, family_id=family_id)
+    t = threading.Thread(target=wrapper)
+    t.start()
+    return t
 
 @upload.command()
 @click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
@@ -88,10 +95,10 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     LOG.info("----------------- AUTO -----------------")
 
     status_db: Store = context.obj.status_db
-    ui = UiWorker()
 
     exit_code = 0
 
+    jobs = []
     for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
@@ -102,16 +109,15 @@ def auto(context: click.Context, pipeline: Pipeline = None):
 
         case_id = analysis_obj.family.internal_id
         LOG.info("Uploading analysis for case: %s", case_id)
-        with ui.patch_click():
-            try:
-                t = Thread(target=upload(family_id=case_id))
-                t.start()
-                ui.run()
-            except Exception:
-                LOG.error(f"Case {case_id} upload failed")
-                LOG.error(traceback.format_exc())
-                exit_code = 1
-
+        try:
+            jobs.append(spawn_thread(ctx=context, family_id=case_id))
+        except Exception:
+            LOG.error(f"Case {case_id} upload failed")
+            LOG.error(traceback.format_exc())
+            exit_code = 1
+    for job in jobs:
+        job.run()
+        
     sys.exit(exit_code)
 
 
