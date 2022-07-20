@@ -78,13 +78,16 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         suggest_cases_to_upload(status_db=upload_api.status_db)
         raise click.Abort()
 
+
 def spawn_thread(ctx, family_id: str) -> threading.Thread:
     def wrapper():
         with ctx:
             ctx.invoke(upload, family_id=family_id)
+
     t = threading.Thread(target=wrapper)
     t.start()
     return t
+
 
 @upload.command()
 @click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
@@ -117,7 +120,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
             exit_code = 1
     for job in jobs:
         job.run()
-        
+
     sys.exit(exit_code)
 
 
