@@ -3,7 +3,7 @@
 import logging
 
 import click
-from cg.cli.workflow.balsamic.base import config_case
+from cg.cli.workflow.balsamic.base import config_case, run, start
 
 from cg.cli.workflow.commands import resolve_compression, link
 
@@ -28,5 +28,5 @@ def balsamic_pon(context: click.Context):
 balsamic_pon.add_command(resolve_compression)
 balsamic_pon.add_command(link)
 balsamic_pon.add_command(config_case)
-# balsamic_pon.add_command(run)
-# balsamic_qc.add_command(start)
+balsamic_pon.add_command(run)
+balsamic_pon.add_command(start)
