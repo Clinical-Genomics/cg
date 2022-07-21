@@ -127,7 +127,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return analysis_type
 
     def get_sample_fastq_destination_dir(
-        self, case_obj: models.Family, sample_obj: models.Sample
+        self, case_obj: models.Family, sample_obj: models.Sample = None
     ) -> Path:
         return self.get_case_path(case_obj.internal_id) / "fastq"
 
@@ -170,7 +170,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return "tumor"
         return "normal"
 
-    def get_verified_bed(self, sample_data: dict, panel_bed: Path) -> Optional[str]:
+    def get_verified_bed(self, panel_bed: Path, sample_data: dict = None) -> Optional[str]:
         """ "Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
@@ -423,7 +423,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "gender": gender or self.get_verified_gender(sample_data=sample_data),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
-            "panel_bed": self.get_verified_bed(sample_data=sample_data, panel_bed=panel_bed),
+            "panel_bed": self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data),
             "pon_cnn": self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=panel_bed),
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
