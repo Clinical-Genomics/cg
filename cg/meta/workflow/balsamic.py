@@ -223,6 +223,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return pon_cnn
 
+    def get_latest_pon_file(self, panel_bed: Path) -> Optional[Path]:
+        """Returns the latest PON cnn file associated to a specific capture bed"""
+
+        pon_list = Path(self.bed_path).glob(f"*{panel_bed.stem}_CNVkit_PON_reference_*.cnn")
+        sorted_pon_files = sorted(pon_list, key=lambda x: int(x.stem.split("_v")[-1]), reverse=True)
+
+        return sorted_pon_files[0] if sorted_pon_files else None
+
     @staticmethod
     def get_verified_tumor_path(sample_data: dict) -> str:
         """Takes a dict with samples and attributes, and returns the path

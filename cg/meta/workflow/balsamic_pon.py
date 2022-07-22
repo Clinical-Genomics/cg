@@ -20,7 +20,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     def __init__(
         self,
         config: CGConfig,
-        pipeline: Pipeline = Pipeline.BALSAMIC,
+        pipeline: Pipeline = Pipeline.BALSAMIC_PON,
     ):
         super().__init__(config=config, pipeline=pipeline)
 
@@ -70,14 +70,6 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                     f"Please provide an absolute path to the desired BED file or a valid bed shortname."
                 )
             return derived_panel_bed
-
-    def get_latest_pon_file(self, panel_bed: Path) -> Optional[Path]:
-        """Returns the latest PON cnn file associated to a specific capture bed"""
-
-        pon_list = Path(self.bed_path).glob(f"*{panel_bed.stem}_CNVkit_PON_reference_*.cnn")
-        sorted_pon_files = sorted(pon_list, key=lambda x: int(x.stem.split("_v")[-1]), reverse=True)
-
-        return sorted_pon_files[0] if sorted_pon_files else None
 
     def get_next_pon_version(self, panel_bed: Path) -> str:
         """Returns the next PON version to be generated"""
