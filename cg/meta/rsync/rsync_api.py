@@ -60,7 +60,7 @@ class RsyncAPI(MetaAPI):
         """Write slurm job IDs to a .YAML file used as the trailblazer config"""
         LOG.info(f"Writing slurm jobs to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
-            WriteFile, content=content, file_format=FileFormat.YAML, file_path=config_path
+            content=content, file_format=FileFormat.YAML, file_path=config_path
         )
 
     @staticmethod
