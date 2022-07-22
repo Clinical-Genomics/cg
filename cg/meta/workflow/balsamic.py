@@ -45,6 +45,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
+        self.bed_pon_path = config.bed_path + "/PON/"
 
     @property
     def root(self) -> str:
@@ -205,28 +206,34 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
             return Path(self.bed_path, target_bed).as_posix()
 
-    @staticmethod
-    def get_verified_pon(panel_bed: Path, pon_cnn: str) -> Optional[str]:
-        """Returns the validated PoN path
+    def get_verified_pon(self, panel_bed: Optional[str], pon_cnn: Optional[str]) -> Optional[str]:
+        """Returns the validated PON or extracts the latest one available if it is not provided
 
         Raises BalsamicStartError:
             When there is a missmatch between the PoN and the panel bed file names
         """
-        if pon_cnn:
-            pon_cnn = Path(str(pon_cnn))
-            if panel_bed.stem not in pon_cnn.stem:
+
+        if not panel_bed:
+            latest_pon = None
+        elif pon_cnn:
+            latest_pon = Path(pon_cnn)
+            if Path(panel_bed).stem not in latest_pon.stem:
                 raise BalsamicStartError(
-                    f"The specified PoN reference file {pon_cnn} does not match the panel bed {panel_bed}"
+                    f"The specified PON reference file {latest_pon} does not match the panel bed {panel_bed}"
+                )
+        else:
+            latest_pon = self.get_latest_pon_file(Path(panel_bed))
+            if latest_pon:
+                LOG.warning(
+                    f"The following PON reference file will be used for the analysis: {latest_pon}"
                 )
 
-            return pon_cnn.as_posix()
-
-        return pon_cnn
+        return latest_pon.as_posix() if latest_pon else None
 
     def get_latest_pon_file(self, panel_bed: Path) -> Optional[Path]:
         """Returns the latest PON cnn file associated to a specific capture bed"""
 
-        pon_list = Path(self.bed_path).glob(f"*{panel_bed.stem}_CNVkit_PON_reference_*.cnn")
+        pon_list = Path(self.bed_pon_path).glob(f"*{panel_bed.stem}_CNVkit_PON_reference_*.cnn")
         sorted_pon_files = sorted(pon_list, key=lambda x: int(x.stem.split("_v")[-1]), reverse=True)
 
         return sorted_pon_files[0] if sorted_pon_files else None
@@ -424,6 +431,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                     )
                 panel_bed = derived_panel_bed
 
+        verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
+
         return {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
@@ -431,8 +440,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "gender": gender or self.get_verified_gender(sample_data=sample_data),
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
-            "panel_bed": self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data),
-            "pon_cnn": self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=panel_bed),
+            "panel_bed": verified_panel_bed,
+            "pon_cnn": self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed),
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
