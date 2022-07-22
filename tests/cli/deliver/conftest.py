@@ -13,8 +13,8 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="delivery_inbox")
-def fixture_delivery_inbox(project_dir: Path, customer_id: Path, ticket_nr: int) -> Path:
-    return project_dir / customer_id / "inbox" / str(ticket_nr)
+def fixture_delivery_inbox(project_dir: Path, customer_id: Path, ticket: str) -> Path:
+    return project_dir / customer_id / "inbox" / ticket
 
 
 @pytest.fixture(name="deliver_vcf_path")

@@ -28,11 +28,11 @@ class ExternalDataAPI(MetaAPI):
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.RSYNC_FILE_POSTFIX: str = "_rsync_external_data"
 
-    def create_log_dir(self, dry_run: bool, ticket_id: int) -> Path:
+    def create_log_dir(self, dry_run: bool, ticket: str) -> Path:
         """Creates a directory for log file to be stored"""
         timestamp: dt.datetime = dt.datetime.now()
         timestamp_str: str = timestamp.strftime("%y%m%d_%H_%M_%S_%f")
-        folder_name: Path = Path("_".join([str(ticket_id), timestamp_str]))
+        folder_name: Path = Path("_".join([ticket, timestamp_str]))
         log_dir: Path = Path(self.base_path, folder_name)
         LOG.info("Creating folder: %s", log_dir)
         if dry_run:
@@ -44,29 +44,29 @@ class ExternalDataAPI(MetaAPI):
     def get_source_path(
         self,
         customer: str,
-        ticket_id: int,
+        ticket: str,
         cust_sample_id: Optional[str] = "",
     ) -> Path:
         """Returns the path to where the sample files are fetched from"""
-        return Path(self.source_path % customer, str(ticket_id), cust_sample_id)
+        return Path(self.source_path % customer, ticket, cust_sample_id)
 
     def get_destination_path(self, customer: str, lims_sample_id: Optional[str] = "") -> Path:
         """Returns the path to where the files are to be transferred"""
         return Path(self.destination_path % customer, lims_sample_id)
 
-    def transfer_sample_files_from_source(self, dry_run: bool, ticket_id: int) -> None:
+    def transfer_sample_files_from_source(self, dry_run: bool, ticket: str) -> None:
         """Transfers all sample files, related to given ticket, from source to destination"""
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
-        log_dir: Path = self.create_log_dir(ticket_id=ticket_id, dry_run=dry_run)
+        cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
+        log_dir: Path = self.create_log_dir(ticket=ticket, dry_run=dry_run)
         error_function: str = ERROR_RSYNC_FUNCTION.format()
         Path(self.destination_path % cust).mkdir(exist_ok=True)
 
         command: str = RSYNC_CONTENTS_COMMAND.format(
-            source_path=self.get_source_path(customer=cust, ticket_id=ticket_id),
+            source_path=self.get_source_path(customer=cust, ticket=ticket),
             destination_path=self.get_destination_path(customer=cust),
         )
         sbatch_parameters: Sbatch = Sbatch(
-            job_name=str(ticket_id) + self.RSYNC_FILE_POSTFIX,
+            job_name=ticket + self.RSYNC_FILE_POSTFIX,
             account=self.account,
             number_tasks=1,
             memory=1,
@@ -80,11 +80,11 @@ class ExternalDataAPI(MetaAPI):
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
-        sbatch_path: Path = Path(log_dir, str(ticket_id) + self.RSYNC_FILE_POSTFIX + ".sh")
+        sbatch_path: Path = Path(log_dir, ticket + self.RSYNC_FILE_POSTFIX + ".sh")
         self.slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
         LOG.info(
             "The folder {src_path} is now being rsynced to hasta".format(
-                src_path=self.get_source_path(customer=cust, ticket_id=ticket_id)
+                src_path=self.get_source_path(customer=cust, ticket=ticket)
             )
         )
 
@@ -112,12 +112,12 @@ class ExternalDataAPI(MetaAPI):
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
                 return fastq_path
 
-    def get_available_samples(self, folder: Path, ticket_id: int) -> List[models.Sample]:
+    def get_available_samples(self, folder: Path, ticket: str) -> List[models.Sample]:
         """Returns the samples from given ticket that are present in the provided folder"""
         available_folders: List[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
         available_samples: List[models.Sample] = [
             sample
-            for sample in self.status_db.get_samples_from_ticket(ticket_id=ticket_id)
+            for sample in self.status_db.get_samples_from_ticket(ticket=ticket)
             if sample.internal_id in available_folders or sample.name in available_folders
         ]
         return available_samples
@@ -167,17 +167,17 @@ class ExternalDataAPI(MetaAPI):
             )
 
     def add_transfer_to_housekeeper(
-        self, ticket_id: int, dry_run: bool = False, force: bool = False
+        self, ticket: str, dry_run: bool = False, force: bool = False
     ) -> None:
         """Creates sample bundles in housekeeper and adds the available files corresponding to the ticket to the
         bundle"""
         failed_paths: List[Path] = []
-        cust: str = self.status_db.get_customer_id_from_ticket(ticket_id=ticket_id)
+        cust: str = self.status_db.get_customer_id_from_ticket(ticket=ticket)
         destination_folder_path: Path = self.get_destination_path(customer=cust)
         for sample_folder in destination_folder_path.iterdir():
             self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
         available_samples: List[models.Sample] = self.get_available_samples(
-            folder=destination_folder_path, ticket_id=ticket_id
+            folder=destination_folder_path, ticket=ticket
         )
         cases_to_start: List[dict] = []
         for sample in available_samples:

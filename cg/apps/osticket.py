@@ -46,7 +46,7 @@ class OsTicket(object):
 
     def open_ticket(
         self, attachment: dict, email: str, message: str, name: str, subject: str
-    ) -> int:
+    ) -> str:
         """Open a new ticket through the REST API."""
         data = dict(
             name=name,
@@ -57,7 +57,7 @@ class OsTicket(object):
         )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
-            return int(res.text)
+            return res.text
         LOG.error("res.text: %s, reason: %s", res.text, res.reason)
         raise TicketCreationError(res)
 

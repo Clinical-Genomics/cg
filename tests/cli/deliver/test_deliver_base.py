@@ -67,7 +67,7 @@ def test_run_deliver_delivered_ticket(cg_context: CGConfig, mocker, caplog, help
     # WHEN running cg deliver ticket
     result = runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket-id", "123456", "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", "123456", "--delivery-type", "fastq"],
         obj=cg_context,
     )
 
@@ -96,7 +96,7 @@ def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers):
     # WHEN running cg deliver ticket
     result = runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket-id", "123456", "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", "123456", "--delivery-type", "fastq"],
         obj=cg_context,
     )
 

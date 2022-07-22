@@ -179,7 +179,7 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="rml_pool_store")
-def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket_number: int):
+def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket: str):
     new_customer = store.add_customer(
         internal_id="cust000",
         name="Test customer",
@@ -218,7 +218,7 @@ def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket_number: i
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
-        name=PoolSubmitter.create_case_name(ticket=ticket_number, pool_name="Test"),
+        name=PoolSubmitter.create_case_name(ticket=ticket, pool_name="Test"),
     )
     store.add_commit(new_case)
     yield store
@@ -231,7 +231,7 @@ def fixture_re_sequenced_sample_store(
     family_name: str,
     flowcell_name,
     sample_id: str,
-    ticket_number: int,
+    ticket: str,
     helpers,
 ) -> Store:
     """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells"""
@@ -249,7 +249,7 @@ def fixture_re_sequenced_sample_store(
         application_type="tgs",
         reads=1200000000,
         store=re_sequenced_sample_store,
-        ticket=ticket_number,
+        original_ticket=ticket,
         sequenced_at=dt.datetime.now(),
     )
 

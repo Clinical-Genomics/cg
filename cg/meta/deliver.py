@@ -33,8 +33,8 @@ class DeliverAPI:
         Each case can have one or multiple samples linked to them.
 
         Each delivery is built around case tags and sample tags. All files tagged will the case_tags will be hard linked
-        to the inbox of a customer under <ticket_nr>/<case_id>. All files tagged with sample_tags will be linked to
-        <ticket_nr>/<case_id>/<sample_id>
+        to the inbox of a customer under <ticket>/<case_id>. All files tagged with sample_tags will be linked to
+        <ticket>/<case_id>/<sample_id>
         """
         self.store = store
         self.hk_api = hk_api
@@ -43,7 +43,7 @@ class DeliverAPI:
         self.all_case_tags: Set[str] = {tag for tags in case_tags for tag in tags}
         self.sample_tags: List[Set[str]] = sample_tags
         self.customer_id: str = ""
-        self.ticket_id: str = ""
+        self.ticket: str = ""
         self.dry_run = False
         self.delivery_type: str = delivery_type
         self.skip_missing_bundle = self.delivery_type in constants.SKIP_MISSING
@@ -71,7 +71,7 @@ class DeliverAPI:
             LOG.warning("Could not find any samples linked to case %s", case_id)
             return
         samples: List[Sample] = [link.sample for link in link_objs]
-        self.set_ticket_id(self.store.get_ticket_from_case(case_id=case_id))
+        self.set_ticket(case_obj.ticket)
         self.set_customer_id(case_obj=case_obj)
 
         sample_ids: Set[str] = {sample.internal_id for sample in samples}
@@ -256,24 +256,24 @@ class DeliverAPI:
         LOG.info("Setting customer_id to %s", customer_id)
         self.customer_id = customer_id
 
-    def _set_ticket_id(self, ticket_nr: int) -> None:
-        LOG.info("Setting ticket_id to %s", ticket_nr)
-        self.ticket_id = str(ticket_nr)
+    def _set_ticket(self, ticket: str) -> None:
+        LOG.info("Setting ticket to %s", ticket)
+        self.ticket = ticket
 
     def set_customer_id(self, case_obj: Family) -> None:
         """Set the customer_id for this upload"""
         self._set_customer_id(case_obj.customer.internal_id)
 
-    def set_ticket_id(self, ticket_id: int) -> None:
-        """Set the ticket_id for this upload"""
-        self._set_ticket_id(ticket_nr=ticket_id)
+    def set_ticket(self, ticket: str) -> None:
+        """Set the ticket for this upload"""
+        self._set_ticket(ticket=ticket)
 
     def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
         """Create a path for delivering files
 
         Note that case name and sample name needs to be the identifiers sent from customer
         """
-        delivery_path = self.project_base_path / self.customer_id / "inbox" / self.ticket_id
+        delivery_path = self.project_base_path / self.customer_id / "inbox" / self.ticket
         if case_name:
             delivery_path = delivery_path / case_name
         if sample_name:

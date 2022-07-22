@@ -136,23 +136,23 @@ def test_get_latest_flow_cell_on_case(
     assert latest_flow_cell_obj.name == latest_flow_cell_on_case.name
 
 
-def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_nr):
+def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
     """Tests if the function in fact returns the correct customer"""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket_nr) == customer_id
+    assert analysis_store.get_customer_id_from_ticket(ticket) == customer_id
 
 
-def test_get_ticket_from_case(case_id: str, analysis_store_single_case, ticket_nr: int):
+def test_get_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
     """Tests if the correct ticket is returned for the given case"""
     # GIVEN a populated store with a case
 
     # WHEN the function is called
-    ticket_from_case: int = analysis_store_single_case.get_ticket_from_case(case_id=case_id)
+    ticket_from_case: str = analysis_store_single_case.get_ticket_from_case(case_id=case_id)
 
     # THEN the ticket should be correct
-    assert ticket_nr == ticket_from_case
+    assert ticket == ticket_from_case
 
 
 def test_get_case_pool(case_id: str, rml_pool_store: Store):

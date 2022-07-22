@@ -104,6 +104,10 @@ class Application(Model):
         "ApplicationVersion", order_by="ApplicationVersion.version", backref="application"
     )
 
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def __str__(self) -> str:
         return self.tag
 
@@ -315,6 +319,7 @@ class Family(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
+    ticket = Column(types.String(32))
 
     @property
     def cohorts(self) -> List[str]:
@@ -488,7 +493,7 @@ class Pool(Model):
     order = Column(types.String(64), nullable=False)
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
-    ticket_number = Column(types.Integer)
+    ticket = Column(types.String(32))
 
 
 class Sample(Model, PriorityMixin):
@@ -520,6 +525,7 @@ class Sample(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, nullable=False)
     organism_id = Column(ForeignKey("organism.id"))
     organism = orm.relationship("Organism", foreign_keys=[organism_id])
+    original_ticket = Column(types.String(32))
     _phenotype_groups = Column(types.Text)
     _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
@@ -532,7 +538,8 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
-    ticket_number = Column(types.Integer)
+
+    # ticket = Column(types.String(32))
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"

@@ -63,6 +63,7 @@ class FastqSubmitter(Submitter):
             name="_".join([sample_obj.name, "MAF"]),
             panels=None,
             priority=Priority.research,
+            ticket=sample_obj.original_ticket,
         )
         case_obj.customer = self.status.customer("cust000")
         relationship: models.FamilySample = self.status.relate_sample(
@@ -71,28 +72,28 @@ class FastqSubmitter(Submitter):
         self.status.add(case_obj, relationship)
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[models.Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer_obj = self.status.customer(customer)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer}")
         new_samples = []
-        case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
+        case_obj = self.status.find_family(customer=customer_obj, name=ticket)
         case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in items:
                 new_sample = self.status.add_sample(
-                    capture_kit=sample["capture_kit"],
+                    name=sample["name"],
+                    sex=sample["sex"] or "unknown",
                     comment=sample["comment"],
                     internal_id=sample.get("internal_id"),
-                    name=sample["name"],
                     order=order,
                     ordered=ordered,
+                    original_ticket=ticket,
                     priority=sample["priority"],
-                    sex=sample["sex"] or "unknown",
-                    ticket=ticket,
                     tumour=sample["tumour"],
+                    capture_kit=sample["capture_kit"],
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample["application"]
@@ -105,9 +106,10 @@ class FastqSubmitter(Submitter):
                     case_obj = self.status.add_case(
                         data_analysis=Pipeline(case["data_analysis"]),
                         data_delivery=DataDelivery(case["data_delivery"]),
-                        name=str(ticket),
+                        name=ticket,
                         panels=None,
                         priority=case["priority"],
+                        ticket=ticket,
                     )
                 if (
                     not new_sample.is_tumour

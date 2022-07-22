@@ -79,7 +79,7 @@ def fixture_fastq_context(
 
 
 @pytest.fixture(name="fastq_case")
-def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_nr) -> dict:
+def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket: str) -> dict:
     """Returns a dict describing a fastq case"""
     return {
         "name": family_name,
@@ -89,12 +89,13 @@ def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_n
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,
+        "ticket": ticket,
         "samples": [
             {
                 "internal_id": sample_id,
                 "sex": "male",
                 "name": cust_sample_id,
-                "ticket_number": ticket_nr,
+                "original_ticket": ticket,
                 "reads": 1000000,
                 "capture_kit": "anything",
             },

@@ -128,7 +128,7 @@ class AddHandler(BaseHandler):
         ordered: dt.datetime = None,
         priority: Priority = None,
         received: dt.datetime = None,
-        ticket: int = None,
+        original_ticket: str = None,
         tumour: bool = False,
         **kwargs,
     ) -> models.Sample:
@@ -145,10 +145,10 @@ class AddHandler(BaseHandler):
             name=name,
             order=order,
             ordered_at=ordered or dt.datetime.now(),
+            original_ticket=original_ticket,
             priority=priority,
             received_at=received,
             sex=sex,
-            ticket_number=ticket,
             **kwargs,
         )
 
@@ -157,6 +157,7 @@ class AddHandler(BaseHandler):
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
         name: str,
+        ticket: str,
         panels: Optional[List[str]] = None,
         cohorts: Optional[List[str]] = None,
         priority: Optional[Priority] = Priority.standard,
@@ -181,6 +182,7 @@ class AddHandler(BaseHandler):
             panels=panels,
             priority=priority,
             synopsis=synopsis,
+            ticket=ticket,
         )
         return new_case
 
@@ -258,7 +260,7 @@ class AddHandler(BaseHandler):
         order: str,
         ordered: dt.datetime,
         application_version: models.ApplicationVersion,
-        ticket: int = None,
+        ticket: str = None,
         comment: str = None,
         received: dt.datetime = None,
         capture_kit: str = None,
@@ -269,7 +271,7 @@ class AddHandler(BaseHandler):
             name=name,
             ordered_at=ordered or dt.datetime.now(),
             order=order,
-            ticket_number=ticket,
+            ticket=ticket,
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,

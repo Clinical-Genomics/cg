@@ -69,7 +69,7 @@ class OrdersAPI:
         submit_handler.validate_order(order=order_in)
 
         # detect manual ticket assignment
-        ticket_number: Optional[int] = TicketHandler.parse_ticket_number(order_in.name)
+        ticket_number: Optional[str] = TicketHandler.parse_ticket_number(order_in.name)
         if not ticket_number:
             ticket_number = self.ticket_handler.create_ticket(
                 order=order_in, user_name=user_name, user_mail=user_mail, project=project
