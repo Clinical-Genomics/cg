@@ -201,9 +201,7 @@ class MipAnalysisAPI(AnalysisAPI):
         full_file_path: Path = Path(self.housekeeper_api.get_root_dir()).joinpath(
             relative_file_path
         )
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, sample_info_raw=full_file_path
-        )
+        return ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=full_file_path)
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
         """Get the latest trending data for a family"""
