@@ -24,7 +24,7 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        f"{Orderform.MIP_DNA}:26",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
+        f"{Orderform.MIP_DNA}:27",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
         f"{Orderform.MICROSALT}:11",  # Microbial WGS
         f"{Orderform.RML}:15",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:10",  # Microbial meta genomes
@@ -195,12 +195,14 @@ class ExcelOrderformParser(OrderformParser):
 
         if data_delivery == "fastq-qc":
             return DataDelivery.FASTQ_QC
+        if data_delivery == "fastq-+-analysis":
+            return DataDelivery.FASTQ_ANALYSIS
+        if data_delivery == "analysis-+-scout":
+            return DataDelivery.ANALYSIS_SCOUT
+        if data_delivery == "fastq-+-analysis-+-scout":
+            return DataDelivery.FASTQ_ANALYSIS_SCOUT
         if data_delivery == "fastq-qc-+-analysis":
             return DataDelivery.FASTQ_QC_ANALYSIS
-        if data_delivery == "fastq-qc-+-analysis-+-cram":
-            return DataDelivery.FASTQ_QC_ANALYSIS_CRAM
-        if data_delivery == "fastq-qc-+-analysis-+-cram-+-scout":
-            return DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT
 
         try:
             return DataDelivery(data_delivery)

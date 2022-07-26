@@ -608,7 +608,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
         str(Pipeline.BALSAMIC_QC),
         str(Pipeline.BALSAMIC_UMI),
     ]
-    assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
+    assert new_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS_SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == Priority.standard.name
 
