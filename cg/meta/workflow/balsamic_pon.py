@@ -56,6 +56,11 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
+    def get_case_config_path(self, case_id: str) -> Path:
+        """Returns the BALSAMIC PON config path"""
+
+        return Path(self.root_dir, case_id, case_id + "_PON.json")
+
     def get_next_pon_version(self, panel_bed: str) -> str:
         """Returns the next PON version to be generated"""
 
