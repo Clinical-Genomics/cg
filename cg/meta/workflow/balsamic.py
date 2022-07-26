@@ -171,7 +171,27 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return "tumor"
         return "normal"
 
-    def get_verified_bed(self, panel_bed: Path, sample_data: dict = None) -> Optional[str]:
+    def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
+        """Returns the verified capture kit path or extracts the derived panel bed"""
+
+        if panel_bed:
+            if Path(f"{panel_bed}").is_file():
+                panel_bed = Path(f"{panel_bed}")
+            else:
+                derived_panel_bed = Path(
+                    self.bed_path,
+                    self.status_db.bed_version(panel_bed).filename,
+                )
+                if not derived_panel_bed.is_file():
+                    raise BalsamicStartError(
+                        f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
+                        f"Please provide absolute path to desired BED file or a valid bed shortname!"
+                    )
+                panel_bed = derived_panel_bed
+
+        return panel_bed
+
+    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
         """ "Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
@@ -184,8 +204,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         - When multiple samples have different parameters
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
-        application_types = {v["application_type"].lower() for k, v in sample_data.items()}
 
+        panel_bed = self.get_derived_bed(panel_bed)
+        application_types = {v["application_type"].lower() for k, v in sample_data.items()}
         target_beds = {v["target_bed"] for k, v in sample_data.items()}
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
@@ -206,37 +227,44 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
             return Path(self.bed_path, target_bed).as_posix()
 
-    def get_verified_pon(self, panel_bed: Optional[str], pon_cnn: Optional[str]) -> Optional[str]:
+    def get_verified_pon(self, panel_bed: str, pon_cnn: str) -> Optional[str]:
         """Returns the validated PON or extracts the latest one available if it is not provided
 
         Raises BalsamicStartError:
-            When there is a missmatch between the PoN and the panel bed file names
+            When there is a missmatch between the PON and the panel bed file names
         """
 
         if not panel_bed:
             latest_pon = None
         elif pon_cnn:
-            latest_pon = Path(pon_cnn)
-            if Path(panel_bed).stem not in latest_pon.stem:
+            latest_pon = pon_cnn
+            if Path(panel_bed).stem not in Path(latest_pon).stem:
                 raise BalsamicStartError(
                     f"The specified PON reference file {latest_pon} does not match the panel bed {panel_bed}"
                 )
         else:
-            latest_pon = self.get_latest_pon_file(Path(panel_bed))
+            latest_pon = self.get_latest_pon_file(panel_bed)
             if latest_pon:
                 LOG.warning(
                     f"The following PON reference file will be used for the analysis: {latest_pon}"
                 )
 
-        return latest_pon.as_posix() if latest_pon else None
+        return latest_pon
 
-    def get_latest_pon_file(self, panel_bed: Path) -> Optional[Path]:
+    def get_latest_pon_file(self, panel_bed: str) -> Optional[str]:
         """Returns the latest PON cnn file associated to a specific capture bed"""
 
-        pon_list = Path(self.bed_pon_path).glob(f"*{panel_bed.stem}_CNVkit_PON_reference_*.cnn")
-        sorted_pon_files = sorted(pon_list, key=lambda x: int(x.stem.split("_v")[-1]), reverse=True)
+        if not panel_bed:
+            raise BalsamicStartError("BALSAMIC PON workflow requires a panel bed to be specified")
 
-        return sorted_pon_files[0] if sorted_pon_files else None
+        pon_list = Path(self.bed_pon_path).glob(
+            f"*{Path(panel_bed).stem}_CNVkit_PON_reference_*.cnn"
+        )
+        sorted_pon_files = sorted(
+            pon_list, key=lambda file: int(file.stem.split("_v")[-1]), reverse=True
+        )
+
+        return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
     def get_verified_tumor_path(sample_data: dict) -> str:
@@ -416,20 +444,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         sample_data = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if len(sample_data) == 0:
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
-        if panel_bed:
-            if Path(f"{panel_bed}").is_file():
-                panel_bed = Path(f"{panel_bed}")
-            else:
-                derived_panel_bed = Path(
-                    self.bed_path,
-                    self.status_db.bed_version(panel_bed).filename,
-                )
-                if not derived_panel_bed.is_file():
-                    raise BalsamicStartError(
-                        f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
-                        f"Please provide absolute path to desired BED file or a valid bed shortname!"
-                    )
-                panel_bed = derived_panel_bed
 
         verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
 
