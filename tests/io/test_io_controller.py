@@ -26,6 +26,21 @@ def test_get_content_from_file(case_qc_sample_info_path: Path):
     assert isinstance(sample_info_object, MipBaseSampleInfo)
 
 
+def test_get_content_from_file_when_json(mip_json_order_form_path: Path):
+    """
+    Tests get_content_from_file when json
+    """
+    # GIVEN a json file
+
+    # WHEN reading the json file
+    raw_mip_order_form_info: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=mip_json_order_form_path
+    )
+
+    # Then assert a dict is returned
+    assert isinstance(raw_mip_order_form_info, dict)
+
+
 def test_get_content_from_stream(yaml_stream: str):
     """
     Tests read_yaml_stream

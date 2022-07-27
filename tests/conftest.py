@@ -16,7 +16,9 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
+from cg.io.controller import ReadFile
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
@@ -296,19 +298,19 @@ def fixture_fixtures_dir() -> Path:
 @pytest.fixture(name="analysis_dir")
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir"""
-    return fixtures_dir / "analysis"
+    return Path(fixtures_dir, "analysis")
 
 
 @pytest.fixture(name="apps_dir")
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir"""
-    return fixtures_dir / "apps"
+    return Path(fixtures_dir, "apps")
 
 
 @pytest.fixture(name="fastq_dir")
 def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir"""
-    return demultiplexed_runs / "fastq"
+    return Path(demultiplexed_runs, "fastq")
 
 
 @pytest.fixture(scope="function", name="project_dir")
@@ -321,15 +323,15 @@ def fixture_project_dir(
 
 
 @pytest.fixture(scope="function")
-def tmp_file(project_dir):
-    """Get a temp file"""
-    return project_dir / "test"
+def tmp_file(project_dir) -> Path:
+    """Return a temp file path"""
+    return Path(project_dir, "test")
 
 
 @pytest.fixture(name="non_existing_file_path")
 def fixture_non_existing_file_path(project_dir: Path) -> Path:
     """Return the path to a non existing file"""
-    return project_dir / "a_file.txt"
+    return Path(project_dir, "a_file.txt")
 
 
 @pytest.fixture(name="content")
@@ -356,7 +358,7 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
 @pytest.fixture(name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with orderforms"""
-    return fixtures_dir / "orderforms"
+    return Path(fixtures_dir, "orderforms")
 
 
 @pytest.fixture(name="case_qc_sample_info_path")
@@ -380,13 +382,13 @@ def fixture_delivery_report_html(apps_dir: Path) -> Path:
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
-    return apps_dir / "mip" / "dna" / "store"
+    return Path(apps_dir, "mip", "dna", "store")
 
 
 @pytest.fixture(name="mip_analysis_dir")
 def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with mip analysis files"""
-    return analysis_dir / "mip"
+    return Path(analysis_dir, "mip")
 
 
 @pytest.fixture(name="balsamic_analysis_dir")
@@ -398,37 +400,37 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
 @pytest.fixture(name="balsamic_wgs_analysis_dir")
 def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    return balsamic_analysis_dir / "tn_wgs"
+    return Path(balsamic_analysis_dir, "tn_wgs")
 
 
 @pytest.fixture(name="mip_dna_analysis_dir")
 def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     """Return the path to the directory with mip dna analysis files"""
-    return mip_analysis_dir / "dna"
+    return Path(mip_analysis_dir, "dna")
 
 
 @pytest.fixture(name="sample1_cram")
 def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for sample 1"""
-    return mip_dna_analysis_dir / "adm1.cram"
+    return Path(mip_dna_analysis_dir, "adm1.cram")
 
 
 @pytest.fixture(name="mip_deliverables_file")
 def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
     """Fixture for general deliverables file in mip"""
-    return mip_dna_store_files / "case_id_deliverables.yaml"
+    return Path(mip_dna_store_files, "case_id_deliverables.yaml")
 
 
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to to a vcf file"""
-    return mip_dna_store_files / "yellowhog_clinical_selected.vcf"
+    return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
 
 
 @pytest.fixture(name="fastq_file")
 def fixture_fastq_file(fastq_dir: Path) -> Path:
     """Return the path to to a fastq file"""
-    return fastq_dir / "dummy_run_R1_001.fastq.gz"
+    return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
 
 
 # Orderform fixtures
@@ -452,10 +454,18 @@ def rml_orderform(orderforms: Path) -> str:
     return Path(orderforms / "1604.15.rml.xlsx").as_posix()
 
 
-@pytest.fixture
-def mip_json_orderform(orderforms: Path) -> dict:
-    """Load an example of json scout order."""
-    return json.load(open(orderforms / "mip-json.json"))
+@pytest.fixture(name="mip_json_order_form_path")
+def fixture_mip_json_path(orderforms: Path) -> Path:
+    """Return a MIP JSON order form path"""
+    return Path(orderforms, "mip-json.json")
+
+
+@pytest.fixture(name="mip_json_orderform")
+def fixture_mip_json_orderform(mip_json_order_form_path: Path) -> dict:
+    """Load an example of json scout order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=mip_json_order_form_path
+    )
 
 
 @pytest.fixture(name="madeline_output")
