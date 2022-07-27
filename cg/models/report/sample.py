@@ -9,6 +9,7 @@ from cg.models.report.validators import (
     validate_boolean,
     validate_rml_sample,
     validate_date,
+    validate_gender,
 )
 
 
@@ -127,6 +128,7 @@ class SampleModel(BaseModel):
     timestamps: TimestampModel
 
     _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)
-    _values = validator(
-        "name", "id", "ticket", "status", "gender", "source", always=True, allow_reuse=True
-    )(validate_empty_field)
+    _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
+    _values = validator("name", "id", "ticket", "status", "source", always=True, allow_reuse=True)(
+        validate_empty_field
+    )

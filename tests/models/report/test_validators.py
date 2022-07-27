@@ -9,6 +9,7 @@ from cg.models.report.validators import (
     validate_list,
     validate_rml_sample,
     validate_supported_pipeline,
+    validate_gender,
 )
 
 
@@ -86,6 +87,22 @@ def test_validate_rml_sample(caplog):
     # THEN check if an exception was raised
     except ValueError:
         assert "The delivery report generation does not support RML samples" in caplog.text
+
+
+def test_validate_gender(caplog):
+    """Tests report gender parsing"""
+
+    # GIVEN an invalid gender category
+    gender = "female"
+    invalid_gender = "not_a_gender"
+
+    # WHEN performing the validation
+    validated_gender = validate_gender(gender)
+    validated_invalid_gender = validate_gender(invalid_gender)
+
+    # THEN check if the gender has been correctly formatted
+    assert validated_gender == "Hona"
+    assert validated_invalid_gender == NA_FIELD
 
 
 def test_validate_supported_pipeline_match_error(caplog):

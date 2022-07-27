@@ -8,6 +8,12 @@ NA_FIELD = "N/A"
 YES_FIELD = "Ja"
 NO_FIELD = "Nej"
 
+REPORT_GENDER = {
+    "unknown": "Okänd",
+    "female": "Hona",
+    "male": "Hanne",
+}
+
 BALSAMIC_ANALYSIS_TYPE = {
     "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
     "tumor_normal_wgs": "Tumör/normal (helgenomsekvensering)",
