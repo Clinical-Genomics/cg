@@ -69,7 +69,7 @@ class CaseSubmitter(Submitter):
             existing_sample: models.Sample = self.status.sample(sample.internal_id)
             data_customer: models.Customer = self.status.customer(customer_id)
 
-            if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
+            if existing_sample.customer not in data_customer.collaborators:
                 raise OrderError(f"Sample not available: {sample.name}")
 
     def _validate_case_names_are_unique(

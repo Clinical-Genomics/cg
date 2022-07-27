@@ -144,14 +144,11 @@ def test_submit_illegal_sample_customer(
 
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
-    sample_store.add_commit(customer_group)
     new_customer = sample_store.add_customer(
         "customer999",
         "customer 999",
         scout_access=True,
         invoice_address="dummy street",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
     sample_store.add_commit(new_customer)
@@ -194,14 +191,13 @@ def test_submit_scout_legal_sample_customer(
     monkeypatch_process_lims(monkeypatch, order_data)
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
-    sample_store.add_commit(customer_group)
+    collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
+    sample_store.add_commit(collaboration)
     sample_customer = sample_store.add_customer(
         "customer1",
         "customer 1",
         scout_access=True,
         invoice_address="dummy street 1",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
     order_customer = sample_store.add_customer(
@@ -209,9 +205,10 @@ def test_submit_scout_legal_sample_customer(
         "customer 2",
         scout_access=True,
         invoice_address="dummy street 2",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
+    sample_customer.collaborations.append(collaboration)
+    order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample = sample_store.samples().first()
