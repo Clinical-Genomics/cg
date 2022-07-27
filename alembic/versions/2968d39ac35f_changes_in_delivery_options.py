@@ -50,27 +50,33 @@ update_map = {
 downgrade_map = {
     "fastq_analysis": "fastq_qc-analysis-cram",
     "fastq_analysis_scout": "fastq_qc-analysis-cram-scout",
+    "": None,
 }
 
 
 class Family(Base):
     __tablename__ = "family"
+    id = Column(types.Integer, primary_key=True)
     data_delivery = Column(types.VARCHAR(64))
+    internal_id = Column(types.String(32), unique=True, nullable=False)
 
 
 def upgrade():
+    op.alter_column("family", "data_delivery", type_=types.VARCHAR(64))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for case in session.query(Family).filter(Family.data_delivery in removed_options):
-        case.data_delivery = update_map[case.data_delivery]
+    for case in session.query(Family):
+        if case.data_delivery in removed_options:
+            case.data_delivery = update_map[case.data_delivery]
+
     session.commit()
-    op.alter_column("family", "data_delivery", type_=types.VARCHAR(64))
 
 
 def downgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    for case in session.query(Family).filter(Family.data_delivery in added_options):
-        case.data_delivery = downgrade_map[case.data_delivery]
+    for case in session.query(Family):
+        if case.data_delivery == "" or case.data_delivery in added_options:
+            case.data_delivery = downgrade_map[case.data_delivery]
     session.commit()
     op.alter_column("family", "data_delivery", type_=old_enum)
