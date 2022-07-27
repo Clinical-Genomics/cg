@@ -3,7 +3,6 @@
 """
 import copy
 import datetime as dt
-import json
 import logging
 import os
 import shutil
@@ -292,7 +291,7 @@ def fixture_os_ticket(ticket_number: int) -> MockOsTicket:
 @pytest.fixture(name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:
     """Return the path to the fixtures dir"""
-    return Path("tests/fixtures")
+    return Path("tests", "fixtures")
 
 
 @pytest.fixture(name="analysis_dir")
@@ -305,6 +304,12 @@ def fixture_analysis_dir(fixtures_dir: Path) -> Path:
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir"""
     return Path(fixtures_dir, "apps")
+
+
+@pytest.fixture(name="cgweb_orders_dir")
+def fixture_cgweb_orders_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the cgweb_orders dir"""
+    return Path(fixtures_dir, "cgweb_orders")
 
 
 @pytest.fixture(name="fastq_dir")
@@ -357,32 +362,38 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
 
 @pytest.fixture(name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
-    """Return the path to the directory with orderforms"""
+    """Return the path to the directory with order forms"""
     return Path(fixtures_dir, "orderforms")
-
-
-@pytest.fixture(name="case_qc_sample_info_path")
-def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
-    """Return path to case_qc_sample_info.yaml"""
-    return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
-
-
-@pytest.fixture(name="case_qc_metrics_deliverables")
-def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics deliverables file with case data"""
-    return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
-
-
-@pytest.fixture(name="delivery_report_html")
-def fixture_delivery_report_html(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics deliverables file with case data"""
-    return Path("tests", "fixtures", "apps", "mip", "dna", "store", "empty_delivery_report.html")
 
 
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
     return Path(apps_dir, "mip", "dna", "store")
+
+
+@pytest.fixture(name="case_qc_sample_info_path")
+def fixture_case_qc_sample_info_path(mip_dna_store_files: Path) -> Path:
+    """Return path to case_qc_sample_info.yaml"""
+    return Path(mip_dna_store_files, "case_qc_sample_info.yaml")
+
+
+@pytest.fixture(name="delivery_report_html")
+def fixture_delivery_report_html(mip_dna_store_files: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path(mip_dna_store_files, "empty_delivery_report.html")
+
+
+@pytest.fixture(name="mip_deliverables_file")
+def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
+    """Fixture for general deliverables file in mip"""
+    return Path(mip_dna_store_files, "case_id_deliverables.yaml")
+
+
+@pytest.fixture(name="case_qc_metrics_deliverables")
+def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
 
 
 @pytest.fixture(name="mip_analysis_dir")
@@ -394,7 +405,7 @@ def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
 @pytest.fixture(name="balsamic_analysis_dir")
 def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files"""
-    return analysis_dir / "balsamic"
+    return Path(analysis_dir, "balsamic")
 
 
 @pytest.fixture(name="balsamic_wgs_analysis_dir")
@@ -415,12 +426,6 @@ def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
     return Path(mip_dna_analysis_dir, "adm1.cram")
 
 
-@pytest.fixture(name="mip_deliverables_file")
-def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
-    """Fixture for general deliverables file in mip"""
-    return Path(mip_dna_store_files, "case_id_deliverables.yaml")
-
-
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to to a vcf file"""
@@ -439,19 +444,19 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 @pytest.fixture
 def microbial_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples"""
-    return Path(orderforms / "1603.11.microbial.xlsx").as_posix()
+    return Path(orderforms, "1603.11.microbial.xlsx").as_posix()
 
 
 @pytest.fixture
 def sarscov2_orderform(orderforms: Path) -> str:
     """Orderform fixture for sarscov2 samples"""
-    return Path(orderforms / "2184.7.sarscov2.xlsx").as_posix()
+    return Path(orderforms, "2184.7.sarscov2.xlsx").as_posix()
 
 
 @pytest.fixture
 def rml_orderform(orderforms: Path) -> str:
     """Orderform fixture for RML samples"""
-    return Path(orderforms / "1604.15.rml.xlsx").as_posix()
+    return Path(orderforms, "1604.15.rml.xlsx").as_posix()
 
 
 @pytest.fixture(name="mip_json_order_form_path")
@@ -462,7 +467,7 @@ def fixture_mip_json_path(orderforms: Path) -> Path:
 
 @pytest.fixture(name="mip_json_orderform")
 def fixture_mip_json_orderform(mip_json_order_form_path: Path) -> dict:
-    """Load an example of json scout order"""
+    """Load an example of MIP JSON Scout order"""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=mip_json_order_form_path
     )
@@ -470,63 +475,80 @@ def fixture_mip_json_orderform(mip_json_order_form_path: Path) -> dict:
 
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
-    """File with madeline output"""
-    _file = apps_dir / "madeline/madeline.xml"
-    return str(_file)
+    """Return str of path for file with Madeline output"""
+    return Path(apps_dir, "madeline", "madeline.xml").as_posix()
 
 
-@pytest.fixture
-def mip_order_to_submit() -> dict:
-    """Load an example scout order."""
-    return json.load(open("tests/fixtures/cgweb_orders/mip.json"))
+@pytest.fixture(name="mip_order_to_submit")
+def fixture_mip_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example scout order for MIP DNA"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip.json")
+    )
 
 
-@pytest.fixture
-def mip_rna_order_to_submit() -> dict:
-    """Load an example rna order."""
-    return json.load(open("tests/fixtures/cgweb_orders/mip_rna.json"))
+@pytest.fixture(name="mip_rna_order_to_submit")
+def fixture_mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example rna order for MIP RNA"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip_rna.json")
+    )
 
 
-@pytest.fixture
-def fastq_order_to_submit() -> dict:
-    """Load an example fastq order."""
-    return json.load(open("tests/fixtures/cgweb_orders/fastq.json"))
+@pytest.fixture(name="fastq_order_to_submit")
+def fixture_fastq_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example FASTQ order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fastq.json")
+    )
 
 
-@pytest.fixture
-def rml_order_to_submit() -> dict:
-    """Load an example rml order."""
-    return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
+@pytest.fixture(name="rml_order_to_submit")
+def fixture_rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example RML order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
+    )
 
 
-@pytest.fixture
-def fluffy_order_to_submit() -> dict:
-    """Load an example fluffy order."""
-    return json.load(open("tests/fixtures/cgweb_orders/rml.json"))
+@pytest.fixture(name="fluffy_order_to_submit")
+def fixture_fluffy_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example Fluffy order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
+    )
 
 
-@pytest.fixture
-def metagenome_order_to_submit() -> dict:
-    """Load an example metagenome order."""
-    return json.load(open("tests/fixtures/cgweb_orders/metagenome.json"))
+@pytest.fixture(name="")
+def fixture_metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example meta genome order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
+    )
 
 
-@pytest.fixture
-def microbial_order_to_submit() -> dict:
-    """Load an example microbial order."""
-    return json.load(open("tests/fixtures/cgweb_orders/microsalt.json"))
+@pytest.fixture(name="microbial_order_to_submit")
+def fixture_microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example microbial order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microsalt.json")
+    )
 
 
-@pytest.fixture
-def sarscov2_order_to_submit() -> dict:
-    """Load an example sarscov2 order."""
-    return json.load(open("tests/fixtures/cgweb_orders/sarscov2.json"))
+@pytest.fixture(name="sarscov2_order_to_submit")
+def fixture_sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example sarscov2 order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "sarscov2.json")
+    )
 
 
-@pytest.fixture
-def balsamic_order_to_submit() -> dict:
-    """Load an example cancer order."""
-    return json.load(open("tests/fixtures/cgweb_orders/balsamic.json"))
+@pytest.fixture(name="balsamic_order_to_submit")
+def fixture_balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example cancer order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic.json")
+    )
 
 
 # Compression fixtures
