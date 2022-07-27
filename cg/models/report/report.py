@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Union
 
 from pydantic import BaseModel, validator, root_validator
-from cg.constants import Pipeline
+from cg.constants import Pipeline, DataDelivery
 from cg.models.report.sample import SampleModel, ApplicationModel
 from cg.models.report.validators import (
     validate_empty_field,
@@ -39,6 +39,7 @@ class DataAnalysisModel(BaseModel):
 
     Attributes:
         customer_pipeline: data analysis requested by the customer; source: StatusDB/family/data_analysis
+        data_delivery: data delivery requested by the customer; source: StatusDB/family/data_delivery
         pipeline: actual pipeline used for analysis; source: statusDB/analysis/pipeline
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
         type: analysis type carried out; source: pipeline workflow
@@ -48,6 +49,7 @@ class DataAnalysisModel(BaseModel):
     """
 
     customer_pipeline: Optional[Pipeline]
+    data_delivery: Optional[DataDelivery]
     pipeline: Optional[Pipeline]
     pipeline_version: Optional[str]
     type: Optional[str]
@@ -58,6 +60,7 @@ class DataAnalysisModel(BaseModel):
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
     _str_values = validator(
         "customer_pipeline",
+        "data_delivery",
         "pipeline",
         "pipeline_version",
         "type",

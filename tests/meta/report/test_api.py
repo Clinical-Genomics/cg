@@ -294,6 +294,7 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
     # GIVEN an expected data analysis output
     expected_case_analysis_data = {
         "customer_pipeline": "mip-dna",
+        "data_delivery": "N/A",
         "pipeline": "mip-dna",
         "pipeline_version": "1.0",
         "type": "wgs",

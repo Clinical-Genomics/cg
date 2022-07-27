@@ -288,6 +288,7 @@ class ReportAPI(MetaAPI):
 
         return DataAnalysisModel(
             customer_pipeline=case.data_analysis,
+            data_delivery=case.data_delivery,
             pipeline=analysis.pipeline,
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case),
