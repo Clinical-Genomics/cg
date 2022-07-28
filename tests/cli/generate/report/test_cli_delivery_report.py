@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 
-from cg.cli.generate.commands import delivery_report
+from cg.cli.generate.report.base import delivery_report, available_delivery_reports
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 

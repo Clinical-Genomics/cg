@@ -92,7 +92,7 @@ def resolve_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> R
 
 def resolve_report_analysis_started(
     case_obj: models.Family, report_api: ReportAPI, analysis_started_at: str
-):
+) -> datetime:
     """Resolves analysis date"""
 
     if not analysis_started_at:
@@ -106,3 +106,4 @@ def resolve_report_analysis_started(
         raise click.Abort
 
     LOG.info("Using analysis started at: %s", analysis_started_at)
+    return analysis_started_at
