@@ -20,7 +20,7 @@ branch_labels = None
 depends_on = None
 
 Base = declarative_base()
-added_options = ("fastq_analysis", "fastq_analysis_scout", "analysis_scout")
+added_options = ("fastq-analysis", "fastq-analysis-scout", "analysis-scout")
 removed_options = ("analysis-bam", "fastq_qc-analysis-cram", "fastq_qc-analysis-cram-scout")
 
 old_options = (
@@ -44,13 +44,12 @@ new_enum = mysql.ENUM(*new_options)
 
 update_map = {
     "analysis-bam": "analysis",
-    "fastq_qc-analysis-cram": "fastq_analysis",
-    "fastq_qc-analysis-cram-scout": "fastq_analysis_scout",
+    "fastq_qc-analysis-cram": "fastq-analysis",
+    "fastq_qc-analysis-cram-scout": "fastq-analysis-scout",
 }
 downgrade_map = {
-    "fastq_analysis": "fastq_qc-analysis-cram",
-    "fastq_analysis_scout": "fastq_qc-analysis-cram-scout",
-    "": None,
+    "fastq-analysis": "fastq_qc-analysis-cram",
+    "fastq-analysis-scout": "fastq_qc-analysis-cram-scout",
 }
 
 
@@ -76,7 +75,9 @@ def downgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for case in session.query(Family):
-        if case.data_delivery == "" or case.data_delivery in added_options:
+        if case.data_delivery == "":
+            case.data_delivery = None
+        if case.data_delivery in added_options:
             case.data_delivery = downgrade_map[case.data_delivery]
     session.commit()
     op.alter_column("family", "data_delivery", type_=old_enum)
