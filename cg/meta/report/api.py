@@ -106,15 +106,14 @@ class ReportAPI(MetaAPI):
         template = env.get_template(template_name)
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self):
+    def get_cases_without_delivery_report(self, pipeline: Pipeline):
         """Returns a list of analyses that need a delivery report"""
 
-        return self.status_db.analyses_to_delivery_report(self.analysis_api.pipeline)[:50]
+        return self.status_db.analyses_to_delivery_report(pipeline)[:50]
 
-    def update_delivery_report_date(self, case_id: str, analysis_date: datetime) -> None:
+    def update_delivery_report_date(self, case_obj: models.Family, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created"""
 
-        case_obj = self.status_db.family(case_id)
         analysis_obj = self.status_db.analysis(case_obj, analysis_date)
         analysis_obj.delivery_report_created_at = datetime.now()
         self.status_db.commit()
