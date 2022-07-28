@@ -74,12 +74,15 @@ class MutantAnalysisAPI(AnalysisAPI):
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]
         for sample_obj in samples:
+            application = sample_obj.application_version.application
+            if self._is_nanopore(application):
+                self.link_nanopore_fastq_for_sample(
+                    case_obj=case_obj, sample_obj=sample_obj, concatenate=True
+                )
+                continue
             if not sample_obj.sequencing_qc:
                 LOG.info("Sample %s read count below threshold, skipping!", sample_obj.internal_id)
                 continue
-            application = sample_obj.application_version.application
-            if self._is_nanopore(application):
-                self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
             else:
                 self.link_fastq_files_for_sample(
                     case_obj=case_obj, sample_obj=sample_obj, concatenate=True
@@ -114,6 +117,7 @@ class MutantAnalysisAPI(AnalysisAPI):
             lab_code=self.lims_api.get_sample_attribute(
                 lims_id=sample_obj.internal_id, key="lab_code"
             ),
+            primer=self.lims_api.get_sample_attribute(lims_id=sample_obj.internal_id, key="primer"),
         )
 
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
@@ -183,3 +187,59 @@ class MutantAnalysisAPI(AnalysisAPI):
             for case_object in self.get_running_cases()
             if Path(self.get_deliverables_file_path(case_id=case_object.internal_id)).exists()
         ]
+
+    def get_metadata_for_nanopore_sample(self, sample_obj: models.Sample) -> List[dict]:
+        return [
+            self.fastq_handler.parse_nanopore_file_data(file_obj.full_path)
+            for file_obj in self.housekeeper_api.files(
+                bundle=sample_obj.internal_id, tags=["fastq"]
+            )
+        ]
+
+    def link_nanopore_fastq_for_sample(
+        self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
+    ) -> None:
+        """
+        Link FASTQ files for a nanopore sample to working directory.
+        If pipeline input requires concatenated fastq, files can also be concatenated
+        """
+        read_paths = []
+        files: List[dict] = self.get_metadata_for_nanopore_sample(sample_obj=sample_obj)
+        sorted_files = sorted(files, key=lambda k: k["path"])
+        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir.mkdir(parents=True, exist_ok=True)
+
+        counter = 0
+        for fastq_data in sorted_files:
+            fastq_path = Path(fastq_data["path"])
+            fastq_name = self.fastq_handler.create_nanopore_fastq_name(
+                flowcell=fastq_data["flowcell"],
+                sample=sample_obj.internal_id,
+                filenr=str(counter),
+                meta=self.get_additional_naming_metadata(sample_obj),
+            )
+            counter += 1
+            destination_path: Path = fastq_dir / fastq_name
+            read_paths.append(destination_path)
+
+            if not destination_path.exists():
+                LOG.info(f"Linking: {fastq_path} -> {destination_path}")
+                destination_path.symlink_to(fastq_path)
+            else:
+                LOG.warning(f"Destination path already exists: {destination_path}")
+
+        if not concatenate:
+            return
+
+        concatenated_fastq_name = self.fastq_handler.create_nanopore_fastq_name(
+            flowcell=fastq_data["flowcell"],
+            sample=sample_obj.internal_id,
+            filenr=str(1),
+            meta=self.get_additional_naming_metadata(sample_obj),
+        )
+        concatenated_path = (
+            f"{fastq_dir}/{self.fastq_handler.get_concatenated_name(concatenated_fastq_name)}"
+        )
+        LOG.info("Concatenation in progress for sample %s.", sample_obj.internal_id)
+        self.fastq_handler.concatenate(read_paths, concatenated_path)
+        self.fastq_handler.remove_files(read_paths)
