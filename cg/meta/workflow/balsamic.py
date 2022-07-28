@@ -258,7 +258,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError("BALSAMIC PON workflow requires a panel bed to be specified")
 
         pon_list = Path(self.bed_pon_path).glob(
-            f"*{Path(panel_bed).stem}_CNVkit_PON_reference_*.cnn"
+            f"*{Path(panel_bed).stem}_CNVkit_PON_reference_v*.cnn"
         )
         sorted_pon_files = sorted(
             pon_list, key=lambda file: int(file.stem.split("_v")[-1]), reverse=True
