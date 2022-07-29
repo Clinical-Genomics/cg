@@ -175,8 +175,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns the verified capture kit path or extracts the derived panel bed"""
 
         if panel_bed:
-            if Path(f"{panel_bed}").is_file():
-                panel_bed = Path(f"{panel_bed}")
+            if Path(panel_bed).is_file():
+                panel_bed = Path(panel_bed)
             else:
                 derived_panel_bed = Path(
                     self.bed_path,
@@ -234,9 +234,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             When there is a missmatch between the PON and the panel bed file names
         """
 
-        if not panel_bed:
-            latest_pon = None
-        elif pon_cnn:
+        if pon_cnn:
             latest_pon = pon_cnn
             if Path(panel_bed).stem not in Path(latest_pon).stem:
                 raise BalsamicStartError(
@@ -245,7 +243,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         else:
             latest_pon = self.get_latest_pon_file(panel_bed)
             if latest_pon:
-                LOG.warning(
+                LOG.info(
                     f"The following PON reference file will be used for the analysis: {latest_pon}"
                 )
 
@@ -446,6 +444,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
         verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
+        verified_pon = (
+            self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed)
+            if verified_panel_bed
+            else None
+        )
 
         return {
             "case_id": case_id,
@@ -455,7 +458,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "normal": self.get_verified_normal_path(sample_data=sample_data),
             "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": verified_panel_bed,
-            "pon_cnn": self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed),
+            "pon_cnn": verified_pon,
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
