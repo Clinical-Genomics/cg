@@ -46,7 +46,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
-        self.bed_pon_path = config.bed_pon_path
+        self.pon_path = config.pon_path
 
     @property
     def root(self) -> str:
@@ -65,6 +65,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if not self._process:
             self._process = Process(self.config.balsamic.binary_path)
         return self._process
+
+    @property
+    def PON_file_suffix(self) -> str:
+        """Panel of normals reference file suffix (<panel-bed>_<PON>_<version>.cnn)"""
+
+        return "CNVkit_PON_reference_v*.cnn"
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
@@ -256,11 +262,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if not panel_bed:
             raise BalsamicStartError("BALSAMIC PON workflow requires a panel bed to be specified")
 
-        pon_list = Path(self.bed_pon_path).glob(
-            f"*{Path(panel_bed).stem}_CNVkit_PON_reference_v*.cnn"
-        )
+        pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
         sorted_pon_files = sorted(
-            pon_list, key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST]), reverse=True
+            pon_list,
+            key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST.value]),
+            reverse=True,
         )
 
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None

@@ -67,7 +67,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
 
         latest_pon_file = self.get_latest_pon_file(panel_bed)
         next_version = (
-            int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST]) + 1
+            int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST.value]) + 1
             if latest_pon_file
             else 1
         )
