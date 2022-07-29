@@ -198,6 +198,7 @@ class CGConfig(BaseModel):
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
     bed_path: str
+    bed_pon_path: str
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings

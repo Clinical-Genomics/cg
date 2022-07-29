@@ -45,7 +45,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
-        self.bed_pon_path = config.bed_path + "/PON/"
+        self.bed_pon_path = config.bed_pon_path
 
     @property
     def root(self) -> str:
