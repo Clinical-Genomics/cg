@@ -8,6 +8,7 @@ from typing import List, Optional, Union, Any
 import yaml
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.indexes import ListIndexes
 from cg.constants.subject import Gender
 from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
@@ -259,7 +260,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             f"*{Path(panel_bed).stem}_CNVkit_PON_reference_v*.cnn"
         )
         sorted_pon_files = sorted(
-            pon_list, key=lambda file: int(file.stem.split("_v")[-1]), reverse=True
+            pon_list, key=lambda file: int(file.stem.split("_v")[ListIndexes.LAST]), reverse=True
         )
 
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
