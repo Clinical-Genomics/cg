@@ -1,21 +1,23 @@
 """Tests for the config part of Crunchy"""
-import json
 from pathlib import Path
 
 from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_date
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cgmodels.crunchy.metadata import CrunchyMetadata
 
 
 def test_get_spring_metadata_real_file(real_spring_metadata_path: Path, crunchy_config_dict: dict):
     """Test to parse the content of a real spring metadata file"""
     # GIVEN the path to a file with spring metadata content
-    with open(real_spring_metadata_path, "r") as infile:
-        content = json.load(infile)
+    content: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=real_spring_metadata_path
+    )
 
     # WHEN parsing the content
     crunchy_metadata: CrunchyMetadata = get_crunchy_metadata(real_spring_metadata_path)
 
-    # THEN assert the content is the same
+    # THEN assert the length is the same
     assert len(content) == len(crunchy_metadata.files)
 
 

@@ -87,6 +87,37 @@ def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
     assert raw_sample_info == written_raw_sample_info
 
 
+def test_write_file_from_content_when_json(mip_json_order_form_path: Path, cg_dir: Path):
+    """
+    Tests write_file_from_content when json
+    """
+    # GIVEN a json file
+
+    # GIVEN a file path to write to
+    json_file: Path = Path(cg_dir, "write_json.json")
+
+    # WHEN reading the json file
+    raw_mip_order_form: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=mip_json_order_form_path
+    )
+
+    # WHEN writing the json file from list
+    WriteFile.write_file_from_content(
+        content=raw_mip_order_form, file_format=FileFormat.JSON, file_path=json_file
+    )
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(json_file)
+
+    # WHEN reading it as a yaml
+    written_raw_sample_info: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=json_file
+    )
+
+    # THEN assert that all data is kept
+    assert raw_mip_order_form == written_raw_sample_info
+
+
 def test_write_yaml_stream_from_content(yaml_stream: str):
     """
     Tests read_yaml_stream

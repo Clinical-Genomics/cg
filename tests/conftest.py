@@ -7,7 +7,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Dict
 
 import pytest
 
@@ -519,9 +519,9 @@ def fixture_fluffy_order_to_submit(cgweb_orders_dir: Path) -> dict:
     )
 
 
-@pytest.fixture(name="")
+@pytest.fixture(name="metagenome_order_to_submit")
 def fixture_metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example meta genome order."""
+    """Load an example meta genome order"""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
     )
@@ -578,9 +578,13 @@ def fixture_compression_object(
     fastq_stub: Path, original_fastq_data: CompressionData
 ) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression"""
-    working_files = CompressionData(fastq_stub)
-    shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
-    shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
+    working_files: CompressionData = CompressionData(fastq_stub)
+    working_file_map: Dict[str, str] = {
+        original_fastq_data.fastq_first.as_posix(): working_files.fastq_first.as_posix(),
+        original_fastq_data.fastq_second.as_posix(): working_files.fastq_second.as_posix(),
+    }
+    for original_file, working_file in working_file_map.items():
+        shutil.copy(original_file, working_file)
     return working_files
 
 
