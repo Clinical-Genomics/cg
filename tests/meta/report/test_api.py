@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
 from tests.meta.report.helper import recursive_assert
 
@@ -196,8 +197,6 @@ def test_get_samples_data(
     # GIVEN a mip analysis mock metadata
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
-    # print(mip_metadata)
-
     # WHEN extracting the samples of a specific case
     samples_data = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)[0]
 
@@ -206,7 +205,7 @@ def test_get_samples_data(
     assert samples_data.id == str(expected_sample_data.sample.internal_id)
     assert samples_data.ticket == str(expected_sample_data.sample.ticket_number)
     assert samples_data.status == str(expected_sample_data.status)
-    assert samples_data.gender == str(expected_lims_data.get("sex"))
+    assert samples_data.gender == REPORT_GENDER.get(str(expected_lims_data.get("sex")))
     assert samples_data.source == str(expected_lims_data.get("source"))
     assert samples_data.tumour == "Nej"
     assert samples_data.application

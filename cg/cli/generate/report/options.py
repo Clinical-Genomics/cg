@@ -6,7 +6,7 @@ from cg.constants import REPORT_SUPPORTED_PIPELINES
 
 ARGUMENT_CASE_ID = click.argument(
     "case_id",
-    required=True,
+    required=False,
     type=str,
 )
 

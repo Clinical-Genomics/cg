@@ -71,6 +71,13 @@ class MockMipDNAReportAPI(MipDNAReportAPI):
             analysis_date,
         )
 
+    def get_delivery_report_from_hk(self, case_id: str) -> str:
+        """docstring for get_delivery_report_from_hk"""
+
+        LOG.info(f"get_delivery_report_from_hk called with the following args: case={case_id}")
+
+        return "/path/to/delivery_report.html"
+
 
 class MockDB(Store):
     """Mock database"""

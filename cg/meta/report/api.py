@@ -72,6 +72,7 @@ class ReportAPI(MetaAPI):
         try:
             self.get_delivery_report_from_hk(case_id=case_id)
         except FileNotFoundError:
+            LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
             file = self.housekeeper_api.add_file(
                 delivery_report_file.name, version, HK_DELIVERY_REPORT_TAG
             )
@@ -90,7 +91,7 @@ class ReportAPI(MetaAPI):
         )
 
         if delivery_report_files.count() == 0:
-            LOG.info(f"No existing delivery report found in housekeeper for {case_id}. Adding one.")
+            LOG.info(f"No existing delivery report found in housekeeper for {case_id}")
             raise FileNotFoundError
 
         return delivery_report_files[0].full_path

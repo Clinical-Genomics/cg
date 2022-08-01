@@ -8,7 +8,7 @@ from typing import TextIO, Optional
 
 import click
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models
+from housekeeper.store import models as hk_models
 
 from cg.cli.generate.report.helpers import (
     resolve_report_case,
@@ -66,7 +66,7 @@ def delivery_report(
         force_report=force_report,
     )
 
-    hk_report_file: Optional[models.File] = report_api.add_delivery_report_to_hk(
+    hk_report_file: Optional[hk_models.File] = report_api.add_delivery_report_to_hk(
         delivery_report_file, case_id, analysis_date
     )
 
