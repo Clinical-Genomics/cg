@@ -4,7 +4,7 @@ import logging
 
 import click
 
-from cg.cli.generate.report.helpers import resolve_report_case, resolve_report_api
+from cg.cli.generate.report.utils import resolve_report_case, resolve_report_api
 from cg.cli.generate.report.options import ARGUMENT_CASE_ID
 from cg.meta.report.report_api import ReportAPI
 

@@ -10,7 +10,7 @@ import click
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
-from cg.cli.generate.report.helpers import (
+from cg.cli.generate.report.utils import (
     resolve_report_case,
     resolve_report_api,
     resolve_report_analysis_started,
