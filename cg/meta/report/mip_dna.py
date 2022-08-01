@@ -16,7 +16,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
 )
 from cg.models.cg_config import CGConfig
-from cg.meta.report.api import ReportAPI
+from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import MipDNASampleMetadataModel

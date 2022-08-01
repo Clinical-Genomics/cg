@@ -25,7 +25,7 @@ from cg.cli.generate.report.options import (
 )
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 from cg.exc import CgError
-from cg.meta.report.api import ReportAPI
+from cg.meta.report.report_api import ReportAPI
 
 LOG = logging.getLogger(__name__)
 

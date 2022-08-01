@@ -19,7 +19,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
 )
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.report.api import ReportAPI
+from cg.meta.report.report_api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
 from cg.models.cg_config import CGConfig
@@ -58,7 +58,10 @@ class BalsamicReportAPI(ReportAPI):
 
     @staticmethod
     def get_panel_metadata(
-        sample, million_read_pairs, sample_metrics, analysis_metadata
+        sample: models.Sample,
+        million_read_pairs: float,
+        sample_metrics: BalsamicTargetedQCMetrics,
+        analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
         """Returns a report metadata for BALSAMIC TGS analysis"""
 

@@ -7,7 +7,7 @@ import click
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
-from cg.meta.report.api import ReportAPI
+from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
