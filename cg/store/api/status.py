@@ -629,7 +629,7 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
-        """Fetch analyses that needs the delivery report to be regenerated."""
+        """Fetches analyses that need a delivery report to be regenerated"""
 
         analyses_query = self.latest_analyses()
 
