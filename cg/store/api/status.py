@@ -633,29 +633,12 @@ class StatusHandler(BaseHandler):
 
         analyses_query = self.latest_analyses()
 
-        analyses_query = (
-            analyses_query.filter(models.Analysis.uploaded_at)
-            .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
-            .join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(
-                and_(
-                    models.Analysis.pipeline == str(pipeline),
-                    models.Family.data_delivery.contains(DataDelivery.SCOUT),
-                    models.Sample.delivered_at.isnot(None),
-                )
-            )
-            .filter(
-                or_(
-                    models.Analysis.delivery_report_created_at.is_(None),
-                    and_(
-                        models.Analysis.delivery_report_created_at.isnot(None),
-                        models.Analysis.delivery_report_created_at > VALID_DATA_IN_PRODUCTION,
-                        models.Analysis.delivery_report_created_at < models.Sample.delivered_at,
-                    ),
-                ),
-            )
-            .order_by(models.Analysis.uploaded_at.desc())
-        )
+        analyses_query = analyses_query.filter(
+            models.Analysis.delivery_report_created_at.is_(None),
+            VALID_DATA_IN_PRODUCTION < models.Analysis.started_at,
+            models.Analysis.pipeline == str(pipeline),
+        ).order_by(models.Analysis.uploaded_at.desc())
+
         return analyses_query
 
     def samples_to_deliver(self) -> Query:

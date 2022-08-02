@@ -31,31 +31,6 @@ def test_missing(analysis_store: Store, helpers):
     assert analysis in analyses
 
 
-def test_outdated(analysis_store, helpers):
-    """Tests that analyses that have a delivery report but is older than the delivery are
-    returned"""
-
-    # GIVEN an analysis that is delivered but has an outdated delivery report
-    pipeline = Pipeline.BALSAMIC
-    timestamp = datetime.now()
-    delivery_timestamp = timestamp - timedelta(days=1)
-    analysis = helpers.add_analysis(
-        analysis_store,
-        started_at=timestamp,
-        uploaded_at=timestamp,
-        delivery_reported_at=delivery_timestamp,
-        pipeline=pipeline,
-        data_delivery=DataDelivery.SCOUT,
-    )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
-    analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
-    # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.analyses_to_delivery_report(pipeline=pipeline).all()
-
-    # THEN this analyse should be returned
-    assert analysis in analyses
-
-
 def test_outdated_analysis(analysis_store, helpers):
     """Tests that analyses that are older then when Hasta became production (2017-09-26) are not included in the cases to generate a delivery report for"""
 

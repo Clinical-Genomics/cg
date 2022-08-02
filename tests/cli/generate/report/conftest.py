@@ -37,6 +37,7 @@ def fixture_mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) 
         store=store,
         case=case,
         pipeline=Pipeline.MIP_DNA,
+        delivery_reported_at=datetime.now(),
         started_at=datetime.now(),
     )
     helpers.add_relationship(
