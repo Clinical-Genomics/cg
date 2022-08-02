@@ -95,8 +95,6 @@ REQUIRED_SAMPLE_METHODS_FIELDS = []
 REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
     "ordered_at",
     "received_at",
-    "delivered_at",
-    "processing_days",
 ]
 
 # Metadata required fields

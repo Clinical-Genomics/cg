@@ -115,7 +115,6 @@
                 <th>Sekvensering</th>
                 <th>Sekvenserad</th>
                 <th>Bioinformatisk analys</th>
-                <th>Svarsdatum</th>
               </tr>
             </thead>
             <tbody>
@@ -129,12 +128,6 @@
                   <td>{{ sample.methods.sequencing }}</td>
                   <td>{{ sample.timestamps.sequenced_at }}</td>
                   <td>{{ case.data_analysis.pipeline }}</td>
-                  <td>
-                    {{ sample.timestamps.delivered_at }}
-                    {% if sample.timestamps.processing_days != 'N/A' %}
-                      ({{ sample.timestamps.processing_days }} dagar)
-                    {% endif %}
-                  </td>
                 </tr>
               {% endfor %}
             </tbody>

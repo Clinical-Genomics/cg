@@ -3,7 +3,7 @@
 from datetime import datetime
 import logging
 from pathlib import Path
-from typing import TextIO, Optional, List, Union
+from typing import TextIO, Optional, List
 
 import housekeeper
 import requests
@@ -297,7 +297,8 @@ class ReportAPI(MetaAPI):
             panels=case.panels,
         )
 
-    def get_sample_timestamp_data(self, sample: models.Sample) -> TimestampModel:
+    @staticmethod
+    def get_sample_timestamp_data(sample: models.Sample) -> TimestampModel:
         """Retrieves the sample processing dates"""
 
         return TimestampModel(
@@ -305,18 +306,7 @@ class ReportAPI(MetaAPI):
             received_at=sample.received_at,
             prepared_at=sample.prepared_at,
             sequenced_at=sample.sequenced_at,
-            delivered_at=sample.delivered_at,
-            processing_days=self.get_processing_days(sample),
         )
-
-    @staticmethod
-    def get_processing_days(sample: models.Sample) -> Union[int, None]:
-        """Calculates the days it takes to deliver a sample"""
-
-        if sample.received_at and sample.delivered_at:
-            return (sample.delivered_at - sample.received_at).days
-
-        return None
 
     def get_sample_metadata(
         self,

@@ -322,8 +322,6 @@ def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timest
         "received_at": str((datetime.now() - timedelta(days=2)).date()),
         "prepared_at": str(timestamp_yesterday.date()),
         "sequenced_at": str(timestamp_yesterday.date()),
-        "delivered_at": str((datetime.now()).date()),
-        "processing_days": "2",
     }
 
     # WHEN extracting the timestamp data associated to a specific sample
@@ -333,32 +331,3 @@ def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timest
 
     # THEN check if the dates are correctly retrieved
     assert sample_timestamp_data == expected_case_samples_data
-
-
-def test_get_processing_days(report_api_mip_dna, sample_store, helpers):
-    """Tests processing dates calculation"""
-
-    # GIVEN a specific sample received 5 days ago
-    sample = helpers.add_sample(sample_store)
-    sample.received_at = datetime.now() - timedelta(days=5)
-    sample.delivered_at = datetime.now()
-
-    # WHEN calling the processing dates calculation method
-    processing_days = report_api_mip_dna.get_processing_days(sample)
-
-    # THEN check if the days to deliver are correctly calculated
-    assert processing_days == 5
-
-
-def test_get_processing_days_none(report_api_mip_dna, sample_store, helpers):
-    """Tests processing dates calculation when a date value is missing"""
-
-    # GIVEN a specific sample without a timestamp value
-    sample = helpers.add_sample(sample_store)
-    sample.received_at = None
-
-    # WHEN calling the processing dates calculation method
-    processing_days = report_api_mip_dna.get_processing_days(sample)
-
-    # THEN check if None is returned
-    assert processing_days is None

@@ -72,29 +72,21 @@ class TimestampModel(BaseModel):
         received_at: arrival date; source: StatusDB/sample/received_at
         prepared_at: library preparation date; source: StatusDB/sample/prepared_at
         sequenced_at: sequencing date; source: StatusDB/sample/sequenced_at
-        delivered_at: delivery date; source: StatusDB/sample/delivered_at
-        processing_days: days between sample arrival and delivery; source: CG workflow
     """
 
     ordered_at: Union[None, datetime, str]
     received_at: Union[None, datetime, str]
     prepared_at: Union[None, datetime, str]
     sequenced_at: Union[None, datetime, str]
-    delivered_at: Union[None, datetime, str]
-    processing_days: Union[None, int, str]
 
     _values = validator(
         "ordered_at",
         "received_at",
         "prepared_at",
         "sequenced_at",
-        "delivered_at",
         always=True,
         allow_reuse=True,
     )(validate_date)
-    _processing_days = validator("processing_days", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
 
 
 class SampleModel(BaseModel):
