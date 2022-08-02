@@ -27,6 +27,7 @@ Cg written in Python 3.6+ and is available on the [Python Package Index][pypi] (
 pip install cg
 ```
 
+
 If you would like to install the latest development version:
 
 ```bash
