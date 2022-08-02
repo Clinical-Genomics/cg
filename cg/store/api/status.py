@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
+from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery, REPORT_SUPPORTED_PIPELINES
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -633,10 +633,11 @@ class StatusHandler(BaseHandler):
 
         analyses_query = self.latest_analyses()
 
-        if pipeline:
-            analyses_query = analyses_query.filter(
-                models.Analysis.pipeline == str(pipeline),
-            )
+        analyses_query = (
+            analyses_query.filter(models.Analysis.pipeline == str(pipeline))
+            if pipeline
+            else analyses_query.filter(models.Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
+        )
 
         analyses_query = analyses_query.filter(
             models.Analysis.delivery_report_created_at.is_(None),

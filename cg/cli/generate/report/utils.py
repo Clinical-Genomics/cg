@@ -37,15 +37,15 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
         pipeline = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
-        cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)
-        if not cases_without_delivery_report:
+        analysis_without_delivery_report = report_api.get_analysis_without_delivery_report(pipeline)
+        if not analysis_without_delivery_report:
             click.echo(
                 click.style("There are no cases available to generate delivery reports", fg="green")
             )
         else:
-            LOG.error("Provide one of the following case IDs:\n")
-            for case_obj in cases_without_delivery_report:
-                click.echo(case_obj)
+            LOG.error("Provide one of the following case IDs:")
+            for analysis_obj in analysis_without_delivery_report:
+                click.echo(f"{analysis_obj} ({ analysis_obj.pipeline})")
 
         raise click.Abort
 

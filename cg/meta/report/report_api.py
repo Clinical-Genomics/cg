@@ -107,7 +107,7 @@ class ReportAPI(MetaAPI):
         template = env.get_template(template_name)
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Pipeline):
+    def get_analysis_without_delivery_report(self, pipeline: Pipeline):
         """Returns a list of analyses that need a delivery report"""
 
         return self.status_db.analyses_to_delivery_report(pipeline)[:50]
