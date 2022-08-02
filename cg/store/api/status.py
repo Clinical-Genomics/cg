@@ -633,10 +633,14 @@ class StatusHandler(BaseHandler):
 
         analyses_query = self.latest_analyses()
 
+        if pipeline:
+            analyses_query = analyses_query.filter(
+                models.Analysis.pipeline == str(pipeline),
+            )
+
         analyses_query = analyses_query.filter(
             models.Analysis.delivery_report_created_at.is_(None),
-            VALID_DATA_IN_PRODUCTION < models.Analysis.started_at,
-            models.Analysis.pipeline == str(pipeline),
+            VALID_DATA_IN_PRODUCTION < models.Analysis.completed_at,
         ).order_by(models.Analysis.uploaded_at.desc())
 
         return analyses_query
