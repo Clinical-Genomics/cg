@@ -24,8 +24,8 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
 
     # Default report API (MIP DNA report API)
     report_api: ReportAPI = (
-        context.obj.meta_apis["report_api"]
-        if context.obj.meta_apis["report_api"]
+        context.obj.meta_apis.get("report_api")
+        if context.obj.meta_apis.get("report_api")
         else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
     )
 
@@ -34,7 +34,9 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
     # Missing or not valid internal case ID
     if not case_id or not case_obj:
         LOG.warning("Invalid case ID. Retrieving cases without a delivery report.")
-        pipeline = report_api.analysis_api.pipeline if context.obj.meta_apis["report_api"] else None
+        pipeline = (
+            report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
+        )
         cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)
         if not cases_without_delivery_report:
             click.echo(
@@ -60,8 +62,8 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
 def resolve_report_api(context: click.Context, case_obj: models.Family) -> ReportAPI:
     """Resolves the report API to be used for the delivery report generation"""
 
-    if context.obj.meta_apis["report_api"]:
-        report_api = context.obj.meta_apis["report_api"]
+    if context.obj.meta_apis.get("report_api"):
+        report_api = context.obj.meta_apis.get("report_api")
     else:
         report_api = resolve_report_api_pipeline(context, case_obj.data_analysis)
 
