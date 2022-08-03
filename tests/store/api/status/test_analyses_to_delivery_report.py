@@ -15,6 +15,7 @@ def test_missing(analysis_store: Store, helpers):
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp,
+        completed_at=timestamp,
         uploaded_at=timestamp,
         pipeline=pipeline,
         data_delivery=DataDelivery.SCOUT,

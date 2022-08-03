@@ -1,7 +1,7 @@
 """Tests delivery report models validators"""
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import NA_FIELD, YES_FIELD
+from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER
 from cg.models.report.validators import (
     validate_empty_field,
     validate_boolean,
@@ -101,7 +101,7 @@ def test_validate_gender(caplog):
     validated_invalid_gender = validate_gender(invalid_gender)
 
     # THEN check if the gender has been correctly formatted
-    assert validated_gender == "Hona"
+    assert validated_gender == REPORT_GENDER.get("female")
     assert validated_invalid_gender == NA_FIELD
 
 

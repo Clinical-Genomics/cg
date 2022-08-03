@@ -22,8 +22,8 @@ def test_delivery_report_invalid_case(mip_dna_context, cli_runner, caplog):
     )
 
     # THEN the command should fail due to an invalid case ID
-    assert "Invalid case ID. Retrieving cases without a delivery report." in caplog.text
-    assert "There are no cases available to generate delivery reports" in result.output
+    assert "Invalid case ID. Retrieving available cases." in caplog.text
+    assert "There are no valid cases for performing delivery report actions" in result.output
     assert result.exit_code == EXIT_FAIL
 
 

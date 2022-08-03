@@ -10,8 +10,8 @@ NO_FIELD = "Nej"
 
 REPORT_GENDER = {
     "unknown": "Okänd",
-    "female": "Hona",
-    "male": "Hanne",
+    "female": "Kvinnlig",
+    "male": "Manlig",
 }
 
 BALSAMIC_ANALYSIS_TYPE = {
