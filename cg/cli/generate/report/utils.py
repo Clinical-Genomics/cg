@@ -33,14 +33,23 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
 
     # Missing or not valid internal case ID
     if not case_id or not case_obj:
-        LOG.warning("Invalid case ID. Retrieving cases without a delivery report.")
+        LOG.warning("Invalid case ID. Retrieving available cases.")
+
         pipeline = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
-        analysis_without_delivery_report = report_api.get_analysis_without_delivery_report(pipeline)
+
+        analysis_without_delivery_report = (
+            report_api.get_analysis_without_delivery_report(pipeline)
+            if not context.obj.meta_apis.get("upload_api")
+            else report_api.get_analysis_without_uploaded_delivery_reports(pipeline)
+        )
+
         if not analysis_without_delivery_report:
             click.echo(
-                click.style("There are no cases available to generate delivery reports", fg="green")
+                click.style(
+                    "There are no valid cases for performing delivery report actions", fg="green"
+                )
             )
         else:
             LOG.error("Provide one of the following case IDs:")

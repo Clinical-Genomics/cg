@@ -91,7 +91,7 @@ class ReportAPI(MetaAPI):
         )
 
         if delivery_report_files.count() == 0:
-            LOG.info(f"No existing delivery report found in housekeeper for {case_id}")
+            LOG.error(f"No existing delivery report found in housekeeper for {case_id}")
             raise FileNotFoundError
 
         return delivery_report_files[0].full_path
@@ -111,6 +111,11 @@ class ReportAPI(MetaAPI):
         """Returns a list of analyses that need a delivery report"""
 
         return self.status_db.analyses_to_delivery_report(pipeline)[:50]
+
+    def get_analysis_without_uploaded_delivery_reports(self, pipeline: Pipeline):
+        """Returns a list of analyses that need a delivery report"""
+
+        return self.status_db.analyses_to_upload_delivery_reports(pipeline)[:50]
 
     def update_delivery_report_date(self, case_obj: models.Family, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created"""

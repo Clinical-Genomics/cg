@@ -646,6 +646,25 @@ class StatusHandler(BaseHandler):
 
         return analyses_query
 
+    def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
+        """Fetches analyses that need a delivery report to be uploaded"""
+
+        analyses_query = self.latest_analyses()
+
+        analyses_query = (
+            analyses_query.filter(models.Analysis.pipeline == str(pipeline))
+            if pipeline
+            else analyses_query.filter(models.Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
+        )
+
+        analyses_query = analyses_query.filter(
+            models.Analysis.delivery_report_created_at.isnot(None),
+            models.Analysis.uploaded_at.is_(None),
+            VALID_DATA_IN_PRODUCTION < models.Analysis.completed_at,
+        ).order_by(models.Analysis.uploaded_at.desc())
+
+        return analyses_query
+
     def samples_to_deliver(self) -> Query:
         """Fetch samples that have been sequenced but not delivered."""
         return self.Sample.query.filter(
