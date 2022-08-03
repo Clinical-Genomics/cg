@@ -120,6 +120,7 @@ class BalsamicReportAPI(ReportAPI):
         sequencing_type = analysis_metadata.config.analysis.sequencing_type
         analysis_type = analysis_metadata.config.analysis.analysis_type
         var_callers = analysis_metadata.config.vcf
+        tools_version = analysis_metadata.config.bioinfo_tools_version
 
         analysis_var_callers = list()
         for var_caller, var_caller_attributes in var_callers.items():
@@ -127,7 +128,9 @@ class BalsamicReportAPI(ReportAPI):
                 sequencing_type in var_caller_attributes.sequencing_type
                 and analysis_type in var_caller_attributes.analysis_type
             ):
-                analysis_var_callers.append(var_caller)
+                version = next((v[0] for k, v in tools_version.items() if k in var_caller), None)
+                tool = f"{var_caller} (v{version})" if version else var_caller
+                analysis_var_callers.append(tool)
 
         return analysis_var_callers
 
