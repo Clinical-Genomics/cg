@@ -3,6 +3,8 @@
 import logging
 
 import click
+
+from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.scout import scout
 from cg.cli.upload.observations import observations
 from cg.cli.upload.genotype import genotypes
@@ -40,5 +42,6 @@ class MipDNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
+            ctx.invoke(upload_delivery_report_to_scout, case_id=case_obj.internal_id, dry_run=False)
 
         self.update_uploaded_at(analysis_obj)
