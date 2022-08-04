@@ -1,6 +1,6 @@
 name: CG CI
 
-on: ["push"]
+on: ["pull_request"]
 
 jobs:
 
@@ -36,3 +36,13 @@ jobs:
       env:
         GITHUB: 1
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+  finish:
+    needs: tests-coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
