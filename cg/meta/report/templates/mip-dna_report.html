@@ -204,22 +204,22 @@
               <p>Varianter finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
               <ul>
                 {% if case.data_analysis.scout_files.snv_vcf != 'N/A' %}
-                  <li><i>Clinical SNV and Indels</i> fil: {{ case.data_analysis.scout_files.snv_vcf }}</li>
+                  <li><strong>Clinical SNV and Indels fil</strong>: <i>{{ case.data_analysis.scout_files.snv_vcf }}</i></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.snv_research_vcf != 'N/A' %}
-                  <li><i>Research SNV and INDELs</i> fil: {{ case.data_analysis.scout_files.snv_research_vcf }}</li>
+                  <li><strong>Research SNV and INDELs fil</strong>: <i>{{ case.data_analysis.scout_files.snv_research_vcf }}</i></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_vcf != 'N/A' %}
-                  <li><i>Clinical structural variants</i> fil: {{ case.data_analysis.scout_files.sv_vcf }}</li>
+                  <li><strong>Clinical structural variants fil</strong>: <i>{{ case.data_analysis.scout_files.sv_vcf }}</i></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_research_vcf != 'N/A' %}
-                  <li><i>Research structural variants</i> fil: {{ case.data_analysis.scout_files.sv_research_vcf }}</li>
+                  <li><strong>Research structural variants fil</strong>: <i>{{ case.data_analysis.scout_files.sv_research_vcf }}</i></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.vcf_str != 'N/A' %}
-                  <li><i>Clinical STR variants</i> fil: {{ case.data_analysis.scout_files.vcf_str }}</li>
+                  <li><strong>Clinical STR variants fil</strong>: <i>{{ case.data_analysis.scout_files.vcf_str }}</i></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.smn_tsv != 'N/A' %}
-                  <li><i>SMN CN</i> fil: {{ case.data_analysis.scout_files.smn_tsv }}</li>
+                  <li><strong>SMN CN fil</strong>: <i>{{ case.data_analysis.scout_files.smn_tsv }}</i></li>
                 {% endif %}
                 </ul>
             </div>
