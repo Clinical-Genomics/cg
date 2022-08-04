@@ -112,7 +112,7 @@ class ReportAPI(MetaAPI):
         )
 
         if not tags or uploaded_file.count() == 0:
-            LOG.warning(
+            LOG.info(
                 f"No files were found for the following Scout key: {scout_tag} (case: {case_id})"
             )
 
