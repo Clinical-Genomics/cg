@@ -203,11 +203,23 @@
             <div class="card-text">
               <p>Varianter finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
               <ul>
-                {% if case.data_analysis.snv_vcf != 'N/A' %}
-                  <li><i>Clinical SNV and Indels</i> fil: {{ case.data_analysis.snv_vcf }}</li>
+                {% if case.data_analysis.scout_files.snv_vcf != 'N/A' %}
+                  <li><i>Clinical SNV and Indels</i> fil: {{ case.data_analysis.scout_files.snv_vcf }}</li>
                 {% endif %}
-                {% if case.data_analysis.sv_vcf != 'N/A' %}
-                  <li><i>Clinical structural variants</i> fil: {{ case.data_analysis.sv_vcf }}</li>
+                {% if case.data_analysis.scout_files.snv_research_vcf != 'N/A' %}
+                  <li><i>Research SNV and INDELs</i> fil: {{ case.data_analysis.scout_files.snv_research_vcf }}</li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.sv_vcf != 'N/A' %}
+                  <li><i>Clinical structural variants</i> fil: {{ case.data_analysis.scout_files.sv_vcf }}</li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.sv_research_vcf != 'N/A' %}
+                  <li><i>Research structural variants</i> fil: {{ case.data_analysis.scout_files.sv_research_vcf }}</li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.vcf_str != 'N/A' %}
+                  <li><i>Clinical STR variants</i> fil: {{ case.data_analysis.scout_files.vcf_str }}</li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.smn_tsv != 'N/A' %}
+                  <li><i>SMN CN</i> fil: {{ case.data_analysis.scout_files.smn_tsv }}</li>
                 {% endif %}
                 </ul>
             </div>

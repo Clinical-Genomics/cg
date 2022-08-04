@@ -18,7 +18,13 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
 from cg.models.report.metadata import SampleMetadataModel
-from cg.models.report.report import ReportModel, CustomerModel, CaseModel, DataAnalysisModel
+from cg.models.report.report import (
+    ReportModel,
+    CustomerModel,
+    CaseModel,
+    DataAnalysisModel,
+    ScoutReportFiles,
+)
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
 from cg.store import models
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -318,8 +324,17 @@ class ReportAPI(MetaAPI):
             genome_build=self.get_genome_build(analysis_metadata),
             variant_callers=self.get_variant_callers(analysis_metadata),
             panels=case.panels,
+            scout_files=self.get_scout_uploaded_files(case),
+        )
+
+    def get_scout_uploaded_files(self, case: models.Family) -> ScoutReportFiles:
+        """Extracts the files that will be uploaded to Scout"""
+
+        return ScoutReportFiles(
             snv_vcf=self.get_scout_uploaded_file_from_hk(case.internal_id, "snv_vcf"),
             sv_vcf=self.get_scout_uploaded_file_from_hk(case.internal_id, "sv_vcf"),
+            vcf_str=self.get_scout_uploaded_file_from_hk(case.internal_id, "vcf_str"),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(case.internal_id, "smn_tsv"),
         )
 
     @staticmethod

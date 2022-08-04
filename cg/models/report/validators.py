@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Union
 
 from cg.models.orders.constants import OrderType
@@ -53,6 +54,12 @@ def validate_list(value: list) -> str:
     return validate_empty_field(
         ", ".join(validate_empty_field(v) for v in value) if value else NA_FIELD
     )
+
+
+def validate_path(file_path: str) -> str:
+    """Returns the name of a specific file"""
+
+    return Path(file_path).name if file_path and Path(file_path).is_file() else NA_FIELD
 
 
 def validate_gender(value: str) -> str:

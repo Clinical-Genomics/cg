@@ -9,6 +9,7 @@ from cg.models.report.validators import (
     validate_supported_pipeline,
     validate_list,
     validate_date,
+    validate_path,
 )
 
 
@@ -33,6 +34,38 @@ class CustomerModel(BaseModel):
     )
 
 
+class ScoutReportFiles(BaseModel):
+    """
+    Model that describes the files uploaded to Scout and delivered to the customer
+
+    Attributes:
+        snv_vcf: SNV VCF file uploaded to Scout; source: HK
+        snv_research_vcf: SNV research VCF file uploaded to Scout; source: HK
+        sv_vcf: SV VCF file uploaded to Scout; source: HK
+        sv_research_vcf: SV research VCF file uploaded to Scout; source: HK
+        vcf_str: Short Tandem Repeat variants file (MIP-DNA specific); source: HK
+        smn_tsv: SMN gene variants file (MIP-DNA specific); source: HK
+    """
+
+    snv_vcf: Optional[str]
+    snv_research_vcf: Optional[str]
+    sv_vcf: Optional[str]
+    sv_research_vcf: Optional[str]
+    vcf_str: Optional[str]
+    smn_tsv: Optional[str]
+
+    _str_values = validator(
+        "snv_vcf",
+        "snv_research_vcf",
+        "sv_vcf",
+        "sv_research_vcf",
+        "vcf_str",
+        "smn_tsv",
+        always=True,
+        allow_reuse=True,
+    )(validate_path)
+
+
 class DataAnalysisModel(BaseModel):
     """
     Model that describes the pipeline attributes used for the data analysis
@@ -44,10 +77,9 @@ class DataAnalysisModel(BaseModel):
         pipeline_version: pipeline version; source: statusDB/analysis/pipeline_version
         type: analysis type carried out; source: pipeline workflow
         genome_build: build version of the genome reference; source: pipeline workflow
-        variant_callers: variant-calling filters
+        variant_callers: variant-calling filters; source: pipeline workflow
         panels: list of case specific panels; source: StatusDB/family/panels
-        snv_vcf: SNV VCF file uploaded to Scout; source: housekeeper
-        sv_vcf: SV VCF file uploaded to Scout; source: housekeeper
+        scout_files: list of file names uploaded to Scout
     """
 
     customer_pipeline: Optional[Pipeline]
@@ -58,8 +90,7 @@ class DataAnalysisModel(BaseModel):
     genome_build: Optional[str]
     variant_callers: Union[None, List[str], str]
     panels: Union[None, List[str], str]
-    snv_vcf: Optional[str]
-    sv_vcf: Optional[str]
+    scout_files: ScoutReportFiles
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
     _str_values = validator(
@@ -69,8 +100,6 @@ class DataAnalysisModel(BaseModel):
         "pipeline_version",
         "type",
         "genome_build",
-        "snv_vcf",
-        "sv_vcf",
         always=True,
         allow_reuse=True,
     )(validate_empty_field)
