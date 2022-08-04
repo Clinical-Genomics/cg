@@ -97,7 +97,7 @@ class ReportAPI(MetaAPI):
         )
 
         if delivery_report_files.count() == 0:
-            LOG.error(f"No existing delivery report found in housekeeper for {case_id}")
+            LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
             raise FileNotFoundError
 
         return delivery_report_files[0].full_path
