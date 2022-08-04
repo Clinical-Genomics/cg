@@ -109,7 +109,7 @@ class TransferLims(object):
         pools = self._pool_functions[status_type]()
 
         for pool_obj in pools:
-            ticket = pool_obj.ticket
+            ticket = pool_obj.tickets
             number_of_samples = self.lims.get_sample_number(projectname=ticket)
             if not self._is_pool_valid(pool_obj, ticket, number_of_samples):
                 continue

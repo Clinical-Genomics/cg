@@ -319,7 +319,7 @@ class Family(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
-    ticket = Column(types.String(32))
+    tickets = Column(types.VARCHAR)
 
     @property
     def cohorts(self) -> List[str]:
@@ -338,6 +338,10 @@ class Family(Model, PriorityMixin):
     @panels.setter
     def panels(self, panel_list: List[str]):
         self._panels = ",".join(panel_list) if panel_list else None
+
+    @property
+    def latest_ticket(self) -> str:
+        return self.tickets.split(sep=",")[-1]
 
     @property
     def latest_analyzed(self) -> Optional[dt.datetime]:

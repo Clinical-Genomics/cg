@@ -71,7 +71,7 @@ class DeliverAPI:
             LOG.warning("Could not find any samples linked to case %s", case_id)
             return
         samples: List[Sample] = [link.sample for link in link_objs]
-        self.set_ticket(case_obj.ticket)
+        self.set_ticket(case_obj.latest_ticket)
         self.set_customer_id(case_obj=case_obj)
 
         sample_ids: Set[str] = {sample.internal_id for sample in samples}
