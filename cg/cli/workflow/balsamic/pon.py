@@ -27,7 +27,6 @@ def balsamic_pon(context: click.Context):
 
 balsamic_pon.add_command(resolve_compression)
 balsamic_pon.add_command(link)
-
 balsamic_pon.add_command(config_case)
 balsamic_pon.add_command(run)
 balsamic_pon.add_command(start)
