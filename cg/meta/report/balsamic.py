@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import List, Union, Optional
 
 from cgmodels.cg.constants import Pipeline
 
@@ -18,6 +18,7 @@ from cg.constants import (
     BALSAMIC_ANALYSIS_TYPE,
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
 )
+from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -183,3 +184,10 @@ class BalsamicReportAPI(ReportAPI):
         """Retrieves the template name to render the delivery report"""
 
         return Pipeline.BALSAMIC + "_report.html"
+
+    def get_scout_file_tags(self, scout_tag: str) -> Optional[list]:
+        """Retrieves BALSAMIC uploaded to scout file tags"""
+
+        tags = BALSAMIC_CASE_TAGS.get(scout_tag)
+
+        return list(tags) if tags else None

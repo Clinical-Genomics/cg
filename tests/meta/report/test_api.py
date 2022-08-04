@@ -300,6 +300,8 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
         "genome_build": "hg19",
         "variant_callers": "N/A",
         "panels": "IEM, EP",
+        "snv_vcf": "path/to/snv_vcf",
+        "sv_vcf": "path/to/sv_vcf",
     }
 
     # WHEN retrieving analysis information

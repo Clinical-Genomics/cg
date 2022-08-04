@@ -96,6 +96,24 @@ class ReportAPI(MetaAPI):
 
         return delivery_report_files[0].full_path
 
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Returns the file path of the uploaded to Scout file given its tag"""
+
+        version = self.housekeeper_api.last_version(case_id)
+        tags = self.get_scout_file_tags(scout_tag)
+        uploaded_file = self.housekeeper_api.get_files(
+            bundle=case_id, tags=tags, version=version.id
+        )
+
+        if not tags or uploaded_file.count() == 0:
+            LOG.warning(
+                f"No files were found for the following Scout key: {scout_tag} (case: {case_id})"
+            )
+
+            return None
+
+        return uploaded_file[0].full_path
+
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template"""
 
@@ -300,6 +318,8 @@ class ReportAPI(MetaAPI):
             genome_build=self.get_genome_build(analysis_metadata),
             variant_callers=self.get_variant_callers(analysis_metadata),
             panels=case.panels,
+            snv_vcf=self.get_scout_uploaded_file_from_hk(case.internal_id, "snv_vcf"),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(case.internal_id, "sv_vcf"),
         )
 
     @staticmethod
@@ -376,3 +396,8 @@ class ReportAPI(MetaAPI):
             required_sample_fields.update({sample.id: required_fields})
 
         return required_sample_fields
+
+    def get_scout_file_tags(self, scout_tag: str) -> Optional[list]:
+        """Retrieves pipeline specific uploaded to scout file tags"""
+
+        raise NotImplementedError

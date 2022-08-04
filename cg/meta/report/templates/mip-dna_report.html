@@ -197,11 +197,21 @@
 
         </div>
 
-        {% if customer.scout_access %}
-          <p class="card-block">
-            Varianter finns uppladdade i Scout:
-            <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a>
-          </p>
+        {% if customer.scout_access and "scout" in case.data_analysis.data_delivery %}
+          <div class="card-block">
+            <h4 class="card-title">Scout</h4>
+            <div class="card-text">
+              <p>Varianter finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+              <ul>
+                {% if case.data_analysis.snv_vcf != 'N/A' %}
+                  <li><i>Clinical SNV and Indels</i> fil: {{ case.data_analysis.snv_vcf }}</li>
+                {% endif %}
+                {% if case.data_analysis.sv_vcf != 'N/A' %}
+                  <li><i>Clinical structural variants</i> fil: {{ case.data_analysis.sv_vcf }}</li>
+                {% endif %}
+                </ul>
+            </div>
+          </div>
         {% endif %}
 
         {% for application in case.applications %}

@@ -46,6 +46,8 @@ class DataAnalysisModel(BaseModel):
         genome_build: build version of the genome reference; source: pipeline workflow
         variant_callers: variant-calling filters
         panels: list of case specific panels; source: StatusDB/family/panels
+        snv_vcf: SNV VCF file uploaded to Scout; source: housekeeper
+        sv_vcf: SV VCF file uploaded to Scout; source: housekeeper
     """
 
     customer_pipeline: Optional[Pipeline]
@@ -56,6 +58,8 @@ class DataAnalysisModel(BaseModel):
     genome_build: Optional[str]
     variant_callers: Union[None, List[str], str]
     panels: Union[None, List[str], str]
+    snv_vcf: Optional[str]
+    sv_vcf: Optional[str]
 
     _values = root_validator(pre=True, allow_reuse=True)(validate_supported_pipeline)
     _str_values = validator(
@@ -65,6 +69,8 @@ class DataAnalysisModel(BaseModel):
         "pipeline_version",
         "type",
         "genome_build",
+        "snv_vcf",
+        "sv_vcf",
         always=True,
         allow_reuse=True,
     )(validate_empty_field)

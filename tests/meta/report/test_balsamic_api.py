@@ -44,15 +44,15 @@ def test_get_variant_callers(report_api_balsamic, case_id):
 
     # GIVEN an expected output for tumor normal panel analysis
     expected_callers = [
-        "manta (1.6.0)",
+        "manta (v1.6.0)",
         "cnvkit",
-        "vardict (2019.06.04=pl526_0)",
+        "vardict (v2019.06.04=pl526_0)",
         "dnascope",
         "tnhaplotyper",
-        "manta_germline (1.6.0)",
+        "manta_germline (v1.6.0)",
         "haplotypecaller",
         "TNscope_umi",
-        "delly (0.8.7)",
+        "delly (v0.8.7)",
     ]
 
     # WHEN retrieving the analysis variant callers
