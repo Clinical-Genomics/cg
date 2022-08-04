@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Union
 
 from cg.constants.constants import FileFormat
-from cg.io.json import read_json, write_json
+from cg.io.json import read_json, write_json, write_json_stream, read_json_stream
 from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream, write_yaml_stream
 
 
@@ -10,8 +10,8 @@ class ReadFile:
     """Reading file using different methods"""
 
     read_file = {
-        FileFormat.YAML: read_yaml,
         FileFormat.JSON: read_json,
+        FileFormat.YAML: read_yaml,
     }
 
     @classmethod
@@ -24,6 +24,7 @@ class ReadStream:
     """Reading stream using different methods"""
 
     read_stream = {
+        FileFormat.JSON: read_json_stream,
         FileFormat.YAML: read_yaml_stream,
     }
 
@@ -53,6 +54,7 @@ class WriteStream:
     """write stream using different methods"""
 
     write_stream = {
+        FileFormat.JSON: write_json_stream,
         FileFormat.YAML: write_yaml_stream,
     }
 

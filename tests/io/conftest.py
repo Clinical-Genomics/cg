@@ -3,6 +3,13 @@ from pathlib import Path
 import pytest
 
 
+@pytest.fixture(name="json_stream")
+def json_stream() -> str:
+    """Return string with json format"""
+    _content = """{"Lorem": {"ipsum": "sit"}}"""
+    return _content
+
+
 @pytest.fixture(name="yaml_stream")
 def yaml_stream() -> str:
     """Return string with yaml format"""

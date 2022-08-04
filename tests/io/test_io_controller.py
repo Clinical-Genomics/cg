@@ -56,6 +56,21 @@ def test_get_content_from_stream(yaml_stream: str):
     assert isinstance(raw_content, list)
 
 
+def test_get_content_from_stream_when_json(json_stream: str):
+    """
+    Tests read_json_stream
+    """
+    # GIVEN a string in json format
+
+    # WHEN reading the json content in string
+    raw_content: dict = ReadStream.get_content_from_stream(
+        file_format=FileFormat.JSON, stream=json_stream
+    )
+
+    # THEN assert that a dict is returned
+    assert isinstance(raw_content, dict)
+
+
 def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
     """
     Tests write_file_from_content
@@ -135,3 +150,22 @@ def test_write_yaml_stream_from_content(yaml_stream: str):
 
     # THEN assert all data is kept abd in yaml format
     assert yaml_stream == yaml_content
+
+
+def test_write_json_stream_from_content(json_stream: str):
+    """
+    Tests read_json_stream
+    """
+    # GIVEN a string in json format
+
+    # WHEN reading the json content in string
+    raw_content: list = ReadStream.get_content_from_stream(
+        file_format=FileFormat.JSON, stream=json_stream
+    )
+    # WHEN writing a jsoon stream
+    json_content = WriteStream.write_stream_from_content(
+        content=raw_content, file_format=FileFormat.JSON
+    )
+
+    # THEN assert all data is kept abd in yaml format
+    assert json_stream == json_content
