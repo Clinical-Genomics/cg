@@ -1,4 +1,6 @@
 """Tests for BALSAMIC analysis"""
+from pathlib import Path
+
 import pytest
 
 from cg.constants.subject import Gender
@@ -23,7 +25,7 @@ def test_get_verified_gender():
     assert retrieved_gender == "female"
 
 
-def test_get_verified_gender_error(caplog):
+def test_get_verified_gender_error():
     """Tests gender extraction from a sample dictionary when two different gender has been provided"""
 
     # GIVEN a sample object with different genders
@@ -35,8 +37,6 @@ def test_get_verified_gender_error(caplog):
     # WHEN extracting the gender
     with pytest.raises(BalsamicStartError):
         BalsamicAnalysisAPI.get_verified_gender(sample_obj)
-        # THEN the gender extraction should fail
-        assert f"Unable to retrieve a valid gender from samples: {sample_obj.keys()}" in caplog.text
 
 
 def test_get_verified_gender_unknown(caplog):
@@ -54,3 +54,20 @@ def test_get_verified_gender_unknown(caplog):
     # THEN gender must match the expected one
     assert retrieved_gender == Gender.FEMALE
     assert f"The provided gender is unknown, setting {Gender.FEMALE} as the default" in caplog.text
+
+
+def test_get_verified_pon():
+    """Tests PON verification"""
+
+    # GIVEN specific panel bed and PON files
+    panel_bed = "/path/gmcksolid_4.1_hg19_design.bed"
+    pon_cnn = "/path/PON/gmcksolid_4.1_hg19_design_CNVkit_PON_reference_v2.cnn"
+    invalid_pon_cnn = "/path/PON/gmssolid_15.2_hg19_design_CNVkit_PON_reference_v2.cnn"
+
+    # WHEN validating the PON
+    validated_pon = BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, pon_cnn)
+
+    # THEN the PON verification should be performed successfully
+    assert pon_cnn == validated_pon
+    with pytest.raises(BalsamicStartError):
+        BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn)
