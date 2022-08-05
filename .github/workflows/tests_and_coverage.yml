@@ -21,7 +21,7 @@ jobs:
 
     - name: CG Dependencies
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip==21.0.1
         pip install .
         pip install -r requirements-dev.txt
 
@@ -36,13 +36,3 @@ jobs:
       env:
         GITHUB: 1
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
-  finish:
-    needs: tests-coverage
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.github_token }}
-        parallel-finished: true
