@@ -2,10 +2,10 @@
 
 import logging
 
-import yaml
-
 from cg.apps.scout.scout_export import Variant
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadStream
 
 
 def test_get_causative_variants_no_variants(scout_api: ScoutAPI, case_id: str):
@@ -28,6 +28,11 @@ def test_get_causative_variants_one_variant(
     # GIVEN a scout api and a process that returns some relevant input
     assert scout_api.process.stdout == causative_output
 
+    # WHEN reading the yaml formatted string
+    raw_info: dict = ReadStream.get_content_from_stream(
+        file_format=FileFormat.YAML, stream=causative_output
+    )
+
     # WHEN querying for causative variants
     result = scout_api.get_causative_variants(case_id=case_id)
 
@@ -37,7 +42,6 @@ def test_get_causative_variants_one_variant(
     # THEN assert that there was one variant in the list
     assert len(result) == 1
     first_variant: Variant = result[0]
-    raw_info = yaml.safe_load(causative_output)
 
     # THEN assert that the variant has a variant_id
     assert first_variant.document_id == raw_info[0]["_id"]
