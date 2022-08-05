@@ -89,7 +89,7 @@ def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket: 
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,
-        "ticket": ticket,
+        "tickets": ticket,
         "samples": [
             {
                 "internal_id": sample_id,

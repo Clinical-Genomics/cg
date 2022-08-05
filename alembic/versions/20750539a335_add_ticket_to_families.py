@@ -1,7 +1,7 @@
 """Adds ticket to Families
 
 Revision ID: 20750539a335
-Revises: ddc94088be4d
+Revises: 9c9ca9407227
 Create Date: 2022-07-22 08:43:36.271777
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 
 revision = "20750539a335"
-down_revision = "ddc94088be4d"
+down_revision = "9c9ca9407227"
 branch_labels = None
 depends_on = None
 
@@ -46,10 +46,10 @@ class Sample(Base):
 
 
 def upgrade():
-    # op.alter_column(
-    #     "sample", "ticket_number", new_column_name="original_ticket", type_=mysql.VARCHAR(32)
-    # )
-    # op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR(128), nullable=True))
+    op.alter_column(
+        "sample", "ticket_number", new_column_name="original_ticket", type_=mysql.VARCHAR(32)
+    )
+    op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR(128), nullable=True))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for family in session.query(Family):
