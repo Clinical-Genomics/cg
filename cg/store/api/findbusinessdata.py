@@ -186,20 +186,24 @@ class FindBusinessDataHandler(BaseHandler):
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""
         return (
-            self.Sample.query.filter(models.Sample.original_ticket == ticket)
+            self.Family.query.filter(models.Family.tickets.contains(ticket))
             .first()
             .customer.internal_id
         )
 
     def get_samples_from_ticket(self, ticket: str) -> List[models.Sample]:
-        return self.Sample.query.filter(models.Sample.original_ticket == ticket).all()
+        return (
+            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.tickets.contains(ticket))
+            .all()
+        )
 
     def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
         flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
         if flowcell:
             return flowcell.samples
 
-    def get_ticket_from_case(self, case_id: str) -> str:
+    def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
         return self.family(case_id).latest_ticket
 
@@ -281,21 +285,21 @@ class FindBusinessDataHandler(BaseHandler):
             .first()
         )
 
-    def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
-        """Find a link between a family and a sample."""
-
-        query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-
-        if case_id:
-            query = query.filter(models.Family.internal_id == case_id)
-
-        if sample_id:
-            query = query.filter(models.Sample.internal_id == sample_id)
-
-        if ticket:
-            query = query.filter(models.Sample.original_ticket == ticket)
-
-        return query
+    # def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
+    #     """Find a link between a family and a sample."""
+    #
+    #     query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
+    #
+    #     if case_id:
+    #         query = query.filter(models.Family.internal_id == case_id)
+    #
+    #     if sample_id:
+    #         query = query.filter(models.Sample.internal_id == sample_id)
+    #
+    #     if ticket:
+    #         query = query.filter(models.Sample.original_ticket == ticket)
+    #
+    #     return query
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""

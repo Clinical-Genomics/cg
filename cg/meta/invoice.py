@@ -63,7 +63,7 @@ class InvoiceAPI:
         for raw_record in self.raw_records:
             if self.record_type == "Pool":
                 pooled_samples += genologics_lims.samples_in_pools(
-                    raw_record.name, raw_record.original_ticket
+                    raw_record.name, raw_record.ticket
                 )
             record = self.prepare_record(
                 costcenter=costcenter.lower(), discount=self.invoice_obj.discount, record=raw_record
@@ -144,7 +144,7 @@ class InvoiceAPI:
         )
 
         order = record.order
-        ticket = record.original_ticket
+        ticket = record.ticket if self.record_type == "Pool" else record.original_ticket
         lims_id = None if self.record_type == "Pool" else record.internal_id
         priority = "research" if self.record_type == "Pool" else record.priority_human
 

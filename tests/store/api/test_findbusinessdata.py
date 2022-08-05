@@ -144,12 +144,12 @@ def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
     assert analysis_store.get_customer_id_from_ticket(ticket) == customer_id
 
 
-def test_get_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
+def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
     """Tests if the correct ticket is returned for the given case"""
     # GIVEN a populated store with a case
 
     # WHEN the function is called
-    ticket_from_case: str = analysis_store_single_case.get_ticket_from_case(case_id=case_id)
+    ticket_from_case: str = analysis_store_single_case.get_latest_ticket_from_case(case_id=case_id)
 
     # THEN the ticket should be correct
     assert ticket == ticket_from_case

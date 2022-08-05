@@ -192,8 +192,8 @@ def test_slurm_rsync_single_case(
         "rsync_destination_path": Path("/path/to/destination"),
     }
 
-    mocker.patch.object(Store, "get_ticket_from_case")
-    Store.get_ticket_from_case.return_value = ticket
+    mocker.patch.object(Store, "get_latest_ticket_from_case")
+    Store.get_latest_ticket_from_case.return_value = ticket
 
     # WHEN the destination path is created
     sbatch_number: int = rsync_api.slurm_rsync_single_case(

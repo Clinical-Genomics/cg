@@ -182,7 +182,7 @@ class RsyncAPI(MetaAPI):
     ) -> int:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type"""
 
-        ticket: str = self.status_db.get_ticket_from_case(case_id=case_id)
+        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket
         )
