@@ -3,15 +3,16 @@
 import json
 import logging
 from pathlib import Path
-from typing import List, Optional, Union, Any
+from typing import List, Optional, Union
 
-import yaml
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.constants.subject import Gender
+from cg.constants.constants import FileFormat
 from cg.constants.tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
+from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -333,7 +334,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return None
         return normal_paths[0]
 
-    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Any:
+    def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
 
         version = self.housekeeper_api.last_version(bundle=case_id)
@@ -345,11 +346,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise FileNotFoundError(
                 f"No file associated to {tags} was found in housekeeper for {case_id}"
             )
-
-        with open(Path(raw_file.full_path), "r") as stream:
-            data = yaml.safe_load(stream)
-
-        return data
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=Path(raw_file.full_path)
+        )
 
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Get the latest metadata of a specific BALSAMIC case"""
