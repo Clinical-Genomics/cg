@@ -1,16 +1,24 @@
-import yaml
+from pathlib import Path
+from typing import Tuple
 
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 
 
-def get_balsamic_raw_data():
+def get_balsamic_raw_data() -> Tuple[dict, dict]:
     """Extracts mock BALSAMIC analysis data"""
 
-    config: dict = yaml.safe_load(open("tests/fixtures/apps/balsamic/case/config.json"))
-    metrics: dict = yaml.safe_load(
-        open("tests/fixtures/apps/balsamic/case/metrics_deliverables.yaml")
+    config: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML,
+        file_path=Path("tests", "fixtures", "apps", "balsamic", "case", "config.json"),
     )
-
+    metrics: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML,
+        file_path=Path(
+            "tests", "fixtures", "apps", "balsamic", "case", "metrics_deliverables.yaml"
+        ),
+    )
     return config, metrics
 
 
