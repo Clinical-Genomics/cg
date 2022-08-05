@@ -1,5 +1,4 @@
 import http
-import json
 import logging
 import tempfile
 from functools import wraps
@@ -24,6 +23,8 @@ from werkzeug.utils import secure_filename
 
 from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from ..apps.orderform.json_orderform_parser import JsonOrderformParser
+from ..constants.constants import FileFormat
+from ..io.controller import WriteStream, ReadStream
 from ..models.orders.orderform_schema import Orderform
 from .ext import db, lims, osticket
 
@@ -86,7 +87,12 @@ def submit_order(order_type):
     error_message: str
     try:
         request_json = request.get_json()
-        LOG.info("processing order: %s", json.dumps(request_json))
+        LOG.info(
+            "processing order: %s",
+            WriteStream.write_stream_from_content(
+                content=request_json, file_format=FileFormat.JSON
+            ),
+        )
         project: OrderType = OrderType(order_type)
         order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
 
@@ -394,7 +400,9 @@ def orderform():
             order_parser = ExcelOrderformParser()
             order_parser.parse_orderform(excel_path=saved_path)
         else:
-            json_data = json.load(input_file.stream, strict=False)
+            json_data = ReadStream.get_content_from_stream(
+                file_format=FileFormat.JSON, stream=input_file.stream
+            )
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
