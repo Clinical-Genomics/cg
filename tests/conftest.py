@@ -99,7 +99,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
-        "ticket": ticket,
+        "tickets": ticket,
         "samples": [
             {
                 "name": "proband",
@@ -122,7 +122,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
-        "ticket": ticket,
+        "tickets": ticket,
         "panels": ["IEM", "EP"],
         "samples": [
             {

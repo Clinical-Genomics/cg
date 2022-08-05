@@ -543,8 +543,6 @@ class Sample(Model, PriorityMixin):
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
-    # ticket = Column(types.String(32))
-
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 

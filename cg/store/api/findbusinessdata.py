@@ -181,7 +181,7 @@ class FindBusinessDataHandler(BaseHandler):
         return cases
 
     def get_cases_from_ticket(self, ticket: str) -> Query:
-        return self.Family.query.filter(ticket in models.Family.tickets)
+        return self.Family.query.filter(models.Family.tickets.contains(ticket))
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""

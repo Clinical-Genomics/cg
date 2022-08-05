@@ -47,7 +47,6 @@ def test_add_microbial_sample(base_store: Store, helpers):
     internal_id = "lims-id"
     reference_genome = "ref_gen"
     priority = "research"
-    ticket = "123456"
     application_version = base_store.ApplicationVersion.query.first()
     base_store.add_organism(organism_name, organism_name, reference_genome)
     organism = base_store.Organism.query.first()

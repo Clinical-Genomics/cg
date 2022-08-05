@@ -46,16 +46,16 @@ class Sample(Base):
 
 
 def upgrade():
-    op.alter_column(
-        "sample", "ticket_number", new_column_name="original_ticket", type_=mysql.VARCHAR(32)
-    )
-    op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR, nullable=True))
+    # op.alter_column(
+    #     "sample", "ticket_number", new_column_name="original_ticket", type_=mysql.VARCHAR(32)
+    # )
+    # op.add_column("family", sa.Column("tickets", type_=mysql.VARCHAR(128), nullable=True))
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
     for family in session.query(Family):
         if len(family.links) == 0:
             continue
-        family.tickets = family.links[0].original_ticket
+        family.tickets = family.links[0].sample.original_ticket
     session.commit()
 
 

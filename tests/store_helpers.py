@@ -375,7 +375,7 @@ class StoreHelpers:
             data_delivery=case_info.get("data_delivery", str(DataDelivery.SCOUT)),
             created_at=created_at,
             action=case_info.get("action"),
-            ticket=case_info["ticket"],
+            tickets=case_info["tickets"],
         )
 
         case_obj = StoreHelpers.add_case(
