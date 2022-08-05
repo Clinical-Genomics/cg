@@ -168,6 +168,7 @@ def fixture_base_config_dict() -> dict:
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
         "bed_path": "path/to/bed",
+        "pon_path": "path/to/pon",
         "delivery_path": "path/to/delivery",
         "housekeeper": {
             "database": "sqlite:///",
@@ -1180,6 +1181,7 @@ def fixture_context_config(
         "database": fixture_cg_uri,
         "madeline_exe": "echo",
         "bed_path": str(cg_dir),
+        "pon_path": str(cg_dir),
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "email_base_settings": {
