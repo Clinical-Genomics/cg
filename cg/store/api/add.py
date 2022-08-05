@@ -182,7 +182,7 @@ class AddHandler(BaseHandler):
             panels=panels,
             priority=priority,
             synopsis=synopsis,
-            ticket=ticket,
+            tickets=ticket,
         )
         return new_case
 
