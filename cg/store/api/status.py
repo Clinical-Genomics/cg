@@ -556,7 +556,9 @@ class StatusHandler(BaseHandler):
         """Fetch analyses that haven't been uploaded."""
         records = self.Analysis.query.join(models.Analysis.family)
         records = records.filter(
-            models.Analysis.completed_at.isnot(None), models.Analysis.uploaded_at.is_(None)
+            models.Analysis.uploaded_at.is_(None),
+            models.Analysis.completed_at.isnot(None),
+            models.Analysis.delivery_report_created_at.isnot(None),
         )
 
         if pipeline:
