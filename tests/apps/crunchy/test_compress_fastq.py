@@ -98,6 +98,7 @@ def test_fastq_to_spring_sbatch(
     log_path: Path = get_log_dir(spring_path)
     run_name: str = compression_object.run_name
     sbatch_path: Path = get_fastq_to_spring_sbatch_path(log_dir=log_path, run_name=run_name)
+
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
     # GIVEN that the pending path does not exist
