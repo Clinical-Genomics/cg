@@ -18,7 +18,7 @@ def test_delivery_report_to_scout_no_params(upload_context, cli_runner):
     )
 
     # THEN the command should fail due to a missing case ID
-    assert "There are no valid cases for performing delivery report actions" in result.output
+    assert "There are no valid cases to perform delivery report actions" in result.output
     assert result.exit_code == EXIT_FAIL
 
 

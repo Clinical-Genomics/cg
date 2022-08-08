@@ -48,7 +48,7 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
         if not cases_without_delivery_report:
             click.echo(
                 click.style(
-                    "There are no valid cases for performing delivery report actions", fg="green"
+                    "There are no valid cases to perform delivery report actions", fg="green"
                 )
             )
         else:
