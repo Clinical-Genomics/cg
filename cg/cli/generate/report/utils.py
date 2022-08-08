@@ -39,13 +39,13 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
 
-        analysis_without_delivery_report = (
-            report_api.get_analysis_without_delivery_report(pipeline)
+        cases_without_delivery_report = (
+            report_api.get_cases_without_delivery_report(pipeline)
             if not context.obj.meta_apis.get("upload_api")
-            else report_api.get_analysis_without_uploaded_delivery_reports(pipeline)
+            else report_api.get_cases_without_uploaded_delivery_report(pipeline)
         )
 
-        if not analysis_without_delivery_report:
+        if not cases_without_delivery_report:
             click.echo(
                 click.style(
                     "There are no valid cases for performing delivery report actions", fg="green"
@@ -53,8 +53,8 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
             )
         else:
             LOG.error("Provide one of the following case IDs:")
-            for analysis_obj in analysis_without_delivery_report:
-                click.echo(f"{analysis_obj} ({ analysis_obj.pipeline})")
+            for case_obj in cases_without_delivery_report:
+                click.echo(f"{case_obj.internal_id} ({ case_obj.data_analysis})")
 
         raise click.Abort
 

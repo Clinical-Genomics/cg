@@ -133,15 +133,34 @@ class ReportAPI(MetaAPI):
         template = env.get_template(template_name)
         return template.render(**report_data)
 
-    def get_analysis_without_delivery_report(self, pipeline: Pipeline):
-        """Returns a list of analyses that need a delivery report"""
+    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> List[models.Family]:
+        """Returns a list of cases that has been stored and need a delivery report"""
 
-        return self.status_db.analyses_to_delivery_report(pipeline)[:50]
+        stored_cases = []
+        analyses = self.status_db.analyses_to_delivery_report(pipeline)[:50]
 
-    def get_analysis_without_uploaded_delivery_reports(self, pipeline: Pipeline):
-        """Returns a list of analyses that need a delivery report"""
+        for analysis_obj in analyses:
+            case_obj = analysis_obj.family
 
-        return self.status_db.analyses_to_upload_delivery_reports(pipeline)[:50]
+            last_version = self.housekeeper_api.last_version(case_obj.internal_id)
+            if self.housekeeper_api.check_for_files(
+                bundle=case_obj.internal_id, version=last_version.id
+            ):
+                stored_cases.append(case_obj)
+            else:
+                LOG.warning(
+                    f"Case {case_obj.internal_id} must be stored before creating a delivery report"
+                )
+
+        return stored_cases
+
+    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> List[models.Family]:
+        """Returns a list of cases that need a delivery report to be uploaded"""
+
+        analyses = self.status_db.analyses_to_upload_delivery_reports(pipeline)[:50]
+        cases = [analysis_obj.family for analysis_obj in analyses]
+
+        return cases
 
     def update_delivery_report_date(self, case_obj: models.Family, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created"""

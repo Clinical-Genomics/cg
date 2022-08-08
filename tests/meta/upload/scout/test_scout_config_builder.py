@@ -189,11 +189,8 @@ def test_include_balsamic_delivery_report(balsamic_config_builder: BalsamicConfi
     # WHEN including the case level files
     balsamic_config_builder.build_load_config()
 
-    # THEN assert that the coverage_qc_report exists
-    assert balsamic_config_builder.load_config.coverage_qc_report
-
-    # THEN assert that the delivery_report is None
-    assert balsamic_config_builder.load_config.delivery_report is None
+    # THEN assert that the delivery_report exists
+    assert balsamic_config_builder.load_config.delivery_report
 
 
 def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):

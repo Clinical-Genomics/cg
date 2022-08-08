@@ -94,8 +94,8 @@ def available_delivery_reports(
     report_api: ReportAPI = resolve_report_api_pipeline(context, pipeline)
     context.obj.meta_apis["report_api"] = report_api
 
-    analysis_without_delivery_report = report_api.get_analysis_without_delivery_report(pipeline)
-    if not analysis_without_delivery_report:
+    cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)
+    if not cases_without_delivery_report:
         click.echo(
             click.style(
                 f"There are no cases available to generate delivery reports ({datetime.now()})",
@@ -103,8 +103,8 @@ def available_delivery_reports(
             )
         )
     else:
-        for analysis_obj in analysis_without_delivery_report:
-            case_id = analysis_obj.family.internal_id
+        for case_obj in cases_without_delivery_report:
+            case_id = case_obj.internal_id
             LOG.info("Generating delivery report for case: %s", case_id)
             try:
                 context.invoke(
