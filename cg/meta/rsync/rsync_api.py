@@ -229,9 +229,7 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self.sbatch_rsync_commands(
-            commands=commands, job_prefix=str(ticket), dry_run=dry_run
-        )
+        return self.sbatch_rsync_commands(commands=commands, job_prefix=ticket, dry_run=dry_run)
 
     def sbatch_rsync_commands(
         self,

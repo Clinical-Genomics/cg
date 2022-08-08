@@ -8,6 +8,7 @@ Create Date: 2022-07-22 08:43:36.271777
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
+import datetime as dt
 
 
 # revision identifiers, used by Alembic.
@@ -43,6 +44,12 @@ class Sample(Base):
     __tablename__ = "sample"
     id = sa.Column(sa.types.Integer, primary_key=True)
     original_ticket = sa.Column(sa.types.String(32))
+    created_at = sa.Column(sa.types.DateTime, default=dt.datetime.now)
+
+
+class Pool(Base):
+    __tablename__ = "pool"
+    id = sa.Column(sa.types.Integer, primary_key=True)
 
 
 def upgrade():
@@ -55,8 +62,12 @@ def upgrade():
     for family in session.query(Family):
         if len(family.links) == 0:
             continue
-        family.tickets = family.links[0].sample.original_ticket
+        family.tickets = sorted(
+            family.links, key=lambda fam_samp: fam_samp.sample.created_at, reverse=True
+        )[0].sample.original_ticket
     session.commit()
+
+    op.alter_column("pool", "ticket_number", new_column_name="ticket", type_=mysql.VARCHAR(32))
 
 
 def downgrade():
@@ -64,3 +75,5 @@ def downgrade():
         "sample", "original_ticket", new_column_name="ticket_number", type_=mysql.INTEGER
     )
     op.drop_column("family", "tickets")
+
+    op.alter_column("pool", "ticket", new_column_name="ticket_number", type_=mysql.INTEGER)
