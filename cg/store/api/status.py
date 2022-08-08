@@ -671,6 +671,7 @@ class StatusHandler(BaseHandler):
             models.Analysis.delivery_report_created_at.isnot(None),
             models.Analysis.uploaded_at.is_(None),
             VALID_DATA_IN_PRODUCTION < models.Analysis.completed_at,
+            models.Family.data_delivery.contains(DataDelivery.SCOUT),
         ).order_by(models.Analysis.uploaded_at.desc())
 
         return analyses_query

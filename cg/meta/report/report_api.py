@@ -141,7 +141,6 @@ class ReportAPI(MetaAPI):
 
         for analysis_obj in analyses:
             case_obj = analysis_obj.family
-
             last_version = self.housekeeper_api.last_version(case_obj.internal_id)
             if self.housekeeper_api.check_for_files(
                 bundle=case_obj.internal_id, version=last_version.id
