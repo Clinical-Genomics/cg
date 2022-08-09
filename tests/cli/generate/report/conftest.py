@@ -1,7 +1,10 @@
 from datetime import datetime
 
+import click
 import pytest
 from cgmodels.cg.constants import Pipeline
+
+from cg.cli.generate.report.base import delivery_report
 from cg.models.cg_config import CGConfig
 from tests.mocks.report import MockMipDNAReportAPI, MockMipDNAAnalysisAPI
 
@@ -48,3 +51,10 @@ def fixture_mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) 
     )
 
     return cg_context
+
+
+@pytest.fixture(name="click_context")
+def fixture_click_context(mip_dna_context) -> click.Context:
+    """Click delivery report context fixture"""
+
+    return click.Context(delivery_report, obj=mip_dna_context)

@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from typing import Optional
 
 import click
 from cgmodels.cg.constants import Pipeline
@@ -102,7 +103,7 @@ def resolve_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> R
 
 
 def resolve_report_analysis_started(
-    case_obj: models.Family, report_api: ReportAPI, analysis_started_at: str
+    case_obj: models.Family, report_api: ReportAPI, analysis_started_at: Optional[str]
 ) -> datetime:
     """Resolves analysis date"""
 
