@@ -1,12 +1,25 @@
+# Delivery report constants
+
 from cgmodels.cg.constants import Pipeline
 
-# Validation constants
-REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+from cg.constants import DataDelivery
+
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
-PRECISION = 2
+
+REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+REPORT_SUPPORTED_DATA_DELIVERY = (
+    DataDelivery.ANALYSIS_BAM_FILES,
+    DataDelivery.ANALYSIS_FILES,
+    DataDelivery.FASTQ_QC_ANALYSIS,
+    DataDelivery.FASTQ_QC_ANALYSIS_CRAM,
+    DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT,
+    DataDelivery.SCOUT,
+)
+
 NA_FIELD = "N/A"
 YES_FIELD = "Ja"
 NO_FIELD = "Nej"
+PRECISION = 2
 
 REPORT_GENDER = {
     "unknown": "Okänd",

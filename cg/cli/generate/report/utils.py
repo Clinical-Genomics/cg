@@ -7,7 +7,7 @@ from typing import Optional
 import click
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import REPORT_SUPPORTED_PIPELINES
+from cg.constants import REPORT_SUPPORTED_PIPELINES, REPORT_SUPPORTED_DATA_DELIVERY
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.balsamic_umi import BalsamicUmiReportAPI
@@ -62,6 +62,11 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
     if case_obj.data_analysis not in REPORT_SUPPORTED_PIPELINES:
         LOG.error(
             f"The {case_obj.data_analysis} pipeline does not support delivery reports (case: {case_obj.internal_id})"
+        )
+
+    if case_obj.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:
+        LOG.error(
+            f"The {case_obj.data_delivery} data delivery does not support delivery reports (case: {case_obj.internal_id})"
         )
 
         raise click.Abort
