@@ -142,11 +142,11 @@ class ReportAPI(MetaAPI):
         for analysis_obj in analyses:
             case_obj = analysis_obj.family
             last_version = self.housekeeper_api.last_version(case_obj.internal_id)
-            hk_files = self.housekeeper_api.get_files(
-                bundle=case_obj.internal_id, version=last_version.id
-            )
+            hk_file = self.housekeeper_api.get_files(
+                bundle=case_obj.internal_id, version=last_version.id if last_version else None
+            ).first()
 
-            if Path(hk_files.first().full_path).is_file():
+            if hk_file and Path(hk_file.full_path).is_file():
                 stored_cases.append(case_obj)
             else:
                 LOG.warning(
