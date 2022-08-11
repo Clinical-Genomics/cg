@@ -21,7 +21,7 @@ from cg.meta.rsync import RsyncAPI
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.command("clinical-delivery")
 @click.pass_context
 @click.argument("case_id", required=True)
 @DRY_RUN

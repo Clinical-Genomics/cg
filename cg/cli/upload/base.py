@@ -13,7 +13,7 @@ from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
 from . import vogue
-from .clinical_delivery import fastq
+from .clinical_delivery import fastq, clinical_delivery
 from .coverage import coverage
 from .delivery_report import mip_dna, balsamic
 from .fohm import fohm
@@ -126,5 +126,6 @@ upload.add_command(gisaid)
 upload.add_command(nipt)
 upload.add_command(fohm)
 upload.add_command(fastq)
+upload.add_command(clinical_delivery)
 upload.add_command(mip_dna)
 upload.add_command(balsamic)
