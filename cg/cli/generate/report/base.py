@@ -92,7 +92,7 @@ def available_delivery_reports(
     exit_code = EXIT_SUCCESS
 
     report_api: ReportAPI = resolve_report_api_pipeline(context, pipeline)
-    context.obj.meta_apis["report_api"] = report_api
+    context.obj.meta_apis["report_api"] = report_api if pipeline else None
 
     cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)
     if not cases_without_delivery_report:
