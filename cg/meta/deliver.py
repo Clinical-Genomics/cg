@@ -2,13 +2,16 @@
 
 import logging
 import os
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Iterable, List, Set
 
+from cgmodels.cg.constants import Pipeline
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import delivery as constants
-from cg.store import Store
+from cg.constants import delivery as constants, DataDelivery
+from cg.store import Store, models
 from cg.store.models import Family, FamilySample, Sample
 from housekeeper.store import models as hk_models
 
@@ -280,3 +283,13 @@ class DeliverAPI:
             delivery_path = delivery_path / sample_name
 
         return delivery_path
+
+    @staticmethod
+    def get_delivery_arguments(case_obj: models.Family) -> Set[str]:
+        delivery_arguments: Set[str] = set()
+        requested_deliveries: List[str] = re.split("[-_]", case_obj.data_delivery)
+        if DataDelivery.FASTQ in requested_deliveries:
+            delivery_arguments.add(Pipeline.FASTQ)
+        if DataDelivery.ANALYSIS_FILES in requested_deliveries:
+            delivery_arguments.add(case_obj.data_analysis)
+        return delivery_arguments

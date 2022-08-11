@@ -219,10 +219,11 @@ class CaseSubmitter(Submitter):
         new_families = []
         for case in items:
             case_obj = self.status.family(case["internal_id"])
-            if not case_obj:
+            if case_obj:
+                self._
+            else:
                 case_obj = self._create_case(case, customer_obj, ticket)
                 new_families.append(case_obj)
-
             self._update_case(case, case_obj)
 
             family_samples = {}

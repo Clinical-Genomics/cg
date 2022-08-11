@@ -3,6 +3,7 @@ import datetime as dt
 import logging
 
 from pathlib import Path
+from typing import Set
 
 import click
 
@@ -18,6 +19,46 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 
 LOG = logging.getLogger(__name__)
+
+
+@click.group()
+@click.pass_context
+@click.argument("case_id", required=True)
+@DRY_RUN
+def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
+    status_db: Store = context.obj.status_db
+    case_obj: models.Family = status_db.family(case_id)
+    delivery_types: Set[str] = DeliverAPI.get_delivery_arguments(case_obj=case_obj)
+    trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
+    rsync_api = RsyncAPI(context.obj)
+    for delivery_type in delivery_types:
+        delivery_api = DeliverAPI(
+            store=context.obj.status_db,
+            hk_api=context.obj.housekeeper_api,
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
+            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
+            delivery_type=delivery_type,
+            project_base_path=Path(context.obj.delivery_path),
+        )
+        delivery_api.deliver_files(case_obj=case_obj)
+    job_id: int = rsync_api.slurm_rsync_single_case(
+        case_id=case_id, dry_run=dry_run, sample_files_present=True
+    )
+    rsync_api.write_trailblazer_config(
+        {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
+    )
+    if not dry_run:
+        trailblazer_api.add_pending_analysis(
+            case_id=case_id,
+            analysis_type=AnalysisAPI.get_application_type(
+                status_db.family(case_id).links[0].sample
+            ),
+            config_path=str(rsync_api.trailblazer_config_path),
+            out_dir=str(rsync_api.log_dir),
+            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case_obj.priority],
+            data_analysis=Pipeline.RSYNC,
+        )
+    LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
 
 
 @click.group()

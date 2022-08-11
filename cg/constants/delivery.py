@@ -1,6 +1,6 @@
 """Constants for delivery"""
 
-import copy
+from cgmodels.cg.constants import Pipeline
 
 ONLY_ONE_CASE_PER_TICKET = [
     "fastq",
@@ -136,35 +136,35 @@ SARSCOV2_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 PIPELINE_ANALYSIS_TAG_MAP = {
-    "balsamic": {
+    Pipeline.BALSAMIC: {
         "case_tags": BALSAMIC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_ANALYSIS_SAMPLE_TAGS,
     },
-    "balsamic-qc": {
+    Pipeline.BALSAMIC_QC: {
         "case_tags": BALSAMIC_QC_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS,
     },
-    "balsamic-umi": {
+    Pipeline.BALSAMIC_UMI: {
         "case_tags": BALSAMIC_UMI_ANALYSIS_CASE_TAGS,
         "sample_tags": BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS,
     },
-    "mip-dna": {
+    Pipeline.MIP_DNA: {
         "case_tags": MIP_DNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_DNA_ANALYSIS_SAMPLE_TAGS,
     },
-    "mip-rna": {
+    Pipeline.MIP_RNA: {
         "case_tags": MIP_RNA_ANALYSIS_CASE_TAGS,
         "sample_tags": MIP_RNA_ANALYSIS_SAMPLE_TAGS,
     },
-    "microsalt": {
+    Pipeline.MICROSALT: {
         "case_tags": MICROSALT_ANALYSIS_CASE_TAGS,
         "sample_tags": MICROSALT_ANALYSIS_SAMPLE_TAGS,
     },
-    "fastq": {
+    Pipeline.FASTQ: {
         "case_tags": FASTQ_ANALYSIS_CASE_TAGS,
         "sample_tags": FASTQ_ANALYSIS_SAMPLE_TAGS,
     },
-    "sarscov2": {
+    Pipeline.SARS_COV_2: {
         "case_tags": SARSCOV2_ANALYSIS_CASE_TAGS,
         "sample_tags": SARSCOV2_ANALYSIS_SAMPLE_TAGS,
     },
