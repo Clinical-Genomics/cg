@@ -7,7 +7,13 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery, REPORT_SUPPORTED_PIPELINES
+from cg.constants import (
+    CASE_ACTIONS,
+    Pipeline,
+    DataDelivery,
+    REPORT_SUPPORTED_PIPELINES,
+    REPORT_SUPPORTED_DATA_DELIVERY,
+)
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
@@ -641,40 +647,41 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Fetches analyses that need a delivery report to be regenerated"""
 
-        analyses_query = self.latest_analyses()
+        records = self.Analysis.query.join(models.Analysis.family)
 
-        analyses_query = (
-            analyses_query.filter(models.Analysis.pipeline == str(pipeline))
+        records = (
+            records.filter(models.Analysis.pipeline == str(pipeline))
             if pipeline
-            else analyses_query.filter(models.Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
+            else records.filter(models.Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
         )
 
-        analyses_query = analyses_query.filter(
+        records = records.filter(
             models.Analysis.delivery_report_created_at.is_(None),
+            models.Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY),
             VALID_DATA_IN_PRODUCTION < models.Analysis.completed_at,
         ).order_by(models.Analysis.uploaded_at.desc())
 
-        return analyses_query
+        return records
 
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
         """Fetches analyses that need a delivery report to be uploaded"""
 
-        analyses_query = self.latest_analyses()
+        records = self.Analysis.query.join(models.Analysis.family)
 
-        analyses_query = (
-            analyses_query.filter(models.Analysis.pipeline == str(pipeline))
+        records = (
+            records.filter(models.Analysis.pipeline == str(pipeline))
             if pipeline
-            else analyses_query.filter(models.Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
+            else records.filter(models.Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
         )
 
-        analyses_query = analyses_query.filter(
+        records = records.filter(
             models.Analysis.delivery_report_created_at.isnot(None),
             models.Analysis.uploaded_at.is_(None),
-            VALID_DATA_IN_PRODUCTION < models.Analysis.completed_at,
             models.Family.data_delivery.contains(DataDelivery.SCOUT),
+            VALID_DATA_IN_PRODUCTION < models.Analysis.completed_at,
         ).order_by(models.Analysis.uploaded_at.desc())
 
-        return analyses_query
+        return records
 
     def samples_to_deliver(self) -> Query:
         """Fetch samples that have been sequenced but not delivered."""
