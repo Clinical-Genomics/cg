@@ -140,17 +140,17 @@ class ReportAPI(MetaAPI):
         analyses = self.status_db.analyses_to_delivery_report(pipeline)[:50]
 
         for analysis_obj in analyses:
-            case_obj = analysis_obj.family
-            last_version = self.housekeeper_api.last_version(case_obj.internal_id)
+            case: models.Family = analysis_obj.family
+            last_version = self.housekeeper_api.last_version(case.internal_id)
             hk_file = self.housekeeper_api.get_files(
-                bundle=case_obj.internal_id, version=last_version.id if last_version else None
+                bundle=case.internal_id, version=last_version.id if last_version else None
             ).first()
 
             if hk_file and Path(hk_file.full_path).is_file():
-                stored_cases.append(case_obj)
+                stored_cases.append(case)
             else:
                 LOG.warning(
-                    f"Case {case_obj.internal_id} must be stored before creating a delivery report"
+                    f"Case {case.internal_id} must be stored before creating a delivery report"
                 )
 
         return stored_cases
@@ -163,10 +163,10 @@ class ReportAPI(MetaAPI):
 
         return cases
 
-    def update_delivery_report_date(self, case_obj: models.Family, analysis_date: datetime) -> None:
+    def update_delivery_report_date(self, case: models.Family, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created"""
 
-        analysis_obj = self.status_db.analysis(case_obj, analysis_date)
+        analysis_obj = self.status_db.analysis(case, analysis_date)
         analysis_obj.delivery_report_created_at = datetime.now()
         self.status_db.commit()
 

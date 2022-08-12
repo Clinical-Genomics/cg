@@ -30,10 +30,10 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
         else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
     )
 
-    case_obj = report_api.status_db.family(case_id)
+    case: models.Family = report_api.status_db.family(case_id)
 
     # Missing or not valid internal case ID
-    if not case_id or not case_obj:
+    if not case_id or not case:
         LOG.warning("Invalid case ID. Retrieving available cases.")
 
         pipeline = (
@@ -54,33 +54,33 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
             )
         else:
             LOG.error("Provide one of the following case IDs:")
-            for case_obj in cases_without_delivery_report:
-                click.echo(f"{case_obj.internal_id} ({ case_obj.data_analysis})")
+            for case in cases_without_delivery_report:
+                click.echo(f"{case.internal_id} ({ case.data_analysis})")
 
         raise click.Abort
 
-    if case_obj.data_analysis not in REPORT_SUPPORTED_PIPELINES:
+    if case.data_analysis not in REPORT_SUPPORTED_PIPELINES:
         LOG.error(
-            f"The {case_obj.data_analysis} pipeline does not support delivery reports (case: {case_obj.internal_id})"
+            f"The {case.data_analysis} pipeline does not support delivery reports (case: {case_obj.internal_id})"
         )
 
-    if case_obj.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:
+    if case.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:
         LOG.error(
-            f"The {case_obj.data_delivery} data delivery does not support delivery reports (case: {case_obj.internal_id})"
+            f"The {case.data_delivery} data delivery does not support delivery reports (case: {case_obj.internal_id})"
         )
 
         raise click.Abort
 
-    return case_obj
+    return case
 
 
 def resolve_report_api(context: click.Context, case_obj: models.Family) -> ReportAPI:
     """Resolves the report API to be used for the delivery report generation"""
 
     if context.obj.meta_apis.get("report_api"):
-        report_api = context.obj.meta_apis.get("report_api")
+        report_api: ReportAPI = context.obj.meta_apis.get("report_api")
     else:
-        report_api = resolve_report_api_pipeline(context, case_obj.data_analysis)
+        report_api: ReportAPI = resolve_report_api_pipeline(context, case_obj.data_analysis)
 
     return report_api
 
@@ -90,17 +90,17 @@ def resolve_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> R
 
     if pipeline == Pipeline.BALSAMIC:
         # BALSAMIC report API
-        report_api = BalsamicReportAPI(
+        report_api: BalsamicReportAPI = BalsamicReportAPI(
             config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
         )
     elif pipeline == Pipeline.BALSAMIC_UMI:
         # BALSAMIC UMI report API
-        report_api = BalsamicUmiReportAPI(
+        report_api: BalsamicUmiReportAPI = BalsamicUmiReportAPI(
             config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
         )
     else:
         # Default report API (MIP DNA report API)
-        report_api = MipDNAReportAPI(
+        report_api: MipDNAReportAPI = MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         )
 

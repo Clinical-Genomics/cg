@@ -10,6 +10,7 @@ import click
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
+from cg import models
 from cg.cli.generate.report.utils import (
     resolve_report_case,
     resolve_report_api,
@@ -47,9 +48,9 @@ def delivery_report(
 
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
 
-    case_obj = resolve_report_case(context, case_id)
-    report_api: ReportAPI = resolve_report_api(context, case_obj)
-    analysis_date = resolve_report_analysis_started(case_obj, report_api, analysis_started_at)
+    case: models.Family = resolve_report_case(context, case_id)
+    report_api: ReportAPI = resolve_report_api(context, case)
+    analysis_date: datetime = resolve_report_analysis_started(case, report_api, analysis_started_at)
 
     # Dry run: prints the HTML report to console
     if dry_run:
@@ -72,7 +73,7 @@ def delivery_report(
 
     if hk_report_file:
         click.echo(click.style("Uploaded delivery report to housekeeper", fg="green"))
-        report_api.update_delivery_report_date(case_obj, analysis_date)
+        report_api.update_delivery_report_date(case, analysis_date)
     else:
         click.echo(click.style("Delivery report already uploaded to housekeeper", fg="yellow"))
 
@@ -103,8 +104,8 @@ def available_delivery_reports(
             )
         )
     else:
-        for case_obj in cases_without_delivery_report:
-            case_id = case_obj.internal_id
+        for case in cases_without_delivery_report:
+            case_id: str = case.internal_id
             LOG.info("Generating delivery report for case: %s", case_id)
             try:
                 context.invoke(
