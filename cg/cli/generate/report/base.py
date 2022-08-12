@@ -7,15 +7,15 @@ from pathlib import Path
 from typing import TextIO, Optional
 
 import click
+from cg.store import models
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
-from cg import models
 from cg.cli.generate.report.utils import (
-    resolve_report_case,
-    resolve_report_api,
-    resolve_report_analysis_started,
-    resolve_report_api_pipeline,
+    get_report_case,
+    get_report_api,
+    get_report_analysis_started,
+    get_report_api_pipeline,
 )
 from cg.cli.generate.report.options import (
     ARGUMENT_CASE_ID,
@@ -48,9 +48,9 @@ def delivery_report(
 
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
 
-    case: models.Family = resolve_report_case(context, case_id)
-    report_api: ReportAPI = resolve_report_api(context, case)
-    analysis_date: datetime = resolve_report_analysis_started(case, report_api, analysis_started_at)
+    case: models.Family = get_report_case(context, case_id)
+    report_api: ReportAPI = get_report_api(context, case)
+    analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
 
     # Dry run: prints the HTML report to console
     if dry_run:
@@ -92,7 +92,7 @@ def available_delivery_reports(
 
     exit_code = EXIT_SUCCESS
 
-    report_api: ReportAPI = resolve_report_api_pipeline(context, pipeline)
+    report_api: ReportAPI = get_report_api_pipeline(context, pipeline)
     context.obj.meta_apis["report_api"] = report_api if pipeline else None
 
     cases_without_delivery_report = report_api.get_cases_without_delivery_report(pipeline)

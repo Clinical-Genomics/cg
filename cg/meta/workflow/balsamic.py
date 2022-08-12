@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import ValidationError
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat

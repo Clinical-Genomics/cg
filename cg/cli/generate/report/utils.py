@@ -20,8 +20,8 @@ from cg.store import models
 LOG = logging.getLogger(__name__)
 
 
-def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
-    """Resolves case object for delivery report generation"""
+def get_report_case(context: click.Context, case_id: str) -> models.Family:
+    """Extracts a case object for delivery report generation"""
 
     # Default report API (MIP DNA report API)
     report_api: ReportAPI = (
@@ -61,12 +61,12 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
 
     if case.data_analysis not in REPORT_SUPPORTED_PIPELINES:
         LOG.error(
-            f"The {case.data_analysis} pipeline does not support delivery reports (case: {case_obj.internal_id})"
+            f"The {case.data_analysis} pipeline does not support delivery reports (case: {case.internal_id})"
         )
 
     if case.data_delivery not in REPORT_SUPPORTED_DATA_DELIVERY:
         LOG.error(
-            f"The {case.data_delivery} data delivery does not support delivery reports (case: {case_obj.internal_id})"
+            f"The {case.data_delivery} data delivery does not support delivery reports (case: {case.internal_id})"
         )
 
         raise click.Abort
@@ -74,18 +74,18 @@ def resolve_report_case(context: click.Context, case_id: str) -> models.Family:
     return case
 
 
-def resolve_report_api(context: click.Context, case_obj: models.Family) -> ReportAPI:
-    """Resolves the report API to be used for the delivery report generation"""
+def get_report_api(context: click.Context, case_obj: models.Family) -> ReportAPI:
+    """Returns a report API to be used for the delivery report generation"""
 
     if context.obj.meta_apis.get("report_api"):
         report_api: ReportAPI = context.obj.meta_apis.get("report_api")
     else:
-        report_api: ReportAPI = resolve_report_api_pipeline(context, case_obj.data_analysis)
+        report_api: ReportAPI = get_report_api_pipeline(context, case_obj.data_analysis)
 
     return report_api
 
 
-def resolve_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> ReportAPI:
+def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> ReportAPI:
     """Resolves the report API given a specific pipeline"""
 
     if pipeline == Pipeline.BALSAMIC:
@@ -107,10 +107,10 @@ def resolve_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> R
     return report_api
 
 
-def resolve_report_analysis_started(
+def get_report_analysis_started(
     case_obj: models.Family, report_api: ReportAPI, analysis_started_at: Optional[str]
 ) -> datetime:
-    """Resolves analysis date"""
+    """Resolves and returns a valid analysis date"""
 
     if not analysis_started_at:
         analysis_started_at: datetime = (
