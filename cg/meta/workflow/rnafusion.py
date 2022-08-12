@@ -192,7 +192,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        bg: bool,
         log: str,
         work_dir: str,
         resume: bool,
@@ -278,7 +277,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
 
-    def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
+    def report_deliver(self, case_id: str) -> None:
         """Write report deliver"""
         df = pd.read_csv(resources.rnafusion_bundle_filenames_path)
         df = df.replace({"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True)

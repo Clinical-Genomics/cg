@@ -4,7 +4,6 @@ import logging
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.nextflow.options import (
-    OPTION_BACKGROUND,
     OPTION_LOG,
     OPTION_WORKDIR,
     OPTION_RESUME,
@@ -82,7 +81,6 @@ def config_case(
 
 @rnafusion.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_BACKGROUND
 @OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_RESUME
@@ -105,7 +103,6 @@ def config_case(
 def run(
     context: CGConfig,
     case_id: str,
-    bg: bool,
     log: str,
     work_dir: str,
     resume: bool,
@@ -133,7 +130,6 @@ def run(
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
-            bg=bg,
             log=log,
             work_dir=work_dir,
             resume=resume,
@@ -167,7 +163,6 @@ def run(
 
 @rnafusion.command("start")
 @ARGUMENT_CASE_ID
-@OPTION_BACKGROUND
 @OPTION_LOG
 @OPTION_WORKDIR
 @OPTION_RESUME
@@ -190,7 +185,6 @@ def run(
 def start(
     context: CGConfig,
     case_id: str,
-    bg: bool,
     log: str,
     work_dir: str,
     resume: bool,
@@ -221,7 +215,6 @@ def start(
         context.invoke(
             run,
             case_id=case_id,
-            bg=bg,
             log=log,
             work_dir=work_dir,
             resume=resume,
@@ -280,7 +273,8 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         # analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
-        analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
+        if not dry_run:
+            analysis_api.report_deliver(case_id=case_id)
     except CgError as e:
         LOG.error(f"Could not create report file: {e.message}")
         raise click.Abort()

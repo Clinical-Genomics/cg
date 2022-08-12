@@ -2,12 +2,6 @@
 
 import click
 
-OPTION_BACKGROUND = click.option(
-    "-bg",
-    is_flag=True,
-    default=True,
-    help="Execute nextflow in background",
-)
 OPTION_LOG = click.option(
     "-log",
     type=click.Path(),
