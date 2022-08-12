@@ -72,10 +72,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         for link in case_obj.links:
             file_collection = pd.DataFrame(self.gather_file_metadata_for_sample(link.sample))
             file_collection = file_collection.sort_values(by=["path"])
-            fastq_R1 = file_collection[file_collection["read"] == 1]["path"].to_list()
-            fastq_R2 = file_collection[file_collection["read"] == 2]["path"].to_list()
+            fastq_r1 = file_collection[file_collection["read"] == 1]["path"].to_list()
+            fastq_r2 = file_collection[file_collection["read"] == 2]["path"].to_list()
             samplesheet = pd.DataFrame(
-                list(zip(fastq_R1, fastq_R2)), columns=["fastq_1", "fastq_2"]
+                list(zip(fastq_r1, fastq_r2)), columns=["fastq_1", "fastq_2"]
             )
             samplesheet["sample"] = case_id
             samplesheet["strandedness"] = strandedness
@@ -111,7 +111,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             return outdir
         return Path(self.get_case_path(case_id))
 
-    def get_references_path(self, case_id: str, genomes_bases: str = None) -> Path:
+    def get_references_path(self, genomes_bases: str = None) -> Path:
         if genomes_bases:
             return genomes_bases
         return Path(self.references)
@@ -146,7 +146,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             "-stub": stub,
             "--input": self.get_input_path(case_id, input),
             "--outdir": self.get_outdir_path(case_id, outdir),
-            "--genomes_base": self.get_references_path(case_id, genomes_base),
+            "--genomes_base": self.get_references_path(genomes_base),
             "--trim": trim,
             "--fusioninspector_filter": fusioninspector_filter,
             "--all": all,
@@ -160,7 +160,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_verified_arguments_nextflow(
         self,
         case_id: str,
-        bg: bool,
         log: str,
     ) -> dict:
         """This is a function to document"""
@@ -239,7 +238,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         nextflow_options = self.__build_command_str(
             self.get_verified_arguments_nextflow(
                 case_id=case_id,
-                bg=bg,
                 log=log,
             )
         )
@@ -263,46 +261,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    # def get_latest_metadata(self, family_id: str) -> MipAnalysis:
-    #     """Get the latest trending data for a family"""
-
-    #     mip_config_raw = self._get_latest_raw_file(
-    #         family_id=family_id, tags=HkMipAnalysisTag.CONFIG
-    #     )
-    #     qc_metrics_raw = self._get_latest_raw_file(
-    #         family_id=family_id, tags=HkMipAnalysisTag.QC_METRICS
-    #     )
-    #     sample_info_raw = self._get_latest_raw_file(
-    #         family_id=family_id, tags=HkMipAnalysisTag.SAMPLE_INFO
-    #     )
-    #     if mip_config_raw and qc_metrics_raw and sample_info_raw:
-    #         try:
-    #             mip_analysis: MipAnalysis = self.parse_analysis(
-    #                 config_raw=mip_config_raw,
-    #                 qc_metrics_raw=qc_metrics_raw,
-    #                 sample_info_raw=sample_info_raw,
-    #             )
-    #             return mip_analysis
-    #         except ValidationError as error:
-    #             LOG.error(
-    #                 "get_latest_metadata failed for '%s', missing attribute: %s",
-    #                 family_id,
-    #                 error,
-    #             )
-    #             raise error
-    #     else:
-    #         LOG.error(f"Unable to retrieve the latest metadata for {family_id}")
-    #         raise CgError
-
-    # def get_valid_cases_to_analyze(self) -> list:
-    #     """Retrieve a list of balsamic cases without analysis,
-    #     where samples have enough reads to be analyzed"""
-
-    #     return [
-    #         case_object.internal_id
-    #         for case_object in self.get_cases_to_analyze()
-    #     ]
-
     def get_cases_to_analyze(self) -> List[models.Family]:
         cases_query: List[models.Family] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
@@ -310,11 +268,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         cases_to_analyze = []
         for case_obj in cases_query:
             if case_obj.action == "analyze" or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-            elif (
-                self.trailblazer_api.get_latest_analysis_status(case_id=case_obj.internal_id)
-                == "failed"
-            ):
                 cases_to_analyze.append(case_obj)
         return cases_to_analyze
 
