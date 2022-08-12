@@ -268,6 +268,7 @@ def mutant_past_run_dirs(
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
+
 @click.command("rnafusion-past-run-dirs")
 @OPTION_YES
 @OPTION_DRY

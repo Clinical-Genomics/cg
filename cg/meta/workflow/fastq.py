@@ -273,7 +273,6 @@ class RnafusionFastqHandler(FastqHandler):
         date_str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date_str}_{flowcell}_{sample}_{index}_{read}.fastq.gz"
 
-
     @staticmethod
     def get_concatenated_name(linked_fastq_name: str) -> str:
         """ "Create a name for the concatenated file from multiple lanes"""

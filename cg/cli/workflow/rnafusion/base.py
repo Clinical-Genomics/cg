@@ -12,7 +12,7 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_STUB,
     OPTION_TOWER,
     OPTION_INPUT,
-    OPTION_OUTDIR
+    OPTION_OUTDIR,
 )
 from cg.cli.workflow.rnafusion.options import (
     OPTION_STRANDEDNESS,
@@ -25,7 +25,7 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_SQUID,
     OPTION_STARFUSION,
     OPTION_FUSIONCATCHER,
-    OPTION_ARRIBA
+    OPTION_ARRIBA,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -52,7 +52,9 @@ def rnafusion(context: click.Context):
         config=config,
     )
 
+
 rnafusion.add_command(resolve_compression)
+
 
 @rnafusion.command("config-case")
 @ARGUMENT_CASE_ID
@@ -69,8 +71,7 @@ def config_case(
     try:
         LOG.info(f"Creating samplesheet file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.config_case(
-            case_id=case_id, strandedness=strandedness)
+        analysis_api.config_case(case_id=case_id, strandedness=strandedness)
     except CgError as e:
         LOG.error(f"Could not create samplesheet: {e.message}")
         raise click.Abort()

@@ -137,6 +137,7 @@ class MipConfig(BaseModel):
     root: str
     script: str
 
+
 class RnafusionConfig(BaseModel):
     root: str
     references: str
@@ -144,6 +145,7 @@ class RnafusionConfig(BaseModel):
     pipeline_path: str
     conda_env: str
     profile: str
+
 
 class CGStatsConfig(BaseModel):
     database: str
