@@ -88,23 +88,22 @@ def get_report_api(context: click.Context, case_obj: models.Family) -> ReportAPI
 def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> ReportAPI:
     """Resolves the report API given a specific pipeline"""
 
-    if pipeline == Pipeline.BALSAMIC:
-        # BALSAMIC report API
-        report_api: BalsamicReportAPI = BalsamicReportAPI(
-            config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
-        )
-    elif pipeline == Pipeline.BALSAMIC_UMI:
-        # BALSAMIC UMI report API
-        report_api: BalsamicUmiReportAPI = BalsamicUmiReportAPI(
-            config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
-        )
-    else:
-        # Default report API (MIP DNA report API)
-        report_api: MipDNAReportAPI = MipDNAReportAPI(
-            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
-        )
+    # Default report API pipeline: MIP-DNA
+    pipeline = pipeline if pipeline else Pipeline.MIP_DNA
 
-    return report_api
+    dispatch_report_api = {
+        Pipeline.MIP_DNA: MipDNAReportAPI(
+            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+        ),
+        Pipeline.BALSAMIC: BalsamicReportAPI(
+            config=context.obj, analysis_api=BalsamicAnalysisAPI(config=context.obj)
+        ),
+        Pipeline.BALSAMIC_UMI: BalsamicUmiReportAPI(
+            config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
+        ),
+    }
+
+    return dispatch_report_api.get(pipeline)
 
 
 def get_report_analysis_started(
