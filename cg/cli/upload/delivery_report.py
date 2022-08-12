@@ -3,6 +3,7 @@
 import logging
 
 import click
+from cg.store import models
 
 from cg.cli.generate.report.utils import get_report_case, get_report_api
 from cg.cli.generate.report.options import ARGUMENT_CASE_ID
@@ -22,11 +23,11 @@ def upload_delivery_report_to_scout(context: click.Context, case_id: str, dry_ru
 
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
 
-    case_obj = get_report_case(context, case_id)
-    report_api: ReportAPI = get_report_api(context, case_obj)
-    report_path = report_api.get_delivery_report_from_hk(case_id)
+    case: models.Family = get_report_case(context, case_id)
+    report_api: ReportAPI = get_report_api(context, case)
+    report_path: str = report_api.get_delivery_report_from_hk(case_id)
 
     if not dry_run:
         report_api.scout_api.upload_delivery_report(
-            report_path=report_path, case_id=case_obj.internal_id, update=True
+            report_path=report_path, case_id=case.internal_id, update=True
         )
