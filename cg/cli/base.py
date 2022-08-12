@@ -1,4 +1,6 @@
 """ Start of CLI """
+from pathlib import Path
+
 import logging
 import sys
 from typing import Optional
@@ -6,10 +8,11 @@ from typing import Optional
 import cg
 import click
 import coloredlogs
-import yaml
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
+from cg.constants.constants import FileFormat
 from cg.cli.store.store import store as store_cmd
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
@@ -35,7 +38,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 
 
 @click.group()
-@click.option("-c", "--config", type=click.File(), help="path to config file")
+@click.option("-c", "--config", type=click.Path(exists=True), help="path to config file")
 @click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
     "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
@@ -45,7 +48,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.pass_context
 def base(
     context: click.Context,
-    config: click.File,
+    config: click.Path,
     database: Optional[str],
     log_level: str,
     verbose: bool,
@@ -57,8 +60,12 @@ def base(
         log_format = "%(message)s" if sys.stdout.isatty() else None
 
     coloredlogs.install(level=log_level, fmt=log_format)
-    raw_configs: dict = yaml.full_load(config) if config else {"database": database}
-    context.obj = CGConfig(**raw_configs)
+    raw_config: dict = (
+        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=Path(config))
+        if config
+        else {"database": database}
+    )
+    context.obj = CGConfig(**raw_config)
 
 
 @base.command()

@@ -3,13 +3,14 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import yaml
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
+from cg.io.controller import WriteFile
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
@@ -185,8 +186,9 @@ class DemultiplexingAPI:
     def write_trailblazer_config(content: dict, file_path: Path) -> None:
         """Write the content to a yaml file"""
         LOG.info("Writing yaml content %s to %s", content, file_path)
-        with file_path.open("w") as yaml_file:
-            yaml.safe_dump(content, yaml_file, indent=4, explicit_start=True)
+        WriteFile.write_file_from_content(
+            content=content, file_format=FileFormat.YAML, file_path=file_path
+        )
 
     def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flowcell: Flowcell):
         """Add demultiplexing entry to trailblazer"""

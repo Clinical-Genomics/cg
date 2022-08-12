@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-import yaml
-
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -21,8 +21,9 @@ def test_instantiate_mip_sampleinfo(sample_info_dna_raw: dict):
 def test_mip_sampleinfo(case_qc_sample_info_path: Path):
     """Test to parse the content of a real qc_sample_info file"""
     # GIVEN the path to a file with sample_info metadata content
-    with open(case_qc_sample_info_path, "r") as sample_info_handle:
-        raw_sample_info = yaml.full_load(sample_info_handle)
+    raw_sample_info = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=case_qc_sample_info_path
+    )
 
     # WHEN instantiating a MipBaseSampleInfo object
     sample_info_object = MipBaseSampleInfo(**raw_sample_info)

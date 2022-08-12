@@ -154,33 +154,33 @@ class CustomerView(BaseView):
     """Admin view for Model.Customer"""
 
     column_editable_list = [
-        "scout_access",
-        "loqus_upload",
-        "return_samples",
-        "primary_contact",
-        "delivery_contact",
-        "priority",
-        "customer_group",
+        "collaborations",
         "comment",
+        "delivery_contact",
+        "loqus_upload",
+        "primary_contact",
+        "priority",
+        "return_samples",
+        "scout_access",
     ]
     column_list = [
+        "comment",
+        "delivery_contact",
         "internal_id",
         "name",
-        "priority",
         "primary_contact",
-        "delivery_contact",
-        "scout_access",
-        "return_samples",
+        "priority",
         "project_account_KI",
         "project_account_kth",
-        "comment",
+        "return_samples",
+        "scout_access",
     ]
     column_filters = ["priority", "scout_access"]
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
-class CustomerGroupView(BaseView):
+class CollaborationView(BaseView):
     """Admin view for Model.CustomerGroup"""
 
     column_editable_list = ["name"]
