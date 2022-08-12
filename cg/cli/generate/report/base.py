@@ -1,4 +1,4 @@
-"""Commands to generate BALSAMIC cancer and MIP rare disease DNA reports"""
+"""Commands to generate delivery reports"""
 
 import logging
 import sys
