@@ -98,6 +98,11 @@ MIP_VALIDATION_CASES = [
     "vitalmouse",  # DNA rare disease positive control
 ]
 
+# List of cases used for validation that we should skip
+RNAFUSION_VALIDATION_CASES = [
+    "solidfawn",  # RNAFUSION seracare commercial sample
+]
+
 OTHER_VALIDATION_CASES = [
     "bigdrum",
     "busycolt",
@@ -108,6 +113,7 @@ OTHER_VALIDATION_CASES = [
     "keencalf",
     "keenviper",
     "luckyhog",
+    "maturejay",
     "meetpossum",
     "mintbaboon",
     "mintyeti",
@@ -115,8 +121,13 @@ OTHER_VALIDATION_CASES = [
     "propercoral",
     "pumpedcat",
     "strongman",
+    "truecoyote",
 ]
 
 CASES_TO_IGNORE = (
-    PROBLEMATIC_CASES + OTHER_VALIDATION_CASES + BALSAMIC_VALIDATION_CASES + MIP_VALIDATION_CASES
+    PROBLEMATIC_CASES
+    + OTHER_VALIDATION_CASES
+    + BALSAMIC_VALIDATION_CASES
+    + MIP_VALIDATION_CASES
+    + RNAFUSION_VALIDATION_CASES
 )
