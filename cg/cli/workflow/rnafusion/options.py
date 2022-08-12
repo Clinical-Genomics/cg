@@ -1,44 +1,71 @@
 import click
 
-from cg.constants.constants import GenomeVersion
-from cg.constants.priority import SlurmQos
-from cg.constants.subject import Gender
-
-OPTION_GENDER = click.option(
-    "--gender",
-    type=click.Choice([Gender.FEMALE, Gender.MALE]),
-    required=False,
-    help="Case associated gender. Set this option to override the one selected by the customer in StatusDB.",
-)
-OPTION_GENOME_VERSION = click.option(
-    "--genome-version",
+OPTION_STRANDEDNESS = click.option(
+    '--strandedness',
+    type=str,
+    default='reverse',
     show_default=True,
-    default=GenomeVersion.hg19,
-    type=click.Choice([GenomeVersion.hg19, GenomeVersion.hg38, GenomeVersion.canfam3]),
-    help="Type and build version of the reference genome. Set this option to override the default.",
+    help="Strandedness: forward or reverse (default)"
 )
-OPTION_PANEL_BED = click.option(
-    "--panel-bed",
-    required=False,
-    help="Panel BED is determined based on capture kit \
-    used for library prep. Set this option to override the default",
+
+OPTION_REFERENCES = click.option(
+    '--genomes_base',
+    type=click.Path(),
+    help="Path to references folder"
 )
-OPTION_RUN_ANALYSIS = click.option(
-    "-r",
-    "--run-analysis",
+OPTION_TRIM = click.option(
+    '--trim',
+    is_flag=True,
+    default=True,
+    show_default=True,
+    help="Preform trimming of reads to 75 bp"
+)
+OPTION_FUSIONINSPECTOR_FILTER = click.option(
+    '--fusioninspector_filter',
+    is_flag=True,
+    default=True,
+    show_default=True,
+    help="Feed filtered fusionreport fusions to fusioninspector"
+)
+OPTION_ALL = click.option(
+    '--all',
+    is_flag=True,
+    default=True,
+    show_default=True,
+    help="Run all analysis tools"
+)
+OPTION_PIZZLY = click.option(
+    '--pizzly',
     is_flag=True,
     default=False,
-    help="Execute BALSAMIC in non-dry mode",
+    show_default=True,
+    help="Run pizzly analysis tool"
 )
-OPTION_QOS = click.option(
-    "-qos",
-    "--slurm-quality-of-service",
-    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH, SlurmQos.EXPRESS]),
-    help="Job priority in SLURM. Setting this option will override the StatusDB case priority.",
+OPTION_SQUID = click.option(
+    '--squid',
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Run squid analysis tool"
 )
-OPTION_PON_CNN = click.option(
-    "--pon-cnn",
-    type=click.Path(exists=True),
-    required=False,
-    help="Panel of normal reference (.cnn) for cnvkit",
+OPTION_STARFUSION = click.option(
+    '--starfusion',
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Run starfusion analysis tool"
+)
+OPTION_FUSIONCATCHER = click.option(
+    '--fusioncatcher',
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Run fusioncatcher analysis tool"
+)
+OPTION_ARRIBA = click.option(
+    '--arriba',
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Run arriba analysis tool"
 )

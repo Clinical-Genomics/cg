@@ -141,8 +141,7 @@ class RnafusionConfig(BaseModel):
     root: str
     references: str
     binary_path: str
-    singularity_cache: str
-    pipeline: str
+    pipeline_path: str
     conda_env: str
     profile: str
 

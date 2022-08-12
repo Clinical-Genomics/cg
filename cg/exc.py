@@ -195,6 +195,12 @@ class PipelineUnknownError(CgError):
     """
 
 
+class RnafusionStartError(CgError):
+    """
+    Exception raised when rnafusion fails to start
+    """
+
+
 class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails"""
 

@@ -19,6 +19,7 @@ from cg.cli.workflow.commands import (
     fluffy_past_run_dirs,
     mip_past_run_dirs,
     mutant_past_run_dirs,
+    rnafusion_past_run_dirs,
     rsync_past_run_dirs,
 )
 from cg.constants import FlowCellStatus, HousekeeperTags
@@ -54,6 +55,7 @@ clean.add_command(balsamic_past_run_dirs)
 clean.add_command(fluffy_past_run_dirs)
 clean.add_command(mip_past_run_dirs)
 clean.add_command(mutant_past_run_dirs)
+clean.add_command(rnafusion_past_run_dirs)
 clean.add_command(rsync_past_run_dirs)
 
 
