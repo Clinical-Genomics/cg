@@ -6,10 +6,11 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional
 
-import yaml
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
+from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.exc import ScoutUploadError
+from cg.io.controller import ReadFile
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 
@@ -28,9 +29,11 @@ class ScoutAPI:
 
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
-        with open(scout_load_config, "r") as stream:
-            data = yaml.safe_load(stream)
-        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**data)
+
+        scout_config: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=scout_load_config
+        )
+        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
         existing_case: Optional[ScoutExportCase] = self.get_case(
             case_id=scout_load_config_object.family
         )
