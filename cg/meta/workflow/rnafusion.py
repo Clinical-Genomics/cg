@@ -13,7 +13,6 @@ from cg.constants import DataDelivery, Pipeline
 from cg.exc import RnafusionStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
-from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
