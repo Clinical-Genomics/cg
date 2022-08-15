@@ -287,7 +287,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str):
-    """Store a finished analysis in Housekeeper and StatusDB."""
+    """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -295,7 +295,6 @@ def store_housekeeper(context: CGConfig, case_id: str):
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id)
         analysis_api.upload_bundle_statusdb(case_id=case_id)
@@ -328,13 +327,13 @@ def store(context: click.Context, case_id: str, dry_run: bool):
 @DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished analyses in Housekeeper"""
+    """Store bundles for all finished RNAFUSION analyses in Housekeeper"""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
-        LOG.info("Storing deliverables for %s", case_obj.internal_id)
+        LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
