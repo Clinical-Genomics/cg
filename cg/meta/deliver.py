@@ -5,7 +5,7 @@ import os
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Iterable, List, Set, Tuple
 
 from cgmodels.cg.constants import Pipeline
 
@@ -286,6 +286,7 @@ class DeliverAPI:
 
     @staticmethod
     def get_delivery_arguments(case_obj: models.Family) -> Set[str]:
+        """Translates the case data_delivery field to pipeline specific arguments"""
         delivery_arguments: Set[str] = set()
         requested_deliveries: List[str] = re.split("[-_]", case_obj.data_delivery)
         if DataDelivery.FASTQ in requested_deliveries:
@@ -293,3 +294,14 @@ class DeliverAPI:
         if DataDelivery.ANALYSIS_FILES in requested_deliveries:
             delivery_arguments.add(case_obj.data_analysis)
         return delivery_arguments
+
+    @staticmethod
+    def get_delivery_scope(delivery_arguments: Set[str]) -> Tuple[bool, bool]:
+        """Returns the scope of the delivery, ie whether sample- and or case files were delivered"""
+        case_delivery = sample_delivery = False
+        for delivery in delivery_arguments:
+            if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]:
+                sample_delivery = False
+            if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"]:
+                case_delivery = True
+        return sample_delivery, case_delivery
