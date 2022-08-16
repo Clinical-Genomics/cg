@@ -1,5 +1,4 @@
 """Test methods for compressing FASTQ"""
-import json
 import logging
 from pathlib import Path
 from typing import Dict, List
@@ -13,6 +12,8 @@ from cg.apps.crunchy.files import (
     get_spring_archive_files,
 )
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile
 from cg.models import CompressionData
 from cg.utils import Process
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
@@ -57,8 +58,9 @@ def test_get_spring_metadata_malformed_info(
     """Test the method that fetches the SPRING metadata from a file when file is malformed"""
     # GIVEN a SPRING metadata file with missing information
     spring_metadata[0].pop("path")
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
+    WriteFile.write_file_from_content(
+        content=spring_metadata, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN fetching the content of the file
     with pytest.raises(ValidationError):
@@ -72,8 +74,9 @@ def test_get_spring_metadata_wrong_number_files(
     """Test the method that fetches the SPRING metadata from a file when a file is missing"""
     # GIVEN a SPRING metadata file with missing file
     spring_metadata = spring_metadata[1:]
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
+    WriteFile.write_file_from_content(
+        content=spring_metadata, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN fetching the content of the file
     with pytest.raises(ValidationError):
