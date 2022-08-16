@@ -224,6 +224,6 @@ class ExcelOrderformParser(OrderformParser):
 
         self.samples: List[ExcelSample] = parse_obj_as(List[ExcelSample], raw_samples)
         self.project_type: str = self.get_project_type(document_title)
-        self.delivery_type = self.get_data_delivery(project_type=OrderType(self.project_type))
+        self.delivery_type = self.get_data_delivery()
         self.customer_id = self.get_customer_id()
         self.order_name = Path(excel_path).stem
