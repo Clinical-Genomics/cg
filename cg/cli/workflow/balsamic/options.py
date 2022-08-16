@@ -40,5 +40,5 @@ OPTION_PON_CNN = click.option(
     "--pon-cnn",
     type=click.Path(exists=True),
     required=False,
-    help="Panel of normal reference (.cnn) for cnvkit",
+    help="Panel of normal reference (.cnn) for CNVkit",
 )
