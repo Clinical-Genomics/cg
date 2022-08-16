@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -171,38 +171,11 @@ class ExcelOrderformParser(OrderformParser):
 
         return data_analyses.pop().lower().replace(" ", "-")
 
-    def is_from_orderform_without_data_delivery(self, data_delivery: str) -> bool:
-        return data_delivery == self.NO_VALUE
-
-    def default_delivery_type(self, project_type: OrderType) -> str:
-        """Returns the default delivery type for a project type"""
-
-        if project_type == OrderType.MICROSALT and self.parse_data_analysis() in [
-            "custom",
-            "fastq",
-        ]:
-            return DataDelivery.FASTQ_QC
-
-        raise OrderFormError("Could not determine value for Data Delivery")
-
-    def get_data_delivery(self, project_type: OrderType) -> str:
+    def get_data_delivery(self) -> str:
         """Determine the order_data delivery type."""
 
         data_delivery: str = self.parse_data_delivery()
 
-        if self.is_from_orderform_without_data_delivery(data_delivery):
-            return self.default_delivery_type(project_type)
-
-        delivery_type_map = {
-            "fastq-qc": DataDelivery.FASTQ_QC,
-            "fastq-+-analysis": DataDelivery.FASTQ_ANALYSIS,
-            "analysis-+-scout": DataDelivery.ANALYSIS_SCOUT,
-            "fastq-+-analysis-+-scout": DataDelivery.FASTQ_ANALYSIS_SCOUT,
-            "fastq-qc-+-analysis": DataDelivery.FASTQ_QC_ANALYSIS,
-            "fastq-+-scout": DataDelivery.FASTQ_SCOUT,
-        }
-        if data_delivery in delivery_type_map:
-            return delivery_type_map[data_delivery]
         try:
             return DataDelivery(data_delivery)
         except ValueError as e:
@@ -210,12 +183,14 @@ class ExcelOrderformParser(OrderformParser):
 
     def parse_data_delivery(self) -> str:
 
-        data_deliveries = {sample.data_delivery or self.NO_VALUE for sample in self.samples}
+        data_deliveries: Set[str] = {
+            sample.data_delivery or self.NO_VALUE for sample in self.samples
+        }
 
         if len(data_deliveries) > 1:
             raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
-        return data_deliveries.pop().lower().replace(" ", "-")
+        return data_deliveries.pop().lower().replace(" + ", "-").replace(" ", "_")
 
     def get_customer_id(self) -> str:
         """Set the customer id"""
