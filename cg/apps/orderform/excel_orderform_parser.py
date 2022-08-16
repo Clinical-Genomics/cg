@@ -14,7 +14,7 @@ from cg.exc import OrderFormError
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
 
-from cg.constants.orderforms import Orderform
+from cg.constants.orderforms import Orderform, ORDERFORM_VERSIONS
 
 LOG = logging.getLogger(__name__)
 
@@ -24,11 +24,11 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        f"{Orderform.MIP_DNA}:27",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
-        f"{Orderform.MICROSALT}:11",  # Microbial WGS
-        f"{Orderform.RML}:15",  # Orderform Ready made libraries (RML)
-        f"{Orderform.METAGENOME}:10",  # Microbial meta genomes
-        f"{Orderform.SARS_COV_2}:7",  # Orderform SARS-CoV-2
+        f"{Orderform.MIP_DNA}:{ORDERFORM_VERSIONS[Orderform.MIP_DNA]}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
+        f"{Orderform.MICROSALT}:{ORDERFORM_VERSIONS[Orderform.MICROSALT]}",  # Microbial WGS
+        f"{Orderform.RML}:{ORDERFORM_VERSIONS[Orderform.RML]}",  # Orderform Ready made libraries (RML)
+        f"{Orderform.METAGENOME}:{ORDERFORM_VERSIONS[Orderform.METAGENOME]}",  # Microbial meta genomes
+        f"{Orderform.SARS_COV_2}:{ORDERFORM_VERSIONS[Orderform.SARS_COV_2]}",  # Orderform SARS-CoV-2
     ]
     samples: List[ExcelSample] = []
 
@@ -193,21 +193,20 @@ class ExcelOrderformParser(OrderformParser):
         if self.is_from_orderform_without_data_delivery(data_delivery):
             return self.default_delivery_type(project_type)
 
-        if data_delivery == "fastq-qc":
-            return DataDelivery.FASTQ_QC
-        if data_delivery == "fastq-+-analysis":
-            return DataDelivery.FASTQ_ANALYSIS
-        if data_delivery == "analysis-+-scout":
-            return DataDelivery.ANALYSIS_SCOUT
-        if data_delivery == "fastq-+-analysis-+-scout":
-            return DataDelivery.FASTQ_ANALYSIS_SCOUT
-        if data_delivery == "fastq-qc-+-analysis":
-            return DataDelivery.FASTQ_QC_ANALYSIS
-
+        delivery_type_map = {
+            "fastq-qc": DataDelivery.FASTQ_QC,
+            "fastq-+-analysis": DataDelivery.FASTQ_ANALYSIS,
+            "analysis-+-scout": DataDelivery.ANALYSIS_SCOUT,
+            "fastq-+-analysis-+-scout": DataDelivery.FASTQ_ANALYSIS_SCOUT,
+            "fastq-qc-+-analysis": DataDelivery.FASTQ_QC_ANALYSIS,
+            "fastq-+-scout": DataDelivery.FASTQ_SCOUT,
+        }
+        if data_delivery in delivery_type_map:
+            return delivery_type_map[data_delivery]
         try:
             return DataDelivery(data_delivery)
-        except ValueError:
-            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}")
+        except ValueError as e:
+            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from e
 
     def parse_data_delivery(self) -> str:
 

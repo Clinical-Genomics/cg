@@ -20,7 +20,7 @@ branch_labels = None
 depends_on = None
 
 Base = declarative_base()
-added_options = ("fastq-analysis", "fastq-analysis-scout", "analysis-scout")
+added_options = ("fastq-analysis", "fastq-analysis-scout", "analysis-scout", "fastq-scout")
 removed_options = ("analysis-bam", "fastq_qc-analysis-cram", "fastq_qc-analysis-cram-scout")
 
 old_options = (

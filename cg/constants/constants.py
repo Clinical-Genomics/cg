@@ -62,6 +62,7 @@ class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"
     FASTQ: str = "fastq"
+    FASTQ_SCOUT: str = "fastq-scout"
     FASTQ_QC: str = "fastq_qc"
     FASTQ_ANALYSIS: str = "fastq-analysis"
     FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"

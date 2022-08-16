@@ -13,6 +13,8 @@ CASE_PROJECT_TYPES = [
     str(OrderType.MIP_RNA),
 ]
 
+ORDERFORM_VERSIONS = {"1508": "27", "1604": "15", "1605": "10", "1603": "11", "2184": "7"}
+
 
 class Orderform(StrEnum):
     BALSAMIC: str = "1508"
