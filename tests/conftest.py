@@ -7,7 +7,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator, Dict
+from typing import Generator, Dict, List
 
 import pytest
 
@@ -595,18 +595,38 @@ def fixture_compression_object(
 @pytest.fixture(name="demultiplex_fixtures")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixtures"""
-    return apps_dir / "demultiplexing"
+    return Path(apps_dir, "demultiplexing")
 
 
 @pytest.fixture(name="demultiplexed_runs")
 def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return demultiplex_fixtures / "demultiplexed-runs"
+    return Path(demultiplex_fixtures, "demultiplexed-runs")
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a novaseq bcl2fastq sample sheet"""
-    return demultiplex_fixtures / "SampleSheetS2_Dragen.csv"
+    return Path(demultiplex_fixtures, "SampleSheetS2_Dragen.csv")
+
+
+@pytest.fixture(name="raw_lims_sample_dir")
+def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the raw samples fixtures"""
+    return Path(demultiplex_fixtures, "raw_lims_samples")
+
+
+@pytest.fixture(name="lims_novaseq_samples_file")
+def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
+    """Return the path to a file with sample info in lims format"""
+    return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
+
+
+@pytest.fixture(name="lims_novaseq_samples_raw")
+def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
+    """Return a list of raw flowcell samples"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
+    )
 
 
 @pytest.fixture(name="flowcell_full_name")
