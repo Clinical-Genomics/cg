@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 from typing import List
 
@@ -11,6 +10,8 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleBcl2Fastq,
     LimsFlowcellSampleDragen,
 )
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -126,35 +127,37 @@ def fixture_raw_lims_sample(flowcell_name: str) -> LimsFlowcellSample:
 @pytest.fixture(name="lims_novaseq_samples_file")
 def fixture_lims_novaseq_samples_file(raw_samples_dir: Path) -> Path:
     """Return the path to a file with sample info in lims format"""
-    return raw_samples_dir / "raw_samplesheet_novaseq.json"
+    return Path(raw_samples_dir, "raw_samplesheet_novaseq.json")
+
+
+@pytest.fixture(name="lims_novaseq_samples_raw")
+def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
+    """Return a list of raw flowcell samples"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
+    )
 
 
 @pytest.fixture(name="lims_novaseq_samples")
-def fixture_lims_novaseq_samples(lims_novaseq_samples_file: Path) -> List[LimsFlowcellSample]:
+def fixture_lims_novaseq_samples(lims_novaseq_samples_raw: List[dict]) -> List[LimsFlowcellSample]:
     """Return a list of parsed flowcell samples"""
-    with open(lims_novaseq_samples_file, "r") as in_file:
-        raw_samples: List[dict] = json.load(in_file)
-        return [LimsFlowcellSample(**sample) for sample in raw_samples]
+    return [LimsFlowcellSample(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
 def fixture_lims_novaseq_bcl2fastq_samples(
-    lims_novaseq_samples_file: Path,
+    lims_novaseq_samples_raw: List[dict],
 ) -> List[LimsFlowcellSampleBcl2Fastq]:
-    """Return a list of parsed flowcell samples"""
-    with open(lims_novaseq_samples_file, "r") as in_file:
-        raw_samples: List[dict] = json.load(in_file)
-        return [LimsFlowcellSampleBcl2Fastq(**sample) for sample in raw_samples]
+    """Return a list of parsed flow cell samples"""
+    return [LimsFlowcellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_dragen_samples")
 def fixture_lims_novaseq_dragen_samples(
-    lims_novaseq_samples_file: Path,
+    lims_novaseq_samples_raw: List[dict],
 ) -> List[LimsFlowcellSampleDragen]:
     """Return a list of parsed flowcell samples"""
-    with open(lims_novaseq_samples_file, "r") as in_file:
-        raw_samples: List[dict] = json.load(in_file)
-        return [LimsFlowcellSampleDragen(**sample) for sample in raw_samples]
+    return [LimsFlowcellSampleDragen(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="novaseq_run_parameters_object")
