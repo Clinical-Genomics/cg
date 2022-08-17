@@ -1,7 +1,7 @@
 path,path_index,step,tag,id,format
 PATHTOCASE/fusioncatcher/CASEID.fusioncatcher.fusion-genes.txt,,fusioncatcher,fusioncatcher,CASEID,tsv
-PATHTOCASE/fusioncatcher/CASEID.fusioncatcher.summary.txt,,fusioncatcher,fusioncatcher_summary,CASEID,txt
+PATHTOCASE/fusioncatcher/CASEID.fusioncatcher.summary.txt,,fusioncatcher_summary,fusioncatcher_summary,CASEID,txt
 PATHTOCASE/pizzly/CASEID.pizzly.txt,,pizzly,pizzly,CASEID,tsv
-PATHTOCASE/starfusion/CASEID.starfusion.fusion_predictions.tsv,,starfusion,star-fusion,CASEID,tsv
+PATHTOCASE/starfusion/CASEID.starfusion.fusion_predictions.tsv,,star-fusion,star-fusion,CASEID,tsv
 PATHTOCASE/arriba/CASEID.arriba.fusions.tsv,,arriba,arriba,CASEID,tsv
 PATHTOCASE/arriba/CASEID.squid.fusions.annotated.txt,,squid,squid,CASEID,tsv
