@@ -167,6 +167,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             "-log": self.get_log_path(case_id, log),
         }
 
+    def get_pipeline_version(self, case_id: str) -> str:
+        try:
+            self.process.run_command(["-version"])
+            return list(self.process.stdout_lines())[0].split()[-1]
+        except (Exception, CalledProcessError):
+            LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
+            return "0.0.0"
+
     @staticmethod
     def __build_command_str(options: dict) -> List[str]:
         formatted_options = []
