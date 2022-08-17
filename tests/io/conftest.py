@@ -4,14 +4,20 @@ import pytest
 
 
 @pytest.fixture(name="json_stream")
-def json_stream() -> str:
+def fixture_json_stream() -> str:
     """Return string with json format"""
     _content = """{"Lorem": {"ipsum": "sit"}}"""
     return _content
 
 
+@pytest.fixture(name="json_temp_path")
+def fixture_json_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when wrtiting json"""
+    return Path(cg_dir, "write_json.json")
+
+
 @pytest.fixture(name="yaml_stream")
-def yaml_stream() -> str:
+def fixture_yaml_stream() -> str:
     """Return string with yaml format"""
     _content = """- Lorem
 - ipsum
@@ -22,7 +28,7 @@ def yaml_stream() -> str:
 
 
 @pytest.fixture(name="invalid_yaml_file")
-def invalid_yaml_file(project_dir: Path) -> Path:
+def fixture_invalid_yaml_file(project_dir: Path) -> Path:
     """Return path for invalid yaml file"""
     content = """a: b: c"""
     invalid_yaml: Path = Path(project_dir, "invalid_yaml_file.txt")

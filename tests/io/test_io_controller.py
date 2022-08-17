@@ -102,14 +102,13 @@ def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
     assert raw_sample_info == written_raw_sample_info
 
 
-def test_write_file_from_content_when_json(mip_json_order_form_path: Path, cg_dir: Path):
+def test_write_file_from_content_when_json(mip_json_order_form_path: Path, json_temp_path: Path):
     """
     Tests write_file_from_content when json
     """
     # GIVEN a json file
 
     # GIVEN a file path to write to
-    json_file: Path = Path(cg_dir, "write_json.json")
 
     # WHEN reading the json file
     raw_mip_order_form: list = ReadFile.get_content_from_file(
@@ -118,15 +117,15 @@ def test_write_file_from_content_when_json(mip_json_order_form_path: Path, cg_di
 
     # WHEN writing the json file from list
     WriteFile.write_file_from_content(
-        content=raw_mip_order_form, file_format=FileFormat.JSON, file_path=json_file
+        content=raw_mip_order_form, file_format=FileFormat.JSON, file_path=json_temp_path
     )
 
     # THEN assert that a file was successfully created
-    assert Path.exists(json_file)
+    assert Path.exists(json_temp_path)
 
     # WHEN reading it as a yaml
     written_raw_sample_info: list = ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=json_file
+        file_format=FileFormat.JSON, file_path=json_temp_path
     )
 
     # THEN assert that all data is kept
@@ -162,10 +161,10 @@ def test_write_json_stream_from_content(json_stream: str):
     raw_content: list = ReadStream.get_content_from_stream(
         file_format=FileFormat.JSON, stream=json_stream
     )
-    # WHEN writing a jsoon stream
+    # WHEN writing a json stream
     json_content = WriteStream.write_stream_from_content(
         content=raw_content, file_format=FileFormat.JSON
     )
 
-    # THEN assert all data is kept abd in yaml format
+    # THEN assert all data is kept abd in json format
     assert json_stream == json_content

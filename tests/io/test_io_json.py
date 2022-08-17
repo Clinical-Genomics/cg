@@ -29,26 +29,25 @@ def test_get_content_from_stream(json_stream: str):
     assert isinstance(raw_content, dict)
 
 
-def test_write_json(mip_json_order_form_path: Path, cg_dir: Path):
+def test_write_json(mip_json_order_form_path: Path, json_temp_path: Path):
     """
     Tests write_json
     """
     # GIVEN a json file
 
     # GIVEN a file path to write to
-    json_file: Path = Path(cg_dir, "write_json.json")
 
     # WHEN reading the json file
     raw_mip_order_form: dict = read_json(file_path=mip_json_order_form_path)
 
     # WHEN writing the json file from dict
-    write_json(content=raw_mip_order_form, file_path=json_file)
+    write_json(content=raw_mip_order_form, file_path=json_temp_path)
 
     # THEN assert that a file was successfully created
-    assert Path.exists(json_file)
+    assert Path.exists(json_temp_path)
 
     # WHEN reading it as a json
-    written_raw_mip_order_form: dict = read_json(file_path=json_file)
+    written_raw_mip_order_form: dict = read_json(file_path=json_temp_path)
 
     # THEN assert that all data is kept
     assert raw_mip_order_form == written_raw_mip_order_form
@@ -58,10 +57,10 @@ def test_write_json_stream(json_stream: str):
     """
     Tests write_json_stream
     """
-    # GIVEN a list
+    # GIVEN a dict
     raw_content: dict = read_json_stream(stream=json_stream)
 
-    # WHEN writing the list to a json stream
+    # WHEN writing the dict to a json stream
     json_content = write_json_stream(content=raw_content)
 
     # THEN assert that all data is kept and properly formatted
