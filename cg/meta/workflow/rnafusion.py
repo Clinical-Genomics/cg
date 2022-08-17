@@ -284,5 +284,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         df["path_index"] = "~"
         text = yaml.dump(df.to_dict(orient="records")).replace("'~'", "~")
         deliver_file = open(self.get_deliverables_file_path(case_id), "w")
+        deliver_file.write("files:")
         deliver_file.write(text)
         deliver_file.close()
