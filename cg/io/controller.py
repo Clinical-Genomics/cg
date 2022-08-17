@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Any
 
 from cg.constants.constants import FileFormat
 from cg.io.json import read_json, write_json, write_json_stream, read_json_stream
@@ -15,7 +15,7 @@ class ReadFile:
     }
 
     @classmethod
-    def get_content_from_file(cls, file_format: str, file_path: Path) -> Union[dict, list]:
+    def get_content_from_file(cls, file_format: str, file_path: Path) -> Any:
         """Read file using file format dispatch table"""
         return cls.read_file[file_format](file_path=file_path)
 
@@ -29,9 +29,7 @@ class ReadStream:
     }
 
     @classmethod
-    def get_content_from_stream(
-        cls, file_format: str, stream: Union[dict, list]
-    ) -> Union[dict, list]:
+    def get_content_from_stream(cls, file_format: str, stream: Any) -> Any:
         """Read stream using file format dispatch table"""
         return cls.read_stream[file_format](stream=stream)
 
@@ -45,7 +43,7 @@ class WriteFile:
     }
 
     @classmethod
-    def write_file_from_content(cls, content: dict, file_format: str, file_path: Path) -> None:
+    def write_file_from_content(cls, content: Any, file_format: str, file_path: Path) -> None:
         """write file using file format dispatch table"""
         cls.write_file[file_format](content=content, file_path=file_path)
 
@@ -59,6 +57,6 @@ class WriteStream:
     }
 
     @classmethod
-    def write_stream_from_content(cls, content: dict, file_format: str) -> str:
+    def write_stream_from_content(cls, content: Any, file_format: str) -> str:
         """write stream using file format dispatch table"""
         return cls.write_stream[file_format](content=content)
