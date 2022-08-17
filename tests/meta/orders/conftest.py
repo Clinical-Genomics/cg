@@ -14,6 +14,7 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
+from tests.apps.orderform.conftest import *
 
 
 @pytest.fixture

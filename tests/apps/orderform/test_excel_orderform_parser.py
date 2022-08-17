@@ -226,3 +226,10 @@ def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, c
     assert order.samples
     # THEN assert that no cases where found since this is an RML order
     assert not order.cases
+
+
+def test_parse_data_delivery(microbial_order_parser):
+    """Tests that the data_delivery field is correctly parsed and translated to a value in the
+    data_delivery enum"""
+    data_delivery = microbial_order_parser.get_data_delivery()
+    assert data_delivery

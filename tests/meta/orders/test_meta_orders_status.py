@@ -1,4 +1,5 @@
 import datetime as dt
+from copy import deepcopy
 
 import pytest
 
@@ -177,7 +178,8 @@ def test_cases_to_status(mip_order_to_submit):
 
 def test_cases_to_status_synopsis(mip_order_to_submit):
     # GIVEN a scout order with a trio case where synopsis is None
-    for sample in mip_order_to_submit["samples"]:
+    modified_order: dict = deepcopy(mip_order_to_submit)
+    for sample in modified_order["samples"]:
         sample["synopsis"] = None
 
     project: OrderType = OrderType.MIP_DNA

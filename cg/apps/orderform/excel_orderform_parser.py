@@ -190,7 +190,7 @@ class ExcelOrderformParser(OrderformParser):
         if len(data_deliveries) > 1:
             raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
-        return data_deliveries.pop().lower().replace(" + ", "-").replace(" ", "_")
+        return self._transform_data_delivery(data_deliveries.pop())
 
     def get_customer_id(self) -> str:
         """Set the customer id"""
@@ -227,3 +227,8 @@ class ExcelOrderformParser(OrderformParser):
         self.delivery_type = self.get_data_delivery()
         self.customer_id = self.get_customer_id()
         self.order_name = Path(excel_path).stem
+
+    @staticmethod
+    def _transform_data_delivery(data_delivery: str) -> str:
+        """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
+        return data_delivery.lower().replace(" + ", "-").replace(" ", "_")
