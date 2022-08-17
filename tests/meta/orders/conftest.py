@@ -14,7 +14,16 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
-from tests.apps.orderform.conftest import *
+from tests.apps.orderform.conftest import (
+    balsamic_order_to_submit,
+    fastq_order_to_submit,
+    metagenome_order_to_submit,
+    microbial_order_to_submit,
+    mip_order_to_submit,
+    mip_rna_order_to_submit,
+    rml_order_to_submit,
+    sarscov2_order_to_submit,
+)
 
 
 @pytest.fixture
