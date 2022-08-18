@@ -1,7 +1,7 @@
 """Modifies available delivery options
 
 Revision ID: 2968d39ac35f
-Revises: ddc94088be4d
+Revises: 9c9ca9407227
 Create Date: 2022-07-19 13:34:18.685207
 
 """
@@ -15,7 +15,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, types, orm
 
 revision = "2968d39ac35f"
-down_revision = "ddc94088be4d"
+down_revision = "9c9ca9407227"
 branch_labels = None
 depends_on = None
 
