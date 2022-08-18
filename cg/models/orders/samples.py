@@ -101,8 +101,6 @@ class Of1508Sample(OrderInSample):
     # This information is required for panel- or exome analysis
     elution_buffer: Optional[str]
     tumour_purity: Optional[int]
-    # This information is required for BalsamicQC analysis
-    reference_genome: Optional[GenomeVersion]
     # "This information is optional for FFPE-samples for new samples"
     formalin_fixation_time: Optional[int]
     post_formalin_fixation_time: Optional[int]
@@ -160,6 +158,7 @@ class BalsamicSample(Of1508Sample):
 
 class BalsamicQCSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC_QC
+    reference_genome: Optional[GenomeVersion]
 
 
 class BalsamicUmiSample(Of1508Sample):
