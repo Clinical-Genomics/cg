@@ -18,6 +18,8 @@ from cg.store import models
 from cg.utils import Process
 from cg import resources
 from datetime import datetime
+from subprocess import CalledProcessError
+
 
 LOG = logging.getLogger(__name__)
 
@@ -170,7 +172,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_pipeline_version(self, case_id: str) -> str:
         try:
             self.process.run_command(["-version"])
-            return list(self.process.stdout_lines())[0].split()[-1]
+            return list(self.process.stdout_lines())[2].split()[1]
         except (Exception, CalledProcessError):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
