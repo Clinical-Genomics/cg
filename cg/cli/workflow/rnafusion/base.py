@@ -151,7 +151,6 @@ def run(
         )
         if dry_run:
             return
-        # analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except CgError as e:
         LOG.error(f"Could not run analysis: {e.message}")
@@ -272,7 +271,6 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
-        # analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         if not dry_run:
             analysis_api.report_deliver(case_id=case_id)
     except CgError as e:
