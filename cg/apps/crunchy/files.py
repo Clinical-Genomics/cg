@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile, ReadStream, WriteStream
+from cg.io.controller import ReadFile, ReadStream, WriteStream, WriteFile
 from cg.utils.date import get_date
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
@@ -94,10 +94,6 @@ def update_metadata_date(spring_metadata_path: Path) -> None:
     content: dict = ReadStream.get_content_from_stream(
         file_format=FileFormat.JSON, stream=spring_metadata.json(exclude_none=True)
     )
-
-    with open(spring_metadata_path, "w") as outfile:
-        outfile.write(
-            WriteStream.write_stream_from_content(
-                content=content["files"], file_format=FileFormat.JSON
-            )
-        )
+    WriteFile.write_file_from_content(
+        content=content["files"], file_format=FileFormat.JSON, file_path=spring_metadata_path
+    )
