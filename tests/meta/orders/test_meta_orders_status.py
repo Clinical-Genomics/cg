@@ -156,7 +156,10 @@ def test_cases_to_status(mip_order_to_submit):
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == Priority.standard.name
     assert family["cohorts"] == ["Other"]
-    assert family["synopsis"] == "Här kommer det att komma en väldigt lång text med för synopsis."
+    assert (
+        family["synopsis"]
+        == "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for."
+    )
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
 
@@ -489,7 +492,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert set(new_case.cohorts) == {"Other"}
     assert (
         new_case.synopsis
-        == "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
+        == "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for."
     )
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"

@@ -33,7 +33,7 @@ class ExcelOrderformParser(OrderformParser):
     samples: List[ExcelSample] = []
 
     def check_orderform_version(self, document_title: str) -> None:
-        """Raise an error if the orderform is too new or too old for the order portal."""
+        """Raise an error if the orderform is too new or too old for the order portal"""
         LOG.info("Validating that %s is a correct orderform version", document_title)
         for valid_orderform in self.VALID_ORDERFORMS:
             if valid_orderform in document_title:
@@ -172,7 +172,7 @@ class ExcelOrderformParser(OrderformParser):
         return data_analyses.pop().lower().replace(" ", "-")
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data delivery type."""
+        """Determine the order_data delivery type"""
 
         data_delivery: str = self.parse_data_delivery()
 
@@ -201,7 +201,7 @@ class ExcelOrderformParser(OrderformParser):
         return customers.pop()
 
     def parse_orderform(self, excel_path: str) -> None:
-        """Parse out information from an order form."""
+        """Parse out information from an order form"""
 
         LOG.info("Open excel workbook from file %s", excel_path)
         workbook: Workbook = openpyxl.load_workbook(
