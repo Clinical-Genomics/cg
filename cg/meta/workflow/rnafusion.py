@@ -64,7 +64,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def make_case_folder(self, case_id: str) -> None:
         """Make the case folder where rnafusion analysis should be located"""
-        self.get_case_path(case_id)
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
     def write_samplesheet(self, case_id: str, strandedness="reverse") -> None:
