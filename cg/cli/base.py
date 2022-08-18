@@ -22,7 +22,6 @@ from .clean import clean
 from .compress.base import compress, decompress
 from .deliver.base import deliver as deliver_cmd
 from .demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
-from .deploy.base import deploy as deploy_cmd
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
@@ -105,7 +104,6 @@ base.add_command(transfer_group)
 base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
-base.add_command(deploy_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
