@@ -46,9 +46,8 @@ def rnafusion(context: click.Context) -> None:
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
         return None
-    config = context.obj
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(
-        config=config,
+        config=context.obj,
     )
 
 
