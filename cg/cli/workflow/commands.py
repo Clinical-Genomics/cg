@@ -276,7 +276,7 @@ def mutant_past_run_dirs(
 @click.pass_context
 def rnafusion_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
-):
+) -> None:
     """Clean up of "old" RNAFUSION case run dirs"""
 
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(context.obj)

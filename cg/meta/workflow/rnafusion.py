@@ -1,4 +1,4 @@
-"""Module for Balsamic Analysis API"""
+"""Module for Rnafusion Analysis API"""
 
 import json
 import logging
@@ -59,7 +59,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return Path(self.root_dir, case_id)
 
     def get_case_config_path(self, case_id: str) -> Path:
-        """Generates a path where the Rnafusion samplesheet for the case_id should be located."""
+        """Generates a path where the Rnafusion sample sheet for the case_id should be located"""
         return Path((self.get_case_path(case_id)), case_id + "_samplesheet.csv")
 
     def make_case_folder(self, case_id: str) -> None:
@@ -68,7 +68,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
     def write_samplesheet(self, case_id: str, strandedness="reverse") -> None:
-        """Write samplesheet for rnafusion analysis in case folder"""
+        """Write sample sheet for rnafusion analysis in case folder"""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
             file_collection = pd.DataFrame(self.gather_file_metadata_for_sample(link.sample))
@@ -179,7 +179,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def __build_command_str(options: dict) -> List[str]:
-        formatted_options = []
+        formatted_options: list = []
         for key, val in options.items():
             if val:
                 formatted_options.append(str(key))
@@ -191,7 +191,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         case_id: str,
         strandedness: str,
     ) -> None:
-        """Create samplesheet file for RNAFUSION analysis"""
+        """Create sample sheet file for RNAFUSION analysis"""
         self.make_case_folder(case_id)
         if not (self.get_case_config_path(case_id)).is_file():
             LOG.info("Samplesheet does not exist, writing samplesheet")

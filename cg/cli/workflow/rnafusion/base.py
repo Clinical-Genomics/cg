@@ -1,4 +1,4 @@
-"""CLI support to create config and/or start BALSAMIC """
+"""CLI support to create config and/or start RNAFUSION"""
 
 import logging
 import click
@@ -41,7 +41,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def rnafusion(context: click.Context):
+def rnafusion(context: click.Context) -> None:
     """nf-core/rnafusion analysis workflow"""
     if context.invoked_subcommand is None:
         click.echo(context.get_help())
@@ -63,7 +63,7 @@ def config_case(
     context: CGConfig,
     case_id: str,
     strandedness: str,
-):
+) -> None:
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID"""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -121,7 +121,7 @@ def run(
     fusioncatcher: bool,
     arriba: bool,
     dry_run: bool,
-):
+) -> None:
     """Run rnafusion analysis for given CASE ID"""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
@@ -203,7 +203,7 @@ def start(
     fusioncatcher: bool,
     arriba: bool,
     dry_run: bool,
-):
+) -> None:
     """Start full workflow for CASE ID"""
     LOG.info(f"Starting analysis for {case_id}")
     try:
@@ -241,7 +241,7 @@ def start(
 @rnafusion.command("start-available")
 @DRY_RUN
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool = False):
+def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start full workflow for all cases ready for analysis"""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
@@ -264,7 +264,7 @@ def start_available(context: click.Context, dry_run: bool = False):
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.pass_obj
-def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
+def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a housekeeper deliverables file for given CASE ID"""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -286,8 +286,8 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
 @rnafusion.command("store-housekeeper")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str):
-    """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
+def store_housekeeper(context: CGConfig, case_id: str) -> None:
+    """Store a finished RNAFUSION analysis in Housekeeper and StatusDB"""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -316,7 +316,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool):
+def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
