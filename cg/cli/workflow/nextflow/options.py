@@ -1,4 +1,4 @@
-"""CLI support for nextflow pipelines """
+"""CLI support for nextflow pipelines"""
 
 import click
 
