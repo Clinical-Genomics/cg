@@ -81,7 +81,7 @@ class StatusHandler(BaseHandler):
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
         cases = self.get_families_with_extended_models()
-        filters = ["cases_has_sequence", "cases_with_pipeline"]
+        filters = ["cases_has_sequence", "cases_with_pipeline", "filter_cases_for_analysis"]
         for function in filters:
             cases = apply_filter(function=function, cases=cases, pipeline=pipeline)
 
@@ -90,20 +90,21 @@ class StatusHandler(BaseHandler):
             # families: List[Query] = list(self.get_families_with_extended_models()
             # .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
             # .filter(models.Family.data_analysis == str(pipeline))
-            .filter(
-                or_(
-                    models.Family.action == CaseActions.ANALYZE,
-                    and_(
-                        models.Application.is_external.isnot(True),
-                        models.Family.action.is_(None),
-                        models.Analysis.created_at.is_(None),
-                    ),
-                    and_(
-                        models.Family.action.is_(None),
-                        models.Analysis.created_at < models.Sample.sequenced_at,
-                    ),
-                )
-            ).order_by(models.Family.ordered_at)
+            # .filter(
+            #    or_(
+            #       models.Family.action == CaseActions.ANALYZE,
+            #       and_(
+            #           models.Application.is_external.isnot(True),
+            #           models.Family.action.is_(None),
+            #           models.Analysis.created_at.is_(None),
+            #       ),
+            #       and_(
+            ##           models.Family.action.is_(None),
+            #           models.Analysis.created_at < models.Sample.sequenced_at,
+            #       ),
+            #   )
+            # )
+            .order_by(models.Family.ordered_at)
         )
         families = [
             case_obj
