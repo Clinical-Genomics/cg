@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
@@ -8,7 +7,9 @@ from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
+from cg.constants.constants import CaseActions
 from cg.store import models
+from cg.store.status_case_filters import apply_filter
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
 
@@ -66,23 +67,32 @@ class StatusHandler(BaseHandler):
             .order_by(models.Sample.received_at)
         )
 
+    def get_families_with_extended_models(self) -> Query:
+        """Return all cases in the database with links, samples, applications and application version"""
+        return self.Family.query.outerjoin(models.Analysis).join(
+            models.Family.links,
+            models.FamilySample.sample,
+            models.ApplicationVersion,
+            models.Application,
+        )
+
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
-        families_query = list(
-            self.Family.query.outerjoin(models.Analysis)
-            .join(
-                models.Family.links,
-                models.FamilySample.sample,
-                models.ApplicationVersion,
-                models.Application,
-            )
-            .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Family.data_analysis == str(pipeline))
+        cases = self.get_families_with_extended_models()
+        filters = ["cases_has_sequence", "cases_with_pipeline"]
+        for function in filters:
+            cases = apply_filter(function=function, cases=cases, pipeline=pipeline)
+
+        families: List[Query] = list(
+            cases
+            # families: List[Query] = list(self.get_families_with_extended_models()
+            # .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
+            # .filter(models.Family.data_analysis == str(pipeline))
             .filter(
                 or_(
-                    models.Family.action == "analyze",
+                    models.Family.action == CaseActions.ANALYZE,
                     and_(
                         models.Application.is_external.isnot(True),
                         models.Family.action.is_(None),
@@ -93,25 +103,35 @@ class StatusHandler(BaseHandler):
                         models.Analysis.created_at < models.Sample.sequenced_at,
                     ),
                 )
-            )
-            .order_by(models.Family.ordered_at)
+            ).order_by(models.Family.ordered_at)
         )
-        families_query = [
+        families = [
             case_obj
-            for case_obj in families_query
+            for case_obj in families
             if case_obj.latest_sequenced
             and (
-                case_obj.action == "analyze"
+                case_obj.action == CaseActions.ANALYZE
                 or not case_obj.latest_analyzed
                 or case_obj.latest_analyzed < case_obj.latest_sequenced
             )
         ]
 
         if threshold:
-            families_query = [
-                case_obj for case_obj in families_query if case_obj.all_samples_pass_qc
-            ]
-        return families_query[:limit]
+            families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
+        return families[:limit]
+
+    def get_cases_to_analyze(
+        self, pipeline: Pipeline = None, use_reads_threshold: bool = False
+    ) -> List[models.Family]:
+        cases_query: List[models.Family] = self.cases_to_analyze(
+            pipeline=pipeline, threshold=use_reads_threshold
+        )
+        cases_to_analyze: List[models.Family] = []
+        case: models.Family
+        for case in cases_query:
+            if case.action == CaseActions.ANALYZE or not case.latest_analyzed:
+                cases_to_analyze.append(case)
+        return cases_to_analyze
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
         """Returns a list of cases that may be available to store in Housekeeper"""

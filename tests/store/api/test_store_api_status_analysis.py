@@ -2,6 +2,8 @@
 from datetime import datetime
 
 from cg.constants import Pipeline
+from cg.constants.constants import CaseActions
+from cg.constants.subject import Gender
 from cg.store import Store
 
 
@@ -95,6 +97,28 @@ def test_case_to_re_analyse(base_store: Store, helpers):
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=pipeline)
+
+    # THEN cases should contain the test case
+    assert cases
+    assert test_analysis.family in cases
+
+
+def test_get_case_to_analyse(base_store: Store, helpers):
+    """Test that a case marked for ranalyse with one sample that has been sequenced and
+    with completed analysis do show up among the cases to analyse"""
+
+    # GIVEN a database with a case with one of one sequenced samples and completed analysis
+    pipeline = Pipeline.MIP_DNA
+    test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    assert test_sample.sequenced_at
+    test_analysis = helpers.add_analysis(base_store, completed_at=datetime.now(), pipeline=pipeline)
+    assert test_analysis.completed_at
+    test_analysis.family.action = CaseActions.ANALYZE
+    assert test_analysis.family.action == CaseActions.ANALYZE
+    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+
+    # WHEN getting cases to analyse
+    cases = base_store.get_cases_to_analyze(pipeline=pipeline, use_reads_threshold=False)
 
     # THEN cases should contain the test case
     assert cases
