@@ -80,9 +80,13 @@ class StatusHandler(BaseHandler):
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
-        cases = self.get_families_with_extended_models()
-        filters = ["cases_has_sequence", "cases_with_pipeline", "filter_cases_for_analysis"]
-        for function in filters:
+        cases: Query = self.get_families_with_extended_models()
+        filter_functions: str = [
+            "cases_has_sequence",
+            "cases_with_pipeline",
+            "filter_cases_for_analysis",
+        ]
+        for function in filter_functions:
             cases = apply_filter(function=function, cases=cases, pipeline=pipeline)
 
         families: List[Query] = list(

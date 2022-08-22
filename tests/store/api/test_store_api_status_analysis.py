@@ -35,7 +35,7 @@ def test_that_cases_can_have_many_samples(base_store: Store, helpers):
     )
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_case = helpers.add_case(base_store, "family_one_sample")
-    base_store.relate_sample(test_case, test_sample, "unknown")
+    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -54,8 +54,8 @@ def test_external_sample_to_re_analyse(base_store: Store, helpers):
     pipeline = Pipeline.MIP_DNA
     test_sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
     test_analysis = helpers.add_analysis(base_store, completed_at=datetime.now(), pipeline=pipeline)
-    test_analysis.family.action = "analyze"
-    base_store.relate_sample(test_analysis.family, test_sample, "unknown")
+    test_analysis.family.action = CaseActions.ANALYZE
+    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=pipeline)
@@ -72,7 +72,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers):
     pipeline = Pipeline.BALSAMIC
     test_sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
     test_case = helpers.add_case(base_store, data_analysis=pipeline)
-    base_store.relate_sample(test_case, test_sample, "unknown")
+    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=pipeline)
@@ -91,9 +91,9 @@ def test_case_to_re_analyse(base_store: Store, helpers):
     assert test_sample.sequenced_at
     test_analysis = helpers.add_analysis(base_store, completed_at=datetime.now(), pipeline=pipeline)
     assert test_analysis.completed_at
-    test_analysis.family.action = "analyze"
-    assert test_analysis.family.action == "analyze"
-    base_store.relate_sample(test_analysis.family, test_sample, "unknown")
+    test_analysis.family.action = CaseActions.ANALYZE
+    assert test_analysis.family.action == CaseActions.ANALYZE
+    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=pipeline)
@@ -108,17 +108,21 @@ def test_get_case_to_analyse(base_store: Store, helpers):
     with completed analysis do show up among the cases to analyse"""
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    pipeline = Pipeline.MIP_DNA
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     assert test_sample.sequenced_at
-    test_analysis = helpers.add_analysis(base_store, completed_at=datetime.now(), pipeline=pipeline)
+
+    test_analysis = helpers.add_analysis(
+        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+    )
     assert test_analysis.completed_at
+
     test_analysis.family.action = CaseActions.ANALYZE
     assert test_analysis.family.action == CaseActions.ANALYZE
+
     base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
-    cases = base_store.get_cases_to_analyze(pipeline=pipeline, use_reads_threshold=False)
+    cases = base_store.get_cases_to_analyze(pipeline=Pipeline.MIP_DNA, use_reads_threshold=False)
 
     # THEN cases should contain the test case
     assert cases
@@ -132,8 +136,8 @@ def test_all_samples_and_analysis_completed(base_store: Store, helpers):
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_analysis = helpers.add_analysis(base_store, completed_at=datetime.now())
-    test_analysis.family.action = "analyze"
-    base_store.relate_sample(test_analysis.family, test_sample, "unknown")
+    test_analysis.family.action = CaseActions.ANALYZE
+    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -150,7 +154,7 @@ def test_specified_analysis_in_result(base_store: Store, helpers):
     pipeline = Pipeline.BALSAMIC
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_case = helpers.add_case(base_store, data_analysis=pipeline)
-    base_store.relate_sample(test_case, test_sample, "unknown")
+    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=pipeline)
@@ -167,7 +171,7 @@ def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers)
     # GIVEN a database with a case with one sequenced samples for specified analysis
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
-    base_store.relate_sample(test_case, test_sample, "unknown")
+    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -184,8 +188,8 @@ def test_one_of_two_sequenced_samples(base_store: Store, helpers):
     test_case = helpers.add_case(base_store)
     test_sample1 = helpers.add_sample(base_store, sequenced_at=datetime.now())
     test_sample2 = helpers.add_sample(base_store, sequenced_at=None)
-    base_store.relate_sample(test_case, test_sample1, "unknown")
-    base_store.relate_sample(test_case, test_sample2, "unknown")
+    base_store.relate_sample(test_case, test_sample1, Gender.UNKNOWN)
+    base_store.relate_sample(test_case, test_sample2, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA, threshold=True)
@@ -201,7 +205,7 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers):
     # GIVEN a database with a case with one of one sequenced samples and no analysis
     test_case = helpers.add_case(base_store)
     test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-    base_store.relate_sample(test_case, test_sample, "unknown")
+    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
     assert test_sample.sequenced_at is not None
 
     # WHEN getting cases to analyse
@@ -216,7 +220,7 @@ def relate_samples(base_store, family, samples):
     """utility function to relate many samples to one case"""
 
     for sample in samples:
-        base_store.relate_sample(family, sample, "unknown")
+        base_store.relate_sample(family, sample, Gender.UNKNOWN)
 
 
 def add_case_with_samples(base_store, helpers, case_name, n_samples, sequenced_at):

@@ -179,9 +179,11 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="rml_pool_store")
-def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket_number: int):
+def fixture_rml_pool_store(
+    case_id: str, customer_id: str, helpers, store: Store, ticket_number: int
+):
     new_customer = store.add_customer(
-        internal_id="cust000",
+        internal_id=customer_id,
         name="Test customer",
         scout_access=True,
         invoice_address="skolgatan 15",
