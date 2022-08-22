@@ -4,6 +4,7 @@ import pytest
 from typing import Iterable, List
 
 from cg.constants import Pipeline
+from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store, models
 from cg.store.api.import_func import (
@@ -205,7 +206,12 @@ def fixture_rml_pool_store(
         application=application,
         version=1,
         valid_from=dt.datetime.today(),
-        prices={"standard": 12, "priority": 222, "express": 123, "research": 12},
+        prices={
+            PriorityTerms.STANDARD: 12,
+            PriorityTerms.PRIORITY: 222,
+            PriorityTerms.EXPRESS: 123,
+            PriorityTerms.RESEARCH: 12,
+        },
     )
     store.add_commit(app_version)
 
@@ -272,3 +278,15 @@ def fixture_re_sequenced_sample_store(
     helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
 
     return re_sequenced_sample_store
+
+
+@pytest.fixture(name="max_nr_of_cases")
+def fixture_max_nr_of_cases() -> int:
+    """Return the number of maximum number of ceses"""
+    return 50
+
+
+@pytest.fixture(name="max_nr_of_samples")
+def fixture_max_nr_of_samples() -> int:
+    """Return the number of maximum number of samples"""
+    return 50
