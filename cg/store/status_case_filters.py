@@ -1,6 +1,5 @@
 from alchy import Query
 from sqlalchemy import and_, or_
-from typing import Dict
 
 from cg.constants.constants import CaseActions
 from cg.store import models
