@@ -68,7 +68,7 @@ class StatusHandler(BaseHandler):
         )
 
     def get_families_with_extended_models(self) -> Query:
-        """Return all cases in the database with links, samples, applications and application version"""
+        """Return all cases in the database with an analysis"""
         return self.Family.query.outerjoin(models.Analysis).join(
             models.Family.links,
             models.FamilySample.sample,
@@ -86,30 +86,10 @@ class StatusHandler(BaseHandler):
             "cases_with_pipeline",
             "filter_cases_for_analysis",
         ]
-        for function in filter_functions:
-            cases = apply_filter(function=function, cases=cases, pipeline=pipeline)
+        for filter_function in filter_functions:
+            cases = apply_filter(function=filter_function, cases=cases, pipeline=pipeline)
 
-        families: List[Query] = list(
-            cases
-            # families: List[Query] = list(self.get_families_with_extended_models()
-            # .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
-            # .filter(models.Family.data_analysis == str(pipeline))
-            # .filter(
-            #    or_(
-            #       models.Family.action == CaseActions.ANALYZE,
-            #       and_(
-            #           models.Application.is_external.isnot(True),
-            #           models.Family.action.is_(None),
-            #           models.Analysis.created_at.is_(None),
-            #       ),
-            #       and_(
-            ##           models.Family.action.is_(None),
-            #           models.Analysis.created_at < models.Sample.sequenced_at,
-            #       ),
-            #   )
-            # )
-            .order_by(models.Family.ordered_at)
-        )
+        families: List[Query] = list(cases.order_by(models.Family.ordered_at))
         families = [
             case_obj
             for case_obj in families
@@ -124,19 +104,6 @@ class StatusHandler(BaseHandler):
         if threshold:
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
-
-    def get_cases_to_analyze(
-        self, pipeline: Pipeline = None, use_reads_threshold: bool = False
-    ) -> List[models.Family]:
-        cases_query: List[models.Family] = self.cases_to_analyze(
-            pipeline=pipeline, threshold=use_reads_threshold
-        )
-        cases_to_analyze: List[models.Family] = []
-        case: models.Family
-        for case in cases_query:
-            if case.action == CaseActions.ANALYZE or not case.latest_analyzed:
-                cases_to_analyze.append(case)
-        return cases_to_analyze
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
         """Returns a list of cases that may be available to store in Housekeeper"""

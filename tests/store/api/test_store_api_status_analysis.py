@@ -1,6 +1,7 @@
 """This script tests the cli methods to add cases to status-db"""
 from typing import List
 
+from alchy import Query
 from datetime import datetime
 
 from cg.constants import Pipeline
@@ -8,6 +9,47 @@ from cg.constants.constants import CaseActions
 from cg.constants.subject import Gender
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
+
+
+def test_get_families_with_extended_models(base_store: Store, helpers: StoreHelpers):
+    """Test that a query is returned from the database"""
+
+    # GIVEN a sequenced sample
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+
+    # GIVEN a completed analysis
+    test_analysis: models.Analysis = helpers.add_analysis(
+        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+    )
+
+    # Given an action set to analyze
+    test_analysis.family.action: str = CaseActions.ANALYZE
+
+    # GIVEN a database with a case with one of one sequenced samples and completed analysis
+    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+
+    # WHEN getting cases to analyse
+    cases: List[Query] = list(base_store.get_families_with_extended_models())
+
+    case: models.Family = cases[0]
+
+    # THEN cases should be returned
+    assert cases
+
+    # THEN analysis should be part of cases attributes
+    assert case.analyses[0].pipeline == Pipeline.MIP_DNA
+
+
+def test_get_families_with_extended_models_when_no_case(base_store: Store):
+    """test that no case is returned from the database when no cases"""
+
+    # GIVEN an empty database
+
+    # WHEN getting cases to analyse
+    cases: List[Query] = list(base_store.get_families_with_extended_models())
+
+    # THEN no cases should be returned
+    assert not cases
 
 
 def test_that_many_cases_can_have_one_sample_each(
@@ -245,31 +287,3 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers: StoreHelpers):
 
     # THEN cases should contain the test case
     assert test_case in cases
-
-
-def test_get_case_to_analyse(base_store: Store, helpers: StoreHelpers):
-    """Test that a case marked for ranalyse with one sample that has been sequenced and
-    with completed analysis do show up among the cases to analyse"""
-
-    # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
-
-    # GIVEN a comleted analysis
-    test_analysis: models.Analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
-    )
-
-    # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
-
-    # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
-
-    # WHEN getting cases to analyse
-    cases = base_store.get_cases_to_analyze(pipeline=Pipeline.MIP_DNA, use_reads_threshold=False)
-
-    # THEN cases should be returned
-    assert cases
-
-    # THEN test case should be among the cases returned for analysis
-    assert test_analysis.family in cases
