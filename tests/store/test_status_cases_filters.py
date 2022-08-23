@@ -15,13 +15,15 @@ from cg.store.status_case_filters import (
 from tests.store_helpers import StoreHelpers
 
 
-def test_filter_cases_has_sequence(base_store: Store, helpers: StoreHelpers):
+def test_filter_cases_has_sequence(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case is returned when there is a cases with a sequenced sample"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
-    # GIVEN a cancer case
+    # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
@@ -37,13 +39,13 @@ def test_filter_cases_has_sequence(base_store: Store, helpers: StoreHelpers):
     assert cases
 
 
-def test_filter_cases_has_sequence_when_not_external(base_store: Store, helpers: StoreHelpers):
+def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: StoreHelpers):
     """Test that a case is returned when there is a case with an externally sequenced sample"""
 
     # GIVEN a sequenced sample
     test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
 
-    # GIVEN a cancer case
+    # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
@@ -65,7 +67,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     # GIVEN a sequenced sample
     test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None)
 
-    # GIVEN a cancer case
+    # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
@@ -81,7 +83,9 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     assert not cases
 
 
-def test_filter_cases_has_sequence_when_not_external(base_store: Store, helpers: StoreHelpers):
+def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
+    base_store: Store, helpers: StoreHelpers
+):
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external"""
 
     # GIVEN a sequenced sample
@@ -89,7 +93,7 @@ def test_filter_cases_has_sequence_when_not_external(base_store: Store, helpers:
         base_store, sequenced_at=None, is_external=False
     )
 
-    # GIVEN a cancer case
+    # GIVEN a case
     test_case = helpers.add_case(base_store)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
@@ -105,11 +109,13 @@ def test_filter_cases_has_sequence_when_not_external(base_store: Store, helpers:
     assert not cases
 
 
-def test_filter_cases_with_pipeline_when_correct_pipline(base_store: Store, helpers: StoreHelpers):
+def test_filter_cases_with_pipeline_when_correct_pipline(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that no case is returned when there are no cases with the  specified pipeline"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -128,12 +134,12 @@ def test_filter_cases_with_pipeline_when_correct_pipline(base_store: Store, help
 
 
 def test_filter_cases_with_pipeline_when_incorrect_pipline(
-    base_store: Store, helpers: StoreHelpers
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -161,7 +167,7 @@ def test_filter_cases_for_analysis(
 
     # GIVEN a completed analysis
     test_analysis: models.Analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+        base_store, completed_at=timestamp_today, pipeline=Pipeline.MIP_DNA
     )
 
     # Given an action set to analyze
@@ -180,10 +186,10 @@ def test_filter_cases_for_analysis(
     assert cases
 
 
-def test_filter_cases_for_analysis_when_sequenced_sample_and_an_analysis(
+def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
 ):
-    """Test that a case is returned when there is internally created cases with no action set and a created_at timestamp"""
+    """Test that a case is returned when there are internally created cases with no action set and no prior analysis"""
 
     # GIVEN a sequenced sample
     test_sample: models.Sample = helpers.add_sample(

@@ -6,7 +6,7 @@ from cg.store import models
 
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
-    """Return cases that is not sequenced according to recorded in StstusDB"""
+    """Return cases that is not sequenced according to record in StatusDB"""
     return cases.filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
 
 
@@ -17,9 +17,9 @@ def filter_cases_with_pipeline(cases: Query, pipeline: str, **kwargs) -> Query:
 
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """Return cases in need of analysis by:
-    1. action set to analyze or
-    2. internally created cases with no action set and a created_at timestamp or
-    3. cases with no action, but new sequence data
+    1. Action set to analyze or
+    2. Internally created cases with no action set and no prior analysis or
+    3. Cases with no action, but new sequence data
     """
     return cases.filter(
         or_(

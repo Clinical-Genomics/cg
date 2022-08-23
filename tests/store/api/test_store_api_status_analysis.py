@@ -11,15 +11,17 @@ from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_families_with_extended_models(base_store: Store, helpers: StoreHelpers):
+def test_get_families_with_extended_models(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a query is returned from the database"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a completed analysis
     test_analysis: models.Analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+        base_store, completed_at=timestamp_today, pipeline=Pipeline.MIP_DNA
     )
 
     # Given an action set to analyze
@@ -53,13 +55,13 @@ def test_get_families_with_extended_models_when_no_case(base_store: Store):
 
 
 def test_that_many_cases_can_have_one_sample_each(
-    base_store: Store, helpers: StoreHelpers, max_nr_of_cases: int
+    base_store: Store, helpers: StoreHelpers, max_nr_of_cases: int, timestamp_today: datetime
 ):
     """Test that tests that cases are returned even if there are many result rows in the query"""
 
     # GIVEN a database with max_nr_of_cases cases
     test_cases: List[models.Family] = helpers.add_cases_with_samples(
-        base_store, max_nr_of_cases, sequenced_at=datetime.now()
+        base_store, max_nr_of_cases, sequenced_at=timestamp_today
     )
 
     # WHEN getting cases to analyse
@@ -69,16 +71,18 @@ def test_that_many_cases_can_have_one_sample_each(
     assert len(cases) == len(test_cases)
 
 
-def test_that_cases_can_have_many_samples(base_store: Store, helpers, max_nr_of_samples: int):
+def test_that_cases_can_have_many_samples(
+    base_store: Store, helpers, max_nr_of_samples: int, timestamp_today: datetime
+):
     """Test that tests that cases are returned even if there are many result rows in the query"""
 
     # GIVEN a cases with max_nr_of_samples sequenced samples
     case_with_50: models.Family = helpers.add_case_with_samples(
-        base_store, "case_with_50_samples", max_nr_of_samples, sequenced_at=datetime.now()
+        base_store, "case_with_50_samples", max_nr_of_samples, sequenced_at=timestamp_today
     )
 
     # GIVEN a sequnced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
     assert test_sample.sequenced_at
 
     # GIVEN a case with one sample
@@ -98,7 +102,9 @@ def test_that_cases_can_have_many_samples(base_store: Store, helpers, max_nr_of_
     assert case_with_one in cases
 
 
-def test_external_sample_to_re_analyse(base_store: Store, helpers: StoreHelpers):
+def test_external_sample_to_re_analyse(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case marked for re-analyse with one sample external not sequenced in-house and
     with completed analysis show up among the cases to analyse"""
 
@@ -107,7 +113,7 @@ def test_external_sample_to_re_analyse(base_store: Store, helpers: StoreHelpers)
 
     # GIVEN a completed analysis
     test_analysis: models.Analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+        base_store, completed_at=timestamp_today, pipeline=Pipeline.MIP_DNA
     )
     assert test_analysis.completed_at
 
@@ -146,16 +152,16 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     assert test_case not in cases
 
 
-def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers):
+def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_today: datetime):
     """Test that a case marked for re-analyse with one sample that has been sequenced and
     with completed analysis do show up among the cases to analyse"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a completed analysis
     test_analysis: models.Analysis = helpers.add_analysis(
-        base_store, completed_at=datetime.now(), pipeline=Pipeline.MIP_DNA
+        base_store, completed_at=timestamp_today, pipeline=Pipeline.MIP_DNA
     )
 
     # Given an action set to analyze
@@ -174,15 +180,17 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers):
     assert test_analysis.family in cases
 
 
-def test_all_samples_and_analysis_completed(base_store: Store, helpers: StoreHelpers):
+def test_all_samples_and_analysis_completed(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case with one sample that has been sequenced and with completed
     analysis don't show up among the cases to analyse"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a completed analysis
-    test_analysis: models.Analysis = helpers.add_analysis(base_store, completed_at=datetime.now())
+    test_analysis: models.Analysis = helpers.add_analysis(base_store, completed_at=timestamp_today)
 
     # Given an action set to analyze
     test_analysis.family.action: str = CaseActions.ANALYZE
@@ -197,11 +205,13 @@ def test_all_samples_and_analysis_completed(base_store: Store, helpers: StoreHel
     assert not cases
 
 
-def test_specified_analysis_in_result(base_store: Store, helpers: StoreHelpers):
+def test_specified_analysis_in_result(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case with one sample that has specified data_analysis does show up"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a cancer case
     test_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -219,12 +229,14 @@ def test_specified_analysis_in_result(base_store: Store, helpers: StoreHelpers):
     assert test_case in cases
 
 
-def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers: StoreHelpers):
+def test_exclude_other_pipeline_analysis_from_result(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case with specified analysis and with one sample does not show up among
     others"""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -239,7 +251,9 @@ def test_exclude_other_pipeline_analysis_from_result(base_store: Store, helpers:
     assert not cases
 
 
-def test_one_of_two_sequenced_samples(base_store: Store, helpers: StoreHelpers):
+def test_one_of_two_sequenced_samples(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case with one sequenced samples and one not sequenced sample do not shows up among the
     cases to analyse"""
 
@@ -247,7 +261,7 @@ def test_one_of_two_sequenced_samples(base_store: Store, helpers: StoreHelpers):
     test_case: models.Family = helpers.add_case(base_store)
 
     # GIVEN a sequenced sample
-    sequenced_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    sequenced_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a NOT sequenced sample
     not_sequenced_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None)
@@ -265,7 +279,9 @@ def test_one_of_two_sequenced_samples(base_store: Store, helpers: StoreHelpers):
     assert not cases
 
 
-def test_one_of_one_sequenced_samples(base_store: Store, helpers: StoreHelpers):
+def test_one_of_one_sequenced_samples(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
     """Test that a case with one of one samples that has been sequenced shows up among the
     cases to analyse"""
 
@@ -273,7 +289,7 @@ def test_one_of_one_sequenced_samples(base_store: Store, helpers: StoreHelpers):
     test_case: models.Family = helpers.add_case(base_store)
 
     # GIVEN a sequenced sample
-    test_sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    test_sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a database with a case with a sequenced samples and no analysis
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)

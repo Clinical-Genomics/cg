@@ -282,7 +282,7 @@ def fixture_re_sequenced_sample_store(
 
 @pytest.fixture(name="max_nr_of_cases")
 def fixture_max_nr_of_cases() -> int:
-    """Return the number of maximum number of ceses"""
+    """Return the number of maximum number of cases"""
     return 50
 
 
