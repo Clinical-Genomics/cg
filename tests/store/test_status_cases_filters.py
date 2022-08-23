@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
@@ -229,7 +229,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis: models.Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.family.action: str = None
+    test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
@@ -261,7 +261,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     test_analysis: models.Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
-    test_analysis.family.action: str = None
+    test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
