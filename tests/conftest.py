@@ -289,7 +289,7 @@ def fixture_os_ticket(ticket_number: int) -> MockOsTicket:
 # Files fixtures
 
 # Common file fixtures
-@pytest.fixture(name="fixtures_dir")
+@pytest.fixture(scope="session", name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:
     """Return the path to the fixtures dir"""
     return Path("tests", "fixtures")
@@ -361,7 +361,7 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
     return non_existing_file_path
 
 
-@pytest.fixture(name="orderforms")
+@pytest.fixture(scope="session", name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with order forms"""
     return Path(fixtures_dir, "orderforms")
@@ -439,117 +439,10 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
     return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
 
 
-# Orderform fixtures
-
-
-@pytest.fixture
-def microbial_orderform(orderforms: Path) -> str:
-    """Orderform fixture for microbial samples"""
-    return Path(orderforms, "1603.11.microbial.xlsx").as_posix()
-
-
-@pytest.fixture
-def sarscov2_orderform(orderforms: Path) -> str:
-    """Orderform fixture for sarscov2 samples"""
-    return Path(orderforms, "2184.7.sarscov2.xlsx").as_posix()
-
-
-@pytest.fixture
-def rml_orderform(orderforms: Path) -> str:
-    """Orderform fixture for RML samples"""
-    return Path(orderforms, "1604.15.rml.xlsx").as_posix()
-
-
-@pytest.fixture(name="mip_json_order_form_path")
-def fixture_mip_json_path(orderforms: Path) -> Path:
-    """Return a MIP JSON order form path"""
-    return Path(orderforms, "mip-json.json")
-
-
-@pytest.fixture(name="mip_json_orderform")
-def fixture_mip_json_orderform(mip_json_order_form_path: Path) -> dict:
-    """Load an example of MIP JSON Scout order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=mip_json_order_form_path
-    )
-
-
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
     """Return str of path for file with Madeline output"""
     return Path(apps_dir, "madeline", "madeline.xml").as_posix()
-
-
-@pytest.fixture(name="mip_order_to_submit")
-def fixture_mip_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example scout order for MIP DNA"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip.json")
-    )
-
-
-@pytest.fixture(name="mip_rna_order_to_submit")
-def fixture_mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example rna order for MIP RNA"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip_rna.json")
-    )
-
-
-@pytest.fixture(name="fastq_order_to_submit")
-def fixture_fastq_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example FASTQ order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fastq.json")
-    )
-
-
-@pytest.fixture(name="rml_order_to_submit")
-def fixture_rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example RML order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
-    )
-
-
-@pytest.fixture(name="fluffy_order_to_submit")
-def fixture_fluffy_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example Fluffy order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
-    )
-
-
-@pytest.fixture(name="metagenome_order_to_submit")
-def fixture_metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example meta genome order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
-    )
-
-
-@pytest.fixture(name="microbial_order_to_submit")
-def fixture_microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example microbial order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microsalt.json")
-    )
-
-
-@pytest.fixture(name="sarscov2_order_to_submit")
-def fixture_sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example sarscov2 order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "sarscov2.json")
-    )
-
-
-@pytest.fixture(name="balsamic_order_to_submit")
-def fixture_balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
-    """Load an example cancer order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic.json")
-    )
 
 
 # Compression fixtures
