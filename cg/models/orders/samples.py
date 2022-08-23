@@ -5,6 +5,7 @@ from pydantic import BaseModel, constr, validator
 from pydantic.typing import Optional
 
 from cg.constants import DataDelivery
+from cg.constants.constants import GenomeVersion
 from cg.models.orders.order import OrderType
 from cg.models.orders.sample_base import (
     ContainerEnum,
@@ -157,6 +158,7 @@ class BalsamicSample(Of1508Sample):
 
 class BalsamicQCSample(Of1508Sample):
     _suitable_project = OrderType.BALSAMIC_QC
+    reference_genome: Optional[GenomeVersion]
 
 
 class BalsamicUmiSample(Of1508Sample):
