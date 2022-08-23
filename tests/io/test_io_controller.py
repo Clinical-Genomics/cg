@@ -26,19 +26,19 @@ def test_get_content_from_file(case_qc_sample_info_path: Path):
     assert isinstance(sample_info_object, MipBaseSampleInfo)
 
 
-def test_get_content_from_file_when_json(mip_json_order_form_path: Path):
+def test_get_content_from_file_when_json(json_file_path: Path):
     """
     Tests get_content_from_file when json
     """
     # GIVEN a json file
 
     # WHEN reading the json file
-    raw_mip_order_form_info: dict = ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=mip_json_order_form_path
+    raw_json_content: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=json_file_path
     )
 
     # Then assert a dict is returned
-    assert isinstance(raw_mip_order_form_info, dict)
+    assert isinstance(raw_json_content, dict)
 
 
 def test_get_content_from_stream(yaml_stream: str):
@@ -102,7 +102,7 @@ def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
     assert raw_sample_info == written_raw_sample_info
 
 
-def test_write_file_from_content_when_json(mip_json_order_form_path: Path, json_temp_path: Path):
+def test_write_file_from_content_when_json(json_file_path: Path, json_temp_path: Path):
     """
     Tests write_file_from_content when json
     """
@@ -111,13 +111,13 @@ def test_write_file_from_content_when_json(mip_json_order_form_path: Path, json_
     # GIVEN a file path to write to
 
     # WHEN reading the json file
-    raw_mip_order_form: list = ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=mip_json_order_form_path
+    raw_json_content: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=json_file_path
     )
 
     # WHEN writing the json file from list
     WriteFile.write_file_from_content(
-        content=raw_mip_order_form, file_format=FileFormat.JSON, file_path=json_temp_path
+        content=raw_json_content, file_format=FileFormat.JSON, file_path=json_temp_path
     )
 
     # THEN assert that a file was successfully created
@@ -129,7 +129,7 @@ def test_write_file_from_content_when_json(mip_json_order_form_path: Path, json_
     )
 
     # THEN assert that all data is kept
-    assert raw_mip_order_form == written_raw_sample_info
+    assert raw_json_content == written_raw_sample_info
 
 
 def test_write_yaml_stream_from_content(yaml_stream: str):

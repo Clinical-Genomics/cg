@@ -10,9 +10,15 @@ def fixture_json_stream() -> str:
     return _content
 
 
+@pytest.fixture(name="json_file_path")
+def fixture_json_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example json file"""
+    return Path(fixtures_dir, "io", "example_json.json")
+
+
 @pytest.fixture(name="json_temp_path")
 def fixture_json_temp_path(cg_dir: Path) -> Path:
-    """Return a temp file path to use when wrtiting json"""
+    """Return a temp file path to use when writing json"""
     return Path(cg_dir, "write_json.json")
 
 
