@@ -486,7 +486,6 @@ class StoreHelpers:
             organism=organism,
             reads=6000000,
             sex=Gender.UNKNOWN,
-
         )
         sample.customer = customer
         case = StoreHelpers.ensure_case(
