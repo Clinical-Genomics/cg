@@ -197,6 +197,9 @@ class CaseSubmitter(Submitter):
                         "name": sample.name,
                         "phenotype_groups": list(sample.phenotype_groups),
                         "phenotype_terms": list(sample.phenotype_terms),
+                        "reference_genome": sample.reference_genome
+                        if hasattr(sample, "reference_genome")
+                        else None,
                         "sex": sample.sex,
                         "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
@@ -274,19 +277,20 @@ class CaseSubmitter(Submitter):
     def _create_sample(self, case, customer_obj, order, ordered, sample, ticket):
         sample_obj = self.status.add_sample(
             name=sample["name"],
-            sex=sample["sex"],
             comment=sample["comment"],
             control=sample["control"],
             internal_id=sample["internal_id"],
             order=order,
             ordered=ordered,
             original_ticket=ticket,
-            priority=case["priority"],
             tumour=sample["tumour"],
             age_at_sampling=sample["age_at_sampling"],
             capture_kit=sample["capture_kit"],
             phenotype_groups=sample["phenotype_groups"],
             phenotype_terms=sample["phenotype_terms"],
+            priority=case["priority"],
+            reference_genome=sample["reference_genome"],
+            sex=sample["sex"],
             subject_id=sample["subject_id"],
         )
         sample_obj.customer = customer_obj

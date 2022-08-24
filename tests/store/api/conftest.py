@@ -4,6 +4,7 @@ import pytest
 from typing import Iterable, List
 
 from cg.constants import Pipeline
+from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store, models
 from cg.store.api.import_func import (
@@ -179,9 +180,11 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="rml_pool_store")
-def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket: str):
+def fixture_rml_pool_store(
+    case_id: str, customer_id: str, helpers, store: Store,  ticket: str
+):
     new_customer = store.add_customer(
-        internal_id="cust000",
+        internal_id=customer_id,
         name="Test customer",
         scout_access=True,
         invoice_address="skolgatan 15",
@@ -203,7 +206,12 @@ def fixture_rml_pool_store(case_id: str, helpers, store: Store, ticket: str):
         application=application,
         version=1,
         valid_from=dt.datetime.today(),
-        prices={"standard": 12, "priority": 222, "express": 123, "research": 12},
+        prices={
+            PriorityTerms.STANDARD: 12,
+            PriorityTerms.PRIORITY: 222,
+            PriorityTerms.EXPRESS: 123,
+            PriorityTerms.RESEARCH: 12,
+        },
     )
     store.add_commit(app_version)
 
@@ -270,3 +278,15 @@ def fixture_re_sequenced_sample_store(
     helpers.add_relationship(store=re_sequenced_sample_store, case=store_case, sample=store_sample)
 
     return re_sequenced_sample_store
+
+
+@pytest.fixture(name="max_nr_of_cases")
+def fixture_max_nr_of_cases() -> int:
+    """Return the number of maximum number of cases"""
+    return 50
+
+
+@pytest.fixture(name="max_nr_of_samples")
+def fixture_max_nr_of_samples() -> int:
+    """Return the number of maximum number of samples"""
+    return 50
