@@ -285,22 +285,6 @@ class FindBusinessDataHandler(BaseHandler):
             .first()
         )
 
-    # def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
-    #     """Find a link between a family and a sample."""
-    #
-    #     query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-    #
-    #     if case_id:
-    #         query = query.filter(models.Family.internal_id == case_id)
-    #
-    #     if sample_id:
-    #         query = query.filter(models.Sample.internal_id == sample_id)
-    #
-    #     if ticket:
-    #         query = query.filter(models.Sample.original_ticket == ticket)
-    #
-    #     return query
-
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
         query = self.Invoice.query.all()
