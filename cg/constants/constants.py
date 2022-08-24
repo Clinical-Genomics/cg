@@ -19,6 +19,11 @@ CAPTUREKIT_OPTIONS = (
     "other",
 )
 
+
+class CaseActions(StrEnum):
+    ANALYZE: str = "analyze"
+
+
 CASE_ACTIONS = ("analyze", "running", "hold")
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
