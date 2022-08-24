@@ -67,7 +67,7 @@ class StatusHandler(BaseHandler):
             .order_by(models.Sample.received_at)
         )
 
-    def get_families_with_extended_models(self) -> Query:
+    def get_families_with_analyses(self) -> Query:
         """Return all cases in the database with an analysis"""
         return self.Family.query.outerjoin(models.Analysis).join(
             models.Family.links,
@@ -80,7 +80,7 @@ class StatusHandler(BaseHandler):
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
-        cases: Query = self.get_families_with_extended_models()
+        cases: Query = self.get_families_with_analyses()
         filter_functions: List[str] = [
             "cases_has_sequence",
             "cases_with_pipeline",

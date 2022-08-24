@@ -30,7 +30,7 @@ def test_filter_cases_has_sequence(
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_has_sequence(cases=cases))
@@ -52,7 +52,7 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_has_sequence(cases=cases))
@@ -74,7 +74,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_has_sequence(cases=cases))
@@ -100,7 +100,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_has_sequence(cases=cases))
@@ -124,7 +124,7 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
@@ -148,7 +148,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
@@ -177,7 +177,7 @@ def test_filter_cases_for_analysis(
     base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_for_analysis(cases=cases))
@@ -203,7 +203,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_for_analysis(cases=cases))
@@ -238,7 +238,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis.created_at = timestamp_yesterday
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_for_analysis(cases=cases))
@@ -267,7 +267,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_extended_models()
+    cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(filter_cases_for_analysis(cases=cases))

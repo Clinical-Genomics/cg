@@ -31,7 +31,7 @@ def test_get_families_with_extended_models(
     base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(base_store.get_families_with_extended_models())
+    cases: List[Query] = list(base_store.get_families_with_analyses())
 
     case: models.Family = cases[0]
 
@@ -48,7 +48,7 @@ def test_get_families_with_extended_models_when_no_case(base_store: Store):
     # GIVEN an empty database
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(base_store.get_families_with_extended_models())
+    cases: List[Query] = list(base_store.get_families_with_analyses())
 
     # THEN no cases should be returned
     assert not cases
