@@ -80,10 +80,10 @@ class CompressAPI:
         if not sample_fastq_dict:
             return False
 
-        all_ok = True
+        compression_has_started = True
         for run_name in sample_fastq_dict:
             LOG.info("Check if compression possible for run %s", run_name)
-            compression_object = sample_fastq_dict[run_name]["compression_data"]
+            compression_object: CompressionData = sample_fastq_dict[run_name]["compression_data"]
             if FileData.is_empty(compression_object.fastq_first):
                 LOG.warning(
                     "Fastq files are empty for %s: %s", sample_id, compression_object.fastq_first
@@ -92,23 +92,23 @@ class CompressAPI:
                     hk_fastq_first=sample_fastq_dict[run_name]["hk_first"],
                     hk_fastq_second=sample_fastq_dict[run_name]["hk_second"],
                 )
-                all_ok = False
+                compression_has_started = False
                 continue
 
-            if not self.crunchy_api.is_fastq_compression_possible(compression_object):
-                LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run_name)
-                all_ok = False
+            if self.crunchy_api.is_fastq_compression_possible(compression_object):
+                LOG.info(
+                    "Compressing %s and %s for sample %s into SPRING format",
+                    compression_object.fastq_first,
+                    compression_object.fastq_second,
+                    sample_id,
+                )
+                self.crunchy_api.fastq_to_spring(compression_object, sample_id=sample_id)
                 continue
 
-            LOG.info(
-                "Compressing %s and %s for sample %s into SPRING format",
-                compression_object.fastq_first,
-                compression_object.fastq_second,
-                sample_id,
-            )
-            self.crunchy_api.fastq_to_spring(compression_object, sample_id=sample_id)
-
-        return all_ok
+            LOG.warning("FASTQ to SPRING not possible for %s, run %s", sample_id, run_name)
+            if not compression_object.pending_exists():
+                compression_has_started = False
+        return compression_has_started
 
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample

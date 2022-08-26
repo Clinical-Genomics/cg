@@ -63,7 +63,7 @@ def fastq_cmd(
     ind_conversion_count = 0
     for case in cases:
         # Keeps track on if all samples in a case have been converted
-        case_converted = True
+        compression_started = True
         if case_conversion_count >= number_of_conversions:
             break
         internal_id: str = case.internal_id
@@ -76,12 +76,12 @@ def fastq_cmd(
             continue
         for link_obj in case.links:
             sample_id: str = link_obj.sample.internal_id
-            case_converted: bool = compress_api.compress_fastq(sample_id)
-            if not case_converted:
+            compression_started: bool = compress_api.compress_fastq(sample_id)
+            if not compression_started:
                 LOG.info("skipping individual %s", sample_id)
                 continue
             ind_conversion_count += 1
-        if case_converted:
+        if compression_started:
             case_conversion_count += 1
             LOG.info("Considering case %s converted", internal_id)
 
