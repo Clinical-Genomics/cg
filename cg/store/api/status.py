@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
@@ -14,7 +13,9 @@ from cg.constants import (
     REPORT_SUPPORTED_PIPELINES,
     REPORT_SUPPORTED_DATA_DELIVERY,
 )
+from cg.constants.constants import CaseActions
 from cg.store import models
+from cg.store.status_case_filters import apply_filter
 from cg.store.api.base import BaseHandler
 from cg.utils.date import get_date
 
@@ -72,52 +73,43 @@ class StatusHandler(BaseHandler):
             .order_by(models.Sample.received_at)
         )
 
+    def get_families_with_analyses(self) -> Query:
+        """Return all cases in the database with an analysis"""
+        return self.Family.query.outerjoin(models.Analysis).join(
+            models.Family.links,
+            models.FamilySample.sample,
+            models.ApplicationVersion,
+            models.Application,
+        )
+
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
-        families_query = list(
-            self.Family.query.outerjoin(models.Analysis)
-            .join(
-                models.Family.links,
-                models.FamilySample.sample,
-                models.ApplicationVersion,
-                models.Application,
-            )
-            .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Family.data_analysis == str(pipeline))
-            .filter(
-                or_(
-                    models.Family.action == "analyze",
-                    and_(
-                        models.Application.is_external.isnot(True),
-                        models.Family.action.is_(None),
-                        models.Analysis.created_at.is_(None),
-                    ),
-                    and_(
-                        models.Family.action.is_(None),
-                        models.Analysis.created_at < models.Sample.sequenced_at,
-                    ),
-                )
-            )
-            .order_by(models.Family.ordered_at)
-        )
-        families_query = [
+        cases: Query = self.get_families_with_analyses()
+        filter_functions: List[str] = [
+            "cases_has_sequence",
+            "cases_with_pipeline",
+            "filter_cases_for_analysis",
+        ]
+        for filter_function in filter_functions:
+            cases = apply_filter(function=filter_function, cases=cases, pipeline=pipeline)
+
+        families: List[Query] = list(cases.order_by(models.Family.ordered_at))
+        families = [
             case_obj
-            for case_obj in families_query
+            for case_obj in families
             if case_obj.latest_sequenced
             and (
-                case_obj.action == "analyze"
+                case_obj.action == CaseActions.ANALYZE
                 or not case_obj.latest_analyzed
                 or case_obj.latest_analyzed < case_obj.latest_sequenced
             )
         ]
 
         if threshold:
-            families_query = [
-                case_obj for case_obj in families_query if case_obj.all_samples_pass_qc
-            ]
-        return families_query[:limit]
+            families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
+        return families[:limit]
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
         """Returns a list of cases that may be available to store in Housekeeper"""

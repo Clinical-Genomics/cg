@@ -1,4 +1,5 @@
 import datetime as dt
+from copy import deepcopy
 
 import pytest
 
@@ -155,7 +156,10 @@ def test_cases_to_status(mip_order_to_submit):
     assert family["data_delivery"] == str(DataDelivery.SCOUT)
     assert family["priority"] == Priority.standard.name
     assert family["cohorts"] == ["Other"]
-    assert family["synopsis"] == "Här kommer det att komma en väldigt lång text med för synopsis."
+    assert (
+        family["synopsis"]
+        == "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for."
+    )
     assert set(family["panels"]) == {"IEM"}
     assert len(family["samples"]) == 3
 
@@ -177,7 +181,8 @@ def test_cases_to_status(mip_order_to_submit):
 
 def test_cases_to_status_synopsis(mip_order_to_submit):
     # GIVEN a scout order with a trio case where synopsis is None
-    for sample in mip_order_to_submit["samples"]:
+    modified_order: dict = deepcopy(mip_order_to_submit)
+    for sample in modified_order["samples"]:
         sample["synopsis"] = None
 
     project: OrderType = OrderType.MIP_DNA
@@ -487,7 +492,7 @@ def test_store_mip(orders_api, base_store, mip_status_data):
     assert set(new_case.cohorts) == {"Other"}
     assert (
         new_case.synopsis
-        == "H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis."
+        == "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for."
     )
     assert new_link.status == "affected"
     assert new_link.mother.name == "sample2"
@@ -608,7 +613,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
         str(Pipeline.BALSAMIC_QC),
         str(Pipeline.BALSAMIC_UMI),
     ]
-    assert new_case.data_delivery == str(DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT)
+    assert new_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS_SCOUT)
     assert set(new_case.panels) == set()
     assert new_case.priority_human == Priority.standard.name
 

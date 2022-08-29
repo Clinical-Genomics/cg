@@ -1,11 +1,13 @@
 """Utility functions to simply add test data in a cg store"""
 import logging
-import uuid
 from datetime import datetime
 from typing import List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.pedigree import Pedigree
+from cg.constants.priority import PriorityTerms
+from cg.constants.subject import Gender
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
@@ -72,7 +74,12 @@ class StoreHelpers:
                 sequencing_depth=sequencing_depth,
             )
 
-        prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
+        prices = {
+            PriorityTerms.STANDARD: 10,
+            PriorityTerms.PRIORITY: 20,
+            PriorityTerms.EXPRESS: 30,
+            PriorityTerms.RESEARCH: 5,
+        }
         version = store.application_version(application, 1)
         if not version:
             version = store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
@@ -227,7 +234,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        gender: str = "female",
+        gender: str = Gender.FEMALE,
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
@@ -401,16 +408,16 @@ class StoreHelpers:
         for sample_data in case_info["samples"]:
             sample_obj = sample_objs[sample_data["internal_id"]]
             father = None
-            if sample_data.get("father"):
-                father = sample_objs[sample_data["father"]]
+            if sample_data.get(Pedigree.FATHER):
+                father = sample_objs[sample_data[Pedigree.FATHER]]
             mother = None
-            if sample_data.get("mother"):
-                mother = sample_objs[sample_data["mother"]]
+            if sample_data.get(Pedigree.MOTHER):
+                mother = sample_objs[sample_data[Pedigree.MOTHER]]
             StoreHelpers.add_relationship(
                 store,
                 case=case_obj,
                 sample=sample_obj,
-                status=sample_data.get("status", "unknown"),
+                status=sample_data.get("status", Gender.UNKNOWN),
                 father=father,
                 mother=mother,
             )
@@ -454,7 +461,7 @@ class StoreHelpers:
     def add_microbial_sample(
         store: Store,
         sample_id: str = "microbial_sample_id",
-        priority: str = "research",
+        priority: str = PriorityTerms.RESEARCH,
         name: str = "microbial_name_test",
         organism: models.Organism = None,
         comment: str = "comment",
@@ -474,7 +481,7 @@ class StoreHelpers:
             organism=organism,
             priority=priority,
             reads=6000000,
-            sex="unknown",
+            sex=Gender.UNKNOWN,
             ticket=ticket,
         )
         sample.customer = customer
@@ -489,7 +496,7 @@ class StoreHelpers:
         return sample
 
     @staticmethod
-    def add_samples(store: Store, nr_samples: int = 5) -> list:
+    def add_samples(store: Store, nr_samples: int = 5) -> List[models.Sample]:
         """Utility function to add a number of samples to use in tests"""
         nr_samples = max(nr_samples, 2)
         return [
@@ -527,7 +534,7 @@ class StoreHelpers:
         store: Store,
         sample: models.Sample,
         case: models.Family,
-        status: str = "unknown",
+        status: str = Gender.UNKNOWN,
         father: models.Sample = None,
         mother: models.Sample = None,
     ) -> models.FamilySample:
@@ -589,3 +596,37 @@ class StoreHelpers:
         sample_obj.subject_id = subject_id
         store.commit()
         return sample_obj
+
+    @classmethod
+    def relate_samples(cls, base_store: Store, family: str, samples: List[str]):
+        """Utility function to relate many samples to one case"""
+
+        for sample in samples:
+            base_store.relate_sample(family, sample, Gender.UNKNOWN)
+
+    @classmethod
+    def add_case_with_samples(
+        cls, base_store: Store, case_name: str, nr_samples: int, sequenced_at: datetime
+    ) -> models.Family:
+        """Utility function to add one case with many samples and return the case"""
+
+        samples: List[models.Sample] = cls.add_samples(base_store, nr_samples)
+        for sample in samples:
+            sample.sequenced_at: datetime = sequenced_at
+        case: models.Family = cls.add_case(base_store, case_name)
+        cls.relate_samples(base_store, case, samples)
+        return case
+
+    @classmethod
+    def add_cases_with_samples(
+        cls, base_store: Store, nr_cases: int, sequenced_at: datetime
+    ) -> List[models.Family]:
+        """Utility function to add many cases with two samples to use in tests"""
+
+        cases: List[models.Family] = []
+        for i in range(nr_cases):
+            case: List[models.Family] = cls.add_case_with_samples(
+                base_store, f"f{i}", 2, sequenced_at=sequenced_at
+            )
+            cases.append(case)
+        return cases

@@ -209,7 +209,7 @@ def test_analyses_to_upload_with_scout_as_data_delivery(helpers, sample_store, t
         store=sample_store,
         completed_at=timestamp,
         pipeline=Pipeline.MIP_DNA,
-        data_delivery=DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
 
     # WHEN fetching all available analyses
@@ -229,7 +229,7 @@ def test_analyses_to_upload_with_delivery_report(helpers, sample_store, timestam
         store=sample_store,
         completed_at=timestamp,
         pipeline=Pipeline.BALSAMIC_UMI,
-        data_delivery=DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
         delivery_reported_at=timestamp,
     )
 
