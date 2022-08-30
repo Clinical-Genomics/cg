@@ -38,7 +38,7 @@ class PoolSubmitter(Submitter):
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
-        """Convert input to pools."""
+        """Convert input to pools"""
 
         status_data = {
             "customer": order.customer,
@@ -110,7 +110,7 @@ class PoolSubmitter(Submitter):
     def store_items_in_status(
         self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[models.Pool]:
-        """Store pools in the status database."""
+        """Store pools in the status database"""
         customer_obj: models.Customer = self.status.customer(customer)
         new_pools: List[models.Pool] = []
         new_samples: List[models.Sample] = []

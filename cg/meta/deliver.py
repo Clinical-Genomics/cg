@@ -256,24 +256,21 @@ class DeliverAPI:
         LOG.info("Setting customer_id to %s", customer_id)
         self.customer_id = customer_id
 
-    def _set_ticket(self, ticket: str) -> None:
-        LOG.info("Setting ticket to %s", ticket)
-        self.ticket = ticket
-
     def set_customer_id(self, case_obj: Family) -> None:
         """Set the customer_id for this upload"""
         self._set_customer_id(case_obj.customer.internal_id)
 
     def set_ticket(self, ticket: str) -> None:
         """Set the ticket for this upload"""
-        self._set_ticket(ticket=ticket)
+        LOG.info("Setting ticket to %s", ticket)
+        self.ticket = ticket
 
     def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
         """Create a path for delivering files
 
         Note that case name and sample name needs to be the identifiers sent from customer
         """
-        delivery_path = self.project_base_path / self.customer_id / "inbox" / self.ticket
+        delivery_path: Path = Path(self.project_base_path, self.customer_id, "inbox", self.ticket)
         if case_name:
             delivery_path = delivery_path / case_name
         if sample_name:

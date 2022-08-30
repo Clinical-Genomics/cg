@@ -1,4 +1,3 @@
-"""Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
 import datetime as dt
 import logging
 from pathlib import Path

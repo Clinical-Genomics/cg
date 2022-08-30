@@ -17,6 +17,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.priority import SlurmQos
+from cg.constants.subject import Gender
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
@@ -103,7 +104,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
         "samples": [
             {
                 "name": "proband",
-                "sex": "male",
+                "sex": Gender.MALE,
                 "internal_id": "ADM1",
                 "status": "affected",
                 "original_ticket": ticket,
@@ -127,7 +128,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
         "samples": [
             {
                 "name": "child",
-                "sex": "male",
+                "sex": Gender.MALE,
                 "internal_id": "ADM1",
                 "father": "ADM2",
                 "mother": "ADM3",
@@ -138,7 +139,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
             },
             {
                 "name": "father",
-                "sex": "male",
+                "sex": Gender.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
                 "original_ticket": ticket,
@@ -147,7 +148,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
             },
             {
                 "name": "mother",
-                "sex": "female",
+                "sex": Gender.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
                 "original_ticket": ticket,
@@ -245,7 +246,7 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
 def fixture_external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture"""
     _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
-    _external_data_api.status_db = analysis_store
+    # _external_data_api.status_db = analysis_store
     return _external_data_api
 
 
@@ -992,7 +993,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
 def sample_store(base_store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample("ordered", sex="male"),
+        base_store.add_sample("ordered", sex=Gender.MALE),
         base_store.add_sample("received", sex="unknown", received=dt.datetime.now()),
         base_store.add_sample(
             "received-prepared",
@@ -1000,13 +1001,13 @@ def sample_store(base_store) -> Store:
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
         ),
-        base_store.add_sample("external", sex="female", external=True),
+        base_store.add_sample("external", sex=Gender.FEMALE, external=True),
         base_store.add_sample(
-            "external-received", sex="female", received=dt.datetime.now(), external=True
+            "external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
         ),
         base_store.add_sample(
             "sequenced",
-            sex="male",
+            sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
             sequenced_at=dt.datetime.now(),
@@ -1014,7 +1015,7 @@ def sample_store(base_store) -> Store:
         ),
         base_store.add_sample(
             "sequenced-partly",
-            sex="male",
+            sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
             reads=(250 * 1000000),
