@@ -11,7 +11,7 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     # WHEN checking if genotype upload compatible
     genotype_check = case_obj.genotype_check
 
-    # THEN
+    # THEN it should return True, genotype compatible
     assert genotype_check == True
 
 
@@ -23,7 +23,7 @@ def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     # WHEN checking if genotype upload compatible
     genotype_check = case_obj.genotype_check
 
-    # THEN
+    # THEN it should return False, not genotype compatible
     assert genotype_check == False
 
 
@@ -35,5 +35,5 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     # WHEN checking if genotype upload compatible
     genotype_check = case_obj.genotype_check
 
-    # THEN
+    # THEN it should return False, not genotype compatible
     assert genotype_check == False
