@@ -34,7 +34,7 @@ class BalsamicUploadAPI(UploadAPI):
             self.update_uploaded_at(analysis_obj)
         else:
             LOG.warning(
-                f"There is nothing to upload for case {case_obj.internal_id} and "
+                f"There is nothing to upload to Scout for case {case_obj.internal_id} and "
                 f"the specified data delivery ({case_obj.data_delivery})"
             )
             ctx.abort()
@@ -42,17 +42,22 @@ class BalsamicUploadAPI(UploadAPI):
         # Genotype specific upload
         if case_obj.genotype_check:
             ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
+        else:
+            LOG.info(f"Balsamic case {case_obj.internal_id} is not compatible for Genotype upload")
+            ctx.abort()
 
     def genotype_check(self, case_obj: models.Family) -> bool:
         """Check if balsamic case is contains WGS and normal sample"""
 
-        family_samples: List[models.FamilySample] = case_obj.get_samples_by_family_id
+        family_samples: List[models.Sample] = self.status_db.get_samples_by_family_id(
+            case_obj.internal_id
+        )
 
         for sample in family_samples:
             # check if normal sample
-            if not sample.is_tumor:
+            if not sample.is_tumour:
                 # Check if WGS sample
-                if "WGS" in sample.applicatiion_version:
+                if "wgs" == sample.application_version.application.prep_category:
                     return True
 
         return False
