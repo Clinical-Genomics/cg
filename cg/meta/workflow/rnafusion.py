@@ -10,6 +10,7 @@ import os
 import yaml
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.constants import CaseActions
 from cg.exc import RnafusionStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
@@ -274,7 +275,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         cases_to_analyze = []
         for case_obj in cases_query:
-            if case_obj.action == "analyze" or not case_obj.latest_analyzed:
+            if case_obj.action == CaseActions.ANALYZE or not case_obj.latest_analyzed:
                 cases_to_analyze.append(case_obj)
         return cases_to_analyze
 
