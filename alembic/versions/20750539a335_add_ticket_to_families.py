@@ -15,7 +15,7 @@ import datetime as dt
 from sqlalchemy.ext.declarative import declarative_base
 
 revision = "20750539a335"
-down_revision = "9c9ca9407227"
+down_revision = "2968d39ac35f"
 branch_labels = None
 depends_on = None
 
