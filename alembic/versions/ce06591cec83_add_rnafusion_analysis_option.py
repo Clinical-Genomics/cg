@@ -1,8 +1,8 @@
-"""add rnafusion option
+"""add rnafusion analysis option
 
-Revision ID: 4ff5d0e50f83
-Revises: bcf73370eece
-Create Date: 2022-08-15 13:32:36.965972
+Revision ID: ce06591cec83
+Revises: 2968d39ac35f
+Create Date: 2022-08-30 14:00:17.865006
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ from sqlalchemy.dialects import mysql
 
 
 # revision identifiers, used by Alembic.
-revision = "4ff5d0e50f83"
-down_revision = "2968d39ac35f"
+revision = 'ce06591cec83'
+down_revision = '2968d39ac35f'
 branch_labels = None
 depends_on = None
 
