@@ -1,6 +1,6 @@
 import click
 
-def get_help(self, context):
+def get_help(context):
     """
     If no argument is passed, print help text
     """
