@@ -27,12 +27,12 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_ARRIBA,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
+from cg.cli.workflow.options import get_help
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-import cg.cli.workflow.options
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from pydantic import ValidationError
@@ -44,10 +44,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def rnafusion(context: click.Context) -> None:
     """nf-core/rnafusion analysis workflow"""
-    # if context.invoked_subcommand is None:
-    #     click.echo(context.get_help())
-    #     return None
-    cg.cli.workflow.options.get_help(context)
+    get_help(context)
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(
         config=context.obj,
     )
