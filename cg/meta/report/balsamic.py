@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 
 from cgmodels.cg.constants import Pipeline
 
@@ -22,6 +22,7 @@ from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.balsamic.config import BalsamicVarCaller
 from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import (
@@ -116,24 +117,41 @@ class BalsamicReportAPI(ReportAPI):
         return analysis_metadata.config.reference.reference_genome_version
 
     def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
-        """Extracts the list of BALSAMIC variant-calling filters from the config.json file"""
+        """
+        Extracts the list of BALSAMIC variant-calling filters and their versions (if available) from the
+        config.json file
+        """
 
         sequencing_type = analysis_metadata.config.analysis.sequencing_type
         analysis_type = analysis_metadata.config.analysis.analysis_type
-        var_callers = analysis_metadata.config.vcf
-        tools_version = analysis_metadata.config.bioinfo_tools_version
+        var_callers: Dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
+        tool_versions: Dict[str, list] = analysis_metadata.config.bioinfo_tools_version
 
         analysis_var_callers = list()
-        for var_caller, var_caller_attributes in var_callers.items():
+        for var_caller_name, var_caller_attributes in var_callers.items():
             if (
                 sequencing_type in var_caller_attributes.sequencing_type
                 and analysis_type in var_caller_attributes.analysis_type
             ):
-                version = next((v[0] for k, v in tools_version.items() if k in var_caller), None)
-                tool = f"{var_caller} (v{version})" if version else var_caller
-                analysis_var_callers.append(tool)
+                version = self.get_variant_caller_version(var_caller_name, tool_versions)
+                analysis_var_callers.append(
+                    f"{var_caller_name} (v{version})" if version else var_caller_name
+                )
 
         return analysis_var_callers
+
+    @staticmethod
+    def get_variant_caller_version(
+        var_caller_name: str,
+        var_caller_versions: dict,
+    ) -> Optional[str]:
+        """Returns the version of a specific BALSAMIC tool"""
+
+        for tool_name, versions in var_caller_versions.items():
+            if tool_name in var_caller_name:
+                return versions[0]
+
+        return None
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: BalsamicAnalysis
