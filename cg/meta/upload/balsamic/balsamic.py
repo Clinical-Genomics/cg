@@ -1,9 +1,11 @@
 """Balsamic upload API"""
 
 import logging
+from typing import List
 
 import click
 from cg.cli.upload.scout import scout
+from cg.cli.upload.genotype import genotypes
 from cg.constants import DataDelivery
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -36,3 +38,21 @@ class BalsamicUploadAPI(UploadAPI):
                 f"the specified data delivery ({case_obj.data_delivery})"
             )
             ctx.abort()
+
+        # Genotype specific upload
+        if case_obj.genotype_check:
+            ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
+
+    def genotype_check(self, case_obj: models.Family) -> bool:
+        """Check if balsamic case is contains WGS and normal sample"""
+
+        family_samples: List[models.FamilySample] = case_obj.get_samples_by_family_id
+
+        for sample in family_samples:
+            # check if normal sample
+            if not sample.is_tumor:
+                # Check if WGS sample
+                if "WGS" in sample.applicatiion_version:
+                    return True
+
+        return False
