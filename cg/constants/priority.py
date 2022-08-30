@@ -11,6 +11,13 @@ class SlurmQos(StrEnum):
     EXPRESS: str = "express"
 
 
+class PriorityTerms(StrEnum):
+    EXPRESS: str = "express"
+    PRIORITY: str = "priority"
+    RESEARCH: str = "research"
+    STANDARD: str = "standard"
+
+
 SLURM_ACCOUNT_TO_QOS = {
     "production": SlurmQos.NORMAL,
     "development": SlurmQos.LOW,
