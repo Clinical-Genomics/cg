@@ -245,9 +245,7 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
 @pytest.fixture(name="external_data_api")
 def fixture_external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture"""
-    _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
-    # _external_data_api.status_db = analysis_store
-    return _external_data_api
+    return ExternalDataAPI(config=cg_context)
 
 
 @pytest.fixture(name="genotype_api")
