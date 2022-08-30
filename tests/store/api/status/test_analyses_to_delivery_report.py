@@ -63,3 +63,26 @@ def test_outdated_analysis(analysis_store, helpers):
 
     # THEN this analyses should not be returned
     assert len(analyses) == 0
+
+
+def test_analyses_to_upload_delivery_reports(analysis_store, helpers):
+    """Tests extraction of analyses ready for delivery report upload"""
+
+    # GIVEN an analysis that has a delivery report generated
+    pipeline = Pipeline.BALSAMIC
+    timestamp = datetime.now()
+    analysis = helpers.add_analysis(
+        analysis_store,
+        started_at=timestamp,
+        completed_at=timestamp,
+        uploaded_at=None,
+        delivery_reported_at=timestamp,
+        pipeline=pipeline,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+    )
+
+    # WHEN calling the analyses_to_upload_delivery_reports
+    analyses = analysis_store.analyses_to_upload_delivery_reports(pipeline=pipeline).all()
+
+    # THEN the previously defined analysis should be returned
+    assert analysis in analyses
