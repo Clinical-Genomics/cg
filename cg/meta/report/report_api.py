@@ -111,7 +111,7 @@ class ReportAPI(MetaAPI):
         """Returns the file path of the uploaded to Scout file given its tag"""
 
         version: hk_models.Version = self.housekeeper_api.last_version(case_id)
-        tags: list = self.get_scout_file_tags(scout_tag)
+        tags: list = self.get_hk_scout_file_tags(scout_tag)
         uploaded_files: Query = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags, version=version.id
         )
@@ -442,7 +442,14 @@ class ReportAPI(MetaAPI):
 
         return required_sample_fields
 
-    def get_scout_file_tags(self, scout_tag: str) -> Optional[list]:
-        """Retrieves pipeline specific uploaded to scout file tags"""
+    def get_hk_scout_file_tags(self, scout_tag: str) -> Optional[list]:
+        """Retrieves pipeline specific uploaded to Scout Housekeeper file tags given a Scout key"""
+
+        tags = self.get_upload_case_tags().get(scout_tag)
+
+        return list(tags) if tags else None
+
+    def get_upload_case_tags(self):
+        """Retrieves pipeline specific upload case tags"""
 
         raise NotImplementedError

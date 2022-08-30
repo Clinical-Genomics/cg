@@ -203,9 +203,7 @@ class BalsamicReportAPI(ReportAPI):
 
         return Pipeline.BALSAMIC + "_report.html"
 
-    def get_scout_file_tags(self, scout_tag: str) -> Optional[list]:
-        """Retrieves BALSAMIC uploaded to scout file tags"""
+    def get_upload_case_tags(self) -> dict:
+        """Retrieves BALSAMIC upload case tags"""
 
-        tags = BALSAMIC_CASE_TAGS.get(scout_tag)
-
-        return list(tags) if tags else None
+        return BALSAMIC_CASE_TAGS

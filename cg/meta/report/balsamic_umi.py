@@ -17,9 +17,7 @@ class BalsamicUmiReportAPI(BalsamicReportAPI):
         super().__init__(config=config, analysis_api=analysis_api)
         self.analysis_api = analysis_api
 
-    def get_scout_file_tags(self, scout_tag: str) -> Optional[list]:
-        """Retrieves BALSAMIC UMI uploaded to scout file tags"""
+    def get_upload_case_tags(self) -> dict:
+        """Retrieves BALSAMIC UMI upload case tags"""
 
-        tags = BALSAMIC_UMI_CASE_TAGS.get(scout_tag)
-
-        return list(tags) if tags else None
+        return BALSAMIC_UMI_CASE_TAGS

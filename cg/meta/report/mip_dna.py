@@ -144,9 +144,7 @@ class MipDNAReportAPI(ReportAPI):
 
         return Pipeline.MIP_DNA + "_report.html"
 
-    def get_scout_file_tags(self, scout_tag: str) -> Optional[list]:
-        """Retrieves MIP DNA uploaded to scout file tags"""
+    def get_upload_case_tags(self) -> dict:
+        """Retrieves MIP DNA upload case tags"""
 
-        tags = MIP_CASE_TAGS.get(scout_tag)
-
-        return list(tags) if tags else None
+        return MIP_CASE_TAGS
