@@ -551,7 +551,7 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
-        """Fetch analyses that haven't been uploaded."""
+        """Fetch analyses that have not been uploaded"""
         records = self.Analysis.query.join(models.Analysis.family)
         records = records.filter(
             models.Analysis.completed_at.isnot(None),

@@ -2,6 +2,8 @@
 import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
+MAX_ITEMS_TO_RETRIEVE = 50
+
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
 CAPTUREKIT_CANCER_OPTIONS = (

@@ -74,15 +74,13 @@ def get_report_case(context: click.Context, case_id: str) -> models.Family:
     return case
 
 
-def get_report_api(context: click.Context, case_obj: models.Family) -> ReportAPI:
+def get_report_api(context: click.Context, case: models.Family) -> ReportAPI:
     """Returns a report API to be used for the delivery report generation"""
 
     if context.obj.meta_apis.get("report_api"):
-        report_api: ReportAPI = context.obj.meta_apis.get("report_api")
-    else:
-        report_api: ReportAPI = get_report_api_pipeline(context, case_obj.data_analysis)
+        return context.obj.meta_apis.get("report_api")
 
-    return report_api
+    return get_report_api_pipeline(context, case.data_analysis)
 
 
 def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> ReportAPI:
@@ -107,17 +105,17 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
 
 
 def get_report_analysis_started(
-    case_obj: models.Family, report_api: ReportAPI, analysis_started_at: Optional[str]
+    case: models.Family, report_api: ReportAPI, analysis_started_at: Optional[str]
 ) -> datetime:
     """Resolves and returns a valid analysis date"""
 
     if not analysis_started_at:
         analysis_started_at: datetime = (
-            report_api.status_db.family(case_obj.internal_id).analyses[0].started_at
+            report_api.status_db.family(case.internal_id).analyses[0].started_at
         )
 
     # If there is no analysis for the provided date
-    if not report_api.status_db.analysis(case_obj, analysis_started_at):
+    if not report_api.status_db.analysis(case, analysis_started_at):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
         raise click.Abort
 

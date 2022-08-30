@@ -23,8 +23,8 @@ PRECISION = 2
 
 REPORT_GENDER = {
     "unknown": "Okänd",
-    "female": "Kvinnlig",
-    "male": "Manlig",
+    "female": "Kvinna",
+    "male": "Man",
 }
 
 BALSAMIC_ANALYSIS_TYPE = {
