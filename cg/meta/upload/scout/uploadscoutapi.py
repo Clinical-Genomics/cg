@@ -210,14 +210,13 @@ class UploadScoutAPI:
                     % rna_sample.internal_id,
                 )
 
-            dna_cases: [models.Family] = self.status_db.families_by_subject_id(
+            dna_cases: Set[models.Family] = self.status_db.families_by_subject_id(
                 customer_id=rna_sample.customer.internal_id,
                 data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
                 subject_id=rna_sample.subject_id,
                 is_tumour=rna_sample.is_tumour,
             )
 
-            self._check_cases_single_connected(dna_cases, rna_sample)
 
             upload_dna_cases.update(dna_cases)
 
@@ -246,22 +245,6 @@ class UploadScoutAPI:
 
         LOG.info("Upload %s fusion report finished!", report_type)
 
-    @staticmethod
-    def _check_cases_single_connected(
-        dna_cases: [models.Family], rna_sample: models.Sample
-    ) -> None:
-        if not dna_cases:
-            raise CgDataError(
-                "Failed to upload RNA sample %s since there are no DNA samples linked to it via subject_id"
-                % rna_sample.internal_id,
-            )
-
-        if len(dna_cases) > 1:
-            raise CgDataError(
-                "Failed to upload RNA sample %s since there are more than one DNA sample linked to it via subject_id"
-                % rna_sample.internal_id,
-            )
-
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout.
             This command can be executed as:
@@ -279,6 +262,7 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         rna_case = status_db.family(case_id)
+        upload_dna_cases: Set[models.Family] = set()
 
         link: models.FamilySample
         rna_coverage_bigwig: Optional[hk_models.File]
@@ -308,7 +292,13 @@ class UploadScoutAPI:
                 is_tumour=rna_sample.is_tumour,
             )
 
-            self._check_cases_single_connected(dna_cases, rna_sample)
+            upload_dna_cases.update(dna_cases)
+
+        if not upload_dna_cases:
+            raise CgDataError(
+                "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                % rna_case.internal_id,
+            )
 
             dna_case: models.Family
             for dna_case in dna_cases:
@@ -348,6 +338,7 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         rna_case: models.Family = status_db.family(case_id)
+        upload_dna_cases: Set[models.Family] = set()
 
         link: models.FamilySample
         for link in rna_case.links:
@@ -376,7 +367,13 @@ class UploadScoutAPI:
                 is_tumour=rna_sample.is_tumour,
             )
 
-            self._check_cases_single_connected(dna_cases, rna_sample)
+            upload_dna_cases.update(dna_cases)
+
+        if not upload_dna_cases:
+            raise CgDataError(
+                "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                % rna_case.internal_id,
+            )
 
             dna_case: models.Family
             for dna_case in dna_cases:
