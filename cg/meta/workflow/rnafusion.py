@@ -7,7 +7,7 @@ from typing import List, Optional, Union, Any
 import pandas as pd
 import os
 
-import yaml
+from cg.io.controller import WriteFile
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import CaseActions
@@ -269,16 +269,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    def get_cases_to_analyze(self) -> List[models.Family]:
-        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
-            pipeline=self.pipeline, threshold=self.threshold_reads
-        )
-        cases_to_analyze = []
-        for case_obj in cases_query:
-            if case_obj.action == CaseActions.ANALYZE or not case_obj.latest_analyzed:
-                cases_to_analyze.append(case_obj)
-        return cases_to_analyze
-
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the rnafusion deliverables file for the case_id should be located.
 
@@ -286,13 +276,17 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
 
+    # def write_deliverables_file_yaml():
+    #     WriteFile
     def report_deliver(self, case_id: str) -> None:
         """Write report deliver"""
         df = pd.read_csv(resources.rnafusion_bundle_filenames_path)
         df = df.replace({"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True)
         df = df.replace({"CASEID": case_id}, regex=True)
         df["path_index"] = "~"
-        text = yaml.dump(df.to_dict(orient="records")).replace("'~'", "~")
+
+        # text = yaml.dump(df.to_dict(orient="records")).replace("'~'", "~")
+
         deliver_file = open(self.get_deliverables_file_path(case_id), "w")
         deliver_file.write("files:\n")
         deliver_file.write(text)
