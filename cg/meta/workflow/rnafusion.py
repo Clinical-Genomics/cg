@@ -82,7 +82,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
             samplesheet["sample"] = case_id
             samplesheet["strandedness"] = strandedness
-            filename = self.get_case_config_path(case_id)
+            filename: Path = self.get_case_config_path(case_id)
             LOG.info("Writing samplesheet for case " + case_id + " to " + str(filename))
             samplesheet.to_csv(
                 filename, index=False, columns=["sample", "fastq_1", "fastq_2", "strandedness"]
