@@ -20,10 +20,7 @@ def test_transfer_samples_received_at_overwriteable(transfer_lims_api):
     new_date = dt.datetime.today()
     lims_samples = [
         sample_store.add_sample(
-            name=sample.name,
-            sex=sample.sex,
-            internal_id=sample.internal_id,
-            received=new_date,
+            name=sample.name, sex=sample.sex, internal_id=sample.internal_id, received=new_date
         )
     ]
     lims_api.mock_set_samples(lims_samples)
@@ -48,10 +45,7 @@ def test_transfer_samples_all(transfer_lims_api):
     new_date = dt.datetime.today()
     lims_samples = [
         sample_store.add_sample(
-            name=sample.name,
-            sex=sample.sex,
-            internal_id=sample.internal_id,
-            received=new_date,
+            name=sample.name, sex=sample.sex, internal_id=sample.internal_id, received=new_date
         )
     ]
     lims_api.mock_set_samples(lims_samples)

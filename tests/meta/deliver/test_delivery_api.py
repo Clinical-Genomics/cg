@@ -26,15 +26,15 @@ def test_get_delivery_path(
         delivery_type="balsamic",
     )
     customer_id = "cust000"
-    ticket_id = 1234
+    ticket = "1234"
     deliver_api._set_customer_id(customer_id)
-    deliver_api._set_ticket_id(ticket_id)
+    deliver_api.set_ticket(ticket)
 
     # WHEN fetching the deliver path
     deliver_path = deliver_api.create_delivery_dir_path(case_name=case_id)
 
     # THEN assert that the path looks like expected
-    assert deliver_path == project_dir / customer_id / "inbox" / str(ticket_id) / case_id
+    assert deliver_path == project_dir / customer_id / "inbox" / ticket / case_id
 
 
 def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str):

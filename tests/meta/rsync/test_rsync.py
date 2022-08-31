@@ -13,7 +13,7 @@ from cg.store import models, Store
 
 
 def test_get_source_and_destination_paths(
-    mutant_case: models.Family, rsync_api: RsyncAPI, ticket_number: int, mocker
+    mutant_case: models.Family, rsync_api: RsyncAPI, ticket: str, mocker
 ):
     """Test generating the source path before rsync"""
 
@@ -25,24 +25,22 @@ def test_get_source_and_destination_paths(
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the source path is created
-    source_and_destination_paths = rsync_api.get_source_and_destination_paths(
-        ticket_id=ticket_number
-    )
+    source_and_destination_paths = rsync_api.get_source_and_destination_paths(ticket=ticket)
 
     # THEN the source path ends with a customer id, followed by "inbox" and a ticket id
     assert (
         source_and_destination_paths["delivery_source_path"]
         .as_posix()
-        .endswith(f"/cust000/inbox/{ticket_number}")
+        .endswith(f"/cust000/inbox/{ticket}")
     )
-    # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket_id/
+    # THEN the destination path is in the format server.name.se:/path/cust_id/path/ticket/
     assert (
         source_and_destination_paths["rsync_destination_path"].as_posix()
         == "server.name.se:/some/cust000/inbox"
     )
 
 
-def test_get_source_path_no_case(rsync_api: RsyncAPI, ticket_number: int, mocker, helpers, caplog):
+def test_get_source_path_no_case(rsync_api: RsyncAPI, ticket: str, mocker, helpers, caplog):
     """Test generating the source path before rsync when there is no case"""
     caplog.set_level(logging.WARNING)
 
@@ -52,13 +50,13 @@ def test_get_source_path_no_case(rsync_api: RsyncAPI, ticket_number: int, mocker
 
     with pytest.raises(CgError):
         # WHEN the source path is collected
-        rsync_api.get_source_and_destination_paths(ticket_id=ticket_number)
+        rsync_api.get_source_and_destination_paths(ticket=ticket)
 
         # THEN the source path ends with a customer id, followed by "inbox" and a ticket id
         assert "Could not find any cases for ticket_id" in caplog.text
 
 
-def test_set_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
+def test_set_log_dir(rsync_api: RsyncAPI, ticket: str, caplog):
     """Test function to set log dir for path"""
 
     caplog.set_level(logging.INFO)
@@ -67,30 +65,30 @@ def test_set_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
     base_path: Path = rsync_api.log_dir
 
     # WHEN setting the log directory
-    rsync_api.set_log_dir(folder_prefix=str(ticket_number))
+    rsync_api.set_log_dir(folder_prefix=ticket)
 
     # THEN the log dir should set to a new path, different from the base path
     assert base_path.as_posix() != rsync_api.log_dir.as_posix()
     assert "Setting log dir to:" in caplog.text
 
 
-def test_make_log_dir(rsync_api: RsyncAPI, ticket_number: int, caplog):
+def test_make_log_dir(rsync_api: RsyncAPI, ticket: str, caplog):
     """Test generating the directory for logging"""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    rsync_api.set_log_dir(folder_prefix=str(ticket_number))
+    rsync_api.set_log_dir(folder_prefix=ticket)
     rsync_api.create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
 
     # THEN the created path is
-    assert str(rsync_api.log_dir).startswith(f"/another/path/{ticket_number}")
+    assert str(rsync_api.log_dir).startswith(f"/another/path/{ticket}")
 
 
 def test_run_rsync_on_slurm(
-    microsalt_case: models.Family, rsync_api: RsyncAPI, ticket_number: int, caplog, mocker, helpers
+    microsalt_case: models.Family, rsync_api: RsyncAPI, ticket: str, caplog, mocker, helpers
 ):
     """Test for running rsync on slurm"""
     caplog.set_level(logging.INFO)
@@ -109,7 +107,7 @@ def test_run_rsync_on_slurm(
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the destination path is created
-    sbatch_number: int = rsync_api.run_rsync_on_slurm(ticket_id=ticket_number, dry_run=True)
+    sbatch_number: int = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=True)
 
     # THEN check that SARS-COV-2 analysis is not delivered
     assert "Delivering report for SARS-COV-2 analysis" not in caplog.text
@@ -139,20 +137,20 @@ def test_get_folders_to_deliver(
 
 
 def test_concatenate_rsync_commands(
-    analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket_nr
+    analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket: str
 ):
     """Tests the function to concatenate rsync commands for transferring multiple files"""
     # GIVEN a list with a case and a sample name
     folder_list: List[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
     source_and_destination_paths = {
-        "delivery_source_path": project_dir / customer_id / str(ticket_nr),
+        "delivery_source_path": project_dir / customer_id / ticket,
         "rsync_destination_path": project_dir / customer_id,
     }
     # WHEN then commands are generated
     commands: str = RsyncAPI.concatenate_rsync_commands(
         folder_list=folder_list,
         source_and_destination_paths=source_and_destination_paths,
-        ticket_id=ticket_nr,
+        ticket=ticket,
     )
     # THEN the correct folder should be added to the source path
     assert (
@@ -179,7 +177,7 @@ def test_concatenate_rsync_commands(
 
 
 def test_slurm_rsync_single_case(
-    microsalt_case: models.Family, rsync_api: RsyncAPI, caplog, mocker, helpers, ticket_number: int
+    microsalt_case: models.Family, rsync_api: RsyncAPI, caplog, mocker, helpers, ticket: str
 ):
     """Test for running rsync on a single case on slurm"""
     caplog.set_level(logging.INFO)
@@ -194,8 +192,8 @@ def test_slurm_rsync_single_case(
         "rsync_destination_path": Path("/path/to/destination"),
     }
 
-    mocker.patch.object(Store, "get_ticket_from_case")
-    Store.get_ticket_from_case.return_value = ticket_number
+    mocker.patch.object(Store, "get_latest_ticket_from_case")
+    Store.get_latest_ticket_from_case.return_value = ticket
 
     # WHEN the destination path is created
     sbatch_number: int = rsync_api.slurm_rsync_single_case(

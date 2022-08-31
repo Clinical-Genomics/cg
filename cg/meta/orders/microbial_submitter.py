@@ -72,7 +72,7 @@ class MicrobialSubmitter(Submitter):
         order: str,
         ordered: dt.datetime,
         items: List[dict],
-        ticket: int,
+        ticket: str,
     ) -> [models.Sample]:
         """Store microbial samples in the status database"""
 
@@ -84,7 +84,7 @@ class MicrobialSubmitter(Submitter):
         with self.status.session.no_autoflush:
 
             for sample_data in items:
-                case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
+                case_obj = self.status.find_family(customer=customer_obj, name=ticket)
 
                 if not case_obj:
                     case_obj = self.status.add_case(
@@ -92,6 +92,7 @@ class MicrobialSubmitter(Submitter):
                         data_delivery=data_delivery,
                         name=ticket,
                         panels=None,
+                        ticket=ticket,
                     )
                     case_obj.customer = customer_obj
                     self.status.add_commit(case_obj)
@@ -112,19 +113,19 @@ class MicrobialSubmitter(Submitter):
                     case_obj.comment = f"Order comment: {comment}"
 
                 new_sample = self.status.add_sample(
-                    application_version=application_version,
+                    name=sample_data["name"],
+                    sex="unknown",
                     comment=sample_data["comment"],
                     control=sample_data["control"],
-                    customer=customer_obj,
                     internal_id=sample_data.get("internal_id"),
-                    name=sample_data["name"],
                     order=order,
                     ordered=ordered,
-                    organism=organism,
+                    original_ticket=ticket,
                     priority=sample_data["priority"],
+                    application_version=application_version,
+                    customer=customer_obj,
+                    organism=organism,
                     reference_genome=sample_data["reference_genome"],
-                    sex="unknown",
-                    ticket=ticket,
                 )
 
                 priority = new_sample.priority

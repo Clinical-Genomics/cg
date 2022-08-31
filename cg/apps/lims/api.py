@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Generator, Optional
+from typing import Generator, Optional, Union, Dict, List
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
@@ -167,7 +167,7 @@ class LimsAPI(Lims, OrderHandler):
 
         return None
 
-    def get_samples(self, *args, map_ids=False, **kwargs):
+    def get_samples(self, *args, map_ids=False, **kwargs) -> Union[Dict[str, str], List[Sample]]:
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
         if map_ids:
