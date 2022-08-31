@@ -57,6 +57,7 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
+STRANDEDNESS_DEFAULT = ("reverse")
 
 class FileFormat(StrEnum):
     YAML: str = "yaml"

@@ -1,9 +1,11 @@
 import click
+from cg.constants.constants import STRANDEDNESS_DEFAULT
+
 
 OPTION_STRANDEDNESS = click.option(
     "--strandedness",
     type=str,
-    default="reverse",
+    default=STRANDEDNESS_DEFAULT,
     show_default=True,
     help="Strandedness: forward or reverse (default)",
 )

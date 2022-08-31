@@ -11,6 +11,8 @@ from cg.io.controller import WriteFile
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import CaseActions
+from cg.constants.constants import STRANDEDNESS_DEFAULT
+
 from cg.exc import RnafusionStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
@@ -67,7 +69,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Make the case folder where rnafusion analysis should be located"""
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
-    def write_samplesheet(self, case_id: str, strandedness="reverse") -> None:
+    def write_samplesheet(self, case_id: str, strandedness=STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder"""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
