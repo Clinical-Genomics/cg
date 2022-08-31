@@ -35,11 +35,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.RNAFUSION,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config.rnafusion.root
-        self.nfcore_pipeline_path = config.rnafusion.pipeline_path
-        self.references = config.rnafusion.references
-        self.profile = config.rnafusion.profile
-        self.conda_env = config.rnafusion.conda_env
+        self.root_dir: str = config.rnafusion.root
+        self.nfcore_pipeline_path: str = config.rnafusion.pipeline_path
+        self.references: str = config.rnafusion.references
+        self.profile: str = config.rnafusion.profile
+        self.conda_env: str = config.rnafusion.conda_env
 
     @property
     def root(self) -> str:
