@@ -1,4 +1,4 @@
-"""Module for building the rsync command to send files to customer inbox on caesar"""
+"""Module for building the rsync command to send files to customer inbox on the delivery server"""
 import datetime as dt
 import glob
 import logging
@@ -73,14 +73,14 @@ class RsyncAPI(MetaAPI):
 
     @staticmethod
     def concatenate_rsync_commands(
-        folder_list: List[str], source_and_destination_paths: Dict[str, Path], ticket_id: int
+        folder_list: List[str], source_and_destination_paths: Dict[str, Path], ticket: str
     ) -> str:
         """Concatenates the rsync commands for each folder to be transferred"""
         commands = ""
         for folder in folder_list:
             source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
-            destination_path: Path = source_and_destination_paths["rsync_destination_path"] / str(
-                ticket_id
+            destination_path: Path = Path(
+                source_and_destination_paths["rsync_destination_path"], ticket
             )
             commands += RSYNC_COMMAND.format(
                 source_path=source_path, destination_path=destination_path
@@ -95,19 +95,18 @@ class RsyncAPI(MetaAPI):
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
-    def get_all_cases_from_ticket(self, ticket_id: int) -> List[models.Family]:
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        return cases
+    def get_all_cases_from_ticket(self, ticket: str) -> List[models.Family]:
+        return self.status_db.get_cases_from_ticket(ticket=ticket).all()
 
-    def get_source_and_destination_paths(self, ticket_id: int) -> Dict[str, Path]:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
-        source_and_destination_paths = {}
+    def get_source_and_destination_paths(self, ticket: str) -> Dict[str, Path]:
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        source_and_destination_paths: Dict[str, Path] = {}
         if not cases:
-            LOG.warning("Could not find any cases for ticket_id %s", ticket_id)
+            LOG.warning("Could not find any cases for ticket %s", ticket)
             raise CgError()
         customer_id: str = cases[0].customer.internal_id
         source_and_destination_paths["delivery_source_path"]: Path = Path(
-            self.delivery_path, customer_id, "inbox", str(ticket_id)
+            self.delivery_path, customer_id, "inbox", ticket
         )
         source_and_destination_paths["rsync_destination_path"]: Path = Path(
             self.destination_path, customer_id, "inbox"
@@ -115,7 +114,7 @@ class RsyncAPI(MetaAPI):
         return source_and_destination_paths
 
     def add_to_trailblazer_api(
-        self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket_id: int, dry_run: bool
+        self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket: str, dry_run: bool
     ) -> None:
         """Add rsync process to trailblazer"""
         if dry_run:
@@ -125,7 +124,7 @@ class RsyncAPI(MetaAPI):
             config_path=self.trailblazer_config_path,
         )
         tb_api.add_pending_analysis(
-            case_id=str(ticket_id),
+            case_id=ticket,
             analysis_type="other",
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
@@ -134,15 +133,15 @@ class RsyncAPI(MetaAPI):
             data_analysis=Pipeline.RSYNC,
         )
 
-    def format_covid_report_path(self, case: models.Family, ticket_id: int) -> str:
+    def format_covid_report_path(self, case: models.Family, ticket: str) -> str:
         """Return a formatted of covid report path"""
         covid_report_options: List[str] = glob.glob(
-            self.covid_report_path % (str(case.internal_id), ticket_id)
+            self.covid_report_path % (case.internal_id, ticket)
         )
         if not covid_report_options:
             LOG.error(
                 f"No report file could be found with path"
-                f" {self.covid_report_path % (str(case.internal_id), ticket_id)}!"
+                f" {self.covid_report_path % (case.internal_id, ticket)}!"
             )
             raise CgError()
         return covid_report_options[0]
@@ -187,9 +186,9 @@ class RsyncAPI(MetaAPI):
     ) -> int:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type"""
 
-        ticket_id: int = self.status_db.get_ticket_from_case(case_id=case_id)
+        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket_id=ticket_id
+            ticket=ticket
         )
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
@@ -202,26 +201,26 @@ class RsyncAPI(MetaAPI):
         commands: str = RsyncAPI.concatenate_rsync_commands(
             folder_list=folder_list,
             source_and_destination_paths=source_and_destination_paths,
-            ticket_id=ticket_id,
+            ticket=ticket,
         )
 
         return self.sbatch_rsync_commands(commands=commands, job_prefix=case_id, dry_run=dry_run)
 
-    def run_rsync_on_slurm(self, ticket_id: int, dry_run: bool) -> int:
+    def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:
         """Runs rsync of a whole ticket folder to the delivery server"""
-        self.set_log_dir(folder_prefix=str(ticket_id))
+        self.set_log_dir(folder_prefix=ticket)
         self.create_log_dir(dry_run=dry_run)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket_id=ticket_id
+            ticket=ticket
         )
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
         customer_id: str = cases[0].customer.internal_id
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
             commands = COVID_RSYNC.format(
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
-                covid_report_path=self.format_covid_report_path(case=cases[0], ticket_id=ticket_id),
+                covid_report_path=self.format_covid_report_path(case=cases[0], ticket=ticket),
                 covid_destination_path=self.format_covid_destination_path(
                     self.covid_destination_path, customer_id=customer_id
                 ),
@@ -232,9 +231,7 @@ class RsyncAPI(MetaAPI):
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self.sbatch_rsync_commands(
-            commands=commands, job_prefix=str(ticket_id), dry_run=dry_run
-        )
+        return self.sbatch_rsync_commands(commands=commands, job_prefix=ticket, dry_run=dry_run)
 
     def sbatch_rsync_commands(
         self,

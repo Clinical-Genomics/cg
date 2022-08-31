@@ -275,7 +275,7 @@ class ReportAPI(MetaAPI):
                 SampleModel(
                     name=lims_sample.get("name"),
                     id=sample.internal_id,
-                    ticket=sample.ticket_number,
+                    ticket=sample.original_ticket,
                     gender=lims_sample.get("sex"),
                     source=lims_sample.get("source"),
                     tumour=sample.is_tumour,

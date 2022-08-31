@@ -146,13 +146,13 @@ def lims_api():
 
 @pytest.fixture(name="external_data_directory", scope="session")
 def external_data_directory(
-    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_nr
+    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket: str
 ) -> Path:
     """Fixture that returns a customer folder with fastq.gz files in sample-directories"""
     sample1: str = cust_sample_id + "1"
     sample2: str = cust_sample_id + "2"
     cust_folder = tmpdir_factory.mktemp(customer_id, numbered=False)
-    ticket_folder = cust_folder / str(ticket_nr)
+    ticket_folder = cust_folder / ticket
     ticket_folder.mkdir()
     Path(ticket_folder, sample1).mkdir(exist_ok=True, parents=True)
     Path(ticket_folder, sample2).mkdir(exist_ok=True, parents=True)

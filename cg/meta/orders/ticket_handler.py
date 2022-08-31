@@ -23,14 +23,14 @@ class TicketHandler:
         self.status_db: Store = status_db
 
     @staticmethod
-    def parse_ticket_number(name: str) -> Optional[int]:
+    def parse_ticket_number(name: str) -> Optional[str]:
         """Try to parse a ticket number from a string"""
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r"#([0-9]{6})", name)
         if ticket_match:
-            ticket_number = int(ticket_match.group(1))
-            LOG.info("%s: detected ticket in order name", ticket_number)
-            return ticket_number
+            ticket_id = ticket_match.group(1)
+            LOG.info("%s: detected ticket in order name", ticket_id)
+            return ticket_id
         LOG.info("Could not detected ticket number in name %s", name)
         return None
 
@@ -44,7 +44,7 @@ class TicketHandler:
             project=project,
         )
         attachment: dict = self.create_attachment(order=order)
-        ticket_nr: Optional[int] = self.osticket.open_ticket(
+        ticket_nr: Optional[str] = self.osticket.open_ticket(
             name=user_name,
             email=user_mail,
             subject=order.name,
@@ -171,7 +171,7 @@ class TicketHandler:
         return obj
 
     def connect_to_ticket(
-        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: int
+        self, order: OrderIn, user_name: str, user_mail: str, project: str, ticket_number: str
     ) -> None:
         """Appends a new order message to the ticket selected by the customer"""
         LOG.info("Connecting order to ticket %s", ticket_number)

@@ -203,7 +203,7 @@ def test_get_samples_data(
     # THEN assert that the retrieved sample is the expected one
     assert samples_data.name == str(expected_lims_data.get("name"))
     assert samples_data.id == str(expected_sample_data.sample.internal_id)
-    assert samples_data.ticket == str(expected_sample_data.sample.ticket_number)
+    assert samples_data.ticket == str(expected_sample_data.sample.original_ticket)
     assert samples_data.status == str(expected_sample_data.status)
     assert samples_data.gender == REPORT_GENDER.get(str(expected_lims_data.get("sex")))
     assert samples_data.source == str(expected_lims_data.get("source"))
