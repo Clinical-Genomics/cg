@@ -22,7 +22,11 @@ def get_subject_id_from_case(store: Store, case_id: str) -> str:
 
 
 def ensure_two_dna_tumour_matches(
-    dna_case_id: str, extra_tumor_sample_id: str, helpers: StoreHelpers, rna_case_id: str, rna_store: Store
+    dna_case_id: str,
+    extra_tumor_sample_id: str,
+    helpers: StoreHelpers,
+    rna_case_id: str,
+    rna_store: Store,
 ) -> None:
     """Ensures that we have one RNA case that has two matching DNA cases via subjectID and tumour state"""
     set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
@@ -371,7 +375,9 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     """Test that an RNA case's gene fusion report is uploaded to all DNA matches connected by subject ID"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(
+        dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store
+    )
     upload_scout_api.status_db = rna_store
     all_cases = rna_store.families()
 
@@ -399,7 +405,9 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     """Test that A RNA case's gene fusion report and junction splice files are uploaded to the sample in the additional case"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(
+        dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store
+    )
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -411,6 +419,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
     assert extra_tumor_sample_id in caplog.text
+
 
 def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
@@ -425,7 +434,9 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     """Test that A RNA case's junction splice files are uploaded to the sample in the additional case"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(
+        dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store
+    )
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper

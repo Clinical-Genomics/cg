@@ -217,12 +217,11 @@ class UploadScoutAPI:
                 is_tumour=rna_sample.is_tumour,
             )
 
-
             upload_dna_cases.update(dna_cases)
 
         if not upload_dna_cases:
             raise CgDataError(
-                "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                "Failed to upload fusion report on RNA case %s: no DNA cases linked to it via subject_id"
                 % rna_case.internal_id,
             )
 
@@ -296,7 +295,7 @@ class UploadScoutAPI:
 
             if not upload_dna_cases:
                 raise CgDataError(
-                    "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                    "Failed to upload rna_coverage_bigwig for RNA case %s: no DNA cases linked to it via subject_id"
                     % rna_case.internal_id,
                 )
 
@@ -371,7 +370,7 @@ class UploadScoutAPI:
 
             if not upload_dna_cases:
                 raise CgDataError(
-                    "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                    "Failed to upload splice_junctions_bed for RNA case %s: no DNA cases linked to it via subject_id"
                     % rna_case.internal_id,
                 )
             dna_case: models.Family
