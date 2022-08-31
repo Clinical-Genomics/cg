@@ -49,6 +49,17 @@ FLOWCELL_Q30_THRESHOLD = {
     "novaseq": 75,
 }
 
+
+class PrepCategory(StrEnum):
+    COVID: str = "cov"
+    MICROBIAL: str = "mic"
+    READY_MADE_LIBRARY: str = "rml"
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+
+
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
 SEX_OPTIONS = ("male", "female", "unknown")

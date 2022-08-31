@@ -47,15 +47,6 @@ class NiptUploadAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def expected_reads(self, case_id: str) -> float:
-        """Return the target reads of the case"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        application_version = self.status_db.ApplicationVersion.query.filter(
-            models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
-        ).first()
-
-        return application_version.application.expected_reads
-
     def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """Check average Q30 and of the latest flowcell related to a case"""
         latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
@@ -66,7 +57,9 @@ class NiptUploadAPI:
         ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
         return flow_cell_reads_and_q30_summary[
             "q30"
-        ] >= q30_threshold and flow_cell_reads_and_q30_summary["reads"] >= self.expected_reads(
+        ] >= q30_threshold and flow_cell_reads_and_q30_summary[
+            "reads"
+        ] >= self.status_db.ready_made_library_expected_reads(
             case_id=case_id
         )
 

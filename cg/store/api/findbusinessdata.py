@@ -4,6 +4,7 @@ from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query, load_only
+from cg.constants.constants import PrepCategory
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -111,7 +112,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
+        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
     ) -> Query:
         """Fetch families."""
 
@@ -336,6 +337,20 @@ class FindBusinessDataHandler(BaseHandler):
     def pool(self, pool_id: int) -> models.Pool:
         """Fetch a pool."""
         return self.Pool.get(pool_id)
+
+    def ready_made_library_expected_reads(self, case_id: str) -> float:
+        """Return the target reads of a ready made library case"""
+        case_obj: models.Family = self.family(case_id)
+        application_version = self.ApplicationVersion.query.filter(
+            models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
+        ).first()
+        if application_version.application.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
+            raise ValueError(
+                f"{case_id} not a ready made library case, found prep category"
+                f"{application_version.application.prep_category}"
+            )
+
+        return application_version.application.expected_reads
 
     def sample(self, internal_id: str) -> models.Sample:
         """Fetch a sample by lims id."""

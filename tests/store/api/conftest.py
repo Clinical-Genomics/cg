@@ -181,7 +181,7 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 @pytest.fixture(name="rml_pool_store")
 def fixture_rml_pool_store(
-    case_id: str, customer_id: str, helpers, store: Store, ticket_number: int
+    case_id: str, customer_id: str, helpers, sample_id: str, store: Store, ticket_number: int
 ):
     new_customer = store.add_customer(
         internal_id=customer_id,
@@ -199,13 +199,14 @@ def fixture_rml_pool_store(
         percent_kth=80,
         percent_reads_guaranteed=75,
         sequencing_depth=0,
+        target_reads=800,
     )
     store.add_commit(application)
 
     app_version = store.add_version(
         application=application,
         version=1,
-        valid_from=dt.datetime.today(),
+        valid_from=dt.datetime.now(),
         prices={
             PriorityTerms.STANDARD: 12,
             PriorityTerms.PRIORITY: 222,
@@ -219,7 +220,7 @@ def fixture_rml_pool_store(
         customer=new_customer,
         name="Test",
         order="Test",
-        ordered=dt.datetime.today(),
+        ordered=dt.datetime.now(),
         application_version=app_version,
     )
     store.add_commit(new_pool)
@@ -229,6 +230,23 @@ def fixture_rml_pool_store(
         name=PoolSubmitter.create_case_name(ticket=ticket_number, pool_name="Test"),
     )
     store.add_commit(new_case)
+
+    new_sample = helpers.add_sample(
+        store=store,
+        internal_id=sample_id,
+        application_tag=application.tag,
+        application_type=application.prep_category,
+        customer_id=new_customer.id,
+    )
+    new_sample.application_version = app_version
+    store.add_commit(new_sample)
+
+    helpers.add_relationship(
+        store=store,
+        sample=new_sample,
+        case=new_case,
+    )
+
     yield store
 
 
