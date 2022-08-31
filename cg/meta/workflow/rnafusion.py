@@ -77,7 +77,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_collection = file_collection.sort_values(by=["path"])
             fastq_r1 = file_collection[file_collection["read"] == 1]["path"].to_list()
             fastq_r2 = file_collection[file_collection["read"] == 2]["path"].to_list()
-            samplesheet: DataFrame = pd.DataFrame(
+            samplesheet: pd.DataFrame = pd.DataFrame(
                 list(zip(fastq_r1, fastq_r2)), columns=["fastq_1", "fastq_2"]
             )
             samplesheet["sample"] = case_id
@@ -280,18 +280,36 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
 
-    # def write_deliverables_file_yaml():
-    #     WriteFile
+    def get_template_deliverables_file(self, rnafusion_bundle_template: Path) -> pd.DataFrame:
+        """Read deliverables file template and output to dataframe format"""
+        return pd.read_csv(rnafusion_bundle_template)
+
+    def edit_template_deliverables_file(
+        self, case_id: str, deliverables_template: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Replace PATHTOCASE and CASEID from template deliverables file to corresponding strings, add path_index column"""
+        edited_deliverables = deliverables_template.replace(
+            {"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True
+        )
+        edited_deliverables = edited_deliverables.replace({"CASEID": case_id}, regex=True)
+        edited_deliverables = edited_deliverables["path_index"] = "~"
+        return edited_deliverables
+
+    def convert_deliverables_dataframe_to_dict(self, dataframe: pd.DataFrame):
+        """Convert deliverables dataframe to dict with dict values in list format  [{column -> value}, … , {column -> value}] with (orient="records"). Also reformat apostrophes in path_index column"""
+        return dataframe.to_dict(orient="records").replace("'~'", "~")
+
     def report_deliver(self, case_id: str) -> None:
-        """Write report deliver"""
-        df = pd.read_csv(resources.rnafusion_bundle_filenames_path)
-        df = df.replace({"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True)
-        df = df.replace({"CASEID": case_id}, regex=True)
-        df["path_index"] = "~"
-
-        # text = yaml.dump(df.to_dict(orient="records")).replace("'~'", "~")
-
-        deliver_file = open(self.get_deliverables_file_path(case_id), "w")
-        deliver_file.write("files:\n")
-        deliver_file.write(text)
-        deliver_file.close()
+        """Get a deliverables file template from resources, edit by replacing paths and case_id, then write deliverables file"""
+        deliverables_template: pd.DataFrame = self.get_template_deliverables_file(
+            resources.rnafusion_bundle_filenames_path
+        )
+        edited_deliverables: pd.DataFrame = self.edit_template_deliverables_file(
+            case_id, deliverables_template
+        )
+        deliverables_file_dict: dict = self.convert_deliverables_dataframe_to_dict(
+            edited_deliverables
+        )
+        WriteFile(
+            content=deliverables_file_dict, file_path=self.get_deliverables_file_path(case_id)
+        )
