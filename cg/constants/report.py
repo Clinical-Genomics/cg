@@ -52,6 +52,7 @@ REQUIRED_CUSTOMER_FIELDS = [
 # Case required fields
 REQUIRED_CASE_FIELDS = [
     "name",
+    "id",
     "samples",
     "data_analysis",
     "applications",

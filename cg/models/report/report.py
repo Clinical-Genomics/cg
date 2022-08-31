@@ -114,12 +114,14 @@ class CaseModel(BaseModel):
 
     Attributes:
         name: case name; source: StatusDB/family/name
+        id: case ID; source: StatusDB/family/internal_id
         samples: list of samples associated to a case/family
         data_analysis: pipeline attributes
         applications: case associated unique applications
     """
 
     name: Optional[str]
+    id: Optional[str]
     samples: List[SampleModel]
     data_analysis: DataAnalysisModel
     applications: List[ApplicationModel]

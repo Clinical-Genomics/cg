@@ -253,6 +253,7 @@ class ReportAPI(MetaAPI):
 
         return CaseModel(
             name=case.name,
+            id=case.internal_id,
             data_analysis=self.get_case_analysis_data(case, analysis, analysis_metadata),
             samples=samples,
             applications=unique_applications,
