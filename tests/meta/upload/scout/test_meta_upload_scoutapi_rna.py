@@ -22,7 +22,7 @@ def get_subject_id_from_case(store: Store, case_id: str) -> str:
 
 
 def ensure_two_dna_tumour_matches(
-    dna_case_id: str, helpers: StoreHelpers, rna_case_id: str, rna_store: Store
+    dna_case_id: str, extra_tumor_sample_id: str, helpers: StoreHelpers, rna_case_id: str, rna_store: Store
 ) -> None:
     """Ensures that we have one RNA case that has two matching DNA cases via subjectID and tumour state"""
     set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
@@ -32,7 +32,7 @@ def ensure_two_dna_tumour_matches(
         store=rna_store, customer=rna_store.family(dna_case_id).customer
     )
     dna_extra_tumour = helpers.add_sample(
-        store=rna_store, name="dna_extra_tumour", subject_id=subject_id, is_tumour=True
+        store=rna_store, name=extra_tumor_sample_id, subject_id=subject_id, is_tumour=True
     )
     helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
     rna_store.commit()
@@ -361,41 +361,45 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
 def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
+    extra_tumor_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that an RNA case's gene fusion report is not uploaded if the is_tumour has too many DNA-matches"""
+    """Test that an RNA case's gene fusion report is uploaded to all DNA matches connected by subject ID"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
+    all_cases = rna_store.families()
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
 
-    # THEN an exception should be raised on unconnected data
-    with pytest.raises(CgDataError):
-        upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
+    # THEN the log should contain the RNA case and all matching DNA cases
+    upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
+
+    assert all(case.internal_id in caplog.text for case in all_cases)
 
 
 def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
+    extra_tumor_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
+    """Test that A RNA case's gene fusion report and junction splice files are uploaded to the sample in the additional case"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -403,24 +407,25 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
 
-    # THEN an exception should be raised on unconnected data
-    with pytest.raises(CgDataError):
-        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+    # THEN the log should contain the extra sample of the second case
+    upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
+    assert extra_tumor_sample_id in caplog.text
 
 def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
+    extra_tumor_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that A RNA case's junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
+    """Test that A RNA case's junction splice files are uploaded to the sample in the additional case"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper
@@ -428,6 +433,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
 
-    # THEN an exception should be raised on unconnected data
-    with pytest.raises(CgDataError):
-        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+    # THEN the log should contain the extra sample of the second case
+    upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+
+    assert extra_tumor_sample_id in caplog.text

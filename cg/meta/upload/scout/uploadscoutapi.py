@@ -294,11 +294,11 @@ class UploadScoutAPI:
 
             upload_dna_cases.update(dna_cases)
 
-        if not upload_dna_cases:
-            raise CgDataError(
-                "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
-                % rna_case.internal_id,
-            )
+            if not upload_dna_cases:
+                raise CgDataError(
+                    "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                    % rna_case.internal_id,
+                )
 
             dna_case: models.Family
             for dna_case in dna_cases:
@@ -369,12 +369,11 @@ class UploadScoutAPI:
 
             upload_dna_cases.update(dna_cases)
 
-        if not upload_dna_cases:
-            raise CgDataError(
-                "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
-                % rna_case.internal_id,
-            )
-
+            if not upload_dna_cases:
+                raise CgDataError(
+                    "Failed to upload on RNA case %s since there are no DNA cases linked to it via subject_id"
+                    % rna_case.internal_id,
+                )
             dna_case: models.Family
             for dna_case in dna_cases:
                 dna_case_id: str = dna_case.internal_id
