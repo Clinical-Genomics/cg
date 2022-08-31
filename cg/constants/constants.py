@@ -59,6 +59,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 STRANDEDNESS_DEFAULT = "reverse"
 
+NFX_WORK_DIR = "work"
 
 class FileFormat(StrEnum):
     YAML: str = "yaml"

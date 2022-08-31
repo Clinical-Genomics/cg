@@ -11,7 +11,7 @@ from cg.io.controller import WriteFile
 from pydantic import ValidationError
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import CaseActions
-from cg.constants.constants import STRANDEDNESS_DEFAULT
+from cg.constants.constants import STRANDEDNESS_DEFAULT, NFX_WORK_DIR
 
 from cg.exc import RnafusionStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -102,7 +102,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_workdir_path(self, case_id: str, work_dir: str = None) -> Path:
         if work_dir:
             return work_dir
-        return Path(self.get_case_path(case_id), "work")
+        return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
     def get_input_path(self, case_id: str, input: str = None) -> Path:
         if input:
