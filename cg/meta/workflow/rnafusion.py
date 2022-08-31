@@ -69,7 +69,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Make the case folder where rnafusion analysis should be located"""
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
-    def write_samplesheet(self, case_id: str, strandedness=STRANDEDNESS_DEFAULT) -> None:
+    def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder"""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
@@ -77,7 +77,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_collection = file_collection.sort_values(by=["path"])
             fastq_r1 = file_collection[file_collection["read"] == 1]["path"].to_list()
             fastq_r2 = file_collection[file_collection["read"] == 2]["path"].to_list()
-            samplesheet = pd.DataFrame(
+            samplesheet: DataFrame = pd.DataFrame(
                 list(zip(fastq_r1, fastq_r2)), columns=["fastq_1", "fastq_2"]
             )
             samplesheet["sample"] = case_id
