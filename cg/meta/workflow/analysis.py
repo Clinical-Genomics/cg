@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import os
+import click
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
@@ -46,6 +47,14 @@ class AnalysisAPI(MetaAPI):
     @property
     def fastq_handler(self):
         return FastqHandler
+
+    def get_help(context):
+        """
+        If no argument is passed, print help text
+        """
+        if context.invoked_subcommand is None:
+            click.echo(context.get_help())
+            return None
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
