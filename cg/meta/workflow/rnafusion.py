@@ -91,8 +91,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_log_path(self, case_id: str, log: str = None) -> Path:
         if log:
             return log
-        dt = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-        return Path(self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + dt + ".log")
+        launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
+        return Path(self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + launch_time + ".log")
 
     def get_profile(self, profile: str = None) -> Path:
         if profile:
