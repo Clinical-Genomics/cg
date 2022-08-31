@@ -92,7 +92,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-        return Path(self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + launch_time + ".log")
+        return Path(
+            self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + launch_time + ".log"
+        )
 
     def get_profile(self, profile: str = None) -> Path:
         if profile:
