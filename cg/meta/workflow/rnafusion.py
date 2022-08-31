@@ -141,7 +141,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         fusioncatcher: bool,
         arriba: bool,
     ) -> dict:
-        """This is a function to document"""
+        """Transforms click argument related to rnafusion that were left empty into defaults constructed with case_id paths or from config"""
 
         return {
             "-w": self.get_workdir_path(case_id, work_dir),
@@ -167,7 +167,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         case_id: str,
         log: str,
     ) -> dict:
-        """This is a function to document"""
+        """Transforms click argument related to nextflow that were left empty into defaults constructed with case_id paths"""
 
         return {
             "-log": self.get_log_path(case_id, log),
