@@ -346,7 +346,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).first()
         if application_version.application.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
             raise ValueError(
-                f"{case_id} not a ready made library case, found prep category"
+                f"{case_id} not a ready made library case, found prep category: "
                 f"{application_version.application.prep_category}"
             )
 

@@ -4,6 +4,7 @@ import pytest
 from typing import Iterable, List
 
 from cg.constants import Pipeline
+from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store, models
@@ -272,7 +273,7 @@ def fixture_re_sequenced_sample_store(
     store_sample = helpers.add_sample(
         internal_id=sample_id,
         is_tumour=False,
-        application_type="tgs",
+        application_type=str(PrepCategory.READY_MADE_LIBRARY),
         reads=1200000000,
         store=re_sequenced_sample_store,
         ticket=ticket_number,
