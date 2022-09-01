@@ -163,7 +163,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return {
             "CG_ID_project": self.get_project(sample_id),
-            "Customer_ID_project": sample_obj.ticket_number,
+            "Customer_ID_project": sample_obj.original_ticket,
             "CG_ID_sample": sample_obj.internal_id,
             "Customer_ID_sample": sample_obj.name,
             "organism": self.get_organism(sample_obj),

@@ -95,7 +95,7 @@ class CaseSubmitter(Submitter):
             status_samples = [
                 link_obj.sample
                 for link_obj in case_obj.links
-                if link_obj.sample.ticket_number == order.ticket
+                if link_obj.sample.original_ticket == order.ticket
             ]
             self._add_missing_reads(status_samples)
         return result
@@ -214,7 +214,7 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
 
@@ -223,7 +223,7 @@ class CaseSubmitter(Submitter):
         for case in items:
             case_obj = self.status.family(case["internal_id"])
             if not case_obj:
-                case_obj = self._create_case(case, customer_obj)
+                case_obj = self._create_case(case, customer_obj, ticket)
                 new_families.append(case_obj)
 
             self._update_case(case, case_obj)
@@ -276,22 +276,22 @@ class CaseSubmitter(Submitter):
 
     def _create_sample(self, case, customer_obj, order, ordered, sample, ticket):
         sample_obj = self.status.add_sample(
-            age_at_sampling=sample["age_at_sampling"],
-            capture_kit=sample["capture_kit"],
+            name=sample["name"],
             comment=sample["comment"],
             control=sample["control"],
             internal_id=sample["internal_id"],
-            name=sample["name"],
             order=order,
             ordered=ordered,
+            original_ticket=ticket,
+            tumour=sample["tumour"],
+            age_at_sampling=sample["age_at_sampling"],
+            capture_kit=sample["capture_kit"],
             phenotype_groups=sample["phenotype_groups"],
             phenotype_terms=sample["phenotype_terms"],
             priority=case["priority"],
             reference_genome=sample["reference_genome"],
             sex=sample["sex"],
             subject_id=sample["subject_id"],
-            ticket=ticket,
-            tumour=sample["tumour"],
         )
         sample_obj.customer = customer_obj
         with self.status.session.no_autoflush:
@@ -304,7 +304,7 @@ class CaseSubmitter(Submitter):
         self.status.add(new_delivery)
         return sample_obj
 
-    def _create_case(self, case, customer_obj):
+    def _create_case(self, case: dict, customer_obj: models.Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
             data_analysis=Pipeline(case["data_analysis"]),
@@ -312,6 +312,7 @@ class CaseSubmitter(Submitter):
             name=case["name"],
             priority=case["priority"],
             synopsis=case["synopsis"],
+            ticket=ticket,
         )
         case_obj.customer = customer_obj
         return case_obj
