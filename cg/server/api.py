@@ -1,5 +1,6 @@
 import http
 import logging
+import json
 import tempfile
 from functools import wraps
 from pathlib import Path
@@ -399,9 +400,7 @@ def orderform():
             order_parser = ExcelOrderformParser()
             order_parser.parse_orderform(excel_path=saved_path)
         else:
-            json_data = ReadStream.get_content_from_stream(
-                file_format=FileFormat.JSON, stream=input_file.stream
-            )
+            json_data = json.load(input_file.stream, strict=False)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
         parsed_order: Orderform = order_parser.generate_orderform()
