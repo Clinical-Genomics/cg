@@ -1,13 +1,13 @@
 """Fixtures for crunchy api"""
-import copy
-import json
 import logging
 from pathlib import Path
 from typing import List
 
 import pytest
+
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile
 from cg.models import CompressionData
-from cg.utils import Process
 from cgmodels.crunchy.metadata import CrunchyMetadata
 from tests.mocks.process_mock import ProcessMock
 
@@ -15,31 +15,28 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="real_spring_metadata_path")
-def fixture_real_spring_metadata_path(fixtures_dir) -> Path:
+def fixture_real_spring_metadata_path(apps_dir: Path) -> Path:
     """Return the path to a SPRING metadata file"""
-    return fixtures_dir / "apps" / "crunchy" / "spring_metadata.json"
+    return Path(apps_dir, "crunchy", "spring_metadata.json")
 
 
 @pytest.fixture(name="spring_metadata")
 def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
     """Return meta data information"""
-    first_read = compression_object.fastq_first
-    second_read = compression_object.fastq_second
-    spring_path = compression_object.spring_path
     return [
         {
-            "path": str(first_read),
+            "path": compression_object.fastq_first.as_posix(),
             "file": "first_read",
             "checksum": "checksum_first_read",
             "algorithm": "sha256",
         },
         {
-            "path": str(second_read),
+            "path": compression_object.fastq_second.as_posix(),
             "file": "second_read",
             "checksum": "checksum_second_read",
             "algorithm": "sha256",
         },
-        {"path": str(spring_path), "file": "spring"},
+        {"path": compression_object.spring_path.as_posix(), "file": "spring"},
     ]
 
 
@@ -49,16 +46,16 @@ def fixture_crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetad
     return CrunchyMetadata(files=spring_metadata)
 
 
-@pytest.fixture(scope="function", name="spring_metadata_file")
+@pytest.fixture(name="spring_metadata_file")
 def fixture_spring_metadata_file(
     compression_object: CompressionData, spring_metadata: List[dict]
 ) -> Path:
     """Return the path to a populated SPRING metadata file"""
     metadata_path = compression_object.spring_metadata_path
 
-    with open(metadata_path, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
-
+    WriteFile.write_file_from_content(
+        content=spring_metadata, file_format=FileFormat.JSON, file_path=metadata_path
+    )
     return metadata_path
 
 

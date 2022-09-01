@@ -59,6 +59,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    JSON: str = "json"
     YAML: str = "yaml"
 
 

@@ -1,11 +1,12 @@
 """Tests for CrunchyAPI"""
-import json
 import logging
 from pathlib import Path
 from typing import Dict, List
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile, WriteFile
 from cg.models import CompressionData
 
 
@@ -229,8 +230,9 @@ def test_is_compression_done_spring_new_files(
 
     # GIVEN that the files where updated less than three weeks ago
     update_metadata_date(metadata_file)
-    with open(metadata_file, "r") as infile:
-        content: List[Dict[str, str]] = json.load(infile)
+    content: List[Dict[str, str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=metadata_file
+    )
     for file_info in content:
         assert "updated" in file_info
 
@@ -266,13 +268,13 @@ def test_is_compression_done_spring_old_files(
 
     # GIVEN that the files where updated less than three weeks ago
     update_metadata_date(metadata_file)
-    with open(metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(file_format=FileFormat.JSON, file_path=metadata_file)
     for file_info in content:
         file_info["updated"] = "2019-01-01"
 
-    with open(metadata_file, "w") as outfile:
-        outfile.write(json.dumps(content))
+    WriteFile.write_file_from_content(
+        content=content, file_format=FileFormat.JSON, file_path=metadata_file
+    )
 
     # WHEN checking if SPRING compression is done
     result = crunchy_api.is_fastq_compression_done(compression_object)

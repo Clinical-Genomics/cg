@@ -97,8 +97,8 @@ def loqus_process_exception(loqus_binary_path, loqus_config_path):
     return ProcessMock(binary=loqus_binary_path, config=loqus_config_path, error=True)
 
 
-@pytest.fixture(scope="function")
-def loqusdbapi(loqus_config: dict, loqus_process):
+@pytest.fixture(name="loqusdbapi")
+def fixture_loqusdbapi(loqus_config: dict, loqus_process) -> LoqusdbAPI:
     """
     loqusdb API fixture
     """
@@ -121,21 +121,20 @@ def loqusdbapi_exception(loqus_config, loqus_process_exception):
     return _loqus_api
 
 
-@pytest.fixture(scope="function")
-def loqusdb_output():
+@pytest.fixture(name="loqusdb_output")
+def fixture_loqusdb_output() -> bytes:
     """
     loqusdb stderr for a successful load
     """
     return LOQUSDB_OUTPUT
 
 
-@pytest.fixture(scope="function")
-def loqusdb_case_output():
+@pytest.fixture(name="loqusdb_case_output")
+def fixture_loqusdb_case_output() -> bytes:
     """
     loqusdb output for a 'loqusdb cases -c <case_id> --to-json' command
     """
-
-    _output = (
+    return (
         b'[{"_id": "1234", "case_id": "yellowhog", '
         b'"vcf_path": "test.vcf.gz", "vcf_sv_path": null, "nr_variants": 15, '
         b'"nr_sv_variants": null, "profile_path": "test.vcf.gz", "individuals": '
@@ -165,14 +164,11 @@ def loqusdb_case_output():
         b'"_sv_inds": {}}]\n'
     )
 
-    return _output
 
-
-@pytest.fixture(scope="function")
-def loqusdb_duplicate_output():
+@pytest.fixture(name="loqusdb_duplicate_output")
+def fixture_loqusdb_duplicate_output() -> bytes:
     """loqusdb output for a 'loqusdb profile --check-vcf' call"""
-
-    _output = (
+    return (
         b'{"ind_id": "proband", "name": "proband", "case_id": "recessive_trio_test", '
         b'"ind_index": 4, "sex": 1, "profile": ["TT", "CC", "CC", "CC", "TT", "AA",'
         b' "CC", "GG", "GG", "GG", "TT", "GG", "CC", "AA", "GG", "GG", "GG", "AA", '
@@ -180,5 +176,3 @@ def loqusdb_duplicate_output():
         b'"GT", "CC", "AC", "AG", "AG", "AA", "GA", "AA", "CC", "GG", "AA", "TT", "AA", '
         b'"GG", "GG", "CC", "AA", "TT", "TT"]}'
     )
-
-    return _output

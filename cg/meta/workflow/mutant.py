@@ -1,11 +1,11 @@
-import datetime as dt
-import json
 import logging
 import shutil
 from pathlib import Path
 from typing import List, Optional
 
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
 from cg.models.cg_config import CGConfig
@@ -131,7 +131,9 @@ class MutantAnalysisAPI(AnalysisAPI):
             LOG.info("Dry-run, would have created config at path %s, with content:", config_path)
             LOG.info(case_config_list)
         config_path.parent.mkdir(parents=True, exist_ok=True)
-        json.dump(case_config_list, open(config_path, "w"), indent=4)
+        WriteFile.write_file_from_content(
+            content=case_config_list, file_format=FileFormat.JSON, file_path=config_path
+        )
         LOG.info("Saved config to %s", config_path)
 
     def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
