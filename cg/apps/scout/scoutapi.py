@@ -1,6 +1,5 @@
 """Code for talking to Scout regarding uploads"""
 
-import json
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -10,7 +9,7 @@ from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.exc import ScoutUploadError
-from cg.io.controller import ReadFile
+from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 
@@ -134,7 +133,9 @@ class ScoutAPI:
             LOG.warning("Could not find case %s in scout", case_id)
             return []
         variants: List[Variant] = []
-        for variant_info in json.loads(self.process.stdout):
+        for variant_info in ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.process.stdout
+        ):
             variants.append(Variant(**variant_info))
         return variants
 
@@ -180,11 +181,12 @@ class ScoutAPI:
             LOG.info("Could not find cases")
             return []
 
-        cases = []
-        for case_export in json.loads(self.process.stdout):
+        cases: List[ScoutExportCase] = []
+        for case_export in ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.process.stdout
+        ):
             LOG.info("Validating case %s", case_export.get("_id"))
-            case_obj = ScoutExportCase(**case_export)
-            cases.append(case_obj)
+            cases.append(ScoutExportCase(**case_export))
         return cases
 
     def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:

@@ -1,4 +1,5 @@
-import json
+from pathlib import Path
+
 import logging
 import os.path
 from tempfile import TemporaryDirectory
@@ -6,7 +7,9 @@ from tempfile import TemporaryDirectory
 import requests
 from flask import Flask
 
+from cg.constants.constants import FileFormat
 from cg.exc import TicketCreationError
+from cg.io.controller import WriteStream, WriteFile
 
 LOG = logging.getLogger(__name__)
 TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
@@ -63,11 +66,20 @@ class OsTicket(object):
 
     @staticmethod
     def create_new_ticket_attachment(content: dict, file_name: str) -> dict:
-        return {file_name: TEXT_FILE_ATTACH_PARAMS.format(content=json.dumps(content))}
+        return {
+            file_name: TEXT_FILE_ATTACH_PARAMS.format(
+                content=WriteStream.write_stream_from_content(
+                    content=content, file_format=FileFormat.JSON
+                )
+            )
+        }
 
     @staticmethod
     def create_connecting_ticket_attachment(content: dict) -> TemporaryDirectory:
         directory = TemporaryDirectory()
-        with open(f"{directory.name}/order.json", "w") as json_file:
-            json_file.write(json.dumps(content))
+        WriteFile.write_file_from_content(
+            content=content,
+            file_format=FileFormat.JSON,
+            file_path=Path(directory.name, "order.json"),
+        )
         return directory

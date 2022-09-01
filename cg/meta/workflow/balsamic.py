@@ -1,12 +1,11 @@
 """Module for Balsamic Analysis API"""
 
-import json
 import logging
 from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import ValidationError
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
@@ -562,8 +561,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_pipeline_version(self, case_id: str) -> str:
         LOG.debug("Fetch pipeline version")
-        sample_config = self.get_case_config_path(case_id=case_id)
-        config_data: dict = json.load(open(sample_config, "r"))
+        config_data: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
+        )
         return config_data["analysis"]["BALSAMIC_version"]
 
     def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:

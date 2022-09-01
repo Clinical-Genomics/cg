@@ -4,8 +4,10 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.constants import FileFormat
 from cg.constants.pedigree import Pedigree
 from cg.constants.subject import RelationshipStatus, Gender, PhenotypeStatus
+from cg.io.controller import ReadFile
 from tests.mocks.process_mock import ProcessMock
 
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -22,8 +24,8 @@ class MockScoutApi(ScoutAPI):
 def fixture_sample_dict() -> dict:
     sample_dict = {
         "analysis_type": "wgs",
-        "bam_path": "/path/to/sample.bam",
-        "mt_bam": "/path/to/reduced_mt.bam",
+        "bam_path": Path("path", "to", "sample.bam").as_posix(),
+        "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
         "capture_kit": None,
         Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
         Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
@@ -71,12 +73,13 @@ def fixture_other_sex_case_file(scout_dir: Path) -> Path:
     return Path(scout_dir, "other_sex_case.json")
 
 
-@pytest.fixture(name="none_case_output")
-def fixture_none_case_output(none_case_file: Path) -> str:
-    """Return the content of a export causatives run with scout"""
-    with open(none_case_file, "r") as infile:
-        content = infile.read()
-    return content
+@pytest.fixture(name="none_case_raw")
+def fixture_none_case_raw(none_case_file: Path) -> dict:
+    """Return a single case of a export causatives run with scout"""
+    cases: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=none_case_file
+    )
+    return cases[0]
 
 
 @pytest.fixture(name="other_sex_case_output")
