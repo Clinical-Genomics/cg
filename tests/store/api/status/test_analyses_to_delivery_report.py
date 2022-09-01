@@ -6,21 +6,20 @@ from cg.store import Store
 from cg.utils.date import get_date
 
 
-def test_missing(analysis_store: Store, helpers):
+def test_missing(analysis_store: Store, helpers, timestamp_today):
     """Tests that analyses that are completed but lacks delivery report are returned"""
 
     # GIVEN an analysis that is delivered but has no delivery report
     pipeline = Pipeline.BALSAMIC
-    timestamp = datetime.now()
     analysis = helpers.add_analysis(
         analysis_store,
-        started_at=timestamp,
-        completed_at=timestamp,
-        uploaded_at=timestamp,
+        started_at=timestamp_today,
+        completed_at=timestamp_today,
+        uploaded_at=timestamp_today,
         pipeline=pipeline,
         data_delivery=DataDelivery.SCOUT,
     )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_today)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
     assert sample.delivered_at is not None
     assert analysis.delivery_report_created_at is None
@@ -32,7 +31,7 @@ def test_missing(analysis_store: Store, helpers):
     assert analysis in analyses
 
 
-def test_outdated_analysis(analysis_store, helpers):
+def test_outdated_analysis(analysis_store, helpers, timestamp_today, timestamp_yesterday):
     """Tests that analyses that are older then when Hasta became production (2017-09-26) are not included in the cases to generate a delivery report for"""
 
     # GIVEN an analysis that is older than Hasta
@@ -40,20 +39,18 @@ def test_outdated_analysis(analysis_store, helpers):
     pipeline = Pipeline.BALSAMIC
 
     # GIVEN a delivery report created at date which is older than the upload date to trigger delivery report generation
-    timestamp = datetime.now()
-    delivery_reported_at_timestamp = timestamp - timedelta(days=1)
 
     # GIVEN a store to add analysis to
     analysis = helpers.add_analysis(
         analysis_store,
         started_at=timestamp_old_analysis,
-        uploaded_at=timestamp,
-        delivery_reported_at=delivery_reported_at_timestamp,
+        uploaded_at=timestamp_today,
+        delivery_reported_at=timestamp_yesterday,
         pipeline=pipeline,
     )
 
     # GIVEN samples which has been delivered
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_today)
 
     # GIVEN a store sample case relation
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
@@ -65,18 +62,17 @@ def test_outdated_analysis(analysis_store, helpers):
     assert len(analyses) == 0
 
 
-def test_analyses_to_upload_delivery_reports(analysis_store, helpers):
+def test_analyses_to_upload_delivery_reports(analysis_store, helpers, timestamp_today):
     """Tests extraction of analyses ready for delivery report upload"""
 
     # GIVEN an analysis that has a delivery report generated
     pipeline = Pipeline.BALSAMIC
-    timestamp = datetime.now()
     analysis = helpers.add_analysis(
         analysis_store,
-        started_at=timestamp,
-        completed_at=timestamp,
+        started_at=timestamp_today,
+        completed_at=timestamp_today,
         uploaded_at=None,
-        delivery_reported_at=timestamp,
+        delivery_reported_at=timestamp_today,
         pipeline=pipeline,
         data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
