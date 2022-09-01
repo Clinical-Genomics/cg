@@ -53,8 +53,8 @@ def fixture_mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) 
     return cg_context
 
 
-@pytest.fixture(name="click_context")
-def fixture_click_context(mip_dna_context) -> click.Context:
+@pytest.fixture(name="delivery_report_click_context")
+def fixture_delivery_report_click_context(mip_dna_context) -> click.Context:
     """Click delivery report context fixture"""
 
     return click.Context(delivery_report, obj=mip_dna_context)
