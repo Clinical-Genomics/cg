@@ -651,7 +651,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Fetches analyses that need a delivery report to be regenerated"""
 
-        records = self.get_report_records_by_pipeline(pipeline)
+        records: Query = self.get_report_records_by_pipeline(pipeline)
         records = records.filter(
             models.Analysis.delivery_report_created_at.is_(None),
             models.Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY),
@@ -663,7 +663,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
         """Fetches analyses that need a delivery report to be uploaded"""
 
-        records = self.get_report_records_by_pipeline(pipeline)
+        records: Query = self.get_report_records_by_pipeline(pipeline)
         records = records.filter(
             models.Analysis.delivery_report_created_at.isnot(None),
             models.Analysis.uploaded_at.is_(None),
