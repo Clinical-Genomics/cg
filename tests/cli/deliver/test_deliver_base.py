@@ -53,39 +53,39 @@ def test_run_deliver_ticket_help(base_context: CGConfig):
     assert "Will first collect hard links" in result.output
 
 
-def test_run_deliver_delivered_ticket(cg_context: CGConfig, mocker, caplog, helpers):
-    """Test for when files are already delivered to customer inbox on hasta"""
+def test_run_deliver_delivered_ticket(cg_context: CGConfig, mocker, caplog, helpers, ticket):
+    """Test for when files are already delivered to customer inbox the HPC"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a cli runner
     runner = CliRunner()
 
-    # GIVEN uploading data to caesar is not needed
+    # GIVEN uploading data to the delivery server is not needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket
     result = runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket-id", "123456", "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
         obj=cg_context,
     )
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN assert that files are already delivered to the customer inbox on hasta
-    assert "Files already delivered to customer inbox on hasta" in caplog.text
+    # THEN assert that files are already delivered to the customer inbox on the HPC
+    assert "Files already delivered to customer inbox on the HPC" in caplog.text
 
 
-def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers):
+def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers, ticket):
     """Test for delivering tu customer inbox"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a cli runner
     runner = CliRunner()
 
-    # GIVEN uploading data to caesar is needed
+    # GIVEN uploading data to the delivery server is needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = True
 
@@ -96,9 +96,9 @@ def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers):
     # WHEN running cg deliver ticket
     result = runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket-id", "123456", "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
         obj=cg_context,
     )
 
     # THEN assert that files are delivered
-    assert "Delivering files to customer inbox on hasta" in caplog.text
+    assert "Delivering files to customer inbox on the HPC" in caplog.text

@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from typing import Dict, Union, List
 
 import cg.store.models
 import genologics.entities
@@ -109,12 +110,14 @@ class TransferLims(object):
         pools = self._pool_functions[status_type]()
 
         for pool_obj in pools:
-            ticket_number = pool_obj.ticket_number
-            number_of_samples = self.lims.get_sample_number(projectname=ticket_number)
-            if not self._is_pool_valid(pool_obj, ticket_number, number_of_samples):
+            ticket: str = pool_obj.ticket
+            number_of_samples: int = self.lims.get_sample_number(projectname=ticket)
+            if not self._is_pool_valid(pool_obj, ticket, number_of_samples):
                 continue
 
-            samples_in_pool = self.lims.get_samples(projectname=ticket_number)
+            samples_in_pool: Union[Dict[str:str], List[genologics.Sample]] = self.lims.get_samples(
+                projectname=ticket
+            )
             for sample_obj in samples_in_pool:
                 if not self._is_sample_valid(pool_obj, sample_obj):
                     continue
@@ -139,16 +142,14 @@ class TransferLims(object):
         return self.status.samples_not_downsampled()
 
     @staticmethod
-    def _is_pool_valid(
-        pool_obj: cg.store.models.Pool, ticket_number: int, number_of_samples: int
-    ) -> bool:
+    def _is_pool_valid(pool_obj: cg.store.models.Pool, ticket: str, number_of_samples: int) -> bool:
         """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
 
-        if ticket_number is None:
+        if ticket is None:
             LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
             return False
         if number_of_samples == 0:
-            LOG.warning(f"No samples found for pool with ticket number {ticket_number}.")
+            LOG.warning(f"No samples found for pool with ticket number {ticket}.")
             return False
         return True
 

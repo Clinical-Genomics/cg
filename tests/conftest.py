@@ -18,6 +18,7 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
 from cg.io.controller import ReadFile
+from cg.constants.subject import Gender
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
@@ -91,14 +92,8 @@ def fixture_customer_id() -> str:
     return "cust000"
 
 
-@pytest.fixture(name="ticket_nr", scope="session")
-def fixture_ticket_nr() -> int:
-    """Return a ticket nr"""
-    return 123456
-
-
 @pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: int) -> dict:
+def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -106,13 +101,14 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: in
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
+        "tickets": ticket,
         "samples": [
             {
                 "name": "proband",
-                "sex": "male",
+                "sex": Gender.MALE,
                 "internal_id": "ADM1",
                 "status": "affected",
-                "ticket_number": ticket_nr,
+                "original_ticket": ticket,
                 "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
             }
@@ -121,41 +117,42 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket_nr: in
 
 
 @pytest.fixture(scope="function", name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, ticket_nr: int) -> dict:
+def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict:
     """Return a dictionary with information from a analysis case"""
     return {
         "name": family_name,
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
+        "tickets": ticket,
         "panels": ["IEM", "EP"],
         "samples": [
             {
                 "name": "child",
-                "sex": "male",
+                "sex": Gender.MALE,
                 "internal_id": "ADM1",
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
-                "ticket_number": ticket_nr,
+                "original_ticket": ticket,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
             },
             {
                 "name": "father",
-                "sex": "male",
+                "sex": Gender.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
-                "ticket_number": ticket_nr,
+                "original_ticket": ticket,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
             },
             {
                 "name": "mother",
-                "sex": "female",
+                "sex": Gender.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
-                "ticket_number": ticket_nr,
+                "original_ticket": ticket,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -247,10 +244,9 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
 
 
 @pytest.fixture(name="external_data_api")
-def fixture_external_data_api(cg_context: CGConfig) -> ExternalDataAPI:
+def fixture_external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture"""
-    _external_data_api: ExternalDataAPI = ExternalDataAPI(config=cg_context)
-    return _external_data_api
+    return ExternalDataAPI(config=cg_context)
 
 
 @pytest.fixture(name="genotype_api")
@@ -272,17 +268,17 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     return _api
 
 
-@pytest.fixture(name="ticket_number")
-def fixture_ticket_number() -> int:
+@pytest.fixture(name="ticket", scope="session")
+def fixture_ticket_number() -> str:
     """Return a ticket number for testing"""
-    return 123456
+    return "123456"
 
 
 @pytest.fixture(name="osticket")
-def fixture_os_ticket(ticket_number: int) -> MockOsTicket:
+def fixture_os_ticket(ticket: str) -> MockOsTicket:
     """Return a api that mock the os ticket api"""
     api = MockOsTicket()
-    api.set_ticket_nr(ticket_number)
+    api.set_ticket_nr(ticket)
     return api
 
 
@@ -756,7 +752,6 @@ def fixture_analysis_store(
     helpers.ensure_case_from_dict(
         base_store, case_info=analysis_family, app_tag=wgs_application_tag
     )
-
     yield base_store
 
 
@@ -831,7 +826,7 @@ def fixture_external_wes_info(external_wes_application_tag) -> dict:
 @pytest.fixture(scope="function", name="wgs_application_tag")
 def fixture_wgs_application_tag() -> str:
     """Return the wgs app tag"""
-    return "WGSPCFC060"
+    return "WGSPCFC030"
 
 
 @pytest.fixture(scope="function", name="wgs_application_info")
@@ -951,6 +946,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             limitations="some",
             percent_kth=80,
             percent_reads_guaranteed=75,
+            min_sequencing_depth=30,
         ),
         store.add_application(
             tag="METLIFR020",
@@ -988,6 +984,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
             sequencing_depth=25,
             accredited=True,
             target_reads=10,
+            min_sequencing_depth=30,
         ),
         store.add_application(
             tag="VWGDPTR001",
@@ -1024,7 +1021,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
 def sample_store(base_store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample("ordered", sex="male"),
+        base_store.add_sample("ordered", sex=Gender.MALE),
         base_store.add_sample("received", sex="unknown", received=dt.datetime.now()),
         base_store.add_sample(
             "received-prepared",
@@ -1032,13 +1029,13 @@ def sample_store(base_store) -> Store:
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
         ),
-        base_store.add_sample("external", sex="female", external=True),
+        base_store.add_sample("external", sex=Gender.FEMALE, external=True),
         base_store.add_sample(
-            "external-received", sex="female", external=True, received=dt.datetime.now()
+            "external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
         ),
         base_store.add_sample(
             "sequenced",
-            sex="male",
+            sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
             sequenced_at=dt.datetime.now(),
@@ -1046,7 +1043,7 @@ def sample_store(base_store) -> Store:
         ),
         base_store.add_sample(
             "sequenced-partly",
-            sex="male",
+            sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
             reads=(250 * 1000000),
