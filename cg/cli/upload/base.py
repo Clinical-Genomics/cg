@@ -12,16 +12,16 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
 
-from . import vogue
-from .clinical_delivery import fastq
-from .coverage import coverage
-from .delivery_report import upload_delivery_report_to_scout
-from .fohm import fohm
-from .genotype import genotypes
-from .gisaid import gisaid
-from .mutacc import process_solved, processed_solved
-from .observations import observations
-from .scout import (
+from cg.cli.upload import vogue
+from cg.cli.upload.clinical_delivery import fastq
+from cg.cli.upload.coverage import coverage
+from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
+from cg.cli.upload.fohm import fohm
+from cg.cli.upload.genotype import genotypes
+from cg.cli.upload.gisaid import gisaid
+from cg.cli.upload.mutacc import process_solved, processed_solved
+from cg.cli.upload.observations import observations
+from cg.cli.upload.scout import (
     create_scout_load_config,
     scout,
     upload_case_to_scout,
@@ -29,11 +29,11 @@ from .scout import (
     upload_rna_to_scout,
     upload_rna_junctions_to_scout,
 )
-from .utils import suggest_cases_to_upload
-from .validate import validate
-from ...exc import AnalysisAlreadyUploadedError
-from ...meta.upload.balsamic.balsamic import BalsamicUploadAPI
-from ...meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
+from cg.cli.upload.utils import suggest_cases_to_upload
+from cg.cli.upload.validate import validate
+from cg.exc import AnalysisAlreadyUploadedError
+from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
+from cg.meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
 
 LOG = logging.getLogger(__name__)
 
