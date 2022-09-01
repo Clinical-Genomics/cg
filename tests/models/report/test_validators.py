@@ -2,6 +2,8 @@
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER
+from cg.constants.subject import Gender
+from cg.models.orders.constants import OrderType
 from cg.models.report.validators import (
     validate_empty_field,
     validate_boolean,
@@ -78,7 +80,7 @@ def test_validate_rml_sample(caplog):
     """Performs validation on a preparation category"""
 
     # GIVEN an invalid prep category
-    prep_category = "rml"
+    prep_category = OrderType.RML
 
     # WHEN performing the validation
     try:
@@ -93,7 +95,7 @@ def test_validate_gender(caplog):
     """Tests report gender parsing"""
 
     # GIVEN an invalid gender category
-    gender = "female"
+    gender = Gender.FEMALE
     invalid_gender = "not_a_gender"
 
     # WHEN performing the validation
