@@ -181,36 +181,32 @@ class FindBusinessDataHandler(BaseHandler):
                 cases.add(case)
         return cases
 
-    def get_cases_from_ticket(self, ticket_id: int) -> Query:
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.ticket_number == ticket_id
-        )
+    def get_cases_from_ticket(self, ticket: str) -> Query:
+        return self.Family.query.filter(models.Family.tickets.contains(ticket))
 
-    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
+    def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""
         return (
-            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
+            self.Family.query.filter(models.Family.tickets.contains(ticket))
             .first()
             .customer.internal_id
         )
 
-    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
-        return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
+    def get_samples_from_ticket(self, ticket: str) -> List[models.Sample]:
+        return (
+            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.tickets.contains(ticket))
+            .all()
+        )
 
     def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
         flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
         if flowcell:
             return flowcell.samples
 
-    def get_ticket_from_case(self, case_id: str) -> int:
+    def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
-        newest_sample: models.Sample = (
-            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .order_by(models.Sample.created_at.desc())
-            .first()
-        )
-        return newest_sample.ticket_number
+        return self.family(case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> models.Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case"""
@@ -289,22 +285,6 @@ class FindBusinessDataHandler(BaseHandler):
             .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id)
             .first()
         )
-
-    def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
-        """Find a link between a family and a sample."""
-
-        query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-
-        if case_id:
-            query = query.filter(models.Family.internal_id == case_id)
-
-        if sample_id:
-            query = query.filter(models.Sample.internal_id == sample_id)
-
-        if ticket:
-            query = query.filter(models.Sample.ticket_number == ticket)
-
-        return query
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""

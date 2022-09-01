@@ -14,7 +14,7 @@ TEXT_FILE_ATTACH_PARAMS = "data:text/plain;charset=utf-8,{content}"
 
 class OsTicket(object):
 
-    """Interface to ticket system."""
+    """Interface to ticket system"""
 
     def __init__(self):
         self.headers = None
@@ -23,7 +23,7 @@ class OsTicket(object):
         self.email_uri = None
 
     def init_app(self, app: Flask):
-        """Initialize the API in Flask."""
+        """Initialize the API in Flask"""
         self.setup(
             api_key=app.config["OSTICKET_API_KEY"],
             domain=app.config["OSTICKET_DOMAIN"],
@@ -38,7 +38,7 @@ class OsTicket(object):
         osticket_email: str = None,
         email_uri: str = None,
     ):
-        """Initialize the API."""
+        """Initialize the API"""
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
         self.osticket_email = osticket_email
@@ -46,8 +46,8 @@ class OsTicket(object):
 
     def open_ticket(
         self, attachment: dict, email: str, message: str, name: str, subject: str
-    ) -> int:
-        """Open a new ticket through the REST API."""
+    ) -> str:
+        """Open a new ticket through the REST API"""
         data = dict(
             name=name,
             email=email,
@@ -57,7 +57,7 @@ class OsTicket(object):
         )
         res = requests.post(self.url, json=data, headers=self.headers)
         if res.ok:
-            return int(res.text)
+            return res.text
         LOG.error("res.text: %s, reason: %s", res.text, res.reason)
         raise TicketCreationError(res)
 
