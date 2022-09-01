@@ -1,9 +1,13 @@
-import json
+from pathlib import Path
+
 from datetime import datetime, timedelta
 from typing import List
 
 import pytest
 from cgmodels.cg.constants import Pipeline
+
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
@@ -67,14 +71,15 @@ def mip_analysis_api() -> MockMipAnalysis:
 
 
 @pytest.fixture(name="lims_family")
-def lims_family() -> dict:
+def fixture_lims_family(fixtures_dir: Path) -> dict:
     """Returns a lims-like case of samples"""
-
-    return json.load(open("tests/fixtures/report/lims_family.json"))
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+    )
 
 
 @pytest.fixture(name="lims_samples")
-def lims_samples(lims_family: dict) -> List[dict]:
+def fixture_lims_samples(lims_family: dict) -> List[dict]:
     """Returns the samples of a lims case"""
 
     return lims_family["samples"]

@@ -1,9 +1,10 @@
 """Tests for SPRING decompression methods"""
-import json
 import logging
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile, WriteFile
 
 
 def test_is_spring_decompression_done_all_files_exist(
@@ -26,13 +27,16 @@ def test_is_spring_decompression_done_all_files_exist(
     # GIVEN a existing flag file
     # GIVEN that the files have an updated tag
     old_date = "2019-01-01"
-    with open(spring_metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
+
     # GIVEN that the files where updated more than three weeks ago
     for file_info in content:
         file_info["updated"] = old_date
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(content))
+    WriteFile.write_file_from_content(
+        content=content, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN checking if SPRING decompression is done
     result = crunchy_api.is_spring_decompression_done(compression_object)
@@ -89,8 +93,10 @@ def test_is_spring_decompression_done_all_files_exist_not_updated(
 
     # GIVEN a existing flag file
     # GIVEN that the files are missing the updated tag
-    with open(spring_metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
+
     # GIVEN that the files where updated more than three weeks ago
     for file_info in content:
         assert "updated" not in file_info
@@ -165,13 +171,16 @@ def test_is_spring_decompression_possible(
     # GIVEN a existing flag file
     # GIVEN that the files have an updated tag
     old_date = "2019-01-01"
-    with open(spring_metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
+
     # GIVEN that the files where updated more than three weeks ago
     for file_info in content:
         file_info["updated"] = old_date
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(content))
+    WriteFile.write_file_from_content(
+        content=content, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN checking if SPRING decompression is done
     result = crunchy_api.is_spring_decompression_possible(compression_object)

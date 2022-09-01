@@ -21,12 +21,10 @@ from tests.apps.demultiplex.conftest import (
     fixture_lims_novaseq_bcl2fastq_samples,
     fixture_lims_novaseq_dragen_samples,
     fixture_lims_novaseq_samples,
-    fixture_lims_novaseq_samples_file,
     fixture_novaseq_dir,
     fixture_novaseq_dir_bcl2fastq,
     fixture_novaseq_dir_dragen,
     fixture_novaseq_run_parameters,
-    fixture_raw_samples_dir,
 )
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
@@ -39,13 +37,13 @@ LOG = logging.getLogger(__name__)
 @pytest.fixture(name="demux_results_finished_dir")
 def fixture_demux_results_finished_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with demultiplexing results where files are renamed etc"""
-    return demultiplex_fixtures / "demultiplexed-runs"
+    return Path(demultiplex_fixtures, "demultiplexed-runs")
 
 
 @pytest.fixture(name="demux_results_not_finished_dir")
 def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned"""
-    return demultiplex_fixtures / "demultiplexed-runs-unfinished"
+    return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
 
 
 @pytest.fixture(name="flowcell_object")
@@ -57,13 +55,13 @@ def fixture_flowcell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flo
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
 def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a novaseq bcl2fastq sample sheet"""
-    return demultiplex_fixtures / "SampleSheetS2_Bcl2Fastq.csv"
+    return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
 
 
 @pytest.fixture(name="flowcell_runs_working_directory")
 def fixture_flowcell_runs_working_directory(project_dir: Path):
     """Return the path to a working directory with flowcells ready for demux"""
-    working_dir = project_dir / "flowcell-runs"
+    working_dir: Path = Path(project_dir, "flowcell-runs")
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -71,7 +69,7 @@ def fixture_flowcell_runs_working_directory(project_dir: Path):
 @pytest.fixture(name="flowcell_runs_working_directory_bcl2fastq")
 def fixture_flowcell_runs_working_directory_bcl2fastq(flowcell_runs_working_directory: Path):
     """Return the path to a working directory with flowcells ready for demux"""
-    working_dir = flowcell_runs_working_directory / "bcl2fastq"
+    working_dir: Path = Path(flowcell_runs_working_directory, "bcl2fastq")
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -79,7 +77,7 @@ def fixture_flowcell_runs_working_directory_bcl2fastq(flowcell_runs_working_dire
 @pytest.fixture(name="flowcell_runs_working_directory_dragen")
 def fixture_flowcell_runs_working_directory_dragen(flowcell_runs_working_directory: Path):
     """Return the path to a working directory with flowcells ready for demux"""
-    working_dir = flowcell_runs_working_directory / "dragen"
+    working_dir: Path = Path(flowcell_runs_working_directory, "dragen")
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -87,7 +85,7 @@ def fixture_flowcell_runs_working_directory_dragen(flowcell_runs_working_directo
 @pytest.fixture(name="demultiplexed_flowcells_working_directory")
 def fixture_demultiplexed_flowcells_working_directory(project_dir: Path) -> Path:
     """Return the path to a working directory with flowcells that have been demultiplexed"""
-    working_dir = project_dir / "demultiplexed-runs"
+    working_dir: Path = Path(project_dir, "demultiplexed-runs")
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -99,8 +97,8 @@ def fixture_demultiplexed_flowcell_working_directory(
     flowcell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location"""
-    source: Path = demux_results_not_finished_dir / flowcell_full_name
-    destination: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
+    source: Path = Path(demux_results_not_finished_dir, flowcell_full_name)
+    destination: Path = Path(demultiplexed_flowcells_working_directory, flowcell_full_name)
     shutil.copytree(src=source, dst=destination)
     return destination
 
@@ -112,8 +110,8 @@ def fixture_demultiplexed_flowcell_finished_working_directory(
     flowcell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location"""
-    source: Path = demux_results_finished_dir / flowcell_full_name
-    destination: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
+    source: Path = Path(demux_results_finished_dir, flowcell_full_name)
+    destination: Path = Path(demultiplexed_flowcells_working_directory, flowcell_full_name)
     shutil.copytree(src=source, dst=destination)
     return destination
 
@@ -126,12 +124,13 @@ def fixture_flowcell_working_directory(
 
     This is a path to a flowcell directory with the run parameters present
     """
-    working_dir: Path = flowcell_runs_working_directory / novaseq_dir.name
+    working_dir: Path = Path(flowcell_runs_working_directory, novaseq_dir.name)
     working_dir.mkdir(parents=True)
     existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir)
     working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
     shutil.copy(
-        str(existing_flowcell.run_parameters_path), str(working_flowcell.run_parameters_path)
+        existing_flowcell.run_parameters_path.as_posix(),
+        working_flowcell.run_parameters_path.as_posix(),
     )
     return working_dir
 
@@ -144,12 +143,13 @@ def fixture_flowcell_working_directory_bcl2fastq(
 
     This is a path to a flowcell directory with the run parameters present
     """
-    working_dir: Path = flowcell_runs_working_directory_bcl2fastq / flowcell_dir_bcl2fastq.name
+    working_dir: Path = Path(flowcell_runs_working_directory_bcl2fastq, flowcell_dir_bcl2fastq.name)
     working_dir.mkdir(parents=True)
     existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_bcl2fastq)
     working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
     shutil.copy(
-        str(existing_flowcell.run_parameters_path), str(working_flowcell.run_parameters_path)
+        existing_flowcell.run_parameters_path.as_posix(),
+        working_flowcell.run_parameters_path.as_posix(),
     )
     return working_dir
 
@@ -162,12 +162,13 @@ def fixture_flowcell_working_directory_dragen(
 
     This is a path to a flowcell directory with the run parameters present
     """
-    working_dir: Path = flowcell_runs_working_directory_dragen / flowcell_dir_dragen.name
+    working_dir: Path = Path(flowcell_runs_working_directory_dragen, flowcell_dir_dragen.name)
     working_dir.mkdir(parents=True)
     existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_dragen)
     working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
     shutil.copy(
-        str(existing_flowcell.run_parameters_path), str(working_flowcell.run_parameters_path)
+        existing_flowcell.run_parameters_path.as_posix(),
+        working_flowcell.run_parameters_path.as_posix(),
     )
     return working_dir
 
@@ -177,9 +178,8 @@ def fixture_flowcell_working_directory_no_run_parameters(
     novaseq_dir: Path, flowcell_runs_working_directory: Path
 ) -> Path:
     """This is a path to a flowcell directory with the run parameters missing"""
-    working_dir: Path = flowcell_runs_working_directory / novaseq_dir.name
+    working_dir: Path = Path(flowcell_runs_working_directory, novaseq_dir.name)
     working_dir.mkdir(parents=True)
-
     return working_dir
 
 
@@ -191,7 +191,10 @@ def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq
     """
     existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir)
     working_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_working_directory)
-    shutil.copy(str(existing_flowcell.sample_sheet_path), str(working_flowcell.sample_sheet_path))
+    shutil.copy(
+        existing_flowcell.sample_sheet_path.as_posix(),
+        working_flowcell.sample_sheet_path.as_posix(),
+    )
     shutil.copy(
         str(DemultiplexingAPI.get_stderr_logfile(existing_flowcell)),
         str(DemultiplexingAPI.get_stderr_logfile(working_flowcell)),
@@ -207,11 +210,14 @@ def fixture_demultiplex_ready_flowcell_bcl2fastq(
 ) -> Path:
     """Return the path to a working directory that is ready for demultiplexing
 
-    This is a path to a flowcell directory with all the files necessary to start demultiplexing present
+    This is a path to a flow cell directory with all the files necessary to start demultiplexing present
     """
     existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_bcl2fastq)
     working_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_working_directory_bcl2fastq)
-    shutil.copy(str(existing_flowcell.sample_sheet_path), str(working_flowcell.sample_sheet_path))
+    shutil.copy(
+        existing_flowcell.sample_sheet_path.as_posix(),
+        working_flowcell.sample_sheet_path.as_posix(),
+    )
     shutil.copy(
         str(DemultiplexingAPI.get_stderr_logfile(existing_flowcell)),
         str(DemultiplexingAPI.get_stderr_logfile(working_flowcell)),
@@ -235,7 +241,10 @@ def fixture_demultiplex_ready_flowcell_dragen(
     working_flowcell: Flowcell = Flowcell(
         flowcell_path=flowcell_working_directory_dragen, bcl_converter="dragen"
     )
-    shutil.copy(str(existing_flowcell.sample_sheet_path), str(working_flowcell.sample_sheet_path))
+    shutil.copy(
+        existing_flowcell.sample_sheet_path.as_posix(),
+        working_flowcell.sample_sheet_path.as_posix(),
+    )
     shutil.copy(
         str(DemultiplexingAPI.get_stderr_logfile(existing_flowcell)),
         str(DemultiplexingAPI.get_stderr_logfile(working_flowcell)),
@@ -257,13 +266,11 @@ def fixture_demultiplex_configs(
     demultiplexed_flowcells_working_directory: Path,
     demultiplex_fixtures: Path,
 ) -> dict:
-    out_dir: Path = demultiplexed_flowcells_working_directory
-    run_dir: Path = flowcell_runs_working_directory
-    out_dir.mkdir(parents=True, exist_ok=True)
+    demultiplexed_flowcells_working_directory.mkdir(parents=True, exist_ok=True)
     return {
         "demultiplex": {
-            "out_dir": str(out_dir),
-            "run_dir": str(run_dir),
+            "out_dir": demultiplexed_flowcells_working_directory.as_posix(),
+            "run_dir": flowcell_runs_working_directory.as_posix(),
             "slurm": {"account": "test", "mail_user": "testuser@github.se"},
         }
     }

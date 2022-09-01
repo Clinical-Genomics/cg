@@ -1,6 +1,7 @@
 """Fixtures for compress api tests"""
 import copy
-import json
+from typing import List
+
 import os
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +10,8 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile
 from cg.meta.compress import CompressAPI
 
 
@@ -35,8 +38,10 @@ class CompressionData:
         return self.pending_path
 
     @staticmethod
-    def _spring_metadata(fastq_first, fastq_second, spring_path, updated=False, date=None):
-        """Return metada information"""
+    def _spring_metadata(
+        fastq_first, fastq_second, spring_path, updated=False, date=None
+    ) -> List[dict]:
+        """Return spring metadata"""
         metadata = [
             {
                 "path": str(fastq_first.resolve()),
@@ -61,24 +66,28 @@ class CompressionData:
     def spring_metadata_file(self):
         """Return the path to an existing spring metadata file"""
 
-        spring_metadata = CompressionData._spring_metadata(
+        spring_metadata: List[dict] = CompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path
         )
-        with open(self.spring_metadata_path, "w") as outfile:
-            outfile.write(json.dumps(spring_metadata))
-
+        WriteFile.write_file_from_content(
+            content=spring_metadata,
+            file_format=FileFormat.JSON,
+            file_path=self.spring_metadata_path,
+        )
         return self.spring_metadata_path
 
     @property
     def updated_spring_metadata_file(self):
         """Return the path to an existing spring metadata file"""
 
-        spring_metadata = CompressionData._spring_metadata(
+        spring_metadata: List[dict] = CompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path, True
         )
-        with open(self.spring_metadata_path, "w") as outfile:
-            outfile.write(json.dumps(spring_metadata))
-
+        WriteFile.write_file_from_content(
+            content=spring_metadata,
+            file_format=FileFormat.JSON,
+            file_path=self.spring_metadata_path,
+        )
         return self.spring_metadata_path
 
     @staticmethod
