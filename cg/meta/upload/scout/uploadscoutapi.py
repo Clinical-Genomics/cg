@@ -347,6 +347,25 @@ class UploadScoutAPI:
                     "Failed on RNA sample %s since it is not linked to anything via subject_id"
                     % rna_sample.internal_id,
                 )
+
+            dna_cases: [models.Family] = self.status_db.families_by_subject_id(
+                customer_id=rna_sample.customer.internal_id,
+                subject_id=rna_sample.subject_id,
+                data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
+                is_tumour=rna_sample.is_tumour,
+            )
+
+            upload_dna_cases.update(dna_cases)
+
+        if not upload_dna_cases:
+            raise CgDataError(
+                "Failed to upload splice_junctions_bed for RNA case %s: no DNA cases linked to it via subject_id"
+                % rna_case.internal_id,
+            )
+
+        for link in rna_case.links:
+            rna_sample = link.sample
+
             rna_sample_id = rna_sample.internal_id
             splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
@@ -359,39 +378,29 @@ class UploadScoutAPI:
 
             LOG.info(f"Splice junctions bed file %s found", splice_junctions_bed.path)
 
-            dna_cases: [models.Family] = self.status_db.families_by_subject_id(
-                customer_id=rna_sample.customer.internal_id,
-                subject_id=rna_sample.subject_id,
-                data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
-                is_tumour=rna_sample.is_tumour,
-            )
 
-            upload_dna_cases.update(dna_cases)
-
-            if not upload_dna_cases:
-                raise CgDataError(
-                    "Failed to upload splice_junctions_bed for RNA case %s: no DNA cases linked to it via subject_id"
-                    % rna_case.internal_id,
-                )
             dna_case: models.Family
-            for dna_case in dna_cases:
-                dna_case_id: str = dna_case.internal_id
-                dna_sample: models.Sample = self._get_sample(
-                    case=dna_case, subject_id=rna_sample.subject_id
-                )
-                dna_sample_name: str = dna_sample.name
+            for dna_case in upload_dna_cases:
+                for link in dna_case.links:
+                    dna_sample = link.sample
+                    if dna_sample.subject_id == rna_sample.subject_id:
+                        dna_case_id: str = dna_case.internal_id
+                        dna_sample: models.Sample = self._get_sample(
+                            case=dna_case, subject_id=rna_sample.subject_id
+                        )
+                        dna_sample_name: str = dna_sample.name
 
-                LOG.info("Uploading splice junctions bed file for %s in scout", dna_sample_name)
+                        LOG.info("Uploading splice junctions bed file for %s in scout", dna_sample_name)
 
-                if dry_run:
-                    continue
+                        if dry_run:
+                            continue
 
-                scout_api.upload_splice_junctions_bed(
-                    file_path=splice_junctions_bed.full_path,
-                    case_id=dna_case_id,
-                    customer_sample_id=dna_sample_name,
-                )
-                LOG.info("Uploaded splice junctions bed file")
+                        scout_api.upload_splice_junctions_bed(
+                            file_path=splice_junctions_bed.full_path,
+                            case_id=dna_case_id,
+                            customer_sample_id=dna_sample_name,
+                        )
+                        LOG.info("Uploaded splice junctions bed file")
 
         LOG.info("Upload splice junctions bed file finished!")
 

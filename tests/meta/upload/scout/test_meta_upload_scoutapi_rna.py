@@ -23,7 +23,7 @@ def get_subject_id_from_case(store: Store, case_id: str) -> str:
 
 def ensure_two_dna_tumour_matches(
     dna_case_id: str,
-    extra_tumor_sample_id: str,
+    extra_tumour_sample_id: str,
     helpers: StoreHelpers,
     rna_case_id: str,
     rna_store: Store,
@@ -36,7 +36,7 @@ def ensure_two_dna_tumour_matches(
         store=rna_store, customer=rna_store.family(dna_case_id).customer
     )
     dna_extra_tumour = helpers.add_sample(
-        store=rna_store, name=extra_tumor_sample_id, subject_id=subject_id, is_tumour=True
+        store=rna_store, name=extra_tumour_sample_id, subject_id=subject_id, is_tumour=True
     )
     helpers.add_relationship(store=rna_store, sample=dna_extra_tumour, case=dna_extra_case)
     rna_store.commit()
@@ -365,7 +365,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
 def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    extra_tumor_sample_id: str,
+    extra_tumour_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -376,7 +376,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
     ensure_two_dna_tumour_matches(
-        dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store
+        dna_case_id, extra_tumour_sample_id, helpers, rna_case_id, rna_store
     )
     upload_scout_api.status_db = rna_store
     all_cases = rna_store.families()
@@ -395,7 +395,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
 def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    extra_tumor_sample_id: str,
+    extra_tumour_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -406,7 +406,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
     ensure_two_dna_tumour_matches(
-        dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store
+        dna_case_id, extra_tumour_sample_id, helpers, rna_case_id, rna_store
     )
     upload_scout_api.status_db = rna_store
 
@@ -418,13 +418,13 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     # THEN the log should contain the extra sample of the second case
     upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
-    assert extra_tumor_sample_id in caplog.text
+    assert extra_tumour_sample_id in caplog.text
 
 
 def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    extra_tumor_sample_id: str,
+    extra_tumour_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -435,7 +435,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
     ensure_two_dna_tumour_matches(
-        dna_case_id, extra_tumor_sample_id, helpers, rna_case_id, rna_store
+        dna_case_id, extra_tumour_sample_id, helpers, rna_case_id, rna_store
     )
     upload_scout_api.status_db = rna_store
 
@@ -447,4 +447,4 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     # THEN the log should contain the extra sample of the second case
     upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
 
-    assert extra_tumor_sample_id in caplog.text
+    assert extra_tumour_sample_id in caplog.text
