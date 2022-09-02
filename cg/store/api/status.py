@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
@@ -552,7 +551,7 @@ class StatusHandler(BaseHandler):
             "not_uploaded_analyses",
             "records_ready_for_upload",
             "valid_analyses_in_production",
-            "order_analyses_by_uploaded_at",
+            "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
             records = apply_analysis_filter(
@@ -641,7 +640,7 @@ class StatusHandler(BaseHandler):
             "filter_report_analyses_by_pipeline",
             "analyses_without_delivery_report",
             "valid_analyses_in_production",
-            "order_analyses_by_uploaded_at",
+            "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
             records = apply_analysis_filter(
@@ -666,7 +665,7 @@ class StatusHandler(BaseHandler):
             "analyses_with_delivery_report",
             "not_uploaded_analyses",
             "valid_analyses_in_production",
-            "order_analyses_by_uploaded_at",
+            "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
             records = apply_analysis_filter(
