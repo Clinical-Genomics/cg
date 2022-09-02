@@ -219,7 +219,7 @@
                   <li><strong>Clinical STR variants fil</strong>: <em>{{ case.data_analysis.scout_files.vcf_str.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.smn_tsv != 'N/A' %}
-                  <li><strong>SMN CN fil</strong>: <em>{{ case.data_analysis.scout_files.smn_tsv }}</em></li>
+                  <li><strong>SMN CN fil</strong>: <em>{{ case.data_analysis.scout_files.smn_tsv.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 </ul>
             </div>
