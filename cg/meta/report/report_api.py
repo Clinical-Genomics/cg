@@ -85,7 +85,7 @@ class ReportAPI(MetaAPI):
         except FileNotFoundError:
             LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
             file: hk_models.File = self.housekeeper_api.add_file(
-                delivery_report_file.name, version, HK_DELIVERY_REPORT_TAG
+                delivery_report_file.name, version, [case_id, HK_DELIVERY_REPORT_TAG]
             )
             self.housekeeper_api.include_file(file, version)
             self.housekeeper_api.add_commit(file)
