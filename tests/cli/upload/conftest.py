@@ -25,6 +25,7 @@ from cg.store import Store, models
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.cli.workflow.balsamic.conftest import *
 
 LOG = logging.getLogger(__name__)
 
@@ -225,6 +226,10 @@ class MockAnalysisApi(MipAnalysisAPI):
         return {}
 
 
+class MockScoutLoadConfig(ScoutLoadConfig):
+    pass
+
+
 class MockScoutUploadApi(UploadScoutAPI):
     def __init__(self, **kwargs):
         """docstring for __init__"""
@@ -296,3 +301,6 @@ def upload_context(cg_context: CGConfig) -> CGConfig:
     )
 
     return cg_context
+
+
+
