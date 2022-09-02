@@ -1,9 +1,11 @@
 """Utility functions for the upload cli commands"""
+
 import logging
 from typing import List, Optional
 
 import click
 from cg.constants import Pipeline
+from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -25,6 +27,6 @@ class LinkHelper:
 
 def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = None) -> None:
     LOG.warning("Provide a case, suggestions:")
-    records = status_db.analyses_to_upload(pipeline=pipeline)[:50]
+    records = status_db.analyses_to_upload(pipeline=pipeline)[:MAX_ITEMS_TO_RETRIEVE]
     for case_obj in records:
         click.echo(case_obj)

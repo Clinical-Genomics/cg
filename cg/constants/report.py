@@ -1,12 +1,31 @@
+# Delivery report constants
+
 from cgmodels.cg.constants import Pipeline
 
-# Validation constants
-REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+from cg.constants import DataDelivery
+
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
-PRECISION = 2
+
+REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+REPORT_SUPPORTED_DATA_DELIVERY = (
+    DataDelivery.ANALYSIS_FILES,
+    DataDelivery.ANALYSIS_SCOUT,
+    DataDelivery.FASTQ_ANALYSIS,
+    DataDelivery.FASTQ_QC_ANALYSIS,
+    DataDelivery.FASTQ_ANALYSIS_SCOUT,
+    DataDelivery.SCOUT,
+)
+
 NA_FIELD = "N/A"
 YES_FIELD = "Ja"
 NO_FIELD = "Nej"
+PRECISION = 2
+
+REPORT_GENDER = {
+    "unknown": "Okänd",
+    "female": "Kvinna",
+    "male": "Man",
+}
 
 BALSAMIC_ANALYSIS_TYPE = {
     "tumor_wgs": "Tumör-endast (helgenomsekvensering)",
@@ -33,6 +52,7 @@ REQUIRED_CUSTOMER_FIELDS = [
 # Case required fields
 REQUIRED_CASE_FIELDS = [
     "name",
+    "id",
     "samples",
     "data_analysis",
     "applications",
@@ -89,8 +109,6 @@ REQUIRED_SAMPLE_METHODS_FIELDS = []
 REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
     "ordered_at",
     "received_at",
-    "delivered_at",
-    "processing_days",
 ]
 
 # Metadata required fields

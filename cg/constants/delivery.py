@@ -1,7 +1,5 @@
 """Constants for delivery"""
 
-import copy
-
 ONLY_ONE_CASE_PER_TICKET = [
     "fastq",
     "microsalt",
@@ -15,6 +13,7 @@ SKIP_MISSING = [
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS = [
+    {"delivery-report"},
     {"multiqc-html"},
     {"metrics"},
     {"visualization"},
@@ -64,6 +63,7 @@ BALSAMIC_UMI_ANALYSIS_SAMPLE_TAGS.extend(BALSAMIC_ANALYSIS_SAMPLE_TAGS)
 
 
 MIP_DNA_ANALYSIS_CASE_TAGS = [
+    {"delivery-report"},
     {"vcf-clinical-sv-bin"},
     {"vcf-clinical-sv-bin-index"},
     {"vcf-research-sv-bin"},

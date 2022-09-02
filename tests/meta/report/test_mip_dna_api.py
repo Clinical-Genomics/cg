@@ -1,3 +1,6 @@
+from cg.constants import REPORT_GENDER
+
+
 def test_get_sample_metadata(
     report_api_mip_dna, mip_analysis_api, case_mip_dna, sample_store, helpers
 ):
@@ -13,7 +16,7 @@ def test_get_sample_metadata(
         "million_read_pairs": "N/A",
         "duplicates": "4.01",
         "bait_set": "N/A",
-        "gender": "male",
+        "gender": REPORT_GENDER.get("male"),
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",
         "pct_10x": "99.1",
