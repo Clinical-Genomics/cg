@@ -569,6 +569,12 @@ def fixture_root_path(project_dir: Path) -> Path:
     return _root_path
 
 
+@pytest.fixture(scope="function", name="old_timestamp")
+def fixture_old_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format"""
+    return dt.datetime(1900, 1, 1)
+
+
 @pytest.fixture(scope="function", name="timestamp")
 def fixture_timestamp() -> dt.datetime:
     """Return a time stamp in date time format"""

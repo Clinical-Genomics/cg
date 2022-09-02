@@ -75,9 +75,14 @@ def filter_records_ready_for_upload(analyses: Query, **kwargs) -> Query:
     )
 
 
+def order_analyses_by_completed_at(analyses: Query, **kwargs) -> Query:
+    """Return a query of ordered analyses (from old to new) by the completed_at field"""
+    return analyses.order_by(models.Analysis.completed_at.asc())
+
+
 def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
-    """Return a query of ordered analyses by the uploaded_at field"""
-    return analyses.order_by(models.Analysis.uploaded_at.desc())
+    """Return a query of ordered analyses (from old to new) by the uploaded_at field"""
+    return analyses.order_by(models.Analysis.uploaded_at.asc())
 
 
 def apply_analysis_filter(function: str, analyses: Query, pipeline: Pipeline = None) -> Query:
@@ -94,6 +99,7 @@ def apply_analysis_filter(function: str, analyses: Query, pipeline: Pipeline = N
         "analyses_without_delivery_report": filter_analyses_without_delivery_report,
         "filter_report_analyses_by_pipeline": filter_report_analyses_by_pipeline,
         "records_ready_for_upload": filter_records_ready_for_upload,
+        "order_analyses_by_completed_at": order_analyses_by_completed_at,
         "order_analyses_by_uploaded_at": order_analyses_by_uploaded_at,
     }
 
