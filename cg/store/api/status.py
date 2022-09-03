@@ -560,7 +560,9 @@ class StatusHandler(BaseHandler):
 
         if pipeline and Pipeline.BALSAMIC in pipeline:
             # BALSAMIC only supports Scout uploads
-            records.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
+            records = apply_filter(
+                function="cases_with_scout_data_delivery", cases=records, pipeline=pipeline
+            )
 
         return records
 
