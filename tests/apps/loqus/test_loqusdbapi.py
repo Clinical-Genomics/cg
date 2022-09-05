@@ -1,12 +1,13 @@
 """
     Tests for loqusdbAPI
 """
-import json
 import subprocess
 
 import pytest
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError
+from cg.io.controller import ReadStream
 from cg.models.observations.observations_input_files import ObservationsInputFiles
 
 
@@ -71,14 +72,18 @@ def test_get_case_command_fail(case_id: str, loqusdbapi_exception):
         loqusdbapi.get_case(case_id)
 
 
-def test_get_duplicate(loqusdbapi, loqusdb_duplicate_output, observation_input_files_raw: dict):
+def test_get_duplicate(
+    loqusdbapi, loqusdb_duplicate_output: bytes, observation_input_files_raw: dict
+):
     """Test when duplicate exists"""
 
     # GIVEN a loqusdb api
     loqusdbapi.process.stdout = loqusdb_duplicate_output.decode("utf-8")
 
     # GIVEN a duplicate output
-    dup_json = json.loads(loqusdb_duplicate_output.decode("utf-8"))
+    dup_json = ReadStream.get_content_from_stream(
+        file_format=FileFormat.JSON, stream=loqusdb_duplicate_output.decode("utf-8")
+    )
 
     # GIVEN an ObservationsInputFiles object
     files = ObservationsInputFiles(**observation_input_files_raw)

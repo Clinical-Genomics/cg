@@ -57,7 +57,7 @@ def test_submit(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -75,11 +75,13 @@ def test_submit(
 
     # THEN the result should contain the ticket number for the order
     for record in result["records"]:
-        if isinstance(record, (models.Pool, models.Sample)):
-            assert record.ticket_number == ticket_number
+        if isinstance(record, models.Pool):
+            assert record.ticket == ticket
+        elif isinstance(record, models.Sample):
+            assert record.original_ticket == ticket
         elif isinstance(record, models.Family):
             for link_obj in record.links:
-                assert link_obj.sample.ticket_number == ticket_number
+                assert link_obj.sample.original_ticket == ticket
 
 
 def monkeypatch_process_lims(monkeypatch, order_data):
@@ -102,7 +104,6 @@ def test_submit_ticketexception(
     monkeypatch,
     orders_api: OrdersAPI,
     order_type: OrderType,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):
@@ -134,7 +135,7 @@ def test_submit_illegal_sample_customer(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -182,7 +183,6 @@ def test_submit_scout_legal_sample_customer(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):
@@ -236,7 +236,7 @@ def test_submit_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -252,6 +252,7 @@ def test_submit_duplicate_sample_case_name(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
+                ticket=ticket,
             )
             case_obj.customer = customer_obj
             store.add_commit(case_obj)
@@ -281,7 +282,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -309,7 +310,7 @@ def test_submit_unique_sample_case_name(
     mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
-    ticket_number: int,
+    ticket: str,
     user_name: str,
     user_mail: str,
     monkeypatch,
@@ -479,7 +480,7 @@ def test_submit_unique_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -509,7 +510,6 @@ def test_sarscov2_submit_duplicate_sample_name(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):
@@ -560,7 +560,6 @@ def test_not_sarscov2_submit_duplicate_sample_name(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):

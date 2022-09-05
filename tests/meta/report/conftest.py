@@ -1,9 +1,13 @@
-import json
+from pathlib import Path
+
 from datetime import datetime, timedelta
 from typing import List
 
 import pytest
 from cgmodels.cg.constants import Pipeline
+
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
@@ -12,7 +16,7 @@ from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
-from tests.mocks.report import MockChanjo, MockDB
+from tests.mocks.report import MockChanjo, MockDB, MockHousekeeperMipDNAReportAPI
 
 
 @pytest.fixture(scope="function", name="report_api_mip_dna")
@@ -24,7 +28,7 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
     cg_context.scout_api_ = MockScoutApi(cg_context)
-    return MipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
+    return MockHousekeeperMipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
 @pytest.fixture(scope="function", name="report_api_balsamic")
@@ -67,14 +71,15 @@ def mip_analysis_api() -> MockMipAnalysis:
 
 
 @pytest.fixture(name="lims_family")
-def lims_family() -> dict:
+def fixture_lims_family(fixtures_dir: Path) -> dict:
     """Returns a lims-like case of samples"""
-
-    return json.load(open("tests/fixtures/report/lims_family.json"))
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+    )
 
 
 @pytest.fixture(name="lims_samples")
-def lims_samples(lims_family: dict) -> List[dict]:
+def fixture_lims_samples(lims_family: dict) -> List[dict]:
     """Returns the samples of a lims case"""
 
     return lims_family["samples"]

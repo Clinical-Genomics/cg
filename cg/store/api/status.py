@@ -2,18 +2,15 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
 from cg.constants.constants import CaseActions
 from cg.store import models
+from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_filter
 from cg.store.api.base import BaseHandler
-from cg.utils.date import get_date
-
-VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
 
 class StatusHandler(BaseHandler):
@@ -545,17 +542,20 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
-        """Fetch analyses that haven't been uploaded."""
+        """Fetch analyses that have not been uploaded"""
         records = self.Analysis.query.join(models.Analysis.family)
-        records = records.filter(
-            models.Analysis.completed_at.isnot(None), models.Analysis.uploaded_at.is_(None)
-        )
 
-        if pipeline:
-            records = records.filter(models.Analysis.pipeline == str(pipeline))
-
-            if Pipeline.BALSAMIC in pipeline:
-                records = records.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
+        analysis_filter_functions: List[str] = [
+            "analyses_with_pipeline",
+            "completed_analyses",
+            "not_uploaded_analyses",
+            "valid_analyses_in_production",
+            "order_analyses_by_completed_at",
+        ]
+        for filter_function in analysis_filter_functions:
+            records: Query = apply_analysis_filter(
+                function=filter_function, analyses=records, pipeline=pipeline
+            )
 
         return records
 
@@ -621,34 +621,57 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
-        """Fetch analyses that needs the delivery report to be regenerated."""
+        """Fetches analyses that need a delivery report to be regenerated"""
 
-        analyses_query = self.latest_analyses()
+        records = self.Analysis.query.join(models.Analysis.family)
 
-        analyses_query = (
-            analyses_query.filter(models.Analysis.uploaded_at)
-            .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
-            .join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(
-                and_(
-                    models.Analysis.pipeline == str(pipeline),
-                    models.Family.data_delivery.contains(DataDelivery.SCOUT),
-                    models.Sample.delivered_at.isnot(None),
-                )
+        case_filter_functions: List[str] = [
+            "filter_report_cases_with_valid_data_delivery",
+        ]
+        for filter_function in case_filter_functions:
+            records: Query = apply_filter(
+                function=filter_function, cases=records, pipeline=pipeline
             )
-            .filter(
-                or_(
-                    models.Analysis.delivery_report_created_at.is_(None),
-                    and_(
-                        models.Analysis.delivery_report_created_at.isnot(None),
-                        models.Analysis.delivery_report_created_at > VALID_DATA_IN_PRODUCTION,
-                        models.Analysis.delivery_report_created_at < models.Sample.delivered_at,
-                    ),
-                ),
+
+        analysis_filter_functions: List[str] = [
+            "filter_report_analyses_by_pipeline",
+            "analyses_without_delivery_report",
+            "valid_analyses_in_production",
+            "order_analyses_by_completed_at",
+        ]
+        for filter_function in analysis_filter_functions:
+            records: Query = apply_analysis_filter(
+                function=filter_function, analyses=records, pipeline=pipeline
             )
-            .order_by(models.Analysis.uploaded_at.desc())
-        )
-        return analyses_query
+
+        return records
+
+    def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
+        """Fetches analyses that need a delivery report to be uploaded"""
+
+        records = self.Analysis.query.join(models.Analysis.family)
+
+        case_filter_functions: List[str] = [
+            "cases_with_scout_data_delivery",
+        ]
+        for filter_function in case_filter_functions:
+            records: Query = apply_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
+
+        analysis_filter_functions: List[str] = [
+            "filter_report_analyses_by_pipeline",
+            "analyses_with_delivery_report",
+            "not_uploaded_analyses",
+            "valid_analyses_in_production",
+            "order_analyses_by_completed_at",
+        ]
+        for filter_function in analysis_filter_functions:
+            records: Query = apply_analysis_filter(
+                function=filter_function, analyses=records, pipeline=pipeline
+            )
+
+        return records
 
     def samples_to_deliver(self) -> Query:
         """Fetch samples that have been sequenced but not delivered."""

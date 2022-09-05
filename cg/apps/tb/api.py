@@ -1,6 +1,5 @@
 """ Trailblazer API for cg """ ""
 import datetime as dt
-import json
 import logging
 from typing import Any, Optional
 
@@ -10,9 +9,11 @@ from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
+from cg.io.controller import ReadStream
 
 LOG = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class TrailblazerAPI:
                 f"Request {command} failed with status code {response.status_code}: {response.text}"
             )
         LOG.debug(f"RESPONSE BODY {response.text}")
-        return json.loads(response.text)
+        return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
     def analyses(
         self,

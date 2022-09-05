@@ -1,12 +1,13 @@
 """
     Module for loqusdb API
 """
-import json
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
 
+from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError
+from cg.io.controller import ReadStream
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -71,25 +72,21 @@ class LoqusdbAPI:
         return dict(variants=nr_variants)
 
     def get_case(self, case_id: str) -> dict:
-        """Find a case in the database by case id."""
-        case_obj = None
+        """Find a case in the database by case id"""
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
         self.process.run_command(parameters=cases_parameters)
 
-        output = self.process.stdout
-
         # If case not in loqusdb, stdout of loqusdb command will be empty.
-        if not output:
+        if not self.process.stdout:
             raise CaseNotFoundError(f"Case {case_id} not found in loqusdb")
 
-        case_obj = json.loads(output)[0]
-
-        return case_obj
+        return ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.process.stdout
+        )[0]
 
     def get_duplicate(self, vcf_file: Path) -> dict:
         """Find matching profiles in loqusdb"""
-        ind_obj = {}
         duplicates_params = [
             "profile",
             "--check-vcf",
@@ -105,15 +102,13 @@ class LoqusdbAPI:
             LOG.critical("Could not run profile command")
             raise
 
-        output = self.process.stdout
-
-        if not output:
+        if not self.process.stdout:
             LOG.info("No duplicates found")
-            return ind_obj
+            return {}
 
-        ind_obj = json.loads(output)
-
-        return ind_obj
+        return ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.process.stdout
+        )
 
     def __repr__(self):
 

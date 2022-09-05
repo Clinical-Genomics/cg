@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import List, Union, Optional
 
 from cgmodels.cg.constants import Pipeline
 
@@ -15,8 +15,9 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
 )
+from cg.constants.scout_upload import MIP_CASE_TAGS
 from cg.models.cg_config import CGConfig
-from cg.meta.report.api import ReportAPI
+from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import MipDNASampleMetadataModel
@@ -142,3 +143,8 @@ class MipDNAReportAPI(ReportAPI):
         """Retrieves the template name to render the delivery report"""
 
         return Pipeline.MIP_DNA + "_report.html"
+
+    def get_upload_case_tags(self) -> dict:
+        """Retrieves MIP DNA upload case tags"""
+
+        return MIP_CASE_TAGS

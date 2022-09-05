@@ -207,13 +207,13 @@ def decompress_flowcell(context: click.Context, flowcell_id: str, dry_run: bool)
 
 
 @click.command("ticket")
-@click.argument("ticket_id", type=int)
+@click.argument("ticket", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def decompress_ticket(context: click.Context, ticket_id: int, dry_run: bool):
+def decompress_ticket(context: click.Context, ticket: str, dry_run: bool):
     """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
     store: Store = context.obj.status_db
-    samples: Iterable[models.Sample] = store.get_samples_from_ticket(ticket_id=ticket_id)
+    samples: Iterable[models.Sample] = store.get_samples_from_ticket(ticket=ticket)
     decompressed_inds = 0
     for sample in samples:
         decompressed_count = context.invoke(

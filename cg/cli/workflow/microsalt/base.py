@@ -1,7 +1,6 @@
 """CLI support to start microsalt"""
 
 import datetime as dt
-import json
 import logging
 from pathlib import Path
 from typing import Any, List, Optional
@@ -9,7 +8,9 @@ from typing import Any, List, Optional
 import click
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants.constants import FileFormat
 from cg.exc import CgError
+from cg.io.controller import WriteStream, WriteFile
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
@@ -102,10 +103,13 @@ def config_case(
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
-        click.echo(json.dumps(parameters, indent=4, sort_keys=True))
+        click.echo(
+            WriteStream.write_stream_from_content(content=parameters, file_format=FileFormat.JSON)
+        )
         return
-    with open(config_case_path, "w") as outfile:
-        json.dump(parameters, outfile, indent=4, sort_keys=True)
+    WriteFile.write_file_from_content(
+        content=parameters, file_format=FileFormat.JSON, file_path=config_case_path
+    )
     LOG.info("Saved config %s", config_case_path)
 
 

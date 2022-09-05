@@ -3,6 +3,7 @@ import logging
 from cgmodels.cg.constants import Pipeline
 
 from cg.cli.upload.clinical_delivery import upload_fastq, auto_fastq
+from cg.constants import DataDelivery
 from cg.store import models
 
 
@@ -13,6 +14,7 @@ def test_auto_fastq_not_started(
     caplog.set_level(logging.INFO)
     # GIVEN a case to be delivered
     analysis_obj.pipeline = Pipeline.FASTQ
+    analysis_obj.family.data_delivery = DataDelivery.FASTQ
     fastq_context.status_db.commit()
     fastq_context.status_db.session.close()
     # WHEN the upload command is invoked with dry run

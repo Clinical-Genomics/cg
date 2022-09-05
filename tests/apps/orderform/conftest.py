@@ -1,5 +1,4 @@
 """Fixtures for the orderform tests"""
-import json
 from pathlib import Path
 
 import openpyxl
@@ -8,7 +7,9 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.constants.constants import FileFormat
 from cg.constants.orderforms import Orderform, ORDERFORM_VERSIONS
+from cg.io.controller import ReadFile
 
 
 def get_nr_samples_excel(orderform_path: str) -> int:
@@ -169,117 +170,130 @@ def rml_orderform(orderforms: Path) -> str:
 
 @pytest.fixture(scope="session")
 def mip_order_to_submit(orderforms: Path) -> dict:
-    """Load an example scout order."""
-    return json.load(open(Path(orderforms, "mip.json")))
+    """Load an example MIP order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "mip.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def mip_rna_order_to_submit(orderforms: Path) -> dict:
-    """Load an example rna order."""
-    return json.load(open(Path(orderforms, "mip_rna.json")))
+    """Load an example rna order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "mip_rna.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def fastq_order_to_submit(orderforms) -> dict:
-    """Load an example fastq order."""
-    return json.load(open(Path(orderforms, "fastq.json")))
+    """Load an example fastq order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "fastq.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def rml_order_to_submit(orderforms: Path) -> dict:
-    """Load an example rml order."""
-    return json.load(open(Path(orderforms, "rml.json")))
+    """Load an example rml order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "rml.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def fluffy_order_to_submit(orderforms: Path) -> dict:
-    """Load an example fluffy order."""
-    return json.load(open(Path(orderforms, "rml.json")))
+    """Load an example fluffy order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "rml.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def metagenome_order_to_submit(orderforms: Path) -> dict:
-    """Load an example metagenome order."""
-    return json.load(open(Path(orderforms, "metagenome.json")))
+    """Load an example metagenome order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "metagenome.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def microbial_order_to_submit(orderforms: Path) -> dict:
-    """Load an example microbial order."""
-    return json.load(open(Path(orderforms, "microsalt.json")))
+    """Load an example microbial order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "microsalt.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def sarscov2_order_to_submit(orderforms: Path) -> dict:
-    """Load an example sarscov2 order."""
-    return json.load(open(Path(orderforms, "sarscov2.json")))
+    """Load an example sarscov2 order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "sarscov2.json")
+    )
 
 
 @pytest.fixture(scope="session")
 def balsamic_order_to_submit(orderforms: Path) -> dict:
-    """Load an example cancer order."""
-    return json.load(open(Path(orderforms, "balsamic.json")))
-
-
-@pytest.fixture(scope="session")
-def balsamic_orderform(orderforms: Path) -> str:
-    """Orderform fixture for Balsamic samples"""
-    _file = Path(
-        orderforms, f"{Orderform.BALSAMIC}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC]}.balsamic.xlsx"
+    """Load an example cancer order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "balsamic.json")
     )
-    return str(_file)
 
 
-@pytest.fixture(scope="session")
-def balsamic_qc_orderform(orderforms: Path) -> str:
+@pytest.fixture(scope="session", name="balsamic_orderform")
+def fixture_balsamic_orderform(orderforms: Path) -> str:
+    """Orderform fixture for Balsamic samples"""
+    return Path(
+        orderforms, f"{Orderform.BALSAMIC}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC]}.balsamic.xlsx"
+    ).as_posix()
+
+
+@pytest.fixture(scope="session", name="balsamic_qc_orderform")
+def fixture_balsamic_qc_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic QC samples"""
-    _file = Path(
+    return Path(
         orderforms,
         f"{Orderform.BALSAMIC_QC}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC_QC]}.balsamic_qc.xlsx",
-    )
-    return str(_file)
+    ).as_posix()
 
 
-@pytest.fixture(scope="session")
-def balsamic_umi_orderform(orderforms: Path) -> str:
+@pytest.fixture(scope="session", name="balsamic_umi_orderform")
+def fixture_balsamic_umi_orderform(orderforms: Path) -> str:
     """Orderform fixture for Balsamic UMI samples"""
-    _file = Path(
+    return Path(
         orderforms,
         f"{Orderform.BALSAMIC_UMI}.{ORDERFORM_VERSIONS[Orderform.BALSAMIC_UMI]}.balsamic_umi.xlsx",
-    )
-    return str(_file)
+    ).as_posix()
 
 
-@pytest.fixture(scope="session")
-def fastq_orderform(orderforms: Path):
+@pytest.fixture(scope="session", name="fastq_orderform")
+def fixture_fastq_orderform(orderforms: Path):
     """Orderform fixture for fastq samples"""
-    _file = Path(orderforms, f"{Orderform.FASTQ}.{ORDERFORM_VERSIONS[Orderform.FASTQ]}.fastq.xlsx")
-    return str(_file)
+    return Path(
+        orderforms, f"{Orderform.FASTQ}.{ORDERFORM_VERSIONS[Orderform.FASTQ]}.fastq.xlsx"
+    ).as_posix()
 
 
-@pytest.fixture(scope="session")
-def metagenome_orderform(orderforms: Path) -> str:
+@pytest.fixture(scope="session", name="metagenome_orderform")
+def fixture_metagenome_orderform(orderforms: Path) -> str:
     """Orderform fixture for metagenome samples"""
-    _file = Path(
+    return Path(
         orderforms,
         f"{Orderform.METAGENOME}.{ORDERFORM_VERSIONS[Orderform.METAGENOME]}.metagenome.xlsx",
-    )
-    return str(_file)
+    ).as_posix()
 
 
-@pytest.fixture(scope="session")
-def mip_orderform(orderforms: Path) -> str:
+@pytest.fixture(scope="session", name="mip_orderform")
+def fixture_mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples"""
-    _file = Path(
+    return Path(
         orderforms, f"{Orderform.MIP_DNA}.{ORDERFORM_VERSIONS[Orderform.MIP_DNA]}.mip.xlsx"
-    )
-    return str(_file)
+    ).as_posix()
 
 
-@pytest.fixture(scope="session")
-def mip_rna_orderform(orderforms: Path) -> str:
+@pytest.fixture(scope="session", name="mip_rna_orderform")
+def fixture_mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples"""
-    _file = Path(
+    return Path(
         orderforms, f"{Orderform.MIP_RNA}.{ORDERFORM_VERSIONS[Orderform.MIP_RNA]}.mip_rna.xlsx"
-    )
-    return str(_file)
+    ).as_posix()
