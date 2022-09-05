@@ -1,9 +1,8 @@
 """Module for Rnafusion Analysis API"""
 
-import json
 import logging
 from pathlib import Path
-from typing import List, Optional, Union, Any
+from typing import List
 import pandas as pd
 import os
 
@@ -13,15 +12,14 @@ from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import CaseActions
 from cg.constants.constants import STRANDEDNESS_DEFAULT, NFX_WORK_DIR
 
-from cg.exc import RnafusionStartError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.models.cg_config import CGConfig
-from cg.store import models
 from cg.utils import Process
 from cg import resources
 from datetime import datetime
 from subprocess import CalledProcessError
+from cg.constants.constants import FileFormat
 
 
 LOG = logging.getLogger(__name__)
@@ -54,7 +52,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(self.config.rnafusion.binary_path, None, None, self.conda_env)
+            self._process = Process(self.config.rnafusion.binary_path, '', '', self.conda_env)
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
@@ -94,7 +92,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 filename, index=False, columns=["sample", "fastq_1", "fastq_2", "strandedness"]
             )
 
-    def get_log_path(self, case_id: str, log: str = None) -> Path:
+    def get_log_path(self, case_id: str, log: Path = None) -> Path:
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
@@ -102,27 +100,27 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + launch_time + ".log"
         )
 
-    def get_profile(self, profile: str = None) -> Path:
+    def get_profile(self, profile: Path = None) -> Path:
         if profile:
             return profile
         return self.profile
 
-    def get_workdir_path(self, case_id: str, work_dir: str = None) -> Path:
+    def get_workdir_path(self, case_id: str, work_dir: Path = None) -> Path:
         if work_dir:
             return work_dir
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
 
-    def get_input_path(self, case_id: str, input: str = None) -> Path:
+    def get_input_path(self, case_id: str, input: Path = None) -> Path:
         if input:
             return input
         return Path(self.get_case_config_path(case_id))
 
-    def get_outdir_path(self, case_id: str, outdir: str = None) -> Path:
+    def get_outdir_path(self, case_id: str, outdir: Path = None) -> Path:
         if outdir:
             return outdir
         return Path(self.get_case_path(case_id))
 
-    def get_references_path(self, genomes_bases: str = None) -> Path:
+    def get_references_path(self, genomes_bases: Path = None) -> Path:
         if genomes_bases:
             return genomes_bases
         return Path(self.references)
@@ -147,7 +145,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         fusioncatcher: bool,
         arriba: bool,
     ) -> dict:
-        """Transforms click argument related to rnafusion that were left empty into defaults constructed with case_id paths or from config"""
+        """Transforms click argument related to rnafusion that were left empty into
+        defaults constructed with case_id paths or from config"""
 
         return {
             "-w": self.get_workdir_path(case_id, work_dir),
@@ -173,7 +172,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         case_id: str,
         log: str,
     ) -> dict:
-        """Transforms click argument related to nextflow that were left empty into defaults constructed with case_id paths"""
+        """Transforms click argument related to nextflow that were left empty
+         into defaults constructed with case_id paths"""
 
         return {
             "-log": self.get_log_path(case_id, log),
@@ -295,7 +295,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def edit_template_deliverables_file(
         self, case_id: str, deliverables_template: pd.DataFrame
     ) -> pd.DataFrame:
-        """Replace PATHTOCASE and CASEID from template deliverables file to corresponding strings, add path_index column"""
+        """Replace PATHTOCASE and CASEID from template deliverables file
+        to corresponding strings, add path_index column"""
         edited_deliverables: pd.DataFrame = deliverables_template.replace(
             {"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True
         )
@@ -308,7 +309,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return dataframe.to_dict(orient="records").replace("'~'", "~")
 
     def report_deliver(self, case_id: str) -> None:
-        """Get a deliverables file template from resources, edit by replacing paths and case_id, then write deliverables file"""
+        """Get a deliverables file template from resources,
+        edit by replacing paths and case_id, then write deliverables file"""
         deliverables_template: pd.DataFrame = self.get_template_deliverables_file(
             resources.rnafusion_bundle_filenames_path
         )
@@ -316,6 +318,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             case_id, deliverables_template
         )
         deliverables_file: dict = self.convert_deliverables_dataframe_to_dict(edited_deliverables)
-        WriteFile(
-            content=deliverables_file_dict, file_path=self.get_deliverables_file_path(case_id)
+        WriteFile.write_file_from_content(
+            content=deliverables_file, file_format=FileFormat.YAML, file_path=self.get_deliverables_file_path(case_id)
         )
