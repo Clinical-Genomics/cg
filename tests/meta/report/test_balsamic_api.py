@@ -44,15 +44,15 @@ def test_get_variant_callers(report_api_balsamic, case_id):
 
     # GIVEN an expected output for tumor normal panel analysis
     expected_callers = [
-        "manta",
+        "manta (v1.6.0)",
         "cnvkit",
-        "vardict",
+        "vardict (v2019.06.04=pl526_0)",
         "dnascope",
         "tnhaplotyper",
-        "manta_germline",
+        "manta_germline (v1.6.0)",
         "haplotypecaller",
         "TNscope_umi",
-        "delly",
+        "delly (v0.8.7)",
     ]
 
     # WHEN retrieving the analysis variant callers
@@ -60,6 +60,25 @@ def test_get_variant_callers(report_api_balsamic, case_id):
 
     # THEN check that the callers are correctly identified
     assert variant_callers == expected_callers
+
+
+def test_get_variant_caller_version(report_api_balsamic, case_id):
+    """Tests variant caller version extraction"""
+
+    # GIVEN a tool name and a mock variant caller versions dictionary
+    var_caller_name = "manta"
+    var_caller_versions = report_api_balsamic.analysis_api.get_latest_metadata(
+        case_id
+    ).config.bioinfo_tools_version
+
+    # GIVEN the tools mock version
+    expected_version = "1.6.0"
+
+    # WHEN retrieving the version of a specific variant caller
+    version = report_api_balsamic.get_variant_caller_version(var_caller_name, var_caller_versions)
+
+    # THEN verify that the extracted version is correct
+    assert version == expected_version
 
 
 def test_get_report_accreditation(report_api_balsamic, case_id):

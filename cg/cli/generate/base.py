@@ -2,9 +2,7 @@
 
 import click
 
-
-from .mip_dna.base import mip_dna
-from .balsamic.base import balsamic, balsamic_umi
+from cg.cli.generate.report.base import delivery_report, available_delivery_reports
 
 
 @click.group()
@@ -12,6 +10,5 @@ def generate():
     """Generates and/or modifies files"""
 
 
-generate.add_command(mip_dna)
-generate.add_command(balsamic)
-generate.add_command(balsamic_umi)
+generate.add_command(delivery_report)
+generate.add_command(available_delivery_reports)

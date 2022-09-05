@@ -52,7 +52,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(self.config.rnafusion.binary_path, '', '', self.conda_env)
+            self._process = Process(self.config.rnafusion.binary_path, "", "", self.conda_env)
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
@@ -173,7 +173,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         log: str,
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
-         into defaults constructed with case_id paths"""
+        into defaults constructed with case_id paths"""
 
         return {
             "-log": self.get_log_path(case_id, log),
@@ -309,8 +309,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return dataframe.to_dict(orient="records").replace("'~'", "~")
 
     def report_deliver(self, case_id: str) -> None:
-        """Get a deliverables file template from resources,
-        edit by replacing paths and case_id, then write deliverables file"""
+        """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
         deliverables_template: pd.DataFrame = self.get_template_deliverables_file(
             resources.rnafusion_bundle_filenames_path
         )
@@ -319,5 +318,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         deliverables_file: dict = self.convert_deliverables_dataframe_to_dict(edited_deliverables)
         WriteFile.write_file_from_content(
-            content=deliverables_file, file_format=FileFormat.YAML, file_path=self.get_deliverables_file_path(case_id)
+            content=deliverables_file,
+            file_format=FileFormat.YAML,
+            file_path=self.get_deliverables_file_path(case_id),
         )

@@ -47,21 +47,19 @@ def test_add_microbial_sample(base_store: Store, helpers):
     internal_id = "lims-id"
     reference_genome = "ref_gen"
     priority = "research"
-    ticket_number = 123456
     application_version = base_store.ApplicationVersion.query.first()
     base_store.add_organism(organism_name, organism_name, reference_genome)
     organism = base_store.Organism.query.first()
 
     # WHEN adding a new microbial sample
     new_sample = base_store.add_sample(
-        application_version=application_version,
-        internal_id=internal_id,
         name=name,
-        organism=organism,
-        priority=priority,
-        reference_genome=reference_genome,
         sex="unknown",
-        ticket=ticket_number,
+        internal_id=internal_id,
+        priority=priority,
+        application_version=application_version,
+        organism=organism,
+        reference_genome=reference_genome,
     )
     new_sample.customer = customer_obj
     base_store.add_commit(new_sample)

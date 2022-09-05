@@ -315,10 +315,10 @@ class PoolView(BaseView):
     """Admin view for Model.Pool"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["ticket_number"]
+    column_editable_list = ["ticket"]
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {"invoice": InvoiceView.view_invoice_link}
-    column_searchable_list = ["name", "order", "ticket_number", "customer.internal_id"]
+    column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
 
 
 class SampleView(BaseView):
@@ -337,7 +337,6 @@ class SampleView(BaseView):
         "is_tumour",
         "sequenced_at",
         "sex",
-        "ticket_number",
     ]
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
@@ -350,8 +349,8 @@ class SampleView(BaseView):
         "internal_id",
         "name",
         "subject_id",
-        "ticket_number",
         "customer.internal_id",
+        "original_ticket",
     ]
     form_excluded_columns = [
         "age_at_sampling",

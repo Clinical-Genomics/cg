@@ -1495,6 +1495,7 @@ def add_case(
     priority=None,
     data_analysis=Pipeline.BALSAMIC,
     data_delivery=DataDelivery.SCOUT,
+    ticket="123456",
 ):
     """utility function to add a case to use in tests"""
     panel = helpers.ensure_panel(disk_store)
@@ -1505,6 +1506,7 @@ def add_case(
         name=case_id,
         panels=panel.name,
         priority=priority,
+        ticket=ticket,
     )
     case.customer = customer
     case.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
