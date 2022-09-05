@@ -1,4 +1,4 @@
-"""Module for Rnafusion Analysis API"""
+"""Module for Rnafusion Analysis API."""
 
 import logging
 from pathlib import Path
@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 
 class RnafusionAnalysisAPI(AnalysisAPI):
     """Handles communication between RNAFUSION processes
-    and the rest of CG infrastructure"""
+    and the rest of CG infrastructure."""
 
     def __init__(
         self,
@@ -56,19 +56,19 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
-        """Returns a path where the rnafusion case should be located"""
+        """Returns a path where the rnafusion case should be located."""
         return Path(self.root_dir, case_id)
 
     def get_case_config_path(self, case_id: str) -> Path:
-        """Generates a path where the Rnafusion sample sheet for the case_id should be located"""
+        """Generates a path where the Rnafusion sample sheet for the case_id should be located."""
         return Path((self.get_case_path(case_id)), case_id + "_samplesheet.csv")
 
     def make_case_folder(self, case_id: str) -> None:
-        """Make the case folder where rnafusion analysis should be located"""
+        """Make the case folder where rnafusion analysis should be located."""
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
-        """Write sample sheet for rnafusion analysis in case folder"""
+        """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
             read_files_dataframe: pd.DataFrame = pd.DataFrame(
@@ -100,7 +100,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + launch_time + ".log"
         )
 
-    def get_profile(self, profile: Path = None) -> Path:
+    def get_profile(self, profile: str = None) -> str:
         if profile:
             return profile
         return self.profile
@@ -128,14 +128,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_verified_arguments(
         self,
         case_id: str,
-        work_dir: str,
+        work_dir: Path,
         resume: bool,
         profile: str,
         with_tower: bool,
         stub: bool,
-        input: str,
-        outdir: str,
-        genomes_base: str,
+        input: Path,
+        outdir: Path,
+        genomes_base: Path,
         trim: bool,
         fusioninspector_filter: bool,
         all: bool,
@@ -146,7 +146,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         arriba: bool,
     ) -> dict:
         """Transforms click argument related to rnafusion that were left empty into
-        defaults constructed with case_id paths or from config"""
+        defaults constructed with case_id paths or from config."""
 
         return {
             "-w": self.get_workdir_path(case_id, work_dir),
@@ -170,10 +170,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_verified_arguments_nextflow(
         self,
         case_id: str,
-        log: str,
+        log: Path,
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
-        into defaults constructed with case_id paths"""
+        into defaults constructed with case_id paths."""
 
         return {
             "-log": self.get_log_path(case_id, log),
@@ -201,7 +201,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         case_id: str,
         strandedness: str,
     ) -> None:
-        """Create sample sheet file for RNAFUSION analysis"""
+        """Create sample sheet file for RNAFUSION analysis."""
         self.make_case_folder(case_id)
         if not (self.get_case_config_path(case_id)).is_file():
             LOG.info("Samplesheet does not exist, writing samplesheet")
@@ -211,15 +211,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        log: str,
-        work_dir: str,
+        log: Path,
+        work_dir: Path,
         resume: bool,
         profile: str,
         with_tower: bool,
         stub: bool,
-        input: str,
-        outdir: str,
-        genomes_base: str,
+        input: Path,
+        outdir: Path,
+        genomes_base: Path,
         trim: bool,
         fusioninspector_filter: bool,
         all: bool,
@@ -230,7 +230,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         arriba: bool,
         dry_run: bool = False,
     ) -> None:
-        """Execute RNAFUSION run analysis with given options"""
+        """Execute RNAFUSION run analysis with given options."""
 
         options = self.__build_command_str(
             self.get_verified_arguments(
@@ -282,7 +282,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the rnafusion deliverables file for the case_id should be located.
 
-        (Optional) Checks if deliverables file exists
+        (Optional) Checks if deliverables file exists.
         """
         return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
 
@@ -296,12 +296,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self, case_id: str, deliverables_template: pd.DataFrame
     ) -> pd.DataFrame:
         """Replace PATHTOCASE and CASEID from template deliverables file
-        to corresponding strings, add path_index column"""
+        to corresponding strings, add path_index column."""
         edited_deliverables: pd.DataFrame = deliverables_template.replace(
             {"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True
         )
         edited_deliverables = edited_deliverables.replace({"CASEID": case_id}, regex=True)
-        edited_deliverables = edited_deliverables["path_index"] = "~"
+        edited_deliverables["path_index"] = "~"
         return edited_deliverables
 
     def convert_deliverables_dataframe(self, dataframe: pd.DataFrame) -> dict:
