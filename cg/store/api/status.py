@@ -549,19 +549,12 @@ class StatusHandler(BaseHandler):
             "analyses_with_pipeline",
             "completed_analyses",
             "not_uploaded_analyses",
-            "records_ready_for_upload",
             "valid_analyses_in_production",
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
             records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
-            )
-
-        if pipeline and Pipeline.BALSAMIC in pipeline:
-            # BALSAMIC only supports Scout uploads
-            records: Query = apply_filter(
-                function="cases_with_scout_data_delivery", cases=records, pipeline=pipeline
             )
 
         return records

@@ -15,7 +15,6 @@ from cg.store.status_analysis_filters import (
     filter_analyses_with_delivery_report,
     filter_analyses_without_delivery_report,
     filter_report_analyses_by_pipeline,
-    filter_records_ready_for_upload,
     order_analyses_by_uploaded_at,
     order_analyses_by_completed_at,
 )
@@ -29,7 +28,7 @@ def test_filter_valid_analyses_in_production(
     timestamp_today: datetime,
     old_timestamp: datetime,
 ):
-    """Test that an expected analysis is returned when it has a production valid completed_at date"""
+    """Test that an expected analysis is returned when it has a production valid completed_at date."""
 
     # GIVEN a set of mock analyses
     analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_today)
@@ -50,7 +49,7 @@ def test_filter_valid_analyses_in_production(
 def test_filter_analyses_with_pipeline(
     base_store: Store, helpers: StoreHelpers, case_obj: models.Family
 ):
-    """Test analyses filtering by pipeline"""
+    """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
     balsamic_analysis: models.Analysis = helpers.add_analysis(
@@ -74,7 +73,7 @@ def test_filter_analyses_with_pipeline(
 def test_filter_completed_analyses(
     base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
 ):
-    """Test filtering of completed analyses"""
+    """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
     analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_today)
@@ -203,33 +202,6 @@ def test_filter_report_analyses_by_pipeline(
     # THEN only the delivery report supported analysis should be retrieved
     assert balsamic_analysis in analyses
     assert fluffy_analysis not in analyses
-
-
-def test_filter_records_ready_for_upload(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family, timestamp_today: datetime
-):
-    """Test filtering of analyses ready to be uploaded."""
-
-    # GIVEN a set of mock analyses
-    ready_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, data_delivery=DataDelivery.SCOUT, delivery_reported_at=timestamp_today
-    )
-    not_ready_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store,
-        case=case_obj,
-        data_delivery=DataDelivery.SCOUT,
-        delivery_reported_at=None,
-    )
-
-    # GIVEN an analysis query
-    analyses_query: Query = base_store.latest_analyses()
-
-    # WHEN filtering analyses ready to be uploaded
-    analyses: Query = filter_records_ready_for_upload(analyses_query)
-
-    # THEN only the expected analyses should be returned
-    assert ready_analysis in analyses
-    assert not_ready_analysis not in analyses
 
 
 def test_order_analyses_by_completed_at(
