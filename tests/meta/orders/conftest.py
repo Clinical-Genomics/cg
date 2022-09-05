@@ -57,30 +57,6 @@ def all_orders_to_submit(
 
 
 @pytest.fixture
-def all_json_orders_to_submit(
-    balsamic_order_to_submit,
-    fastq_order_to_submit,
-    metagenome_order_to_submit,
-    microbial_order_to_submit,
-    mip_order_to_submit,
-    mip_rna_order_to_submit,
-    rml_order_to_submit,
-    sarscov2_order_to_submit,
-):
-    return {
-        OrderType.BALSAMIC: balsamic_order_to_submit,
-        OrderType.FASTQ: fastq_order_to_submit,
-        OrderType.FLUFFY: rml_order_to_submit,
-        OrderType.METAGENOME: metagenome_order_to_submit,
-        OrderType.MICROSALT: microbial_order_to_submit,
-        OrderType.MIP_DNA: mip_order_to_submit,
-        OrderType.MIP_RNA: mip_rna_order_to_submit,
-        OrderType.RML: rml_order_to_submit,
-        OrderType.SARS_COV_2: sarscov2_order_to_submit,
-    }
-
-
-@pytest.fixture
 def balsamic_status_data(balsamic_order_to_submit: dict):
     """Parse balsamic order example."""
     project: OrderType = OrderType.BALSAMIC

@@ -1,5 +1,6 @@
 """Fixtures for the orderform tests"""
 from pathlib import Path
+from typing import Dict, List
 
 import openpyxl
 import pytest
@@ -10,6 +11,7 @@ from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants.constants import FileFormat
 from cg.constants.orderforms import Orderform, ORDERFORM_VERSIONS
 from cg.io.controller import ReadFile
+from cg.models.orders.constants import OrderType
 
 
 def get_nr_samples_excel(orderform_path: str) -> int:
@@ -204,7 +206,7 @@ def rml_order_to_submit(orderforms: Path) -> dict:
 def fluffy_order_to_submit(orderforms: Path) -> dict:
     """Load an example fluffy order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "rml.json")
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "NIPT-json.json")
     )
 
 
@@ -297,3 +299,17 @@ def fixture_mip_rna_orderform(orderforms: Path) -> str:
     return Path(
         orderforms, f"{Orderform.MIP_RNA}.{ORDERFORM_VERSIONS[Orderform.MIP_RNA]}.mip_rna.xlsx"
     ).as_posix()
+
+
+@pytest.fixture(scope="session", name="json_order_list")
+def fixture_valid_json_order_list(
+    mip_order_to_submit,
+    fluffy_order_to_submit,
+    balsamic_order_to_submit,
+) -> List[dict]:
+    return [
+        mip_order_to_submit,
+        rml_order_to_submit,
+        fluffy_order_to_submit,
+        balsamic_order_to_submit,
+    ]
