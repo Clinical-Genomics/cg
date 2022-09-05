@@ -61,7 +61,7 @@ def config_case(
     case_id: str,
     strandedness: str,
 ) -> None:
-    """Create samplesheet file for RNAFUSION analysis for a given CASE_ID"""
+    """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
@@ -119,7 +119,7 @@ def run(
     arriba: bool,
     dry_run: bool,
 ) -> None:
-    """Run rnafusion analysis for given CASE ID"""
+    """Run rnafusion analysis for given CASE ID."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.verify_case_id_in_statusdb(case_id)
@@ -200,7 +200,7 @@ def start(
     arriba: bool,
     dry_run: bool,
 ) -> None:
-    """Start full workflow for CASE ID"""
+    """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
@@ -238,7 +238,7 @@ def start(
 @DRY_RUN
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False) -> None:
-    """Start full workflow for all cases ready for analysis"""
+    """Start full workflow for all cases ready for analysis."""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
@@ -261,7 +261,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 @DRY_RUN
 @click.pass_obj
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create a housekeeper deliverables file for given CASE ID"""
+    """Create a housekeeper deliverables file for given CASE ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
@@ -282,7 +282,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str) -> None:
-    """Store a finished RNAFUSION analysis in Housekeeper and StatusDB"""
+    """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -312,7 +312,7 @@ def store_housekeeper(context: CGConfig, case_id: str) -> None:
 @DRY_RUN
 @click.pass_context
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
-    """Generate Housekeeper report for CASE ID and store in Housekeeper"""
+    """Generate Housekeeper report for CASE ID and store in Housekeeper."""
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id)
@@ -322,7 +322,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 @DRY_RUN
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished RNAFUSION analyses in Housekeeper"""
+    """Store bundles for all finished RNAFUSION analyses in Housekeeper."""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
