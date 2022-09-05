@@ -90,7 +90,7 @@ def test_filter_completed_analyses(
 
 
 def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
-    """Test filtering of ongoing analyses"""
+    """Test filtering of ongoing analyses."""
 
     # GIVEN a mock not completed analysis
     analysis_not_completed: models.Analysis = helpers.add_analysis(
@@ -110,7 +110,7 @@ def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers)
 def test_filter_uploaded_analyses(
     base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
 ):
-    """Test filtering of analysis with an uploaded_at field"""
+    """Test filtering of analysis with an uploaded_at field."""
 
     # GIVEN a mock uploaded analysis
     analysis: models.Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_today)
@@ -126,7 +126,7 @@ def test_filter_uploaded_analyses(
 
 
 def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
-    """Test filtering of analysis that has not been uploaded"""
+    """Test filtering of analysis that has not been uploaded."""
 
     # GIVEN a mock not uploaded analysis
     not_uploaded_analysis: models.Analysis = helpers.add_analysis(
@@ -146,7 +146,7 @@ def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
 def test_filter_analyses_with_delivery_report(
     base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
 ):
-    """Test filtering of analysis with a delivery report generated"""
+    """Test filtering of analysis with a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
     analysis: models.Analysis = helpers.add_analysis(
@@ -164,7 +164,7 @@ def test_filter_analyses_with_delivery_report(
 
 
 def test_filter_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
-    """Test filtering of analysis without a delivery report generated"""
+    """Test filtering of analysis without a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
     analysis_without_delivery_report: models.Analysis = helpers.add_analysis(
@@ -184,7 +184,7 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
 def test_filter_report_analyses_by_pipeline(
     base_store: Store, helpers: StoreHelpers, case_obj: models.Family
 ):
-    """Test filtering delivery report related analysis by pipeline"""
+    """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
     balsamic_analysis: models.Analysis = helpers.add_analysis(
@@ -208,7 +208,7 @@ def test_filter_report_analyses_by_pipeline(
 def test_filter_records_ready_for_upload(
     base_store: Store, helpers: StoreHelpers, case_obj: models.Family, timestamp_today: datetime
 ):
-    """Test filtering of analyses ready to be uploaded"""
+    """Test filtering of analyses ready to be uploaded."""
 
     # GIVEN a set of mock analyses
     ready_analysis: models.Analysis = helpers.add_analysis(
@@ -239,7 +239,7 @@ def test_order_analyses_by_completed_at(
     timestamp_today: datetime,
     timestamp_yesterday: datetime,
 ):
-    """Test sorting of analyses by the completed_at field"""
+    """Test sorting of analyses by the completed_at field."""
 
     # GIVEN a set of mock analyses
     new_analysis: models.Analysis = helpers.add_analysis(
@@ -267,7 +267,7 @@ def test_order_analyses_by_uploaded_at(
     timestamp_today: datetime,
     timestamp_yesterday: datetime,
 ):
-    """Test sorting of analyses by the uploaded_at field"""
+    """Test sorting of analyses by the uploaded_at field."""
 
     # GIVEN a set of mock analyses
     new_analysis: models.Analysis = helpers.add_analysis(

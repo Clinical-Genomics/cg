@@ -554,13 +554,13 @@ class StatusHandler(BaseHandler):
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
-            records = apply_analysis_filter(
+            records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
 
         if pipeline and Pipeline.BALSAMIC in pipeline:
             # BALSAMIC only supports Scout uploads
-            records = apply_filter(
+            records: Query = apply_filter(
                 function="cases_with_scout_data_delivery", cases=records, pipeline=pipeline
             )
 
@@ -636,7 +636,9 @@ class StatusHandler(BaseHandler):
             "filter_report_cases_with_valid_data_delivery",
         ]
         for filter_function in case_filter_functions:
-            records = apply_filter(function=filter_function, cases=records, pipeline=pipeline)
+            records: Query = apply_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
 
         analysis_filter_functions: List[str] = [
             "filter_report_analyses_by_pipeline",
@@ -645,7 +647,7 @@ class StatusHandler(BaseHandler):
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
-            records = apply_analysis_filter(
+            records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
 
@@ -660,7 +662,9 @@ class StatusHandler(BaseHandler):
             "cases_with_scout_data_delivery",
         ]
         for filter_function in case_filter_functions:
-            records = apply_filter(function=filter_function, cases=records, pipeline=pipeline)
+            records: Query = apply_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
 
         analysis_filter_functions: List[str] = [
             "filter_report_analyses_by_pipeline",
@@ -670,7 +674,7 @@ class StatusHandler(BaseHandler):
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
-            records = apply_analysis_filter(
+            records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
 
