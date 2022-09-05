@@ -308,7 +308,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return dataframe.to_dict(orient="records").replace("'~'", "~")
 
     def report_deliver(self, case_id: str) -> None:
-        """Get a deliverables file template from resources, edit by replacing paths and case_id, then write deliverables file"""
+        """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
         deliverables_template: pd.DataFrame = self.get_template_deliverables_file(
             resources.rnafusion_bundle_filenames_path
         )
