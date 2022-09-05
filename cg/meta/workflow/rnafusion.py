@@ -292,7 +292,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Read deliverables file template and return content."""
         return pd.read_csv(rnafusion_bundle_template)
 
-    def edit_template_deliverables_file(
+    def parse_template_deliverables_file(
         self, case_id: str, deliverables_template: pd.DataFrame
     ) -> pd.DataFrame:
         """Replace PATHTOCASE and CASEID from template deliverables file
