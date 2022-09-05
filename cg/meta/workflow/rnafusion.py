@@ -280,23 +280,23 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
 
-    def get_template_deliverables_file(self, rnafusion_bundle_template: Path) -> pd.DataFrame:
-        """Read deliverables file template and output to dataframe format"""
+    def get_template_deliverables_file_content(self, rnafusion_bundle_template: Path) -> pd.DataFrame:
+        """Read deliverables file template and return content."""
         return pd.read_csv(rnafusion_bundle_template)
 
     def edit_template_deliverables_file(
         self, case_id: str, deliverables_template: pd.DataFrame
     ) -> pd.DataFrame:
         """Replace PATHTOCASE and CASEID from template deliverables file to corresponding strings, add path_index column"""
-        edited_deliverables = deliverables_template.replace(
+        edited_deliverables: pd.DataFrame = deliverables_template.replace(
             {"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True
         )
         edited_deliverables = edited_deliverables.replace({"CASEID": case_id}, regex=True)
         edited_deliverables = edited_deliverables["path_index"] = "~"
         return edited_deliverables
 
-    def convert_deliverables_dataframe_to_dict(self, dataframe: pd.DataFrame):
-        """Convert deliverables dataframe to dict with dict values in list format  [{column -> value}, … , {column -> value}] with (orient="records"). Also reformat apostrophes in path_index column"""
+    def convert_deliverables_dataframe(self, dataframe: pd.DataFrame) -> dict:
+        """Convert deliverables dataframe."""
         return dataframe.to_dict(orient="records").replace("'~'", "~")
 
     def report_deliver(self, case_id: str) -> None:
@@ -307,7 +307,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         edited_deliverables: pd.DataFrame = self.edit_template_deliverables_file(
             case_id, deliverables_template
         )
-        deliverables_file_dict: dict = self.convert_deliverables_dataframe_to_dict(
+        deliverables_file: dict = self.convert_deliverables_dataframe_to_dict(
             edited_deliverables
         )
         WriteFile(
