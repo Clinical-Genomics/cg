@@ -73,10 +73,16 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write sample sheet for rnafusion analysis in case folder"""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
-            file_collection = pd.DataFrame(self.gather_file_metadata_for_sample(link.sample))
-            file_collection = file_collection.sort_values(by=["path"])
-            fastq_r1 = file_collection[file_collection["read"] == 1]["path"].to_list()
-            fastq_r2 = file_collection[file_collection["read"] == 2]["path"].to_list()
+            read_files_dataframe: pd.DataFrame = pd.DataFrame(
+                self.gather_file_metadata_for_sample(link.sample)
+            )
+            read_files_dataframe = read_files_dataframe.sort_values(by=["path"])
+            fastq_r1: list = read_files_dataframe[read_files_dataframe["read"] == 1][
+                "path"
+            ].to_list()
+            fastq_r2: list = read_files_dataframe[read_files_dataframe["read"] == 2][
+                "path"
+            ].to_list()
             samplesheet: pd.DataFrame = pd.DataFrame(
                 list(zip(fastq_r1, fastq_r2)), columns=["fastq_1", "fastq_2"]
             )
