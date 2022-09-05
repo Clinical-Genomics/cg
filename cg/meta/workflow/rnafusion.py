@@ -286,7 +286,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """
         return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
 
-    def get_template_deliverables_file_content(self, rnafusion_bundle_template: Path) -> pd.DataFrame:
+    def get_template_deliverables_file_content(
+        self, rnafusion_bundle_template: Path
+    ) -> pd.DataFrame:
         """Read deliverables file template and return content."""
         return pd.read_csv(rnafusion_bundle_template)
 
@@ -313,9 +315,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         edited_deliverables: pd.DataFrame = self.edit_template_deliverables_file(
             case_id, deliverables_template
         )
-        deliverables_file: dict = self.convert_deliverables_dataframe_to_dict(
-            edited_deliverables
-        )
+        deliverables_file: dict = self.convert_deliverables_dataframe_to_dict(edited_deliverables)
         WriteFile(
             content=deliverables_file_dict, file_path=self.get_deliverables_file_path(case_id)
         )
