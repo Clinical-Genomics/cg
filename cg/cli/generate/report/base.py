@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import TextIO, Optional
 
 import click
+
+from cg.cli.upload.coverage import coverage
 from cg.store import models
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
@@ -59,6 +61,10 @@ def delivery_report(
         )
         click.echo(delivery_report_html)
         return
+
+    if report_api.analysis_api.pipeline == Pipeline.MIP_DNA:
+        LOG.info(f"Uploading coverage data for {case.internal_id} delivery report")
+        context.invoke(coverage, family_id=case.internal_id, re_upload=True)
 
     delivery_report_file: TextIO = report_api.create_delivery_report_file(
         case_id,

@@ -3,7 +3,9 @@
 import logging
 from datetime import datetime
 
-from cg.cli.generate.report.base import delivery_report, available_delivery_reports
+from cgmodels.cg.constants import Pipeline
+
+from cg.cli.generate.report.base import delivery_report
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 
@@ -54,7 +56,8 @@ def test_delivery_report(mip_dna_context, cli_runner, case_id, caplog):
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN a MIP DNA context object
+    # GIVEN a MIP DNA context object. Pipeline set to BALSAMIC to skip coverage upload.
+    mip_dna_context.meta_apis["report_api"].analysis_api.pipeline = Pipeline.BALSAMIC
 
     # WHEN calling delivery_report with a dry option
     cli_runner.invoke(
