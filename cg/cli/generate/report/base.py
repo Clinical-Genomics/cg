@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TextIO, Optional
 
 import click
+
 from cg.store import models
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models

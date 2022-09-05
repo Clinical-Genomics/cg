@@ -549,18 +549,13 @@ class StatusHandler(BaseHandler):
             "analyses_with_pipeline",
             "completed_analyses",
             "not_uploaded_analyses",
-            "records_ready_for_upload",
             "valid_analyses_in_production",
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
-            records = apply_analysis_filter(
+            records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
-
-        if pipeline and Pipeline.BALSAMIC in pipeline:
-            # BALSAMIC only supports Scout uploads
-            records.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
 
         return records
 
@@ -634,7 +629,9 @@ class StatusHandler(BaseHandler):
             "filter_report_cases_with_valid_data_delivery",
         ]
         for filter_function in case_filter_functions:
-            records = apply_filter(function=filter_function, cases=records, pipeline=pipeline)
+            records: Query = apply_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
 
         analysis_filter_functions: List[str] = [
             "filter_report_analyses_by_pipeline",
@@ -643,7 +640,7 @@ class StatusHandler(BaseHandler):
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
-            records = apply_analysis_filter(
+            records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
 
@@ -658,7 +655,9 @@ class StatusHandler(BaseHandler):
             "cases_with_scout_data_delivery",
         ]
         for filter_function in case_filter_functions:
-            records = apply_filter(function=filter_function, cases=records, pipeline=pipeline)
+            records: Query = apply_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
 
         analysis_filter_functions: List[str] = [
             "filter_report_analyses_by_pipeline",
@@ -668,7 +667,7 @@ class StatusHandler(BaseHandler):
             "order_analyses_by_completed_at",
         ]
         for filter_function in analysis_filter_functions:
-            records = apply_analysis_filter(
+            records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
 
