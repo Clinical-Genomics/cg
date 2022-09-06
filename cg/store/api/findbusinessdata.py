@@ -82,11 +82,11 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records
 
-    def application_version_by_case(self, case_id: int) -> models.ApplicationVersion:
+    def application_version_by_case(self, case_id: str) -> models.ApplicationVersion:
         """Fetch the application version for a case."""
-        case_obj = self.Family.family(case_id).first()
         return self.ApplicationVersion.query.filter(
-            models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
+            models.ApplicationVersion.id
+            == self.family(case_id).links[0].sample.application_version_id
         ).first()
 
     def latest_analyses(self) -> Query:
@@ -328,7 +328,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case"""
         application_version = self.application_version_by_case(case_id=case_id)
-        if application_version.applcation.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
+        if application_version.application.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
             raise ValueError(
                 f"{case_id} not a ready made library case, found prep category: "
                 f"{application_version.applcation.prep_category}"

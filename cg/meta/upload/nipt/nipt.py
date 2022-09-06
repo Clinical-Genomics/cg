@@ -59,7 +59,7 @@ class NiptUploadAPI:
             "q30"
         ] >= q30_threshold and flow_cell_reads_and_q30_summary[
             "reads"
-        ] >= self.status_db.ready_made_library_expected_reads(
+        ] >= self.status_db.get_ready_made_library_expected_reads(
             case_id=case_id
         )
 

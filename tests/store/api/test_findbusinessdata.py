@@ -166,7 +166,7 @@ def test_get_case_pool(case_id: str, rml_pool_store: Store):
     assert pool.name == case_name.split("-", 1)[-1]
 
 
-def test_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
+def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
     """Test if the correct number of expected reads is returned"""
 
     # GIVEN a case with a sample with an application version
@@ -175,7 +175,7 @@ def test_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
     )
 
     # WHEN the expected reads is fetched from the case
-    expected_reads: float = rml_pool_store.ready_made_library_expected_reads(case_id=case_id)
+    expected_reads: int = rml_pool_store.get_ready_made_library_expected_reads(case_id=case_id)
 
     # THEN the fetched reads should be equal to the expected reads of the application versions application
     assert application_version.application.expected_reads == expected_reads
