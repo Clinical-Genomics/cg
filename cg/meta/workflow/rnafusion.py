@@ -317,12 +317,18 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     ) -> pd.DataFrame:
         """Replace PATHTOCASE and CASEID from template deliverables file
         to corresponding strings, add path_index column."""
-        edited_deliverables: pd.DataFrame = deliverables_template.replace(
-            {"PATHTOCASE": str(self.get_case_path(case_id))}, regex=True
-        )
-        edited_deliverables = edited_deliverables.replace({"CASEID": case_id}, regex=True)
-        edited_deliverables["path_index"] = "~"
-        return edited_deliverables
+        replace_map: dict[str, str] = {
+            "PATHTOCASE": str(self.get_case_path(case_id)),
+            "CASEID": case_id,
+        }
+
+        for str_to_replace, with_value in replace_map.item():
+            deliverables_template = deliverables_template.replace(
+                str_to_replace, with_value, regex=True
+            )
+
+        deliverables_template["path_index"] = "~"
+        return deliverables_template
 
     def convert_deliverables_dataframe(self, dataframe: pd.DataFrame) -> dict:
         """Convert deliverables dataframe."""
