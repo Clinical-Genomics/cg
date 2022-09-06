@@ -48,12 +48,12 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
-    def get_help(self):
+    def get_help(self, context):
         """
         If no argument is passed, print help text
         """
-        if self.context.invoked_subcommand is None:
-            click.echo(self.context.get_help())
+        if context.invoked_subcommand is None:
+            click.echo(context.get_help())
             return None
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
