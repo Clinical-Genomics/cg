@@ -6,6 +6,7 @@ import click
 from cg.cli.workflow.commands import link, resolve_compression, store, store_available
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -15,9 +16,7 @@ LOG = logging.getLogger(__name__)
 def mip_rna(context: click.Context):
     """Rare disease RNA workflow"""
 
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return
+    AnalysisAPI.get_help(context)
 
     context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(config=context.obj)
 

@@ -12,6 +12,7 @@ from cg.cli.workflow.commands import (
 )
 from cg.cli.workflow.mip.base import config_case, panel, run, start, start_available
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -22,9 +23,7 @@ def mip_dna(
     context: click.Context,
 ):
     """Rare disease DNA workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return
+    AnalysisAPI.get_help(context)
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(config=context.obj)
 

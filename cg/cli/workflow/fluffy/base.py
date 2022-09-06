@@ -6,6 +6,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.meta.workflow.analysis import AnalysisAPI
 
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
@@ -22,9 +23,7 @@ def fluffy(context: click.Context):
     """
     Fluffy workflow
     """
-    if context.invoked_subcommand is None:
-        LOG.info(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(
         config=context.obj,
     )

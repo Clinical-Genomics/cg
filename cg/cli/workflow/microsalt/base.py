@@ -15,6 +15,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import File
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -43,9 +44,7 @@ ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=cli
 @click.pass_context
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
         config=context.obj,
     )
