@@ -26,7 +26,7 @@ from tests.apps.orderform.conftest import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def all_orders_to_submit(
     balsamic_order_to_submit,
     fastq_order_to_submit,

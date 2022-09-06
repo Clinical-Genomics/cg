@@ -1,6 +1,6 @@
 """Fixtures for the orderform tests"""
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 import openpyxl
 import pytest
@@ -171,34 +171,34 @@ def rml_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def mip_order_to_submit(orderforms: Path) -> dict:
+def mip_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example MIP order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "mip.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip.json")
     )
 
 
 @pytest.fixture(scope="session")
-def mip_rna_order_to_submit(orderforms: Path) -> dict:
+def mip_rna_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example rna order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "mip_rna.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "mip_rna.json")
     )
 
 
 @pytest.fixture(scope="session")
-def fastq_order_to_submit(orderforms) -> dict:
+def fastq_order_to_submit(cgweb_orders_dir) -> dict:
     """Load an example fastq order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "fastq.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "fastq.json")
     )
 
 
 @pytest.fixture(scope="session")
-def rml_order_to_submit(orderforms: Path) -> dict:
+def rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example rml order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "rml.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "rml.json")
     )
 
 
@@ -211,34 +211,34 @@ def fluffy_order_to_submit(orderforms: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
-def metagenome_order_to_submit(orderforms: Path) -> dict:
+def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example metagenome order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "metagenome.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "metagenome.json")
     )
 
 
 @pytest.fixture(scope="session")
-def microbial_order_to_submit(orderforms: Path) -> dict:
+def microbial_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example microbial order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "microsalt.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "microsalt.json")
     )
 
 
 @pytest.fixture(scope="session")
-def sarscov2_order_to_submit(orderforms: Path) -> dict:
+def sarscov2_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example sarscov2 order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "sarscov2.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "sarscov2.json")
     )
 
 
 @pytest.fixture(scope="session")
-def balsamic_order_to_submit(orderforms: Path) -> dict:
+def balsamic_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example cancer order"""
     return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "balsamic.json")
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "balsamic.json")
     )
 
 
@@ -301,15 +301,31 @@ def fixture_mip_rna_orderform(orderforms: Path) -> str:
     ).as_posix()
 
 
+@pytest.fixture(scope="session", name="mip_uploaded_json_order")
+def fixture_mip_uploaded_json_order(orderforms: Path) -> str:
+    """JSON orderform fixture for MIP DNA samples"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "mip_uploaded_json_orderform.json")
+    )
+
+
+@pytest.fixture(scope="session", name="balsamic_uploaded_json_order")
+def fixture_balsamic_uploaded_json_order(orderforms: Path) -> str:
+    """JSON orderform fixture for BALSAMIC samples"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON,
+        file_path=Path(orderforms, "balsamic_uploaded_json_orderform.json"),
+    )
+
+
 @pytest.fixture(scope="session", name="json_order_list")
 def fixture_valid_json_order_list(
-    mip_order_to_submit,
+    mip_uploaded_json_order,
     fluffy_order_to_submit,
-    balsamic_order_to_submit,
-) -> List[dict]:
-    return [
-        mip_order_to_submit,
-        rml_order_to_submit,
-        fluffy_order_to_submit,
-        balsamic_order_to_submit,
-    ]
+    balsamic_uploaded_json_order,
+) -> Dict[str, dict]:
+    return {
+        OrderType.MIP_DNA: mip_uploaded_json_order,
+        OrderType.FLUFFY: fluffy_order_to_submit,
+        OrderType.BALSAMIC: balsamic_uploaded_json_order,
+    }

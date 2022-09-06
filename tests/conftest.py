@@ -303,7 +303,7 @@ def fixture_apps_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "apps")
 
 
-@pytest.fixture(name="cgweb_orders_dir")
+@pytest.fixture(name="cgweb_orders_dir", scope="session")
 def fixture_cgweb_orders_dir(fixtures_dir: Path) -> Path:
     """Return the path to the cgweb_orders dir"""
     return Path(fixtures_dir, "cgweb_orders")
