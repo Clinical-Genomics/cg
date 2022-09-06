@@ -88,8 +88,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         samples_full_list: list = []
         strandedness_full_list: list = []
         for i in range(len(fastq_r1)):
-            samples_full_list[i] = case_id
-            strandedness_full_list[i] = strandedness
+            samples_full_list.append(case_id)
+            strandedness_full_list.append(strandedness)
 
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
