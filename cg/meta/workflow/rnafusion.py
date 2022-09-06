@@ -71,6 +71,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
+            LOG.info(self.gather_file_metadata_for_sample(link.sample))
             read_files_dataframe: pd.DataFrame = pd.DataFrame(
                 self.gather_file_metadata_for_sample(link.sample)
             )
