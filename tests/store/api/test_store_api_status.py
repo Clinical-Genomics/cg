@@ -1,7 +1,7 @@
 """Tests the status part of the cg.store.api"""
 from datetime import datetime, timedelta
 
-from cg.constants import Pipeline, Priority
+from cg.constants import Pipeline, Priority, DataDelivery
 from cg.store import Store
 from cg.store.models import Application, Family, Sample
 
@@ -201,28 +201,69 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     assert len(records) == 0
 
 
-def test_multiple_analyses(analysis_store, helpers):
+def test_analyses_to_upload_with_scout_as_data_delivery(helpers, sample_store, timestamp):
+    """Test analyses to upload to for a Scout data delivery analysis without a delivery report"""
+
+    # GIVEN a store with Scout as data delivery
+    helpers.add_analysis(
+        store=sample_store,
+        completed_at=timestamp,
+        pipeline=Pipeline.MIP_DNA,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+    )
+
+    # WHEN fetching all available analyses
+    records = [
+        analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=Pipeline.MIP_DNA)
+    ]
+
+    # THEN no analysis object should be returned since Scout uploads require a delivery report
+    assert len(records) == 0
+
+
+def test_analyses_to_upload_with_delivery_report(helpers, sample_store, timestamp):
+    """Test analyses to upload to when a delivery report has been generated and Scout is specified as data delivery"""
+
+    # GIVEN a store with Scout as data delivery
+    helpers.add_analysis(
+        store=sample_store,
+        completed_at=timestamp,
+        pipeline=Pipeline.BALSAMIC_UMI,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+        delivery_reported_at=timestamp,
+    )
+
+    # WHEN fetching all available analyses
+    records = [
+        analysis_obj
+        for analysis_obj in sample_store.analyses_to_upload(pipeline=Pipeline.BALSAMIC_UMI)
+    ]
+
+    # THEN a valid analysis object should be returned
+    assert len(records) == 1
+
+
+def test_multiple_analyses(analysis_store, helpers, timestamp_today, timestamp_yesterday):
     """Tests that analyses that are not latest are not returned"""
 
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
-    timestamp = datetime.now()
     case = helpers.add_case(analysis_store)
     analysis_oldest = helpers.add_analysis(
         analysis_store,
         case=case,
-        started_at=timestamp - timedelta(days=1),
-        uploaded_at=timestamp - timedelta(days=1),
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
         delivery_reported_at=None,
     )
     analysis_store.add_commit(analysis_oldest)
     analysis_newest = helpers.add_analysis(
         analysis_store,
         case=case,
-        started_at=timestamp,
-        uploaded_at=timestamp,
+        started_at=timestamp_today,
+        uploaded_at=timestamp_today,
         delivery_reported_at=None,
     )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_today)
     analysis_store.relate_sample(family=analysis_oldest.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_delivery_report
@@ -249,12 +290,12 @@ def test_set_case_action(analysis_store, case_id):
 
 
 def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers
+    base_store: Store, helpers, timestamp_today
 ):
     """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC"""
 
     # GIVEN a database with a case which has an express sample with half the amount of reads
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20
@@ -268,12 +309,12 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
 
 
 def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
-    base_store: Store, helpers
+    base_store: Store, helpers, timestamp_today
 ):
     """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC"""
 
     # GIVEN a database with a case which has an normal sample with half the amount of reads
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=datetime.now())
+    sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
     application: Application = sample.application_version.application
     application.target_reads = 40
     sample.reads = 20

@@ -1,7 +1,8 @@
 from alchy import Query
 from sqlalchemy import and_, or_
 
-from cg.constants.constants import CaseActions
+from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
+from cg.constants.constants import CaseActions, DataDelivery
 from cg.store import models
 
 
@@ -37,11 +38,23 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     )
 
 
+def filter_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
+    """Return cases containing Scout as a data delivery option"""
+    return cases.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
+
+
+def filter_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
+    """Extracts cases with a valid data delivery for delivery report generation"""
+    return cases.filter(models.Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
+
+
 def apply_filter(function: str, pipeline: str, cases: Query):
     """Apply filtering functions and return filtered results"""
     filter_map = {
         "cases_has_sequence": filter_cases_has_sequence,
         "cases_with_pipeline": filter_cases_with_pipeline,
         "filter_cases_for_analysis": filter_cases_for_analysis,
+        "cases_with_scout_data_delivery": filter_cases_with_scout_data_delivery,
+        "filter_report_cases_with_valid_data_delivery": filter_report_supported_data_delivery_cases,
     }
     return filter_map[function](cases=cases, pipeline=pipeline)

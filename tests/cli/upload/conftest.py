@@ -28,6 +28,7 @@ from cg.store import Store, models
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.report import MockMipDNAReportAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -291,7 +292,7 @@ class MockLims:
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = MipDNAReportAPI(cg_context, analysis_api)
+    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,

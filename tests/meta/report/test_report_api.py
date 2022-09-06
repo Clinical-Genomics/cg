@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
 from tests.meta.report.helper import recursive_assert
 
@@ -196,8 +197,6 @@ def test_get_samples_data(
     # GIVEN a mip analysis mock metadata
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
-    # print(mip_metadata)
-
     # WHEN extracting the samples of a specific case
     samples_data = report_api_mip_dna.get_samples_data(case_mip_dna, mip_metadata)[0]
 
@@ -206,7 +205,7 @@ def test_get_samples_data(
     assert samples_data.id == str(expected_sample_data.sample.internal_id)
     assert samples_data.ticket == str(expected_sample_data.sample.original_ticket)
     assert samples_data.status == str(expected_sample_data.status)
-    assert samples_data.gender == str(expected_lims_data.get("sex"))
+    assert samples_data.gender == REPORT_GENDER.get(str(expected_lims_data.get("sex")))
     assert samples_data.source == str(expected_lims_data.get("source"))
     assert samples_data.tumour == "Nej"
     assert samples_data.application
@@ -291,24 +290,15 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
     # GIVEN a mip analysis mock metadata
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
-    # GIVEN an expected data analysis output
-    expected_case_analysis_data = {
-        "customer_pipeline": "mip-dna",
-        "pipeline": "mip-dna",
-        "pipeline_version": "1.0",
-        "type": "wgs",
-        "genome_build": "hg19",
-        "variant_callers": "N/A",
-        "panels": "IEM, EP",
-    }
-
     # WHEN retrieving analysis information
     case_analysis_data = report_api_mip_dna.get_case_analysis_data(
         case_mip_dna, case_mip_dna.analyses[0], mip_metadata
     )
 
     # THEN check if the retrieved analysis data is correct
-    assert case_analysis_data == expected_case_analysis_data
+    assert case_analysis_data.pipeline == "mip-dna"
+    assert case_analysis_data.panels == "IEM, EP"
+    assert case_analysis_data.scout_files
 
 
 def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timestamp_yesterday):
@@ -322,8 +312,6 @@ def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timest
         "received_at": str((datetime.now() - timedelta(days=2)).date()),
         "prepared_at": str(timestamp_yesterday.date()),
         "sequenced_at": str(timestamp_yesterday.date()),
-        "delivered_at": str((datetime.now()).date()),
-        "processing_days": "2",
     }
 
     # WHEN extracting the timestamp data associated to a specific sample
@@ -333,32 +321,3 @@ def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timest
 
     # THEN check if the dates are correctly retrieved
     assert sample_timestamp_data == expected_case_samples_data
-
-
-def test_get_processing_days(report_api_mip_dna, sample_store, helpers):
-    """Tests processing dates calculation"""
-
-    # GIVEN a specific sample received 5 days ago
-    sample = helpers.add_sample(sample_store)
-    sample.received_at = datetime.now() - timedelta(days=5)
-    sample.delivered_at = datetime.now()
-
-    # WHEN calling the processing dates calculation method
-    processing_days = report_api_mip_dna.get_processing_days(sample)
-
-    # THEN check if the days to deliver are correctly calculated
-    assert processing_days == 5
-
-
-def test_get_processing_days_none(report_api_mip_dna, sample_store, helpers):
-    """Tests processing dates calculation when a date value is missing"""
-
-    # GIVEN a specific sample without a timestamp value
-    sample = helpers.add_sample(sample_store)
-    sample.received_at = None
-
-    # WHEN calling the processing dates calculation method
-    processing_days = report_api_mip_dna.get_processing_days(sample)
-
-    # THEN check if None is returned
-    assert processing_days is None
