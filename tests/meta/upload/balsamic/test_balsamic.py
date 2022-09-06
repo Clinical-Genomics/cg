@@ -3,10 +3,24 @@
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
-from tests.cli.workflow.balsamic.conftest import *
+from tests.cli.workflow.balsamic.conftest import (
+    fixture_balsamic_context,
+    balsamic_lims,
+    balsamic_housekeeper,
+    balsamic_mock_fastq_files,
+    balsamic_housekeeper_dir,
+    fastq_file_l_1_r_1,
+    fastq_file_l_1_r_2,
+    fastq_file_l_2_r_1,
+    fastq_file_l_2_r_2,
+    fastq_file_l_3_r_1,
+    fastq_file_l_3_r_2,
+    fastq_file_l_4_r_1,
+    fastq_file_l_4_r_2,
+)
 
 
-def test_genotype_check_wgs_normal(balsamic_context):
+def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     """Test a balsamic case with WGS and Normal sample that is genotype compatible"""
     # GIVEN a balsamic case with WGS tag and a normal sample
     internal_id = "balsamic_case_wgs_paired_enough_reads"
@@ -16,30 +30,30 @@ def test_genotype_check_wgs_normal(balsamic_context):
     genotype_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return True, genotype compatible
-    assert genotype_check == True
+    assert True == genotype_check
 
 
-def test_genotype_check_non_wgs_normal(balsamic_context):
+def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     """Test a balsamic case with no WGS sample that is not genotype compatible"""
     # GIVEN a balsamic case with a normal sample but no WGS tag
     internal_id = "balsamic_case_tgs_paired"
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
     # WHEN checking if genotype upload compatible
-    genotype_check = balsamic_context.genotype_check(case_obj)
+    genotype_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return False, not genotype compatible
     assert genotype_check == False
 
 
-def test_genotype_check_only_tumour(balsamic_context):
+def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     """Test a balsamic case with only a tumour sample that is not genotype compatible"""
     # GIVEN a balsamic case with only tumour sample
     internal_id = "balsamic_case_wgs_single"
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
     # WHEN checking if genotype upload compatible
-    genotype_check = balsamic_context.genotype_check(case_obj)
+    genotype_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return False, not genotype compatible
     assert genotype_check == False

@@ -301,6 +301,3 @@ def upload_context(cg_context: CGConfig) -> CGConfig:
     )
 
     return cg_context
-
-
-

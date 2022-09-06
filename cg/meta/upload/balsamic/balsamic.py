@@ -45,5 +45,3 @@ class BalsamicUploadAPI(UploadAPI):
         else:
             LOG.info(f"Balsamic case {case_obj.internal_id} is not compatible for Genotype upload")
             ctx.abort()
-
-
