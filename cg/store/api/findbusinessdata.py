@@ -319,7 +319,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Pool.get(pool_id)
 
     def ready_made_library_expected_reads(self, case_id: str) -> float:
-        """Return the target reads of a ready made library case"""
+        """Return the target reads of a ready made library case."""
         case_obj: models.Family = self.family(case_id)
         application_version = self.ApplicationVersion.query.filter(
             models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
