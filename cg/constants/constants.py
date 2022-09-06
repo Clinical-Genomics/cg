@@ -80,6 +80,7 @@ RNAFUSION_STRANDEDNESS_HEADER = "strandedness"
 
 RNAFUSION_SAMPLESHEET_HEADERS = NFX_SAMPLESHEET_HEADERS.append([RNAFUSION_STRANDEDNESS_HEADER])
 
+
 class FileFormat(StrEnum):
     JSON: str = "json"
     YAML: str = "yaml"
