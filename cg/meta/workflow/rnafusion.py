@@ -104,8 +104,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         with open(config_path, "w", newline='') as outfile:
             writer = csv.DictWriter(outfile, fieldnames=RNAFUSION_SAMPLESHEET_HEADERS)
             writer.writeheader()
-            LOG.info(samplesheet_content.values())
-            writer.writerows(samplesheet_content.values())
+            # LOG.info(samplesheet_content.values())
+            writer.writerows(zip(*samplesheet_content.values()))
 
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
