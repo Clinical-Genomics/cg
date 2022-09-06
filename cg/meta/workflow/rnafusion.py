@@ -87,7 +87,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Build samplesheet headers and lists"""
         samples_full_list: list = []
         strandedness_full_list: list = []
-        for i in range(len(fastq_r1)):
+        for _ in range(len(fastq_r1)):
             samples_full_list.append(case_id)
             strandedness_full_list.append(strandedness)
 
@@ -102,8 +102,21 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def create_samplesheet_csv(self, samplesheet_content: dict, config_path: Path) -> None:
         """Write samplesheet csv file."""
         with open(config_path, "w") as outfile:
-            writer = csv.DictWriter(outfile, fieldnames=RNAFUSION_SAMPLESHEET_HEADERS)
-            writer.writerow(samplesheet_content)
+            writer = csv.DictWriter(outfile)
+            # convert the dictionary keys to a list
+            key_list = list(samplesheet_content.keys())
+
+            # find the length of the key_list
+            limit = len(key_list)
+
+            # the length of the keys corresponds to
+            # no. of. columns.
+            writer.writerow(test.keys())
+
+            # iterate each column and assign the
+            # corresponding values to the column
+            for i in range(limit):
+                writer.writerow([test[x][i] for x in key_list])
 
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
