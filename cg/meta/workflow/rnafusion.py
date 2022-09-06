@@ -103,20 +103,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write samplesheet csv file."""
         with open(config_path, "w") as outfile:
             writer = csv.DictWriter(outfile)
-            # convert the dictionary keys to a list
-            key_list = list(samplesheet_content.keys())
-
-            # find the length of the key_list
-            limit = len(key_list)
-
-            # the length of the keys corresponds to
-            # no. of. columns.
             writer.writerow(samplesheet_content.keys())
-
-            # iterate each column and assign the
-            # corresponding values to the column
-            for i in range(limit):
-                writer.writerow([samplesheet_content[x][i] for x in key_list])
+            writer.writerows(zip(*samplesheet_content.values()))
 
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
