@@ -27,10 +27,10 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
     # WHEN checking if genotype upload compatible
-    genotype_check = UploadGenotypesAPI.genotype_check(case_obj)
+    passed_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return True, genotype compatible
-    assert True == genotype_check
+    assert passed_check
 
 
 def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
@@ -40,10 +40,10 @@ def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
     # WHEN checking if genotype upload compatible
-    genotype_check = UploadGenotypesAPI.genotype_check(case_obj)
+    passed_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return False, not genotype compatible
-    assert genotype_check == False
+    assert not passed_check
 
 
 def test_genotype_check_only_tumour(balsamic_context: CGConfig):
@@ -53,7 +53,7 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
     # WHEN checking if genotype upload compatible
-    genotype_check = UploadGenotypesAPI.genotype_check(case_obj)
+    passed_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return False, not genotype compatible
-    assert genotype_check == False
+    assert not passed_check
