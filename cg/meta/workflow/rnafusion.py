@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 import pandas as pd
 import os
+import operator
 
 from cg.io.controller import WriteFile
 from pydantic import ValidationError
@@ -67,32 +68,37 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Make the case folder where rnafusion analysis should be located."""
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
+    def extract_read_files(self, read_nb: int, metadata: list) -> list:
+        sorted_metadata: list = sorted(metadata, key=operator.itemgetter('path'))
+        return [d["path"] for d in sorted_metadata if d["read"] == read_nb]
+
+
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
-            LOG.info(link.sample)
-            LOG.info(self.gather_file_metadata_for_sample(link.sample))
-            read_files_dataframe: pd.DataFrame = pd.DataFrame(
-                self.gather_file_metadata_for_sample(link.sample)
-            )
-            read_files_dataframe = read_files_dataframe.sort_values(by=["path"])
-            fastq_r1: list = read_files_dataframe[read_files_dataframe["read"] == 1][
-                "path"
-            ].to_list()
-            fastq_r2: list = read_files_dataframe[read_files_dataframe["read"] == 2][
-                "path"
-            ].to_list()
-            samplesheet: pd.DataFrame = pd.DataFrame(
-                list(zip(fastq_r1, fastq_r2)), columns=["fastq_1", "fastq_2"]
-            )
-            samplesheet["sample"] = case_id
-            samplesheet["strandedness"] = strandedness
-            filename: Path = self.get_case_config_path(case_id)
-            LOG.info("Writing samplesheet for case " + case_id + " to " + str(filename))
-            samplesheet.to_csv(
-                filename, index=False, columns=["sample", "fastq_1", "fastq_2", "strandedness"]
-            )
+            sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
+            fastq_r1: list = self.extract_read_files(1, sample_metadata)
+            fastq_r2: list = self.extract_read_files(2, sample_metadata)
+            LOG.info(fastq_r1)
+            LOG.info(fastq_r2)
+            # read_files_dataframe = read_files_dataframe.sort_values(by=["path"])
+            # fastq_r1: list = read_files_dataframe[read_files_dataframe["read"] == 1][
+            #     "path"
+            # ].to_list()
+            # fastq_r2: list = read_files_dataframe[read_files_dataframe["read"] == 2][
+            #     "path"
+            # ].to_list()
+            # samplesheet: pd.DataFrame = pd.DataFrame(
+            #     list(zip(fastq_r1, fastq_r2)), columns=["fastq_1", "fastq_2"]
+            # )
+            # samplesheet["sample"] = case_id
+            # samplesheet["strandedness"] = strandedness
+            # filename: Path = self.get_case_config_path(case_id)
+            # LOG.info("Writing samplesheet for case " + case_id + " to " + str(filename))
+            # samplesheet.to_csv(
+            #     filename, index=False, columns=["sample", "fastq_1", "fastq_2", "strandedness"]
+            # )
 
     def get_log_path(self, case_id: str, log: Path = None) -> Path:
         if log:
