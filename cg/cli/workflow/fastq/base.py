@@ -19,7 +19,6 @@ def fastq(context: click.Context):
     AnalysisAPI.get_help(context)
 
 
-
 @fastq.command("store")
 @DRY_RUN
 @ARGUMENT_CASE_ID
