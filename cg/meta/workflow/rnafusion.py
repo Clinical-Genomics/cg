@@ -101,7 +101,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def create_samplesheet_csv(self, samplesheet_content: dict, config_path: Path) -> None:
         """Write samplesheet csv file."""
-        with open("test.csv", "w") as outfile:
+        with open(config_path, "w") as outfile:
             outfile.write(",".join((RNAFUSION_SAMPLESHEET_HEADERS)))
             for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
                 outfile.write("\n")
