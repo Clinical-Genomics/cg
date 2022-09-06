@@ -101,11 +101,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def create_samplesheet_csv(self, samplesheet_content: dict, config_path: Path) -> None:
         """Write samplesheet csv file."""
-        with open(config_path, "w", newline='') as outfile:
-            writer = csv.DictWriter(outfile, fieldnames=RNAFUSION_SAMPLESHEET_HEADERS)
-            writer.writeheader()
-            # LOG.info(samplesheet_content.values())
-            writer.writerows(zip(*samplesheet_content.values()))
+        with open('test.csv', "w") as outfile:
+            outfile.write(','.join((RNAFUSION_SAMPLESHEET_HEADERS)))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write('\n')
+                outfile.write(','.join([samplesheet_content[k][i] for k in RNAFUSION_SAMPLESHEET_HEADERS]))
 
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
