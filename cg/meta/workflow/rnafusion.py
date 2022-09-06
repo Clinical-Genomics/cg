@@ -112,7 +112,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: list = self.extract_read_files(1, sample_metadata)
             fastq_r2: list = self.extract_read_files(2, sample_metadata)
-            samplesheet_content: list = self.build_samplesheet_content(
+            samplesheet_content: dict = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2, strandedness
             )
             LOG.info(samplesheet_content)

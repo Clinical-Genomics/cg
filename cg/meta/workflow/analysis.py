@@ -48,6 +48,7 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    @staticmethod
     def get_help(context):
         """
         If no argument is passed, print help text
