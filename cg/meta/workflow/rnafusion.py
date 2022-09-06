@@ -103,7 +103,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write samplesheet csv file."""
         with open(config_path, "w", newline='') as outfile:
             writer = csv.DictWriter(outfile, fieldnames=RNAFUSION_SAMPLESHEET_HEADERS)
-            writer.writerows(samplesheet_content.keys())
+            writer.writeheader()
             LOG.info(samplesheet_content.values())
             writer.writerows(samplesheet_content.values())
 
