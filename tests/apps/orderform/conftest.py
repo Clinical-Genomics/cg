@@ -203,14 +203,6 @@ def rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
 
 
 @pytest.fixture(scope="session")
-def fluffy_order_to_submit(orderforms: Path) -> dict:
-    """Load an example fluffy order"""
-    return ReadFile.get_content_from_file(
-        file_format=FileFormat.JSON, file_path=Path(orderforms, "NIPT-json.json")
-    )
-
-
-@pytest.fixture(scope="session")
 def metagenome_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example metagenome order"""
     return ReadFile.get_content_from_file(
@@ -318,14 +310,22 @@ def fixture_balsamic_uploaded_json_order(orderforms: Path) -> str:
     )
 
 
+@pytest.fixture(scope="session")
+def fluffy_uploaded_json_order(orderforms: Path) -> dict:
+    """Load an example fluffy order"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(orderforms, "NIPT-json.json")
+    )
+
+
 @pytest.fixture(scope="session", name="json_order_list")
 def fixture_valid_json_order_list(
     mip_uploaded_json_order,
-    fluffy_order_to_submit,
+    fluffy_uploaded_json_order,
     balsamic_uploaded_json_order,
 ) -> Dict[str, dict]:
     return {
         OrderType.MIP_DNA: mip_uploaded_json_order,
-        OrderType.FLUFFY: fluffy_order_to_submit,
+        OrderType.FLUFFY: fluffy_uploaded_json_order,
         OrderType.BALSAMIC: balsamic_uploaded_json_order,
     }

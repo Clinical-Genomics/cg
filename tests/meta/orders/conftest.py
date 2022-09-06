@@ -114,10 +114,10 @@ def rml_status_data(rml_order_to_submit):
 
 
 @pytest.fixture
-def fluffy_status_data(fluffy_order_to_submit):
+def fluffy_status_data(fluffy_uploaded_json_order):
     """Parse fluffy order example."""
     project: OrderType = OrderType.FLUFFY
-    order: OrderIn = OrderIn.parse_obj(obj=fluffy_order_to_submit, project=project)
+    order: OrderIn = OrderIn.parse_obj(obj=fluffy_uploaded_json_order, project=project)
     return FluffySubmitter.order_to_status(order=order)
 
 
