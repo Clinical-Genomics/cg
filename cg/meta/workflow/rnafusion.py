@@ -111,12 +111,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
             # the length of the keys corresponds to
             # no. of. columns.
-            writer.writerow(test.keys())
+            writer.writerow(samplesheet_content.keys())
 
             # iterate each column and assign the
             # corresponding values to the column
             for i in range(limit):
-                writer.writerow([test[x][i] for x in key_list])
+                writer.writerow([samplesheet_content[x][i] for x in key_list])
 
     def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
