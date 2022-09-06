@@ -4,9 +4,11 @@ import logging
 from typing import List
 
 import click
+
+from cg.cli.generate.report.base import delivery_report
 from cg.cli.upload.scout import scout
 from cg.cli.upload.genotype import genotypes
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
@@ -28,11 +30,15 @@ class BalsamicUploadAPI(UploadAPI):
 
         analysis_obj: models.Analysis = case_obj.analyses[0]
 
+        self.update_upload_started_at(analysis_obj)
+
+        # Delivery report generation
+        if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
+            ctx.invoke(delivery_report, case_id=case_obj.internal_id)
+
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
-            self.update_upload_started_at(analysis_obj)
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
-            self.update_uploaded_at(analysis_obj)
         else:
             LOG.warning(
                 f"There is nothing to upload to Scout for case {case_obj.internal_id} and "
@@ -45,3 +51,6 @@ class BalsamicUploadAPI(UploadAPI):
         else:
             LOG.info(f"Balsamic case {case_obj.internal_id} is not compatible for Genotype upload")
             ctx.abort()
+
+        self.update_uploaded_at(analysis_obj)
+

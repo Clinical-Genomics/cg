@@ -1,5 +1,6 @@
 """Fixtures for cli balsamic tests"""
-import json
+from typing import Union
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -11,8 +12,10 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS, PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.constants import FileFormat
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.rsync import RsyncAPI
@@ -26,6 +29,8 @@ from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.cli.workflow.balsamic.conftest import *
+from tests.mocks.report import MockMipDNAReportAPI
+
 
 LOG = logging.getLogger(__name__)
 
@@ -273,12 +278,15 @@ class MockLims:
         self.lims = self
 
     @staticmethod
-    def lims_samples():
+    def lims_samples() -> dict:
         """Return LIMS-like case samples"""
-        lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
-        return lims_family["samples"]
+        lims_case: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON,
+            file_path=Path("tests", "fixtures", "report", "lims_family.json"),
+        )
+        return lims_case["samples"]
 
-    def sample(self, sample_id):
+    def sample(self, sample_id) -> Union[str, None]:
         """Returns a lims sample matching the provided sample_id"""
         for sample in self.lims_samples():
             if sample["id"] == sample_id:
@@ -290,7 +298,7 @@ class MockLims:
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = MipDNAReportAPI(cg_context, analysis_api)
+    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,

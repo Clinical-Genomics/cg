@@ -2,6 +2,13 @@
 import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
+from cg.utils.date import get_date
+
+
+VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
+
+MAX_ITEMS_TO_RETRIEVE = 50
+
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
 CAPTUREKIT_CANCER_OPTIONS = (
@@ -59,6 +66,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    JSON: str = "json"
     YAML: str = "yaml"
 
 

@@ -1,6 +1,5 @@
 """Fixtures for the upload scout api tests"""
 
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -8,6 +7,8 @@ from typing import List
 
 import pytest
 from cg.constants import Pipeline, DataDelivery
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -186,9 +187,11 @@ def fixture_rna_store(
 
 
 @pytest.fixture(name="lims_family")
-def fixture_lims_family() -> dict:
+def fixture_lims_family(fixtures_dir) -> dict:
     """Returns a lims-like case of samples"""
-    return json.load(open("tests/fixtures/report/lims_family.json"))
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+    )
 
 
 @pytest.fixture(name="lims_samples")

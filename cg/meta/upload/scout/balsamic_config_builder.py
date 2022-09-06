@@ -45,12 +45,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
-    def include_delivery_report(self) -> None:
-        LOG.info("Include coverage qc report to case")
-        self.load_config.coverage_qc_report = self.fetch_file_from_hk(
-            self.case_tags.delivery_report
-        )
-
     def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
         """Build a sample with balsamic specific information"""
         config_sample = ScoutBalsamicIndividual()

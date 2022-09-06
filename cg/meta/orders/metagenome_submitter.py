@@ -41,7 +41,7 @@ class MetagenomeSubmitter(Submitter):
             customer=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=int(order.ticket),
+            ticket=order.ticket,
             items=status_data["families"],
         )
         self._add_missing_reads(new_samples)
@@ -78,7 +78,7 @@ class MetagenomeSubmitter(Submitter):
         customer: str,
         order: str,
         ordered: dt.datetime,
-        ticket: int,
+        ticket: str,
         items: List[dict],
     ) -> List[models.Sample]:
         """Store samples in the status database."""
@@ -91,15 +91,15 @@ class MetagenomeSubmitter(Submitter):
         with self.status.session.no_autoflush:
             for sample in case["samples"]:
                 new_sample = self.status.add_sample(
+                    name=sample["name"],
+                    sex="unknown",
                     comment=sample["comment"],
                     control=sample["control"],
                     internal_id=sample.get("internal_id"),
-                    name=sample["name"],
                     order=order,
                     ordered=ordered,
+                    original_ticket=ticket,
                     priority=sample["priority"],
-                    sex="unknown",
-                    ticket=ticket,
                 )
                 new_sample.customer = customer_obj
                 application_tag = sample["application"]
@@ -116,6 +116,7 @@ class MetagenomeSubmitter(Submitter):
                         name=str(ticket),
                         panels=None,
                         priority=case["priority"],
+                        ticket=ticket,
                     )
                     case_obj.customer = customer_obj
                     self.status.add(case_obj)
