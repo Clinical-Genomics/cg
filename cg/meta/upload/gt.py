@@ -1,12 +1,13 @@
 import logging
 from pathlib import Path
+from typing import List
 
 from cgmodels.cg.constants import Pipeline
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.tags import HkMipAnalysisTag
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile
@@ -131,12 +132,11 @@ class UploadGenotypesAPI(object):
     def genotype_check(case_obj: models.Family) -> bool:
         """Check if balsamic case is contains WGS and normal sample"""
 
-        samples = [link.sample for link in case_obj.links]
+        samples: List[models.Sample] = case_obj.get_samples_in_case
         for sample in samples:
-            # check if normal sample
+            sample_prep_category: str = sample.application_version.application.prep_category
             if not sample.is_tumour:
-                # Check if WGS sample
-                if "wgs" == sample.application_version.application.prep_category:
+                if PrepCategory.WHOLE_GENOME_SEQUENCING == sample_prep_category:
                     return True
 
         return False
