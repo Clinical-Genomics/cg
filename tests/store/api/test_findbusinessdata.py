@@ -167,7 +167,7 @@ def test_get_case_pool(case_id: str, rml_pool_store: Store):
 
 
 def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
-    """Test if the correct number of expected reads is returned"""
+    """Test if the correct number of expected reads is returned."""
 
     # GIVEN a case with a sample with an application version
     application_version: models.ApplicationVersion = (
