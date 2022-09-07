@@ -53,4 +53,3 @@ class BalsamicUploadAPI(UploadAPI):
             ctx.abort()
 
         self.update_uploaded_at(analysis_obj)
-
