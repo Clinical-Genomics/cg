@@ -312,6 +312,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Read deliverables file template and return content."""
         return pd.read_csv(rnafusion_bundle_template)
 
+    def replace_in_dataframe(self, dataframe: pd.DataFrame, replace_map: dict[str, str]) -> pd.DataFrame:
+        for str_to_replace, with_value in replace_map.item():
+            dataframe = deliverables_template.replace(
+                str_to_replace, with_value, regex=True
+            )
+
     def parse_template_deliverables_file(
         self, case_id: str, deliverables_template: pd.DataFrame
     ) -> pd.DataFrame:
@@ -322,10 +328,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             "CASEID": case_id,
         }
 
-        for str_to_replace, with_value in replace_map.item():
-            deliverables_template = deliverables_template.replace(
-                str_to_replace, with_value, regex=True
-            )
+        deliverables_template = self.replace_in_dataframe(deliverables_template, replace_map)
 
         deliverables_template["path_index"] = "~"
         return deliverables_template
