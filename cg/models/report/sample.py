@@ -25,7 +25,6 @@ class ApplicationModel(BaseModel):
         limitations: application limitations; source: StatusDB/application/limitations
         accredited: if the sample associated process is accredited or not; source: StatusDB/application/is_accredited
         external: whether the app tag is external or not; source: StatusDB/application/is_external
-
     """
 
     tag: Optional[str]
