@@ -44,7 +44,6 @@ class BalsamicUploadAPI(UploadAPI):
                 f"the specified data delivery ({case_obj.data_delivery})"
             )
 
-        # Genotype specific upload
         if UploadGenotypesAPI.genotype_check(case_obj):
             ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
         else:
