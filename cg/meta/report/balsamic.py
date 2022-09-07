@@ -49,7 +49,11 @@ class BalsamicReportAPI(ReportAPI):
         """Fetches the sample metadata to include in the report"""
 
         sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
-        million_read_pairs = round(sample.reads / 2000000, 1) if sample.reads else None
+        million_read_pairs = (
+            round(sample.reads / 2000000, 1)
+            if sample.reads or isinstance(sample.reads, int)
+            else None
+        )
 
         if "wgs" in self.get_data_analysis_type(case):
             return self.get_wgs_metadata(million_read_pairs, sample_metrics)
