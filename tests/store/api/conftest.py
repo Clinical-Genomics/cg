@@ -181,7 +181,15 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="rml_pool_store")
-def fixture_rml_pool_store(case_id: str, customer_id: str, helpers, sample_id: str, store: Store, ticket: str):
+def fixture_rml_pool_store(
+    case_id: str,
+    customer_id: str,
+    helpers,
+    sample_id: str,
+    store: Store,
+    ticket: str,
+    timestamp_now: dt.datetime,
+):
     new_customer = store.add_customer(
         internal_id=customer_id,
         name="Test customer",
@@ -205,7 +213,7 @@ def fixture_rml_pool_store(case_id: str, customer_id: str, helpers, sample_id: s
     app_version = store.add_version(
         application=application,
         version=1,
-        valid_from=dt.datetime.now(),
+        valid_from=timestamp_now,
         prices={
             PriorityTerms.STANDARD: 12,
             PriorityTerms.PRIORITY: 222,
@@ -257,6 +265,7 @@ def fixture_re_sequenced_sample_store(
     flowcell_name,
     sample_id: str,
     ticket: str,
+    timestamp_now: dt.datetime,
     helpers,
 ) -> Store:
     """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells"""
@@ -275,14 +284,16 @@ def fixture_re_sequenced_sample_store(
         reads=1200000000,
         store=re_sequenced_sample_store,
         original_ticket=ticket,
-        sequenced_at=dt.datetime.now(),
+        sequenced_at=timestamp_now,
     )
 
-    now = dt.datetime.now()
-    one_day_ahead_of_now = now + dt.timedelta(days=1)
+    one_day_ahead_of_now = timestamp_now + dt.timedelta(days=1)
 
     helpers.add_flowcell(
-        store=re_sequenced_sample_store, flowcell_id="HF57HDRXY", samples=[store_sample], date=now
+        store=re_sequenced_sample_store,
+        flowcell_id="HF57HDRXY",
+        samples=[store_sample],
+        date=timestamp_now,
     )
 
     helpers.add_flowcell(

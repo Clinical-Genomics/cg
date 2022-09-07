@@ -65,7 +65,7 @@ def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker):
     assert is_upload_needed is False
 
 
-def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_today):
+def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_now):
     """Test to generate the date tag"""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
@@ -78,7 +78,7 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_toda
         data_analysis=Pipeline.SARS_COV_2,
     )
 
-    case.ordered_at = timestamp_today
+    case.ordered_at = timestamp_now
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case]
@@ -87,7 +87,7 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_toda
     date = deliver_ticket_api.generate_date_tag(ticket="123456")
 
     # THEN check that a date was returned
-    assert str(timestamp_today) == str(date)
+    assert str(timestamp_now) == str(date)
 
 
 def test_sort_files(cg_context: CGConfig):

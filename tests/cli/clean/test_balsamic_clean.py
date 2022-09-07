@@ -37,7 +37,7 @@ def test_run_dir_without_options(cli_runner: CliRunner, clean_context: CGConfig)
 def test_with_yes(
     cli_runner: CliRunner,
     clean_context: CGConfig,
-    timestamp_today: dt.datetime,
+    timestamp_now: dt.datetime,
     helpers: StoreHelpers,
     caplog,
     mocker,
@@ -45,7 +45,7 @@ def test_with_yes(
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
     analysis_api = clean_context.meta_apis["analysis_api"]
-    timestamp_now = timestamp_today
+    timestamp_now = timestamp_now
 
     case_id = "balsamic_case_clean"
     analysis_to_clean = analysis_api.status_db.family(case_id).analyses[0]
@@ -60,7 +60,7 @@ def test_with_yes(
     # THEN the analysis should have been cleaned
     assert result.exit_code == EXIT_SUCCESS
     assert analysis_to_clean.cleaned_at
-    assert analysis_to_clean not in analysis_api.get_analyses_to_clean(before=timestamp_today)
+    assert analysis_to_clean not in analysis_api.get_analyses_to_clean(before=timestamp_now)
     assert not Path(case_path).exists()
 
 
