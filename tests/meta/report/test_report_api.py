@@ -125,6 +125,23 @@ def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog
         assert "accredited" in caplog.text
 
 
+def test_get_validated_report_data_external_sample(report_api_mip_dna, case_mip_dna):
+    """Tests report data retrieval"""
+
+    # GIVEN a delivery report with external sample data
+    report_data = report_api_mip_dna.get_report_data(
+        case_mip_dna.internal_id, case_mip_dna.analyses[0].started_at
+    )
+    report_data.case.samples[0].timestamps.received_at = None
+    report_data.case.samples[0].application.external = True
+
+    # THEN check the generation
+    report_data = report_api_mip_dna.validate_report_fields(
+        case_mip_dna.internal_id, report_data, force_report=False
+    )
+    assert report_data
+
+
 def test_get_customer_data(report_api_mip_dna, case_mip_dna):
     """Checks that the retrieved customer data is the expected one"""
 

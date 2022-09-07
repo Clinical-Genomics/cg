@@ -453,6 +453,7 @@ class ReportAPI(MetaAPI):
         for sample in case.samples:
             if sample.application.external:
                 required_fields.remove("received_at")
+                break
 
         return ReportAPI.get_sample_required_fields(case, required_fields)
 
