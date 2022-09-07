@@ -1,13 +1,11 @@
 """Test module cg.cli.upload.nipt"""
 import datetime
-import json
 import logging
 
 from click.testing import CliRunner
 
 from cg.cli.upload.nipt.base import nipt_upload_all, nipt_upload_case
 from cg.meta.upload.nipt import NiptUploadAPI
-from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
 

@@ -3,12 +3,11 @@
 """
 import copy
 import datetime as dt
-import json
 import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Dict, List
 
 import pytest
 
@@ -16,7 +15,9 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
+from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
@@ -287,25 +288,31 @@ def fixture_os_ticket(ticket: str) -> MockOsTicket:
 @pytest.fixture(scope="session", name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:
     """Return the path to the fixtures dir"""
-    return Path("tests/fixtures")
+    return Path("tests", "fixtures")
 
 
 @pytest.fixture(name="analysis_dir")
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir"""
-    return fixtures_dir / "analysis"
+    return Path(fixtures_dir, "analysis")
 
 
 @pytest.fixture(name="apps_dir")
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir"""
-    return fixtures_dir / "apps"
+    return Path(fixtures_dir, "apps")
+
+
+@pytest.fixture(name="cgweb_orders_dir")
+def fixture_cgweb_orders_dir(fixtures_dir: Path) -> Path:
+    """Return the path to the cgweb_orders dir"""
+    return Path(fixtures_dir, "cgweb_orders")
 
 
 @pytest.fixture(name="fastq_dir")
 def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
     """Return the path to the fastq files dir"""
-    return demultiplexed_runs / "fastq"
+    return Path(demultiplexed_runs, "fastq")
 
 
 @pytest.fixture(scope="function", name="project_dir")
@@ -318,15 +325,15 @@ def fixture_project_dir(
 
 
 @pytest.fixture(scope="function")
-def tmp_file(project_dir):
-    """Get a temp file"""
-    return project_dir / "test"
+def tmp_file(project_dir) -> Path:
+    """Return a temp file path"""
+    return Path(project_dir, "test")
 
 
 @pytest.fixture(name="non_existing_file_path")
 def fixture_non_existing_file_path(project_dir: Path) -> Path:
     """Return the path to a non existing file"""
-    return project_dir / "a_file.txt"
+    return Path(project_dir, "a_file.txt")
 
 
 @pytest.fixture(name="content")
@@ -352,87 +359,86 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
 
 @pytest.fixture(scope="session", name="orderforms")
 def fixture_orderform(fixtures_dir: Path) -> Path:
-    """Return the path to the directory with orderforms"""
-    return fixtures_dir / "orderforms"
-
-
-@pytest.fixture(name="case_qc_sample_info_path")
-def fixture_case_qc_sample_info_path(fixtures_dir) -> Path:
-    """Return path to case_qc_sample_info.yaml"""
-    return Path(fixtures_dir, "apps", "mip", "dna", "store", "case_qc_sample_info.yaml")
-
-
-@pytest.fixture(name="case_qc_metrics_deliverables")
-def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics deliverables file with case data"""
-    return Path("tests", "fixtures", "apps", "mip", "case_metrics_deliverables.yaml")
-
-
-@pytest.fixture(name="delivery_report_html")
-def fixture_delivery_report_html(apps_dir: Path) -> Path:
-    """Return the path to a qc metrics deliverables file with case data"""
-    return Path("tests", "fixtures", "apps", "mip", "dna", "store", "empty_delivery_report.html")
+    """Return the path to the directory with order forms"""
+    return Path(fixtures_dir, "orderforms")
 
 
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files"""
-    return apps_dir / "mip" / "dna" / "store"
+    return Path(apps_dir, "mip", "dna", "store")
 
 
-@pytest.fixture(name="mip_analysis_dir")
-def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
-    """Return the path to the directory with mip analysis files"""
-    return analysis_dir / "mip"
+@pytest.fixture(name="case_qc_sample_info_path")
+def fixture_case_qc_sample_info_path(mip_dna_store_files: Path) -> Path:
+    """Return path to case_qc_sample_info.yaml"""
+    return Path(mip_dna_store_files, "case_qc_sample_info.yaml")
 
 
-@pytest.fixture(name="balsamic_analysis_dir")
-def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
-    """Return the path to the directory with balsamic analysis files"""
-    return analysis_dir / "balsamic"
-
-
-@pytest.fixture(name="balsamic_wgs_analysis_dir")
-def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
-    """Return the path to the directory with balsamic analysis files"""
-    return balsamic_analysis_dir / "tn_wgs"
-
-
-@pytest.fixture(name="mip_dna_analysis_dir")
-def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
-    """Return the path to the directory with mip dna analysis files"""
-    return mip_analysis_dir / "dna"
-
-
-@pytest.fixture(name="sample1_cram")
-def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
-    """Return the path to the cram file for sample 1"""
-    return mip_dna_analysis_dir / "adm1.cram"
+@pytest.fixture(name="delivery_report_html")
+def fixture_delivery_report_html(mip_dna_store_files: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path(mip_dna_store_files, "empty_delivery_report.html")
 
 
 @pytest.fixture(name="mip_deliverables_file")
 def fixture_mip_deliverables_files(mip_dna_store_files: Path) -> Path:
     """Fixture for general deliverables file in mip"""
-    return mip_dna_store_files / "case_id_deliverables.yaml"
+    return Path(mip_dna_store_files, "case_id_deliverables.yaml")
+
+
+@pytest.fixture(name="case_qc_metrics_deliverables")
+def fixture_case_qc_metrics_deliverables(apps_dir: Path) -> Path:
+    """Return the path to a qc metrics deliverables file with case data"""
+    return Path(apps_dir, "mip", "case_metrics_deliverables.yaml")
+
+
+@pytest.fixture(name="mip_analysis_dir")
+def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with mip analysis files"""
+    return Path(analysis_dir, "mip")
+
+
+@pytest.fixture(name="balsamic_analysis_dir")
+def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with balsamic analysis files"""
+    return Path(analysis_dir, "balsamic")
+
+
+@pytest.fixture(name="balsamic_wgs_analysis_dir")
+def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
+    """Return the path to the directory with balsamic analysis files"""
+    return Path(balsamic_analysis_dir, "tn_wgs")
+
+
+@pytest.fixture(name="mip_dna_analysis_dir")
+def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
+    """Return the path to the directory with mip dna analysis files"""
+    return Path(mip_analysis_dir, "dna")
+
+
+@pytest.fixture(name="sample1_cram")
+def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for sample 1"""
+    return Path(mip_dna_analysis_dir, "adm1.cram")
 
 
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
     """Return the path to to a vcf file"""
-    return mip_dna_store_files / "yellowhog_clinical_selected.vcf"
+    return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
 
 
 @pytest.fixture(name="fastq_file")
 def fixture_fastq_file(fastq_dir: Path) -> Path:
     """Return the path to to a fastq file"""
-    return fastq_dir / "dummy_run_R1_001.fastq.gz"
+    return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
 
 
 @pytest.fixture(name="madeline_output")
 def fixture_madeline_output(apps_dir: Path) -> str:
-    """File with madeline output"""
-    _file = apps_dir / "madeline/madeline.xml"
-    return str(_file)
+    """Return str of path for file with Madeline output"""
+    return Path(apps_dir, "madeline", "madeline.xml").as_posix()
 
 
 # Compression fixtures
@@ -462,9 +468,13 @@ def fixture_compression_object(
     fastq_stub: Path, original_fastq_data: CompressionData
 ) -> CompressionData:
     """Creates compression data object with information about files used in fastq compression"""
-    working_files = CompressionData(fastq_stub)
-    shutil.copy(str(original_fastq_data.fastq_first), str(working_files.fastq_first))
-    shutil.copy(str(original_fastq_data.fastq_second), str(working_files.fastq_second))
+    working_files: CompressionData = CompressionData(fastq_stub)
+    working_file_map: Dict[str, str] = {
+        original_fastq_data.fastq_first.as_posix(): working_files.fastq_first.as_posix(),
+        original_fastq_data.fastq_second.as_posix(): working_files.fastq_second.as_posix(),
+    }
+    for original_file, working_file in working_file_map.items():
+        shutil.copy(original_file, working_file)
     return working_files
 
 
@@ -474,18 +484,38 @@ def fixture_compression_object(
 @pytest.fixture(name="demultiplex_fixtures")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixtures"""
-    return apps_dir / "demultiplexing"
+    return Path(apps_dir, "demultiplexing")
 
 
 @pytest.fixture(name="demultiplexed_runs")
 def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return demultiplex_fixtures / "demultiplexed-runs"
+    return Path(demultiplex_fixtures, "demultiplexed-runs")
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a novaseq bcl2fastq sample sheet"""
-    return demultiplex_fixtures / "SampleSheetS2_Dragen.csv"
+    return Path(demultiplex_fixtures, "SampleSheetS2_Dragen.csv")
+
+
+@pytest.fixture(name="raw_lims_sample_dir")
+def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the raw samples fixtures"""
+    return Path(demultiplex_fixtures, "raw_lims_samples")
+
+
+@pytest.fixture(name="lims_novaseq_samples_file")
+def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
+    """Return the path to a file with sample info in lims format"""
+    return Path(raw_lims_sample_dir, "raw_samplesheet_novaseq.json")
+
+
+@pytest.fixture(name="lims_novaseq_samples_raw")
+def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
+    """Return a list of raw flowcell samples"""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
+    )
 
 
 @pytest.fixture(name="flowcell_full_name")
@@ -537,6 +567,12 @@ def fixture_root_path(project_dir: Path) -> Path:
     _root_path = project_dir / "bundles"
     _root_path.mkdir(parents=True, exist_ok=True)
     return _root_path
+
+
+@pytest.fixture(scope="function", name="old_timestamp")
+def fixture_old_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format"""
+    return dt.datetime(1900, 1, 1)
 
 
 @pytest.fixture(scope="function", name="timestamp")

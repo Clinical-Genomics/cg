@@ -1,4 +1,4 @@
-"""Tests enabled workflows for the generate command"""
+"""Tests enabled commands for the generate command"""
 
 from cg.constants import EXIT_SUCCESS
 
@@ -15,5 +15,5 @@ def test_generate_no_options(base_context, cli_runner):
 
     # THEN the output should list all the supported pipelines
     assert result.exit_code == EXIT_SUCCESS
-    assert "mip-dna" in result.output
-    assert "balsamic" in result.output
+    assert "delivery-report" in result.output
+    assert "available-delivery-reports" in result.output

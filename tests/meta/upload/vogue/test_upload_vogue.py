@@ -1,9 +1,9 @@
 """Test for UploadVogueAPI"""
 
-import json
-
 import mock
 
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadStream
 from cg.meta.upload.vogue import UploadVogueAPI
 
 
@@ -24,7 +24,9 @@ def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
     upload_vogue_api.load_genotype(days="1")
 
     # THEN vogueapi.load_genotype will be called once for each sample in genotype_return_value
-    samples = json.loads(genotype_return["sample"])
+    samples = ReadStream.get_content_from_stream(
+        file_format=FileFormat.JSON, stream=genotype_return["sample"]
+    )
     call_list = vogue_api.load_genotype_data.call_args_list
 
     assert vogue_api.load_genotype_data.call_count == 4
