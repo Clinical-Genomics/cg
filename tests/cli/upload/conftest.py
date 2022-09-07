@@ -28,7 +28,6 @@ from cg.store import Store, models
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.cli.workflow.balsamic.conftest import *
 from tests.mocks.report import MockMipDNAReportAPI
 
 
