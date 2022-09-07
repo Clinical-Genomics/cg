@@ -48,6 +48,5 @@ class BalsamicUploadAPI(UploadAPI):
             ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
         else:
             LOG.info(f"Balsamic case {case_obj.internal_id} is not compatible for Genotype upload")
-            ctx.abort()
 
         self.update_uploaded_at(analysis_obj)
