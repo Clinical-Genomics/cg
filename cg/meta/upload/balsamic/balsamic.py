@@ -1,7 +1,6 @@
 """Balsamic upload API"""
 
 import logging
-from typing import List
 
 import click
 

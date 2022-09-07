@@ -230,10 +230,6 @@ class MockAnalysisApi(MipAnalysisAPI):
         return {}
 
 
-class MockScoutLoadConfig(ScoutLoadConfig):
-    pass
-
-
 class MockScoutUploadApi(UploadScoutAPI):
     def __init__(self, **kwargs):
         """docstring for __init__"""
