@@ -5,6 +5,7 @@ from typing import List, Optional, Set
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query, load_only
 from cg.constants.constants import PrepCategory
+from cg.constants.indexes import ListIndexes
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -66,6 +67,14 @@ class FindBusinessDataHandler(BaseHandler):
             return True
         return False
 
+    def application_by_case(self, case_id: str) -> models.Application:
+        """Fetch the application of a case."""
+        return (
+            self.family(case_id)
+            .links[ListIndexes.FIRST.value]
+            .sample.application_version.application
+        )
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -81,13 +90,6 @@ class FindBusinessDataHandler(BaseHandler):
             records = records.filter(models.Analysis.completed_at < completed_before)
 
         return records
-
-    def application_version_by_case(self, case_id: str) -> models.ApplicationVersion:
-        """Fetch the application version for a case."""
-        return self.ApplicationVersion.query.filter(
-            models.ApplicationVersion.id
-            == self.family(case_id).links[0].sample.application_version_id
-        ).first()
 
     def latest_analyses(self) -> Query:
         """Fetch latest analysis for all cases."""
@@ -327,14 +329,14 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case"""
-        application_version = self.application_version_by_case(case_id=case_id)
-        if application_version.application.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
+        application = self.application_by_case(case_id)
+        if application.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
             raise ValueError(
-                f"{case_id} not a ready made library case, found prep category: "
-                f"{application_version.applcation.prep_category}"
+                f"{case_id} is not a ready made library, found prep category: "
+                f"{application.prep_category}"
             )
 
-        return application_version.application.expected_reads
+        return application.expected_reads
 
     def sample(self, internal_id: str) -> models.Sample:
         """Fetch a sample by lims id."""
