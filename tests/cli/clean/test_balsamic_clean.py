@@ -45,7 +45,6 @@ def test_with_yes(
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
     analysis_api = clean_context.meta_apis["analysis_api"]
-    timestamp_now = timestamp_now
 
     case_id = "balsamic_case_clean"
     analysis_to_clean = analysis_api.status_db.family(case_id).analyses[0]
