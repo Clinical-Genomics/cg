@@ -23,7 +23,8 @@ class ApplicationModel(BaseModel):
         prep_category: library preparation category; source: StatusDB/application/prep_category
         description: analysis description; source: StatusDB/application/description
         limitations: application limitations; source: StatusDB/application/limitations
-        accredited: if the sample associated process is accredited or not; ; source: StatusDB/application/is_accredited
+        accredited: if the sample associated process is accredited or not; source: StatusDB/application/is_accredited
+        external: whether the app tag is external or not; source: StatusDB/application/is_external
 
     """
 
@@ -33,6 +34,7 @@ class ApplicationModel(BaseModel):
     description: Optional[str]
     limitations: Optional[str]
     accredited: Optional[bool]
+    external: Optional[bool]
 
     _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
     _values = validator(

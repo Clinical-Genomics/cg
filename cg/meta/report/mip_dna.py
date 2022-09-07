@@ -120,7 +120,9 @@ class MipDNAReportAPI(ReportAPI):
             "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
             "samples": self.get_sample_required_fields(case, REQUIRED_SAMPLE_MIP_DNA_FIELDS),
             "methods": self.get_sample_required_fields(case, REQUIRED_SAMPLE_METHODS_FIELDS),
-            "timestamps": self.get_sample_required_fields(case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS),
+            "timestamps": self.get_timestamp_required_fields(
+                case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
             "metadata": self.get_sample_metadata_required_fields(case),
         }
 

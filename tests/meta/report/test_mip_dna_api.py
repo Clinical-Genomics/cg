@@ -9,6 +9,7 @@ def test_get_sample_metadata(
     # GIVEN a mock sample and the latest metadata
     sample = helpers.add_sample(sample_store)
     sample.internal_id = "ADM1"
+    sample.reads = None
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # GIVEN the expected output

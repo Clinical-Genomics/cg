@@ -268,8 +268,8 @@ class ReportAPI(MetaAPI):
         case_samples = self.status_db.family_samples(case.internal_id)
 
         for case_sample in case_samples:
-            sample = case_sample.sample
-            lims_sample = self.get_lims_sample(sample.internal_id)
+            sample: models.Sample = case_sample.sample
+            lims_sample: dict = self.get_lims_sample(sample.internal_id)
 
             samples.append(
                 SampleModel(
@@ -303,7 +303,9 @@ class ReportAPI(MetaAPI):
     def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes"""
 
-        application = self.status_db.application(tag=lims_sample.get("application"))
+        application: models.Application = self.status_db.application(
+            tag=lims_sample.get("application")
+        )
 
         return ApplicationModel(
             tag=application.tag,
@@ -312,6 +314,7 @@ class ReportAPI(MetaAPI):
             description=application.description,
             limitations=application.limitations,
             accredited=application.is_accredited,
+            external=application.is_external,
         )
 
     @staticmethod
@@ -442,6 +445,16 @@ class ReportAPI(MetaAPI):
             required_sample_fields.update({sample.id: required_fields})
 
         return required_sample_fields
+
+    @staticmethod
+    def get_timestamp_required_fields(case: CaseModel, required_fields: list) -> dict:
+        """Retrieves sample timestamps required fields"""
+
+        for sample in case.samples:
+            if sample.application.external:
+                required_fields.remove("received_at")
+
+        return ReportAPI.get_sample_required_fields(case, required_fields)
 
     def get_hk_scout_file_tags(self, scout_tag: str) -> Optional[list]:
         """Retrieves pipeline specific uploaded to Scout Housekeeper file tags given a Scout key"""

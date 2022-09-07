@@ -11,4 +11,4 @@ def recursive_assert(data):
             for e in v:
                 recursive_assert(dict(e))
         else:
-            assert v, f"{k} value is missing"
+            assert v or isinstance(v, (int, float, bool)), f"{k} value is missing"
