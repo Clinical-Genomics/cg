@@ -8,7 +8,7 @@ from tests.meta.report.helper import recursive_assert
 
 
 def test_create_delivery_report(report_api_mip_dna, case_mip_dna):
-    """Tests the creation of the rendered delivery report"""
+    """Tests the creation of the rendered delivery report."""
 
     # GIVEN a pre-built case
 
@@ -24,7 +24,7 @@ def test_create_delivery_report(report_api_mip_dna, case_mip_dna):
 
 
 def test_create_delivery_report_file(report_api_mip_dna, case_mip_dna, tmp_path):
-    """Tests file generation containing the delivery report data"""
+    """Tests file generation containing the delivery report data."""
 
     # GIVEN a pre-built case
 
@@ -41,7 +41,7 @@ def test_create_delivery_report_file(report_api_mip_dna, case_mip_dna, tmp_path)
 
 
 def test_render_delivery_report(report_api_mip_dna, case_mip_dna):
-    """Tests delivery report rendering"""
+    """Tests delivery report rendering."""
 
     # GIVEN a generated report
     report_data = report_api_mip_dna.get_report_data(
@@ -57,7 +57,7 @@ def test_render_delivery_report(report_api_mip_dna, case_mip_dna):
 
 
 def test_get_validated_report_data(report_api_mip_dna, case_mip_dna):
-    """Tests report data retrieval"""
+    """Tests report data retrieval."""
 
     # GIVEN a valid case
     assert case_mip_dna
@@ -77,7 +77,7 @@ def test_get_validated_report_data(report_api_mip_dna, case_mip_dna):
 
 
 def test_validate_report_empty_fields(report_api_mip_dna, case_mip_dna, caplog):
-    """Tests the validations of allowed empty report fields"""
+    """Tests the validations of allowed empty report fields."""
 
     caplog.set_level(logging.INFO)
 
@@ -102,7 +102,7 @@ def test_validate_report_empty_fields(report_api_mip_dna, case_mip_dna, caplog):
 
 
 def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog):
-    """Tests the validations of empty required report fields"""
+    """Tests the validations of empty required report fields."""
 
     # GIVEN a delivery report
     report_data = report_api_mip_dna.get_report_data(
@@ -126,7 +126,7 @@ def test_validate_report_missing_fields(report_api_mip_dna, case_mip_dna, caplog
 
 
 def test_get_validated_report_data_external_sample(report_api_mip_dna, case_mip_dna):
-    """Tests report data retrieval"""
+    """Tests report data retrieval."""
 
     # GIVEN a delivery report with external sample data
     report_data = report_api_mip_dna.get_report_data(
@@ -145,7 +145,7 @@ def test_get_validated_report_data_external_sample(report_api_mip_dna, case_mip_
 
 
 def test_get_customer_data(report_api_mip_dna, case_mip_dna):
-    """Checks that the retrieved customer data is the expected one"""
+    """Checks that the retrieved customer data is the expected one."""
 
     # GIVEN a pre-built case
 
@@ -165,7 +165,7 @@ def test_get_customer_data(report_api_mip_dna, case_mip_dna):
 
 
 def test_get_report_version_version(report_api_mip_dna, store, helpers, timestamp_yesterday):
-    """Validates the extracted report versions of two analyses"""
+    """Validates the extracted report versions of two analyses."""
 
     # GIVEN a specific set of analyses
     last_analysis = helpers.add_analysis(store, completed_at=datetime.now())
@@ -183,7 +183,7 @@ def test_get_report_version_version(report_api_mip_dna, store, helpers, timestam
 
 
 def test_get_case_data(report_api_mip_dna, mip_analysis_api, case_mip_dna, family_name):
-    """Tests the extracted case data"""
+    """Tests the extracted case data."""
 
     # GIVEN a pre-built case
 
@@ -205,7 +205,7 @@ def test_get_case_data(report_api_mip_dna, mip_analysis_api, case_mip_dna, famil
 def test_get_samples_data(
     report_api_mip_dna, mip_analysis_api, case_mip_dna, case_samples_data, lims_samples
 ):
-    """Validates the retrieved sample data"""
+    """Validates the retrieved sample data."""
 
     # GIVEN a pre-built case
 
@@ -234,7 +234,7 @@ def test_get_samples_data(
 
 
 def test_get_lims_sample(report_api_mip_dna, case_samples_data, lims_samples):
-    """Tests lims data extraction"""
+    """Tests lims data extraction."""
 
     # GIVEN a family samples instance
 
@@ -249,7 +249,7 @@ def test_get_lims_sample(report_api_mip_dna, case_samples_data, lims_samples):
 
 
 def test_get_sample_application_data(report_api_mip_dna, case_samples_data, lims_samples):
-    """Tests sample application data extraction"""
+    """Tests sample application data extraction."""
 
     # GIVEN a lims sample instance
 
@@ -269,7 +269,7 @@ def test_get_sample_application_data(report_api_mip_dna, case_samples_data, lims
 
 
 def test_get_unique_applications(report_api_mip_dna, mip_analysis_api, case_mip_dna):
-    """Tests unique applications filtering"""
+    """Tests unique applications filtering."""
 
     # GIVEN a list of samples sharing the same application
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
@@ -283,7 +283,7 @@ def test_get_unique_applications(report_api_mip_dna, mip_analysis_api, case_mip_
 
 
 def test_get_sample_methods_data(report_api_mip_dna, case_samples_data):
-    """Tests sample methods retrieval from lims"""
+    """Tests sample methods retrieval from lims."""
 
     # GIVEN a sample ID
     sample_id = case_samples_data[0].sample.to_dict().get("internal_id")
@@ -302,7 +302,7 @@ def test_get_sample_methods_data(report_api_mip_dna, case_samples_data):
 
 
 def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_dna):
-    """Tests data analysis parameters retrieval"""
+    """Tests data analysis parameters retrieval."""
 
     # GIVEN a pre-built case
 
@@ -321,7 +321,7 @@ def test_get_case_analysis_data(report_api_mip_dna, mip_analysis_api, case_mip_d
 
 
 def test_get_sample_timestamp_data(report_api_mip_dna, case_samples_data, timestamp_yesterday):
-    """Checks that the sample timestamp information is correctly retrieved from StatusDB"""
+    """Checks that the sample timestamp information is correctly retrieved from StatusDB."""
 
     # GIVEN a mock sample data
 

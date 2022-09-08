@@ -7,7 +7,7 @@ from cg.models.report.report import ReportModel
 
 
 def get_million_read_pairs(reads: int) -> Optional[float]:
-    """Represents the number of sequencing reads as millions of read pairs"""
+    """Represents the number of sequencing reads as millions of read pairs."""
 
     return round(reads / 2_000_000, 1) if reads or isinstance(reads, int) else None
 

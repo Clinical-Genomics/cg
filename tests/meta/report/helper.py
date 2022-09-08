@@ -2,7 +2,7 @@
 
 
 def recursive_assert(data):
-    """Dictionary recursive assert test"""
+    """Dictionary recursive assert test."""
 
     for key, value in data.items():
         if isinstance(value, dict):
