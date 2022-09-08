@@ -52,7 +52,7 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     internal_id = "balsamic_case_wgs_single"
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
-    # WHEN checking if genotype upload compatible
+   # WHEN checking if the case is Genotype upload compatible
     passed_check = UploadGenotypesAPI.genotype_check(case_obj)
 
     # THEN it should return False, not genotype compatible
