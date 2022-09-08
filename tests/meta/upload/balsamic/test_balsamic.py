@@ -47,7 +47,7 @@ def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
 
 
 def test_genotype_check_only_tumour(balsamic_context: CGConfig):
-    """Test a balsamic case with only a tumour sample that is not genotype compatible"""
+    """Test a cancerr case with only a tumour sample that is not Genotype compatible."""
     # GIVEN a balsamic case with only tumour sample
     internal_id = "balsamic_case_wgs_single"
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
