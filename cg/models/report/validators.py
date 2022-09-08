@@ -39,7 +39,7 @@ def validate_boolean(value: Union[bool, str]) -> str:
 def validate_float(value: Union[float, str]) -> str:
     """Returns a processed float value"""
 
-    return str(round(float(value), PRECISION)) if value else NA_FIELD
+    return str(round(float(value), PRECISION)) if value or isinstance(value, float) else NA_FIELD
 
 
 def validate_date(date: datetime) -> str:

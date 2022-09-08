@@ -2,7 +2,7 @@ import copy
 
 
 def test_get_sample_metadata(report_api_balsamic, case_balsamic, helpers, sample_store):
-    """Tests sample metadata extraction"""
+    """Tests sample metadata extraction."""
 
     # GIVEN a mock tumor sample and the latest metadata
     sample = helpers.add_sample(sample_store)
@@ -37,7 +37,7 @@ def test_get_sample_metadata(report_api_balsamic, case_balsamic, helpers, sample
 
 
 def test_get_variant_callers(report_api_balsamic, case_id):
-    """Test variant callers extraction for TN-PANEL analysis"""
+    """Test variant callers extraction for TN-PANEL analysis."""
 
     # GIVEN a mock metadata object
     balsamic_metadata = report_api_balsamic.analysis_api.get_latest_metadata(case_id)
@@ -63,7 +63,7 @@ def test_get_variant_callers(report_api_balsamic, case_id):
 
 
 def test_get_variant_caller_version(report_api_balsamic, case_id):
-    """Tests variant caller version extraction"""
+    """Tests variant caller version extraction."""
 
     # GIVEN a tool name and a mock variant caller versions dictionary
     var_caller_name = "manta"
@@ -82,7 +82,7 @@ def test_get_variant_caller_version(report_api_balsamic, case_id):
 
 
 def test_get_report_accreditation(report_api_balsamic, case_id):
-    """Tests report accreditation for a specific BALSAMIC analysis"""
+    """Tests report accreditation for a specific BALSAMIC analysis."""
 
     # GIVEN a mock metadata object and an accredited one
     balsamic_metadata = report_api_balsamic.analysis_api.get_latest_metadata(case_id)
