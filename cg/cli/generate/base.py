@@ -7,7 +7,7 @@ from cg.cli.generate.report.base import delivery_report, available_delivery_repo
 
 @click.group()
 def generate():
-    """Generates and/or modifies files"""
+    """Generates and/or modifies files."""
 
 
 generate.add_command(delivery_report)

@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.pass_context
 def upload_delivery_report_to_scout(context: click.Context, case_id: str, dry_run: bool):
-    """Fetches a delivery report from housekeeper and uploads it to scout"""
+    """Fetches a delivery report from housekeeper and uploads it to scout."""
 
     click.echo(click.style("--------------- DELIVERY REPORT UPLOAD ---------------"))
 
