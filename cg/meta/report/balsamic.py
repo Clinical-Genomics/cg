@@ -19,6 +19,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS,
 )
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS
+from cg.meta.report.field_validators import get_million_read_pairs
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
@@ -49,11 +50,7 @@ class BalsamicReportAPI(ReportAPI):
         """Fetches the sample metadata to include in the report"""
 
         sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
-        million_read_pairs = (
-            round(sample.reads / 2000000, 1)
-            if sample.reads or isinstance(sample.reads, int)
-            else None
-        )
+        million_read_pairs = get_million_read_pairs(sample.reads)
 
         if "wgs" in self.get_data_analysis_type(case):
             return self.get_wgs_metadata(million_read_pairs, sample_metrics)

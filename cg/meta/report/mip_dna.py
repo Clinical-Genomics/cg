@@ -16,6 +16,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS,
 )
 from cg.constants.scout_upload import MIP_CASE_TAGS
+from cg.meta.report.field_validators import get_million_read_pairs
 from cg.models.cg_config import CGConfig
 from cg.meta.report.report_api import ReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -49,9 +50,7 @@ class MipDNAReportAPI(ReportAPI):
         return MipDNASampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
             gender=parsed_metrics.predicted_sex,
-            million_read_pairs=round(sample.reads / 2000000, 1)
-            if sample.reads or isinstance(sample.reads, int)
-            else None,
+            million_read_pairs=get_million_read_pairs(sample.reads),
             mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
             pct_10x=sample_coverage.get("mean_completeness"),
