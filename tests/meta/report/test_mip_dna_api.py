@@ -1,11 +1,15 @@
+from cg.constants import REPORT_GENDER
+
+
 def test_get_sample_metadata(
     report_api_mip_dna, mip_analysis_api, case_mip_dna, sample_store, helpers
 ):
-    """Tests sample metadata extraction"""
+    """Tests sample metadata extraction."""
 
     # GIVEN a mock sample and the latest metadata
     sample = helpers.add_sample(sample_store)
     sample.internal_id = "ADM1"
+    sample.reads = None
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
 
     # GIVEN the expected output
@@ -13,7 +17,7 @@ def test_get_sample_metadata(
         "million_read_pairs": "N/A",
         "duplicates": "4.01",
         "bait_set": "N/A",
-        "gender": "male",
+        "gender": REPORT_GENDER.get("male"),
         "mapped_reads": "99.77",
         "mean_target_coverage": "38.34",
         "pct_10x": "99.1",
@@ -27,7 +31,7 @@ def test_get_sample_metadata(
 
 
 def test_get_sample_coverage(report_api_mip_dna, sample_store, helpers, case_mip_dna):
-    """Checks the sample coverage retrieval from Chanjo"""
+    """Checks the sample coverage retrieval from Chanjo."""
 
     # GIVEN a case and a sample with a specific ID
     case_mip_dna.panels = []
@@ -42,7 +46,7 @@ def test_get_sample_coverage(report_api_mip_dna, sample_store, helpers, case_mip
 
 
 def test_get_report_accreditation(report_api_mip_dna, mip_analysis_api, case_mip_dna):
-    """Verifies the report accreditation extraction workflow"""
+    """Verifies the report accreditation extraction workflow."""
 
     # GIVEN a list of accredited samples
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)
@@ -56,7 +60,7 @@ def test_get_report_accreditation(report_api_mip_dna, mip_analysis_api, case_mip
 
 
 def test_get_report_accreditation_false(report_api_mip_dna, mip_analysis_api, case_mip_dna):
-    """Verifies that the report is not accredited if it contains a sample application that is not accredited"""
+    """Verifies that the report is not accredited if it contains a sample application that is not accredited."""
 
     # GIVEN a list of samples when one of them is not accredited
     mip_metadata = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)

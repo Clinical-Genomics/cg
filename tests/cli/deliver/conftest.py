@@ -14,21 +14,21 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="delivery_inbox")
 def fixture_delivery_inbox(project_dir: Path, customer_id: Path, ticket: str) -> Path:
-    return project_dir / customer_id / "inbox" / ticket
+    return Path(project_dir, customer_id, "inbox", ticket)
 
 
 @pytest.fixture(name="deliver_vcf_path")
 def fixture_deliver_vcf_path(
     delivery_inbox: Path, family_name: str, case_id: str, vcf_file: Path
 ) -> Path:
-    return delivery_inbox / family_name / vcf_file.name.replace(case_id, family_name)
+    return Path(delivery_inbox, family_name, vcf_file.name.replace(case_id, family_name))
 
 
 @pytest.fixture(name="deliver_fastq_path")
 def fixture_deliver_fastq_path(
     delivery_inbox: Path, family_name: str, case_id: str, fastq_file: Path, cust_sample_id: str
 ) -> Path:
-    return delivery_inbox / cust_sample_id / "dummy_run_R1_001.fastq.gz"
+    return Path(delivery_inbox, cust_sample_id, "dummy_run_R1_001.fastq.gz")
 
 
 @pytest.fixture(name="base_context")

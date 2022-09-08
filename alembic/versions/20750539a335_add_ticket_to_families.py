@@ -1,7 +1,7 @@
 """Adds ticket to Families
 
 Revision ID: 20750539a335
-Revises: 9c9ca9407227
+Revises: 2968d39ac35f
 Create Date: 2022-07-22 08:43:36.271777
 
 """
@@ -15,7 +15,7 @@ import datetime as dt
 from sqlalchemy.ext.declarative import declarative_base
 
 revision = "20750539a335"
-down_revision = "9c9ca9407227"
+down_revision = "2968d39ac35f"
 branch_labels = None
 depends_on = None
 

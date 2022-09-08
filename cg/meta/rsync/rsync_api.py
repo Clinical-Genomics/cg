@@ -1,4 +1,4 @@
-"""Module for building the rsync command to send files to customer inbox on caesar"""
+"""Module for building the rsync command to send files to customer inbox on the delivery server"""
 import datetime as dt
 import glob
 import logging
@@ -79,7 +79,9 @@ class RsyncAPI(MetaAPI):
         commands = ""
         for folder in folder_list:
             source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
-            destination_path: Path = source_and_destination_paths["rsync_destination_path"] / ticket
+            destination_path: Path = Path(
+                source_and_destination_paths["rsync_destination_path"], ticket
+            )
             commands += RSYNC_COMMAND.format(
                 source_path=source_path, destination_path=destination_path
             )
@@ -98,7 +100,7 @@ class RsyncAPI(MetaAPI):
 
     def get_source_and_destination_paths(self, ticket: str) -> Dict[str, Path]:
         cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
-        source_and_destination_paths = {}
+        source_and_destination_paths: Dict[str, Path] = {}
         if not cases:
             LOG.warning("Could not find any cases for ticket %s", ticket)
             raise CgError()

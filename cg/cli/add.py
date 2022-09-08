@@ -199,7 +199,7 @@ def family(
     name: str,
     ticket: str,
 ):
-    """Add a family to CUSTOMER_ID with a NAME."""
+    """Add a family with the given name and associated with the given customer"""
     status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
     if customer_obj is None:
@@ -284,7 +284,8 @@ def relationship(
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def external(context: CGConfig, ticket: str, dry_run: bool):
-    """Downloads external data from caesar and places it in appropriate folder on hasta"""
+    """Downloads external data from the delivery server and places it in appropriate folder on
+    the HPC"""
     external_data_api = ExternalDataAPI(config=context)
     external_data_api.transfer_sample_files_from_source(ticket=ticket, dry_run=dry_run)
 
@@ -303,6 +304,6 @@ def external(context: CGConfig, ticket: str, dry_run: bool):
 )
 @click.pass_obj
 def external_hk(context: CGConfig, ticket: str, dry_run: bool, force):
-    """Adds external data to housekeeper"""
+    """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
     external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)

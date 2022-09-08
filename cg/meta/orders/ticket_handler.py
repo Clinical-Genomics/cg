@@ -28,9 +28,9 @@ class TicketHandler:
         # detect manual ticket assignment
         ticket_match = re.fullmatch(r"#([0-9]{6})", name)
         if ticket_match:
-            ticket_number = ticket_match.group(1)
-            LOG.info("%s: detected ticket in order name", ticket_number)
-            return ticket_number
+            ticket_id = ticket_match.group(1)
+            LOG.info("%s: detected ticket in order name", ticket_id)
+            return ticket_id
         LOG.info("Could not detected ticket number in name %s", name)
         return None
 

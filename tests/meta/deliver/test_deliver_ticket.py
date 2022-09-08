@@ -9,7 +9,7 @@ from cg.store import Store
 
 
 def test_get_inbox_path(cg_context: CGConfig, helpers, mocker):
-    """Test to get the path to customer inbox on hasta"""
+    """Test to get the path to customer inbox on the HPC"""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 

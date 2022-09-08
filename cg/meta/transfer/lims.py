@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from typing import Dict, Union, List
 
 import cg.store.models
 import genologics.entities
@@ -109,12 +110,14 @@ class TransferLims(object):
         pools = self._pool_functions[status_type]()
 
         for pool_obj in pools:
-            ticket = pool_obj.ticket
-            number_of_samples = self.lims.get_sample_number(projectname=ticket)
+            ticket: str = pool_obj.ticket
+            number_of_samples: int = self.lims.get_sample_number(projectname=ticket)
             if not self._is_pool_valid(pool_obj, ticket, number_of_samples):
                 continue
 
-            samples_in_pool = self.lims.get_samples(projectname=ticket)
+            samples_in_pool: Union[Dict[str:str], List[genologics.Sample]] = self.lims.get_samples(
+                projectname=ticket
+            )
             for sample_obj in samples_in_pool:
                 if not self._is_sample_valid(pool_obj, sample_obj):
                     continue

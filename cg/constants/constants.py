@@ -2,6 +2,13 @@
 import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
+from cg.utils.date import get_date
+
+
+VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
+
+MAX_ITEMS_TO_RETRIEVE = 50
+
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
 CAPTUREKIT_CANCER_OPTIONS = (
@@ -18,6 +25,11 @@ CAPTUREKIT_OPTIONS = (
     "Twist_Target_hg19.bed",
     "other",
 )
+
+
+class CaseActions(StrEnum):
+    ANALYZE: str = "analyze"
+
 
 CASE_ACTIONS = ("analyze", "running", "hold")
 
@@ -54,6 +66,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    JSON: str = "json"
     YAML: str = "yaml"
 
 
@@ -64,13 +77,14 @@ class GenomeVersion(StrEnum):
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS_BAM_FILES: str = "analysis-bam"
     ANALYSIS_FILES: str = "analysis"
+    ANALYSIS_SCOUT: str = "analysis-scout"
     FASTQ: str = "fastq"
+    FASTQ_SCOUT: str = "fastq-scout"
     FASTQ_QC: str = "fastq_qc"
+    FASTQ_ANALYSIS: str = "fastq-analysis"
     FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
-    FASTQ_QC_ANALYSIS_CRAM: str = "fastq_qc-analysis-cram"
-    FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
+    FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
     NIPT_VIEWER: str = "nipt-viewer"
     SCOUT: str = "scout"
     STATINA: str = "statina"
