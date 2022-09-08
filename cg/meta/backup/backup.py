@@ -255,7 +255,7 @@ class BackupAPI:
         query.sort(key=lambda flow_cell: flow_cell.sequenced_at)
         return query
 
-    def query_pdc_for_latest_flow_cell(self, flow_cell_id) -> list:
+    def query_pdc_for_latest_flow_cell(self, flow_cell_id) -> str:
         """Query PDC for the latest flow cell id"""
         query: list = self.query_pdc_for_flow_cell_by_date(flow_cell_id)
         return query[-1]
