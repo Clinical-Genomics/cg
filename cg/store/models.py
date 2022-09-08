@@ -368,7 +368,7 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def get_samples_in_case(self) -> List["Sample"]:
+    def get_samples_in_case(self) -> List[str]:
         """Get samples in a case"""
         return [link.sample for link in self.links]
 
