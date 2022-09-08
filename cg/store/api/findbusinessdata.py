@@ -217,7 +217,8 @@ class FindBusinessDataHandler(BaseHandler):
         return flow_cells_on_case[-1]
 
     def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
-        """Get samples on a given family_id"""
+        """Get samples on a given family_id."""
+
         case: models.Family = self.family(internal_id=family_id)
         return case.get_samples_in_case if case else []
 
