@@ -279,7 +279,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
 
 
 def test_filter_cases_with_scout_data_delivery(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when Scout is specified as a data delivery option."""
 
@@ -303,7 +303,7 @@ def test_filter_cases_with_scout_data_delivery(
 
 
 def test_filter_report_supported_data_delivery_cases(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned for a delivery report supported data delivery option."""
 
