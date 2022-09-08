@@ -35,7 +35,7 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
 
 def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     """Test a cancer case with no WGS sample that is not Genotype compatible."""
-    # GIVEN a balsamic case with a normal sample but no WGS tag
+    # GIVEN a balsamic case with a normal sample, but no WGS tag
     internal_id = "balsamic_case_tgs_paired"
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
 
