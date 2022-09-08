@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_report_case(context: click.Context, case_id: str) -> models.Family:
-    """Extracts a case object for delivery report generation"""
+    """Extracts a case object for delivery report generation."""
 
     # Default report API (MIP DNA report API)
     report_api: ReportAPI = (
@@ -75,7 +75,7 @@ def get_report_case(context: click.Context, case_id: str) -> models.Family:
 
 
 def get_report_api(context: click.Context, case: models.Family) -> ReportAPI:
-    """Returns a report API to be used for the delivery report generation"""
+    """Returns a report API to be used for the delivery report generation."""
 
     if context.obj.meta_apis.get("report_api"):
         return context.obj.meta_apis.get("report_api")
@@ -84,7 +84,7 @@ def get_report_api(context: click.Context, case: models.Family) -> ReportAPI:
 
 
 def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> ReportAPI:
-    """Resolves the report API given a specific pipeline"""
+    """Resolves the report API given a specific pipeline."""
 
     # Default report API pipeline: MIP-DNA
     pipeline = pipeline if pipeline else Pipeline.MIP_DNA
@@ -107,7 +107,7 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
 def get_report_analysis_started(
     case: models.Family, report_api: ReportAPI, analysis_started_at: Optional[str]
 ) -> datetime:
-    """Resolves and returns a valid analysis date"""
+    """Resolves and returns a valid analysis date."""
 
     if not analysis_started_at:
         analysis_started_at: datetime = (
