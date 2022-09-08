@@ -250,18 +250,18 @@ class BackupAPI:
         return query
 
     def query_pdc_for_flow_cell_by_date(self, flow_cell_id) -> List[str]:
-        """Query PDC for a given flow cell id sorted by date"""
-        query: list = self.query_pdc_for_flow_cell(flow_cell_id)
+        """Query PDC for a given flow cell id sorted by date."""
+        query: List[str] = self.query_pdc_for_flow_cell(flow_cell_id)
         query.sort(key=lambda flow_cell: flow_cell.sequenced_at)
         return query
 
     def query_pdc_for_latest_flow_cell(self, flow_cell_id) -> str:
-        """Query PDC for the latest flow cell id"""
-        query: list = self.query_pdc_for_flow_cell_by_date(flow_cell_id)
+        """Query PDC for the latest flow cell id."""
+        query: List[str] = self.query_pdc_for_flow_cell_by_date(flow_cell_id)
         return query[-1]
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
-        """Retrieve the archived file from PDC to a flow cell runs directory"""
+        """Retrieve the archived file from PDC to a flow cell runs directory."""
         retrieved_file: Path = run_dir / archived_file.name
         LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
         self.pdc.retrieve_file_from_pdc(
