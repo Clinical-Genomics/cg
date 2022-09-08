@@ -135,10 +135,12 @@ def test_get_validated_report_data_external_sample(report_api_mip_dna, case_mip_
     report_data.case.samples[0].timestamps.received_at = None
     report_data.case.samples[0].application.external = True
 
-    # THEN check the generation
+    # WHEN validating report fields
     report_data = report_api_mip_dna.validate_report_fields(
         case_mip_dna.internal_id, report_data, force_report=False
     )
+
+    # THEN the validation should have been completed successfully
     assert report_data
 
 
