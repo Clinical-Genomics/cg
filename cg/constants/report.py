@@ -58,7 +58,7 @@ REQUIRED_CASE_FIELDS = [
     "applications",
 ]
 
-# Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations")
+# Application required fields (OPTIONAL: "version", "prep_category", "description", "limitations", "external")
 REQUIRED_APPLICATION_FIELDS = [
     "tag",
     "accredited",
@@ -108,7 +108,7 @@ REQUIRED_SAMPLE_METHODS_FIELDS = []
 # Timestamp required fields (OPTIONAL: "prepared_at", "sequenced_at")
 REQUIRED_SAMPLE_TIMESTAMP_FIELDS = [
     "ordered_at",
-    "received_at",
+    "received_at",  # Optional for external samples
 ]
 
 # Metadata required fields
