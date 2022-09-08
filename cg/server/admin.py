@@ -350,6 +350,7 @@ class SampleView(BaseView):
         "name",
         "subject_id",
         "customer.internal_id",
+        "original_ticket",
     ]
     form_excluded_columns = [
         "age_at_sampling",
