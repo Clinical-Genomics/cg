@@ -138,5 +138,4 @@ class UploadGenotypesAPI(object):
             if not sample.is_tumour:
                 if PrepCategory.WHOLE_GENOME_SEQUENCING == sample_prep_category:
                     return True
-
         return False
