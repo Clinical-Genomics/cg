@@ -129,7 +129,7 @@ class UploadGenotypesAPI(object):
         return self.hk.files(version=version_id, tags=["genotype"]).all()
 
     @staticmethod
-    def genotype_check(case_obj: models.Family) -> bool:
+    def is_suitable_for_genotype_upload(case_obj: models.Family) -> bool:
         """Check if a cancer case is contains WGS and normal sample."""
 
         samples: List[models.Sample] = case_obj.get_samples_in_case
