@@ -21,7 +21,7 @@ from tests.cli.workflow.balsamic.conftest import (
 
 
 def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
-    """Test a balsamic case with WGS and Normal sample that is genotype compatible"""
+    """Test a cancer case with WGS and normal sample that is Genotype compatible."""
     # GIVEN a balsamic case with WGS tag and a normal sample
     internal_id = "balsamic_case_wgs_paired_enough_reads"
     case_obj: models.Family = balsamic_context.status_db.family(internal_id=internal_id)
