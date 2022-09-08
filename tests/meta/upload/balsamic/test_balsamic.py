@@ -55,5 +55,5 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
    # WHEN checking if the case is Genotype upload compatible
     passed_check = UploadGenotypesAPI.genotype_check(case_obj)
 
-    # THEN it should return False, not genotype compatible
+    # THEN it should return False
     assert not passed_check
