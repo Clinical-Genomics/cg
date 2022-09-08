@@ -225,7 +225,6 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sequenced_samples(self, family_id: str) -> List[models.Sample]:
         """Get sequenced samples by family_id."""
 
-
         samples: List[models.Sample] = self.get_samples_by_family_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
 
