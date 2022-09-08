@@ -369,7 +369,7 @@ class Family(Model, PriorityMixin):
 
     @property
     def get_samples_in_case(self) -> List[str]:
-        """Get samples in a case"""
+        """Get samples in a case."""
         return [link.sample for link in self.links]
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
