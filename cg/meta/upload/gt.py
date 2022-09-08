@@ -130,7 +130,7 @@ class UploadGenotypesAPI(object):
 
     @staticmethod
     def genotype_check(case_obj: models.Family) -> bool:
-        """Check if balsamic case is contains WGS and normal sample"""
+        """Check if a cancer case is contains WGS and normal sample."""
 
         samples: List[models.Sample] = case_obj.get_samples_in_case
         for sample in samples:
