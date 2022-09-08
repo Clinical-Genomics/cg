@@ -29,7 +29,7 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     # WHEN checking if the case is Genotype upload compatible
     passed_check = UploadGenotypesAPI.genotype_check(case_obj)
 
-    # THEN it should return True, genotype compatible
+    # THEN it should return True
     assert passed_check
 
 
