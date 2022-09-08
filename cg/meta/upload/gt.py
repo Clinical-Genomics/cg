@@ -129,8 +129,8 @@ class UploadGenotypesAPI(object):
         return self.hk.files(version=version_id, tags=["genotype"]).all()
 
     @staticmethod
-    def genotype_check(case_obj: models.Family) -> bool:
-        """Check if balsamic case is contains WGS and normal sample"""
+    def is_suitable_for_genotype_upload(case_obj: models.Family) -> bool:
+        """Check if a cancer case is contains WGS and normal sample."""
 
         samples: List[models.Sample] = case_obj.get_samples_in_case
         for sample in samples:
@@ -138,5 +138,4 @@ class UploadGenotypesAPI(object):
             if not sample.is_tumour:
                 if PrepCategory.WHOLE_GENOME_SEQUENCING == sample_prep_category:
                     return True
-
         return False

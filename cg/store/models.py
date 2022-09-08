@@ -368,12 +368,12 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def get_samples_in_case(self) -> List["Sample"]:
-        """Get samples in a case"""
+    def get_samples_in_case(self) -> List[str]:
+        """Get samples in a case."""
         return [link.sample for link in self.links]
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
-        """Represent as dictionary"""
+        """Represent as dictionary."""
         data = super(Family, self).to_dict()
         data["panels"] = self.panels
         data["priority"] = self.priority_human

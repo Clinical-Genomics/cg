@@ -217,12 +217,14 @@ class FindBusinessDataHandler(BaseHandler):
         return flow_cells_on_case[-1]
 
     def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
-        """Get samples on a given family_id"""
+        """Get samples on a given family_id."""
+
         case: models.Family = self.family(internal_id=family_id)
         return case.get_samples_in_case if case else []
 
     def get_sequenced_samples(self, family_id: str) -> List[models.Sample]:
-        """Get sequenced samples by family_id"""
+        """Get sequenced samples by family_id."""
+
 
         samples: List[models.Sample] = self.get_samples_by_family_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
