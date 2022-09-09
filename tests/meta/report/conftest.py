@@ -16,7 +16,7 @@ from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
-from tests.mocks.report import MockChanjo, MockDB
+from tests.mocks.report import MockChanjo, MockDB, MockHousekeeperMipDNAReportAPI
 
 
 @pytest.fixture(scope="function", name="report_api_mip_dna")
@@ -28,7 +28,7 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
     cg_context.scout_api_ = MockScoutApi(cg_context)
-    return MipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
+    return MockHousekeeperMipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
 @pytest.fixture(scope="function", name="report_api_balsamic")
