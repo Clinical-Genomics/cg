@@ -196,7 +196,8 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def get_nextflow_stdout_stderr(self, case_id: str) -> List[str]:
+    @staticmethod
+    def get_nextflow_stdout_stderr(case_id: str) -> List[str]:
         return [
             " > "
             + str(self.get_case_path(case_id))
