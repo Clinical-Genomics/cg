@@ -196,20 +196,6 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    @staticmethod
-    def get_nextflow_stdout_stderr(case_id: str) -> List[str]:
-        return [
-            " > "
-            + str(self.get_case_path(case_id))
-            + "/"
-            + case_id
-            + "-stdout.log 2> "
-            + str(self.get_case_path(case_id))
-            + "/"
-            + case_id
-            + "-stdout.err  < /dev/null & "
-        ]
-
     def add_pending_trailblazer_analysis(self, case_id: str) -> None:
         self.check_analysis_ongoing(case_id=case_id)
         self.trailblazer_api.mark_analyses_deleted(case_id=case_id)
