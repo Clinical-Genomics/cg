@@ -312,9 +312,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Read deliverables file template and return content."""
         return pd.read_csv(rnafusion_bundle_template)
 
-    def replace_in_dataframe(
-        self, dataframe: pd.DataFrame, replace_map: dict
-    ) -> pd.DataFrame:
+    def replace_in_dataframe(self, dataframe: pd.DataFrame, replace_map: dict) -> pd.DataFrame:
         for str_to_replace, with_value in replace_map.item():
             dataframe = dataframe.replace(str_to_replace, with_value, regex=True)
 
