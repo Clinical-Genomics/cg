@@ -171,6 +171,7 @@ def fixture_base_config_dict() -> dict:
         "madeline_exe": "path/to/madeline",
         "bed_path": "path/to/bed",
         "pon_path": "path/to/pon",
+        "loqusdb_path": "path/to/loqusdb",
         "delivery_path": "path/to/delivery",
         "housekeeper": {
             "database": "sqlite:///",
@@ -1136,6 +1137,7 @@ def fixture_context_config(
         "madeline_exe": "echo",
         "bed_path": str(cg_dir),
         "pon_path": str(cg_dir),
+        "loqusdb_path": str(cg_dir),
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "email_base_settings": {

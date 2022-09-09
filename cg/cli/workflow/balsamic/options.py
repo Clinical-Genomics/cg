@@ -42,40 +42,19 @@ OPTION_PON_CNN = click.option(
     required=False,
     help="Panel of normal reference (.cnn) for CNVkit",
 )
-OPTION_CLINICAL_SNV_OBSERVATIONS = click.option(
-    "--clinical-snv-observations",
+OPTION_CLINICAL_OBSERVATIONS = click.option(
+    "--clinical-observations",
     type=click.Path(exists=True),
+    multiple=True,
     required=False,
-    help="VCF path of clinical SNV observations (WGS analysis workflow). Set this option to override the latest "
-    "loqusdb dump.",
+    help="VCF paths of clinical SNVs and SVs observations (WGS analysis only). Set this option to override the latest "
+    "loqusdb dumps.",
 )
-OPTION_CLINICAL_SV_OBSERVATIONS = click.option(
-    "--clinical-sv-observations",
+OPTION_CANCER_OBSERVATIONS = click.option(
+    "--cancer-observations",
     type=click.Path(exists=True),
+    multiple=True,
     required=False,
-    help="VCF path of clinical SV observations (WGS analysis workflow)",
-)
-OPTION_CANCER_SNV_NORMAL_OBSERVATIONS = click.option(
-    "--cancer-snv-normal-observations",
-    type=click.Path(exists=True),
-    required=False,
-    help="VCF path of cancer SNV normal observations (WGS analysis workflow)",
-)
-OPTION_CANCER_SNV_TUMOR_OBSERVATIONS = click.option(
-    "--cancer-snv-tumor-observations",
-    type=click.Path(exists=True),
-    required=False,
-    help="VCF path of cancer SNV tumor observations (WGS analysis workflow)",
-)
-OPTION_CANCER_SV_NORMAL_OBSERVATIONS = click.option(
-    "--cancer-sv-normal-observations",
-    type=click.Path(exists=True),
-    required=False,
-    help="VCF path of cancer SV normal observations (WGS analysis workflow)",
-)
-OPTION_CANCER_SV_TUMOR_OBSERVATIONS = click.option(
-    "--cancer-sv-tumor-observations",
-    type=click.Path(exists=True),
-    required=False,
-    help="VCF path of cancer SV tumor observations (WGS analysis workflow)",
+    help="VCF paths of cancer somatic and germline observations (WGS analysis only). Set this option to override the "
+    "latest loqusdb dumps.",
 )

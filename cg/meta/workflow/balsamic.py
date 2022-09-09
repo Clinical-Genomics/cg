@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 from pydantic import ValidationError
 from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
+from cg.constants.loqus_upload import ObservationFileWildcards
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
 from cg.constants.tags import BalsamicAnalysisTag
@@ -23,6 +24,7 @@ from cg.models.balsamic.metrics import (
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
+from cg.utils.utils import get_string_from_list_by_pattern, get_last_element_from_iterator
 
 LOG = logging.getLogger(__name__)
 
@@ -47,6 +49,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
         self.pon_path = config.pon_path
+        self.loqusdb_path = config.loqusdb_path
 
     @property
     def root(self) -> str:
@@ -431,12 +434,57 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if sample_obj:
             return sample_obj.internal_id
 
+    def get_latest_observations(self, observations_pattern: str) -> Optional[str]:
+        """
+        Returns the latest loqusdb dump file (loqusdb_<observations>_export-<date>-.vcf.gz) matching an
+        observations pattern.
+        """
+
+        available_files: iter = Path(self.loqusdb_path).glob(f"*{observations_pattern}*")
+        return get_last_element_from_iterator(available_files)
+
+    def get_verified_observations(
+        self,
+        clinical_observations: List[str],
+        cancer_observations: List[str],
+    ) -> dict:
+        """Returns verified clinical and cancer observations paths."""
+
+        # Clinical observations
+        clinical_snv_observations: str = get_string_from_list_by_pattern(
+            ObservationFileWildcards.CLINICAL_SNV, clinical_observations
+        ) or self.get_latest_observations(ObservationFileWildcards.CLINICAL_SNV)
+        clinical_sv_observations: str = get_string_from_list_by_pattern(
+            ObservationFileWildcards.CLINICAL_SV, clinical_observations
+        ) or self.get_latest_observations(ObservationFileWildcards.CLINICAL_SV)
+
+        # Cancer observations
+        cancer_all_snv_observations: str = get_string_from_list_by_pattern(
+            ObservationFileWildcards.CANCER_ALL_SNV, cancer_observations
+        ) or self.get_latest_observations(ObservationFileWildcards.CANCER_ALL_SNV)
+        cancer_somatic_snv_observations: str = get_string_from_list_by_pattern(
+            ObservationFileWildcards.CANCER_SOMATIC_SNV, cancer_observations
+        ) or self.get_latest_observations(ObservationFileWildcards.CANCER_SOMATIC_SNV)
+        cancer_somatic_sv_observations: str = get_string_from_list_by_pattern(
+            ObservationFileWildcards.CANCER_SOMATIC_SV, cancer_observations
+        ) or self.get_latest_observations(ObservationFileWildcards.CANCER_SOMATIC_SV)
+
+        return {
+            "clinical_snv_observations": clinical_snv_observations,
+            "clinical_sv_observations": clinical_sv_observations,
+            "cancer_all_snv_observations": cancer_all_snv_observations,
+            "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
+            "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
+        }
+
     def get_verified_config_case_arguments(
         self,
         case_id: str,
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        clinical_observations: List[str],
+        cancer_observations: List[str],
         gender: Optional[str] = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
@@ -455,7 +503,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else None
         )
 
-        return {
+        args_dict = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
@@ -467,6 +515,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
+
+        if not verified_panel_bed:
+            args_dict.update(
+                self.get_verified_observations(
+                    clinical_observations,
+                    cancer_observations,
+                )
+            )
+
+        return args_dict
 
     def build_sample_id_map_string(self, case_id: str) -> str:
         """Creates sample info string for balsamic with format lims_id:tumor/normal:customer_sample_id"""
@@ -608,6 +666,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        clinical_observations: List[str],
+        cancer_observations: List[str],
         dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
@@ -617,6 +677,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            clinical_observations=clinical_observations,
+            cancer_observations=cancer_observations,
         )
         command = ["config", "case"]
         options = self.__build_command_str(
@@ -634,6 +696,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--umi-trim-length": arguments.get("umi_trim_length"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
+                "--clinical-snv-observations": arguments.get("clinical_snv_observations"),
+                "--clinical-sv-observations": arguments.get("clinical_sv_observations"),
+                "--cancer-all-snv-observations": arguments.get("cancer_all_snv_observations"),
+                "--cancer-somatic-snv-observations": arguments.get(
+                    "cancer_somatic_snv_observations"
+                ),
+                "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv_observations"),
             }
         )
         parameters = command + options

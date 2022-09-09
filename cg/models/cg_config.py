@@ -199,6 +199,7 @@ class CGConfig(BaseModel):
     madeline_exe: str
     bed_path: str
     pon_path: str
+    loqusdb_path: str
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings
