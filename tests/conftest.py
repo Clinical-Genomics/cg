@@ -595,6 +595,7 @@ def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
     """Return a time stamp 14 days ahead in time"""
     return timestamp_now + dt.timedelta(days=14)
 
+
 @pytest.fixture(scope="function", name="hk_bundle_data")
 def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
     """Get some bundle data for housekeeper."""
