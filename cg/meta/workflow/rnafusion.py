@@ -308,7 +308,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             + ["-bg", "-q"]
             + command
             + options
-            + AnalysisAPI.get_nextflow_stdout_stderr(case_id)
+            + self.get_nextflow_stdout_stderr(case_id)
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
