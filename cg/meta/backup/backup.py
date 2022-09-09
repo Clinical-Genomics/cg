@@ -3,9 +3,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import Optional, Dict
-
-from housekeeper.store import models as hk_models
+from typing import Dict, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions, FlowCellStatus
@@ -20,6 +18,7 @@ from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
 from cg.store import Store, models
 from cg.utils.time import get_elapsed_time, get_start_time
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
