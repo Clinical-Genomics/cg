@@ -154,6 +154,7 @@ class PoolSubmitter(Submitter):
                     internal_id=sample.get("internal_id"),
                     order=order,
                     ordered=ordered,
+                    original_ticket=ticket,
                     priority=priority,
                     application_version=application_version,
                     customer=customer_obj,

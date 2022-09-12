@@ -45,7 +45,7 @@ def delivery_report(
     dry_run: bool,
     analysis_started_at: str = None,
 ):
-    """Creates a delivery report for the provided case"""
+    """Creates a delivery report for the provided case."""
 
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
 
@@ -87,7 +87,7 @@ def delivery_report(
 def available_delivery_reports(
     context: click.Context, pipeline: Pipeline, force_report: bool, dry_run: bool
 ):
-    """Generates delivery reports for all cases that need one and stores them in housekeeper"""
+    """Generates delivery reports for all cases that need one and stores them in housekeeper."""
 
     click.echo(click.style("--------------- AVAILABLE DELIVERY REPORTS ---------------"))
 
