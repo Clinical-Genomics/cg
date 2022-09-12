@@ -194,6 +194,7 @@ class UploadScoutAPI:
         rna_case: models.Family = status_db.family(case_id)
 
         map_dict = self.create_rna_dna_mapper(rna_case=rna_case)
+        unique_dna_cases = set()
         for rna_key in map_dict.keys():
             fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
             if fusion_report is None:
@@ -201,33 +202,22 @@ class UploadScoutAPI:
                     f"{report_type} fusion report was not found in housekeeper for {case_id}"
                 )
 
-            LOG.info(f"{report_type} fusion report %s found", fusion_report.path)
+            LOG.info(f"{report_type} fusion report {fusion_report.path} found")
+            dna_sample_id, case_list = map_dict[rna_key].popitem()
+            unique_dna_cases.update(case_list)
 
-        upload_dna_cases: Set[models.Family] = set()
-        for link in rna_case.links:
-            rna_sample: models.Sample = link.sample
-            if not rna_sample.subject_id:
-                raise CgDataError(
-                    "Failed on RNA sample %s as subject_id field is empty" % rna_sample.internal_id,
-                )
+        for dna_case_id in unique_dna_cases:
+            LOG.info(f"Uploading {report_type} fusion report to scout for case {dna_case_id}")
 
-            for rna_key, dna_value in map_dict.items():
-                for dna_sample_name, dna_cases in dna_value.items():
-                    for dna_case_id in dna_cases:
-                        LOG.info(
-                            f"Uploading {report_type} fusion report to scout for case {dna_case_id}"
-                        )
-
-                        if dry_run:
-                            continue
-
-                        scout_api.upload_fusion_report(
-                            case_id=dna_case_id,
-                            report_path=fusion_report.full_path,
-                            research=research,
-                            update=update,
-                        )
-                        LOG.info("Uploaded %s fusion report", report_type)
+            if dry_run:
+                continue
+            scout_api.upload_fusion_report(
+                case_id=dna_case_id,
+                report_path=fusion_report.full_path,
+                research=research,
+                update=update,
+            )
+            LOG.info("Uploaded %s fusion report", report_type)
 
         LOG.info("Upload %s fusion report finished!", report_type)
 
@@ -262,23 +252,23 @@ class UploadScoutAPI:
 
             LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found")
 
-            for rna_key, dna_value in map_dict.items():
-                for dna_sample_name, dna_cases in dna_value.items():
-                    for dna_case_id in dna_cases:
-                        LOG.info(
-                            f"Uploading RNA coverage bigwig file for {dna_sample_name} in case {dna_case_id} in scout"
-                        )
+            dna_sample_id, case_list = map_dict[rna_sample_id].popitem()
+            for dna_case_id in case_list:
+                LOG.info(
+                    f"Uploading RNA coverage bigwig file for {dna_sample_id} in case {dna_case_id} in scout"
+                )
 
-                        if dry_run:
-                            continue
+                if dry_run:
+                    continue
 
-                        scout_api.upload_rna_coverage_bigwig(
-                            file_path=rna_coverage_bigwig.full_path,
-                            case_id=dna_case_id,
-                            customer_sample_id=dna_sample_name,
-                        )
-
-                        LOG.info("Uploaded RNA coverage bigwig file")
+                scout_api.upload_rna_coverage_bigwig(
+                    file_path=rna_coverage_bigwig.full_path,
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_id,
+                )
+                LOG.info(
+                    f"Uploaded RNA coverage bigwig file for {dna_sample_id} in case {dna_case_id}"
+                )
 
         LOG.info("Upload RNA coverage bigwig file finished!")
 
@@ -311,22 +301,23 @@ class UploadScoutAPI:
 
             LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
 
-            for rna_key, dna_value in map_dict.items():
-                for dna_sample_name, dna_cases in dna_value.items():
-                    for dna_case_id in dna_cases:
-                        LOG.info(
-                            f"Uploading splice junctions bed file for sample {dna_sample_name} in case {dna_case_id} in scout"
-                        )
+            dna_sample_id, case_list = map_dict[rna_sample_id].popitem()
+            for dna_case_id in case_list:
+                LOG.info(
+                    f"Uploading splice junctions bed file for sample {dna_sample_id} in case {dna_case_id} in scout"
+                )
 
-                        if dry_run:
-                            continue
+                if dry_run:
+                    continue
 
-                        scout_api.upload_splice_junctions_bed(
-                            file_path=splice_junctions_bed.full_path,
-                            case_id=dna_case_id,
-                            customer_sample_id=dna_sample_name,
-                        )
-                        LOG.info("Uploaded splice junctions bed file")
+                scout_api.upload_splice_junctions_bed(
+                    file_path=splice_junctions_bed.full_path,
+                    case_id=dna_case_id,
+                    customer_sample_id=dna_sample_id,
+                )
+                LOG.info(
+                    f"Uploaded splice junctions bed file {dna_sample_id} in case {dna_case_id}"
+                )
 
         LOG.info("Upload splice junctions bed file finished!")
 
@@ -386,25 +377,24 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_mapper(self, rna_case: models.Family) -> Dict[str, Dict[list]]:
+    def create_rna_dna_mapper(self, rna_case: models.Family) -> Dict[str, Dict[str, list]]:
         map_dict = {}
         for link in rna_case.links:
             rna_sample = link.sample
 
             if not rna_sample.subject_id:
                 raise CgDataError(
-                    "Failed on RNA sample %s as subject_id field is empty" % rna_sample.internal_id,
+                    f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
                 )
 
             map_dict[rna_sample.internal_id] = {}
             matching_samples = self.status_db.samples_by_subject_id(
                 customer_id=rna_case.customer_id,
                 subject_id=rna_sample.subject_id,
-                data_analyses=[Pipeline.MIP_DNA, Pipeline.BALSAMIC],
                 is_tumour=rna_sample.is_tumour,
             )
 
-            map_dict_error = self.map_dict_correct(bool)
+            map_dict_error = self.map_dict_correct(map_dict=map_dict)
             if not map_dict_error:
                 raise CgDataError()
 
@@ -412,25 +402,28 @@ class UploadScoutAPI:
             for sample in matching_samples:
                 if sample == rna_sample:
                     continue
-                map_dict[rna_sample.internal_id][sample.internal_id] = [
-                    link.family.internal_id
-                    for link in sample.links
-                    if link.family.customer_id == sample.customer_id
-                ]
-
+                map_dict[rna_sample.internal_id][sample.name] = []
+                for link in sample.links:
+                    case_object: models.Family = link.family
+                    if (
+                        case_object.customer_id == sample.customer_id
+                        and case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+                    ):
+                        map_dict[rna_sample.internal_id][sample.name].append(
+                            case_object.internal_id
+                        )
         return map_dict
 
-    def map_dict_correct(self, map_dict: Dict[str, Dict[list]]) -> bool:
+    def map_dict_correct(self, map_dict: Dict[str, Dict[str, list]]) -> bool:
 
         if not map_dict.values:
             raise CgDataError(
-                "Failed to upload files for RNA case %s: no DNA cases linked to it via subject_id"
-                % key,
+                "Failed to upload files for RNA case key: no DNA cases linked to it via subject_id"
             )
 
-        if len(map_dict.items()) > 2:
+        if len(map_dict.items()) / len(map_dict.keys()) > 2:
             raise CgDataError(
-                "Aborting upload files for RNA case %s: multiple DNA samples linked to it via subject_id"
-                % key,
+                "Aborting upload files for RNA case key: multiple DNA samples linked to it via subject_id"
             )
-        return bool(True)
+
+        return True
