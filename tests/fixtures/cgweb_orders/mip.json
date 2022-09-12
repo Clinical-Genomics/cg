@@ -35,9 +35,7 @@
     {
       "age_at_sampling": "2.0",
       "application": "WGSPCFC030",
-      "cohorts": [
-        ""
-      ],
+      "cohorts": ["Other"],
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
@@ -68,9 +66,7 @@
     {
       "age_at_sampling": "3.0",
       "application": "WGSPCFC030",
-      "cohorts": [
-        ""
-      ],
+      "cohorts": ["Other"],
       "container": "96 well plate",
       "container_name": "CMMS",
       "data_analysis": "mip-dna",
@@ -100,9 +96,7 @@
     {
       "age_at_sampling": "4.0",
       "application": "WGSPCFC030",
-      "cohorts": [
-        ""
-      ],
+      "cohorts": ["Other"],
       "container": "96 well plate",
       "container_name": "CMMS",
       "data_analysis": "mip-dna",

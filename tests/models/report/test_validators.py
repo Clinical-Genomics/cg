@@ -63,6 +63,22 @@ def test_validate_float():
     assert validated_str_value == "12.35"
 
 
+def test_validate_float_zero_input():
+    """Tests the validation of a float value"""
+
+    # GIVEN a valid float input (float and string format)
+    float_value = 0.0
+    str_value = "0.0"
+
+    # WHEN performing the validation
+    validated_float_value = validate_float(float_value)
+    validated_str_value = validate_float(str_value)
+
+    # THEN check if the input values were formatted correctly
+    assert validated_float_value == "0.0"
+    assert validated_str_value == "0.0"
+
+
 def test_validate_list():
     """Tests if a list is transformed into a string of comma separated values"""
 
