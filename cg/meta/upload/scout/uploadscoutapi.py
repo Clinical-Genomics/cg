@@ -381,7 +381,6 @@ class UploadScoutAPI:
         map_dict = {}
         for link in rna_case.links:
             rna_sample = link.sample
-
             if not rna_sample.subject_id:
                 raise CgDataError(
                     f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
@@ -389,14 +388,10 @@ class UploadScoutAPI:
 
             map_dict[rna_sample.internal_id] = {}
             matching_samples = self.status_db.samples_by_subject_id(
-                customer_id=rna_case.customer_id,
+                customer_id=rna_case.customer.internal_id,
                 subject_id=rna_sample.subject_id,
                 is_tumour=rna_sample.is_tumour,
             )
-
-            map_dict_error = self.map_dict_correct(map_dict=map_dict)
-            if not map_dict_error:
-                raise CgDataError()
 
             sample: models.Sample
             for sample in matching_samples:
@@ -406,24 +401,27 @@ class UploadScoutAPI:
                 for link in sample.links:
                     case_object: models.Family = link.family
                     if (
-                        case_object.customer_id == sample.customer_id
-                        and case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+                        case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
                     ):
                         map_dict[rna_sample.internal_id][sample.name].append(
                             case_object.internal_id
                         )
+        map_dict_error = self.map_dict_correct(map_dict=map_dict)
+        if not map_dict_error:
+            raise CgDataError()
+
         return map_dict
 
     def map_dict_correct(self, map_dict: Dict[str, Dict[str, list]]) -> bool:
+        for rna_sample, dna_dict in map_dict.items():
+            if not map_dict[rna_sample]:
+                raise CgDataError(
+                    "Failed to upload files for RNA case: no DNA cases linked to it via subject_id"
+                )
 
-        if not map_dict.values:
+        if len(map_dict.items()) != len(map_dict.keys()):
             raise CgDataError(
-                "Failed to upload files for RNA case key: no DNA cases linked to it via subject_id"
-            )
-
-        if len(map_dict.items()) / len(map_dict.keys()) > 2:
-            raise CgDataError(
-                "Aborting upload files for RNA case key: multiple DNA samples linked to it via subject_id"
+                "Aborting upload files for RNA case: multiple DNA samples linked to it via subject_id"
             )
 
         return True
