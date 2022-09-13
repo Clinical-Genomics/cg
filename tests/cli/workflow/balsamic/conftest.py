@@ -33,8 +33,8 @@ def fixture_balsamic_case_id() -> str:
 
 
 @pytest.fixture(name="balsamic_housekeeper_dir")
-def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
-    """Return the path to the balsamic housekeeper dir"""
+def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
 
 
