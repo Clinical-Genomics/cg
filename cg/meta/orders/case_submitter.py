@@ -225,8 +225,13 @@ class CaseSubmitter(Submitter):
             if not case_obj:
                 case_obj = self._create_case(case, customer_obj, ticket)
                 new_families.append(case_obj)
+            else:
+                self._append_ticket(ticket, case_obj)
+                self._update_action("analyze", case_obj)
 
             self._update_case(case, case_obj)
+
+
 
             family_samples = {}
             for sample in case["samples"]:
@@ -256,6 +261,14 @@ class CaseSubmitter(Submitter):
     @staticmethod
     def _update_case(case, case_obj):
         case_obj.panels = case["panels"]
+
+    @staticmethod
+    def _append_ticket(ticket, case_obj):
+        case_obj.ticket = f"{case_obj.ticket},{ticket}"
+
+    @staticmethod
+    def _update_action(action, case_obj):
+        case_obj.action = action
 
     @staticmethod
     def _update_relationship(father_obj, link_obj, mother_obj, sample):
