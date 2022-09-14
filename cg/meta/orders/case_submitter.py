@@ -264,7 +264,7 @@ class CaseSubmitter(Submitter):
 
     @staticmethod
     def _append_ticket(ticket, case_obj):
-        case_obj.ticket = f"{case_obj.ticket},{ticket}"
+        case_obj.tickets = f"{case_obj.tickets},{ticket}"
 
     @staticmethod
     def _update_action(action, case_obj):
