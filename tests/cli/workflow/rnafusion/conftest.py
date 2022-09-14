@@ -1,36 +1,37 @@
-# """Fixtures for cli workflow rnafusion tests"""
-#
-# import datetime as dt
-# import gzip
-# from pathlib import Path
-# from typing import List
-#
-# import pytest
-# from cg.apps.hermes.hermes_api import HermesApi
-# from cg.apps.housekeeper.hk import HousekeeperAPI
-# from cg.constants import Pipeline
-# from cg.constants.constants import FileFormat
-# from cg.io.controller import WriteFile, WriteStream
-# from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-# from cg.models.cg_config import CGConfig
-# from cg.store import Store
-# from tests.mocks.limsmock import MockLimsAPI
-# from tests.mocks.process_mock import ProcessMock
-# from tests.mocks.tb_mock import MockTB
-# from tests.store_helpers import StoreHelpers
-#
-#
-# @pytest.fixture(name="balsamic_dir")
-# def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
-#     """Return the path to the balsamic apps dir"""
-#     balsamic_dir = tmpdir_factory.mktemp("balsamic")
-#     return Path(balsamic_dir).absolute().as_posix()
-#
-#
-# @pytest.fixture(name="balsamic_case_id")
-# def fixture_balsamic_case_id() -> str:
-#     return "balsamic_case_wgs_single"
-#
+"""Fixtures for cli workflow rnafusion tests"""
+
+import datetime as dt
+import gzip
+from pathlib import Path
+from typing import List
+
+import pytest
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile, WriteStream
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.process_mock import ProcessMock
+from tests.mocks.tb_mock import MockTB
+from tests.store_helpers import StoreHelpers
+
+
+@pytest.fixture(name="rnafusion_dir")
+def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the rnafusion apps dir"""
+    balsamic_dir = tmpdir_factory.mktemp("rnafusion")
+    return Path(rnafusion_dir).absolute().as_posix()
+
+
+@pytest.fixture(name="rnafusion_case_id")
+def fixture_rnafusion_case_id() -> str:
+    return "rnafusion_case_id"
+
+
 #
 # @pytest.fixture(name="balsamic_housekeeper_dir")
 # def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
@@ -327,6 +328,8 @@ def fixture_rnafusion_context(
         sequenced_at=dt.datetime.now(),
     )
     return cg_context
+
+
 #
 #
 # @pytest.fixture
