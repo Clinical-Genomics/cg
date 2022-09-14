@@ -202,7 +202,7 @@ class StatusHandler(BaseHandler):
             models.Family.internal_id == case_id
         ).first()
         case_obj.action = action
-        self.commit()
+        self.commit(case_obj)
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
