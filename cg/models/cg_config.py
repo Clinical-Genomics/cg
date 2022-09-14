@@ -264,7 +264,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
-    rnafusion: RnafusionConfig = None
+    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
