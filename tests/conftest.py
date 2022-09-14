@@ -1090,6 +1090,7 @@ def fluffy_dir(tmpdir_factory) -> Path:
 def balsamic_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("balsamic")
 
+
 @pytest.fixture(scope="function")
 def rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
