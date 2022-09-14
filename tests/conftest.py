@@ -1121,6 +1121,7 @@ def fixture_context_config(
     cg_dir: str,
     balsamic_dir: str,
     microsalt_dir: str,
+    rnafusion_dir: str,
 ) -> dict:
     return {
         "database": fixture_cg_uri,
@@ -1253,6 +1254,14 @@ def fixture_context_config(
             "binary_path": "echo",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
+        },
+        "rnafusion": {
+            "root": str(rnafusion_dir),
+            "references_path": "/path/to/references",
+            "binary_path": "/path/to/bin",
+            "pipeline_path": "/pipeline/path",
+            "conda_env": "S_RNAFUSION",
+            "profile": "pyprofile",
         },
         "crunchy": {
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
