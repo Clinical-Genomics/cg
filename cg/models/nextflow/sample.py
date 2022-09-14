@@ -1,15 +1,20 @@
-from typing import Dict
-
-from cg.models.analysis import AnalysisModel
+from pydantic import BaseModel, validator
 
 
-class BalsamicAnalysis(AnalysisModel):
-    """BALSAMIC analysis model
+class NextflowSample(BaseModel):
+    """Nextflow samplesheet model
 
     Attributes:
-        config: balsamic config file attributes model
-        sample_metrics: retrieved QC metrics associated to a sample
+        sample: sample name, corresponds to case_id
+        fastq_r1: list of all fastq read1 files corresponding to case_id
+        fastq_r2: list of all fastq read2 files corresponding to case_id
     """
 
-    config: BalsamicConfigJSON
-    sample_metrics: Dict[str, BalsamicQCMetrics]
+    sample: str
+    fastq_r1: list
+    fastq_r2: list
+
+    @validator("fastq1")
+    def fastq1_fastq2_len_match(cls, value: list, values: dict) -> str:
+        assert len(value) == len(values.get("fastq_r2")) or len(values.get("fastq_r2")) == 0
+        return value

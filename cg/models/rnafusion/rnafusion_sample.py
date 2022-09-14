@@ -1,20 +1,16 @@
-from typing import Dict
-from pydantic import BaseModel, ValidationError, validator
-
-from cg.models.analysis import AnalysisModel
+from cg.models.nextflow.sample import NextflowSample, validator
 
 
-class NextflowSample(BaseModel):
-    """Nextflow samplesheet model
+class RnafusionSample(NextflowSample):
+    """Rnafusion sample model
 
     Attributes:
-        sample: balsamic config file attributes model
-        sample_metrics: retrieved QC metrics associated to a sample
+        strandedness: balsamic config file attributes model
     """
 
-    sampleID: str
-    fastq1: list
-    fastq2: list
+    strandedness: str
 
-    @validator('bla')
-    def fastq1_fastq2_len_match(fastq1, fastq2):
+    @validator("strandedness")
+    def valid_value_strandedness(cls, value: str):
+        assert value in ["reverse", "forward", "unstranded"]
+        return value
