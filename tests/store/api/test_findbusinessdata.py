@@ -21,7 +21,6 @@ def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
     assert db_analysis == analysis
 
 
-
 def test_get_latest_flow_cell_on_case(
     re_sequenced_sample_store: Store, case_id: str, flowcell_name: str
 ):

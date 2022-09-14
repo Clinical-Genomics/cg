@@ -193,18 +193,20 @@ class UploadScoutAPI:
         report_type: str = "Research" if research else "Clinical"
         rna_case: models.Family = status_db.family(case_id)
 
-        map_dict = self.create_rna_dna_mapper(rna_case=rna_case)
-        unique_dna_cases = set()
-        for rna_key in map_dict.keys():
-            fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
-            if fusion_report is None:
-                raise FileNotFoundError(
-                    f"{report_type} fusion report was not found in housekeeper for {case_id}"
-                )
+        rna_to_dna_mapper: Dict[str, Dict[str, list]] = self.create_rna_dna_mapper(
+            rna_case=rna_case
+        )
+        unique_dna_cases: Set[str] = set()
+        fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
+        if fusion_report is None:
+            raise FileNotFoundError(
+                f"{report_type} fusion report was not found in housekeeper for {case_id}"
+            )
 
-            LOG.info(f"{report_type} fusion report {fusion_report.path} found")
-            dna_sample_id, case_list = map_dict[rna_key].popitem()
-            unique_dna_cases.update(case_list)
+        LOG.info(f"{report_type} fusion report {fusion_report.path} found")
+        for rna_sample_id in rna_to_dna_mapper.keys():
+            dna_sample_id, dna_case_list = rna_to_dna_mapper[rna_sample_id].popitem()
+            unique_dna_cases.update(dna_case_list)
 
         for dna_case_id in unique_dna_cases:
             LOG.info(f"Uploading {report_type} fusion report to scout for case {dna_case_id}")
@@ -239,8 +241,8 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case = status_db.family(case_id)
 
-        map_dict = self.create_rna_dna_mapper(rna_case=rna_case)
-        for rna_sample_id in map_dict.keys():
+        rna_to_dna_mapper = self.create_rna_dna_mapper(rna_case=rna_case)
+        for rna_sample_id in rna_to_dna_mapper.keys():
             rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
             )
@@ -252,8 +254,8 @@ class UploadScoutAPI:
 
             LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found")
 
-            dna_sample_id, case_list = map_dict[rna_sample_id].popitem()
-            for dna_case_id in case_list:
+            dna_sample_id, dna_case_list = rna_to_dna_mapper[rna_sample_id].popitem()
+            for dna_case_id in dna_case_list:
                 LOG.info(
                     f"Uploading RNA coverage bigwig file for {dna_sample_id} in case {dna_case_id} in scout"
                 )
@@ -288,8 +290,8 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case: models.Family = status_db.family(case_id)
 
-        map_dict = self.create_rna_dna_mapper(rna_case=rna_case)
-        for rna_sample_id in map_dict.keys():
+        rna_to_dna_mapper = self.create_rna_dna_mapper(rna_case=rna_case)
+        for rna_sample_id in rna_to_dna_mapper.keys():
             splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
             )
@@ -301,8 +303,8 @@ class UploadScoutAPI:
 
             LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
 
-            dna_sample_id, case_list = map_dict[rna_sample_id].popitem()
-            for dna_case_id in case_list:
+            dna_sample_id, dna_case_list = rna_to_dna_mapper[rna_sample_id].popitem()
+            for dna_case_id in dna_case_list:
                 LOG.info(
                     f"Uploading splice junctions bed file for sample {dna_sample_id} in case {dna_case_id} in scout"
                 )
@@ -378,7 +380,17 @@ class UploadScoutAPI:
         return config_builders[analysis.pipeline]
 
     def create_rna_dna_mapper(self, rna_case: models.Family) -> Dict[str, Dict[str, list]]:
-        map_dict = {}
+        """Build nested relationship dictionary for DNA samples and their DNA cases based on each RNA sample
+        subject_id in a case. This allows for upload of all RNA samples in an RNA case to all matching DNA samples in
+        multiple DNA cases. Example dict row: {rna_sample_id : {dna_sample_id : [dna_case_1, dna_case_2]}}. For a
+        trio of RNA samples matching a trio of DNA samples, it would have three of these rows.
+
+        Args:
+            rna_case     (models.Family):           Case
+        Returns:
+            rna_to_dna_mapper     (Dict):       rna-dna relationships, and corresponding dna cases based on subject id
+        """
+        rna_to_dna_mapper = {}
         for link in rna_case.links:
             rna_sample = link.sample
             if not rna_sample.subject_id:
@@ -386,42 +398,49 @@ class UploadScoutAPI:
                     f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
                 )
 
-            map_dict[rna_sample.internal_id] = {}
+            rna_to_dna_mapper[rna_sample.internal_id] = {}
             matching_samples = self.status_db.samples_by_subject_id(
                 customer_id=rna_case.customer.internal_id,
                 subject_id=rna_sample.subject_id,
                 is_tumour=rna_sample.is_tumour,
             )
+            if len(matching_samples.all()) > 2:
+                raise CgDataError(
+                    "Failed to upload files for RNA case: multiple DNA samples linked to it via subject_id"
+                )
 
             sample: models.Sample
             for sample in matching_samples:
-                if sample == rna_sample:
+                if sample.internal_id == rna_sample.internal_id:
                     continue
-                map_dict[rna_sample.internal_id][sample.name] = []
+                rna_to_dna_mapper[rna_sample.internal_id][sample.name] = []
                 for link in sample.links:
                     case_object: models.Family = link.family
-                    if (
-                        case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
-                    ):
-                        map_dict[rna_sample.internal_id][sample.name].append(
+                    if case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+                        rna_to_dna_mapper[rna_sample.internal_id][sample.name].append(
                             case_object.internal_id
                         )
-        map_dict_error = self.map_dict_correct(map_dict=map_dict)
-        if not map_dict_error:
+        rna_to_dna_mapper_error = self.rna_to_dna_mapper_correct(
+            rna_to_dna_mapper=rna_to_dna_mapper
+        )
+        if not rna_to_dna_mapper_error:
             raise CgDataError()
 
-        return map_dict
+        return rna_to_dna_mapper
 
-    def map_dict_correct(self, map_dict: Dict[str, Dict[str, list]]) -> bool:
-        for rna_sample, dna_dict in map_dict.items():
-            if not map_dict[rna_sample]:
+    def rna_to_dna_mapper_correct(self, rna_to_dna_mapper: Dict[str, Dict[str, list]]) -> bool:
+        """While executing create_rna_dna_mapper: Check whether no DNA samples were found based on subject_id of the
+        RNA sample.
+
+        Args:
+            rna_to_dna_mapper     (Dict):       rna-dna relationships, and corresponding dna cases based on subject id
+        Returns:
+            bool                  (True)        True or it will raise CgDataError
+        """
+        for rna_sample, dna_dict in rna_to_dna_mapper.items():
+            if not rna_to_dna_mapper[rna_sample]:
                 raise CgDataError(
-                    "Failed to upload files for RNA case: no DNA cases linked to it via subject_id"
+                    "Failed to upload files for RNA case: no DNA samples linked to it via subject_id"
                 )
-
-        if len(map_dict.items()) != len(map_dict.keys()):
-            raise CgDataError(
-                "Aborting upload files for RNA case: multiple DNA samples linked to it via subject_id"
-            )
 
         return True

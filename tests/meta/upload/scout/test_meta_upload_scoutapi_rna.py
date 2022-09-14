@@ -372,7 +372,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that an RNA case's gene fusion report is uploaded to all DNA matches connected by subject ID"""
+    """Test that an RNA case's gene fusion report is not uploaded if the is_tumour has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
     ensure_two_dna_tumour_matches(
@@ -386,10 +386,9 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
 
-    # THEN the log should contain the RNA case and all matching DNA cases
-    upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
-
-    assert all(case.internal_id in caplog.text for case in all_cases)
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_fusion_report_to_scout(case_id=rna_case_id, dry_run=True)
 
 
 def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
@@ -402,7 +401,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that A RNA case's gene fusion report and junction splice files are uploaded to the sample in the additional case"""
+    """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
     ensure_two_dna_tumour_matches(
@@ -415,10 +414,9 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
 
-    # THEN the log should contain the extra sample of the second case
-    upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
-
-    assert extra_tumour_sample_id in caplog.text
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
 
 
 def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
@@ -431,7 +429,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that A RNA case's junction splice files are uploaded to the sample in the additional case"""
+    """Test that A RNA case's junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
     ensure_two_dna_tumour_matches(
@@ -444,7 +442,6 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
 
-    # THEN the log should contain the extra sample of the second case
-    upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
-
-    assert extra_tumour_sample_id in caplog.text
+    # THEN an exception should be raised on unconnected data
+    with pytest.raises(CgDataError):
+        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
