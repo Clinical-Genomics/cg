@@ -231,8 +231,6 @@ class CaseSubmitter(Submitter):
 
             self._update_case(case, case_obj)
 
-
-
             family_samples = {}
             for sample in case["samples"]:
                 sample_obj = self.status.sample(sample["internal_id"])

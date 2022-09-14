@@ -699,7 +699,6 @@ def test_store_existing_single_sample_from_trio(
     assert not new_families[0].links[0].father
 
 
-
 def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
@@ -720,7 +719,9 @@ def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
     new_families = base_store.families().all()
 
     # Save internal id
-    stored_cases_internal_ids = dict([(family["name"], family["internal_id"]) for family in new_families])
+    stored_cases_internal_ids = dict(
+        [(family["name"], family["internal_id"]) for family in new_families]
+    )
     for family in mip_status_data["families"]:
         family["internal_id"] = stored_cases_internal_ids[family["name"]]
 
@@ -739,8 +740,3 @@ def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
     assert rerun_families[0].tickets == f"{ticket},{new_ticket}"
     assert rerun_families[0].action == "analyze"
-
-
-
-
-
