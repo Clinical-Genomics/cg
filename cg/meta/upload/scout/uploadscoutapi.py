@@ -416,7 +416,10 @@ class UploadScoutAPI:
                 rna_to_dna_mapper[rna_sample.internal_id][sample.name] = []
                 for link in sample.links:
                     case_object: models.Family = link.family
-                    if case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+                    if (
+                        case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+                        and case_object.customer_id == rna_case.customer_id
+                    ):
                         rna_to_dna_mapper[rna_sample.internal_id][sample.name].append(
                             case_object.internal_id
                         )
