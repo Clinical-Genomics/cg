@@ -148,91 +148,17 @@ def rnafusion_reference_path(rnafusion_dir: Path) -> str:
 #     return housekeeper_api
 #
 #
-# @pytest.fixture(name="balsamic_lims")
-# def balsamic_lims(context_config: dict) -> MockLimsAPI:
-#     """Create populated mock LIMS api to mimic all functionality of LIMS used by BALSAMIC"""
-#
-#     balsamic_lims = MockLimsAPI(context_config)
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wgs_paired_tumor",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wgs_paired_normal",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_paired_tumor",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_paired_normal",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wgs_single_tumor",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_single_tumor",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_single_normal_error",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_paired_tumor_error",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_paired_tumor2_error",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_tgs_paired_normal_error",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="mixed_sample_case_wgs_paired_tumor_error",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="mixed_sample_case_tgs_paired_normal_error",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
-#         capture_kit="BalsamicBed1",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
-#         capture_kit="BalsamicBed2",
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wes_tumor",
-#         capture_kit="BalsamicBed2",
-#     )
-#
-#     balsamic_lims.add_capture_kit(
-#         internal_id="mip_sample_case_wgs_single_tumor",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wgs_paired_two_normal_tumor_error",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wgs_paired_two_normal_normal1_error",
-#         capture_kit=None,
-#     )
-#     balsamic_lims.add_capture_kit(
-#         internal_id="sample_case_wgs_paired_two_normal_normal2_error",
-#         capture_kit=None,
-#     )
-#
-#     return balsamic_lims
-#
+@pytest.fixture(name="rnafusion_lims")
+def balsamic_lims(context_config: dict) -> MockLimsAPI:
+    """Create populated mock LIMS api to mimic all functionality of LIMS used by RNAFUSION"""
+
+    rnafusion_lims = MockLimsAPI(context_config)
+    rnafusuion_lims.add_capture_kit(
+        internal_id="sample_rnafusion",
+        capture_kit=None,
+    )
+    return rnafusion_lims
+
 #
 @pytest.fixture(scope="function", name="rnafusion_context")
 def fixture_rnafusion_context(
