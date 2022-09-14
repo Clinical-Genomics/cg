@@ -1262,7 +1262,7 @@ def fixture_context_config(
         },
         "rnafusion": {
             "root": str(rnafusion_dir),
-            "references_path": "/path/to/references",
+            "references": "/path/to/references",
             "binary_path": "/path/to/bin",
             "pipeline_path": "/pipeline/path",
             "conda_env": "S_RNAFUSION",
