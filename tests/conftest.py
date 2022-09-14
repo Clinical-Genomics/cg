@@ -1261,7 +1261,7 @@ def fixture_context_config(
             "binary_path": "/path/to/bin",
             "pipeline_path": "/pipeline/path",
             "conda_env": "S_RNAFUSION",
-            "profile": "pyprofile",
+            "profile": "myprofile",
         },
         "crunchy": {
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
