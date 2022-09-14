@@ -21,3 +21,4 @@ def test_no_options(cli_runner: CliRunner, base_context: CGConfig):
     assert "microsalt" in result.output
     assert "mip-dna" in result.output
     assert "mip-rna" in result.output
+    assert "rnafusion" in result.output

@@ -68,3 +68,18 @@ def test_cli_workflow_clean_mutant(
 
     # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
+
+
+def test_cli_workflow_clean_rnafusion(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    before_date: str,
+):
+
+    # GIVEN a before string
+
+    # WHEN running command in dry-run
+    result = cli_runner.invoke(rnafusion_past_run_dirs, [before_date], obj=base_context)
+
+    # THEN command should terminate successfully
+    assert result.exit_code == EXIT_SUCCESS
