@@ -21,9 +21,9 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="rnafusion_dir")
-def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
+def rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the rnafusion apps dir"""
-    balsamic_dir = tmpdir_factory.mktemp("rnafusion")
+    rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
     return Path(rnafusion_dir).absolute().as_posix()
 
 
@@ -32,48 +32,19 @@ def fixture_rnafusion_case_id() -> str:
     return "rnafusion_case_id"
 
 
-#
-# @pytest.fixture(name="balsamic_housekeeper_dir")
-# def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
-#     """Return the path to the balsamic housekeeper bundle dir."""
-#     return tmpdir_factory.mktemp("bundles")
-#
-#
-# @pytest.fixture(name="balsamic_singularity_path")
-# def balsamic_singularity_path(balsamic_dir: Path) -> str:
-#     balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
-#     balsamic_singularity_path.touch(exist_ok=True)
-#     return balsamic_singularity_path.as_posix()
-#
-#
-# @pytest.fixture(name="balsamic_reference_path")
-# def balsamic_reference_path(balsamic_dir: Path) -> str:
-#     balsamic_reference_path = Path(balsamic_dir, "reference.json")
-#     balsamic_reference_path.touch(exist_ok=True)
-#     return balsamic_reference_path.as_posix()
-#
-#
-# @pytest.fixture(name="balsamic_pon_1_path")
-# def balsamic_pon_1_path(balsamic_dir: Path) -> str:
-#     balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
-#     balsamic_reference_path.touch(exist_ok=True)
-#     return balsamic_reference_path.as_posix()
-#
-#
-# @pytest.fixture(name="balsamic_bed_1_path")
-# def balsamic_bed_1_path(balsamic_dir: Path) -> str:
-#     balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
-#     balsamic_bed_1_path.touch(exist_ok=True)
-#     return balsamic_bed_1_path.as_posix()
-#
-#
-# @pytest.fixture(name="balsamic_bed_2_path")
-# def balsamic_bed_2_path(balsamic_dir: Path) -> str:
-#     balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
-#     balsamic_bed_2_path.touch(exist_ok=True)
-#     return balsamic_bed_2_path.as_posix()
-#
-#
+@pytest.fixture(name="rnafusion_housekeeper_dir")
+def rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
+    """Return the path to the rnafusion housekeeper bundle dir."""
+    return tmpdir_factory.mktemp("bundles")
+
+
+@pytest.fixture(name="rnafusion_reference_path")
+def rnafusion_reference_path(rnafusion_dir: Path) -> str:
+    rnafusion_reference_path = Path(rnafusion_dir, "references")
+    rnafusion_reference_path.touch(exist_ok=True)
+    return rnafusion_reference_path.as_posix()
+
+
 # @pytest.fixture
 # def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> str:
 #     fastq_filename = Path(
@@ -112,48 +83,7 @@ def fixture_rnafusion_case_id() -> str:
 #     with gzip.open(fastq_filename, "wb") as wh:
 #         wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
 #     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_1_r_2(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_2_r_2(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R2_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:2:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_3_r_2(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R2_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:3:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_4_r_2(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R2_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
+
 # @pytest.fixture
 # def balsamic_mock_fastq_files(
 #     fastq_file_l_1_r_1: Path,
