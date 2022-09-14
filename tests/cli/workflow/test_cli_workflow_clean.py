@@ -5,6 +5,7 @@ from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     mip_past_run_dirs,
     mutant_past_run_dirs,
+    rnafusion_past_run_dirs,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
