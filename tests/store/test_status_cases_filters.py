@@ -13,6 +13,7 @@ from cg.store.status_case_filters import (
     filter_cases_for_analysis,
     filter_cases_with_scout_data_delivery,
     filter_report_supported_data_delivery_cases,
+    filter_cases_with_pipeline_loqusdb,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -144,7 +145,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
 
     # GIVEN a cancer case
-    test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
+    test_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
@@ -157,6 +158,35 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
 
     # THEN cases should not contain the test case
     assert not cases
+
+
+def test_filter_cases_with_pipeline_loqusdb(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
+    """Test retrieval of cases that support Loqusdb upload."""
+
+    # GIVEN a sequenced sample
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
+
+    # GIVEN a MIP-DNA and a FLUFFY case
+    test_mip_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_fluffy_case: models.Family = helpers.add_case(
+        base_store, name="test", data_analysis=Pipeline.FLUFFY
+    )
+
+    # GIVEN a database with a case with one sequenced samples for specified analysis
+    base_store.relate_sample(test_mip_case, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_fluffy_case, test_sample, Gender.UNKNOWN)
+
+    # GIVEN a cases Query
+    cases: Query = base_store.get_families_with_analyses()
+
+    # WHEN getting cases with pipeline
+    cases: List[Query] = list(filter_cases_with_pipeline_loqusdb(cases=cases))
+
+    # THEN only the Loqusdb supported case should be extracted
+    assert test_mip_case in cases
+    assert test_fluffy_case not in cases
 
 
 def test_filter_cases_for_analysis(

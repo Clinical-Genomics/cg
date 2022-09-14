@@ -5,12 +5,13 @@ from typing import List, Optional, Tuple
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline, DataDelivery
+from cg.constants import CASE_ACTIONS, Pipeline
 from cg.constants.constants import CaseActions
 from cg.store import models
 from cg.store.status_analysis_filters import apply_analysis_filter
-from cg.store.status_case_filters import apply_filter
+from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
+from cg.store.status_sample_filters import apply_sample_filter
 
 
 class StatusHandler(BaseHandler):
@@ -84,7 +85,7 @@ class StatusHandler(BaseHandler):
             "filter_cases_for_analysis",
         ]
         for filter_function in filter_functions:
-            cases = apply_filter(function=filter_function, cases=cases, pipeline=pipeline)
+            cases = apply_case_filter(function=filter_function, cases=cases, pipeline=pipeline)
 
         families: List[Query] = list(cases.order_by(models.Family.ordered_at))
         families = [
@@ -594,19 +595,27 @@ class StatusHandler(BaseHandler):
         records = records.filter(models.Analysis.started_at <= before)
         return records
 
-    def observations_to_upload(self):
-        """Fetch observations that haven't been uploaded."""
-
-        return self.Family.query.join(
+    def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
+        """Fetch observations that have not been uploaded."""
+        records: Query = self.Family.query.join(
             models.Analysis, models.Family.links, models.FamilySample.sample
-        ).filter(models.Sample.loqusdb_id.is_(None))
-
-    def observations_uploaded(self) -> Query:
-        """Fetch observations that have been uploaded."""
-
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.loqusdb_id.isnot(None)
         )
+        records: Query = apply_case_filter(
+            function="cases_with_pipeline_loqusdb", cases=records, pipeline=pipeline
+        )
+        records: Query = apply_sample_filter(
+            function="samples_not_uploaded_to_loqusdb", samples=records
+        )
+        return records
+
+    def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
+        """Fetch observations that have been uploaded."""
+        records = self.Family.query.join(models.Family.links, models.FamilySample.sample)
+        records: Query = apply_case_filter(
+            function="cases_with_pipeline_loqusdb", cases=records, pipeline=pipeline
+        )
+        records: Query = apply_sample_filter("samples_uploaded_to_loqusdb", samples=records)
+        return records
 
     def analyses_to_deliver(self, pipeline: Pipeline = None) -> Query:
         """Fetch analyses that have been uploaded but not delivered."""
@@ -629,7 +638,7 @@ class StatusHandler(BaseHandler):
             "filter_report_cases_with_valid_data_delivery",
         ]
         for filter_function in case_filter_functions:
-            records: Query = apply_filter(
+            records: Query = apply_case_filter(
                 function=filter_function, cases=records, pipeline=pipeline
             )
 
@@ -655,7 +664,7 @@ class StatusHandler(BaseHandler):
             "cases_with_scout_data_delivery",
         ]
         for filter_function in case_filter_functions:
-            records: Query = apply_filter(
+            records: Query = apply_case_filter(
                 function=filter_function, cases=records, pipeline=pipeline
             )
 

@@ -1,8 +1,10 @@
 """Tests the status part of the cg.store.api"""
 from datetime import datetime, timedelta
 
+from alchy import Query
+
 from cg.constants import Pipeline, Priority, DataDelivery
-from cg.store import Store
+from cg.store import Store, models
 from cg.store.models import Application, Family, Sample
 
 
@@ -57,68 +59,72 @@ def test_samples_to_sequence(sample_store):
 
 
 def test_case_in_uploaded_observations(helpers, sample_store):
-    # GIVEN a case with observations that has been uploaded to loqusdb
-    analysis = helpers.add_analysis(store=sample_store)
+    """Test retrieval of uploaded observations."""
 
-    sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
+    # GIVEN a case with observations that has been uploaded to Loqusdb
+    analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqusdb")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
 
     # WHEN getting observations to upload
-    uploaded_observations = sample_store.observations_uploaded()
+    uploaded_observations: Query = sample_store.observations_uploaded()
 
     # THEN the case should be in the returned collection
     assert analysis.family in uploaded_observations
 
 
 def test_case_not_in_uploaded_observations(helpers, sample_store):
-    # GIVEN a case with observations that has not been uploaded to loqusdb
-    analysis = helpers.add_analysis(store=sample_store)
+    """Test retrieval of uploaded observations that have not been uploaded to Loqusdb."""
 
-    sample = helpers.add_sample(sample_store)
+    # GIVEN a case with observations that has not been uploaded to loqusdb
+    analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    sample: models.Sample = helpers.add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
 
     # WHEN getting observations to upload
-    uploaded_observations = sample_store.observations_uploaded()
+    uploaded_observations: Query = sample_store.observations_uploaded()
 
     # THEN the case should not be in the returned collection
     assert analysis.family not in uploaded_observations
 
 
 def test_case_in_observations_to_upload(helpers, sample_store):
-    # GIVEN a case with completed analysis and samples w/o loqusdb_id
-    analysis = helpers.add_analysis(store=sample_store)
+    """Test extraction of ready to be uploaded to Loqusdb cases."""
 
-    sample = helpers.add_sample(sample_store)
+    # GIVEN a case with completed analysis and samples w/o loqusdb_id
+    analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    sample: models.Sample = helpers.add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
 
     # WHEN getting observations to upload
-    observations_to_upload = sample_store.observations_to_upload()
+    observations_to_upload: Query = sample_store.observations_to_upload()
 
     # THEN the case should be in the returned collection
     assert analysis.family in observations_to_upload
 
 
 def test_case_not_in_observations_to_upload(helpers, sample_store):
-    # GIVEN a case with completed analysis and samples w loqusdb_id
-    analysis = helpers.add_analysis(store=sample_store)
+    """Test case extraction that should not be uploaded to Loqusdb."""
 
-    sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
+    # GIVEN a case with completed analysis and samples w loqusdb_id
+    analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, "unknown")
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
 
     # WHEN getting observations to upload
-    observations_to_upload = sample_store.observations_to_upload()
+    observations_to_upload: Query = sample_store.observations_to_upload()
 
     # THEN the case should not be in the returned collection
     assert analysis.family not in observations_to_upload
