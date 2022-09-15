@@ -45,115 +45,65 @@ def rnafusion_reference_path(rnafusion_dir: Path) -> str:
     return rnafusion_reference_path.as_posix()
 
 
-# @pytest.fixture
-# def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_2_r_1(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L002_R1_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:2:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_3_r_1(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L003_R1_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:3:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
-#
-#
-# @pytest.fixture
-# def fastq_file_l_4_r_1(balsamic_housekeeper_dir: Path) -> str:
-#     fastq_filename = Path(
-#         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L004_R1_001.fastq.gz"
-#     ).as_posix()
-#     with gzip.open(fastq_filename, "wb") as wh:
-#         wh.write(b"@A00689:73:XXXXXXXXX:4:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
-#     return fastq_filename
+@pytest.fixture
+def fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
+    fastq_filename = Path(
+        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
 
-# @pytest.fixture
-# def balsamic_mock_fastq_files(
-#     fastq_file_l_1_r_1: Path,
-#     fastq_file_l_1_r_2: Path,
-#     fastq_file_l_2_r_1: Path,
-#     fastq_file_l_2_r_2: Path,
-#     fastq_file_l_3_r_1: Path,
-#     fastq_file_l_3_r_2: Path,
-#     fastq_file_l_4_r_1: Path,
-#     fastq_file_l_4_r_2: Path,
-# ) -> list:
-#     """Return list of all mock fastq files to commmit to mock housekeeper"""
-#     return [
-#         fastq_file_l_1_r_1,
-#         fastq_file_l_1_r_2,
-#         fastq_file_l_2_r_1,
-#         fastq_file_l_2_r_2,
-#         fastq_file_l_3_r_1,
-#         fastq_file_l_3_r_2,
-#         fastq_file_l_4_r_1,
-#         fastq_file_l_4_r_2,
-#     ]
-#
-#
-# @pytest.fixture(scope="function", name="balsamic_housekeeper")
-# def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: list):
-#     """Create populated housekeeper that holds files for all mock samples"""
-#
-#     samples = [
-#         "sample_case_wgs_paired_tumor",
-#         "sample_case_wgs_paired_normal",
-#         "sample_case_tgs_paired_tumor",
-#         "sample_case_tgs_paired_normal",
-#         "sample_case_wgs_single_tumor",
-#         "sample_case_tgs_single_tumor",
-#         "sample_case_tgs_single_normal_error",
-#         "sample_case_tgs_paired_tumor_error",
-#         "sample_case_tgs_paired_tumor2_error",
-#         "sample_case_tgs_paired_normal_error",
-#         "mixed_sample_case_wgs_paired_tumor_error",
-#         "mixed_sample_case_tgs_paired_normal_error",
-#         "mixed_sample_case_mixed_bed_paired_tumor_error",
-#         "mixed_sample_case_mixed_bed_paired_normal_error",
-#         "mip_sample_case_wgs_single_tumor",
-#         "sample_case_wgs_paired_two_normal_tumor_error",
-#         "sample_case_wgs_paired_two_normal_normal1_error",
-#         "sample_case_wgs_paired_two_normal_normal2_error",
-#         "sample_case_wes_panel_error",
-#         "sample_case_wes_tumor",
-#     ]
-#
-#     for sample in samples:
-#         bundle_data = {
-#             "name": sample,
-#             "created": dt.datetime.now(),
-#             "version": "1.0",
-#             "files": [
-#                 {"path": f, "tags": ["fastq"], "archive": False} for f in balsamic_mock_fastq_files
-#             ],
-#         }
-#         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
-#     return housekeeper_api
-#
-#
+
+@pytest.fixture
+def fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
+    fastq_filename = Path(
+        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture
+def rnafusion_mock_fastq_files(
+    fastq_file_l_1_r_1: Path,
+    fastq_file_l_1_r_2: Path,
+) -> list:
+    """Return list of all mock fastq files to commmit to mock housekeeper"""
+    return [
+        fastq_file_l_1_r_1,
+        fastq_file_l_1_r_2,
+    ]
+
+
+@pytest.fixture(scope="function", name="rnafusion_housekeeper")
+def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_files: list):
+    """Create populated housekeeper that holds files for all mock samples"""
+
+    samples = [
+        "sample_rnafusion",
+    ]
+
+    for sample in samples:
+        bundle_data = {
+            "name": sample,
+            "created": dt.datetime.now(),
+            "version": "1.0",
+            "files": [
+                {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
+            ],
+        }
+        helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    return housekeeper_api
+
+
 @pytest.fixture(name="rnafusion_lims")
 def balsamic_lims(context_config: dict) -> MockLimsAPI:
     """Create populated mock LIMS api to mimic all functionality of LIMS used by RNAFUSION"""
 
     rnafusion_lims = MockLimsAPI(context_config)
-    rnafusuion_lims.add_capture_kit(
+    rnafusion_lims.add_capture_kit(
         internal_id="sample_rnafusion",
         capture_kit=None,
     )
@@ -177,12 +127,38 @@ def fixture_rnafusion_context(
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
-    sample_rnafusion = helpers.add_sample(
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id="no_sample_case", name="no_sample_case")
+
+    # sample_rnafusion = helpers.add_sample(
+    #     status_db,
+    #     internal_id="sample_rnafusion",
+    #     reads=10,
+    #     sequenced_at=dt.datetime.now(),
+    # )
+
+    # Create textbook case for with enough reads
+    case_rnafusion_enough_reads = helpers.add_case(
+        store=status_db,
+        internal_id="case_rnafusion_enough_reads",
+        name="case_rnafusion_enough_reads",
+        data_analysis=Pipeline.RNAFUSION,
+    )
+
+    sample_rnafusion_case_enough_reads = helpers.add_sample(
         status_db,
-        internal_id="sample_rnafusion",
+        internal_id="sample_rnafusion_case_enough_reads",
         reads=10,
         sequenced_at=dt.datetime.now(),
     )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_rnafusion_enough_reads,
+        sample=sample_rnafusion_case_enough_reads,
+    )
+
     return cg_context
 
 
