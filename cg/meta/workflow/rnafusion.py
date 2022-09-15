@@ -246,9 +246,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
         self.make_case_folder(case_id)
-        if not (self.get_case_config_path(case_id)).is_file():
-            LOG.info("Samplesheet does not exist, writing samplesheet")
-            self.write_samplesheet(case_id, strandedness)
+        self.write_samplesheet(case_id, strandedness)
         LOG.info("Samplesheet written")
 
     def run_analysis(
