@@ -1,13 +1,13 @@
 import click
-from cg.constants.constants import STRANDEDNESS_DEFAULT
+from cg.constants.constants import RNAFUSION_STRANDEDNESS_DEFAULT
 
 
 OPTION_STRANDEDNESS = click.option(
     "--strandedness",
     type=str,
-    default=STRANDEDNESS_DEFAULT,
+    default=RNAFUSION_STRANDEDNESS_DEFAULT,
     show_default=True,
-    help="Strandedness: forward or reverse (default)",
+    help="Strandedness: forward, unstranded or reverse (default)",
 )
 
 OPTION_REFERENCES = click.option(
