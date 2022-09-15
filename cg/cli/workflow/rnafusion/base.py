@@ -14,7 +14,6 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_OUTDIR,
 )
 from cg.cli.workflow.rnafusion.options import (
-    OPTION_STRANDEDNESS,
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
     OPTION_TRIM,
@@ -64,6 +63,7 @@ def config_case(
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+
     try:
         LOG.info(f"Creating samplesheet file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
