@@ -74,7 +74,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return Path((self.get_case_path(case_id)), case_id + "_samplesheet.csv")
 
     def make_case_folder(self, case_id: str) -> None:
-        """Make the case folder where rnafusion analysis should be located."""
+        """Make the case folder where analysis should be located."""
         os.makedirs(self.get_case_path(case_id), exist_ok=True)
 
     def extract_read_files(self, read_nb: int, metadata: list) -> list:
