@@ -1,4 +1,4 @@
-SBATCH_HEADER_TEMPLATE = """#! /bin/bash
+SBATCH_HEADER_TEMPLATE = """#! /bin/bash {use_login_shell}
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={number_tasks}
