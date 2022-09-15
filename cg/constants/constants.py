@@ -75,7 +75,9 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
-STRANDEDNESS_DEFAULT = "reverse"
+RNAFUSION_STRANDEDNESS_DEFAULT = "reverse"
+
+RNAFUSION_ACCEPTED_STRANDEDNESS = ["forward", "reverse", "unstranded"]
 
 NFX_WORK_DIR = "work"
 
