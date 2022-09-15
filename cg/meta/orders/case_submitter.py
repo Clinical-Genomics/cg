@@ -5,6 +5,7 @@ from typing import List, Set
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
+from cg.constants.constants import CaseActions
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -226,8 +227,8 @@ class CaseSubmitter(Submitter):
                 case_obj = self._create_case(case, customer_obj, ticket)
                 new_families.append(case_obj)
             else:
-                self._append_ticket(ticket, case_obj)
-                self._update_action("analyze", case_obj)
+                self._append_ticket(ticket=ticket, case=case_obj)
+                self._update_action(action=CaseActions.ANALYZE, case=case_obj)
 
             self._update_case(case, case_obj)
 
@@ -261,12 +262,14 @@ class CaseSubmitter(Submitter):
         case_obj.panels = case["panels"]
 
     @staticmethod
-    def _append_ticket(ticket, case_obj):
-        case_obj.tickets = f"{case_obj.tickets},{ticket}"
+    def _append_ticket(ticket: str, case: models.Family) -> None:
+        """Add a ticket to the case."""
+        case.tickets = f"{case.tickets},{ticket}"
 
     @staticmethod
-    def _update_action(action, case_obj):
-        case_obj.action = action
+    def _update_action(action: str, case: models.Family) -> None:
+        """Update action of a case"""
+        case.action = action
 
     @staticmethod
     def _update_relationship(father_obj, link_obj, mother_obj, sample):

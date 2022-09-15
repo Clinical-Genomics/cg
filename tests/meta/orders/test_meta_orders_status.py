@@ -4,6 +4,7 @@ from copy import deepcopy
 import pytest
 
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.constants import CaseActions
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
@@ -17,6 +18,8 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
+from cg.meta.orders import OrdersAPI
+from cg.store import Store
 
 from cg.constants import Priority
 
@@ -699,7 +702,9 @@ def test_store_existing_single_sample_from_trio(
     assert not new_families[0].links[0].father
 
 
-def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
+def test_store_rerun_case(
+    orders_api: OrdersAPI, base_store: Store, mip_status_data: dict, ticket: str
+):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert base_store.samples().first() is None
     assert base_store.families().first() is None
@@ -707,7 +712,7 @@ def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_families = submitter.store_items_in_status(
+    new_cases = submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
@@ -716,17 +721,16 @@ def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
     )
 
     base_store.close()
-    new_families = base_store.families().all()
+    new_cases = base_store.families().all()
 
     # Save internal id
-    stored_cases_internal_ids = dict(
-        [(family["name"], family["internal_id"]) for family in new_families]
-    )
-    for family in mip_status_data["families"]:
-        family["internal_id"] = stored_cases_internal_ids[family["name"]]
+    stored_cases_internal_ids = dict([(case["name"], case["internal_id"]) for case in new_cases])
+    for case in mip_status_data["families"]:
+        case["internal_id"] = stored_cases_internal_ids[case["name"]]
 
     new_ticket = "234567"
-    rerun_families = submitter.store_items_in_status(
+
+    rerun_cases = submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
@@ -735,8 +739,8 @@ def test_store_rerun_case(orders_api, base_store, mip_status_data, ticket: str):
     )
 
     base_store.close()
-    rerun_families = base_store.families().all()
+    rerun_cases = base_store.families().all()
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
-    assert rerun_families[0].tickets == f"{ticket},{new_ticket}"
-    assert rerun_families[0].action == "analyze"
+    assert rerun_cases[0].tickets == f"{ticket},{new_ticket}"
+    assert rerun_cases[0].action == CaseActions.ANALYZE
