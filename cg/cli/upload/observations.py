@@ -21,7 +21,7 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("observations")
 @ARGUMENT_CASE_ID
 @click.option("--dry-run", is_flag=True, help="Only prints the existing case to be processed")
 @click.pass_obj
@@ -46,7 +46,7 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
     LOG.info(f"Observations uploaded for case: {case.internal_id}")
 
 
-@click.command()
+@click.command("available-observations")
 @click.option(
     "--pipeline",
     type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),

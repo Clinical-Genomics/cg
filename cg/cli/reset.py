@@ -19,7 +19,7 @@ def reset_cmd():
     pass
 
 
-@reset_cmd.command()
+@reset_cmd.command("observations")
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def observations(context: CGConfig, case_id: str):
@@ -44,7 +44,7 @@ def observations(context: CGConfig, case_id: str):
     LOG.info(f"Reset Loqusdb observations for {case.internal_id}")
 
 
-@reset_cmd.command()
+@reset_cmd.command("available-observations")
 @click.option(
     "--pipeline",
     type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
