@@ -4,17 +4,11 @@ import logging
 from pathlib import Path
 from typing import List
 import pandas as pd
-import os
-import operator
-import csv
 
 from cg.io.controller import WriteFile
-from pydantic import ValidationError
-from cg.constants import DataDelivery, Pipeline
-from cg.constants.constants import CaseActions
+from cg.constants import Pipeline
 from cg.constants.constants import (
-    STRANDEDNESS_DEFAULT,
-    NFX_WORK_DIR,
+    RNAFUSION_STRANDEDNESS_DEFAULT,
     RNAFUSION_SAMPLESHEET_HEADERS,
     NFX_SAMPLE_HEADER,
     NFX_READ1_HEADER,
@@ -23,11 +17,13 @@ from cg.constants.constants import (
 )
 
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
 from cg import resources
-from datetime import datetime
+from pydantic import ValidationError
 from subprocess import CalledProcessError
 from cg.constants.constants import FileFormat
 
@@ -65,26 +61,26 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             self._process = Process(self.config.rnafusion.binary_path, "", "", self.conda_env)
         return self._process
 
-    def get_case_path(self, case_id: str) -> Path:
-        """Returns a path where the rnafusion case should be located."""
-        return Path(self.root_dir, case_id)
+    def get_profile(self, profile: str = None) -> str:
+        if profile:
+            return profile
+        return self.profile
 
-    def get_case_config_path(self, case_id: str) -> Path:
-        """Generates a path where the Rnafusion sample sheet for the case_id should be located."""
-        return Path((self.get_case_path(case_id)), case_id + "_samplesheet.csv")
-
-    def make_case_folder(self, case_id: str) -> None:
-        """Make the case folder where analysis should be located."""
-        os.makedirs(self.get_case_path(case_id), exist_ok=True)
-
-    def extract_read_files(self, read_nb: int, metadata: list) -> list:
-        sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        return [d["path"] for d in sorted_metadata if d["read"] == read_nb]
-
+    @staticmethod
     def build_samplesheet_content(
-        self, case_id: str, fastq_r1: list, fastq_r2: list, strandedness: str
+        case_id: str, fastq_r1: list, fastq_r2: list, strandedness: str
     ) -> dict:
         """Build samplesheet headers and lists"""
+        try:
+            RnafusionSample(
+                sample=case_id, fastq_r1=fastq_r1, fastq_r2=fastq_r2, strandedness=strandedness
+            )
+        # except ValidationError:
+        #     LOG.error("ValidationError")
+        except ValidationError as e:
+            LOG.error(e)
+            raise ValueError
+
         samples_full_list: list = []
         strandedness_full_list: list = []
         for _ in range(len(fastq_r1)):
@@ -99,56 +95,34 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         }
         return samplesheet_content
 
-    def create_samplesheet_csv(self, samplesheet_content: dict, config_path: Path) -> None:
-        """Write samplesheet csv file."""
+    @staticmethod
+    def create_samplesheet_csv(samplesheet_content: dict, config_path: Path) -> None:
+        """Write sample sheet csv file."""
         with open(config_path, "w") as outfile:
-            outfile.write(",".join((RNAFUSION_SAMPLESHEET_HEADERS)))
+            outfile.write(",".join(RNAFUSION_SAMPLESHEET_HEADERS))
             for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
                 outfile.write("\n")
                 outfile.write(
                     ",".join([samplesheet_content[k][i] for k in RNAFUSION_SAMPLESHEET_HEADERS])
                 )
 
-    def write_samplesheet(self, case_id: str, strandedness: str = STRANDEDNESS_DEFAULT) -> None:
+    def write_samplesheet(
+        self, case_id: str, strandedness: str = RNAFUSION_STRANDEDNESS_DEFAULT
+    ) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
             sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: list = self.extract_read_files(1, sample_metadata)
-            fastq_r2: list = self.extract_read_files(2, sample_metadata)
+            fastq_r1: list = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
+            fastq_r2: list = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             samplesheet_content: dict = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2, strandedness
             )
             LOG.info(samplesheet_content)
-            self.create_samplesheet_csv(samplesheet_content, self.get_case_config_path(case_id))
-
-    def get_log_path(self, case_id: str, log: Path = None) -> Path:
-        if log:
-            return log
-        launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-        return Path(
-            self.get_case_path(case_id), case_id + "rnafusion_nextflow_log_" + launch_time + ".log"
-        )
-
-    def get_profile(self, profile: str = None) -> str:
-        if profile:
-            return profile
-        return self.profile
-
-    def get_workdir_path(self, case_id: str, work_dir: Path = None) -> Path:
-        if work_dir:
-            return work_dir
-        return Path(self.get_case_path(case_id), NFX_WORK_DIR)
-
-    def get_input_path(self, case_id: str, input: Path = None) -> Path:
-        if input:
-            return input
-        return Path(self.get_case_config_path(case_id))
-
-    def get_outdir_path(self, case_id: str, outdir: Path = None) -> Path:
-        if outdir:
-            return outdir
-        return Path(self.get_case_path(case_id))
+            self.create_samplesheet_csv(
+                samplesheet_content,
+                NextflowAnalysisAPI.get_case_config_path(case_id, self.root_dir),
+            )
 
     def get_references_path(self, genomes_bases: Path = None) -> Path:
         if genomes_bases:
@@ -179,13 +153,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         defaults constructed with case_id paths or from config."""
 
         return {
-            "-w": self.get_workdir_path(case_id, work_dir),
+            "-w": NextflowAnalysisAPI.get_workdir_path(case_id, self.root_dir, work_dir),
             "-resume": resume,
-            "-profile": self.get_profile(profile),
+            "-profile": self.get_profile(profile=profile),
             "-with-tower": with_tower,
             "-stub": stub,
-            "--input": self.get_input_path(case_id, input),
-            "--outdir": self.get_outdir_path(case_id, outdir),
+            "--input": NextflowAnalysisAPI.get_input_path(case_id, self.root_dir, input),
+            "--outdir": NextflowAnalysisAPI.get_outdir_path(case_id, self.root_dir, outdir),
             "--genomes_base": self.get_references_path(genomes_base),
             "--trim": trim,
             "--fusioninspector_filter": fusioninspector_filter,
@@ -206,7 +180,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         into defaults constructed with case_id paths."""
 
         return {
-            "-log": self.get_log_path(case_id, log),
+            "-log": NextflowAnalysisAPI.get_log_path(case_id, self.pipeline, self.root_dir, log),
         }
 
     def get_pipeline_version(self, case_id: str) -> str:
@@ -245,7 +219,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         strandedness: str,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        self.make_case_folder(case_id)
+        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         self.write_samplesheet(case_id, strandedness)
         LOG.info("Samplesheet written")
 
@@ -326,13 +300,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def replace_in_dataframe(self, dataframe: pd.DataFrame, replace_map: dict) -> pd.DataFrame:
         for str_to_replace, with_value in replace_map.item():
             dataframe = dataframe.replace(str_to_replace, with_value, regex=True)
+        return dataframe
 
     def parse_template_deliverables_file(
         self, case_id: str, deliverables_template: pd.DataFrame
     ) -> pd.DataFrame:
         """Replace PATHTOCASE and CASEID from template deliverables file
         to corresponding strings, add path_index column."""
-        replace_map: dict[str, str] = {
+        replace_map: dict = {
             "PATHTOCASE": str(self.get_case_path(case_id)),
             "CASEID": case_id,
         }
