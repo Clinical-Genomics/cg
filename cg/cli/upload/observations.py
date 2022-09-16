@@ -68,7 +68,7 @@ def available_observations(context: click.Context, pipeline: Optional[Pipeline],
         return
 
     for case in cases_to_upload:
-        context.invoke(observations, case=case.internal_id, dry_run=dry_run)
+        context.invoke(observations, case_id=case.internal_id, dry_run=dry_run)
 
 
 def get_observations_case(context: CGConfig, case_id: str) -> models.Family:

@@ -37,7 +37,7 @@ def observations(context: CGConfig, case_id: str):
             LOG.info("Provide one of the following case IDs: ")
             for case in uploaded_observations:
                 LOG.info(f"{case.internal_id} ({case.data_analysis})")
-        raise click.Abort()
+        return
 
     status_db.reset_observations(case)
     status_db.commit()
