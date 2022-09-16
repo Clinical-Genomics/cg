@@ -268,7 +268,7 @@ class CaseSubmitter(Submitter):
 
     @staticmethod
     def _update_action(action: str, case: models.Family) -> None:
-        """Update action of a case"""
+        """Update action of a case."""
         case.action = action
 
     @staticmethod
