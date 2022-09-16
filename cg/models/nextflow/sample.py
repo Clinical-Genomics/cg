@@ -14,7 +14,7 @@ class NextflowSample(BaseModel):
     fastq_r1: list
     fastq_r2: list
 
-    @validator("fastq1")
-    def fastq1_fastq2_len_match(cls, value: list, values: dict) -> str:
-        assert len(value) == len(values.get("fastq_r2")) or len(values.get("fastq_r2")) == 0
-        return value
+    @validator("fastq_r2")
+    def fastq1_fastq2_len_match(cls, value, values: dict) -> str:
+        assert len(value) == len(values.get("fastq_r1")) or len(value) == 0
+        return "Length of fastq_r1 and fastq_r2 do not match"

@@ -1,16 +1,17 @@
 from cg.models.nextflow.sample import NextflowSample, validator
+from cg.constants.constants import RNAFUSION_ACCEPTED_STRANDEDNESS
 
 
 class RnafusionSample(NextflowSample):
     """Rnafusion sample model
 
     Attributes:
-        strandedness: balsamic config file attributes model
+        strandedness: rnafusion config file attributes model
     """
 
     strandedness: str
 
-    @validator("strandedness")
-    def valid_value_strandedness(cls, value: str):
-        assert value in ["reverse", "forward", "unstranded"]
-        return value
+    @validator("strandedness", always=True)
+    def valid_value_strandedness(cls, value) -> str:
+        assert value in RNAFUSION_ACCEPTED_STRANDEDNESS
+        return "Strandedness value not valid"
