@@ -3,7 +3,6 @@
 import datetime as dt
 import gzip
 from pathlib import Path
-from typing import List
 
 import pytest
 from cg.apps.hermes.hermes_api import HermesApi
@@ -70,7 +69,7 @@ def rnafusion_mock_fastq_files(
     fastq_file_l_1_r_1: Path,
     fastq_file_l_1_r_2: Path,
 ) -> list:
-    """Return list of all mock fastq files to commmit to mock housekeeper"""
+    """Return list of all mock fastq files to commit to mock housekeeper"""
     return [
         fastq_file_l_1_r_1,
         fastq_file_l_1_r_2,
@@ -98,23 +97,11 @@ def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_files: 
     return housekeeper_api
 
 
-@pytest.fixture(name="rnafusion_lims")
-def balsamic_lims(context_config: dict) -> MockLimsAPI:
-    """Create populated mock LIMS api to mimic all functionality of LIMS used by RNAFUSION"""
-
-    rnafusion_lims = MockLimsAPI(context_config)
-    rnafusion_lims.add_capture_kit(
-        internal_id="sample_rnafusion",
-        capture_kit=None,
-    )
-    return rnafusion_lims
-
 #
 @pytest.fixture(scope="function", name="rnafusion_context")
 def fixture_rnafusion_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    rnafusion_lims: MockLimsAPI,
     rnafusion_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
     hermes_api: HermesApi,
@@ -122,11 +109,9 @@ def fixture_rnafusion_context(
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = rnafusion_housekeeper
-    cg_context.lims_api_ = rnafusion_lims
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
-
 
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id="no_sample_case", name="no_sample_case")
