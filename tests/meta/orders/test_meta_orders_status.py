@@ -712,7 +712,7 @@ def test_store_rerun_case(
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
     # WHEN storing the order
-    new_cases = submitter.store_items_in_status(
+    submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
@@ -730,7 +730,7 @@ def test_store_rerun_case(
 
     new_ticket = ticket
 
-    rerun_cases = submitter.store_items_in_status(
+    submitter.store_items_in_status(
         customer=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
