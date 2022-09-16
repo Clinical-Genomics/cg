@@ -71,6 +71,24 @@ class LoqusdbAPI:
 
         return dict(variants=nr_variants)
 
+    def delete(
+        self,
+        ped_path: Path,
+        vcf_path: Path,  # This should be VCF_SNV_RESEARCH
+    ) -> dict:
+        """Remove a case from LoqusDB."""
+        delete_call_parameters = [
+            "delete",
+            "--family-file",
+            ped_path.as_posix(),
+            "--variant-file",
+            vcf_path.as_posix(),
+        ]
+
+        # TODO: handle stdout and error exceptions
+        self.process.run_command(parameters=delete_call_parameters)
+        return {}
+
     def get_case(self, case_id: str) -> dict:
         """Find a case in the database by case id"""
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
