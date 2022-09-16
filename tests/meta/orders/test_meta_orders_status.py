@@ -4,6 +4,7 @@ from copy import deepcopy
 import pytest
 
 from cg.constants import DataDelivery, Pipeline
+from cg.constants.constants import CaseActions
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
@@ -17,6 +18,8 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
+from cg.meta.orders import OrdersAPI
+from cg.store import Store
 
 from cg.constants import Priority
 
@@ -697,3 +700,45 @@ def test_store_existing_single_sample_from_trio(
     assert len(new_families[0].links) == 1
     assert not new_families[0].links[0].mother
     assert not new_families[0].links[0].father
+
+
+def test_store_existing_case(
+    orders_api: OrdersAPI, base_store: Store, mip_status_data: dict, ticket: str
+):
+    # GIVEN a basic store with no samples or nothing in it + scout order
+    assert base_store.samples().first() is None
+    assert base_store.families().first() is None
+
+    submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
+
+    # WHEN storing the order
+    submitter.store_items_in_status(
+        customer=mip_status_data["customer"],
+        order=mip_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=ticket,
+        items=mip_status_data["families"],
+    )
+
+    base_store.close()
+    new_cases = base_store.families().all()
+
+    # Save internal id
+    stored_cases_internal_ids = dict([(case["name"], case["internal_id"]) for case in new_cases])
+    for case in mip_status_data["families"]:
+        case["internal_id"] = stored_cases_internal_ids[case["name"]]
+
+    submitter.store_items_in_status(
+        customer=mip_status_data["customer"],
+        order=mip_status_data["order"],
+        ordered=dt.datetime.now(),
+        ticket=ticket,
+        items=mip_status_data["families"],
+    )
+
+    base_store.close()
+    rerun_cases = base_store.families().all()
+
+    # THEN the sample ticket should be appended to previos ticket and action set to analyze
+    assert rerun_cases[0].tickets == f"{ticket},{ticket}"
+    assert rerun_cases[0].action == CaseActions.ANALYZE
