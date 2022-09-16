@@ -37,7 +37,12 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
         LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
         return
 
-    observations_api.process(case.analyses[0])
+    try:
+        observations_api.process(case.analyses[0])
+    except (FileNotFoundError, DuplicateRecordError, DuplicateSampleError) as error:
+        LOG.error(f"Cancelling observations upload for case {case.internal_id}, {error.message}")
+        return
+
     LOG.info(f"Observations uploaded for case: {case.internal_id}")
 
 
@@ -47,12 +52,9 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
     type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
     help="Limit observations upload to a specific pipeline",
 )
-@click.option("-l", "--case-limit", type=int, help="Maximum number of cases to upload")
 @click.option("--dry-run", is_flag=True, help="Only print the cases that would be processed")
 @click.pass_context
-def available_observations(
-    context: click.Context, pipeline: Optional[Pipeline], case_limit: Optional[int], dry_run: bool
-):
+def available_observations(context: click.Context, pipeline: Optional[Pipeline], dry_run: bool):
     """Uploads the available observations to Loqusdb."""
 
     click.echo(click.style("----------------- AVAILABLE OBSERVATIONS -----------------"))
@@ -65,21 +67,8 @@ def available_observations(
         )
         return
 
-    uploaded_cases = 0
     for case in cases_to_upload:
-        if case_limit and uploaded_cases >= case_limit:
-            LOG.warning(
-                f"The number of uploaded cases ({uploaded_cases}) has reached its limit ({case_limit}). Cancelling.",
-            )
-            return
-
-        try:
-            context.invoke(
-                observations, case=case.internal_id, case_limit=case_limit, dry_run=dry_run
-            )
-            uploaded_cases += 1
-        except (FileNotFoundError, DuplicateRecordError, DuplicateSampleError) as error:
-            LOG.error(f"Skipping observations upload for case {case.internal_id}, {error.message}")
+        context.invoke(observations, case=case.internal_id, dry_run=dry_run)
 
 
 def get_observations_case(context: CGConfig, case_id: str) -> models.Family:
