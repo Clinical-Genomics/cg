@@ -229,6 +229,7 @@ class CrunchyAPI:
             pending_path=compression_obj.pending_path,
         )
         sbatch_parameters: Sbatch = Sbatch(
+            use_login_shell="--login",
             job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
             account=self.slurm_account,
             number_tasks=12,
