@@ -728,7 +728,7 @@ def test_store_rerun_case(
     for case in mip_status_data["families"]:
         case["internal_id"] = stored_cases_internal_ids[case["name"]]
 
-    new_ticket = "234567"
+    new_ticket = ticket
 
     rerun_cases = submitter.store_items_in_status(
         customer=mip_status_data["customer"],
