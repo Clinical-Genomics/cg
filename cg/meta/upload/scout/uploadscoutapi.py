@@ -240,8 +240,9 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         rna_case = status_db.family(case_id)
-
-        rna_to_dna_mapper = self.create_rna_dna_mapper(rna_case=rna_case)
+        rna_to_dna_mapper: Dict[str, Dict[str, list]] = self.create_rna_dna_mapper(
+            rna_case=rna_case
+        )
         for rna_sample_id in rna_to_dna_mapper.keys():
             rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
@@ -290,7 +291,9 @@ class UploadScoutAPI:
         status_db: Store = self.status_db
         rna_case: models.Family = status_db.family(case_id)
 
-        rna_to_dna_mapper = self.create_rna_dna_mapper(rna_case=rna_case)
+        rna_to_dna_mapper: Dict[str, Dict[str, list]] = self.create_rna_dna_mapper(
+            rna_case=rna_case
+        )
         for rna_sample_id in rna_to_dna_mapper.keys():
             splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
@@ -380,10 +383,8 @@ class UploadScoutAPI:
         return config_builders[analysis.pipeline]
 
     def create_rna_dna_mapper(self, rna_case: models.Family) -> Dict[str, Dict[str, list]]:
-        """Build nested relationship dictionary for DNA samples and their DNA cases based on each RNA sample
-        subject_id in a case. This allows for upload of all RNA samples in an RNA case to all matching DNA samples in
-        multiple DNA cases. Example dict row: {rna_sample_id : {dna_sample_id : [dna_case_1, dna_case_2]}}. For a
-        trio of RNA samples matching a trio of DNA samples, it would have three of these rows.
+        """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
+        subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
 
         Args:
             rna_case     (models.Family):           Case
@@ -423,27 +424,17 @@ class UploadScoutAPI:
                         rna_to_dna_mapper[rna_sample.internal_id][sample.name].append(
                             case_object.internal_id
                         )
-        rna_to_dna_mapper_error = self.rna_to_dna_mapper_correct(
-            rna_to_dna_mapper=rna_to_dna_mapper
-        )
-        if not rna_to_dna_mapper_error:
-            raise CgDataError()
-
+        self.rna_to_dna_mapper_correct(rna_to_dna_mapper=rna_to_dna_mapper)
         return rna_to_dna_mapper
 
-    def rna_to_dna_mapper_correct(self, rna_to_dna_mapper: Dict[str, Dict[str, list]]) -> bool:
-        """While executing create_rna_dna_mapper: Check whether no DNA samples were found based on subject_id of the
-        RNA sample.
+    def rna_to_dna_mapper_correct(self, rna_to_dna_mapper: Dict[str, Dict[str, list]]):
+        """Check whether no DNA samples were found based on subject_id of the RNA samples.
 
         Args:
             rna_to_dna_mapper     (Dict):       rna-dna relationships, and corresponding dna cases based on subject id
-        Returns:
-            bool                  (True)        True or it will raise CgDataError
         """
         for rna_sample, dna_dict in rna_to_dna_mapper.items():
             if not rna_to_dna_mapper[rna_sample]:
                 raise CgDataError(
                     "Failed to upload files for RNA case: no DNA samples linked to it via subject_id"
                 )
-
-        return True

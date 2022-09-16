@@ -379,7 +379,6 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
         dna_case_id, extra_tumour_sample_id, helpers, rna_case_id, rna_store
     )
     upload_scout_api.status_db = rna_store
-    all_cases = rna_store.families()
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
 
