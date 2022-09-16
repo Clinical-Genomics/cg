@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 @click.command()
 @ARGUMENT_CASE_ID
-@click.option("--dry-run", is_flag=True, help="only print cases to be processed")
+@click.option("--dry-run", is_flag=True, help="Only prints the existing case to be processed")
 @click.pass_obj
 def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
     """Upload observations from an analysis to Loqusdb."""
