@@ -55,7 +55,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     if not dry_run:
         context.obj.trailblazer_api.add_pending_analysis(
             case_id=case_id,
-            analysis_type="Clinical-delivery",
+            analysis_type="other",
             config_path=str(rsync_api.trailblazer_config_path),
             out_dir=str(rsync_api.log_dir),
             slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case_obj.priority],
