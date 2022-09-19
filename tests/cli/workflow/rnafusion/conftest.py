@@ -84,10 +84,13 @@ def rnafusion_mock_fastq_r2_files(
     ]
 
 
-
 @pytest.fixture(scope="function", name="rnafusion_housekeeper")
-def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_r1_files: list,
-                          rnafusion_mock_fastq_r2_files: list):
+def rnafusion_housekeeper(
+    housekeeper_api,
+    helpers,
+    rnafusion_mock_fastq_r1_files: list,
+    rnafusion_mock_fastq_r2_files: list,
+):
     """Create populated housekeeper that holds files for all mock samples"""
 
     samples = [
@@ -100,7 +103,8 @@ def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_r1_file
             "created": dt.datetime.now(),
             "version": "1.0",
             "files": [
-                {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_r1_files
+                {"path": f, "tags": ["fastq"], "archive": False}
+                for f in rnafusion_mock_fastq_r1_files
             ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
@@ -155,7 +159,6 @@ def fixture_rnafusion_context(
     )
 
     return cg_context
-
 
 
 # @pytest.fixture(name="deliverable_data")

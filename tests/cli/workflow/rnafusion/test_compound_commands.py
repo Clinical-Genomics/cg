@@ -38,10 +38,12 @@ def test_start(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
+
+
 #
 #    # GIVEN decompression is not needed
-    # mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
-    # RnafusionAnalysisAPI.resolve_decompression.return_value = None
+# mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
+# RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
 # def test_store(
 #     cli_runner: CliRunner,
