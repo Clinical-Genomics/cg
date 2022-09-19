@@ -34,6 +34,7 @@ class NextflowAnalysisAPI:
     @classmethod
     def extract_read_files(cls, read_nb: int, metadata: list) -> list:
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
+        LOG.info(sorted_metadata)
         return [d["path"] for d in sorted_metadata if d["read"] == read_nb]
 
     @classmethod
