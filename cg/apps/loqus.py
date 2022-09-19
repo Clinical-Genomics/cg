@@ -9,6 +9,7 @@ from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.utils import Process
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -71,22 +72,20 @@ class LoqusdbAPI:
 
         return dict(variants=nr_variants)
 
-    def delete(
-        self,
-        ped_path: Path,
-        vcf_path: Path,  # This should be VCF_SNV_RESEARCH
-    ) -> dict:
+    def delete(self, case_id: str) -> dict:
         """Remove a case from LoqusDB."""
-        delete_call_parameters = [
-            "delete",
-            "--family-file",
-            ped_path.as_posix(),
-            "--variant-file",
-            vcf_path.as_posix(),
-        ]
+        delete_call_parameters = ["delete", "-c", case_id]
 
-        # TODO: handle stdout and error exceptions
-        self.process.run_command(parameters=delete_call_parameters)
+        # TODO: check exit status.
+        # - WARNING is raised when given a non existing_case id
+        # - If deleting a case using a vcf_file with the -f option (not used here!), an error is raised if the file doesn't exist
+        try:
+            self.process.run_command(parameters=delete_call_parameters)
+
+        except CalledProcessError:
+            # If CalledProcessError is raised, log and raise error
+            LOG.critical("Could not delete case")
+            raise
         return {}
 
     def get_case(self, case_id: str) -> dict:
