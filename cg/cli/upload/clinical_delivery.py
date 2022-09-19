@@ -1,22 +1,20 @@
 """Code that handles CLI commands to upload"""
 import datetime as dt
 import logging
-
 from pathlib import Path
 from typing import Set
 
 import click
 
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline, DataDelivery
 from cg.constants.constants import DRY_RUN
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.store import Store, models
-
-from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -38,10 +36,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
         DeliverAPI(
             store=context.obj.status_db,
             hk_api=context.obj.housekeeper_api,
-            case_tags=sum(
-                PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"]
-                for delivery_type in delivery_types
-            ),
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
