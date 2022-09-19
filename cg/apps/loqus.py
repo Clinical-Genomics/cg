@@ -82,6 +82,12 @@ class LoqusdbAPI:
         try:
             self.process.run_command(parameters=delete_call_parameters)
 
+            # If a case is deleted reset StatusDB loqusdb_id to None
+            status_db = CGConfig.status_db
+            status_db.reset_observations(case_id)
+            LOG.info("Reset loqus observations for: %s", case_id)
+            status_db.commit()
+
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error
             LOG.critical("Could not delete case")
