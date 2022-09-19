@@ -65,23 +65,33 @@ def fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def rnafusion_mock_fastq_files(
+def rnafusion_mock_fastq_r1_files(
     fastq_file_l_1_r_1: Path,
-    fastq_file_l_1_r_2: Path,
 ) -> list:
     """Return list of all mock fastq files to commit to mock housekeeper"""
     return [
         fastq_file_l_1_r_1,
+    ]
+
+
+@pytest.fixture
+def rnafusion_mock_fastq_r2_files(
+    fastq_file_l_1_r_2: Path,
+) -> list:
+    """Return list of all mock fastq files to commit to mock housekeeper"""
+    return [
         fastq_file_l_1_r_2,
     ]
 
 
+
 @pytest.fixture(scope="function", name="rnafusion_housekeeper")
-def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_files: list):
+def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_r1_files: list,
+                          rnafusion_mock_fastq_r2_files: list):
     """Create populated housekeeper that holds files for all mock samples"""
 
     samples = [
-        "sample_rnafusion",
+        "case_rnafusion_enough_reads",
     ]
 
     for sample in samples:
@@ -90,7 +100,7 @@ def rnafusion_housekeeper(housekeeper_api, helpers, rnafusion_mock_fastq_files: 
             "created": dt.datetime.now(),
             "version": "1.0",
             "files": [
-                {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
+                {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_r1_files
             ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
@@ -147,36 +157,7 @@ def fixture_rnafusion_context(
     return cg_context
 
 
-#
-#
-# @pytest.fixture
-# def mock_config(balsamic_dir: Path, balsamic_case_id: str) -> None:
-#     """Create dummy config file at specified path"""
-#
-#     config_data = {
-#         "analysis": {
-#             "case_id": f"{balsamic_case_id}",
-#             "analysis_type": "paired",
-#             "sequencing_type": "targeted",
-#             "analysis_dir": f"{balsamic_dir}",
-#             "fastq_path": f"{balsamic_dir}/{balsamic_case_id}/analysis/fastq/",
-#             "script": f"{balsamic_dir}/{balsamic_case_id}/scripts/",
-#             "log": f"{balsamic_dir}/{balsamic_case_id}/logs/",
-#             "result": f"{balsamic_dir}/{balsamic_case_id}/analysis",
-#             "benchmark": f"{balsamic_dir}/{balsamic_case_id}/benchmarks/",
-#             "dag": f"{balsamic_dir}/{balsamic_case_id}/{balsamic_case_id}_BALSAMIC_4.4.0_graph.pdf",
-#             "BALSAMIC_version": "4",
-#             "config_creation_date": "2020-07-15 17:35",
-#         }
-#     }
-#     Path.mkdir(Path(balsamic_dir, balsamic_case_id), parents=True, exist_ok=True)
-#     WriteFile.write_file_from_content(
-#         content=config_data,
-#         file_format=FileFormat.JSON,
-#         file_path=Path(balsamic_dir, balsamic_case_id, balsamic_case_id + ".json"),
-#     )
-#
-#
+
 # @pytest.fixture(name="deliverable_data")
 # def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
 #     samples = [
