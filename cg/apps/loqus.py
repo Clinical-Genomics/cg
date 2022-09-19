@@ -9,7 +9,6 @@ from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.utils import Process
-from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -81,12 +80,6 @@ class LoqusdbAPI:
         # - If deleting a case using a vcf_file with the -f option (not used here!), an error is raised if the file doesn't exist
         try:
             self.process.run_command(parameters=delete_call_parameters)
-
-            # If a case is deleted reset StatusDB loqusdb_id to None
-            status_db = CGConfig.status_db
-            status_db.reset_observations(case_id)
-            LOG.info("Reset loqus observations for: %s", case_id)
-            status_db.commit()
 
         except CalledProcessError:
             # If CalledProcessError is raised, log and raise error

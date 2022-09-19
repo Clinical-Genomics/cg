@@ -100,6 +100,20 @@ class UploadObservationsAPI:
             link.sample.loqusdb_id = str(case_obj["_id"])
         self.status.commit()
 
+    def delete(self, case_id: str) -> None:
+        """Delete a case from loqusdb and reset loqusdb_id in Statusdb."""
+
+        # Make sure case exist before attempting to delete it
+        self.loqusdb.get_case(case_id=case_id)
+
+        # Delete case from loqusdb
+        self.loqusdb.delete(case_id=case_id)
+
+        # If a case is deleted reset StatusDB loqusdb_id to None
+        self.status.reset_observations(case_id)
+        LOG.info("Reset loqus observations for: %s", case_id)
+        self.status.commit()
+
     @staticmethod
     def _all_samples(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced inhouse."""
