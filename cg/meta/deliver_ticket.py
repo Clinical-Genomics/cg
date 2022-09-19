@@ -1,4 +1,5 @@
-"""Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
+"""Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery
+server """
 import logging
 import os
 import re
@@ -32,7 +33,7 @@ class DeliverTicketAPI(MetaAPI):
                 f"The customer id was not identified since no cases for ticket {ticket} was found"
             )
         customer_id: str = cases[0].customer.internal_id
-        return self.delivery_path / customer_id / "inbox" / ticket
+        return Path(self.delivery_path, customer_id, "inbox", ticket)
 
     def check_if_upload_is_needed(self, ticket: str) -> bool:
         customer_inbox: Path = self.get_inbox_path(ticket=ticket)
@@ -54,8 +55,7 @@ class DeliverTicketAPI(MetaAPI):
         if date:
             base_name = Path("_".join([str(date.strftime("%y%m%d")), str(base_name)]))
         fastq_file_name = base_name.with_suffix(".fastq.gz")
-        output: Path = dir_path / fastq_file_name
-        return output
+        return Path(dir_path, fastq_file_name)
 
     @staticmethod
     def sort_files(files: List[Path]) -> List[Path]:
