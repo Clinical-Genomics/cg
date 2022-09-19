@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
-from cg.meta.rsync.rsync_api import RsyncAPI
+
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.delivery import PIPELINE_ANALYSIS_OPTIONS, PIPELINE_ANALYSIS_TAG_MAP
 from cg.meta.deliver import DeliverAPI
 from cg.meta.deliver_ticket import DeliverTicketAPI
-
+from cg.meta.rsync.rsync_api import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -144,12 +144,12 @@ def deliver_ticket(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
     if is_upload_needed:
-        LOG.info("Delivering files to customer inbox on hasta")
+        LOG.info("Delivering files to customer inbox on the HPC")
         context.invoke(
             deliver_analysis, ticket=ticket, delivery_type=delivery_type, dry_run=dry_run
         )
     else:
-        LOG.info("Files already delivered to customer inbox on hasta")
+        LOG.info("Files already delivered to customer inbox on the HPC")
         return
     is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket)
     if is_concatenation_needed and "fastq" in delivery_type:
