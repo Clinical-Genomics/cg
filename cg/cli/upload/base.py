@@ -6,20 +6,15 @@ from typing import Optional
 
 import click
 
-from cg.cli.upload.nipt import nipt
-from cg.constants import Pipeline
-from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from cg.utils.click.EnumChoice import EnumChoice
-
 from cg.cli.upload import vogue
-from cg.cli.upload.clinical_delivery import fastq
+from cg.cli.upload.clinical_delivery import fastq, clinical_delivery
 from cg.cli.upload.coverage import coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
 from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.gisaid import gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
+from cg.cli.upload.nipt import nipt
 from cg.cli.upload.observations import observations
 from cg.cli.upload.scout import (
     create_scout_load_config,
@@ -31,9 +26,13 @@ from cg.cli.upload.scout import (
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
+from cg.constants import Pipeline
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
+from cg.utils.click.EnumChoice import EnumChoice
 
 LOG = logging.getLogger(__name__)
 
@@ -111,6 +110,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
 
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
+upload.add_command(clinical_delivery)
 upload.add_command(validate)
 upload.add_command(scout)
 upload.add_command(upload_case_to_scout)
