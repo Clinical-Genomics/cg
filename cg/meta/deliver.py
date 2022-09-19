@@ -8,12 +8,12 @@ from pathlib import Path
 from typing import Iterable, List, Set, Tuple
 
 from cgmodels.cg.constants import Pipeline
+from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants, DataDelivery
 from cg.store import Store, models
 from cg.store.models import Family, FamilySample, Sample
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -298,7 +298,7 @@ class DeliverAPI:
         case_delivery = sample_delivery = False
         for delivery in delivery_arguments:
             if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]:
-                sample_delivery = False
+                sample_delivery = True
             if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"]:
                 case_delivery = True
         return sample_delivery, case_delivery
