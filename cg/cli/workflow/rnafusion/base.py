@@ -147,6 +147,7 @@ def run(
             dry_run=dry_run,
         )
         if dry_run:
+            LOG.info("Did not run analysis: dry-run")
             return
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except CgError as e:
