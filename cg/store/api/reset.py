@@ -1,4 +1,4 @@
-"""Module to handle resetting of data in status db"""
+"""Module to handle resetting of data in status db."""
 
 import logging
 

@@ -68,10 +68,8 @@ def get_observations_api(context: CGConfig, case: models.Family) -> UploadObserv
         raise LoqusdbUploadError
 
     analysis_type = analysis_list[0]
-    upload_observations_api = UploadObservationsAPI(
+    return UploadObservationsAPI(
         status_api=context.status_db,
         hk_api=context.housekeeper_api,
         loqus_api=loqus_apis[analysis_type],
     )
-
-    return upload_observations_api
