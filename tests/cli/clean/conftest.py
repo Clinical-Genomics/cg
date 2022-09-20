@@ -10,8 +10,22 @@ from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.fixture(name="balsamic_case_clean")
+def fixture_balsamic_case_clean() -> str:
+    """Return a balsamic case to clean"""
+    return "balsamic_case_clean"
+
+
+@pytest.fixture(name="balsamic_case_not_clean")
+def fixture_balsamic_case_not_clean() -> str:
+    """Return a balsamic case to clean"""
+    return "balsamic_case_not_clean"
+
+
 @pytest.fixture()
 def clean_context(
+    balsamic_case_clean: str,
+    balsamic_case_not_clean: str,
     cg_context: CGConfig,
     helpers: StoreHelpers,
     project_dir: Path,
@@ -24,13 +38,13 @@ def clean_context(
     # Create textbook case for cleaning
     case_to_clean = helpers.add_case(
         store=store,
-        internal_id="balsamic_case_clean",
-        name="balsamic_case_clean",
+        internal_id=balsamic_case_clean,
+        name=balsamic_case_clean,
         data_analysis=Pipeline.BALSAMIC,
     )
     sample_case_to_clean = helpers.add_sample(
         store,
-        internal_id="balsamic_sample_clean",
+        internal_id=balsamic_case_clean,
         is_tumour=True,
         application_type="wgs",
     )
@@ -44,13 +58,13 @@ def clean_context(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    Path(analysis_api.get_case_path("balsamic_case_clean")).mkdir(exist_ok=True, parents=True)
+    Path(analysis_api.get_case_path(balsamic_case_clean)).mkdir(exist_ok=True, parents=True)
 
     # Create textbook case not for cleaning
     case_to_not_clean = helpers.add_case(
         store=store,
-        internal_id="balsamic_case_not_clean",
-        name="balsamic_case_not_clean",
+        internal_id=balsamic_case_not_clean,
+        name=balsamic_case_not_clean,
         data_analysis=Pipeline.BALSAMIC,
     )
     case_to_not_clean.action = "running"
@@ -58,7 +72,7 @@ def clean_context(
 
     sample_case_to_not_clean = helpers.add_sample(
         store,
-        internal_id="balsamic_sample_not_clean",
+        internal_id=balsamic_case_not_clean,
         is_tumour=True,
         application_type="wgs",
     )
@@ -72,7 +86,7 @@ def clean_context(
         uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    Path(analysis_api.get_case_path("balsamic_case_not_clean")).mkdir(exist_ok=True, parents=True)
+    Path(analysis_api.get_case_path(balsamic_case_not_clean)).mkdir(exist_ok=True, parents=True)
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     cg_context.data_delivery.base_path = f"{project_dir}/rsync"
