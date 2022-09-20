@@ -156,7 +156,7 @@ def test_get_sample_files_from_version(
 def test_get_delivery_arguments(case_obj: models.Family):
     """Testing the parsing of delivery arguments from the case data_delivery."""
     # GIVEN a DataDelivery
-    fixture_case_obj.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
+    case_obj.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
     # WHEN parsing the delivery types
     delivery_types: Set[str] = DeliverAPI.get_delivery_arguments(case_obj=case_obj)
