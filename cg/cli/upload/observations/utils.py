@@ -23,7 +23,7 @@ def get_observations_case(context: CGConfig, case_id: str) -> models.Family:
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
         cases_to_upload: Query = context.status_db.observations_to_upload()
         if not cases_to_upload:
-            LOG.info("There are no valid cases to be processed by Loqusdb.")
+            LOG.info("There are no valid cases to be processed by Loqusdb")
         else:
             LOG.info("Provide one of the following case IDs: ")
             for case in cases_to_upload:

@@ -54,6 +54,30 @@ def test_get_families_with_extended_models_when_no_case(base_store: Store):
     assert not cases
 
 
+def test_get_families_with_samples(
+    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+):
+    """Test that a family and samples query is returned from the database."""
+
+    # GIVEN a sequenced sample
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
+
+    # GIVEN a completed analysis
+    test_analysis: models.Analysis = helpers.add_analysis(
+        base_store, completed_at=timestamp_today, pipeline=Pipeline.MIP_DNA
+    )
+
+    # GIVEN a database with a case with one of one sequenced samples and completed analysis
+    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+
+    # WHEN getting the stored case with its associated samples
+    cases: List[Query] = list(base_store.get_families_with_samples())
+
+    # THEN a list of cases should be returned, and it should contain the stored and linked sample
+    assert cases
+    assert test_sample == cases[0].links[0].sample
+
+
 def test_that_many_cases_can_have_one_sample_each(
     base_store: Store, helpers: StoreHelpers, max_nr_of_cases: int, timestamp_today: datetime
 ):
