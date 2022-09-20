@@ -32,7 +32,8 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
         delivery_arguments=delivery_types
     )
     if not delivery_types:
-        LOG.debug(f"No delivery of files requested for case {case_id}")
+        LOG.info(f"No delivery of files requested for case {case_id}")
+        return
 
     LOG.debug("Delivery types are: %s", delivery_types)
     for delivery_type in delivery_types:

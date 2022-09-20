@@ -163,8 +163,9 @@ class RsyncAPI(MetaAPI):
         """Returns a list of all the folder names depending if sample and/or case data is to be
         transferred"""
         if not sample_files_present and not case_files_present:
-            LOG.error("Since no file parameter is true, no files will be transferred")
-            raise CgError("Since no file parameter is true, no files will be transferred")
+            raise CgError(
+                "Since neither case or sample files are present, no files will be transferred"
+            )
         folder_list: List[str] = []
         if sample_files_present:
             folder_list.extend(
