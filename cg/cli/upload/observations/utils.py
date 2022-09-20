@@ -45,7 +45,7 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
         )
         raise LoqusdbUploadError
 
-    if not LinkHelper.all_samples_are_non_tumour(case.links):
+    if not LinkHelper.is_all_samples_non_tumour(case.links):
         LOG.error(f"Case {case.internal_id} has tumor samples. Cancelling its upload.")
         raise LoqusdbUploadError
 
