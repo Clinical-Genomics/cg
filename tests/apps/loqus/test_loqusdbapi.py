@@ -154,10 +154,7 @@ def test_delete(case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_case_output: bytes
     # GIVEN a case id
 
     # WHEN deleting a case
-    case_obj = loqusdbapi.delete(case_id)
-
-    # THEN
-    assert case_obj == {}
+    loqusdbapi.delete(case_id)
 
     # THEN CaseNotFoundError should be raised when getting the case
     with pytest.raises(CaseNotFoundError):
