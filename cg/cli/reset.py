@@ -1,12 +1,13 @@
 import logging
-from typing import Iterable, Optional
+from typing import Optional
 
 import click
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.cli.upload.observations.utils import get_observations_case
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, OPTION_LOQUSDB_SUPPORTED_PIPELINES
+from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -26,18 +27,7 @@ def observations(context: CGConfig, case_id: str):
     """Reset observation links from an analysis to Loqusdb for a specific case."""
 
     status_db: Store = context.status_db
-    case: models.Family = context.status_db.family(case_id)
-
-    if not case or case.data_analysis not in LOQUSDB_SUPPORTED_PIPELINES:
-        LOG.error("Invalid case ID. Retrieving available cases for Loqusdb reset.")
-        uploaded_observations: Query = status_db.observations_uploaded()
-        if not uploaded_observations:
-            LOG.info("There are no available case uploaded observations")
-        else:
-            LOG.info("Provide one of the following case IDs: ")
-            for case in uploaded_observations:
-                LOG.info(f"{case.internal_id} ({case.data_analysis})")
-        return
+    case: models.Family = get_observations_case(context, case_id)
 
     status_db.reset_observations(case)
     status_db.commit()
@@ -45,11 +35,7 @@ def observations(context: CGConfig, case_id: str):
 
 
 @reset_cmd.command("available-observations")
-@click.option(
-    "--pipeline",
-    type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
-    help="Limit observations reset to a specific pipeline",
-)
+@OPTION_LOQUSDB_SUPPORTED_PIPELINES
 @click.pass_context
 def available_observations(context: click.Context, pipeline: Optional[Pipeline]):
     """Reset available observation links from an analysis to Loqusdb."""
@@ -63,4 +49,7 @@ def available_observations(context: click.Context, pipeline: Optional[Pipeline])
     click.confirm("Do you want to continue?", abort=True)
 
     for case in uploaded_observations:
-        context.invoke(observations, case_id=case.internal_id)
+        try:
+            context.invoke(observations, case_id=case.internal_id)
+        except CaseNotFoundError:
+            continue

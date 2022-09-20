@@ -7,6 +7,7 @@ from typing import Optional
 import click
 
 from cg.cli.upload.nipt import nipt
+from cg.cli.upload.observations import observations, available_observations
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -20,7 +21,6 @@ from cg.cli.upload.fohm import fohm
 from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.gisaid import gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
-from cg.cli.upload.observations import observations, available_observations
 from cg.cli.upload.scout import (
     create_scout_load_config,
     scout,
