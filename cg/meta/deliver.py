@@ -19,7 +19,7 @@ LOG = logging.getLogger(__name__)
 
 
 class DeliverAPI:
-    """Deliver API for workflows files"""
+    """Deliver API for workflows files."""
 
     def __init__(
         self,
@@ -37,7 +37,7 @@ class DeliverAPI:
 
         Each delivery is built around case tags and sample tags. All files tagged will the case_tags will be hard linked
         to the inbox of a customer under <ticket>/<case_id>. All files tagged with sample_tags will be linked to
-        <ticket>/<case_id>/<sample_id>
+        <ticket>/<case_id>/<sample_id>.
         """
         self.store = store
         self.hk_api = hk_api
@@ -52,14 +52,14 @@ class DeliverAPI:
         self.skip_missing_bundle = self.delivery_type in constants.SKIP_MISSING
 
     def set_dry_run(self, dry_run: bool) -> None:
-        """Update dry run"""
+        """Update dry run."""
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
     def deliver_files(self, case_obj: Family):
-        """Deliver all files for a case
+        """Deliver all files for a case.
 
-        If there are sample tags deliver all files for the samples as well
+        If there are sample tags deliver all files for the samples as well.
         """
         case_id: str = case_obj.internal_id
         case_name: str = case_obj.name
@@ -113,7 +113,7 @@ class DeliverAPI:
     def deliver_case_files(
         self, case_id: str, case_name: str, version_obj: hk_models.Version, sample_ids: Set[str]
     ) -> None:
-        """Deliver files on case level"""
+        """Deliver files on case level."""
         LOG.debug("Deliver case files for %s", case_id)
         # Make sure that the directory exists
         delivery_base: Path = self.create_delivery_dir_path(case_name=case_name)
@@ -152,7 +152,7 @@ class DeliverAPI:
         sample_name: str,
         version_obj: hk_models.Version,
     ) -> None:
-        """Deliver files on sample level"""
+        """Deliver files on sample level."""
         # Make sure that the directory exists
         if self.delivery_type in constants.ONLY_ONE_CASE_PER_TICKET:
             case_name = None
@@ -187,7 +187,7 @@ class DeliverAPI:
     def get_case_files_from_version(
         self, version_obj: hk_models.Version, sample_ids: Set[str]
     ) -> Iterable[Path]:
-        """Fetch all case files from a version that are tagged with any of the case tags"""
+        """Fetch all case files from a version that are tagged with any of the case tags."""
         file_obj: hk_models.File
         for file_obj in version_obj.files:
             if not self.include_file_case(file_obj, sample_ids=sample_ids):
@@ -206,7 +206,7 @@ class DeliverAPI:
             yield Path(file_obj.full_path)
 
     def include_file_case(self, file_obj: hk_models.File, sample_ids: Set[str]) -> bool:
-        """Check if file should be included in case bundle
+        """Check if file should be included in case bundle.
 
         At least one tag should match between file and tags.
         Do not include files with sample tags.
@@ -235,12 +235,12 @@ class DeliverAPI:
         return False
 
     def include_file_sample(self, file_obj: hk_models.File, sample_id: str) -> bool:
-        """Check if file should be included in sample bundle
+        """Check if file should be included in sample bundle.
 
         At least one tag should match between file and tags.
         Only include files with sample tag.
 
-        For fastq delivery we know that we want to deliver all files of bundle
+        For fastq delivery we know that we want to deliver all files of bundle.
         """
         tag: hk_models.Tag
         file_tags = {tag.name for tag in file_obj.tags}
@@ -269,9 +269,9 @@ class DeliverAPI:
         self.ticket = ticket
 
     def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
-        """Create a path for delivering files
+        """Create a path for delivering files.
 
-        Note that case name and sample name needs to be the identifiers sent from customer
+        Note that case name and sample name needs to be the identifiers sent from customer.
         """
         delivery_path: Path = Path(self.project_base_path, self.customer_id, "inbox", self.ticket)
         if case_name:
@@ -283,7 +283,7 @@ class DeliverAPI:
 
     @staticmethod
     def get_delivery_arguments(case_obj: models.Family) -> Set[str]:
-        """Translates the case data_delivery field to pipeline specific arguments"""
+        """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
         requested_deliveries: List[str] = re.split("[-_]", case_obj.data_delivery)
         if DataDelivery.FASTQ in requested_deliveries:
@@ -294,7 +294,7 @@ class DeliverAPI:
 
     @staticmethod
     def get_delivery_scope(delivery_arguments: Set[str]) -> Tuple[bool, bool]:
-        """Returns the scope of the delivery, ie whether sample- and or case files were delivered"""
+        """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
         case_delivery = sample_delivery = False
         for delivery in delivery_arguments:
             if (

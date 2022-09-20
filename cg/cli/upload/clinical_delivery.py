@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 @DRY_RUN
 def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     """Links the appropriate files for a case, based on the data_delivery, to the customer folder
-    and subsequently uses rsync to upload it to caesar"""
+    and subsequently uses rsync to upload it to caesar."""
     case_obj: models.Family = context.obj.status_db.family(case_id)
     delivery_types: Set[str] = DeliverAPI.get_delivery_arguments(case_obj=case_obj)
     sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(
@@ -73,7 +73,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
 @DRY_RUN
 def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all not previously uploaded cases with analysis type fastq to
-    clinical-delivery"""
+    clinical-delivery."""
 
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api

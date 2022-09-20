@@ -18,7 +18,7 @@ from tests.store.conftest import fixture_case_obj
 def test_get_delivery_path(
     base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path, case_id: str
 ):
-    """Test to create the delivery path"""
+    """Test to create the delivery path."""
     # GIVEN a deliver api
     deliver_api = DeliverAPI(
         store=base_store,
@@ -41,7 +41,7 @@ def test_get_delivery_path(
 
 
 def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str):
-    """Test to fetch case specific files for a case that exists in housekeeper"""
+    """Test to fetch case specific files for a case that exists in housekeeper."""
     deliver_api: DeliverAPI = populated_deliver_api
     # GIVEN a case which exist as bundle in hk with a version
     version_obj = deliver_api.hk_api.last_version(case_id)
@@ -123,9 +123,9 @@ def test_get_sample_files_from_version(
     case_id: str,
     helpers=StoreHelpers,
 ):
-    """Test to fetch sample specific files from the deliver API
+    """Test to fetch sample specific files from the deliver API.
 
-    The purpose of the test is to see that only sample specific files are returned
+    The purpose of the test is to see that only sample specific files are returned.
     """
     # GIVEN a case which exist as bundle in hk
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
