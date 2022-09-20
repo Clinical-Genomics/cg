@@ -71,21 +71,11 @@ class LoqusdbAPI:
 
         return dict(variants=nr_variants)
 
-    def delete(self, case_id: str) -> dict:
+    def delete(self, case_id: str) -> None:
         """Remove a case from LoqusDB."""
         delete_call_parameters = ["delete", "-c", case_id]
-
-        # TODO: check exit status.
-        # - WARNING is raised when given a non existing_case id
-        # - If deleting a case using a vcf_file with the -f option (not used here!), an error is raised if the file doesn't exist
-        try:
-            self.process.run_command(parameters=delete_call_parameters)
-
-        except CalledProcessError:
-            # If CalledProcessError is raised, log and raise error
-            LOG.critical("Could not delete case")
-            raise
-        return {}
+        # 'loqusdb delete -c CASE_ID' always returns exit 0 even if case_id does not exist
+        self.process.run_command(parameters=delete_call_parameters)
 
     def get_case(self, case_id: str) -> dict:
         """Find a case in the database by case id"""
