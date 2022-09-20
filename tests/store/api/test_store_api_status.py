@@ -1,15 +1,16 @@
-"""Tests the status part of the cg.store.api"""
+"""Tests the status part of the cg.store.api."""
 from datetime import datetime, timedelta
 
 from alchy import Query
 
-from cg.constants import Pipeline, Priority, DataDelivery
+from cg.constants import Pipeline, Priority
+from cg.constants.subject import Gender
 from cg.store import Store, models
 from cg.store.models import Application, Family, Sample
 
 
 def test_samples_to_receive_external(sample_store, helpers):
-    """Test fetching external sample"""
+    """Test fetching external sample."""
     store = sample_store
     # GIVEN a store with a mixture of samples
     assert store.samples().count() > 1
@@ -64,7 +65,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has been uploaded to Loqusdb
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqusdb")
-    sample_store.relate_sample(analysis.family, sample, "unknown")
+    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -72,7 +73,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     # WHEN getting observations to upload
     uploaded_observations: Query = sample_store.observations_uploaded()
 
-    # THEN the case should be in the returned collection
+    # THEN the case should be in the returned query
     assert analysis.family in uploaded_observations
 
 
@@ -82,7 +83,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
     # GIVEN a case with observations that has not been uploaded to loqusdb
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     sample: models.Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, "unknown")
+    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -90,7 +91,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
     # WHEN getting observations to upload
     uploaded_observations: Query = sample_store.observations_uploaded()
 
-    # THEN the case should not be in the returned collection
+    # THEN the case should not be in the returned query
     assert analysis.family not in uploaded_observations
 
 
@@ -100,7 +101,7 @@ def test_case_in_observations_to_upload(helpers, sample_store):
     # GIVEN a case with completed analysis and samples w/o loqusdb_id
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     sample: models.Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, "unknown")
+    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -108,7 +109,7 @@ def test_case_in_observations_to_upload(helpers, sample_store):
     # WHEN getting observations to upload
     observations_to_upload: Query = sample_store.observations_to_upload()
 
-    # THEN the case should be in the returned collection
+    # THEN the case should be in the returned query
     assert analysis.family in observations_to_upload
 
 
@@ -118,7 +119,7 @@ def test_case_not_in_observations_to_upload(helpers, sample_store):
     # GIVEN a case with completed analysis and samples w loqusdb_id
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
-    sample_store.relate_sample(analysis.family, sample, "unknown")
+    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -126,12 +127,12 @@ def test_case_not_in_observations_to_upload(helpers, sample_store):
     # WHEN getting observations to upload
     observations_to_upload: Query = sample_store.observations_to_upload()
 
-    # THEN the case should not be in the returned collection
+    # THEN the case should not be in the returned query
     assert analysis.family not in observations_to_upload
 
 
 def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
-    """Test analyses to upload with no completed_at date"""
+    """Test analyses to upload with no completed_at date."""
     # GIVEN a store with an analysis without a completed_at date
     helpers.add_analysis(store=sample_store)
 
@@ -143,7 +144,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
 
 
 def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload with no pipeline specified"""
+    """Test analyses to upload with no pipeline specified."""
     # GIVEN a store with one analysis
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
@@ -155,7 +156,7 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
 
 
 def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline"""
+    """Test analyses to upload to when existing pipeline."""
     # GIVEN a store with an analysis that has been run with MIP
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
@@ -167,7 +168,7 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
 
 
 def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline and using it in filtering"""
+    """Test analyses to upload to when existing pipeline and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP
     pipeline = Pipeline.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
@@ -181,7 +182,7 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
 
 
 def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_store, timestamp):
-    """Test analyses to upload to when existing pipeline and using it in filtering"""
+    """Test analyses to upload to when existing pipeline and using it in filtering."""
     # GIVEN a store with an analysis that is analysed with MIP but does not have a completed_at
     pipeline = Pipeline.MIP_DNA
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
@@ -194,7 +195,7 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
 
 
 def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample_store, timestamp):
-    """Test analyses to upload to when missing pipeline and using it in filtering"""
+    """Test analyses to upload to when missing pipeline and using it in filtering."""
     # GIVEN a store with an analysis that has been analysed with "missing_pipeline"
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
@@ -208,7 +209,7 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
 
 
 def test_multiple_analyses(analysis_store, helpers, timestamp_today, timestamp_yesterday):
-    """Tests that analyses that are not latest are not returned"""
+    """Tests that analyses that are not latest are not returned."""
 
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
     case = helpers.add_case(analysis_store)
@@ -228,7 +229,9 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_today, timestamp_y
         delivery_reported_at=None,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_today)
-    analysis_store.relate_sample(family=analysis_oldest.family, sample=sample, status="unknown")
+    analysis_store.relate_sample(
+        family=analysis_oldest.family, sample=sample, status=Gender.UNKNOWN
+    )
 
     # WHEN calling the analyses_to_delivery_report
     analyses = analysis_store.latest_analyses().all()
@@ -256,7 +259,7 @@ def test_set_case_action(analysis_store, case_id):
 def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
     base_store: Store, helpers, timestamp_today
 ):
-    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC"""
+    """Test if priority express sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an express sample with half the amount of reads
     sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
@@ -275,7 +278,7 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
 def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     base_store: Store, helpers, timestamp_today
 ):
-    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC"""
+    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an normal sample with half the amount of reads
     sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)

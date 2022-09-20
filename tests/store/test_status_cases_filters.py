@@ -13,7 +13,7 @@ from cg.store.status_case_filters import (
     filter_cases_for_analysis,
     filter_cases_with_scout_data_delivery,
     filter_report_supported_data_delivery_cases,
-    filter_cases_with_pipeline_loqusdb,
+    filter_cases_with_loqusdb_supported_pipeline,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -160,7 +160,7 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
     assert not cases
 
 
-def test_filter_cases_with_pipeline_loqusdb(
+def test_filter_cases_with_loqusdb_supported_pipeline(
     base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
 ):
     """Test retrieval of cases that support Loqusdb upload."""
@@ -182,7 +182,7 @@ def test_filter_cases_with_pipeline_loqusdb(
     cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases with pipeline
-    cases: List[Query] = list(filter_cases_with_pipeline_loqusdb(cases=cases))
+    cases: List[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases

@@ -601,7 +601,7 @@ class StatusHandler(BaseHandler):
             models.Analysis, models.Family.links, models.FamilySample.sample
         )
         records: Query = apply_case_filter(
-            function="cases_with_pipeline_loqusdb", cases=records, pipeline=pipeline
+            function="cases_with_loqusdb_supported_pipeline", cases=records, pipeline=pipeline
         )
         records: Query = apply_sample_filter(
             function="samples_not_uploaded_to_loqusdb", samples=records
@@ -612,7 +612,7 @@ class StatusHandler(BaseHandler):
         """Fetch observations that have been uploaded."""
         records = self.Family.query.join(models.Family.links, models.FamilySample.sample)
         records: Query = apply_case_filter(
-            function="cases_with_pipeline_loqusdb", cases=records, pipeline=pipeline
+            function="cases_with_loqusdb_supported_pipeline", cases=records, pipeline=pipeline
         )
         records: Query = apply_sample_filter("samples_uploaded_to_loqusdb", samples=records)
         return records

@@ -16,13 +16,12 @@ def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
 
 def filter_cases_with_pipeline(cases: Query, pipeline: str = None, **kwargs) -> Query:
     """Return cases with pipeline."""
-    if pipeline:
-        return cases.filter(models.Family.data_analysis == pipeline)
-
-    return cases
+    return cases.filter(models.Family.data_analysis == pipeline) if pipeline else cases
 
 
-def filter_cases_with_pipeline_loqusdb(cases: Query, pipeline: str = None, **kwargs) -> Query:
+def filter_cases_with_loqusdb_supported_pipeline(
+    cases: Query, pipeline: str = None, **kwargs
+) -> Query:
     """Return loqusdb related cases with pipeline."""
     return (
         cases.filter(models.Family.data_analysis == pipeline)
@@ -68,7 +67,7 @@ def apply_case_filter(function: str, cases: Query, pipeline: Optional[str] = Non
     filter_map = {
         "cases_has_sequence": filter_cases_has_sequence,
         "cases_with_pipeline": filter_cases_with_pipeline,
-        "cases_with_pipeline_loqusdb": filter_cases_with_pipeline_loqusdb,
+        "cases_with_loqusdb_supported_pipeline": filter_cases_with_loqusdb_supported_pipeline,
         "filter_cases_for_analysis": filter_cases_for_analysis,
         "cases_with_scout_data_delivery": filter_cases_with_scout_data_delivery,
         "filter_report_cases_with_valid_data_delivery": filter_report_supported_data_delivery_cases,
