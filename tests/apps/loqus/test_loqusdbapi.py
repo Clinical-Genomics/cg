@@ -142,3 +142,23 @@ def test_repr_string(loqus_config):
     )
 
     assert repr_string == correct_string
+
+
+def test_delete(case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_case_output: bytes):
+    """Test to delete an existing case via the api."""
+    # GIVEN a loqusdb api with an existing case
+    loqusdbapi.process.stdout = loqusdb_case_output.decode("utf-8").rstrip()
+    case_obj = loqusdbapi.get_case(case_id)
+    assert case_obj["case_id"] == case_id
+
+    # GIVEN a case id
+
+    # WHEN deleting a case
+    case_obj = loqusdbapi.delete(case_id)
+
+    # THEN
+    assert case_obj == {}
+
+    # THEN CaseNotFoundError should be raised when getting the case
+    with pytest.raises(CaseNotFoundError):
+        loqusdbapi.get_case(case_id)
