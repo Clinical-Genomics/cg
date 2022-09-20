@@ -100,7 +100,6 @@ class UploadObservationsAPI:
             link.sample.loqusdb_id = str(case_obj["_id"])
         self.status.commit()
 
-
     @staticmethod
     def _all_samples(links: List[models.FamilySample]) -> bool:
         """Return True if all samples are external or sequenced inhouse."""
