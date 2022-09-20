@@ -332,7 +332,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""
 
-        application: models.Application = self.application_by_case(case_id)
+        application: models.Application = self.get_application_by_case(case_id)
 
         if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
 

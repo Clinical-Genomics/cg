@@ -181,7 +181,7 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
     assert application_version.application.expected_reads == expected_reads
 
 
-def test_application_by_case(case_id: str, rml_pool_store: Store):
+def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
     application_version: models.ApplicationVersion = (
@@ -189,7 +189,7 @@ def test_application_by_case(case_id: str, rml_pool_store: Store):
     )
 
     # WHEN the application is fetched from the case
-    application: models.Application = rml_pool_store.application_by_case(case_id=case_id)
+    application: models.Application = rml_pool_store.get_application_by_case(case_id=case_id)
 
     # THEN the fetched application should be equal to the application version application
     assert application_version.application == application
