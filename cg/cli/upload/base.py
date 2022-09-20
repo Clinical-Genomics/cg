@@ -7,7 +7,7 @@ from typing import Optional
 import click
 
 from cg.cli.upload import vogue
-from cg.cli.upload.clinical_delivery import fastq, clinical_delivery
+from cg.cli.upload.clinical_delivery import auto_fastq, clinical_delivery
 from cg.cli.upload.coverage import coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
@@ -108,22 +108,22 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     sys.exit(exit_code)
 
 
+upload.add_command(auto_fastq)
+upload.add_command(clinical_delivery)
+upload.add_command(coverage)
+upload.add_command(create_scout_load_config)
+upload.add_command(fohm)
+upload.add_command(genotypes)
+upload.add_command(gisaid)
+upload.add_command(nipt)
+upload.add_command(observations)
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
-upload.add_command(clinical_delivery)
-upload.add_command(validate)
 upload.add_command(scout)
 upload.add_command(upload_case_to_scout)
+upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_rna_fusion_report_to_scout)
 upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
-upload.add_command(create_scout_load_config)
-upload.add_command(observations)
-upload.add_command(genotypes)
-upload.add_command(coverage)
+upload.add_command(validate)
 upload.add_command(vogue)
-upload.add_command(gisaid)
-upload.add_command(nipt)
-upload.add_command(fohm)
-upload.add_command(fastq)
-upload.add_command(upload_delivery_report_to_scout)

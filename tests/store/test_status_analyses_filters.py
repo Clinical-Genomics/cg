@@ -24,7 +24,7 @@ from tests.store_helpers import StoreHelpers
 def test_filter_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    fixture_case_obj,
     timestamp_today: datetime,
     old_timestamp: datetime,
 ):
@@ -33,7 +33,7 @@ def test_filter_valid_analyses_in_production(
     # GIVEN a set of mock analyses
     analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_today)
     outdated_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, completed_at=old_timestamp
+        store=base_store, case=fixture_case_obj, completed_at=old_timestamp
     )
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
@@ -46,9 +46,7 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
-):
+def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, fixture_case_obj):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
@@ -56,7 +54,7 @@ def test_filter_analyses_with_pipeline(
         store=base_store, pipeline=Pipeline.BALSAMIC
     )
     mip_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, pipeline=Pipeline.MIP_DNA
+        store=base_store, case=fixture_case_obj, pipeline=Pipeline.MIP_DNA
     )
 
     # GIVEN an analysis query
@@ -181,7 +179,7 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
 
 
 def test_filter_report_analyses_by_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
+    base_store: Store, helpers: StoreHelpers, fixture_case_obj
 ):
     """Test filtering delivery report related analysis by pipeline."""
 
@@ -190,7 +188,7 @@ def test_filter_report_analyses_by_pipeline(
         store=base_store, pipeline=Pipeline.BALSAMIC
     )
     fluffy_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, pipeline=Pipeline.FLUFFY
+        store=base_store, case=fixture_case_obj, pipeline=Pipeline.FLUFFY
     )
 
     # GIVEN an analysis query
@@ -207,7 +205,7 @@ def test_filter_report_analyses_by_pipeline(
 def test_order_analyses_by_completed_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    fixture_case_obj,
     timestamp_today: datetime,
     timestamp_yesterday: datetime,
 ):
@@ -218,7 +216,7 @@ def test_order_analyses_by_completed_at(
         store=base_store, completed_at=timestamp_today
     )
     old_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, completed_at=timestamp_yesterday
+        store=base_store, case=fixture_case_obj, completed_at=timestamp_yesterday
     )
 
     # GIVEN an analysis query
@@ -235,7 +233,7 @@ def test_order_analyses_by_completed_at(
 def test_order_analyses_by_uploaded_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    fixture_case_obj,
     timestamp_today: datetime,
     timestamp_yesterday: datetime,
 ):
@@ -247,7 +245,7 @@ def test_order_analyses_by_uploaded_at(
     )
     old_analysis: models.Analysis = helpers.add_analysis(
         store=base_store,
-        case=case_obj,
+        case=fixture_case_obj,
         completed_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
     )

@@ -119,10 +119,10 @@ def fixture_analysis_obj(analysis_store: Store) -> models.Analysis:
     return analysis_store.analyses()[0]
 
 
-@pytest.fixture(scope="function")
-def case_obj(analysis_obj: models.Analysis) -> models.Family:
+@pytest.fixture(scope="function", name="case_obj")
+def fixture_case_obj(analysis_store: Store) -> models.Family:
     """Return a case models object"""
-    return analysis_obj.family
+    return analysis_store.families()[0]
 
 
 @pytest.fixture(scope="function", name="sample_obj")

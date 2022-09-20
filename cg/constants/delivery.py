@@ -3,15 +3,15 @@
 from cgmodels.cg.constants import Pipeline
 
 ONLY_ONE_CASE_PER_TICKET = [
-    "fastq",
-    "microsalt",
-    "sarscov2",
+    Pipeline.FASTQ,
+    Pipeline.MICROSALT,
+    Pipeline.SARS_COV_2,
 ]
 
 SKIP_MISSING = [
-    "fastq",
-    "microsalt",
-    "sarscov2",
+    Pipeline.FASTQ,
+    Pipeline.MICROSALT,
+    Pipeline.SARS_COV_2,
 ]
 
 BALSAMIC_ANALYSIS_CASE_TAGS = [

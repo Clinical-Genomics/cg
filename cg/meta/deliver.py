@@ -297,7 +297,10 @@ class DeliverAPI:
         """Returns the scope of the delivery, ie whether sample- and or case files were delivered"""
         case_delivery = sample_delivery = False
         for delivery in delivery_arguments:
-            if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]:
+            if (
+                constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]
+                and delivery in constants.ONLY_ONE_CASE_PER_TICKET
+            ):
                 sample_delivery = True
             if constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["case_tags"]:
                 case_delivery = True
