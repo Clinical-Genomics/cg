@@ -15,7 +15,7 @@ from cg.store.status_sample_filters import apply_sample_filter
 
 
 class StatusHandler(BaseHandler):
-    """Handles status states for entities in the database"""
+    """Handles status states for entities in the database."""
 
     def samples_to_receive(self, external=False) -> Query:
         """Fetch incoming samples."""
@@ -66,7 +66,7 @@ class StatusHandler(BaseHandler):
         )
 
     def get_families_with_analyses(self) -> Query:
-        """Return all cases in the database with an analysis"""
+        """Return all cases in the database with an analysis."""
         return self.Family.query.outerjoin(models.Analysis).join(
             models.Family.links,
             models.FamilySample.sample,
@@ -74,10 +74,14 @@ class StatusHandler(BaseHandler):
             models.Application,
         )
 
+    def get_families_with_samples(self) -> Query:
+        """Return all cases in the database with samples."""
+        return self.Family.query.join(models.Family.links, models.FamilySample.sample)
+
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
-        """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         cases: Query = self.get_families_with_analyses()
         filter_functions: List[str] = [
             "cases_has_sequence",
@@ -104,7 +108,7 @@ class StatusHandler(BaseHandler):
         return families[:limit]
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
-        """Returns a list of cases that may be available to store in Housekeeper"""
+        """Returns a list of cases that may be available to store in Housekeeper."""
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
@@ -149,7 +153,7 @@ class StatusHandler(BaseHandler):
         exclude_delivery_reported: bool = False,
         exclude_invoiced: bool = False,
     ) -> List[models.Family]:
-        """Fetch cases with and w/o analyses"""
+        """Fetch cases with and w/o analyses."""
         case_q = self._get_filtered_case_query(
             case_action,
             customer_id,
@@ -198,7 +202,7 @@ class StatusHandler(BaseHandler):
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
     def set_case_action(self, action: Literal[CASE_ACTIONS], case_id: str) -> None:
-        """Sets the action of provided cases to None or the given action"""
+        """Sets the action of provided cases to None or the given action."""
         case_obj: models.Family = self.Family.query.filter(
             models.Family.internal_id == case_id
         ).first()
@@ -543,7 +547,7 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
-        """Fetch analyses that have not been uploaded"""
+        """Fetch analyses that have not been uploaded."""
         records = self.Analysis.query.join(models.Analysis.family)
 
         analysis_filter_functions: List[str] = [
@@ -584,7 +588,7 @@ class StatusHandler(BaseHandler):
         before: Optional[datetime] = datetime.now(),
         pipeline: Optional[Pipeline] = None,
     ) -> Query:
-        """Fetch all analyses older than certain date"""
+        """Fetch all analyses older than certain date."""
         records = self.Analysis.query.join(models.Analysis.family)
         if case_id:
             records = records.filter(models.Family.internal_id == case_id)
@@ -597,9 +601,7 @@ class StatusHandler(BaseHandler):
 
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Fetch observations that have not been uploaded."""
-        records: Query = self.Family.query.join(
-            models.Analysis, models.Family.links, models.FamilySample.sample
-        )
+        records: Query = self.get_families_with_samples()
         records: Query = apply_case_filter(
             function="cases_with_loqusdb_supported_pipeline", cases=records, pipeline=pipeline
         )
@@ -610,7 +612,7 @@ class StatusHandler(BaseHandler):
 
     def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
         """Fetch observations that have been uploaded."""
-        records = self.Family.query.join(models.Family.links, models.FamilySample.sample)
+        records: Query = self.get_families_with_samples()
         records: Query = apply_case_filter(
             function="cases_with_loqusdb_supported_pipeline", cases=records, pipeline=pipeline
         )
@@ -630,7 +632,7 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
-        """Fetches analyses that need a delivery report to be regenerated"""
+        """Fetches analyses that need a delivery report to be regenerated."""
 
         records = self.Analysis.query.join(models.Analysis.family)
 
@@ -656,7 +658,7 @@ class StatusHandler(BaseHandler):
         return records
 
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
-        """Fetches analyses that need a delivery report to be uploaded"""
+        """Fetches analyses that need a delivery report to be uploaded."""
 
         records = self.Analysis.query.join(models.Analysis.family)
 
@@ -785,7 +787,7 @@ class StatusHandler(BaseHandler):
         analysis_uploaded_at,
         samples_delivered_at,
     ) -> timedelta:
-        """Calculated estimated turnaround-time"""
+        """Calculated estimated turnaround-time."""
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 
