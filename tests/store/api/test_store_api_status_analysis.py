@@ -105,8 +105,8 @@ def test_that_cases_can_have_many_samples(
 def test_external_sample_to_re_analyse(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
-    """Test that a case marked for re-analyse with one sample external not sequenced in-house and
-    with completed analysis show up among the cases to analyse"""
+    """Test that a case marked for re-analysis with one sample external not sequenced in-house and
+    with completed analysis show up among the cases to analyse."""
 
     # GIVEN a sample which is not sequenced and external
     test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)

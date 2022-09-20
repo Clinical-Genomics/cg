@@ -580,19 +580,19 @@ def fixture_later_timestamp() -> dt.datetime:
 
 @pytest.fixture(scope="function", name="timestamp_now")
 def fixture_timestamp_now() -> dt.datetime:
-    """Return a time stamp of todays date in date time format"""
+    """Return a time stamp of today's date in date time format."""
     return dt.datetime.now()
 
 
 @pytest.fixture(scope="function", name="timestamp_yesterday")
 def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
-    """Return a time stamp of yesterdays date in date time format"""
+    """Return a time stamp of yesterday's date in date time format."""
     return timestamp_now - dt.timedelta(days=1)
 
 
 @pytest.fixture(scope="function", name="timestamp_in_2_weeks")
 def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
-    """Return a time stamp 14 days ahead in time"""
+    """Return a time stamp 14 days ahead in time."""
     return timestamp_now + dt.timedelta(days=14)
 
 

@@ -42,7 +42,7 @@ def test_with_yes(
     caplog,
     mocker,
 ):
-    """Test command with dry run options"""
+    """Test command with dry run options."""
     # GIVEN a case on disk that could be deleted
     analysis_api = clean_context.meta_apis["analysis_api"]
 

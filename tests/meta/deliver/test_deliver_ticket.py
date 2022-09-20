@@ -66,7 +66,7 @@ def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker):
 
 
 def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, timestamp_now):
-    """Test to generate the date tag"""
+    """Test to generate the date tag."""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 

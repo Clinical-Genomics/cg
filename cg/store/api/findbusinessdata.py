@@ -67,8 +67,9 @@ class FindBusinessDataHandler(BaseHandler):
             return True
         return False
 
-    def application_by_case(self, case_id: str) -> models.Application:
-        """Fetch the application of a case."""
+    def get_application_by_case(self, case_id: str) -> models.Application:
+        """Return the application of a case."""
+
         return (
             self.family(case_id)
             .links[ListIndexes.FIRST.value]
@@ -329,14 +330,16 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Pool.get(pool_id)
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
-        """Return the target reads of a ready made library case"""
-        application = self.application_by_case(case_id)
-        if application.prep_category != str(PrepCategory.READY_MADE_LIBRARY):
+        """Return the target reads of a ready made library case."""
+
+        application: models.Application = self.application_by_case(case_id)
+
+        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
             )
-
         return application.expected_reads
 
     def sample(self, internal_id: str) -> models.Sample:

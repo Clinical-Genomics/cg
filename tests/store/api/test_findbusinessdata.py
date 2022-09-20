@@ -182,7 +182,7 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
 
 
 def test_application_by_case(case_id: str, rml_pool_store: Store):
-    """Test that the correct application is returned on a case"""
+    """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
     application_version: models.ApplicationVersion = (
         rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version

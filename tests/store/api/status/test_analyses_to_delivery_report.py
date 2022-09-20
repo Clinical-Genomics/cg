@@ -7,7 +7,7 @@ from cg.utils.date import get_date
 
 
 def test_missing(analysis_store: Store, helpers, timestamp_now):
-    """Tests that analyses that are completed but lacks delivery report are returned"""
+    """Tests that analyses that are completed, but lacks delivery report are returned."""
 
     # GIVEN an analysis that is delivered but has no delivery report
     pipeline = Pipeline.BALSAMIC

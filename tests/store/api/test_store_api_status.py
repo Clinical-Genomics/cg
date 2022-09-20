@@ -269,7 +269,7 @@ def test_sequencing_qc_priority_express_sample_with_one_half_of_the_reads(
 def test_sequencing_qc_priority_standard_sample_with_one_half_of_the_reads(
     base_store: Store, helpers, timestamp_now
 ):
-    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC"""
+    """Test if priority standard sample(s), having more than 50% of the application target reads, pass sample QC."""
 
     # GIVEN a database with a case which has an normal sample with half the amount of reads
     sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
