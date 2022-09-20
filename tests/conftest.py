@@ -518,6 +518,7 @@ def fixture_flowcell_full_name() -> str:
 def fixture_flowcell_name() -> str:
     return "HVKJCDRXX"
 
+
 @pytest.fixture(name="another_flow_cell_name")
 def fixture_another_flow_cell_name() -> str:
     return "HF57HDRXY"

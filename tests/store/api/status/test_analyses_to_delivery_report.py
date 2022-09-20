@@ -21,7 +21,9 @@ def test_missing(analysis_store: Store, helpers, timestamp_now):
         data_delivery=DataDelivery.SCOUT,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    analysis_store.relate_sample(family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    analysis_store.relate_sample(
+        family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+    )
     assert sample.delivered_at is not None
     assert analysis.delivery_report_created_at is None
 
@@ -54,7 +56,9 @@ def test_outdated_analysis(analysis_store, helpers, timestamp_now, timestamp_yes
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
 
     # GIVEN a store sample case relation
-    analysis_store.relate_sample(family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    analysis_store.relate_sample(
+        family=analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+    )
 
     # WHEN calling the analyses_to_delivery_report
     analyses = analysis_store.analyses_to_delivery_report(pipeline=pipeline).all()
