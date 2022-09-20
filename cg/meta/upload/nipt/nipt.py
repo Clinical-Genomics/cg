@@ -48,7 +48,7 @@ class NiptUploadAPI:
         self.dry_run = dry_run
 
     def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
-        """Check average Q30 and of the latest flowcell related to a case"""
+        """Check average Q30 and of the latest flow cell related to a case."""
         latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
             family_id=case_id
         )
