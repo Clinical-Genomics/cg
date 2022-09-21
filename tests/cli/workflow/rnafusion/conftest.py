@@ -3,6 +3,7 @@
 import datetime as dt
 import gzip
 from pathlib import Path
+from typing import List
 
 import pytest
 from cg.apps.hermes.hermes_api import HermesApi
@@ -137,85 +138,63 @@ def fixture_rnafusion_context(
     return cg_context
 
 
-# @pytest.fixture(name="deliverable_data")
-# def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
-#     samples = [
-#         "sample_case_wgs_single_tumor",
-#     ]
-#
-#     return {
-#         "files": [
-#             {
-#                 "path": f"{balsamic_dir}/{balsamic_case_id}/multiqc_report.html",
-#                 "path_index": "",
-#                 "step": "multiqc",
-#                 "tag": ["qc"],
-#                 "id": "T_WGS",
-#                 "format": "html",
-#                 "mandatory": True,
-#             },
-#             {
-#                 "path": f"{balsamic_dir}/{balsamic_case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
-#                 "path_index": "",
-#                 "step": "fastp",
-#                 "tag": [f"concatenated_{samples[0]}_R", "qc"],
-#                 "id": f"concatenated_{samples[0]}_R",
-#                 "format": "fastq.gz",
-#                 "mandatory": True,
-#             },
-#             {
-#                 "path": f"{balsamic_dir}/{balsamic_case_id}/CNV.somatic.{balsamic_case_id}.cnvkit.pass.vcf.gz.tbi",
-#                 "path_index": "",
-#                 "step": "vep_somatic",
-#                 "format": "vcf.gz.tbi",
-#                 "tag": [
-#                     "CNV",
-#                     balsamic_case_id,
-#                     "cnvkit",
-#                     "annotation",
-#                     "somatic",
-#                     "index",
-#                 ],
-#                 "id": balsamic_case_id,
-#                 "mandatory": True,
-#             },
-#         ]
-#     }
-#
-#
-# @pytest.fixture
-# def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_id: str) -> None:
-#     """Create deliverable file with dummy data and files to deliver"""
-#     Path.mkdir(
-#         Path(balsamic_dir, balsamic_case_id, "analysis", "delivery_report"),
-#         parents=True,
-#         exist_ok=True,
-#     )
-#     for report_entry in deliverable_data["files"]:
-#         Path(report_entry["path"]).touch(exist_ok=True)
-#     WriteFile.write_file_from_content(
-#         content=deliverable_data,
-#         file_format=FileFormat.JSON,
-#         file_path=Path(
-#             balsamic_dir, balsamic_case_id, "analysis", "delivery_report", balsamic_case_id + ".hk"
-#         ),
-#     )
-#
-#
-# @pytest.fixture(name="hermes_deliverables")
-# def fixture_hermes_deliverables(deliverable_data: dict, balsamic_case_id: str) -> dict:
-#     hermes_output: dict = {"pipeline": "balsamic", "bundle_id": balsamic_case_id, "files": []}
-#     for file_info in deliverable_data["files"]:
-#         tags: List[str] = []
-#         if "html" in file_info["format"]:
-#             tags.append("multiqc-html")
-#         elif "fastq" in file_info["format"]:
-#             tags.append("fastq")
-#         elif "vcf" in file_info["format"]:
-#             tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
-#         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
-#     return hermes_output
-#
+@pytest.fixture(name="deliverable_data")
+def fixture_deliverables_data(rnafusion_dir: Path, rnafusion_case_id: str) -> dict:
+    sample = "sample_rnafusion_case_enough_reads"
+
+    return {
+        "files": [
+            {
+                "path": f"{rnafusion_dir}/{rnafusion_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "multiqc",
+                "tag": ["qc"],
+                "id": sample,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
+    """Create deliverable file with dummy data and files to deliver"""
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"
+        ),
+    )
+
+
+@pytest.fixture(name="hermes_deliverables")
+def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+    for file_info in deliverable_data["files"]:
+        tags: List[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        # elif "fastq" in file_info["format"]:
+        #     tags.append("fastq")
+        # elif "vcf" in file_info["format"]:
+        #     tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
 #
 # @pytest.fixture(name="malformed_hermes_deliverables")
 # def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
