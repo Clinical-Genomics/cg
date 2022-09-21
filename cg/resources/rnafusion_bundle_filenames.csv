@@ -5,3 +5,4 @@ PATHTOCASE/pizzly/CASEID.pizzly.txt,,pizzly,pizzly,CASEID,tsv
 PATHTOCASE/starfusion/CASEID.starfusion.fusion_predictions.tsv,,star-fusion,star-fusion,CASEID,tsv
 PATHTOCASE/arriba/CASEID.arriba.fusions.tsv,,arriba,arriba,CASEID,tsv
 PATHTOCASE/squid/CASEID.squid.fusions.annotated.txt,,squid,squid,CASEID,tsv
+PATHTOCASE/multiqc/multiqc_report.html,,multiqc,multiqc,CASEID,html
