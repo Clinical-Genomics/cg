@@ -191,7 +191,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
 
-
     @staticmethod
     def __build_command_str(options: dict) -> List[str]:
         formatted_options: list = []
@@ -267,7 +266,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             + ["-bg", "-q"]
             + command
             + options
-            + NextflowAnalysisAPI.get_nextflow_stdout_stderr(case_id=case_id, root_dir=self.root_dir)
+            + NextflowAnalysisAPI.get_nextflow_stdout_stderr(
+                case_id=case_id, root_dir=self.root_dir
+            )
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
