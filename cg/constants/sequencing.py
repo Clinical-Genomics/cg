@@ -27,3 +27,12 @@ class Sequencers(StrEnum):
     NOVASEQ: str = "novaseq"
     HISEQGA: str = "hiseqga"
     HISEQX: str = "hiseqx"
+
+
+class SequencingMethod(StrEnum):
+    """Sequencing method types."""
+
+    TGS: str = "tgs"
+    WGS: str = "wgs"
+    WES: str = "wes"
+    wts: str = "wts"

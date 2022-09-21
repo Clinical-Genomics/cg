@@ -5,6 +5,7 @@ from alchy import Query
 from cg.apps.loqus import LoqusdbAPI
 from cg.cli.upload.utils import LinkHelper
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadError
 from cg.meta.upload.observations.observations_api import UploadObservationsAPI
 from cg.store import models
@@ -56,8 +57,8 @@ def get_observations_api(context: CGConfig, case: models.Family) -> UploadObserv
     """Return an observations API given a specific case object."""
 
     loqus_apis = {
-        "wgs": LoqusdbAPI(context.dict()),
-        "wes": LoqusdbAPI(context.dict(), analysis_type="wes"),
+        SequencingMethod.WGS: LoqusdbAPI(context.dict()),
+        SequencingMethod.WES: LoqusdbAPI(context.dict(), analysis_type=SequencingMethod.WES),
     }
 
     analysis_list = LinkHelper.get_analysis_type_for_each_link(case.links)
