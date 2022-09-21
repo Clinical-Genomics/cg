@@ -83,6 +83,7 @@ def test_store(
     assert rnafusion_context.status_db.family(case_id).analyses
     assert rnafusion_context.housekeeper_api.bundle(case_id)
 
+
 #
 # def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
 #     """Test to ensure all parts of compound start-available command are executed given ideal conditions

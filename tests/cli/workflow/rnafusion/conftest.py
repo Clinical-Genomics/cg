@@ -175,9 +175,7 @@ def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case
     WriteFile.write_file_from_content(
         content=deliverable_data,
         file_format=FileFormat.JSON,
-        file_path=Path(
-            rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"
-        ),
+        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
     )
 
 
@@ -194,6 +192,7 @@ def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) 
         #     tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
+
 
 #
 # @pytest.fixture(name="malformed_hermes_deliverables")
