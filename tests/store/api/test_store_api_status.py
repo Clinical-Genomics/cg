@@ -64,6 +64,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
 
     # GIVEN a case with observations that has been uploaded to Loqusdb
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqusdb")
     sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
@@ -82,6 +83,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
 
     # GIVEN a case with observations that has not been uploaded to loqusdb
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
@@ -100,6 +102,7 @@ def test_case_in_observations_to_upload(helpers, sample_store):
 
     # GIVEN a case with completed analysis and samples w/o loqusdb_id
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store)
     sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses
@@ -118,6 +121,7 @@ def test_case_not_in_observations_to_upload(helpers, sample_store):
 
     # GIVEN a case with completed analysis and samples w loqusdb_id
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
+    analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
     sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
     assert analysis.family.analyses

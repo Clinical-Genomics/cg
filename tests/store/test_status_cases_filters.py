@@ -170,9 +170,11 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
 
     # GIVEN a MIP-DNA and a FLUFFY case
     test_mip_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_mip_case.customer.loqus_upload = True
     test_fluffy_case: models.Family = helpers.add_case(
         base_store, name="test", data_analysis=Pipeline.FLUFFY
     )
+    test_fluffy_case.customer.loqus_upload = True
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     base_store.relate_sample(test_mip_case, test_sample, Gender.UNKNOWN)
