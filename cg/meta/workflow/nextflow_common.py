@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import List
 from datetime import datetime
 import os
 import operator
@@ -68,3 +69,17 @@ class NextflowAnalysisAPI:
         if outdir:
             return outdir
         return Path(cls.get_case_path(case_id, root_dir))
+
+    @classmethod
+    def get_nextflow_stdout_stderr(cls, case_id: str, root_dir: str) -> List[str]:
+        return [
+            " > "
+            + str(cls.get_case_path(case_id=case_id, root_dir=root_dir))
+            + "/"
+            + case_id
+            + "-stdout.log 2> "
+            + str(cls.get_case_path(case_id=case_id, root_dir=root_dir))
+            + "/"
+            + case_id
+            + "-stdout.err  < /dev/null & "
+        ]
