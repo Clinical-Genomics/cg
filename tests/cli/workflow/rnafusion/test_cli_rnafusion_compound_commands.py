@@ -1,24 +1,28 @@
 import logging
 
-from cg.cli.workflow.rnafusion.base import rnafusion, start
+from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.hermes.models import CGDeliverables
+from cg.cli.workflow.rnafusion.base import rnafusion, start, store
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+
 
 EXIT_SUCCESS = 0
 
 
-# def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
-#     """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
-#     # GIVEN no arguments or options besides the command call
-#
-#     # WHEN running command
-#     result = cli_runner.invoke(rnafusion, [], obj=rnafusion_context)
-#
-#     # THEN command runs successfully
-#     assert result.exit_code == EXIT_SUCCESS
-#
-#     # THEN help should be printed
-#     assert "help" in result.output
+def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
+    """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
+    # GIVEN no arguments or options besides the command call
+
+    # WHEN running command
+    result = cli_runner.invoke(rnafusion, [], obj=rnafusion_context)
+
+    # THEN command runs successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN help should be printed
+    assert "help" in result.output
 
 
 def test_start(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
@@ -28,6 +32,9 @@ def test_start(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
     # GIVEN case id for which we created a config file
     case_id = "rnafusion_case_enough_reads"
 
+    # GIVEN decompression is not needed
+    RnafusionAnalysisAPI.resolve_decompression.return_value = None
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
 
@@ -36,52 +43,46 @@ def test_start(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
     assert case_id in caplog.text
 
 
-#
-#    # GIVEN decompression is not needed
-# mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
-# RnafusionAnalysisAPI.resolve_decompression.return_value = None
+def test_store(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    real_housekeeper_api,
+    mock_deliverable,
+    # mock_analysis_finish,
+    caplog,
+    hermes_deliverables,
+    mocker,
+):
+    """Test to ensure all parts of store command are run successfully given ideal conditions"""
+    caplog.set_level(logging.INFO)
 
-# def test_store(
-#     cli_runner: CliRunner,
-#     balsamic_context: CGConfig,
-#     real_housekeeper_api,
-#     mock_config,
-#     mock_deliverable,
-#     mock_analysis_finish,
-#     caplog,
-#     hermes_deliverables,
-#     mocker,
-# ):
-#     """Test to ensure all parts of store command are run successfully given ideal conditions"""
-#     caplog.set_level(logging.INFO)
-#
-#     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
-#     case_id = "balsamic_case_wgs_single"
-#
-#     # Set Housekeeper to an empty real Housekeeper store
-#     balsamic_context.housekeeper_api_ = real_housekeeper_api
-#     balsamic_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
-#
-#     # Make sure the bundle was not present in the store
-#     assert not balsamic_context.housekeeper_api.bundle(case_id)
-#
-#     # Make sure  analysis not already stored in ClinicalDB
-#     assert not balsamic_context.status_db.family(case_id).analyses
-#
-#     # GIVEN that HermesAPI returns a deliverables output
-#     mocker.patch.object(HermesApi, "convert_deliverables")
-#     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-#
-#     # WHEN running command
-#     result = cli_runner.invoke(store, [case_id, "--dry-run"], obj=balsamic_context)
-#
-#     # THEN bundle should be successfully added to HK and STATUS
-#     assert result.exit_code == EXIT_SUCCESS
-#     assert "Analysis successfully stored in Housekeeper" in caplog.text
-#     assert "Analysis successfully stored in StatusDB" in caplog.text
-#     assert balsamic_context.status_db.family(case_id).analyses
-#     assert balsamic_context.housekeeper_api.bundle(case_id)
-#
+    # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
+    case_id = "rnafusion_case_enough_reads"
+
+    # Set Housekeeper to an empty real Housekeeper store
+    rnafusion_context.housekeeper_api_ = real_housekeeper_api
+    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # Make sure the bundle was not present in the store
+    assert not rnafusion_context.housekeeper_api.bundle(case_id)
+
+    # Make sure  analysis not already stored in ClinicalDB
+    assert not rnafusion_context.status_db.family(case_id).analyses
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+
+    # WHEN running command
+    result = cli_runner.invoke(store, [case_id, "--dry-run"], obj=rnafusion_context)
+
+    # THEN bundle should be successfully added to HK and STATUS
+    assert result.exit_code == EXIT_SUCCESS
+    assert "Analysis successfully stored in Housekeeper" in caplog.text
+    assert "Analysis successfully stored in StatusDB" in caplog.text
+    assert rnafusion_context.status_db.family(case_id).analyses
+    assert rnafusion_context.housekeeper_api.bundle(case_id)
+
 #
 # def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
 #     """Test to ensure all parts of compound start-available command are executed given ideal conditions
