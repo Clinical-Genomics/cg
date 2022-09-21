@@ -54,7 +54,7 @@ def test_strandedness(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog
     """Test command with --strandedness option"""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id and genome_version
-    case_id = "case_enough_reads"
+    case_id = "rnafusion_case_enough_reads"
     option_key = "--strandedness"
     option_values = ["reverse", "forward", "unstranded"]
     # WHEN running with strandedness option specified
@@ -75,7 +75,7 @@ def test_wrong_strandedness(cli_runner: CliRunner, rnafusion_context: CGConfig, 
     """Test command with --strandedness option"""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id and genome_version
-    case_id = "case_rnafusion_enough_reads"
+    case_id = "rnafusion_case_enough_reads"
     option_key = "--strandedness"
     option_value = "unknown"
     # WHEN running with strandedness option specified
