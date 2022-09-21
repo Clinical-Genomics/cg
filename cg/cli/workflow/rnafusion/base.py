@@ -269,7 +269,6 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
         if not dry_run:
             analysis_api.report_deliver(case_id=case_id)
     except CgError as e:
