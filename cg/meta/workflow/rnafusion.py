@@ -106,9 +106,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                     ",".join([samplesheet_content[k][i] for k in RNAFUSION_SAMPLESHEET_HEADERS])
                 )
 
-    def write_samplesheet(
-        self, case_id: str, strandedness: str
-    ) -> None:
+    def write_samplesheet(self, case_id: str, strandedness: str) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         if len(case_obj.links) != 1:

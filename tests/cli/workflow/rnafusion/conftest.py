@@ -66,14 +66,10 @@ def rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
 
 @pytest.fixture
 def rnafusion_mock_fastq_files(
-    rnafusion_fastq_file_l_1_r_1: Path,
-    rnafusion_fastq_file_l_1_r_2: Path
+    rnafusion_fastq_file_l_1_r_1: Path, rnafusion_fastq_file_l_1_r_2: Path
 ) -> list:
     """Return list of all mock fastq files to commit to mock housekeeper"""
-    return [
-        rnafusion_fastq_file_l_1_r_1,
-        rnafusion_fastq_file_l_1_r_2
-    ]
+    return [rnafusion_fastq_file_l_1_r_1, rnafusion_fastq_file_l_1_r_2]
 
 
 @pytest.fixture(scope="function", name="rnafusion_housekeeper")
