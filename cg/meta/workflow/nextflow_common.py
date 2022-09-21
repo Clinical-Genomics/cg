@@ -22,6 +22,11 @@ class NextflowAnalysisAPI:
         return Path(root_dir, case_id)
 
     @classmethod
+    def verify_case_config_file_exists(cls, case_id: str, root_dir: str) -> None:
+        if not Path(cls.get_case_config_path(case_id=case_id)).exists():
+            raise ValueError(f"No config file found for case {case_id}")
+
+    @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> Path:
         """Generates a path where the Rnafusion sample sheet for the case_id should be located."""
         return Path((cls.get_case_path(case_id, root_dir)), case_id + "_samplesheet.csv")
@@ -34,7 +39,6 @@ class NextflowAnalysisAPI:
     @classmethod
     def extract_read_files(cls, read_nb: int, metadata: list) -> list:
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
-        LOG.info(sorted_metadata)
         return [d["path"] for d in sorted_metadata if d["read"] == read_nb]
 
     @classmethod

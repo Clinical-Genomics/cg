@@ -107,10 +107,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 )
 
     def write_samplesheet(
-        self, case_id: str, strandedness: str = RNAFUSION_STRANDEDNESS_DEFAULT
+        self, case_id: str, strandedness: str
     ) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
+        if len(case_obj.links) != 1:
+            raise NotImplementedError("Case objects are assuming one link")
+
         for link in case_obj.links:
             sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: list = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
@@ -151,7 +154,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     ) -> dict:
         """Transforms click argument related to rnafusion that were left empty into
         defaults constructed with case_id paths or from config."""
-
         return {
             "-w": NextflowAnalysisAPI.get_workdir_path(case_id, self.root_dir, work_dir),
             "-resume": resume,
@@ -283,6 +285,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             + self.get_nextflow_stdout_stderr(case_id)
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
+
+    def verify_case_config_file_exists(self, case_id: str):
+        NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the rnafusion deliverables file for the case_id should be located.

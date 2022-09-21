@@ -28,7 +28,7 @@ def rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 @pytest.fixture(name="rnafusion_case_id")
 def fixture_rnafusion_case_id() -> str:
-    return "rnafusion_case_id"
+    return "case_rnafusion_enough_reads"
 
 
 @pytest.fixture(name="rnafusion_housekeeper_dir")
@@ -45,7 +45,7 @@ def rnafusion_reference_path(rnafusion_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
+def rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
     ).as_posix()
@@ -55,7 +55,7 @@ def fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
+def rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
     ).as_posix()
@@ -65,22 +65,14 @@ def fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
 
 
 @pytest.fixture
-def rnafusion_mock_fastq_r1_files(
-    fastq_file_l_1_r_1: Path,
+def rnafusion_mock_fastq_files(
+    rnafusion_fastq_file_l_1_r_1: Path,
+    rnafusion_fastq_file_l_1_r_2: Path
 ) -> list:
     """Return list of all mock fastq files to commit to mock housekeeper"""
     return [
-        fastq_file_l_1_r_1,
-    ]
-
-
-@pytest.fixture
-def rnafusion_mock_fastq_r2_files(
-    fastq_file_l_1_r_2: Path,
-) -> list:
-    """Return list of all mock fastq files to commit to mock housekeeper"""
-    return [
-        fastq_file_l_1_r_2,
+        rnafusion_fastq_file_l_1_r_1,
+        rnafusion_fastq_file_l_1_r_2
     ]
 
 
@@ -88,13 +80,12 @@ def rnafusion_mock_fastq_r2_files(
 def rnafusion_housekeeper(
     housekeeper_api,
     helpers,
-    rnafusion_mock_fastq_r1_files: list,
-    rnafusion_mock_fastq_r2_files: list,
+    rnafusion_mock_fastq_files: list,
 ):
     """Create populated housekeeper that holds files for all mock samples"""
 
     samples = [
-        "case_rnafusion_enough_reads",
+        "sample_rnafusion_case_enough_reads",
     ]
 
     for sample in samples:
@@ -103,15 +94,13 @@ def rnafusion_housekeeper(
             "created": dt.datetime.now(),
             "version": "1.0",
             "files": [
-                {"path": f, "tags": ["fastq"], "archive": False}
-                for f in rnafusion_mock_fastq_r1_files
+                {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
             ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
     return housekeeper_api
 
 
-#
 @pytest.fixture(scope="function", name="rnafusion_context")
 def fixture_rnafusion_context(
     cg_context: CGConfig,
@@ -130,34 +119,25 @@ def fixture_rnafusion_context(
     # Create ERROR case with NO SAMPLES
     helpers.add_case(status_db, internal_id="no_sample_case", name="no_sample_case")
 
-    # sample_rnafusion = helpers.add_sample(
-    #     status_db,
-    #     internal_id="sample_rnafusion",
-    #     reads=10,
-    #     sequenced_at=dt.datetime.now(),
-    # )
-
     # Create textbook case for with enough reads
-    case_rnafusion_enough_reads = helpers.add_case(
+    case_enough_reads = helpers.add_case(
         store=status_db,
-        internal_id="case_rnafusion_enough_reads",
-        name="case_rnafusion_enough_reads",
+        internal_id="rnafusion_case_enough_reads",
+        name="rnafusion_case_enough_reads",
         data_analysis=Pipeline.RNAFUSION,
     )
 
     sample_rnafusion_case_enough_reads = helpers.add_sample(
         status_db,
         internal_id="sample_rnafusion_case_enough_reads",
-        reads=10,
         sequenced_at=dt.datetime.now(),
     )
 
     helpers.add_relationship(
         status_db,
-        case=case_rnafusion_enough_reads,
+        case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
-
     return cg_context
 
 
