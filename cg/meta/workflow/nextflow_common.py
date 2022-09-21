@@ -23,7 +23,7 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def verify_case_config_file_exists(cls, case_id: str, root_dir: str) -> None:
-        if not Path(cls.get_case_config_path(case_id=case_id)).exists():
+        if not Path(cls.get_case_config_path(case_id=case_id, root_dir=root_dir)).exists():
             raise ValueError(f"No config file found for case {case_id}")
 
     @classmethod
