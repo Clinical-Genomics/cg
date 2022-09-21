@@ -23,11 +23,13 @@ def filter_cases_with_loqusdb_supported_pipeline(
     cases: Query, pipeline: str = None, **kwargs
 ) -> Query:
     """Return loqusdb related cases with pipeline."""
-    return (
+    records: Query = (
         cases.filter(models.Family.data_analysis == pipeline)
         if pipeline
         else cases.filter(models.Family.data_analysis.in_(LOQUSDB_SUPPORTED_PIPELINES))
     )
+
+    return records.filter(models.Customer.loqus_upload == True)
 
 
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:

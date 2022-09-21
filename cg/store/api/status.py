@@ -76,7 +76,9 @@ class StatusHandler(BaseHandler):
 
     def get_families_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample)
+        return self.Family.query.join(
+            models.Family.links, models.FamilySample.sample, models.Family.customer
+        )
 
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
