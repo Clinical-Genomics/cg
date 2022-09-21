@@ -128,7 +128,7 @@ def test_cleaned_at_invalid(
     """Test command with dry run options"""
     # GIVEN a case on disk that could be deleted
     base_store = clean_context.status_db
-    case_path = clean_context.meta_apis["analysis_api"].get_case_path(case_id)
+    case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_not_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
     assert not base_store.family(balsamic_case_not_clean).analyses[0].cleaned_at
     # WHEN dry running with dry run specified
