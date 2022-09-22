@@ -42,7 +42,7 @@ class Process:
         self.base_call = [self.binary]
         if conda_binary:
             LOG.debug("Activating environment with conda run for binary: %s", self.conda_binary)
-            self.base_call.insert(0, f"{self.conda_binary} run -n {self.environment} ")
+            self.base_call.insert(0, f"{self.conda_binary} run -n {self.environment}")
         elif environment:
             LOG.debug("Activating environment with: %s", self.environment)
             self.base_call.insert(0, f"source activate {self.environment};")
