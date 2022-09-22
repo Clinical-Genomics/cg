@@ -74,8 +74,17 @@ class LoqusdbAPI:
     def delete(self, case_id: str) -> None:
         """Remove a case from LoqusDB."""
         delete_call_parameters = ["delete", "-c", case_id]
-        # 'loqusdb delete -c CASE_ID' always returns exit 0 even if case_id does not exist
+
         self.process.run_command(parameters=delete_call_parameters)
+        for line in self.process.stderr_lines():
+            if "INFO Removing case {0}".format(case_id) in line:
+                return None
+            elif "WARNING Case {0} does not exist".format(case_id) in line:
+                raise CaseNotFoundError(f"Case {case_id} not found in loqusdb")
+            else:
+                # This should not happen. If it does, other exit messages must be handle
+                LOG.critical("Could not delete case {0}".format(case_id))
+                raise
 
     def get_case(self, case_id: str) -> dict:
         """Find a case in the database by case id"""
