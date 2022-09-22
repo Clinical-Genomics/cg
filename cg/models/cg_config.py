@@ -131,7 +131,7 @@ class MutantConfig(BaseModel):
 
 
 class MipConfig(BaseModel):
-    conda_binary: str
+    conda_binary: Optional[str] = None
     conda_env: str
     mip_config: str
     pipeline: str
