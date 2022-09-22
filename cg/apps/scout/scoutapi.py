@@ -262,12 +262,12 @@ class ScoutAPI:
             raise ScoutUploadError("Something went wrong when uploading fusion report")
 
     def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
-        """Load a splice junctions bed file into a case in the database
+        """Load a splice junctions bed file into a case in the database.
 
         Args:
             file_path           (string):       Path to delivery report
             case_id             (string):       Case identifier
-            customer_sample_id  (string):         Customers sample identifier
+            customer_sample_id  (string):       Customers sample identifier
         Returns:
             updated_case(dict)
 
@@ -299,7 +299,7 @@ class ScoutAPI:
         Args:
             file_path           (string):       Path to delivery report
             case_id             (string):       Case identifier
-            customer_sample_id  (string):         Customers sample identifier
+            customer_sample_id  (string):       Customers sample identifier
         Returns:
             updated_case(dict)
 
