@@ -25,7 +25,7 @@ from .demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from .export import export
 from .get import get
 from .import_cmd import import_cmd
-from delete.observations import delete_cmd
+from .delete.observations import delete_cmd
 from .status import status
 from .transfer import transfer_group
 from .upload.base import upload
