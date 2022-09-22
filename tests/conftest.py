@@ -1231,6 +1231,7 @@ def fixture_context_config(
             "conda_env": "S_microSALT",
         },
         "mip-rd-dna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "pipeline": "analyse rd_dna",
@@ -1238,6 +1239,7 @@ def fixture_context_config(
             "script": "mip",
         },
         "mip-rd-rna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "pipeline": "analyse rd_rna",

@@ -22,6 +22,7 @@ class Process:
     def __init__(
         self,
         binary: str,
+        conda_binary: str = None,
         config: str = None,
         config_parameter: str = "--config",
         environment: str = None,
@@ -34,11 +35,15 @@ class Process:
         """
         super(Process, self).__init__()
         self.binary = binary
+        self.conda_binary = conda_binary
         self.config = config
         self.environment = environment
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
-        if environment:
+        if conda_binary:
+            LOG.debug("Activating environment with conda run for binary: %s", self.conda_binary)
+            self.base_call.insert(0, f"{self.conda_binary} run -n {self.environment} ")
+        elif environment:
             LOG.debug("Activating environment with: %s", self.environment)
             self.base_call.insert(0, f"source activate {self.environment};")
         if config:
