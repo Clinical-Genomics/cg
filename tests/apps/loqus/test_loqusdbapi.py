@@ -144,18 +144,27 @@ def test_repr_string(loqus_config):
     assert repr_string == correct_string
 
 
-def test_delete(case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_case_output: bytes):
+def test_delete(case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_delete_stderr: bytes):
     """Test to delete an existing case via the api."""
-    # GIVEN a loqusdb api with an existing case
-    loqusdbapi.process.stdout = loqusdb_case_output.decode("utf-8").rstrip()
-    case_obj = loqusdbapi.get_case(case_id)
-    assert case_obj["case_id"] == case_id
+    # GIVEN a loqusdb api and a case_id
 
-    # GIVEN a case id
+    # WHEN deleting an existing case from loqusdb
+    loqusdbapi.process.stderr = loqusdb_delete_stderr.decode("utf-8")
+    data = loqusdbapi.delete(case_id)
 
-    # WHEN deleting a case
-    loqusdbapi.delete(case_id)
+    # THEN
+    assert data is None
 
-    # THEN CaseNotFoundError should be raised when getting the case
+
+def test_delete_nonexisting_case(
+    case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_delete_nonexisting_stderr: bytes
+):
+    """Test to delete an non existing case via the api."""
+    # GIVEN a loqusdb api and a case_id
+
+    # WHEN deleting an existing case from loqusdb
+    loqusdbapi.process.stderr = loqusdb_delete_nonexisting_stderr.decode("utf-8")
+
+    # THEN assert that the error is raised
     with pytest.raises(CaseNotFoundError):
-        loqusdbapi.get_case(case_id)
+        loqusdbapi.delete(case_id)
