@@ -392,24 +392,22 @@ class UploadScoutAPI:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
         subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
 
-        Args: rna_case     (models.Family):           Case Returns: rna_dna_sample_case_map     (Dict):       rna-dna
-        relationships, and corresponding dna cases based on subject id
+        Args:
+            rna_case                (models.Family):  RNA case identifier
+        Case Returns:
+            rna_dna_sample_case_map     (Dict):       rna-dna relationships, and related dna cases based on subject id
         """
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = {}
         for rna_case.link in rna_case.links:
-            rna_sample = rna_case.link.sample
             self._add_rna_sample(
-                rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
+                rna_sample=rna_case.link.sample, rna_dna_sample_case_map=rna_dna_sample_case_map
             )
         return rna_dna_sample_case_map
 
     def _add_rna_sample(
         self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
-    ):
-        """Adds an RNA sample and its matching DNA sample, and cases to its Dict.
-
-        Args:
-        """
+    ) -> Dict[str, Dict[str, list]]:
+        """Adds an RNA sample and its matching DNA sample, and cases."""
         dna_sample: models.Sample = self._link_rna_sample_to_dna_sample(
             rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
         )
@@ -418,10 +416,11 @@ class UploadScoutAPI:
             rna_dna_sample_case_map=rna_dna_sample_case_map,
             rna_sample=rna_sample,
         )
+        return rna_dna_sample_case_map
 
     def _link_rna_sample_to_dna_sample(
         self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
-    ):
+    ) -> models.Sample:
 
         if not rna_sample.subject_id:
             raise CgDataError(
@@ -433,9 +432,10 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        if len(subject_id_samples.all()) != 2:
+        nr_of_subject_id_dna_samples: int = len(subject_id_samples.all())
+        if nr_of_subject_id_dna_samples != 2:
             raise CgDataError(
-                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {len(subject_id_samples.all())} "
+                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
             )
 
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
@@ -451,9 +451,9 @@ class UploadScoutAPI:
         dna_sample: models.Sample,
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         rna_sample: models.Sample,
-    ):
-        for link in dna_sample.links:
-            case_object: models.Family = link.family
+    ) -> None:
+        for dna_sample.link in dna_sample.links:
+            case_object: models.Family = dna_sample.link.family
             if (
                 case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
                 and case_object.customer_id == rna_sample.customer_id

@@ -87,10 +87,10 @@ def fixture_dna_sample_father_id() -> str:
     return "dna_father"
 
 
-@pytest.fixture(name="extra_sample_id")
-def fixture_extra_sample_id() -> str:
+@pytest.fixture(name="another_sample_id")
+def fixture_another_sample_id() -> str:
     """Return another sample id."""
-    return "dna_extra_sample"
+    return "another_sample_id"
 
 
 @pytest.fixture(name="rna_store")

@@ -23,7 +23,7 @@ def get_subject_id_from_case(store: Store, case_id: str) -> str:
 
 def ensure_two_dna_tumour_matches(
     dna_case_id: str,
-    extra_sample_id: str,
+    another_sample_id: str,
     helpers: StoreHelpers,
     rna_case_id: str,
     rna_store: Store,
@@ -35,10 +35,10 @@ def ensure_two_dna_tumour_matches(
     dna_extra_case = helpers.ensure_case(
         store=rna_store, customer=rna_store.family(dna_case_id).customer
     )
-    dna_extra_sample = helpers.add_sample(
-        store=rna_store, name=extra_sample_id, subject_id=subject_id, is_tumour=True
+    another_sample_id = helpers.add_sample(
+        store=rna_store, name=another_sample_id, subject_id=subject_id, is_tumour=True
     )
-    helpers.add_relationship(store=rna_store, sample=dna_extra_sample, case=dna_extra_case)
+    helpers.add_relationship(store=rna_store, sample=another_sample_id, case=dna_extra_case)
     rna_store.commit()
 
 
@@ -365,7 +365,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
 def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    extra_sample_id: str,
+    another_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -375,7 +375,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
     """Test that an RNA case's gene fusion report is not uploaded if the is_tumour has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, extra_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(dna_case_id, another_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
@@ -391,7 +391,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
 def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    extra_sample_id: str,
+    another_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -401,7 +401,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
     """Test that A RNA case's gene fusion report and junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, extra_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(dna_case_id, another_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -417,7 +417,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
 def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     caplog: Generator[LogCaptureFixture, None, None],
     dna_case_id: str,
-    extra_sample_id: str,
+    another_sample_id: str,
     helpers: StoreHelpers,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -427,7 +427,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     """Test that A RNA case's junction splice files for all samples is not uploaded if the RNA-sample has too many DNA-matches"""
 
     # GIVEN a sample in the RNA case is connected to a sample in the DNA case via is_tumour (i.e. same is_tumour)
-    ensure_two_dna_tumour_matches(dna_case_id, extra_sample_id, helpers, rna_case_id, rna_store)
+    ensure_two_dna_tumour_matches(dna_case_id, another_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper
@@ -445,7 +445,7 @@ def test_create_rna_dna_sample_case_map(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that the create_rna_dna_sample_case_map returns a nested dictionary"""
+    """Test that the create_rna_dna_sample_case_map returns a nested dictionary."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
     rna_case: models.Family = rna_store.families(enquiry=rna_case_id).first()
@@ -462,7 +462,7 @@ def test_add_rna_sample(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test that for a given RNA case the RNA samples are added to the rna_dna_case_map"""
+    """Test that for a given RNA case the RNA samples are added to the rna_dna_case_map."""
 
     # GIVEN an RNA case and the associated RNA samples
     rna_case: models.Family = rna_store.families(enquiry=rna_case_id).first()
@@ -482,14 +482,16 @@ def test_link_rna_sample_to_dna_sample(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test for a given RNA sample, the associated DNA sample name matches and is present in rna_dna_case_map"""
+    """Test for a given RNA sample, the associated DNA sample name matches and is present in rna_dna_case_map."""
 
     # GIVEN an RNA sample
     rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
 
     # WHEN adding the RNA sample to the rna_dna_case_map
     rna_dna_case_map: dict = {}
-    upload_scout_api._add_rna_sample(rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map)
+    upload_scout_api._add_rna_sample(
+        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
+    )
 
     # THEN the rna_dna_case_map should contain the RNA sample
     assert rna_sample_son_id in rna_dna_case_map
@@ -506,7 +508,7 @@ def test_add_dna_cases_to_dna_sample(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ):
-    """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map"""
+    """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
     rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
@@ -515,7 +517,9 @@ def test_add_dna_cases_to_dna_sample(
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_case_map: dict = {}
-    upload_scout_api._add_rna_sample(rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map)
+    upload_scout_api._add_rna_sample(
+        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
+    )
 
     # THEN the rna_dna_case_map should contain the DNA_case name associated with the DNA sample
     case_names: list = rna_dna_case_map[rna_sample.internal_id][dna_sample.name]
