@@ -46,10 +46,15 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return MicrosaltFastqHandler
 
     @property
+    def conda_binary(self) -> str:
+        return self.config.microsalt.conda_binary
+
+    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
                 binary=self.config.microsalt.binary_path,
+                conda_binary=f"{self.conda_binary}",
                 environment=self.config.microsalt.conda_env,
             )
         return self._process

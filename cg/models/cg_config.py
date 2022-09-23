@@ -145,10 +145,11 @@ class CGStatsConfig(BaseModel):
 
 
 class MicrosaltConfig(BaseModel):
-    root: str
-    queries_path: str
     binary_path: str
+    conda_binary: Optional[str] = None
     conda_env: str
+    queries_path: str
+    root: str
 
 
 class GisaidConfig(CommonAppConfig):

@@ -1225,10 +1225,11 @@ def fixture_context_config(
             },
         },
         "microsalt": {
-            "root": str(microsalt_dir),
-            "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_microSALT",
+            "queries_path": Path(microsalt_dir, "queries").as_posix(),
+            "root": str(microsalt_dir),
         },
         "mip-rd-dna": {
             "conda_binary": "a_conda_binary",
