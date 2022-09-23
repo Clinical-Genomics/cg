@@ -38,19 +38,6 @@ LOQUSDB_OUTPUT = (
     b"mongo.adapter[77135] INFO All indexes exists\n"
 )
 
-LOQUSDB_DELETE_STDERR = b"""2022-09-22 12:30:07 evacmbp loqusdb.commands.cli[20689] INFO Running loqusdb version 2.6.9
-2022-09-22 12:30:07 evacmbp mongo_adapter.client[20689] INFO Connecting to uri:mongodb://None:None@localhost:27017
-2022-09-22 12:30:07 evacmbp mongo_adapter.client[20689] INFO Connection established
-2022-09-22 12:30:07 evacmbp mongo_adapter.adapter[20689] INFO Use database loqusdb
-2022-09-22 12:30:07 evacmbp loqusdb.plugins.mongo.case[20689] INFO Removing case yellowhog from database
-2022-09-22 12:30:07 evacmbp loqusdb.utils.delete[20689] INFO deleting variants
-2022-09-22 12:30:07 evacmbp loqusdb.utils.delete[20689] INFO Start deleting chromosome 1"""
-
-LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 evacmbp loqusdb.commands.cli[19944] INFO Running loqusdb version 2.6.9
-2022-09-22 11:40:04 evacmbp mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None:None@localhost:27017
-2022-09-22 11:40:04 evacmbp mongo_adapter.client[19944] INFO Connection established
-2022-09-22 11:40:04 evacmbp mongo_adapter.adapter[19944] INFO Use database loqusdb
-2022-09-22 11:40:04 evacmbp loqusdb.commands.delete[19944] WARNING Case yellowhog does not exist in database"""
 
 # Loqusdb fixtures
 @pytest.fixture(name="loqus_config")
@@ -194,14 +181,24 @@ def fixture_loqusdb_duplicate_output() -> bytes:
 @pytest.fixture(name="loqusdb_delete_stderr")
 def fixture_loqusdb_delete_stderr() -> bytes:
     """
-    loqusdb stderr for a successful delete.
+    Loqusdb STDERR for a successful delete.
     """
-    return LOQUSDB_DELETE_STDERR
+    return b"""2022-09-22 12:30:07 evacmbp loqusdb.commands.cli[20689] INFO Running loqusdb version 2.6.9
+2022-09-22 12:30:07 evacmbp mongo_adapter.client[20689] INFO Connecting to uri:mongodb://None:None@localhost:27017
+2022-09-22 12:30:07 evacmbp mongo_adapter.client[20689] INFO Connection established
+2022-09-22 12:30:07 evacmbp mongo_adapter.adapter[20689] INFO Use database loqusdb
+2022-09-22 12:30:07 evacmbp loqusdb.plugins.mongo.case[20689] INFO Removing case yellowhog from database
+2022-09-22 12:30:07 evacmbp loqusdb.utils.delete[20689] INFO deleting variants
+2022-09-22 12:30:07 evacmbp loqusdb.utils.delete[20689] INFO Start deleting chromosome 1"""
 
 
 @pytest.fixture(name="loqusdb_delete_nonexisting_stderr")
 def fixture_loqusdb_delete_nonexisting_stderr() -> bytes:
     """
-    loqusdb delete stderr for non existing case.
+    Loqusdb delete STDERR for non existing case.
     """
-    return LOQUSDB_DELETE_NONEXISTING_STDERR
+    return b"""2022-09-22 11:40:04 evacmbp loqusdb.commands.cli[19944] INFO Running loqusdb version 2.6.9
+2022-09-22 11:40:04 evacmbp mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None:None@localhost:27017
+2022-09-22 11:40:04 evacmbp mongo_adapter.client[19944] INFO Connection established
+2022-09-22 11:40:04 evacmbp mongo_adapter.adapter[19944] INFO Use database loqusdb
+2022-09-22 11:40:04 evacmbp loqusdb.commands.delete[19944] WARNING Case yellowhog does not exist in database"""

@@ -4,7 +4,7 @@
 class ResetHandler:
     """Class to reset things in the status database"""
 
-    def reset_observations(self, case_id: str):
+    def reset_loqusdb_observation_ids(self, case_id: str):
         """Reset links to loqusdb for a case."""
 
         case_obj = self.family(case_id)

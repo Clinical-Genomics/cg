@@ -23,13 +23,11 @@ def observations(context: CGConfig, case_id: str):
     status_db: Store = context.status_db
     loqusdb_api: LoqusdbAPI = context.loqusdb_api
 
-    # Delete case from loqusdb
     LOG.info("This will delete all variants in LoqusDB for case: %s", case_id)
     click.confirm("Do you want to continue?", abort=True)
     LOG.info("Delete variants from LoqusDB for case: %s", case_id)
-    loqusdb_api.delete(case_id=case_id)
+    loqusdb_api.delete_case(case_id=case_id)
 
-    # If a case is deleted reset StatusDB loqusdb_id to None
-    status_db.reset_observations(case_id)
+    status_db.reset_loqusdb_observation_ids(case_id)
     LOG.info("Reset loqus_id in StatusDB for: %s", case_id)
     status_db.commit()

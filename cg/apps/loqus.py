@@ -71,22 +71,22 @@ class LoqusdbAPI:
 
         return dict(variants=nr_variants)
 
-    def delete(self, case_id: str) -> None:
+    def delete_case(self, case_id: str) -> None:
         """Remove a case from LoqusDB."""
         delete_call_parameters = ["delete", "-c", case_id]
 
         self.process.run_command(parameters=delete_call_parameters)
         for line in self.process.stderr_lines():
-            if "INFO Removing case {0}".format(case_id) in line:
+            if f"INFO Removing case {case_id}" in line:
                 return None
-            if "WARNING Case {0} does not exist".format(case_id) in line:
+            if f"WARNING Case {case_id} does not exist" in line:
                 raise CaseNotFoundError(f"Case {case_id} not found in loqusdb")
 
         # This should not happen. If it does, other exit messages must be handle
         raise DeleteCaseError(f"Could not delete case {case_id}")
 
     def get_case(self, case_id: str) -> dict:
-        """Find a case in the database by case id"""
+        """Find a case in the database by case id."""
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
         self.process.run_command(parameters=cases_parameters)
