@@ -134,7 +134,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         organism: str = sample_obj.organism.internal_id.strip()
         comment: str = self.get_lims_comment(sample_id=sample_obj.internal_id)
-        has_comment = bool(comment)
 
         if "gonorrhoeae" in organism:
             organism = "Neisseria spp."
@@ -143,6 +142,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         if organism == "VRE":
             reference = sample_obj.organism.reference_genome
+            has_comment = bool(comment)
             if reference == "NC_017960.1":
                 organism = "Enterococcus faecium"
             elif reference == "NC_004668.1":

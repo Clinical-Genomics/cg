@@ -125,9 +125,10 @@ class BalsamicConfig(CommonAppConfig):
 
 
 class MutantConfig(BaseModel):
-    root: str
     binary_path: str
+    conda_binary: Optional[str] = None
     conda_env: str
+    root: str
 
 
 class MipConfig(BaseModel):

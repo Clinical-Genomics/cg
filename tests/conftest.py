@@ -1254,6 +1254,7 @@ def fixture_context_config(
         },
         "mutant": {
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
