@@ -143,7 +143,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         case_obj = self.status_db.family(case_id)
         for link in case_obj.links:
             self.link_fastq_files_for_sample(
-                case_obj=case_obj, sample_obj=link.sample, concatenate=True
+                case_obj=case_obj, sample_obj=link.sample, concatenate=False
             )
 
     def get_concatenated_fastq_path(self, link_object: models.FamilySample) -> Path:
@@ -460,8 +460,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
             "gender": gender or self.get_verified_gender(sample_data=sample_data),
-            "normal": self.get_verified_normal_path(sample_data=sample_data),
-            "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
@@ -531,7 +529,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             link_object.sample.internal_id: {
                 "gender": self.get_gender(link_object.sample),
                 "tissue_type": self.get_sample_type(link_object.sample),
-                "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
@@ -623,12 +620,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
+                "--fastq-path": self.get_sample_fastq_destination_dir(
+                    self.status_db.family(case_id)
+                ),
                 "--case-id": arguments.get("case_id"),
                 "--gender": arguments.get("gender"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
-                "--normal": arguments.get("normal"),
-                "--tumor": arguments.get("tumor"),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),
