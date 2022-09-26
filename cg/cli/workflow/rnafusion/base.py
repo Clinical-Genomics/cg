@@ -271,6 +271,8 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         if not dry_run:
             analysis_api.report_deliver(case_id=case_id)
+        else:
+            LOG.info("Dry-run")
     except CgError as e:
         LOG.error(f"Could not create report file: {e.message}")
         raise click.Abort()
