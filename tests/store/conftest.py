@@ -1,4 +1,4 @@
-"""Fixtures for store tests"""
+"""Fixtures for store tests."""
 import datetime as dt
 from pathlib import Path
 
@@ -11,14 +11,14 @@ from cg.store import Store, models
 
 @pytest.fixture
 def application_versions_file(fixtures_dir: Path) -> str:
-    """ "application version import file"""
+    """ "application version import file."""
     _file = fixtures_dir / "store/api/application_versions.xlsx"
     return str(_file)
 
 
 @pytest.fixture
 def applications_file(fixtures_dir):
-    """ "application import file"""
+    """ "application import file."""
     _file = fixtures_dir / "store/api/applications.xlsx"
     return str(_file)
 
@@ -115,17 +115,17 @@ def microbial_store(base_store: Store, microbial_submitted_order):
 
 @pytest.fixture(scope="function", name="analysis_obj")
 def fixture_analysis_obj(analysis_store: Store) -> models.Analysis:
-    """Fetch a analysis object from a populated store"""
+    """Fetch a analysis object from a populated store."""
     return analysis_store.analyses()[0]
 
 
 @pytest.fixture(scope="function", name="case_obj")
 def fixture_case_obj(analysis_store: Store) -> models.Family:
-    """Return a case models object"""
+    """Return a case models object."""
     return analysis_store.families()[0]
 
 
 @pytest.fixture(scope="function", name="sample_obj")
 def fixture_sample_obj(analysis_store) -> models.Sample:
-    """Return a sample models object"""
+    """Return a sample models object."""
     return analysis_store.samples()[0]

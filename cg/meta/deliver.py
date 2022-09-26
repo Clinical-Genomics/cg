@@ -2,17 +2,15 @@
 
 import logging
 import os
-import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Iterable, List, Set, Tuple
-
-from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import delivery as constants, DataDelivery
-from cg.store import Store, models
+from cg.constants import delivery as constants
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
+from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -65,10 +63,11 @@ class DeliverAPI:
         case_name: str = case_obj.name
         LOG.debug("Fetch latest version for case %s", case_id)
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
-        if not last_version and not self.case_tags:
-            LOG.info("Could not find any version for {}".format(case_id))
-        elif not last_version and self.skip_missing_bundle == False:
-            raise SyntaxError("Could not find any version for {}".format(case_id))
+        if not last_version:
+            if not self.case_tags:
+                LOG.info(f"Could not find any version for {case_id}")
+            elif not self.skip_missing_bundle:
+                raise SyntaxError(f"Could not find any version for {case_id}")
         link_objs: List[FamilySample] = self.store.family_samples(case_id)
         if not link_objs:
             LOG.warning("Could not find any samples linked to case %s", case_id)
@@ -99,9 +98,9 @@ class DeliverAPI:
                 last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
             if not last_version:
                 if self.skip_missing_bundle:
-                    LOG.info("Could not find any version for {}".format(sample_id))
+                    LOG.info(f"Could not find any version for {sample_id}")
                     continue
-                raise SyntaxError("Could not find any version for {}".format(sample_id))
+                raise SyntaxError(f"Could not find any version for {sample_id}")
             self.deliver_sample_files(
                 case_id=case_id,
                 case_name=case_name,
@@ -282,20 +281,10 @@ class DeliverAPI:
         return delivery_path
 
     @staticmethod
-    def get_delivery_arguments(case_obj: models.Family) -> Set[str]:
-        """Translates the case data_delivery field to pipeline specific arguments."""
-        delivery_arguments: Set[str] = set()
-        requested_deliveries: List[str] = re.split("[-_]", case_obj.data_delivery)
-        if DataDelivery.FASTQ in requested_deliveries:
-            delivery_arguments.add(Pipeline.FASTQ)
-        if DataDelivery.ANALYSIS_FILES in requested_deliveries:
-            delivery_arguments.add(case_obj.data_analysis)
-        return delivery_arguments
-
-    @staticmethod
     def get_delivery_scope(delivery_arguments: Set[str]) -> Tuple[bool, bool]:
         """Returns the scope of the delivery, ie whether sample and/or case files were delivered."""
-        case_delivery = sample_delivery = False
+        case_delivery: bool = False
+        sample_delivery: bool = False
         for delivery in delivery_arguments:
             if (
                 constants.PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"]

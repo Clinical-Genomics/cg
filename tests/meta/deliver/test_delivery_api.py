@@ -7,12 +7,10 @@ from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import FamilySample, Sample
 from tests.store_helpers import StoreHelpers
-from tests.store.conftest import fixture_case_obj
 
 
 def test_get_delivery_path(
@@ -151,18 +149,6 @@ def test_get_sample_files_from_version(
         assert sample_file.name == vcf_file.name
     # THEN assert that only the sample-tag file was returned
     assert nr_files == 1
-
-
-def test_get_delivery_arguments(case_obj: models.Family):
-    """Testing the parsing of delivery arguments from the case data_delivery."""
-    # GIVEN a DataDelivery
-    case_obj.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
-
-    # WHEN parsing the delivery types
-    delivery_types: Set[str] = DeliverAPI.get_delivery_arguments(case_obj=case_obj)
-
-    # THEN the correct delivery types should be returned
-    assert delivery_types == {Pipeline.MIP_DNA, Pipeline.FASTQ}
 
 
 def test_get_delivery_scope_case_only():

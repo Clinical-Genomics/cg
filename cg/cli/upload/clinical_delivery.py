@@ -7,13 +7,12 @@ from typing import Set
 import click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import Pipeline
 from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +27,9 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     and subsequently uses rsync to upload it to caesar."""
     case_obj: models.Family = context.obj.status_db.family(case_id)
     delivery_types: Set[str] = DeliverAPI.get_delivery_arguments(case_obj=case_obj)
-    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(
+    is_sample_delivery: bool
+    is_case_delivery: bool
+    is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
         delivery_arguments=delivery_types
     )
     if not delivery_types:
@@ -46,12 +47,12 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
             project_base_path=Path(context.obj.delivery_path),
         ).deliver_files(case_obj=case_obj)
 
-    rsync_api = RsyncAPI(context.obj)
+    rsync_api: RsyncAPI = RsyncAPI(context.obj)
     job_id: int = rsync_api.slurm_rsync_single_case(
         case_id=case_id,
         dry_run=dry_run,
-        sample_files_present=sample_delivery,
-        case_files_present=case_delivery,
+        sample_files_present=is_sample_delivery,
+        case_files_present=is_case_delivery,
     )
     RsyncAPI.write_trailblazer_config(
         {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
@@ -60,8 +61,8 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
         context.obj.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             analysis_type="other",
-            config_path=str(rsync_api.trailblazer_config_path),
-            out_dir=str(rsync_api.log_dir),
+            config_path=rsync_api.trailblazer_config_path.as_posix(),
+            out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case_obj.priority],
             data_analysis=Pipeline.RSYNC,
         )
@@ -103,7 +104,8 @@ def auto_fastq(context: click.Context, dry_run: bool):
                 )
             continue
         case: models.Family = analysis_obj.family
-        analysis_obj.upload_started_at = dt.datetime.now()
+        case.internal_id: str = "test"
+        analysis_obj.upload_started_at: dt.datetime = dt.datetime.now()
         LOG.info("Uploading family: %s", case.internal_id)
         context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
         status_db.commit()

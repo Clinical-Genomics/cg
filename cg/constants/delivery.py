@@ -1,4 +1,4 @@
-"""Constants for delivery"""
+"""Constants for delivery."""
 
 from cgmodels.cg.constants import Pipeline
 

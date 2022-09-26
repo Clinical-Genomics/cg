@@ -24,7 +24,7 @@ from tests.store_helpers import StoreHelpers
 def test_filter_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj,
+    case_obj: models.Family,
     timestamp_today: datetime,
     old_timestamp: datetime,
 ):
@@ -46,7 +46,9 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case_obj):
+def test_filter_analyses_with_pipeline(
+    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
+):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
@@ -178,7 +180,9 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHelpers, case_obj):
+def test_filter_report_analyses_by_pipeline(
+    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
+):
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
@@ -203,7 +207,7 @@ def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHel
 def test_order_analyses_by_completed_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj,
+    case_obj: models.Family,
     timestamp_today: datetime,
     timestamp_yesterday: datetime,
 ):
@@ -231,7 +235,7 @@ def test_order_analyses_by_completed_at(
 def test_order_analyses_by_uploaded_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj,
+    case_obj: models.Family,
     timestamp_today: datetime,
     timestamp_yesterday: datetime,
 ):
