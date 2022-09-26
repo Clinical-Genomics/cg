@@ -148,7 +148,7 @@ def test_delete_case(case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_delete_stderr
     """Test to delete an existing case via the api."""
     # GIVEN a loqusdb api and a case_id
 
-    # WHEN deleting an existing case from loqusdb
+    # WHEN deleting an existing case from Loqusdb
     loqusdbapi.process.stderr = loqusdb_delete_stderr.decode("utf-8")
     data = loqusdbapi.delete_case(case_id)
 
@@ -159,10 +159,10 @@ def test_delete_case(case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_delete_stderr
 def test_delete_case_non_existing_case(
     case_id: str, loqusdbapi: LoqusdbAPI, loqusdb_delete_nonexisting_stderr: bytes
 ):
-    """Test to delete an non existing case via the api."""
+    """Test to delete a non existing case via the api."""
     # GIVEN a loqusdb api and a case_id
 
-    # WHEN deleting an existing case from loqusdb
+    # WHEN deleting a non existing case from Loqusdb
     loqusdbapi.process.stderr = loqusdb_delete_nonexisting_stderr.decode("utf-8")
 
     # THEN assert that an error is raised
