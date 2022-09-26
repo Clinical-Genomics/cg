@@ -1,4 +1,4 @@
-"""Helper functions"""
+"""Helper functions."""
 
 from typing import Optional, List, Any
 

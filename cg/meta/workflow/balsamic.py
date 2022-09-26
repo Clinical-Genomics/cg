@@ -448,7 +448,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         clinical_observations: List[str],
         cancer_observations: List[str],
     ) -> dict:
-        """Returns verified clinical and cancer observations paths."""
+        """Returns verified clinical and cancer observations file paths."""
 
         # Clinical observations
         clinical_snv_observations: str = get_string_from_list_by_pattern(
