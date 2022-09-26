@@ -25,7 +25,6 @@ from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from cg.cli.export import export
 from cg.cli.get import get
 from cg.cli.import_cmd import import_cmd
-from cg.cli.delete.observations import delete_cmd
 from cg.cli.status import status
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
