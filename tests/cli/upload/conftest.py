@@ -30,6 +30,7 @@ from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
 
+
 LOG = logging.getLogger(__name__)
 
 
