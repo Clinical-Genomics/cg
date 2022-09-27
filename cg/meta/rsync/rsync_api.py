@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Iterable
 
+from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
@@ -125,7 +126,7 @@ class RsyncAPI(MetaAPI):
         )
         tb_api.add_pending_analysis(
             case_id=ticket,
-            analysis_type="other",
+            analysis_type=AnalysisTypes.OTHER,
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
