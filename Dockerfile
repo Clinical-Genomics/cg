@@ -17,6 +17,7 @@ ENV LIMS_USERNAME="limsadmin"
 ENV LIMS_PASSWORD="limsadminpassword"
 
 ENV MAIL_CONTAINER_URI="http://127.0.0.1:port/container"
+ENV BASE_SENDER_EMAIL="cg@email.com"
 
 ENV OSTICKET_EMAIL="support@system.email"
 ENV OSTICKET_API_KEY=None
