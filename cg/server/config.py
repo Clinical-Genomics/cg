@@ -22,6 +22,7 @@ OSTICKET_API_KEY = os.environ.get("OSTICKET_API_KEY")
 OSTICKET_DOMAIN = os.environ.get("OSTICKET_DOMAIN")
 SUPPORT_SYSTEM_EMAIL = os.environ.get("SUPPORT_SYSTEM_EMAIL")
 EMAIL_URI = os.environ.get("EMAIL_URI")
+BASE_SENDER_EMAIL = os.environ.get("BASE_SENDER_EMAIL")
 
 
 # oauth
