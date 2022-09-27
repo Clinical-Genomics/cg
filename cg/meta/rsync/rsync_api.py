@@ -1,10 +1,11 @@
-"""Module for building the rsync command to send files to customer inbox on the delivery server"""
+"""Module for building the rsync command to send files to customer inbox on the delivery server."""
 import datetime as dt
 import glob
 import logging
 from pathlib import Path
 from typing import List, Dict, Iterable
 
+from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
@@ -37,27 +38,27 @@ class RsyncAPI(MetaAPI):
 
     @property
     def trailblazer_config_path(self) -> Path:
-        """Return Path to trailblazer config"""
+        """Return Path to trailblazer config."""
         return self.log_dir / "slurm_job_ids.yaml"
 
     @property
     def rsync_processes(self) -> Iterable[Path]:
-        """Yield existing rsync processes"""
+        """Yield existing rsync processes."""
         yield from self.base_path.iterdir()
 
     @staticmethod
     def format_covid_destination_path(covid_destination_path: str, customer_id: str) -> str:
-        """Return destination path of covid report"""
+        """Return destination path of covid report."""
         return covid_destination_path % customer_id
 
     @staticmethod
     def get_trailblazer_config(slurm_job_id: int) -> Dict[str, List[str]]:
-        """Return dictionary of slurm job IDs"""
+        """Return dictionary of slurm job IDs."""
         return {"jobs": [str(slurm_job_id)]}
 
     @staticmethod
     def write_trailblazer_config(content: dict, config_path: Path) -> None:
-        """Write slurm job IDs to a .YAML file used as the trailblazer config"""
+        """Write slurm job IDs to a .YAML file used as the trailblazer config."""
         LOG.info(f"Writing slurm jobs to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
             content=content, file_format=FileFormat.YAML, file_path=config_path
@@ -65,7 +66,7 @@ class RsyncAPI(MetaAPI):
 
     @staticmethod
     def process_ready_to_clean(before: dt.datetime, process: Path) -> bool:
-        """Return True if analysis is old enough to be cleaned"""
+        """Return True if analysis is old enough to be cleaned."""
 
         ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
 
@@ -75,7 +76,7 @@ class RsyncAPI(MetaAPI):
     def concatenate_rsync_commands(
         folder_list: List[str], source_and_destination_paths: Dict[str, Path], ticket: str
     ) -> str:
-        """Concatenates the rsync commands for each folder to be transferred"""
+        """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
         for folder in folder_list:
             source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
@@ -116,7 +117,7 @@ class RsyncAPI(MetaAPI):
     def add_to_trailblazer_api(
         self, tb_api: TrailblazerAPI, slurm_job_id: int, ticket: str, dry_run: bool
     ) -> None:
-        """Add rsync process to trailblazer"""
+        """Add rsync process to trailblazer."""
         if dry_run:
             return
         self.write_trailblazer_config(
@@ -125,7 +126,7 @@ class RsyncAPI(MetaAPI):
         )
         tb_api.add_pending_analysis(
             case_id=ticket,
-            analysis_type="other",
+            analysis_type=AnalysisTypes.OTHER,
             config_path=self.trailblazer_config_path.as_posix(),
             out_dir=self.log_dir.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
@@ -134,7 +135,7 @@ class RsyncAPI(MetaAPI):
         )
 
     def format_covid_report_path(self, case: models.Family, ticket: str) -> str:
-        """Return a formatted of covid report path"""
+        """Return a formatted of covid report path."""
         covid_report_options: List[str] = glob.glob(
             self.covid_report_path % (case.internal_id, ticket)
         )
@@ -147,7 +148,7 @@ class RsyncAPI(MetaAPI):
         return covid_report_options[0]
 
     def create_log_dir(self, dry_run: bool) -> None:
-        """Create log dir"""
+        """Create log dir."""
         log_dir: Path = self.log_dir
         LOG.info("Creating folder: %s", log_dir)
         if log_dir.exists():
@@ -161,10 +162,11 @@ class RsyncAPI(MetaAPI):
         self, case_id: str, sample_files_present: bool, case_files_present: bool
     ) -> List[str]:
         """Returns a list of all the folder names depending if sample and/or case data is to be
-        transferred"""
+        transferred."""
         if not sample_files_present and not case_files_present:
-            LOG.error("Since no file parameter is true, no files will be transferred")
-            raise CgError("Since no file parameter is true, no files will be transferred")
+            raise CgError(
+                "Since neither case or sample files are present, no files will be transferred"
+            )
         folder_list: List[str] = []
         if sample_files_present:
             folder_list.extend(
@@ -184,7 +186,7 @@ class RsyncAPI(MetaAPI):
         sample_files_present: bool = False,
         case_files_present: bool = False,
     ) -> int:
-        """Runs rsync of a single case to the delivery server, parameters depend on delivery type"""
+        """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
@@ -207,7 +209,7 @@ class RsyncAPI(MetaAPI):
         return self.sbatch_rsync_commands(commands=commands, job_prefix=case_id, dry_run=dry_run)
 
     def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:
-        """Runs rsync of a whole ticket folder to the delivery server"""
+        """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
         self.create_log_dir(dry_run=dry_run)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
@@ -246,7 +248,7 @@ class RsyncAPI(MetaAPI):
         dry_run: bool = False,
     ) -> int:
         """Instantiates a slurm api and sbatches the given commands. Default parameters can be
-        overridden"""
+        overridden."""
         sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([job_prefix, "rsync"]),
             account=account or self.account,
