@@ -168,8 +168,6 @@ def fixture_base_config_dict() -> dict:
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
         "bed_path": "path/to/bed",
-        "pon_path": "path/to/pon",
-        "loqusdb_path": "path/to/loqusdb",
         "delivery_path": "path/to/delivery",
         "housekeeper": {
             "database": "sqlite:///",
@@ -1145,8 +1143,6 @@ def fixture_context_config(
         "database": fixture_cg_uri,
         "madeline_exe": "echo",
         "bed_path": str(cg_dir),
-        "pon_path": str(cg_dir),
-        "loqusdb_path": str(cg_dir),
         "delivery_path": str(cg_dir),
         "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "email_base_settings": {
@@ -1236,6 +1232,8 @@ def fixture_context_config(
         "balsamic": {
             "root": str(balsamic_dir),
             "binary_path": "echo",
+            "pon_path": str(cg_dir),
+            "loqusdb_path": str(cg_dir),
             "conda_env": "S_BALSAMIC",
             "balsamic_cache": "hello",
             "slurm": {

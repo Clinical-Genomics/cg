@@ -48,8 +48,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
         self.bed_path = config.bed_path
-        self.pon_path = config.pon_path
-        self.loqusdb_path = config.loqusdb_path
+        self.pon_path = config.balsamic.pon_path
+        self.loqusdb_path = config.balsamic.loqusdb_path
 
     @property
     def root(self) -> str:

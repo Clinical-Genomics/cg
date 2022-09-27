@@ -13,7 +13,7 @@ class ObservationAnalysisTag(StrEnum):
 
 
 class ObservationFileWildcards(StrEnum):
-    """Cancer file patterns regarding dump loqusdb files."""
+    """Cancer file patterns regarding dump Loqusdb files."""
 
     CLINICAL_SNV: str = "clinical_snv"
     CLINICAL_SV: str = "clinical_sv"
