@@ -1098,6 +1098,24 @@ def cg_dir(tmpdir_factory) -> Path:
 
 
 @pytest.fixture(scope="function")
+def observations_dir(tmpdir_factory, tmp_path) -> Path:
+    """Loqusdb temporary directory containing observations mock files."""
+    return tmpdir_factory.mktemp("loqusdb")
+
+
+@pytest.fixture(scope="function")
+def observations_files_path(observations_dir) -> List[Path]:
+    """Mock observations files."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf")
+    mock_file.touch(exist_ok=True)
+    mock_old_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf")
+    mock_old_file.touch(exist_ok=True)
+    mock_clinical_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf")
+    mock_clinical_file.touch(exist_ok=True)
+    return [mock_file, mock_old_file, mock_clinical_file]
+
+
+@pytest.fixture(scope="function")
 def microsalt_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("microsalt")
 

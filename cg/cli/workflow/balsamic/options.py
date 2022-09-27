@@ -42,19 +42,11 @@ OPTION_PON_CNN = click.option(
     required=False,
     help="Panel of normal reference (.cnn) for CNVkit",
 )
-OPTION_CLINICAL_OBSERVATIONS = click.option(
-    "--clinical-observations",
+OPTION_OBSERVATIONS = click.option(
+    "--observations",
     type=click.Path(exists=True),
     multiple=True,
     required=False,
-    help="VCF paths of clinical SNVs and SVs observations (WGS analysis only). Set this option to override the latest "
-    "loqusdb dumps.",
-)
-OPTION_CANCER_OBSERVATIONS = click.option(
-    "--cancer-observations",
-    type=click.Path(exists=True),
-    multiple=True,
-    required=False,
-    help="VCF paths of cancer somatic and germline observations (WGS analysis only). Set this option to override the "
-    "latest loqusdb dumps.",
+    help="VCF paths of clinical and/or cancer SNVs and SVs observations (WGS analysis only). Set this option to "
+    "override the latest Loqusdb dump files.",
 )

@@ -12,8 +12,7 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_GENOME_VERSION,
     OPTION_PON_CNN,
     OPTION_GENDER,
-    OPTION_CLINICAL_OBSERVATIONS,
-    OPTION_CANCER_OBSERVATIONS,
+    OPTION_OBSERVATIONS,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -51,8 +50,7 @@ balsamic.add_command(link)
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
-@OPTION_CLINICAL_OBSERVATIONS
-@OPTION_CANCER_OBSERVATIONS
+@OPTION_OBSERVATIONS
 @DRY_RUN
 @click.pass_obj
 def config_case(
@@ -62,8 +60,7 @@ def config_case(
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
-    clinical_observations: List[click.Path],
-    cancer_observations: List[click.Path],
+    observations: List[click.Path],
     dry_run: bool,
 ):
     """Create config file for BALSAMIC analysis for a given CASE_ID."""
@@ -78,8 +75,7 @@ def config_case(
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
-            clinical_observations=clinical_observations,
-            cancer_observations=cancer_observations,
+            observations=observations,
             dry_run=dry_run,
         )
     except CgError as e:

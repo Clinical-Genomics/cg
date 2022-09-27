@@ -24,7 +24,7 @@ from cg.models.balsamic.metrics import (
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
-from cg.utils.utils import get_string_from_list_by_pattern, get_last_element_from_iterator
+from cg.utils.utils import get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -436,46 +436,31 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_latest_observations(self, observations_pattern: str) -> Optional[str]:
         """
-        Returns the latest loqusdb dump file (loqusdb_<observations>_export-<date>-.vcf.gz) matching an
+        Returns the latest Loqusdb dump file (loqusdb_<observations>_export-<date>-.vcf.gz) matching an
         observations pattern.
         """
+        available_files: iter = sorted(
+            Path(self.loqusdb_path).glob(f"*{observations_pattern}*"),
+            key=lambda file: file.stem.split("-"),
+            reverse=True,
+        )
 
-        available_files: iter = Path(self.loqusdb_path).glob(f"*{observations_pattern}*")
-        return get_last_element_from_iterator(available_files)
+        return str(available_files[0]) if available_files else None
 
-    def get_verified_observations(
-        self,
-        clinical_observations: List[str],
-        cancer_observations: List[str],
-    ) -> dict:
-        """Returns verified clinical and cancer observations file paths."""
+    def get_verified_observations(self, observations: List[str]) -> dict:
+        """Returns a verified {option: path} observations dictionary."""
+        observations_dict = dict()
+        for wildcard in list(ObservationFileWildcards):
+            path: str = get_string_from_list_by_pattern(observations, wildcard)
+            observations_dict.update(
+                {
+                    wildcard.replace("_", "-") + "-observations": path
+                    if path
+                    else self.get_latest_observations(wildcard)
+                }
+            )
 
-        # Clinical observations
-        clinical_snv_observations: str = get_string_from_list_by_pattern(
-            ObservationFileWildcards.CLINICAL_SNV, clinical_observations
-        ) or self.get_latest_observations(ObservationFileWildcards.CLINICAL_SNV)
-        clinical_sv_observations: str = get_string_from_list_by_pattern(
-            ObservationFileWildcards.CLINICAL_SV, clinical_observations
-        ) or self.get_latest_observations(ObservationFileWildcards.CLINICAL_SV)
-
-        # Cancer observations
-        cancer_all_snv_observations: str = get_string_from_list_by_pattern(
-            ObservationFileWildcards.CANCER_ALL_SNV, cancer_observations
-        ) or self.get_latest_observations(ObservationFileWildcards.CANCER_ALL_SNV)
-        cancer_somatic_snv_observations: str = get_string_from_list_by_pattern(
-            ObservationFileWildcards.CANCER_SOMATIC_SNV, cancer_observations
-        ) or self.get_latest_observations(ObservationFileWildcards.CANCER_SOMATIC_SNV)
-        cancer_somatic_sv_observations: str = get_string_from_list_by_pattern(
-            ObservationFileWildcards.CANCER_SOMATIC_SV, cancer_observations
-        ) or self.get_latest_observations(ObservationFileWildcards.CANCER_SOMATIC_SV)
-
-        return {
-            "clinical_snv_observations": clinical_snv_observations,
-            "clinical_sv_observations": clinical_sv_observations,
-            "cancer_all_snv_observations": cancer_all_snv_observations,
-            "cancer_somatic_snv_observations": cancer_somatic_snv_observations,
-            "cancer_somatic_sv_observations": cancer_somatic_sv_observations,
-        }
+        return observations_dict
 
     def get_verified_config_case_arguments(
         self,
@@ -483,8 +468,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        clinical_observations: List[str],
-        cancer_observations: List[str],
+        observations: List[str] = None,
         gender: Optional[str] = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
@@ -517,12 +501,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
 
         if not verified_panel_bed:
-            args_dict.update(
-                self.get_verified_observations(
-                    clinical_observations,
-                    cancer_observations,
-                )
-            )
+            args_dict.update(self.get_verified_observations(observations))
 
         return args_dict
 
@@ -666,8 +645,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
-        clinical_observations: List[str],
-        cancer_observations: List[str],
+        observations: List[str],
         dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
@@ -677,8 +655,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
-            clinical_observations=clinical_observations,
-            cancer_observations=cancer_observations,
+            observations=observations,
         )
         command = ["config", "case"]
         options = self.__build_command_str(

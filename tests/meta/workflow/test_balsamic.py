@@ -1,8 +1,8 @@
 """Tests for BALSAMIC analysis"""
-from pathlib import Path
 
 import pytest
 
+from cg.constants.loqus_upload import ObservationFileWildcards
 from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError
 
@@ -71,3 +71,70 @@ def test_get_verified_pon():
     assert pon_cnn == validated_pon
     with pytest.raises(BalsamicStartError):
         BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn)
+
+
+def test_get_latest_observations(cg_context, observations_dir, observations_files_path):
+    """Test latest observations extraction."""
+
+    # GIVEN a Loqusdb temporary directory and a file wildcard
+    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api.loqusdb_path = observations_dir
+    wildcard = ObservationFileWildcards.CANCER_SOMATIC_SNV
+
+    # WHEN getting the latest observations file
+    observation = balsamic_analysis_api.get_latest_observations(wildcard)
+
+    # THEN the extracted observation should match the latest file
+    assert observation == str(observations_files_path[0])
+
+
+def test_get_verified_observation_no_args(cg_context, observations_dir, observations_files_path):
+    """Test verified observations extraction with no arguments."""
+
+    # GIVEN a Loqusdb temporary directory
+    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api.loqusdb_path = observations_dir
+
+    # GIVEN the expected output dictionary
+    expected_args = {
+        "clinical-snv-observations": None,
+        "clinical-sv-observations": str(observations_files_path[2]),
+        "cancer-all-snv-observations": None,
+        "cancer-somatic-snv-observations": str(observations_files_path[0]),
+        "cancer-somatic-sv-observations": None,
+    }
+
+    # WHEN getting the latest observations dictionary
+    args: dict = balsamic_analysis_api.get_verified_observations(None)
+
+    # THEN the extracted observation arguments should match the expected one
+    assert args == expected_args
+
+
+def test_get_verified_observation_overwrite_input(
+    cg_context, observations_dir, observations_files_path
+):
+    """Test verified observations extraction when providing a non default observation file."""
+
+    # GIVEN a Loqusdb temporary directory and a list of custom Loqusdb files
+    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api.loqusdb_path = observations_dir
+    loqusdb_files = [
+        "/test/path/clinical_snv_export-19990101-.vcf",
+        "/test/path/cancer_somatic_snv_export-19990101-.vcf",
+    ]
+
+    # GIVEN the expected output dictionary
+    expected_args = {
+        "clinical-snv-observations": loqusdb_files[0],
+        "clinical-sv-observations": str(observations_files_path[2]),
+        "cancer-all-snv-observations": None,
+        "cancer-somatic-snv-observations": loqusdb_files[1],
+        "cancer-somatic-sv-observations": None,
+    }
+
+    # WHEN getting the latest observations dictionary
+    args: dict = balsamic_analysis_api.get_verified_observations(loqusdb_files)
+
+    # THEN the extracted observation arguments should match the expected one
+    assert args == expected_args

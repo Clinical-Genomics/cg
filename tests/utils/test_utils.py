@@ -1,6 +1,6 @@
 """Tests for the utils module"""
 
-from cg.utils.utils import get_string_from_list_by_pattern, get_last_element_from_iterator
+from cg.utils.utils import get_string_from_list_by_pattern
 
 
 def test_get_string_from_list_by_pattern():
@@ -11,7 +11,7 @@ def test_get_string_from_list_by_pattern():
     list_of_string = ["I do contain the pattern", "test string", "another random string"]
 
     # WHEN calling the filtering method
-    extracted_string: str = get_string_from_list_by_pattern(pattern, list_of_string)
+    extracted_string: str = get_string_from_list_by_pattern(list_of_string, pattern)
 
     # THEN the extracted string should match the one containing the pattern
     assert extracted_string == list_of_string[0]
@@ -25,20 +25,7 @@ def test_get_string_from_list_by_pattern_not_found():
     list_of_string = ["This", "is", "a", "random", "list"]
 
     # WHEN calling the filtering method
-    extracted_string: str = get_string_from_list_by_pattern(pattern, list_of_string)
+    extracted_string: str = get_string_from_list_by_pattern(list_of_string, pattern)
 
     # THEN None should be returned
     assert extracted_string is None
-
-
-def test_get_last_element_from_iterator():
-    """Tests extraction of the last item from an iterator."""
-
-    # GIVEN an iterable object
-    iterable = iter(["first", "second", "last"])
-
-    # WHEN retrieving the last element
-    last = get_last_element_from_iterator(iterable)
-
-    # THEN the correct item should be retrieved
-    assert last == "last"
