@@ -25,6 +25,7 @@ class MockOsTicket(OsTicket):
         self._should_fail: bool = False
         self._return_none: bool = False
         self.email_uri = "http://localhost:0000/sendmail"
+        self.base_sender_email = "cg@email.com"
 
     def set_ticket_nr(self, ticket: str) -> None:
         self._ticket_nr = ticket

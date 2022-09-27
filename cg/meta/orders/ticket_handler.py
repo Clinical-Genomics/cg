@@ -186,7 +186,7 @@ class TicketHandler:
         )
         email_form = FormDataRequest(
             sender_prefix=sender_prefix,
-            email_server_alias=email_server_alias,
+            email_server_alias=self.osticket.base_sender_email,
             request_uri=self.osticket.email_uri,
             recipients=self.osticket.osticket_email,
             mail_title=f"[#{ticket_number}]",
