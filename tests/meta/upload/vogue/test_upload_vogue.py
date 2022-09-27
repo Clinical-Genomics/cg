@@ -75,7 +75,7 @@ def test_update_analysis_uploaded_to_vogue_date_given_date(
 @mock.patch("cg.apps.gt.GenotypeAPI")
 @mock.patch("cg.store.models.Analysis")
 def test_update_analysis_uploaded_to_vogue_date_now(
-    mock_analysis, mock_genotype_api, mock_vogue_api, mock_store, timestamp_today
+    mock_analysis, mock_genotype_api, mock_vogue_api, mock_store, timestamp_now
 ):
     """tests updating the uploaded_to_vogue field of a record in the analysis table"""
 
@@ -85,7 +85,7 @@ def test_update_analysis_uploaded_to_vogue_date_now(
     with mock.patch.object(
         UploadVogueAPI.update_analysis_uploaded_to_vogue_date,
         "__defaults__",
-        (timestamp_today,),
+        (timestamp_now,),
     ):
 
         result = UploadVogueAPI(
@@ -94,4 +94,4 @@ def test_update_analysis_uploaded_to_vogue_date_now(
 
     # THEN the analysis object should have a vogue_uploaded_date set to the default value
     # dt.datetime.now()
-    assert result.uploaded_to_vogue_at == timestamp_today
+    assert result.uploaded_to_vogue_at == timestamp_now

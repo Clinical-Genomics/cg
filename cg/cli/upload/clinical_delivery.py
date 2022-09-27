@@ -40,6 +40,7 @@ def fastq(context: click.Context):
 def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all not previously uploaded cases with analysis type fastq to
     clinical-delivery"""
+
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
     for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FASTQ):
