@@ -223,7 +223,7 @@ def upload_rna_fusion_report_to_scout(
             dry_run=dry_run, research=research, case_id=case_id, update=update
         )
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error.message)
+        LOG.error(error)
         return 1
     return 0
 
@@ -253,6 +253,6 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     try:
         scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error.message)
+        LOG.error(error)
         return 1
     return 0

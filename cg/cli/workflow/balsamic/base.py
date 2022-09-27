@@ -74,7 +74,7 @@ def config_case(
             dry_run=dry_run,
         )
     except CgError as e:
-        LOG.error(f"Could not create config: {e.message}")
+        LOG.error(f"Could not create config: {e}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create config: {error}")
@@ -111,7 +111,7 @@ def run(
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except CgError as e:
-        LOG.error(f"Could not run analysis: {e.message}")
+        LOG.error(f"Could not run analysis: {e}")
         raise click.Abort()
     except Exception as e:
         LOG.error(f"Could not run analysis: {e}")
@@ -133,7 +133,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
     except CgError as e:
-        LOG.error(f"Could not create report file: {e.message}")
+        LOG.error(f"Could not create report file: {e}")
         raise click.Abort()
     except Exception as e:
         LOG.error(f"Could not create report file: {e}")
@@ -161,7 +161,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
         LOG.warning("Deliverables file is malformed")
         raise error
     except CgError as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}")
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
@@ -213,7 +213,7 @@ def start(
             dry_run=dry_run,
         )
     except DecompressionNeededError as e:
-        LOG.error(e.message)
+        LOG.error(e)
 
 
 @balsamic.command("start-available")
@@ -229,7 +229,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run, run_analysis=True)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as e:
             LOG.error("Unspecified error occurred: %s", e)

@@ -37,7 +37,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
         panel_bed: str = analysis_api.resolve_panel_bed(panel_bed=panel_bed)
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
-        LOG.error(error.message)
+        LOG.error(error)
         raise click.Abort()
     if dry_run:
         click.echo(config_data)
@@ -104,7 +104,7 @@ def run(
     try:
         analysis_api.check_analysis_ongoing(case_id=case_id)
     except CgError as e:
-        LOG.error(e.message)
+        LOG.error(e)
         raise click.Abort
     analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
 
@@ -121,7 +121,7 @@ def run(
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("%s run started!", analysis_api.pipeline)
     except CgError as e:
-        LOG.error(e.message)
+        LOG.error(e)
         raise click.Abort
 
 
@@ -172,7 +172,7 @@ def start(
             skip_evaluation=skip_evaluation,
         )
     except (FlowcellsNeededError, DecompressionNeededError) as e:
-        LOG.error(e.message)
+        LOG.error(e)
 
 
 @click.command("start-available")
@@ -188,7 +188,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as e:
             LOG.error(f"Unspecified error occurred: %s", e)

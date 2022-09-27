@@ -10,8 +10,7 @@ class CgError(Exception):
     """
 
     def __init__(self, message: str = ""):
-        super(CgError, self).__init__()
-        self.message = message
+        super().__init__(message)
 
 
 class AccessionNumerMissingError(CgError):
@@ -127,8 +126,8 @@ class HousekeeperFileMissingError(CgError):
     Exception raised when a file is missing in Housekeeper.
     """
 
-    def __init__(self, message, errors=None):
-        self.message = message
+    def __init__(self, message: str = "", errors=None):
+        super().__init__(message)
         self.errors = errors
 
 
@@ -184,8 +183,8 @@ class PedigreeConfigError(CgError):
     Raised when MIP pedigree config validation fails
     """
 
-    def __init__(self, message, errors=None):
-        self.message = message
+    def __init__(self, message: str = "", errors=None):
+        super().__init__(message)
         self.errors = errors
 
 

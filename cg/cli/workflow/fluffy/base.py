@@ -102,7 +102,7 @@ def start(
             run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref
         )
     except DecompressionNeededError as e:
-        LOG.error(e.message)
+        LOG.error(e)
 
 
 @fluffy.command("start-available")
@@ -118,7 +118,7 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as e:
             LOG.error("Unspecified error occurred: %s", e)
