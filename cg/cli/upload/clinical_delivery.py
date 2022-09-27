@@ -26,7 +26,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     """Links the appropriate files for a case, based on the data_delivery, to the customer folder
     and subsequently uses rsync to upload it to caesar."""
     case_obj: models.Family = context.obj.status_db.family(case_id)
-    delivery_types: Set[str] = DeliverAPI.get_delivery_arguments(case_obj=case_obj)
+    delivery_types: Set[str] = case_obj.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
@@ -104,8 +104,6 @@ def auto_fastq(context: click.Context, dry_run: bool):
                 )
             continue
         case: models.Family = analysis_obj.family
-        case.internal_id: str = "test"
-        analysis_obj.upload_started_at: dt.datetime = dt.datetime.now()
         LOG.info("Uploading family: %s", case.internal_id)
         context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
         status_db.commit()
