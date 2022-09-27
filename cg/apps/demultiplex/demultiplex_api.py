@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 from typing_extensions import Literal
 
+from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -200,7 +201,7 @@ class DemultiplexingAPI:
         )
         tb_api.add_pending_analysis(
             case_id=flowcell.flowcell_id,
-            analysis_type="other",
+            analysis_type=AnalysisTypes.OTHER,
             config_path=flowcell.trailblazer_config_path.as_posix(),
             out_dir=flowcell.trailblazer_config_path.parent.as_posix(),
             slurm_quality_of_service=self.slurm_quality_of_service,
