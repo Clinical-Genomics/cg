@@ -18,7 +18,7 @@ def test_auto_fastq_not_started(
     base_context.status_db.commit()
     base_context.status_db.session.close()
     # WHEN the upload command is invoked with dry run
-    results = cli_runner.invoke(auto_fastq, ["--dry-run"], obj=base_context)
+    cli_runner.invoke(auto_fastq, ["--dry-run"], obj=base_context)
 
     # THEN the content of the .sh file should be in the caplog
     assert f"#SBATCH --job-name={case_id}_rsync" in caplog.text
