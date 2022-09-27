@@ -5,8 +5,8 @@ import pytest
 
 from cg.store import Store, models
 from cgmodels.cg.constants import Pipeline
+from cg.constants.indexes import ListIndexes
 from tests.store_helpers import StoreHelpers
-from tests.store.api.conftest import fixture_rml_pool_store
 
 
 def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
@@ -164,3 +164,32 @@ def test_get_case_pool(case_id: str, rml_pool_store: Store):
     # THEN the correct pool should be returned and the pool name should be the last part of the
     # case name
     assert pool.name == case_name.split("-", 1)[-1]
+
+
+def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
+    """Test if the correct number of expected reads is returned."""
+
+    # GIVEN a case with a sample with an application version
+    application_version: models.ApplicationVersion = (
+        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+    )
+
+    # WHEN the expected reads is fetched from the case
+    expected_reads: int = rml_pool_store.get_ready_made_library_expected_reads(case_id=case_id)
+
+    # THEN the fetched reads should be equal to the expected reads of the application versions application
+    assert application_version.application.expected_reads == expected_reads
+
+
+def test_get_application_by_case(case_id: str, rml_pool_store: Store):
+    """Test that the correct application is returned on a case."""
+    # GIVEN a case with a sample with an application version
+    application_version: models.ApplicationVersion = (
+        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+    )
+
+    # WHEN the application is fetched from the case
+    application: models.Application = rml_pool_store.get_application_by_case(case_id=case_id)
+
+    # THEN the fetched application should be equal to the application version application
+    assert application_version.application == application
