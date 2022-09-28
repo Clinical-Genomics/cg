@@ -180,15 +180,15 @@ class TicketHandler:
             order=order,
             project=project,
         )
-        sender_prefix: str = user_mail.split("@")[0]
+        base_sender, base_server = self.osticket.base_sender_email("@")
         temp_dir: TemporaryDirectory = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )
         email_form = FormDataRequest(
-            sender_prefix=sender_prefix,
-            email_server_alias=self.osticket.base_sender_email,
+            sender_prefix=base_sender,
+            email_server_alias=base_server,
             request_uri=self.osticket.email_uri,
-            recipients=self.osticket.osticket_email,
+            recipients=[self.osticket.osticket_email, user_mail],
             mail_title=f"[#{ticket_number}]",
             mail_body=message,
             attachments=[Path(f"{temp_dir.name}/order.json")],
