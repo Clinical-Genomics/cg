@@ -194,7 +194,7 @@ class CompressAPI:
         """Adds unpacked FASTQ files to housekeeper."""
         LOG.info("Adds FASTQ to Housekeeper for %s", sample_obj.internal_id)
         version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
-            bundle_name=sample_id
+            bundle_name=sample_obj.internal_id
         )
         if not version_obj:
             return False

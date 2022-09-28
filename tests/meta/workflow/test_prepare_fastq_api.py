@@ -12,7 +12,7 @@ def test_is_spring_decompression_needed_when_true(
     populated_compress_spring_api: CompressAPI,
     analysis_store_single_case: Store,
     case_id: str,
-    sample: str,
+    sample_id: str,
 ):
     """Test when spring decompression is needed."""
 
@@ -28,7 +28,7 @@ def test_is_spring_decompression_needed_when_true(
     assert link_objects
     # GIVEN a that there exists a version with only spring in housekeeper
     version_object = populated_compress_spring_api.hk_api.get_latest_bundle_version(
-        bundle_name=sample
+        bundle_name=sample_id
     )
     for file in version_object.files:
         assert file.path.endswith(".spring")
@@ -113,7 +113,7 @@ def test_no_fastq_in_housekeeper(
     populated_compress_spring_api: CompressAPI,
     analysis_store_single_case: Store,
     case_id: str,
-    sample: str,
+    sample_id: str,
 ):
     """Test when FASTQ needs to be added to Housekeeper."""
 
@@ -129,7 +129,7 @@ def test_no_fastq_in_housekeeper(
     assert link_objects
     # GIVEN a that there exists a version with only spring in housekeeper
     version_object = populated_compress_spring_api.hk_api.get_latest_bundle_version(
-        bundle_name=sample
+        bundle_name=sample_id
     )
     for file in version_object.files:
         assert file.path.endswith(".spring")
