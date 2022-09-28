@@ -4,6 +4,8 @@ from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query, load_only
+from cg.constants.constants import PrepCategory
+from cg.constants.indexes import ListIndexes
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -65,6 +67,15 @@ class FindBusinessDataHandler(BaseHandler):
             return True
         return False
 
+    def get_application_by_case(self, case_id: str) -> models.Application:
+        """Return the application of a case."""
+
+        return (
+            self.family(case_id)
+            .links[ListIndexes.FIRST.value]
+            .sample.application_version.application
+        )
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -111,7 +122,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
+        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
     ) -> Query:
         """Fetch families."""
 
@@ -284,6 +295,19 @@ class FindBusinessDataHandler(BaseHandler):
     def pool(self, pool_id: int) -> models.Pool:
         """Fetch a pool."""
         return self.Pool.get(pool_id)
+
+    def get_ready_made_library_expected_reads(self, case_id: str) -> int:
+        """Return the target reads of a ready made library case."""
+
+        application: models.Application = self.get_application_by_case(case_id)
+
+        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+
+            raise ValueError(
+                f"{case_id} is not a ready made library, found prep category: "
+                f"{application.prep_category}"
+            )
+        return application.expected_reads
 
     def sample(self, internal_id: str) -> models.Sample:
         """Fetch a sample by lims id."""

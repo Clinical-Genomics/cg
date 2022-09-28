@@ -18,12 +18,12 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_filter_cases_has_sequence(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there is a cases with a sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -112,12 +112,12 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
 
 
 def test_filter_cases_with_pipeline_when_correct_pipline(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -136,12 +136,12 @@ def test_filter_cases_with_pipeline_when_correct_pipline(
 
 
 def test_filter_cases_with_pipeline_when_incorrect_pipline(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -160,16 +160,16 @@ def test_filter_cases_with_pipeline_when_incorrect_pipline(
 
 
 def test_filter_cases_for_analysis(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there is a cases with an action set to analyse."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_today)
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: models.Analysis = helpers.add_analysis(
-        base_store, completed_at=timestamp_today, pipeline=Pipeline.MIP_DNA
+        base_store, completed_at=timestamp_now, pipeline=Pipeline.MIP_DNA
     )
 
     # Given an action set to analyze
@@ -189,13 +189,13 @@ def test_filter_cases_for_analysis(
 
 
 def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there are internally created cases with no action set and no prior analysis."""
 
     # GIVEN a sequenced sample
     test_sample: models.Sample = helpers.add_sample(
-        base_store, sequenced_at=timestamp_today, is_external=False
+        base_store, sequenced_at=timestamp_now, is_external=False
     )
 
     # GIVEN a case
@@ -218,13 +218,13 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     base_store: Store,
     helpers: StoreHelpers,
     timestamp_yesterday: datetime,
-    timestamp_today: datetime,
+    timestamp_now: datetime,
 ):
     """Test that a case is returned when cases with no action, but new sequence data."""
 
     # GIVEN a sequenced sample
     test_sample: models.Sample = helpers.add_sample(
-        base_store, sequenced_at=timestamp_today, is_external=False
+        base_store, sequenced_at=timestamp_now, is_external=False
     )
 
     # GIVEN a completed analysis
@@ -279,7 +279,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
 
 
 def test_filter_cases_with_scout_data_delivery(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when Scout is specified as a data delivery option."""
 
@@ -303,7 +303,7 @@ def test_filter_cases_with_scout_data_delivery(
 
 
 def test_filter_report_supported_data_delivery_cases(
-    base_store: Store, helpers: StoreHelpers, timestamp_today: datetime
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned for a delivery report supported data delivery option."""
 
