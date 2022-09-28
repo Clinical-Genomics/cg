@@ -207,7 +207,6 @@ class UploadScoutAPI:
 
         LOG.info(f"{report_type} fusion report {fusion_report.path} found")
         for rna_sample_id in rna_dna_sample_case_map:
-            dna_sample_id: str
             dna_cases: List[str]
             dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
             unique_dna_cases.update(dna_cases)
