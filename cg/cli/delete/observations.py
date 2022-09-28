@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option("-c", "--case_id", help="internal case id")
+@click.option("-c", "--case_id", required=True, help="internal case id")
 @DRY_RUN
 @SKIP_CONFIRMATION
 @click.pass_obj
