@@ -18,13 +18,13 @@ from cg.constants import FASTQ_DELTA
 from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
 
-from .sbatch import (
+from cg.apps.crunchy.sbatch import (
     FASTQ_TO_SPRING_COMMANDS,
     FASTQ_TO_SPRING_ERROR,
     SPRING_TO_FASTQ_COMMANDS,
     SPRING_TO_FASTQ_ERROR,
 )
-from ...constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos
 
 LOG = logging.getLogger(__name__)
 
