@@ -5,7 +5,6 @@ import shutil
 
 from pathlib import Path
 
-from cgmodels.cg.constants import Pipeline
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
@@ -17,7 +16,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
 from dateutil.parser import parse as parse_date
 
 OPTION_DRY = click.option(
@@ -282,6 +281,3 @@ def microsalt_past_run_dirs(
     context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
-
-
-
