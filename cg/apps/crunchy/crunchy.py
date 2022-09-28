@@ -24,6 +24,7 @@ from .sbatch import (
     SPRING_TO_FASTQ_COMMANDS,
     SPRING_TO_FASTQ_ERROR,
 )
+from ...constants.priority import SlurmQos
 
 LOG = logging.getLogger(__name__)
 
@@ -229,16 +230,17 @@ class CrunchyAPI:
             pending_path=compression_obj.pending_path,
         )
         sbatch_parameters: Sbatch = Sbatch(
-            use_login_shell="--login",
-            job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
             account=self.slurm_account,
-            number_tasks=12,
-            memory=50,
-            log_dir=log_dir.as_posix(),
             email=self.mail_user,
-            hours=24,
-            commands=commands,
             error=error_function,
+            commands=commands,
+            hours=24,
+            job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
+            log_dir=log_dir.as_posix(),
+            memory=50,
+            number_tasks=12,
+            quality_of_service=SlurmQos.MAINTENANCE,
+            use_login_shell="--login",
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
@@ -286,15 +288,16 @@ class CrunchyAPI:
             checksum_second=files_info["fastq_second"].checksum,
         )
         sbatch_parameters: Sbatch = Sbatch(
-            job_name="_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
             account=self.slurm_account,
-            number_tasks=12,
-            memory=50,
-            log_dir=log_dir.as_posix(),
-            email=self.mail_user,
-            hours=24,
             commands=commands,
+            email=self.mail_user,
             error=error_function,
+            hours=24,
+            job_name="_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
+            log_dir=log_dir.as_posix(),
+            memory=50,
+            number_tasks=12,
+            quality_of_service=SlurmQos.LOW,
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path = files.get_spring_to_fastq_sbatch_path(

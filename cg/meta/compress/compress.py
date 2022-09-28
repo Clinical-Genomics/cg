@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from alchy import Query
 from housekeeper.store import models as housekeeper_models
 
 from cg.apps.crunchy import CrunchyAPI
@@ -22,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 class CompressAPI:
-    """API for compressing BAM and FASTQ files"""
+    """API for compressing BAM and FASTQ files."""
 
     def __init__(
         self,
@@ -33,15 +34,15 @@ class CompressAPI:
         dry_run: bool = False,
     ):
 
-        self.hk_api = hk_api
-        self.crunchy_api = crunchy_api
-        self.backup_api = backup_api
+        self.hk_api: HousekeeperAPI = hk_api
+        self.crunchy_api: CrunchyAPI = crunchy_api
+        self.backup_api: SpringBackupAPI = backup_api
         self.demux_root: Path = Path(demux_root)
-        self.dry_run = dry_run
-        self.get_cases_to_compress = get_cases_to_compress
+        self.dry_run: bool = dry_run
+        self.get_cases_to_compress: Query = get_cases_to_compress
 
     def set_dry_run(self, dry_run: bool):
-        """Update dry run"""
+        """Update dry run."""
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
@@ -60,7 +61,7 @@ class CompressAPI:
         return run_name.split("_")[-1][1:]
 
     def get_latest_version(self, bundle_name: str) -> Optional[housekeeper_models.Version]:
-        """Fetch the latest version of a hk bundle"""
+        """Fetch the latest version of a hk bundle."""
         last_version = self.hk_api.last_version(bundle_name)
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", bundle_name)
@@ -70,7 +71,7 @@ class CompressAPI:
 
     # Compression methods
     def compress_fastq(self, sample_id: str) -> bool:
-        """Compress the FASTQ files for a individual"""
+        """Compress the FASTQ files for a individual."""
         LOG.info("Check if FASTQ compression is possible for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
         if not version_obj:
@@ -111,7 +112,7 @@ class CompressAPI:
         return all_ok
 
     def decompress_spring(self, sample_id: str) -> bool:
-        """Decompress SPRING archive for a sample
+        """Decompress SPRING archive for a sample.
 
         This function will make sure that everything is ready for decompression from SPRING archive
         to FASTQ files.
@@ -148,10 +149,10 @@ class CompressAPI:
         return True
 
     def clean_fastq(self, sample_id: str) -> bool:
-        """Check that FASTQ compression is completed for a case and clean
+        """Check that FASTQ compression is completed for a case and clean.
 
         This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
-        file and its metadata file
+        file and its metadata file.
         """
         LOG.info("Clean FASTQ files for %s", sample_id)
         version_obj = self.get_latest_version(sample_id)
@@ -192,7 +193,7 @@ class CompressAPI:
         return all_cleaned
 
     def add_decompressed_fastq(self, sample_obj: models.Sample) -> bool:
-        """Adds unpacked FASTQ files to housekeeper"""
+        """Adds unpacked FASTQ files to housekeeper."""
         LOG.info("Adds FASTQ to Housekeeper for %s", sample_obj.internal_id)
         version_obj = self.get_latest_version(sample_obj.internal_id)
         if not version_obj:
@@ -229,7 +230,7 @@ class CompressAPI:
     def delete_fastq_housekeeper(
         self, hk_fastq_first: housekeeper_models.File, hk_fastq_second: housekeeper_models.File
     ) -> None:
-        """Delete fastq files from housekeeper"""
+        """Delete fastq files from housekeeper."""
         LOG.info("Deleting FASTQ files from Housekeeper")
         hk_fastq_first.delete()
         hk_fastq_second.delete()
@@ -244,7 +245,7 @@ class CompressAPI:
         hk_fastq_first: housekeeper_models.File,
         hk_fastq_second: housekeeper_models.File,
     ) -> None:
-        """Update Housekeeper with compressed FASTQ files and SPRING metadata file"""
+        """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version_obj = self.hk_api.last_version(sample_id)
 
         spring_tags = [sample_id, CompressionHkTags.SPRING]
@@ -288,7 +289,7 @@ class CompressAPI:
     def add_fastq_hk(
         self, sample_obj: models.Sample, fastq_first: Path, fastq_second: Path
     ) -> None:
-        """Add FASTQ files to housekeeper"""
+        """Add FASTQ files to housekeeper."""
 
         if not sample_obj.application_version.application.is_external:
             flow_cell_name: str = self.get_flow_cell_name(fastq_path=fastq_first)
@@ -313,7 +314,7 @@ class CompressAPI:
 
     # Methods to remove files from disc
     def remove_fastq(self, fastq_first: Path, fastq_second: Path):
-        """Remove FASTQ files"""
+        """Remove FASTQ files."""
         LOG.info("Will remove %s and %s", fastq_first, fastq_second)
         if self.dry_run:
             return
