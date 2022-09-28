@@ -54,6 +54,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
+    def get_case_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id)
+
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
 
@@ -62,7 +65,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: model.Sample = case_obj.links[0].sample
+        sample_obj: models.Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
             self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
