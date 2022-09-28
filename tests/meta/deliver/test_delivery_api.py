@@ -3,19 +3,20 @@
 from pathlib import Path
 from typing import List, Set
 
-from tests.store_helpers import StoreHelpers
+from cgmodels.cg.constants import Pipeline
+from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 from cg.store.models import FamilySample, Sample
-from housekeeper.store import models as hk_models
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_delivery_path(
     base_store: Store, real_housekeeper_api: HousekeeperAPI, project_dir: Path, case_id: str
 ):
-    """Test to create the delivery path"""
+    """Test to create the delivery path."""
     # GIVEN a deliver api
     deliver_api = DeliverAPI(
         store=base_store,
@@ -38,7 +39,7 @@ def test_get_delivery_path(
 
 
 def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str):
-    """Test to fetch case specific files for a case that exists in housekeeper"""
+    """Test to fetch case specific files for a case that exists in housekeeper."""
     deliver_api: DeliverAPI = populated_deliver_api
     # GIVEN a case which exist as bundle in hk with a version
     version_obj = deliver_api.hk_api.last_version(case_id)
@@ -120,9 +121,9 @@ def test_get_sample_files_from_version(
     case_id: str,
     helpers=StoreHelpers,
 ):
-    """Test to fetch sample specific files from the deliver API
+    """Test to fetch sample specific files from the deliver API.
 
-    The purpose of the test is to see that only sample specific files are returned
+    The purpose of the test is to see that only sample specific files are returned.
     """
     # GIVEN a case which exist as bundle in hk
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
@@ -148,3 +149,42 @@ def test_get_sample_files_from_version(
         assert sample_file.name == vcf_file.name
     # THEN assert that only the sample-tag file was returned
     assert nr_files == 1
+
+
+def test_get_delivery_scope_case_only():
+    """Testing the delivery scope of a case only delivery."""
+    # GIVEN a case only delivery type
+    delivery_type: Set[str] = {Pipeline.MIP_DNA}
+
+    # WHEN getting the delivery scope
+    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
+
+    # THEN a case_delivery should be True while sample_delivery False
+    assert case_delivery
+    assert not sample_delivery
+
+
+def test_get_delivery_scope_sample_only():
+    """Testing the delivery scope of a sample only delivery."""
+    # GIVEN a sample only delivery type
+    delivery_type = {Pipeline.FASTQ}
+
+    # WHEN getting the delivery scope
+    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
+
+    # THEN a sample_delivery should be True while case_delivery False
+    assert not case_delivery
+    assert sample_delivery
+
+
+def test_get_delivery_scope_case_and_sample():
+    """Testing the delivery scope of a case and sample delivery."""
+    # GIVEN a case and sample delivery type
+    delivery_type = {Pipeline.SARS_COV_2}
+
+    # WHEN getting the delivery scope
+    sample_delivery, case_delivery = DeliverAPI.get_delivery_scope(delivery_type)
+
+    # THEN both case_delivery and sample_delivery should be True
+    assert case_delivery
+    assert sample_delivery
