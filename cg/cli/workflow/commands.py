@@ -37,7 +37,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
-    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError"""
+    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not analysis_api.all_flowcells_on_disk(case_id=case_id):
@@ -52,7 +52,7 @@ def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
 @OPTION_DRY
 @click.pass_obj
 def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
-    """Handles cases where decompression is needed before starting analysis"""
+    """Handles cases where decompression is needed before starting analysis."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     is_decompression_running: bool = analysis_api.resolve_decompression(
@@ -67,7 +67,7 @@ def resolve_compression(context: CGConfig, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_obj
 def link(context: CGConfig, case_id: str, dry_run: bool):
-    """Link FASTQ files for all samples in a case"""
+    """Link FASTQ files for all samples in a case."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id)
     if dry_run:
@@ -80,7 +80,7 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_obj
 def store(context: CGConfig, case_id: str, dry_run: bool):
-    """Store finished analysis files in Housekeeper"""
+    """Store finished analysis files in Housekeeper."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -105,7 +105,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
 @OPTION_DRY
 @click.pass_context
 def store_available(context: click.Context, dry_run: bool) -> None:
-    """Store bundles for all finished analyses in Housekeeper"""
+    """Store bundles for all finished analyses in Housekeeper."""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
@@ -127,7 +127,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 @ARGUMENT_BEFORE_STR
 @click.pass_obj
 def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: bool) -> None:
-    """Remove deliver workflow commands"""
+    """Remove deliver workflow commands."""
 
     rsync_api: RsyncAPI = RsyncAPI(config=context)
 
@@ -151,7 +151,7 @@ def rsync_past_run_dirs(context: CGConfig, before_str: str, dry_run: bool, yes: 
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = False):
-    """Remove workflow run directory"""
+    """Remove workflow run directory."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
@@ -187,7 +187,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 def past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of old case run dirs"""
+    """Clean up of old case run dirs."""
 
     exit_code = EXIT_SUCCESS
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
@@ -217,7 +217,7 @@ def past_run_dirs(
 def balsamic_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" Balsamic case run dirs"""
+    """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
 
@@ -232,7 +232,7 @@ def balsamic_past_run_dirs(
 def fluffy_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" Fluffy case run dirs"""
+    """Clean up of "old" Fluffy case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
 
@@ -247,7 +247,7 @@ def fluffy_past_run_dirs(
 def mip_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MIP case run dirs"""
+    """Clean up of "old" MIP case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
 
@@ -262,7 +262,7 @@ def mip_past_run_dirs(
 def mutant_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MUTANT case run dirs"""
+    """Clean up of "old" MUTANT case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
 
