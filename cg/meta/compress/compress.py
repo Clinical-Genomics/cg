@@ -4,7 +4,7 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from alchy import Query
 from housekeeper.store import models as housekeeper_models
@@ -18,6 +18,7 @@ from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store import models
 from cg.store.queries import get_cases_to_compress
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -60,20 +61,13 @@ class CompressAPI:
         run_name: str = fastq_path.relative_to(self.demux_root).parts[0]
         return run_name.split("_")[-1][1:]
 
-    def get_latest_version(self, bundle_name: str) -> Optional[housekeeper_models.Version]:
-        """Fetch the latest version of a hk bundle."""
-        last_version = self.hk_api.last_version(bundle_name)
-        if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
-            return None
-        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
-        return last_version
-
     # Compression methods
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for a individual."""
         LOG.info("Check if FASTQ compression is possible for %s", sample_id)
-        version_obj = self.get_latest_version(sample_id)
+        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
+            bundle_name=sample_id
+        )
         if not version_obj:
             return False
 
@@ -122,7 +116,9 @@ class CompressAPI:
             - The SPRING metadata file will be updated to include date for decompression
             - PDC archived SPRING files will be retrieved and decrypted before decompression
         """
-        version_obj = self.get_latest_version(sample_id)
+        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
+            bundle_name=sample_id
+        )
         if not version_obj:
             return False
 
@@ -155,7 +151,9 @@ class CompressAPI:
         file and its metadata file.
         """
         LOG.info("Clean FASTQ files for %s", sample_id)
-        version_obj = self.get_latest_version(sample_id)
+        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
+            bundle_name=sample_id
+        )
         if not version_obj:
             return False
 
@@ -195,9 +193,10 @@ class CompressAPI:
     def add_decompressed_fastq(self, sample_obj: models.Sample) -> bool:
         """Adds unpacked FASTQ files to housekeeper."""
         LOG.info("Adds FASTQ to Housekeeper for %s", sample_obj.internal_id)
-        version_obj = self.get_latest_version(sample_obj.internal_id)
+        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
+            bundle_name=sample_id
+        )
         if not version_obj:
-            LOG.warning("Could not find version obj for %s", sample_obj.internal_id)
             return False
 
         spring_paths: List[CompressionData] = files.get_spring_paths(version_obj)

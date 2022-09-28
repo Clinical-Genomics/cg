@@ -228,7 +228,7 @@ class HousekeeperAPI:
         return self._store.version(bundle, date)
 
     def last_version(self, bundle: str) -> models.Version:
-        """Gets the latest version of a bundle"""
+        """Gets the latest version of a bundle."""
         LOG.info("Fetch latest version from bundle %s", bundle)
         return (
             self._store.Version.query.join(models.Version.bundle)
@@ -236,6 +236,15 @@ class HousekeeperAPI:
             .order_by(models.Version.created_at.desc())
             .first()
         )
+
+    def get_latest_bundle_version(self, bundle_name: str) -> Optional[models.Version]:
+        """Fetch the latest version of a hk bundle."""
+        last_version: models.Version = self.last_version(bundle_name)
+        if not last_version:
+            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
+            return None
+        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
+        return last_version
 
     def get_create_version(self, bundle: str) -> models.Version:
         """Returns the latest version of a bundle if it exists. If not creates a bundle and

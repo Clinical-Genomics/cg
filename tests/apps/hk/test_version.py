@@ -58,7 +58,7 @@ def test_add_version_existing_bundle(populated_housekeeper_api, later_date, case
 
 
 def test_get_last_version(populated_housekeeper_api, later_date, case_id):
-    """Test to get a version when there is a bundle and a version"""
+    """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api and a bundle with two versions
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
     new_version = populated_housekeeper_api.new_version(created_at=later_date)
@@ -67,6 +67,41 @@ def test_get_last_version(populated_housekeeper_api, later_date, case_id):
 
     # WHEN fetching the last version of a bundle
     fetched_version = populated_housekeeper_api.last_version(bundle=case_id)
+
+    # THEN assert that the later_date version is fetched
+    assert fetched_version.created_at == later_date
+
+
+def test_get_latest_bundle_version_no_housekeeper_bundle(housekeeper_api, caplog):
+    """Test get_latest_bundle_version function when there is no case bundle in Housekeeper."""
+
+    # GIVEN a case id
+    case_id = "compress_case"
+
+    # WHEN getting the version_obj
+    res = housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
+
+    # THEN assert that None was returned since there is no such case bundle in Housekeeper
+    assert res is None
+
+    # THEN assert that no bundle is found
+    assert f"No bundle found for {case_id} in housekeeper" in caplog.text
+
+
+def test_get_latest_bundle_version_with_housekeeper_bundle(
+    populated_housekeeper_api, later_date, case_id
+):
+    """Test to get a version when there is a bundle and a version."""
+    # GIVEN a populated housekeeper_api
+    bundle_obj = populated_housekeeper_api.bundle(name=case_id)
+
+    # GIVEN a bundle with two versions
+    new_version = populated_housekeeper_api.new_version(created_at=later_date)
+    new_version.bundle = bundle_obj
+    populated_housekeeper_api.add_commit(new_version)
+
+    # WHEN fetching the last version of a bundle
+    fetched_version = populated_housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
 
     # THEN assert that the later_date version is fetched
     assert fetched_version.created_at == later_date

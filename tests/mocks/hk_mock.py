@@ -391,7 +391,7 @@ class MockHousekeeperAPI:
         self._file_included = True
 
     def last_version(self, *args, **kwargs):
-        """Gets the latest version of a bundle"""
+        """Gets the latest version of a bundle."""
         if self._last_version is False:
             return None
         if len(args) > 0:
@@ -399,6 +399,15 @@ class MockHousekeeperAPI:
             if bundle:
                 return bundle.versions[-1]
         return self._version_obj
+
+    def get_latest_bundle_version(self, bundle_name: str):
+        """Get latest version of a bundle or log"""
+        last_version = self.last_version(bundle_name)
+        if not last_version:
+            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
+            return None
+        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
+        return last_version
 
     def get_root_dir(self):
         """Returns the root dir of Housekeeper"""
