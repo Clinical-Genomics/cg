@@ -108,6 +108,7 @@ class LimsConfig(BaseModel):
 
 
 class CrunchyConfig(BaseModel):
+    conda_binary: Optional[str] = None
     cram_reference: str
     slurm: SlurmConfig
 

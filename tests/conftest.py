@@ -200,6 +200,7 @@ def crunchy_config_dict():
     """Crunchy configs."""
     return {
         "crunchy": {
+            "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
             "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
         }
@@ -1259,6 +1260,7 @@ def fixture_context_config(
             "root": str(mip_dir),
         },
         "crunchy": {
+            "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "slurm": {
                 "account": "development",
