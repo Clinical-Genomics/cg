@@ -180,7 +180,7 @@ class TicketHandler:
             order=order,
             project=project,
         )
-        base_sender, base_server = self.osticket.base_sender_email("@")
+        base_sender, base_server = self.osticket.base_sender_email.split("@")
         temp_dir: TemporaryDirectory = self.osticket.create_connecting_ticket_attachment(
             content=self.replace_empty_string_with_none(obj=order.dict())
         )

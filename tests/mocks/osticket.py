@@ -36,10 +36,10 @@ class MockOsTicket(OsTicket):
     def setup(
         self,
         api_key: str = None,
+        base_sender_email: str = None,
         domain: str = None,
-        osticket_email: str = None,
         email_uri: str = None,
-        base_sender_email=None,
+        osticket_email: str = None,
     ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}
