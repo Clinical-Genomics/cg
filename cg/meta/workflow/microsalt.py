@@ -55,7 +55,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
-        return Path(self.root_dir, case_id)
+
+        case_obj: models.Family = self.status_db.family(case_id)
+        lims_project: str = self.get_project(case_obj)
+
+        # hur ska man autocompleta
+
+        return Path(self.root_dir, lims_project)
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
