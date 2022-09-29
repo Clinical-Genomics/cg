@@ -167,11 +167,7 @@ def test_delete_case_non_existing_case(
     loqusdbapi.process.stderr = loqusdb_delete_nonexisting_stderr.decode("utf-8")
 
     # THEN assert that an error is raised
-    # with pytest.raises(CaseNotFoundError):
-    #    loqusdbapi.delete_case(case_id)
-
-    # THEN context should abort
-    with pytest.raises(click.exceptions.Abort):
+    with pytest.raises(CaseNotFoundError):
         loqusdbapi.delete_case(case_id)
 
 
