@@ -158,39 +158,6 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def families_by_subject_id(
-        self,
-        customer_id: str,
-        subject_id: str,
-        data_analyses: [Pipeline] = None,
-        is_tumour: bool = None,
-    ) -> Set[models.Family]:
-        """Get all cases that have a sample for a subject_id.
-
-        Args:
-            customer_id     (str):                 Customer-id of customer owning the cases
-            subject_id      (str):                 Subject-id to search for
-            data_analyses   (list[Pipeline]):      Optional list of data_analysis values to filter on
-            is_tumour       (bool):                Optional is_tumour value to filter on
-        Returns:
-            set containing the matching cases set(models.Family)
-        """
-        cases: set[models.Family] = set()
-        samples: [models.Sample] = self.samples_by_subject_id(
-            customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
-        )
-        sample: models.Sample
-        for sample in samples:
-            link: models.FamilySample
-            for link in sample.links:
-                case: models.Family = link.family
-
-                if data_analyses and case.data_analysis not in data_analyses:
-                    continue
-
-                cases.add(case)
-        return cases
-
     def get_cases_from_ticket(self, ticket: str) -> Query:
         return self.Family.query.filter(models.Family.tickets.contains(ticket))
 
@@ -385,7 +352,7 @@ class FindBusinessDataHandler(BaseHandler):
         query: Query = self.Sample.query.join(models.Customer).filter(
             models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
         )
-        if is_tumour is not None:
+        if is_tumour:
             query: Query = query.filter(models.Sample.is_tumour == is_tumour)
         return query
 
