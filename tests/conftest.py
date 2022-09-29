@@ -199,6 +199,7 @@ def crunchy_config_dict():
     """Crunchy configs."""
     return {
         "crunchy": {
+            "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
             "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
         }
@@ -1248,12 +1249,14 @@ def fixture_context_config(
             },
         },
         "microsalt": {
-            "root": str(microsalt_dir),
-            "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_microSALT",
+            "queries_path": Path(microsalt_dir, "queries").as_posix(),
+            "root": str(microsalt_dir),
         },
         "mip-rd-dna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "pipeline": "analyse rd_dna",
@@ -1261,6 +1264,7 @@ def fixture_context_config(
             "script": "mip",
         },
         "mip-rd-rna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "pipeline": "analyse rd_rna",
@@ -1274,10 +1278,12 @@ def fixture_context_config(
         },
         "mutant": {
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
         "crunchy": {
+            "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "slurm": {
                 "account": "development",
