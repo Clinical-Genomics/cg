@@ -54,7 +54,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if not self._process:
             self._process = Process(
                 binary=self.config.microsalt.binary_path,
-                conda_binary=f"{self.conda_binary}",
+                conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 environment=self.config.microsalt.conda_env,
             )
         return self._process
